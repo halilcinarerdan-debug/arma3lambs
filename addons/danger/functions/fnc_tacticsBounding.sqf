@@ -236,6 +236,8 @@ if (EGVAR(main,debug_functions)) then {
     private _sisFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}];
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}];
+    private _atFn = missionNamespace getVariable ["lambs_danger_fnc_isATUnit", {params ["_u"]; (secondaryWeapon _u) isNotEqualTo "" && {(_u ammo (secondaryWeapon _u)) > 0}}];
+    private _atFireFn = missionNamespace getVariable ["lambs_danger_fnc_atFire", {params ["_u", "_t"]; _u doTarget _t; _u doFire _t; true}];
 
     // -----------------------------------------------------------------------
     // YARDIMCI KODLAR
@@ -302,20 +304,18 @@ if (EGVAR(main,debug_functions)) then {
 
                 // AT: zirha roket
                 private _atAtti = false;
-                if (_rol isEqualTo "AT" && {!isNull _zirh}) then {
+                if (!isNull _zirh && {[_x] call _atFn}) then {
                     private _d = _x distance2D _zirh;
                     if (_d > 40 && {_d < 450} && {(_x knowsAbout _zirh) > 0.5}) then {
-                        _x selectWeapon (secondaryWeapon _x);
-                        _x doTarget _zirh;
-                        _x doFire _zirh;
+                        [_x, _zirh] call _atFireFn;
                         _atAtti = true;
                     };
                 };
 
                 if (!_atAtti) then {
                     // AT piyadeye ates ederken ana silaha don
-                    if (_rol isEqualTo "AT" && {(currentWeapon _x) isEqualTo (secondaryWeapon _x)}) then {
-                        _x selectWeapon (primaryWeapon _x);
+                    if ((secondaryWeapon _x) isNotEqualTo "" && {(currentWeapon _x) isEqualTo (secondaryWeapon _x)}) then {
+                        [_x, primaryWeapon _x] call CBA_fnc_selectWeapon;
                     };
                     if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
                         _x doTarget _odak;

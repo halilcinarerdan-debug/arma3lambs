@@ -57,11 +57,12 @@ if (_armor isEqualTo []) exitWith {false};
 _armor = [_armor, [], {_unit distance2D _x}, "ASCEND"] call BIS_fnc_sortBy;
 private _zirh = _armor select 0;
 
+// AT: LAMBS bayraklariyla GERCEK anti-tank (AA / flare / AP launcher sayilmaz)
+private _atFn = missionNamespace getVariable ["lambs_danger_fnc_isATUnit", {params ["_u"]; (secondaryWeapon _u) isNotEqualTo "" && {(_u ammo (secondaryWeapon _u)) > 0}}];
 private _ats = (units _group) select {
     alive _x
     && {isNull objectParent _x}
-    && {(secondaryWeapon _x) isNotEqualTo ""}
-    && {(_x ammo (secondaryWeapon _x)) > 0}
+    && {[_x] call _atFn}
 };
 if (_ats isEqualTo []) exitWith {false};
 _ats = [_ats, [], {_x distance2D _zirh}, "ASCEND"] call BIS_fnc_sortBy;
@@ -109,6 +110,8 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     private _leader = leader _group;
     private _mySide = side _leader;
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}];
+    private _atFn = missionNamespace getVariable ["lambs_danger_fnc_isATUnit", {params ["_u"]; (secondaryWeapon _u) isNotEqualTo "" && {(_u ammo (secondaryWeapon _u)) > 0}}];
+    private _atFireFn = missionNamespace getVariable ["lambs_danger_fnc_atFire", {params ["_u", "_t"]; _u doTarget _t; _u doFire _t; true}];
 
     // Bilinen dusman PIYADE (merkez etrafinda 300m): grup bilgisi veya 70m icinde
     private _piyadeBul = {
@@ -264,15 +267,12 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     while {time < _loopBitis && {!isNull _group}} do {
         if (!alive _zirh) exitWith { _sonuc = "zirh imha edildi"; };
 
-        private _atVar = _ats select {alive _x && {(_x ammo (secondaryWeapon _x)) > 0}};
+        private _atVar = _ats select {alive _x && {[_x] call _atFn}};
         if (_atVar isEqualTo []) exitWith { _sonuc = "AT mermisi bitti / AT oldu"; };
 
         // AT: roket
-        {
-            _x selectWeapon (secondaryWeapon _x);
-            _x doTarget _zirh;
-            _x doFire _zirh;
-        } forEach _atVar;
+        // LAMBS yontemi: launcher bir kez secilir, doFire 4 sn sonra (her tikte selectWeapon YOK)
+        { [_x, _zirh] call _atFireFn; } forEach _atVar;
 
         // dusman piyade (ilk canli AT'nin etrafinda)
         private _merkez = getPosATL (_atVar select 0);

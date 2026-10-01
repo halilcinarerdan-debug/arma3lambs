@@ -66,7 +66,9 @@ if ((_onbellek select 0) isEqualTo _primary) then {
 // ---------------------------------------------------------------------------
 private _rol = _silahRol;
 if (_silahRol isNotEqualTo "MG") then {
-    if (_launcher isNotEqualTo "" && {(_unit ammo _launcher) > 0}) then {
+    // AT = LAMBS bayraklariyla GERCEK anti-tank (AA / flare / AP launcher AT sayilmaz)
+    private _atFn = missionNamespace getVariable ["lambs_danger_fnc_isATUnit", {params ["_u"]; (secondaryWeapon _u) isNotEqualTo "" && {(_u ammo (secondaryWeapon _u)) > 0}}];
+    if (_launcher isNotEqualTo "" && {[_unit] call _atFn}) then {
         _rol = "AT";
     } else {
         if (_silahRol isEqualTo "RIFLE" && {_unit getUnitTrait "medic"}) then {

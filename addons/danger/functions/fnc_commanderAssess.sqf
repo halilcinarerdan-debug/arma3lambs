@@ -49,6 +49,8 @@ if (isNull _unit) exitWith {"BOUNDING"};
 
 // Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden her asker TUFEKLI sayilir
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+// AT: LAMBS bayraklariyla GERCEK anti-tank (AA / flare / AP launcher sayilmaz)
+private _atFn = missionNamespace getVariable ["lambs_danger_fnc_isATUnit", {params ["_u"]; (secondaryWeapon _u) isNotEqualTo "" && {(_u ammo (secondaryWeapon _u)) > 0}}];
 
 // ---------------------------------------------------------------------------
 // HEDEF NORMALIZE
@@ -116,8 +118,7 @@ private _ownAT = 0;
         default          {1.0};
     });
     if (_r isEqualTo "MG") then {_ownMg = _ownMg + 1;};
-    private _l = secondaryWeapon _x;
-    if (_l isNotEqualTo "" && {(_x ammo _l) > 0}) then {_ownAT = _ownAT + 1;};
+    if ([_x] call _atFn) then {_ownAT = _ownAT + 1;};
 } forEach _aliveUnits;
 
 // ---------------------------------------------------------------------------
