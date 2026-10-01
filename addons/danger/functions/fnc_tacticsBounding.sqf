@@ -220,6 +220,31 @@ if (EGVAR(main,debug_functions)) then {
 
     private _cycleCount = 0;
 
+    // Kosucu hareketi: ADVANCE modunda siperli ileri sicrama; siper yoksa SINIRLI (20m) atilim
+    // (eskiden siper yoksa dogrudan dusman pozisyonuna kosuyordu)
+    private _kosanHareket = {
+        params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil"];
+        if (!alive _kosan || {!isNull objectParent _kosan}) exitWith {};
+
+        private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 1, "ADVANCE"] call EFUNC(main,findCover);
+        private _movePos = [];
+        private _stance  = "AUTO";
+
+        if (_cover isNotEqualTo []) then {
+            _movePos = (_cover select 0) select 0;
+            _stance  = (_cover select 0) select 1;
+        } else {
+            private _kalan = ((_kosan distance2D _hedef) - _hucumMenzil) max 0;
+            _movePos = (getPosATL _kosan) getPos [(20 min _kalan), (_kosan getDir _hedef)];
+        };
+
+        _kosan setVariable [QEGVAR(main,currentTask), "BuddyRush/Move", EGVAR(main,debug_functions)];
+        _kosan setUnitPosWeak _stance;
+        _kosan moveTo _movePos;
+        _kosan doWatch _hedef;
+        _kosan forceSpeed -1;
+    };
+
     // Bounding'i temiz bitirir (bayraklar + enableAttack/allowGetIn/doWatch geri)
     private _bndTemizle = {
         params ["_g"];
@@ -236,9 +261,8 @@ if (EGVAR(main,debug_functions)) then {
         } forEach (units _g);
     };
 
-    if (!GVAR(disableAutonomousSmokeGrenades)) then {
-        [_leader, _target] call EFUNC(main,doSmoke);
-    };
+    // Taktik sis: dusmana dogru, hareket eden birligin onune (tacticalSmoke cooldown'u var)
+    [_group, _target, "COVER_MOVE"] call FUNC(tacticalSmoke);
 
     // FORMASYON ZORLAMA
     [_group] spawn {
@@ -261,6 +285,11 @@ if (EGVAR(main,debug_functions)) then {
         && {_cycleCount < _BND_MAX_CYCLES}
     } do {
         _cycleCount = _cycleCount + 1;
+
+        // Siste periyodik sis (cooldown 45 sn icinde)
+        if ((_cycleCount % 3) isEqualTo 2) then {
+            [_group, _target, "COVER_MOVE"] call FUNC(tacticalSmoke);
+        };
 
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
         // (fnc_tactics bounding sirasinda komutani cagirmadigi icin eskiden
@@ -321,6 +350,18 @@ if (EGVAR(main,debug_functions)) then {
         {
             if (alive _x && {isNull objectParent _x}) then {
                 _x setVariable [QEGVAR(main,currentTask), "Bound/Suppress", EGVAR(main,debug_functions)];
+
+                // MG / nisanci: gorusu olan KORUNAKLI atis pozisyonu (cycle 1, 5, 9...)
+                if ((_cycleCount % 4) isEqualTo 1 && {([_x] call FUNC(getUnitRole)) in ["MG", "MARKSMAN"]}) then {
+                    private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                    if (_ow isNotEqualTo []) then {
+                        private _owPos = (_ow select 0) select 0;
+                        if ((_x distance2D _owPos) > 4) then {
+                            _x moveTo _owPos;
+                        };
+                        _x setUnitPosWeak ((_ow select 0) select 1);
+                    };
+                };
                 _x doWatch _target;
                 [_x, _targetASL] call EFUNC(main,doSuppress);
 
@@ -341,11 +382,14 @@ if (EGVAR(main,debug_functions)) then {
                 params ["_birim"];
                 private _skor = 0;
 
-                private _wpn = primaryWeapon _birim;
-                private _wpnType = getNumber (configFile >> "CfgWeapons" >> _wpn >> "type");
-                if (_wpnType in [4, 5]) then { _skor = _skor + 100; };
-
-                if ((secondaryWeapon _birim) isNotEqualTo "") then { _skor = _skor + 80; };
+                // MG artik kapasiteyle tespit edilir (eski CfgWeapons>>type kontrolu hic eslesmiyordu)
+                _skor = _skor + (switch ([_birim] call FUNC(getUnitRole)) do {
+                    case "MG":       {100};
+                    case "AT":       {80};
+                    case "MARKSMAN": {70};
+                    case "MEDIC":    {50};
+                    default          {0};
+                });
 
                 if (_birim isEqualTo (leader (group _birim))) then { _skor = _skor + 60; };
                 if (_birim isEqualTo (leader _group)) then { _skor = _skor + 40; };
@@ -369,24 +413,19 @@ if (EGVAR(main,debug_functions)) then {
                 _gecici deleteAt _enIyiIdx;
             };
 
+            // BUDDY ESLESTIRME (2026-10-01): en guclu + en zayif (agir silah + tufekli).
+            // Eskiden ardisik siralama MG+AT ve tufekli+tufekli ciftleri uretiyordu.
             private _ciftler = [];
-            private _idx = 0;
-            while {_idx < count _sirali} do {
-                private _kalan = (count _sirali) - _idx;
-                private _cift = [_sirali select _idx];
-
-                if (_kalan >= 2) then {
-                    _cift pushBack (_sirali select (_idx + 1));
-                    _ciftler pushBack _cift;
-                    _idx = _idx + 2;
+            private _n = count _sirali;
+            for "_p" from 0 to ((floor (_n / 2)) - 1) do {
+                _ciftler pushBack [_sirali select _p, _sirali select (_n - 1 - _p)];
+            };
+            if ((_n % 2) isEqualTo 1) then {
+                private _orta = _sirali select (floor (_n / 2));
+                if (_ciftler isNotEqualTo []) then {
+                    (_ciftler select ((count _ciftler) - 1)) pushBack _orta;
                 } else {
-                    if (_ciftler isNotEqualTo []) then {
-                        private _sonCift = _ciftler select ((count _ciftler) - 1);
-                        _sonCift pushBack (_sirali select _idx);
-                    } else {
-                        _ciftler pushBack _cift;
-                    };
-                    _idx = _idx + 1;
+                    _ciftler pushBack [_orta];
                 };
             };
 
@@ -396,23 +435,15 @@ if (EGVAR(main,debug_functions)) then {
                 private _ciftBoyut = count _cift;
 
                 if (_ciftBoyut isEqualTo 1) then {
+                    // Tek kalan bounder FSE suppress ederken ilerler (eskiden hic ilerlemiyordu)
                     private _tek = _cift select 0;
-                    if (alive _tek && {isNull objectParent _tek}) then {
-                        _tek setVariable [QEGVAR(main,currentTask), "BuddyRush/Overwatch", EGVAR(main,debug_functions)];
-                        _tek doWatch _target;
-                        [_tek, _targetASL] call EFUNC(main,doSuppress);
+                    [_tek, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE] call _kosanHareket;
 
-                        private _dusmanTek = _tek findNearestEnemy _tek;
-                        if (!isNull _dusmanTek && {_tek distance2D _dusmanTek < 400}) then {
-                            _tek doTarget _dusmanTek;
-                        };
-
-                        if (EGVAR(main,debug_functions)) then {
-                            diag_log format [
-                                "[BUDDY-RUSH] %1 | cift:%2 | tek:%3 | overwatch",
-                                groupId _group, _ciftIdx, name _tek
-                            ];
-                        };
+                    if (EGVAR(main,debug_functions)) then {
+                        diag_log format [
+                            "[BUDDY-RUSH] %1 | cycle:%2 | cift:%3 | tek:%4 | kosuyor",
+                            groupId _group, _cycleCount, _ciftIdx, name _tek
+                        ];
                     };
                 } else {
                     private _siraliCift = [];
@@ -431,33 +462,16 @@ if (EGVAR(main,debug_functions)) then {
                         _geciciCift deleteAt _enKotuIdx;
                     };
 
-                    private _kosanIdx = _cycleCount % (count _siraliCift);
-                    private _kosan = _siraliCift select _kosanIdx;
-                    private _destekler = [];
-                    {
-                        if (_forEachIndex isNotEqualTo _kosanIdx) then {
-                            _destekler pushBack _x;
-                        };
-                    } forEach _siraliCift;
+                    // MG kosmaz (atis ussu); sadece MG'lerden olusan ciftte hepsi aday
+                    private _kosanAdaylari = _siraliCift select {([_x] call FUNC(getUnitRole)) isNotEqualTo "MG"};
+                    if (_kosanAdaylari isEqualTo []) then {
+                        _kosanAdaylari = +_siraliCift;
+                    };
+                    private _kosan = _kosanAdaylari select (_cycleCount % (count _kosanAdaylari));
+                    private _destekler = _siraliCift - [_kosan];
 
                     // KOSAN — moveTo ile guclu hareket
-                    if (alive _kosan && {isNull objectParent _kosan} && {(vehicle _kosan) isEqualTo _kosan}) then {
-                        private _cover = [_kosan, _target, _BND_COVER_RANGE, "ASCEND", 1] call EFUNC(main,findCover);
-                        private _movePos = _target;
-                        private _stance  = "AUTO";
-
-                        if (_cover isNotEqualTo []) then {
-                            private _coverData = _cover select 0;
-                            _movePos = _coverData select 0;
-                            _stance  = _coverData select 1;
-                        };
-
-                        _kosan setVariable [QEGVAR(main,currentTask), "BuddyRush/Move", EGVAR(main,debug_functions)];
-                        _kosan setUnitPosWeak _stance;
-                        _kosan moveTo _movePos;
-                        _kosan doWatch _target;
-                        _kosan forceSpeed -1;
-                    };
+                    [_kosan, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE] call _kosanHareket;
 
                     // DESTEKLER
                     {

@@ -2,7 +2,11 @@
 /*
  * Author: Cinar (ELITE fork)
  * Grubu 3 fire team'e boler: Fire Support / Maneuver / Reserve
- * NATO doktrini + dinamik boyut (grup sayisina gore)
+ * NATO doktrini + dinamik boyut + ROL BAZLI dagitim
+ *
+ *   FSE      : MG -> nisanci -> AT (atis ussu), eksik kalirsa tufeklilerle tamamlanir
+ *   MANEUVER : lider + tufekliler (artan agir silahlar yer varsa)
+ *   RESERVE  : saglikci + artanlar
  *
  * Arguments:
  * 0: group <GROUP> or leader <OBJECT>
@@ -36,71 +40,80 @@ switch (true) do {
 };
 
 // ---------------------------------------------------------------------------
-// KATEGORIZE — MG/AT/sniper = heavy, digerleri = normal
+// ROL KATEGORIZE (getUnitRole: MG kapasiteyle tespit edilir)
 // ---------------------------------------------------------------------------
 private _leader = leader _group;
-private _heavies = [];
-private _normals = [];
+private _mgs = [];
+private _marks = [];
+private _ats = [];
+private _medics = [];
+private _rifles = [];
 
 {
-    if (_x isEqualTo _leader) then {
-        _normals pushBack _x;
-    } else {
-        private _wpn = primaryWeapon _x;
-        private _wpnType = getNumber (configFile >> "CfgWeapons" >> _wpn >> "type");
-        private _hasLauncher = (secondaryWeapon _x) isNotEqualTo "";
-        if (_wpnType in [4, 5] || _hasLauncher) then {
-            _heavies pushBack _x;
-        } else {
-            _normals pushBack _x;
+    if (_x isNotEqualTo _leader) then {
+        switch ([_x] call FUNC(getUnitRole)) do {
+            case "MG":       { _mgs pushBack _x; };
+            case "MARKSMAN": { _marks pushBack _x; };
+            case "AT":       { _ats pushBack _x; };
+            case "MEDIC":    { _medics pushBack _x; };
+            default          { _rifles pushBack _x; };
         };
     };
 } forEach _units;
 
-// ---------------------------------------------------------------------------
-// DAGITIM
-// ---------------------------------------------------------------------------
 private _fse = [];
 private _maneuver = [];
 private _reserve = [];
 
 // 1) Lider maneuver'a
-if (_leader in _normals) then {
+if (_leader in _units) then {
     _maneuver pushBack _leader;
-    _normals deleteAt (_normals find _leader);
 };
 
-// 2) FSE = heavy'ler (max _fseSize)
-while {count _fse < _fseSize && count _heavies > 0} do {
-    _fse pushBack (_heavies deleteAt 0);
+// 2) FSE = atis ussu: MG -> nisanci -> AT
+{
+    private _liste = _x;
+    while {(count _fse) < _fseSize && {_liste isNotEqualTo []}} do {
+        _fse pushBack (_liste deleteAt 0);
+    };
+} forEach [_mgs, _marks, _ats];
+
+// 3) Maneuver = tufekliler
+while {(count _maneuver) < _mvrSize && {_rifles isNotEqualTo []}} do {
+    _maneuver pushBack (_rifles deleteAt 0);
 };
 
-// 3) Maneuver = kalan rifleman
-while {count _maneuver < _mvrSize && count _normals > 0} do {
-    _maneuver pushBack (_normals deleteAt 0);
+// 3b) Maneuver'da hala yer varsa artan agir silahlar (AT -> nisanci -> MG)
+{
+    private _liste = _x;
+    while {(count _maneuver) < _mvrSize && {_liste isNotEqualTo []}} do {
+        _maneuver pushBack (_liste deleteAt 0);
+    };
+} forEach [_ats, _marks, _mgs];
+
+// 3c) FSE hala eksikse (MG/nisanci yok) kalan tuflekliler son siradan tamamlar
+while {(count _fse) < _fseSize && {_rifles isNotEqualTo []}} do {
+    _fse pushBack (_rifles deleteAt ((count _rifles) - 1));
 };
 
-// 3b) FSE hala eksikse (agir silahli yoksa) normal askerlerle tamamla
-while {count _fse < _fseSize && count _normals > 0} do {
-    _fse pushBack (_normals deleteAt ((count _normals) - 1));
-};
+// 4) Reserve = artan (saglikci dahil)
+_reserve = _medics + _rifles + _ats + _marks + _mgs;
 
-// 4) Reserve = artan
-_reserve = _heavies + _normals;
-
-// 5) Guvenlik: FSE veya Maneuver bos ise reserve'den ekle
-if (_fse isEqualTo [] && {count _reserve > 0}) then {
+// 5) Guvenlik: FSE veya Maneuver bos/az ise reserve'den ekle
+if (_fse isEqualTo [] && {_reserve isNotEqualTo []}) then {
     _fse pushBack (_reserve deleteAt 0);
 };
-if (count _maneuver < 2 && {count _reserve > 0}) then {
+if ((count _maneuver) < 2 && {_reserve isNotEqualTo []}) then {
     _maneuver pushBack (_reserve deleteAt 0);
 };
 
 // Debug
 if (EGVAR(main,debug_functions)) then {
     diag_log format [
-        "[FIRETEAM] %1 (%2 kisi) -> FSE:%3 MVR:%4 RES:%5",
-        groupId _group, _count, count _fse, count _maneuver, count _reserve
+        "[FIRETEAM] %1 (%2 kisi) -> FSE:%3 (MG:%4) MVR:%5 RES:%6",
+        groupId _group, _count, count _fse,
+        {([_x] call FUNC(getUnitRole)) isEqualTo "MG"} count _fse,
+        count _maneuver, count _reserve
     ];
 };
 

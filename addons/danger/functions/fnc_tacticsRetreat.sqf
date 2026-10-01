@@ -198,6 +198,9 @@ if (EGVAR(main,debug_functions)) then {
         };
     };
 
+    // SIS PERDESI: grup ile dusman arasina (derin perde icin 2 atici)
+    [_group, _targetPos, "BREAK_CONTACT"] call FUNC(tacticalSmoke);
+
     // FAZ 1 - RESERVE
     if (EGVAR(main,debug_functions)) then {
         diag_log format ["[GERI-CEKILME] FAZ 1: RESERVE -> ANA (%1 kisi)", count _reserve];

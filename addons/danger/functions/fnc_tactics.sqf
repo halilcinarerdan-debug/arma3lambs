@@ -106,6 +106,7 @@ if (
         case "DELAY": {
             _group setVariable [QGVAR(isExecutingTactic), true];
             [_group, _target] call FUNC(tacticsHide);
+            [_group, _target, "BREAK_CONTACT"] call FUNC(tacticalSmoke);
             [_group, 25] spawn {
                 params ["_g", "_sure"];
                 sleep _sure;

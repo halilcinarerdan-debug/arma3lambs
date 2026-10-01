@@ -1,8 +1,18 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * Komutan Beyni — 5 faktor tehdit analizi + NATO karar tablosu
- * LAMBS'in "random 1 < 0.85" zar atma yerine gercek karar verir.
+ * Komutan Beyni v2 — rol agirlikli guc orani + zirh / MG / baski farkindaligi
+ * + 6 faktorlu tehdit skoru (artik karara DAHIL) + NATO karar tablosu
+ *
+ * v2 degisiklikleri:
+ *   - Dusman sayisi: grubun BILDIGI dusmanlar (knowsAbout) + 70m icindekiler
+ *     (eski: 300m icindeki herkes = hile bilgisi)
+ *   - Guc orani rol agirlikli: MG 2.0, nisanci 1.5, AT 1.4, tufekli 1.0, saglikci 0.6
+ *   - Zirh farkindaligi: dusman Tank/APC varsa kendi AT sayisina gore karar
+ *   - Dusman MG sayisi: 2+ MG acik arazide cepheden saldirmaz (FLANK)
+ *   - Baski (getSuppression) ortalamasi: ezilen grup hareket etmez (HOLD)
+ *   - Bina savunma avantaji
+ *   - Tehdit skoru karar esiği olarak kullanilir
  *
  * Arguments:
  * 0: group <GROUP> or group leader <OBJECT>
@@ -14,12 +24,7 @@
  *   | "FLANK" | "ASSAULT" | "BOUNDING" | "PEEL"
  *
  * Debug HUD legend (systemChat):
- *   [CMD] <leader> [<own>v<enemy>] Cnt:Fir:Cas:Amm:Pos | THR:<score> | <decision> (<reason>)
- *   Cnt = sayi faktoru (0=az tehdit, 1=cok tehdit)
- *   Fir = dusman ates gucu faktoru
- *   Cas = kendi kayip faktoru
- *   Amm = kendi muhimmat faktoru (1=bos)
- *   Pos = pozisyon faktoru (1=acik, 0=bina)
+ *   [CMD] <leader> [<own>v<enemy> P:<oran>] Cnt:Fir:Cas:Amm:Pos:Sup | THR:<score> | <decision> (<reason>)
  *
  * Example:
  * [bob, angryJoe] call lambs_danger_fnc_commanderAssess;
@@ -43,7 +48,7 @@ private _unit = leader _group;
 if (isNull _unit) exitWith {"BOUNDING"};
 
 // ---------------------------------------------------------------------------
-// HEDEF NORMALIZE — _targetPos burada tanimlanir, sonra kullanilir
+// HEDEF NORMALIZE
 // ---------------------------------------------------------------------------
 private _targetPos = _target call CBA_fnc_getPos;
 if ((_targetPos select 2) > 6) then {_targetPos set [2, 0.5];};
@@ -68,52 +73,110 @@ private _mySide = side _unit;
 private _distance = _unit distance2D _targetPos;
 
 // ---------------------------------------------------------------------------
-// FAKTOR 1 — DUSMAN SAYISI  (agirlik %25)
-// 300m icindeki bilinen dusmanlar
+// DUSMAN TESPITI — grubun BILDIGI (knowsAbout) + 70m icindeki dusmanlar
 // ---------------------------------------------------------------------------
-private _nearAll = _unit nearEntities ["CAManBase", 300];
+private _nearAll = _unit nearEntities ["CAManBase", 350];
 private _enemies = _nearAll select {
     alive _x
     && {!((side _x) == civilian)}
     && {(_mySide getFriend (side _x)) < 0.6}
+    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 70}}
+};
+
+// Hedef objeyse ve listede yoksa ekle
+if (_enemies isEqualTo [] && {_target isEqualType objNull} && {!isNull _target} && {alive _target}) then {
+    _enemies = [_target];
 };
 
 private _enemyCount = count _enemies;
-private _countRatio = _enemyCount / (_ownCount max 1);
-private _factorCount = linearConversion [0.5, 2.0, _countRatio, 0.2, 1.0, true];
 
-// ---------------------------------------------------------------------------
-// FAKTOR 2 — DUSMAN ATES GUCU  (agirlik %20)
-// MG (type 4) / Sniper (type 5) / Launcher
-// ---------------------------------------------------------------------------
-private _firepower = 0;
-private _hasHeavyWeapon = false;
+// En yakin dusman mesafesi (hedef pozisyondan daha gercekci)
+private _closest = _distance;
 {
-    private _wpn = primaryWeapon _x;
-    if (_wpn isNotEqualTo "") then {
-        private _wpnType = getNumber (configFile >> "CfgWeapons" >> _wpn >> "type");
-        if (_wpnType in [4, 5]) then {
-            _firepower = _firepower + 1;
-            _hasHeavyWeapon = true;
-        };
-    };
-    if ((secondaryWeapon _x) isNotEqualTo "") then {
-        _firepower = _firepower + 1.5;
-        _hasHeavyWeapon = true;
-    };
+    private _d = _unit distance2D _x;
+    if (_d < _closest) then {_closest = _d;};
 } forEach _enemies;
 
+// ---------------------------------------------------------------------------
+// KENDI GUCU — rol agirlikli
+// ---------------------------------------------------------------------------
+private _ownPower = 0;
+private _ownMg = 0;
+private _ownAT = 0;
+{
+    private _r = [_x] call FUNC(getUnitRole);
+    _ownPower = _ownPower + (switch (_r) do {
+        case "MG":       {2.0};
+        case "MARKSMAN": {1.5};
+        case "AT":       {1.4};
+        case "MEDIC":    {0.6};
+        default          {1.0};
+    });
+    if (_r isEqualTo "MG") then {_ownMg = _ownMg + 1;};
+    private _l = secondaryWeapon _x;
+    if (_l isNotEqualTo "" && {(_x ammo _l) > 0}) then {_ownAT = _ownAT + 1;};
+} forEach _aliveUnits;
+
+// ---------------------------------------------------------------------------
+// DUSMAN GUCU — ilk 12 dusmanin rolu, fazlasi orantilanir
+// ---------------------------------------------------------------------------
+private _enemyPower = 0;
+private _enemyMg = 0;
+private _enemyAT = 0;
+private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else {_enemies};
+{
+    private _r = [_x] call FUNC(getUnitRole);
+    _enemyPower = _enemyPower + (switch (_r) do {
+        case "MG":       {2.0};
+        case "MARKSMAN": {1.5};
+        case "AT":       {1.4};
+        case "MEDIC":    {0.6};
+        default          {1.0};
+    });
+    if (_r isEqualTo "MG") then {_enemyMg = _enemyMg + 1;};
+    if ((secondaryWeapon _x) isNotEqualTo "") then {_enemyAT = _enemyAT + 1;};
+} forEach _enemySample;
+if (_enemyCount > 12) then {
+    _enemyPower = _enemyPower * (_enemyCount / 12);
+};
+
+// ---------------------------------------------------------------------------
+// ZIRH — 450m icinde murettebatli dusman Tank / APC
+// ---------------------------------------------------------------------------
+private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
+    alive _x
+    && {(_mySide getFriend (side _x)) < 0.6}
+    && {!((side _x) == civilian)}
+};
+private _armorCount = count _armor;
+private _armorDist = 9999;
+{
+    private _d = _unit distance2D _x;
+    if (_d < _armorDist) then {_armorDist = _d;};
+} forEach _armor;
+
+// AT varsa zirh 3, yoksa 6 guc puani (AT'siz piyade zirha karsi cok zayif)
+_enemyPower = _enemyPower + (_armorCount * (if (_ownAT > 0) then {3} else {6}));
+
+private _pwrRatio = _enemyPower / (_ownPower max 0.5);
+
+// ---------------------------------------------------------------------------
+// FAKTOR 1 — GUC ORANI  (agirlik %22)
+// ---------------------------------------------------------------------------
+private _factorCount = linearConversion [0.5, 2.0, _pwrRatio, 0.2, 1.0, true];
+
+// ---------------------------------------------------------------------------
+// FAKTOR 2 — DUSMAN ATES GUCU  (agirlik %18)
+// MG (kapasiteyle tespit) / launcher / zirh
+// ---------------------------------------------------------------------------
+private _firepower = _enemyMg + (_enemyAT * 1.5) + (_armorCount * 2);
+private _hasHeavyWeapon = (_enemyMg + _enemyAT + _armorCount) > 0;
 private _factorFirepower = linearConversion [0, 3, _firepower, 0.2, 1.0, true];
 
 // ---------------------------------------------------------------------------
-// FAKTOR 3 — KENDI KAYIP  (agirlik %20)
-// cmdInitialCount XEH_postInit.sqf'te her gruba spawn'da set edilir.
-// Bulletproof: nil donebilir, SQF quirk'i yuzunden kontrol edilir.
+// FAKTOR 3 — KENDI KAYIP  (agirlik %18)
 // ---------------------------------------------------------------------------
 private _initialCount = _group getVariable [QGVAR(cmdInitialCount), -1];
-
-// BULLETPROOF: getVariable nil donebilir, private _x = nil sonrasi _x
-// undefined olur (SQF quirk). Bu yuzden iki katmanli kontrol.
 if (isNil "_initialCount") then { _initialCount = -1; };
 if !(_initialCount isEqualType 0) then { _initialCount = -1; };
 
@@ -129,35 +192,22 @@ if (_initialCount > 0) then {
 private _factorCasualty = linearConversion [0, 0.5, _lossRatio, 0, 1, true];
 
 // ---------------------------------------------------------------------------
-// FAKTOR 4 — KENDI MUHIMMAT  (agirlik %15)
-// 2026-09-30 FIX: needReload yaniltici (bos sarjorde 0 donuyor).
-// Artik magazinesAmmoFull ile GERCEK toplam mermi sayisi olculur.
+// FAKTOR 4 — KENDI MUHIMMAT  (agirlik %12)
+// magazinesAmmo: TUM sarjorler (>1: el bombasi/roket/fume sayilmaz)
 // ---------------------------------------------------------------------------
-// GERCEK CEPHANE — mermi/kisi orani (baseline yok, mutlak esik)
-// 2026-09-30 fix v2: baseline bug'i (bos grup yanlis referans aliyor)
 private _toplamMermi = 0;
 {
     private _asker = _x;
     {
         _x params ["_magClass", "_ammoCount"];
-        // 2026-10-01 FIX: magazinesAmmoFull'un 4. elemani sayi, konum 5. elemandi
-        // -> sadece takili sarjor sayiliyordu, grup ates acinca hep HOLD'a dusuyordu.
-        // magazinesAmmo: TUM sarjorler. >1 filtresi el bombasi/roket/fume atar.
         if (_ammoCount > 1) then {
             _toplamMermi = _toplamMermi + _ammoCount;
         };
     } forEach (magazinesAmmo _asker);
 } forEach _aliveUnits;
 
-// Mermi/kisi orani (30 mermi = 1 sarjor)
 private _mermiPerKisi = _toplamMermi / (_ownCount max 1);
 
-// Esikler (asker basi mermi):
-//   > 90  -> 0.2 bol (3+ sarjor)
-//   60-90 -> 0.4 normal (2 sarjor)
-//   30-60 -> 0.6 az (1 sarjor)
-//   10-30 -> 0.85 kritik
-//   < 10  -> 1.0 bitti
 private _factorAmmo = switch (true) do {
     case (_mermiPerKisi < 10):  { 1.00 };
     case (_mermiPerKisi < 30):  { 0.85 };
@@ -166,7 +216,6 @@ private _factorAmmo = switch (true) do {
     default                     { 0.20 };
 };
 
-// _ammoOran: geriye uyumluluk ve cephane kurali icin
 // 0.0 = bitti, 1.0 = dolu
 private _ammoOran = switch (true) do {
     case (_mermiPerKisi < 10):  { 0.05 };
@@ -176,10 +225,8 @@ private _ammoOran = switch (true) do {
     default                     { 1.00 };
 };
 
-private _reloadAvg = 1 - _ammoOran;  // geriye uyumluluk
 // ---------------------------------------------------------------------------
-// FAKTOR 5 — POZISYON  (agirlik %20)
-// Bina = iyi savunma (dusuk tehdit), Acik = kotu (yuksek tehdit)
+// FAKTOR 5 — POZISYON  (agirlik %15)
 // ---------------------------------------------------------------------------
 private _leaderPos = getPosATL _unit;
 private _buildings = nearestTerrainObjects [
@@ -192,21 +239,32 @@ private _trees = nearestTerrainObjects [
 ];
 private _isUrban  = (count _buildings) >= 8;
 private _isForest = (count _trees) >= 12 && {!_isUrban};
+private _isOpen   = !_isUrban && {!_isForest};
+private _inBuilding = (insideBuilding _unit) > 0.5;
 
 private _factorPosition = if (_isUrban) then {0.2} else {
     if (_isForest) then {0.5} else {0.8}
 };
 
 // ---------------------------------------------------------------------------
-// AGIRLIKLI TEHDIT SKORU (bilgilendirici — karar tablosu bunu kullanmiyor)
-// %25 sayi + %20 ates gucu + %20 kayip + %15 muhimmat + %20 pozisyon
+// FAKTOR 6 — BASKI  (agirlik %15)
+// Grubun ortalama getSuppression degeri (0..1)
+// ---------------------------------------------------------------------------
+private _suppAvg = 0;
+{ _suppAvg = _suppAvg + (getSuppression _x); } forEach _aliveUnits;
+_suppAvg = _suppAvg / _ownCount;
+private _factorSupp = linearConversion [0, 0.8, _suppAvg, 0, 1, true];
+
+// ---------------------------------------------------------------------------
+// AGIRLIKLI TEHDIT SKORU — artik karara dahil (DELAY esigi)
 // ---------------------------------------------------------------------------
 private _threatScore =
-    (_factorCount     * 0.25) +
-    (_factorFirepower * 0.20) +
-    (_factorCasualty  * 0.20) +
-    (_factorAmmo      * 0.15) +
-    (_factorPosition  * 0.20);
+    (_factorCount     * 0.22) +
+    (_factorFirepower * 0.18) +
+    (_factorCasualty  * 0.18) +
+    (_factorAmmo      * 0.12) +
+    (_factorPosition  * 0.15) +
+    (_factorSupp      * 0.15);
 
 // ---------------------------------------------------------------------------
 // KONTROL: Dusman binada mi?
@@ -221,21 +279,15 @@ private _enemyInBuilding = false;
 
 // ---------------------------------------------------------------------------
 // KARAR TABLOSU — oncelik sirali (en tepeden asagi)
-// call {} + exitWith pattern: her blok ilk eslesen karari doner
+// call {} + exitWith: duz (ic ice `if then` YOK) — ic ice exitWith sadece
+// ic blogu bitirir, call'u degil.
 // ---------------------------------------------------------------------------
-private _result = [
-    _lossRatio, _reloadAvg, _enemyCount, _ownCount,
-    _distance, _enemyInBuilding, _hasHeavyWeapon, _ammoOran, _mermiPerKisi
-] call {
-       params [
-        "_lossRatio", "_reloadAvg", "_enemyCount", "_ownCount",
-        "_distance", "_enemyInBuilding", "_hasHeavyWeapon", "_ammoOran", "_mermiPerKisi"
-    ];
+private _result = call {
 
     // =======================================================================
-    // CEPHANE — en kritik (doktrin: mermisi olmayan asker cekilir)
+    // 1) CEPHANE — doktrin: mermisi olmayan asker cekilir
     // =======================================================================
-        if (_ammoOran <= 0.1) exitWith {
+    if (_ammoOran <= 0.1) exitWith {
         ["WITHDRAW", format ["cephane bitti (mermi/kisi: %1)", round _mermiPerKisi]]
     };
     if (_ammoOran <= 0.25) exitWith {
@@ -243,55 +295,89 @@ private _result = [
     };
 
     // =======================================================================
-    // KAYIP — agir
+    // 2) AGIR KAYIP / BASKIN GUC
     // =======================================================================
     if (_lossRatio >= 0.4) exitWith {
         ["WITHDRAW", format ["agir kayip %1%%", round (_lossRatio * 100)]]
     };
-    if (_enemyCount >= (_ownCount * 3) && {_lossRatio >= 0.2}) exitWith {
-        ["WITHDRAW", format ["3x dezavantaj %1v%2 + kayip %3%%", _enemyCount, _ownCount, round (_lossRatio * 100)]]
+    if (_pwrRatio >= 2.5 && {_lossRatio >= 0.2}) exitWith {
+        ["WITHDRAW", format ["%1x guc dezavantaji + kayip %2%%", _pwrRatio toFixed 1, round (_lossRatio * 100)]]
     };
 
     // =======================================================================
-    // PEEL — 2:1 dezavantaj + %10 kayip + yakin temas (NATO doktrini)
+    // 3) ZIRH TEHDIDI
     // =======================================================================
-    if (_enemyCount >= (_ownCount * 2)
+    if (_armorCount > 0 && {_ownAT <= 0} && {_armorDist < 150}) exitWith {
+        ["WITHDRAW", format ["zirh %1m, AT yok", round _armorDist]]
+    };
+    if (_armorCount > 0 && {_ownAT <= 0}) exitWith {
+        ["DELAY", format ["zirh %1m, AT yok - temas kes", round _armorDist]]
+    };
+    if (_armorCount > 0 && {_armorDist > 70}) exitWith {
+        ["FLANK", format ["zirh %1m, AT ile kanat", round _armorDist]]
+    };
+    if (_armorCount > 0) exitWith {
+        ["HOLD", "zirh yakin, AT siperde"]
+    };
+
+    // =======================================================================
+    // 4) PEEL — 1.6x guc dezavantaji + %10 kayip + yakin temas (NATO doktrini)
+    // =======================================================================
+    if (_pwrRatio >= 1.6
         && {_lossRatio >= 0.1}
-        && {_distance <= 250}
-        && {_distance >= 25}) exitWith {
-        ["PEEL", format ["2x dezavantaj %1v%2 + kayip %3%%", _enemyCount, _ownCount, round (_lossRatio * 100)]]
+        && {_closest <= 250}
+        && {_closest >= 25}) exitWith {
+        ["PEEL", format ["%1x guc dezavantaji + kayip %2%%", _pwrRatio toFixed 1, round (_lossRatio * 100)]]
     };
-
-    // PEEL — %15+ kayip
     if (_lossRatio >= 0.15 && {_lossRatio < 0.4}
-        && {_distance >= 25} && {_distance <= 250}
+        && {_closest >= 25} && {_closest <= 250}
         && {_enemyCount > 0}) exitWith {
-        ["PEEL", format ["kayip %1%% temas %2m", round (_lossRatio * 100), round _distance]]
+        ["PEEL", format ["kayip %1%% temas %2m", round (_lossRatio * 100), round _closest]]
     };
 
     // =======================================================================
-    // DIGER KARARLAR
+    // 5) TEHDIT SKORU + BASKI
     // =======================================================================
-    if (_reloadAvg > 0.75) exitWith {
-        ["HOLD", format ["muhimmat az (reload %1)", round (_reloadAvg * 100)]]
+    if (_threatScore >= 0.72 && {_closest > 40}) exitWith {
+        ["DELAY", format ["tehdit skoru yuksek (%1)", _threatScore toFixed 2]]
     };
-    if (_enemyCount >= (_ownCount * 2)) exitWith {
-        ["DELAY", format ["dusman 2x ustun (%1v%2)", _enemyCount, _ownCount]]
+    if (_suppAvg >= 0.6) exitWith {
+        ["HOLD", format ["baski altinda (%1) - hareket yok", _suppAvg toFixed 2]]
     };
+
+    // =======================================================================
+    // 6) SAVUNMA AVANTAJI — binadayiz, esit/ustun guc, dusman yakin ama kapida degil
+    // =======================================================================
+    if (_inBuilding && {_isUrban} && {_pwrRatio >= 0.9} && {_closest > 45} && {_closest < 200}) exitWith {
+        ["HOLD", "binada savunma avantaji"]
+    };
+
+    // =======================================================================
+    // 7) HAREKET / TAARRUZ
+    // =======================================================================
     if (_distance > 250) exitWith {
         ["FLANK", format ["uzak mesafe %1m", round _distance]]
+    };
+    if (_enemyMg >= 2 && {_isOpen}) exitWith {
+        ["FLANK", format ["%1 MG acik arazide - cepheden saldirma", _enemyMg]]
+    };
+    if (_enemyMg >= 1 && {_ownMg > 0} && {_closest > 60}) exitWith {
+        ["SUPPRESS_ASSAULT", "MG ustunlugu: bizim MG baski + hucum"]
     };
     if (_enemyInBuilding) exitWith {
         ["SUPPRESS_ASSAULT", "dusman binada"]
     };
-    if (_hasHeavyWeapon) exitWith {
+    if (_enemyMg >= 1 || {_enemyAT >= 2}) exitWith {
         ["FLANK", "dusman MG/AT"]
     };
-    if (_enemyCount > 0 && {_ownCount >= (_enemyCount * 1.5)}) exitWith {
-        ["ASSAULT", format ["biz 1.5x ustun (%1v%2)", _ownCount, _enemyCount]]
+    if (_enemyCount > 0 && {_pwrRatio <= 0.67}) exitWith {
+        ["ASSAULT", format ["biz ustun (guc orani %1)", _pwrRatio toFixed 2]]
     };
-    if (_distance < 60) exitWith {
-        ["ASSAULT", format ["yakin mesafe %1m", round _distance]]
+    if (_closest < 60) exitWith {
+        ["ASSAULT", format ["yakin mesafe %1m", round _closest]]
+    };
+    if (_pwrRatio >= 1.4) exitWith {
+        ["DELAY", format ["dusman ustun (guc orani %1)", _pwrRatio toFixed 2]]
     };
     ["BOUNDING", "standart"]
 };
@@ -349,14 +435,15 @@ _group setVariable [QGVAR(cmdSonKararZaman), time];
 // ---------------------------------------------------------------------------
 if (EGVAR(main,debug_functions)) then {
     private _msg = format [
-        "[CMD] %1 [%2v%3] Cnt:%4 Fir:%5 Cas:%6 Amm:%7 Pos:%8 | THR:%9 | %10 (%11)",
+        "[CMD] %1 [%2v%3 P:%4] Cnt:%5 Fir:%6 Cas:%7 Amm:%8 Pos:%9 Sup:%10 | THR:%11 | %12 (%13)",
         name _unit,
-        _ownCount, _enemyCount,
+        _ownCount, _enemyCount, _pwrRatio toFixed 2,
         _factorCount     toFixed 2,
         _factorFirepower toFixed 2,
         _factorCasualty  toFixed 2,
         _factorAmmo      toFixed 2,
         _factorPosition  toFixed 2,
+        _factorSupp      toFixed 2,
         _threatScore     toFixed 2,
         _decision, _reason
     ];
@@ -370,7 +457,7 @@ if (EGVAR(main,debug_functions)) then {
 _group setVariable [QGVAR(cmdLastThreat),   _threatScore];
 _group setVariable [QGVAR(cmdLastDecision), _decision];
 _group setVariable [QGVAR(cmdFactors), [
-    _factorCount, _factorFirepower, _factorCasualty, _factorAmmo, _factorPosition
+    _factorCount, _factorFirepower, _factorCasualty, _factorAmmo, _factorPosition, _factorSupp
 ]];
 
 _decision
