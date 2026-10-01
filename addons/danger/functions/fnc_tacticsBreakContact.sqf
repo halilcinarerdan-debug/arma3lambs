@@ -174,7 +174,7 @@ diag_log format [
 
             {
                 if (alive _x && {isNull objectParent _x}) then {
-                    private _p = _hedef getPos [random 3, random 360];
+                    private _p = _hedef getPos [random 5, random 360];
                     _varis pushBack [_x, _p, _stance];
                     // SADECE KOSARKEN: LAMBS reaksiyonlari emri bozmasin, kacma yok
                     _x setVariable [QGVAR(forceMove), true];

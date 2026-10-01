@@ -38,6 +38,11 @@ params [["_unit", objNull, [objNull]], ["_target", objNull, [objNull]]];
 
 private _group = group _unit;
 
+// Dagilma bilinci watchdog'u (yigilma = tek el bombasi / RPG hepsini oldurur) — ilk cagrida bir kez baslar
+if (isNil "lambs_danger_dispersionStarted") then {
+    [] call (missionNamespace getVariable ["lambs_danger_fnc_dispersion", {false}]);
+};
+
 if (EGVAR(main,debug_functions)) then {
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };

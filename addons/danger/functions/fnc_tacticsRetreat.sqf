@@ -248,7 +248,7 @@ if (EGVAR(main,debug_functions)) then {
                     _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
-                    private _p = _ciftNokta getPos [random 3, random 360];
+                    private _p = _ciftNokta getPos [random 4, random 360];
                     _varis pushBack [_x, _p];
                     _x moveTo _p;
                 };

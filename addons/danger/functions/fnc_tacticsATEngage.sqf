@@ -6,7 +6,7 @@
  * Doktrin: AT askeri zirha ates ederken kendisi cok savunmasizdir (roket yeniden doldurma,
  * ates sonrasi gorunur). Bu yuzden:
  *   - AT, zirha gorusu olan KORUNAKLI atis pozisyonuna gider (findCover OVERWATCH, zirhtan >= 60m)
- *   - Her AT'nin YANINA 2 dost piyade ESKORT olarak gider: AT'nin 6-9m'sine, DUSMAN PIYADE
+ *   - Her AT'nin YANINA 2 dost piyade ESKORT olarak gider: AT'nin 8-12m'sine, DUSMAN PIYADE
  *     yonunde (+-40 derece) — AT zirha vururken eskort dusman piyadeyi bastirir (baski + nisan + UGL)
  *   - Kalan piyadeler yerinde dusman piyadeyi bastirir (UGL dahil)
  *   - Piyade yoksa eskort zirhin yonunu izler (AT'yi korur)
@@ -225,7 +225,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
         _atanan append _buEskort;
         {
             private _ofs = [-40, 40] select (_eskortSay % 2);
-            private _p = _atPos getPos [6 + random 3, _piyadeYon + _ofs];
+            private _p = _atPos getPos [8 + random 4, _piyadeYon + _ofs];
             _x disableAI "AUTOCOMBAT";
             _x disableAI "COVER";
             _x setUnitPosWeak "UP";

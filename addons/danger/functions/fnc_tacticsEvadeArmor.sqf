@@ -191,7 +191,7 @@ diag_log format [
 
             {
                 if (alive _x && {isNull objectParent _x}) then {
-                    private _p = _hedef getPos [random 3, random 360];
+                    private _p = _hedef getPos [random 5, random 360];
                     _varis pushBack [_x, _p];
                     _x setVariable [QEGVAR(main,currentTask), "EvadeArmor/Move", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";

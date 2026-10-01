@@ -372,6 +372,11 @@ if (EGVAR(main,debug_functions)) then {
         [_kosan, _movePos, _stance]
     };
 
+    diag_log format [
+        "[BND-BASLA] %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5",
+        groupId _group, round ((leader _group) distance2D _target), count _fse, count _maneuver, count _reserve
+    ];
+
     // Taktik sis: dusmana dogru, hareket eden birligin onune (tacticalSmoke cooldown'u var)
     [_group, _target, "COVER_MOVE"] call _sisFn;
 
@@ -549,9 +554,12 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _kurulum;
 
-            if (_kurulum isNotEqualTo []) then {
-                diag_log format ["[OVERWATCH] %1 | ates ussu kuruldu: %2 asker", groupId _group, count _kurulum];
-            };
+            private _fseCanli = _fse select {alive _x};
+            diag_log format [
+                "[OVERWATCH] %1 | FSE:%2 | pozisyona giden:%3 | MG/nisanci:%4",
+                groupId _group, count _fseCanli, count _kurulum,
+                count (_fseCanli select {([_x] call _rolFn) in ["MG", "MARKSMAN"]})
+            ];
         } else {
             if ((_cycleCount % 4) isEqualTo 1) then {
                 {
@@ -606,14 +614,15 @@ if (EGVAR(main,debug_functions)) then {
                 _group setVariable [QGVAR(bndSonCycleCallout), time];
             };
 
-            if (EGVAR(main,debug_functions)) then {
-                diag_log format [
-                    "[BUDDY-RUSH] %1 | cycle:%2 | %3 | hareket:%4 kapsama:%5 | odak:%6",
-                    groupId _group, _cycleCount, ["buddy", "FSE-sicrama"] select _fseSicrama,
-                    count _hareketler, count _kapsama,
-                    if (isNull _odak) then {"yok"} else {name _odak}
-                ];
-            };
+            // Gozlem: her cycle bir satir (debug kapaliyken de). kapi = ates ustunlugu bekleme suresi (max 5)
+            diag_log format [
+                "[BND] %1 | cycle:%2 | %3 | hareket:%4 kapsama:%5 | kapi:%6s | odak:%7 %8m baski:%9",
+                groupId _group, _cycleCount, ["buddy", "FSE-sicrama"] select _fseSicrama,
+                count _hareketler, count _kapsama, (time - _atesBasi) toFixed 1,
+                if (isNull _odak) then {"yok"} else {name _odak},
+                if (isNull _odak) then {0} else {round ((leader _group) distance2D _odak)},
+                if (isNull _odak) then {"-"} else {(getSuppression _odak) toFixed 2}
+            ];
         };
 
         // Araclar
@@ -664,6 +673,14 @@ if (EGVAR(main,debug_functions)) then {
         [(_hareketEdecek + _kapsama) select {alive _x}, _target, _targetASL, _odak2, "Bound/Fire"] call _atesEt;
 
         sleep (_BND_CYCLE_BASE + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL));
+    };
+
+    if (!isNull _group) then {
+        diag_log format [
+            "[BND-BITTI] %1 | cycle:%2 | mesafe:%3m | bizim:%4",
+            groupId _group, _cycleCount, round ((leader _group) distance2D _target),
+            (_group getVariable [QGVAR(bndToken), ""]) isEqualTo _bndToken
+        ];
     };
 
     // Dongu bitti — token eslesiyorsa bu bounding hala bizim (Retreat devralmadi)

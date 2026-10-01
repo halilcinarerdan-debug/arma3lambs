@@ -307,6 +307,24 @@ private _result = call {
     };
 
     // =======================================================================
+    // 1b) PUSH — sayica / gucce USTUNUZ, kayip agir ama yeterli kisi var -> CEKILME, BASKI + HUCUM
+    //     "cok az degilsek": >= 4 kisi, kayip < %80, cephane yeterli (yukarida), zirh yok.
+    //     (WITHDRAW / PEEL kurallarindan ONCE: ustunken kayip verince kacmak yerine bitir.)
+    // =======================================================================
+    if (_enemyCount > 0
+        && {_ownCount >= 4}
+        && {_ownCount > _enemyCount}
+        && {_pwrRatio <= 1.0}
+        && {_lossRatio >= 0.15}
+        && {_lossRatio < 0.8}
+        && {_armorCount isEqualTo 0}) exitWith {
+        [
+            ["SUPPRESS_ASSAULT", "ASSAULT"] select (_closest < 120),
+            format ["PUSH: ustun guc (%1v%2, oran %3) kayip %4%% - cekilme, bastir + hucum", _ownCount, _enemyCount, _pwrRatio toFixed 2, round (_lossRatio * 100)]
+        ]
+    };
+
+    // =======================================================================
     // 2) AGIR KAYIP / BASKIN GUC
     // =======================================================================
     if (_lossRatio >= 0.4) exitWith {
@@ -394,6 +412,9 @@ private _result = call {
 private _decision = _result select 0;
 private _reason   = _result select 1;
 
+// PUSH kararlari hafiza / koordinasyon ile alternatife CEVRILMEZ (israrla bastir + hucum)
+private _push = (_reason select [0, 5]) isEqualTo "PUSH:";
+
 // ---------------------------------------------------------------------------
 // TAKTIK HAFIZASI + GRUP KOORDINASYONU
 // 1. Ayni grup son 30 sn icinde ayni taktigi tekrarlarsa -> alternatif
@@ -405,7 +426,7 @@ private _sonKararZaman = _group getVariable [QGVAR(cmdSonKararZaman), 0];
 private _tekrarMi = (_sonKarar isEqualTo _decision) && {(time - _sonKararZaman) < 30};
 
 private _digerAyni = false;
-if (!_tekrarMi && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
+if (!_tekrarMi && {!_push} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
     {
         if (
             _x isNotEqualTo _group
@@ -421,7 +442,7 @@ if (!_tekrarMi && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
     } forEach allGroups;
 };
 
-if ((_tekrarMi || _digerAyni) && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
+if ((_tekrarMi || _digerAyni) && {!_push} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
     _decision = switch (_decision) do {
         case "BOUNDING": { "FLANK" };
         case "FLANK":    { "SUPPRESS_ASSAULT" };

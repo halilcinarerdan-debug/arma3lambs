@@ -19,6 +19,7 @@ Dosyalar orijinal proje yollarıyla aynı yerleşimde; ilgili `.sqf` dosyaların
 | `addons/main/functions/fnc_findCover.sqf` | **v4**: FIRE-geometri ile MERMİ KORUNMASI (çalı gizler ama korumaz → −20), omuz testi, EVADE modu (sadece sert siper, bina +12). Eski v3: | **v3 puanlamalı siper**: koruma seviyesi, yan açılardan (±25°) ve diğer bilinen düşmanlardan gizlilik, arazi gizlemesi, mesafe/yaklaşma cezası, yumuşak obje (çalı) cezası, askerler arası rezerv (aynı ağaca yığılma yok). Modlar: DEFEND / ADVANCE / OVERWATCH |
 | `addons/main/functions/UnitAction/fnc_doCover.sqf` | Düşmana göre gerçek cover (findCover + 2 sn önbellek) |
 | `addons/danger/functions/fnc_tacticsPeel.sqf` | Artık sadece `tacticsRetreat`'i çağırır (eski Peel askerleri `PATH/MOVE` kilidiyle dondurabiliyordu; Zeus test komutu doğrudan Peel'e gidiyordu) |
+| `addons/danger/functions/fnc_dispersion.sqf` | **YENİ** — dağılma bilinci: 3+ askerlik yığılmayı (tek el bombası / RPG hepsini öldürür) bozar; launcher'lı düşman / zırh biliniyorsa yarıçap 5 → 8 m; sığınak varsa oraya, yoksa merkezden 7-10 m uzağa; buddy çifti yığılma sayılmaz |
 | `addons/danger/functions/fnc_tacticsBreakContact.sqf` | **YENİ** — küçük grup / TEK KALAN ASKER (<4) en yakın SERT siper (`findCover SURVIVE`) → kaç → bekle (25 sn, karşılık verir). Eskiden komutan beyni sadece ≥4 grup için çalışıyordu, tek kalan LAMBS akışına düşüp çatışmaya devam ediyordu |
 | `addons/danger/functions/fnc_isATUnit.sqf` | **YENİ** — GERÇEK AT tespiti (LAMBS `getLauncherUnits` bayrakları VEHICLE+ARMOUR): AA / flare / AP launcher artık AT sayılmaz |
 | `addons/danger/functions/fnc_atFire.sqf` | **YENİ** — AT roket atışı LAMBS `tacticsHide` yöntemiyle: launcher bir kez seçilir (`CBA_fnc_selectWeapon`), `doFire` 4 sn sonra. Eski kod her tikte `selectWeapon` yapıp AT'nin ateş etmesini engelleyebiliyordu |
@@ -36,7 +37,8 @@ Not: `ELITE_COVER_RANGE` (main/script_component.hpp) 60 m — 30 m önerilir.
 ## Karar önceliği (üstten alta)
 
 1. **Hayatta kalma (birim):** baskı altında / hareket etmiyorken LAMBS FSM'nin cover/dodge reaksiyonu AÇIK. `forceMove` yalnızca HAREKET EDEN askerde ve sadece hareket süresince; varınca kalkar. Baskı ≥ 0.85 olan koşucu `forceMove`'u bırakır ve yatar.
-2. **Kaçış (grup):** `EVADE_ARMOR` (AT yok + zırh) > `WITHDRAW`/`PEEL` (ağır kayıp, cephane) > `TEMAS KES` (<4 kişi / tek asker).
-3. **AT taarruzu:** `AT_ENGAGE` (kendi AT'si var + zırh 70-400 m).
-4. **Manevra:** `BOUNDING` / `FLANK` / `ASSAULT` / `SUPPRESS_ASSAULT`.
-5. **Varsayılan:** LAMBS doğal akışı.
+2. **PUSH:** sayıca/güçte üstün + kayıp ≥ %15 + ≥ 4 kişi + kayıp < %80 + cephane/zırh yok → çekilme DEĞİL, `SUPPRESS_ASSAULT`/`ASSAULT`.
+3. **Kaçış (grup):** `EVADE_ARMOR` (AT yok + zırh) > `WITHDRAW`/`PEEL` (ağır kayıp, cephane) > `TEMAS KES` (<4 kişi / tek asker).
+4. **AT taarruzu:** `AT_ENGAGE` (kendi AT'si var + zırh 70-400 m).
+5. **Manevra:** `BOUNDING` / `FLANK` / `ASSAULT` / `SUPPRESS_ASSAULT`.
+6. **Varsayılan:** LAMBS doğal akışı.

@@ -17,8 +17,8 @@
  *   - uzaklik (0.5 / m; EVADE 0.25 / m)
  *   - dusmana yaklasma (DEFEND/OVERWATCH -0.8 / m;  ADVANCE bonus +0.9 / m;  EVADE: UZAKLASMA bonusu +0.9 / m)
  *   - yumusak obje (cali / kucuk agac) -6
- *   - baska askerin 8 sn icinde rezerve ettigi nokta -20
- *   - 2.2m icinde dost kalabaligi -8 / kisi
+ *   - baska askerin 8 sn icinde rezerve ettigi nokta (6m icinde) -20
+ *   - 5m icinde dost kalabaligi -10 / kisi (tek el bombasi / RPG hepsini almasin)
  *   OVERWATCH: ayakta gorus VARSA +14 — MG/nisanci icin atis pozisyonu
  *   EVADE    : sadece SERT siper (en az 2 yukseklikte FIRE engel), dusmandan >= 40m, bina +12
  *              (zirhtan kacis: tank/APC mermisi ve HE'ye karsi cali / agac yetmez)
@@ -267,11 +267,11 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
 
                         // Baska askerin rezervi / dost kalabaligi
                         if ((_claims findIf {
-                            (((_x select 0) distance2D _pos) < 3) && {(_x select 2) isNotEqualTo _unit}
+                            (((_x select 0) distance2D _pos) < 6) && {(_x select 2) isNotEqualTo _unit}
                         }) > -1) then {
                             _skor = _skor - 20;
                         };
-                        _skor = _skor - ((count ((_pos nearEntities ["CAManBase", 2.2]) - [_unit])) * 8);
+                        _skor = _skor - ((count ((_pos nearEntities ["CAManBase", 5]) - [_unit])) * 10);
 
                         _adaylar pushBack [_skor, _pos, _stances select ((count _stances) - 1)];
                     };
