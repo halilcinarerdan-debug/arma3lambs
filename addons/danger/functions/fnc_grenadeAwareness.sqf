@@ -20,7 +20,9 @@
  *   4) HOLD     patlamadan 1.5 sn sonra serbest: AI geri acilir, stance AUTO, catismaya doner
  *
  *   Darbeli (UGL / fitilsiz) bomba: sadece yere atma (kacis icin sure yok).
- *   ATLANIR: oyuncu, arac, forceMove'lu askerler (baska taktigin koşucusu), binada (sadece yatar, kacmaz).
+ *   SIPERDE KAL: sert siperde (engel <= 3 m) ve bomba ile arada engel varsa (bomba siperin oteki yaninda) ya da
+ *   binadaysa KACMAZ, yerinde yatar. Bomba siperin ayni tarafina duserse kacar.
+ *   ATLANIR: oyuncu, arac, forceMove'lu askerler (baska taktigin koşucusu).
  *   12 sn mutlak guvenlik valfi. Her tepkide stationLast isaretlenir (bond / dagilma / rol istasyonu 20-25 sn
  *   rahat birakir).
  *
@@ -124,6 +126,20 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                             private _kalan = _son - time;
                             private _mes = (((_rad + 2) - _d) max 6) min 20;
 
+                            // SIPERDE KAL: sert engel 3 m icinde + bomba ile aramizda engel (bomba siperin oteki yaninda)
+                            // -> siper kurseklari / dalgayi keser, disari kosmak daha tehlikeli. (Bina icinde de kal.)
+                            private _korunuyor = ((insideBuilding _u) > 0.5) || {
+                                ((nearestTerrainObjects [_u, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE"], 3, false, true]) isNotEqualTo [])
+                                && {lineIntersects [AGLToASL (_gPos vectorAdd [0, 0, 0.3]), AGLToASL ((getPosATL _u) vectorAdd [0, 0, 0.4]), _p, _u]}
+                            };
+
+                            if (_korunuyor) then {
+                                _st set [2, "WAIT"];
+                                diag_log format [
+                                    "[EL-BOMBASI] %1 | %2 | bomba %3 m -> siperde, bomba siperin diger yaninda: YERINDE yatiyor",
+                                    groupId (group _u), name _u, round _d
+                                ];
+                            } else {
                             if (
                                 _son > 0 && {_d < _rad} && {_kalan > (1.8 + (_mes / 5.5))}
                                 && {(insideBuilding _u) < 0.5}
@@ -190,6 +206,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                                 } else {
                                     _st set [2, "WAIT"];
                                 };
+                            };
                             };
                         };
                     };
