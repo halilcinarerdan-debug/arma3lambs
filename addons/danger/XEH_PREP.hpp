@@ -41,6 +41,7 @@ PREP(buddyBond);
 PREP(hasUGL);
 PREP(roleStation);
 PREP(reloadCover);
+PREP(grenadeAwareness);
 PREP(tacticalUGL);
 PREP(isATUnit);
 PREP(atFire);

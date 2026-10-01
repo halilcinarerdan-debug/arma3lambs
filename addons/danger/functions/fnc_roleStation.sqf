@@ -97,6 +97,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
                 || {_g getVariable [QGVAR(isExecutingTactic), false]}
+                || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };
 
             private _tum = (units _g) select {alive _x && {isNull objectParent _x}};
@@ -109,7 +110,8 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
             // =================================================================
             if (!_savasta) then {
                 {
-                    if ((_x getVariable [QGVAR(stationPos), []]) isNotEqualTo []) then {
+                    if (_x getVariable [QGVAR(stationDirty), false]) then {
+                        _x setVariable [QGVAR(stationDirty), nil];
                         _x setVariable [QGVAR(stationPos), nil];
                         if (alive _x && {local _x} && {!isPlayer _x}) then {
                             _x doWatch objNull;
@@ -126,7 +128,6 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     && {missionNamespace getVariable ["lambs_danger_roleReorder", true]}
                     && {(_tum findIf {!(local _x) || {!((lifeState _x) in ["HEALTHY", "INJURED"])}}) isEqualTo -1}
                 ) then {
-                    _g setVariable [QGVAR(roleOrderSig), count _tum];
 
                     private _mg = [];
                     private _gl = [];
@@ -154,6 +155,10 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
 
                     private _sira = _mg + _gl + _rif + _mrk + _at + _med;
                     private _simdi = (units _g) select {_x isNotEqualTo _leader && {alive _x}};
+
+                    if ((count _sira) isEqualTo (count _simdi)) then {
+                        _g setVariable [QGVAR(roleOrderSig), count _tum];   // sadece sayilar tutunca (araca binen varsa tekrar denenir)
+                    };
 
                     if ((count _sira) isEqualTo (count _simdi) && {_sira isNotEqualTo _simdi}) then {
                         private _yeni = createGroup [side _leader, true];
@@ -252,10 +257,13 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     && {_butce > 0}
                     && {_tasinan < 2}
                     && {(time - (_u getVariable [QGVAR(stationLast), -999])) > 20}
+                    && {(time - (_u getVariable [QGVAR(stationTry), -999])) > 20}
                     && {!(_key isEqualTo "MEDIC" && {_yaraliVar})};
 
                 if (_dene) then {
                     private _uPos = getPosATL _u;
+                    // Hedef bulunamasa / suda olsa bile 20 sn sonra tekrar dene (her tikte findCover yemesin)
+                    _u setVariable [QGVAR(stationTry), time];
                     if !([_uPos, _lPos, _fwd, _t] call _uygunFn) then {
                         private _hedef = [];
                         private _stance = "MIDDLE";
@@ -267,11 +275,16 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                         if (_ci > -1) then {
                             _hedef = (_cvr select _ci) select 0;
                             _stance = (_cvr select _ci) select 1;
+                            // findCover EN YUKSEK GIZLI stance'i doner; atis pozisyonunda (MG / nisanci) gorus ister -> bir ust
+                            if (_key in ["MG", "MARKSMAN"]) then {
+                                _stance = ["MIDDLE", "UP", "UP"] select ((["DOWN", "MIDDLE", "UP"] find _stance) max 0);
+                            };
                         } else {
                             // Siper yok: lidere gore rolun geometrik yeri (MG yanda, AT / saglikci arkada...)
                             private _ofs = _t select 5;
                             if (((_tum find _u) % 2) isEqualTo 1) then { _ofs = -_ofs; };
-                            _hedef = _lPos getPos [_t select 6, _yon + _ofs];
+                            // ayni roldeki birden fazla asker ayni noktaya yigilmasin: 4 m'lik halkalar
+                            _hedef = _lPos getPos [(_t select 6) + (4 * ((floor ((_tum find _u) / 2)) min 2)), _yon + _ofs];
                             _kaynak = "geometri";
                         };
 
@@ -279,6 +292,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                             _u doMove _hedef;
                             _u setVariable [QGVAR(stationLast), time];
                             _u setVariable [QGVAR(stationPos), [_hedef, _stance, _ePos, time, false]];
+                            _u setVariable [QGVAR(stationDirty), true];   // temas bitince doFollow / doWatch / stance temizligi icin (stationPos sure dolunca silinse de kalir)
                             _tasinan = _tasinan + 1;
                             diag_log format [
                                 "[ROL] %1 | %2 | %3 istasyonu (%4) | lidere %5m, ileri %6m -> %7m",

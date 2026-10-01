@@ -59,6 +59,11 @@ if (isNil "lambs_danger_roleStationStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_roleStation", {false}]);
 };
 
+// El bombasi farkindaligi (yere at -> yaricaptan uzaklas) — ilk cagrida bir kez baslar
+if (isNil "lambs_danger_grenadeAwareStarted") then {
+    [] call (missionNamespace getVariable ["lambs_danger_fnc_grenadeAwareness", {false}]);
+};
+
 // Sarjor korumasi (once siper / buddy korur / peek-reload-peek) — ilk cagrida bir kez baslar
 if (isNil "lambs_danger_reloadCoverStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_reloadCover", {false}]);

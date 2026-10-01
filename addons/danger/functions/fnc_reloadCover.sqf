@@ -8,7 +8,7 @@
  *
  * Bu watchdog (server / HC basina bir kez, 1 sn'de bir), CATISMA halindeki yerel botlarda:
  *
- *   TETIK    birincil silahta mermi <= max(3, sarjor kapasitesi x %25) VE yedek sarjor var
+ *   TETIK    birincil silahta mermi <= max(3, sarjor kapasitesi x %15) VE yedek sarjor var
  *            (yani sarjor BITMEDEN / bittigi anda; AI sarjoru bitirince zaten reload eder)
  *   1) SIPER ILK: zaten sert siperdeyse (engel <= 3 m + hat kapali) / binadaysa -> orada kal, MIDDLE
  *                 degilse en yakin siperi bul (findCover DEFEND, 20 m) ve ona kos (en fazla 8 sn)
@@ -69,7 +69,20 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
         {
             private _g = _x;
             if (isNull _g) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) <= time) then { continue };   // sadece catisma
+            // Temas bitti: yarim kalan sarjor durumlarini temizle (forceMove / stance takili kalmasin), sonra atla
+            if ((_g getVariable [QGVAR(contact), 0]) <= time) then {
+                {
+                    private _cu = _x;
+                    if (local _cu && {((_cu getVariable [QGVAR(reloadState), []]) isNotEqualTo []) || {(_cu getVariable [QGVAR(reloadPeekEnd), 0]) > 0}}) then {
+                        private _cs = _cu getVariable [QGVAR(reloadState), []];
+                        if (_cs isNotEqualTo [] && {(_cs param [9, false])}) then { _cu setVariable [QGVAR(forceMove), nil]; };
+                        _cu setVariable [QGVAR(reloadState), []];
+                        _cu setVariable [QGVAR(reloadPeekEnd), 0];
+                        _cu setUnitPosWeak "AUTO";
+                    };
+                } forEach (units _g);
+                continue
+            };
             if (
                 (_g getVariable [QGVAR(isRetreating), false])
                 || {_g getVariable [QGVAR(isEvading), false]}
@@ -88,7 +101,18 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
             {
                 private _u = _x;
                 private _w = primaryWeapon _u;
-                if (_w isEqualTo "" || {(currentWeapon _u) isNotEqualTo _w}) then { continue };
+                if (_w isEqualTo "" || {(currentWeapon _u) isNotEqualTo _w}) then {
+                    // launcher / dürbün secildi: yarim kalan sarjor durumunu kapat
+                    private _cs2 = _u getVariable [QGVAR(reloadState), []];
+                    if (_cs2 isNotEqualTo []) then {
+                        if (_cs2 param [9, false]) then { _u setVariable [QGVAR(forceMove), nil]; };
+                        _u setVariable [QGVAR(reloadState), []];
+                        _u setUnitPosWeak "AUTO";
+                    };
+                    continue
+                };
+                // el bombasi kacisi sirasinda sarjor korumasi karismaz
+                if ((_u getVariable [QGVAR(grState), []]) isNotEqualTo []) then { continue };
 
                 private _durum = _u getVariable [QGVAR(reloadState), []];
                 private _mermi = _u ammo _w;
@@ -97,7 +121,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                 // DURUM VAR: ilerlet (GO -> HOLD -> PEEK)
                 // ---------------------------------------------------------
                 if (_durum isNotEqualTo []) then {
-                    _durum params ["_faz", "_t0", "_bitis", "_stance", "_pos", "_tetikMermi", "_buddy", "_sonKoru", "_enemy"];
+                    _durum params ["_faz", "_t0", "_bitis", "_stance", "_pos", "_tetikMermi", "_buddy", "_sonKoru", "_enemy", "_forceBy"];
 
                     // Buddy korumasini tazele (3 sn'de bir)
                     if (!isNull _buddy && {alive _buddy} && {(time - _sonKoru) > 3}) then {
@@ -113,14 +137,16 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                             _u setVariable [QGVAR(forceMove), nil];
                             _u setUnitPosWeak ([_stance, "DOWN"] select _ezildi);
                             _durum set [0, "HOLD"];
+                            _durum set [9, false];
                         };
                     };
 
                     // BITTI: sarjor doldu (mermi arttı) ya da zaman asimi -> PEEK
                     if ((_mermi > (_tetikMermi + 2)) || {time > _bitis}) then {
-                        _u setVariable [QGVAR(forceMove), nil];
+                        if (_forceBy) then { _u setVariable [QGVAR(forceMove), nil]; };   // sadece bizim koydugumuz forceMove
                         _u setVariable [QGVAR(reloadState), []];
-                        _u setVariable [QGVAR(reloadLast), time];
+                        // sarjor DOLDUYSA 15 sn, dolmadan zaman asimiysa 30 sn cooldown (engine mermi bitince reload eder)
+                        _u setVariable [QGVAR(reloadLast), [time + 15, time] select (_mermi > (_tetikMermi + 2))];
                         if (_mermi > 0 && {(getSuppression _u) < 0.5}) then {
                             _u setUnitPosWeak "UP";
                             _u setVariable [QGVAR(reloadPeekEnd), time + 2];
@@ -147,8 +173,13 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                         && {(speed _u) < 2.5}
                     ) then {
                         private _mag = currentMagazine _u;
-                        private _kap = getNumber (configFile >> "CfgMagazines" >> _mag >> "count");
-                        private _esik = (_kap * 0.25) max 3;
+                        private _kap = missionNamespace getVariable ["lambs_rc_cap_" + _mag, -1];
+                        if (_kap < 0) then {
+                            _kap = getNumber (configFile >> "CfgMagazines" >> _mag >> "count");
+                            missionNamespace setVariable ["lambs_rc_cap_" + _mag, _kap];
+                        };
+                        // AI sarjoru ancak BITINCE doldurur: tetik dusuk (%15, en az 3) -> siperde kalan mermiyi biter, orada doldurur
+                        private _esik = (_kap * 0.15) max 3;
                         private _yedek = false;
                         if (_mermi <= _esik) then {
                             private _uyumlu = compatibleMagazines _w;
@@ -223,7 +254,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                             };
 
                             _u setVariable [QGVAR(stationLast), time];
-                            _u setVariable [QGVAR(reloadState), [_faz, time, time + _sure, _stance, _hedef, _mermi, _b, time, _e]];
+                            _u setVariable [QGVAR(reloadState), [_faz, time, time + _sure, _stance, _hedef, _mermi, _b, time, _e, _faz isEqualTo "GO"]];
 
                             // Log (global 3 sn'de bir; catismada dalga dalga yazmasin)
                             if ((time - (missionNamespace getVariable ["lambs_danger_reloadLogT", -999])) > 3) then {

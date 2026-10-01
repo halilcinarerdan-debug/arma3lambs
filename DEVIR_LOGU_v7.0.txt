@@ -284,3 +284,48 @@ RPT'yi atabilir misin şef?"
   (lambs_danger_disableAutonomousFlares) = true. Ayrıca AI GL şarjörünü bitirince envanterden flare/duman
   şarjörünü yükleyebilir (engine) — HE yüklü değilse tacticalUGL zaten ateş etmez.
 - Doğrulanmadı: fireAtTarget'ın AI'da güvenilir ateşlemesi; HE yok ise UGL hiç atmaz (sessiz).
+
+## [v7.2] KAPSAMLI DENETIM + NIHAI SURUM (2026-10-02)
+4 bagimsiz kod denetimi (karar katmani / bounding / retreat-evade-AT-duman-UGL / watchdog + cover) yapildi,
+bulgular dogrulanip uygulandi. Hepsi OKUMA ile; Arma'da calistirilmadi.
+YENI SISTEM
+- fnc_grenadeAwareness [EL-BOMBASI]: elden / UGL bombasi -> hemen yere at (yatiyorsa beklemeden karar) -> fitil yetiyorsa
+  catismayi birakip tehlike yaricapindan (indirectHitRange x 2.2, 10-25 m) uzaklas; yetmiyorsa ve <6 m ise yatarak surun;
+  SIPERDE (engel<=3 m + bomba arada engelli / bina) YERINDE KAL. Duman/flare/flas haric. 12 sn valf.
+- Buddy bagi STABIL: saglam ciftlere dokunulmaz; sadece yetim (es olmus/ayrilmis/yeni) askerler yeniden eslesir,
+  tek yetim en yakin dostun yanina baglanir. [BUDDY] ... yetim ... yeniden eslesti
+- Sarjor: tetik %15 (min 3); kosarken durmaz; yakin dovusta (<20 m) yerinde comelir; siper <=15 m ise once siper, yoksa yatar.
+KARAR KATMANI
+- tacticsHold 2. parametre SURE (saniye): [_group,20] (eskiden hedef nesnesi gidiyordu) — tactics/Retreat/Evade/Bounding
+- DELAY: tacticsHide(_group,_target,false,25) (varsayilan 240 sn WHITE = ates yok idi)
+- cmdInitialCount taban cizgisi yenilenir (grup buyudu / temas bitti) -> bayat kayip WITHDRAW uretmez
+- Gecersiz tehdit (olu/dost/sivil) komutan beynini calistirmaz; zirh taramasi knowsAbout (>=1.2 veya <150 m)
+- DELAY esigi 0.72->0.62 (ulasilamazdi); yakin mesafe ASSAULT, guc>=1.4 iken DELAY'a yol verir;
+  mesafe/zirh kararlari hafiza-koordinasyonla degistirilmez; koordinasyon sadece 400 m icindeki gruplar
+- Dusuk cephane HOLD'u dusman <40 m iken uygulanmaz; enemyAT isATUnit ile; baygin dusman sayilmaz
+- orphanWatchdog: yeniden baslatma korumasi, yerel grup, saglikci/yarali muaf (HALA hicbir yerden baslatilmiyor)
+BOUNDING v3.2
+- token'li donguler (iptal sonrasi eski thread durur), zarif bitis (_delay-20), HOLD/DELAY de keser,
+  MG leapfrog'ta kosmaz, kosucu rotasyonu esit, kosacak yoksa FSE sicrar, arac standoff, odak piyade tercihi,
+  bitiste formasyon/enableAttack/speedMode geri, stance ezilmesi (ezilen yatar, varmayan acikta cokmez), peek sadece
+  baskisiz+varmis askerde, hedef yenilemede 10 sn histerezis
+RETREAT / EVADE / AT / BREAK CONTACT
+- AT taarruzu: atanmamis eskortlarda forceMove kalmaz; 20 sn bitis cooldown; AT stance UP; zirh knowsAbout
+- Evade: zirh yoksa kacmaz (piyadeden kacip ates kesme hatasi); varista TARGET/AUTOTARGET acik; onculer tam siper noktasina
+- BreakContact: 75 sn cooldown; tehdide yakin siper reddedilir; bos birim korumasi
+- Combat mode valflerde geri verilir (Evade/AT/BreakContact); karsilikli dislama (Retreat<->Evade/BC, Evade<->AT/BC)
+- Duman: ruzgar telafisi 8 m'ye kisitli + menzil kisitli, kucuk harf renk filtresi (RHS), AT yaklasirken sis atmaz
+- UGL: dost atesi kontrolu (hedef 12 m), GL muzzle = bombali muzzle (hasUGL), doWatch sifirlanir
+- atFire: mermi/menzil (400 m) kontrolu, stance UP
+WATCHDOG'LAR / COVER
+- buddyBond/dispersion/roleStation: lider haric, isExecutingTactic + FLANK/ASSAULT/SUPPRESS (30 sn) atlanir,
+  istasyondaki / sarjor degistiren / bomba kacan asker rahat birakilir, findCover butcesi, stationDirty temizligi,
+  MG/nisanci istasyon stance'i bir ust (gorus), ayni rol icin halka yayilmasi
+- findCover: su / >4 m yukseklik adayi degil, ROCK+WALL sert siper, sert/yumusak ayri kesilir, omuz testi yukseklik
+- doCover: bos sonuc da onbelleklenir (FSM her tikte tarama yapmasin), stance onbellekten tekrar uygulanir
+BILINEN KALANLAR (bilinçli birakildi)
+- fnc_eliteCover kullanilmiyor (silinebilir); fnc_tactics KILIT KURTARMA pratikte olu kod; isPeeling hic set edilmiyor
+- moveTo vs doMove: Bounding moveTo ile CALISIYOR (kullanici testi) -> degistirilmedi
+- doSuppress/doSmoke/findReadyUnits imzalari lambs_main'de (repoda yok) hala dogrulanmadi
+- AI sarjoru ancak bitince doldurur (erken reload tetiklenemez); fireAtTarget ile UGL ateslemesi oyunda dogrulanmali
+SENTINEL (ilk temasta): [DAGILMA] [BUDDY] [ROL] [RELOAD] [EL-BOMBASI] ... baslatildi

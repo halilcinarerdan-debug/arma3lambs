@@ -55,6 +55,8 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 || {_g getVariable [QGVAR(isEvading), false]}
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
+                || {_g getVariable [QGVAR(isExecutingTactic), false]}
+                || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };
 
             private _savasta = (_g getVariable [QGVAR(contact), 0]) > time;
@@ -69,6 +71,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
             // gorunur -> saglikcilar ve bayilmis/yarali-yatan askerler cohesion'dan muaf
             private _u = _tum select {
                 local _x
+                && {_x isNotEqualTo _leader}
                 && {!isPlayer _x}
                 && {!(_x getUnitTrait "medic")}
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
@@ -77,22 +80,48 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 && {(getSuppression _x) < 0.5}
                 && {(insideBuilding _x) < 0.5}
                 && {(time - (_x getVariable [QGVAR(stationLast), -999])) > 25}
+                && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
+                && {(_x getVariable [QGVAR(reloadState), []]) isEqualTo []}
+                && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
             };
             if (_u isEqualTo []) then { continue };
 
-            // 1) KALICI ES ATAMASI
-            private _ciftler = [_tum] call _pairFn;
-            {
-                private _c = _x;
-                private _anchor = _c select 0;
+            // 1) KALICI ES ATAMASI (STABIL): saglam ciftlere DOKUNULMAZ; sadece esi olmayan (olmus / ayrilmis /
+            //    yeni katilan) YETIM askerler yeniden eslesir. Tek yetim -> en yakin dostun yanina (3'lu) baglanir.
+            private _yetim = _tum select {
+                private _bb = _x getVariable [QGVAR(buddy), objNull];
+                isNull _bb || {!alive _bb} || {!(_bb in _tum)} || {_bb isEqualTo _x}
+            };
+            if ((count _yetim) >= 2) then {
+                private _ciftler = [_yetim] call _pairFn;
                 {
-                    if (_x isEqualTo _anchor) then {
-                        _x setVariable [QGVAR(buddy), _c param [1, objNull]];
-                    } else {
-                        _x setVariable [QGVAR(buddy), _anchor];
-                    };
-                } forEach _c;
-            } forEach _ciftler;
+                    private _c = _x;
+                    private _anchor = _c select 0;
+                    {
+                        if (_x isEqualTo _anchor) then {
+                            _x setVariable [QGVAR(buddy), _c param [1, objNull]];
+                        } else {
+                            _x setVariable [QGVAR(buddy), _anchor];
+                        };
+                    } forEach _c;
+                } forEach _ciftler;
+            } else {
+                if ((count _yetim) isEqualTo 1) then {
+                    private _y = _yetim select 0;
+                    private _yEs = objNull;
+                    private _yMes = 99999;
+                    {
+                        if (_x isNotEqualTo _y) then {
+                            private _dd = _y distance2D _x;
+                            if (_dd < _yMes) then { _yMes = _dd; _yEs = _x; };
+                        };
+                    } forEach _tum;
+                    if (!isNull _yEs) then { _y setVariable [QGVAR(buddy), _yEs]; };
+                };
+            };
+            if (_yetim isNotEqualTo [] && {_savasta}) then {
+                diag_log format ["[BUDDY] %1 | yetim %2 asker yeniden eslesti (es oldu / ayrildi): %3", groupId _g, count _yetim, _yetim apply {name _x}];
+            };
 
             // 2) COHESION
             private _tasinan = 0;
@@ -136,7 +165,9 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                         private _dusman = _m findNearestEnemy _m;
                         private _yakinDusman = !isNull _dusman && {(_m distance2D _dusman) < 25};
                         if (!_yakinDusman) then {
-                            private _p = (getPosATL _hedefDost) getPos [5 + (random 4), random 360];
+                            // Dusman biliniyorsa dostun dusmana DONUK degil ARKA / yan tarafina (+-60 derece) don
+                            private _yonB = if (isNull _dusman) then {random 360} else {((_dusman getDir _hedefDost) + ((random 120) - 60))};
+                            private _p = (getPosATL _hedefDost) getPos [5 + (random 4), _yonB];
                             if (!surfaceIsWater _p) then {
                                 _m setVariable [QGVAR(bondLast), time];
                                 _tasinan = _tasinan + 1;

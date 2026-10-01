@@ -36,6 +36,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
 [] spawn {
     while {true} do {
         sleep 3;
+        private _butce = 6;   // tikte en fazla bu kadar findCover (tum gruplar)
 
         {
             private _g = _x;
@@ -52,6 +53,8 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 || {_g getVariable [QGVAR(isEvading), false]}
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
+                || {_g getVariable [QGVAR(isExecutingTactic), false]}
+                || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };
 
             private _leader = leader _g;
@@ -69,6 +72,9 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 && {(getSuppression _x) < 0.6}
                 && {(insideBuilding _x) < 0.5}
                 && {(time - (_x getVariable [QGVAR(stationLast), -999])) > 25}
+                && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
+                && {(_x getVariable [QGVAR(reloadState), []]) isEqualTo []}
+                && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
             };
             if ((count _u) < 3) then { continue };
 
@@ -126,7 +132,8 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                     private _hedef = _apos getPos [(_yaricap + 2) max 7, _dir + ((random 40) - 20)];
 
                     private _dusman = _a findNearestEnemy _a;
-                    if (!isNull _dusman) then {
+                    if (!isNull _dusman && {_butce > 0}) then {
+                        _butce = _butce - 1;
                         private _cover = [_a, _dusman, 15, "ASCEND", 1, "DEFEND"] call EFUNC(main,findCover);
                         if (_cover isNotEqualTo []) then {
                             private _cp = (_cover select 0) select 0;
