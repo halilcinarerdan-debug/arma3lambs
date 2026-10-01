@@ -10,9 +10,11 @@
  *   - hedef BINADA
  *   - 8 m icinde 2+ dusman KUME (alan etkisi)
  *   - yoksa %50 sans (her cagrida degil, dogal gorunsun)
- *   - birim basina 5 sn cooldown
+ *   - birim basina 12 sn cooldown
  *
- * Atis mekanigi LAMBS'in doUGL'una birakilir (nisan / muzzle secimi / ates orada).
+ * DUZELTME (v2): LAMBS'in lambs_main_fnc_doUGL'u ILLUMINATION (FLARE / DUMAN) atar — bu fonksiyon onu
+ * cagirdigi icin askerler surekli flare ataniyordu. Artik doUGL KULLANILMAZ: yuklu 40mm sarjor
+ * HE ise (flare / duman / aydinlatma DEGIL) muzzle secilir ve fireAtTarget ile dogrudan HE atilir.
  *
  * Arguments:
  * 0: unit <OBJECT>
@@ -36,7 +38,7 @@ params [
 
 if (isNull _unit || {!alive _unit} || {isNull _target} || {!alive _target}) exitWith {false};
 if (!isNull objectParent _unit) exitWith {false};
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 5) exitWith {false};
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 12) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
@@ -77,12 +79,37 @@ if (!_uygun) then {
 if (!_uygun) exitWith {false};
 
 // ---------------------------------------------------------------------------
-// ATIS — LAMBS doUGL (yoksa sessizce atla)
+// YUKLU 40mm SARJOR HE MI? (flare / duman / aydinlatma ATILMAZ)
 // ---------------------------------------------------------------------------
-private _fn = missionNamespace getVariable ["lambs_main_fnc_doUGL", nil];
-if (isNil "_fn") exitWith {false};
+private _glMags = getArray (configFile >> "CfgWeapons" >> _w >> _gl >> "magazines");
+private _yuklu = (primaryWeaponMagazine _unit) select {_x in _glMags};
+if (_yuklu isEqualTo []) exitWith {false};
 
+private _magAd = _yuklu select 0;
+private _ammoAd = getText (configFile >> "CfgMagazines" >> _magAd >> "ammo");
+private _ad = toLower (_magAd + "|" + _ammoAd);
+private _isik = (["flare", "smoke", "illum", "f_40mm", "chemlight", "signal", "cir_"] findIf {(_ad find _x) >= 0}) > -1;
+private _guc = (getNumber (configFile >> "CfgAmmo" >> _ammoAd >> "hit")) + (getNumber (configFile >> "CfgAmmo" >> _ammoAd >> "indirectHit"));
+private _isikli = (getNumber (configFile >> "CfgAmmo" >> _ammoAd >> "intensity")) > 0;
+if (_isik || {_isikli} || {_guc <= 0}) exitWith {false};
+
+// ---------------------------------------------------------------------------
+// ATIS — dogrudan HE: muzzle sec, hedefe bak, 1.5 sn sonra fireAtTarget, 2 sn sonra tufege don
+// ---------------------------------------------------------------------------
 _unit setVariable [QGVAR(uglLast), time];
-[_unit, _target] call _fn;
+_unit doWatch _target;
+_unit doTarget _target;
+_unit selectWeapon _gl;
+
+[{
+    params ["_u", "_t", "_muzzle"];
+    if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0}) then {
+        _u fireAtTarget [_t, _muzzle];
+    };
+    [{
+        params ["_u2"];
+        if (alive _u2) then { _u2 selectWeapon (primaryWeapon _u2); };
+    }, [_u], 2] call CBA_fnc_waitAndExecute;
+}, [_unit, _target, _gl], 1.5] call CBA_fnc_waitAndExecute;
 
 true

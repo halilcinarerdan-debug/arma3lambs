@@ -272,3 +272,15 @@ Bu logu okuduktan sonra şu şekilde yanıt ver:
 RPT'yi atabilir misin şef?"
 
 ============================================================
+
+## [v7.1] DÜZELTME — FLARE SORUNU (UGL)
+- Belirti: askerler aşırı flare atıyor. Sebep: lambs_main_fnc_doUGL ILLUMINATION (flare/duman) atar
+  (stock LAMBS: tacticsAssess'te gece [_units] call doUGL = flare; tacticsAssault'ta 3. param "shotSmoke").
+  fnc_tacticalUGL onu [unit, hedef] ile çağırıyordu -> her UGL'li asker sürekli flare.
+- Çözüm: fnc_tacticalUGL artık doUGL KULLANMAZ; yüklü 40 mm şarjör HE ise (flare/duman/aydınlatma değil;
+  CfgAmmo hit+indirectHit>0, intensity=0, ad filtresi) selectWeapon + fireAtTarget ile doğrudan HE atar,
+  2 sn sonra tüfeğe döner. Cooldown 5 -> 12 sn.
+- Hâlâ flare görülüyorsa: gece LAMBS'in kendi otonom flare'i olabilir -> CBA ayarı "Disable autonomous flares"
+  (lambs_danger_disableAutonomousFlares) = true. Ayrıca AI GL şarjörünü bitirince envanterden flare/duman
+  şarjörünü yükleyebilir (engine) — HE yüklü değilse tacticalUGL zaten ateş etmez.
+- Doğrulanmadı: fireAtTarget'ın AI'da güvenilir ateşlemesi; HE yok ise UGL hiç atmaz (sessiz).
