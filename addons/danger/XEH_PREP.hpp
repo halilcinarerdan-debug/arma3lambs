@@ -37,6 +37,7 @@ PREP(tacticsEvadeArmor);
 PREP(tacticsATEngage);
 PREP(tacticsBreakContact);
 PREP(dispersion);
+PREP(buddyBond);
 PREP(tacticalUGL);
 PREP(isATUnit);
 PREP(atFire);

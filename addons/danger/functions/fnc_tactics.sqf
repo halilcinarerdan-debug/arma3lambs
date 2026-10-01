@@ -43,6 +43,11 @@ if (isNil "lambs_danger_dispersionStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_dispersion", {false}]);
 };
 
+// Buddy bagi (kalici es + "tek basina uzaklarda dolasma" kontrolu) — ilk cagrida bir kez baslar
+if (isNil "lambs_danger_buddyBondStarted") then {
+    [] call (missionNamespace getVariable ["lambs_danger_fnc_buddyBond", {false}]);
+};
+
 if (EGVAR(main,debug_functions)) then {
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };
