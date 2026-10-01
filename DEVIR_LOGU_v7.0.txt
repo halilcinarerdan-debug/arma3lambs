@@ -1,0 +1,254 @@
+============================================================
+ARMA 3 AI PROJE — DEVİR LOGU v7.0
+Tarih: 2026-10-01 (sohbet devri)
+Devam eden: Cinar
+Son Güncelleme: v6.0 sonrası ELITE fork büyük revizyon — Retreat v13, Bounding v3, cover v4,
+rol sistemi, zırh kaçışı, AT taarruzu, UGL, temas kesme, dağılma, buddy bağı, rol istasyonu.
+DURUM: Kod yazıldı ve repoya gitti. Oyunda / RPT'de DOĞRULANMADI. Kullanıcı şu an test ediyor.
+============================================================
+
+## PROJE TANIMI
+Arma 3'te LAMBS Danger FSM 2.6.2 modunu GLOBAL/NATO piyade doktrinine uygun hale getirmek.
+Askeri sim odaklı, polis sim'e sapmıyoruz. NR6HAL ses modülü zaten var — ses katmanı eklenmiyor.
+Felsefe: nkenny'nin "ucu bucağı yok" yaklaşımı.
+
+## ÇALIŞMA DÜZENİ (DEĞİŞTİ)
+- Kod deposu: https://github.com/halilcinarerdan-debug/arma3lambs (dal: main). Claude oraya push eder.
+- Kullanıcı dosyaları MANUEL kopyalar (Claude'dan SendUserFile ile gelir) -> HEMTT ile build eder.
+- Claude'un Arma çalıştırma ortamı YOK: sadece parantez dengesi / mantık kontrolü yapılabilir.
+  Her şey kullanıcının testi + RPT ile doğrulanır.
+- Dosyalar CRLF. LAMBS debug KAPALI: yeni sistemlerin log satırları artık debug'dan bağımsız (always-on).
+- (Eski FiveM reposunda abcccFivemMatrixFix/lambs-fix/ klasörü var — ilk tur kopyası; silinmesi
+  kullanıcıya soruldu, cevap yok. Dokunulmadı.)
+- Ortam: dedicated server, -serverMod=@lambscinar, harita Lythium.
+  Modlar: LAMBS_RPG, LAMBS_Suppression, LAMBS_Turrets, CF_BAI, ACE (+ACE medical AI), A3RO, RHS, ACSTG,
+  Realistic Vegetation Concealment.
+- Eski test ortamı (v6.0): GM Weferlingen Summer (CQB), Eden/Zeus Enhanced.
+
+## KRİTİK DOSYA YOLLARI
+Proje: C:\Users\Cinar\Desktop\LambsDanger-2.6.2 (1)\LambsDanger-2.6.2\
+Mod: C:\@lambscinar\   Yedek: C:\Users\Cinar\Desktop\LambsDanger-YEDEK\
+RPT (sunucu): sunucu .rpt  | (istemci) %LOCALAPPDATA%\Arma 3\Arma3_x64_*.rpt
+Fonksiyonlar: addons\danger\functions\   | cover: addons\main\functions\
+PREP: addons\danger\XEH_PREP.hpp   | PostInit: addons\main\XEH_postInit.sqf
+
+## BUILD KOMUTU
+cd /d "C:\Users\Cinar\Desktop\LambsDanger-2.6.2 (1)\LambsDanger-2.6.2" && hemtt build && xcopy /Y /E /I ".hemttout\build\*" "C:\@lambscinar\"
+
+## v6.0'DAN BU YANA KULLANICI İSTEKLERİ / KARARLAR
+(Kronolojik. Hepsi koda döküldü; test bekliyor.)
+1. Kodu düzelt, cover (siper) çok kötü -> güçlü cover/pozisyon + karar verme + MG rol dağılımı
+2. Sis (duman) kullanımı güzel olsun; buddy team kontrolü; "harbici" (sert) cover
+3. Geri çekilme "aptala dönüyor", olduğu yerde durma / rastgele koşma -> Retreat v13
+4. Bounding daha ölümcül + gözle görülür; overwatch gerçekten var mı -> Bounding v3 + always-on loglar
+5. HER ZAMAN 2 KİŞİ dolaşsın (doktrin) -> kalıcı buddy çiftleri + buddy bağı (uzakta tek başına gezmesin)
+6. Araçlara karşı agresif/ölümcül; AT'si olmayan grup ZIRHTAN KAÇSIN; AT zırha taarruz ederken
+   escort piyade düşman piyadeye karşı cover versin  (NOT: v6.0'daki "zırhlı işleri BIRAKILDI"
+   kararı KULLANICI TARAFINDAN GERİ ALINDI)
+7. UGL (bombaatar) kullanımı boost
+8. Tek kalan asker en yakın siperde beklesin / kaçsın; formasyon çok sıkı, el bombası / RPG
+   hepsini almasın (esneme + dağılma bilinci)
+9. Sayıca üstünlük + kayıp çok = PUSH (saldır), çok az kalmışlarsa değil
+10. "Herkes görevini biliyor mu — MG formasyonda nerede durmalı, AT, UGL" -> rol istasyonu
+11. SONRAKİ (test + RPT sonrası): TEAM LEADER her takımın rollerinden SORUMLU olsun, "bunun gibi
+    diğer yapılar" için de (bkz. SIRADAKİ ADIMLAR -> Takım Lideri Sorumluluk Katmanı)
+12. Devir logu güncellensin (bu dosya)
+
+## v6.0 FAZLARININ GÜNCEL DURUMU
+- Faz 1 Komutan Beyni: commanderAssess v2 (aşağıda). Eskiden "RPT'de onaylandı" — v2 yeniden yazıldı.
+- Faz 2 Fire Team: splitFireTeams ROL BAZLI (FSE=MG->nişancı->AT, MVR=lider+tüfekli, RES=sağlıkçı+kalan)
+- Faz 3 Zırh AI: classifyVehicle/armorSupport dokunulmadı (kullanıcıdan istenecek, bkz. dosya listesi)
+- Faz 4A.1 Retreat: v6.0'da "mükemmel çalışıyor" yazıyordu AMA kullanıcı sonra "aptala dönüyorlar,
+  olduğu yerde duruyor, rastgele koşuyor" dedi -> Retreat v13 yeniden yazıldı
+- Faz 4A.2 AT pozisyon: LAMBS'in kendi AT mantığı + yeni AT_ENGAGE ile yeniden ele alındı
+- Faz 4A.3 Smoke: genel tacticalSmoke olarak yeniden açıldı
+- Faz 4B.1 Buddy Rush: Bounding v3 içinde (buddy çiftleri, kalıcı bağ)
+- Faz 4B.2 Peel: fnc_tacticsPeel.sqf artık sadece Retreat'e giden SARMALAYICI (eski Peel PATH/MOVE'u
+  kapatıp askerleri donduruyordu)
+- 4B.3 Cross, 4B.6 Son Cephane, 4B.7 Zayiat sonrası düzen, 4B.9 Savunmada Bounding: HÂLÂ YAPILMADI
+  (bkz. SIRADAKİ ADIMLAR; 4B.7'nin bir kısmı dispersion + formasyon değişiklikleriyle örtüşüyor)
+
+## YENİ / DEĞİŞEN SİSTEMLER  (hepsi: KOD HAZIR, OYUNDA DOĞRULANMADI)
+| Sistem | Dosya | Log anahtarı |
+|---|---|---|
+| Komutan beyni v2 (rol ağırlıklı güç, PUSH, EVADE_ARMOR, AT_ENGAGE) | fnc_commanderAssess | [CMD] |
+| Rol tespiti (MG/AT/MARKSMAN/MEDIC/RIFLE) | fnc_getUnitRole | - |
+| Gerçek AT tespiti (LAMBS launcher bayrakları) | fnc_isATUnit | - |
+| LAMBS tarzı roket atışı | fnc_atFire | - |
+| Buddy çift hesabı (güçlü+zayıf yılan eşleme) | fnc_buddyPairs | - |
+| Fire team bölme (rol bazlı) | fnc_splitFireTeams | [FIRETEAM] (debug) |
+| Bounding v3 + overwatch | fnc_tacticsBounding | [BND-BASLA] [OVERWATCH] [BND] [BND-BITTI] |
+| Retreat v13 (sıçramalı, çiftli) | fnc_tacticsRetreat | [GERI-CEKILME-BASLA/-sicrama N/-TAMAM/-VALF] |
+| Peel -> Retreat sarmalayıcı | fnc_tacticsPeel | - |
+| Zırhtan kaçış (AT'siz grup) | fnc_tacticsEvadeArmor | [ZIRH-KAC-*] |
+| AT taarruzu + escort piyade | fnc_tacticsATEngage | [AT-TAARRUZ-*] |
+| Temas kes (<4 kişi / tek kalan) | fnc_tacticsBreakContact | [TEMAS-KES-BASLA/-TAMAM/-VALF] |
+| Taktik duman (COVER_MOVE / BREAK_CONTACT) | fnc_tacticalSmoke | - |
+| UGL (40 mm) | fnc_tacticalUGL, fnc_hasUGL | [ROL-GOREV] ... UGL |
+| Dağılma bilinci (yığılma = tek el bombası/RPG) | fnc_dispersion | [DAGILMA] |
+| Buddy bağı (uzakta tek başına dolaşmasın) | fnc_buddyBond | [BUDDY] |
+| Rol istasyonu (formasyon sırası + MG/nişancı/UGL/AT/sağlıkçı yeri+görev) | fnc_roleStation | [ROL] [ROL-SIRA] [ROL-GOREV] |
+| Dispatch + lazy başlatmalar | fnc_tactics | [TACTICS-CAGRI] (debug) |
+| Formasyon seçimi (FILE/DIAMOND LAMBS bastırmayı kapatır -> kaldırıldı) | fnc_selectFormation | [FORMASYON] |
+| Cover v4 (mermi geometrisi, modlar DEFEND/ADVANCE/OVERWATCH/EVADE/SURVIVE) | main\fnc_findCover | - |
+| doCover (zaten siperdeyse kalır, düşmana göre) | main\UnitAction\fnc_doCover | - |
+| eliteCover (nil-güvenli) | fnc_eliteCover | - |
+| orphanWatchdog (temas/yakın karar varsa atlar) | fnc_orphanWatchdog | - |
+
+Sentinel (dağıtım doğrulama) satırları — sunucu RPT'de açılışta/ilk temasta GÖRÜLMELİ:
+  [DAGILMA] dagilma bilinci watchdog baslatildi
+  [BUDDY]   buddy bagi (cohesion) watchdog baslatildi
+  [ROL]     rol istasyonu (formasyon sirasi + ...) watchdog baslatildi
+Görünmüyorsa: XEH_PREP.hpp eski kalmış / dosya yanlış yere kopyalanmış. (Eksik PREP hata VERMEZ,
+özellik sessizce devre dışı kalır — tüm yeni fonksiyon çağrıları getVariable ile korumalı.)
+
+## KARAR ÖNCELİĞİ (üstten alta)
+1. Hayatta kalma (cephane <=%10 WITHDRAW, <=%25 HOLD)
+2. PUSH — sayıca üstün (>=4 kişi, düşmandan fazla, güç oranı <=1.0, kayıp %15..%80, zırh yok):
+   düşman <120 m ASSAULT, uzaksa SUPPRESS_ASSAULT. Sebep "PUSH:" ile başlar.
+3. Kaçış: EVADE_ARMOR (zırh var + AT yok) > WITHDRAW/PEEL (ağır kayıp -> Retreat) > temas kes (<4)
+4. AT taarruzu: AT_ENGAGE (zırh 70-400 m, AT var) — FLANK >400, HOLD <=70
+5. Manevra: HOLD/DELAY/SUPPRESS_ASSAULT/FLANK/ASSAULT/BOUNDING
+6. LAMBS varsayılan akışı
+Eşikler (HEPSİ TAHMİN, testle ayarlanacak): PEEL %15, WITHDRAW %40, tehdit 0.72 (DELAY),
+baskı 0.6 (HOLD), güç oranı 1.0, PUSH kayıp %15-%80, zırh algı 450 m.
+
+## ROL TABLOSU (fnc_roleStation — çatışmada, lider DURUYORSA)
+Formasyon sırası (sakin, temastan >20 sn): lider, MG, UGL, tüfekliler, nişancı, AT, sağlıkçı.
+ MG       lidere 6-28 m, liderin ÖNÜNDE DEĞİL, OVERWATCH siper | hat kapalıysa alana baskı (doSuppress)
+ NİŞANCI  8-35 m, geride/yanda, OVERWATCH siper | launcher'lı/MG'li düşmanı öncelikli vurur
+ UGL      4-20 m, ikinci hat, DEFEND siper | piyadeye 40 mm (tacticalUGL)
+ AT       8-25 m, liderin ARKASINDA, sert siper | zırh gelince AT_ENGAGE devralır
+ SAĞLIKÇI 8-20 m, arkada | grupta yaralı varsa dokunulmaz (ACE medical AI)
+Kapatma: lambs_danger_roleReorder = false  (sadece formasyon sırası); grup bazlı: grup değişkeni
+lambs_danger_roleStationOff = true.
+Atlanan gruplar: Bounding/Retreat/Evade/Temas kes/AT taarruz/isExecutingTactic, oyunculu grup,
+lider hareket halinde (assault/flank), binada garrison, baskı >=0.5.
+
+## BOUNDING / OVERWATCH — GÖZLEMLEME LİSTESİ
+Beklenen: (1) Fire Support Element önce ayrı ayrı sert siperlere gider (MG'ler OVERWATCH), manevra
+bekler (<=8 sn); (2) bastırma kapısı: manevra ekibi FSE düşmanı bastırana kadar 1.5-5 sn bekler;
+(3) buddy çiftleri sprint ile bir sonraki siper noktasına koşar, varışta stance; (4) her 3. döngüde
+FSE+reserve sıçrar (leapfrog); (5) her döngüde komutan yeniden değerlendirir.
+RPT: [BND-BASLA] -> [OVERWATCH] -> [BND] ... kapi:Xs odak:... baski:... -> [BND-BITTI]
+Bozuk işaretleri: herkes aynı anda koşuyor ([OVERWATCH] yok); kapi hep 0; koşan sürünüyor;
+[BND-BITTI] hiç gelmiyor (bayrak takılması; valf 130 sn temizler).
+Zeus zorla: [_g,_t] call lambs_danger_fnc_tacticsBounding;
+
+## TEST — ZEUS SNIPPET'LERİ (_g = doğu grup, _t = en yakın batı birimi; v6.0 snippet'i ile aynı kurulum)
+ [_g,_t] call lambs_danger_fnc_tacticsRetreat;       // Peel de aynı yere gider
+ [_g,_t] call lambs_danger_fnc_tacticsEvadeArmor;    // _t = tank/APC
+ [_g,_t] call lambs_danger_fnc_tacticsATEngage;      // _t = tank/APC, grupta AT olmalı
+ [_g,_t] call lambs_danger_fnc_tacticsBreakContact;  // grup < 4 kişi olmalı
+ [_g,_t] call lambs_danger_fnc_tacticsBounding;
+
+## RPT FİLTRESİ (PowerShell — GÜNCEL)
+Get-Content (Get-ChildItem "$env:LOCALAPPDATA\Arma 3\Arma3_x64_*.rpt" | Sort LastWriteTime | Select -Last 1) | Select-String "GERI-CEKILME|ZIRH-KAC|AT-TAARRUZ|TEMAS-KES|BND|OVERWATCH|DAGILMA|BUDDY|ROL|FIRETEAM|CMD\]|SIS\]|Error in expression|Undefined|not defined" | Set-Content "$env:USERPROFILE\Desktop\test_log.txt"
+(Sunucu RPT için aynı Select-String'i sunucu .rpt yoluna uygulayın.)
+
+## KRİTİK TEKNİK NOTLAR (aynı hatalara düşmemek için)
+SQF:
+- exitWith if-then {} içinde SADECE o bloğu çıkar (call{} + düz exitWith kullan); findIf/% /isEqualTo
+  öncelikleri için parantez zorunlu; findIf'te "> -1" parantezli.
+- CfgWeapons >> type tüm birincil silahlarda 1 -> eski [4,5] MG kontrolü HİÇ eşleşmiyordu; MG şimdi
+  yüklü şarjör kapasitesi >=75 veya silah adı kalıplarıyla.
+- magazinesAmmoFull 4. eleman sayı, konum 5.; eski cephane hesabı sadece takılı şarjörü sayıyordu.
+- Yeni fonksiyon çağrıları guarded: missionNamespace getVariable ["lambs_danger_fnc_X", {fallback}].
+- isNil {...} ile atomik blok (roleStation joinSilent sırası).
+LAMBS:
+- Komutan beyni sadece >=4 kişilik gruplarda çalışır (<4 -> BreakContact).
+- QGVAR(forceMove) bayrağı FSM/tacticsHide'ın birimi atlamasını sağlar. SADECE KOŞARKEN set edilir
+  (hepsine set etmek FSM siper/dodge reaksiyonlarını öldürüyordu).
+- brainEngage: FILE/DIAMOND formasyonda ve combatMode BLUE/GREEN'de bastırma atlanır -> formasyonlar
+  WEDGE/VEE'ye çevrildi.
+- tacticsAssess->tacticsHide LAMBS'in yerel anti-tank'ı (AT: combatMode RED, doTarget, selectWeapon,
+  setUnitPos MIDDLE, 5-8 sn sonra doFire) — atFire bunu taklit eder.
+- getLauncherUnits + AI_AMMO_USAGE_FLAG_VEHICLE/ARMOUR makroları (danger) -> isATUnit.
+- SUBPREP(UnitAction,doCover) dosyası UnitAction\ klasöründe olmalı.
+Cover:
+- lineIntersects (görüş) != lineIntersectsSurfaces [...,"FIRE","NONE"] (mermi durduran geometri).
+- Çalı gizler ama mermi durdurmaz -> sert/yumuşak ayrımı. Mürettebatlı araç siper sayılmaz.
+- ELITE_COVER_RANGE 60 -> 30 ÖNERİLİR (kullanıcının makro dosyası, değiştirilmedi);
+  ELITE_FSM_TIMEOUT 0.03 performans riski.
+
+## DOĞRULANMAMIŞ VARSAYIMLAR (RPT / dosya gerekir)
+- LAMBS FSM'in forceMove'u gerçekten dikkate aldığı (fnc_isForced.sqf, fnc_brain.sqf lazım)
+- lambs_main_fnc_doUGL, doSuppress, doSmoke İMZALARI (EFUNC(main,doSmoke) [unit,pos] varsayıldı)
+- doUGL sonrası silahın geri alınması; AT ile FSM hedef seçimi çatışması
+- CF_BAI / LAMBS_RPG / ACE medical AI ile etkileşim (LAMBS_RPG: AI artık gruba roket atıyor ->
+  "tek RPG hepsini aldı" gözlemini açıklar)
+- Formasyon sırası değişikliği (joinSilent): callsign'ler (Alpha 1-2) karışabilir (görünüş)
+- Tüm eşikler (yukarıda)
+- Sunucuya yüklü eski build'in RPT'sinde LAMBS kaynaklı SQF HATASI YOKTU (script hataları LAMBS debug'dan
+  bağımsız loglanır); ama eski build'de log satırları debug'a bağlıydı -> davranış doğrulanamadı.
+
+## BİLİNEN SORUNLAR (Zararsız)
+- "Destroy waypoint not linked to a target" (vanilla), "Wrong weapon selection" (vanilla AI),
+  "CF_BAI Runtime Vision" (başka mod), "Some of magazines weren't stored" (GM/loadout),
+  HEMTT help/warning (kozmetik)
+
+## KULLANICIDAN İSTENEN DOSYALAR (doğrulama için — yeni sohbette ilk iş)
+1. YENİ test RPT'si (yukarıdaki filtre)
+2. fnc_isForced.sqf + fnc_brain.sqf (forceMove semantiği)
+3. fnc_brainReact.sqf (değiştirdiyse), fnc_doDodge / doPanic / doFleeing
+4. fnc_doSuppress.sqf, fnc_doUGL.sqf, fnc_doSmoke.sqf + fnc_getCompatibleThrowMuzzle.sqf
+5. fnc_classifyVehicle.sqf / fnc_armorSupport.sqf
+6. Değiştirdiği tacticsAssault/Flank/Suppress/Hold/Attack
+7. main XEH_postInit / CBA ayarları (cqbRange, minSuppressionRange) + CF_BAI ayarları
+
+## SIRADAKİ ADIMLAR
+
+### 1) ŞİMDİ: Kullanıcı testi (devam ediyor)
+- Tüm yeni dosyaları + güncel XEH_PREP.hpp'yi kopyala, build et, test et.
+- RPT paylaşılınca: sentinel satırları, hata satırları, [BND]/[ROL]/[GERI-CEKILME]/[ZIRH-KAC]/
+  [AT-TAARRUZ]/[TEMAS-KES]/[DAGILMA]/[BUDDY] akışı incelenir; bozuk olanlar düzeltilir, eşikler ayarlanır.
+
+### 2) SONRA (kullanıcı isteği, RPT paylaşıldıktan sonra): TAKIM LİDERİ SORUMLULUK KATMANI
+İstek: "team leader sorumlu olacak her takımın rollerine, bunun gibi diğer yapılar için de."
+TASARIM TASLAĞI (onay + RPT sonrası kesinleşir):
+- Her takımın (FSE / MVR / RES ve buddy çiftleri) bir Team Leader'ı (FTL) olur: rütbe -> rol önceliği
+  (lider/komutan zaten MVR'nin FTL'si). FTL ölürse en kıdemli/rol puanı yüksek asker devralır.
+- Rol atama, rol istasyonu, sektör (ateş yelpazesi), buddy bağı, dağılma, UGL/MG/AT görev emirleri
+  ŞİMDİKİ merkezi watchdog'lar yerine "FTL emir verir -> takım üyesi uygular" yapısına taşınır
+  (watchdog'lar emir kaynağına dönüşür, çakışan doMove'lar tek yerden çıkar).
+- FTL raporu: takım kayıp/cephane/yaralı durumu komutan beynine (commanderAssess) girdi olur.
+- "Bunun gibi diğer yapılar": takım bazlı sorumluluğa alınacak adaylar — buddyBond, dispersion,
+  tacticalSmoke (kim atar), tacticalUGL (kim atar), AT escort ataması, medic görevi.
+  KAPSAM kullanıcıyla netleştirilecek (hangileri?).
+
+### 3) Eski seçenekler (v6.0'dan kalan, hâlâ açık)
+ A) 4B.3 Cross (çapraz atlama)  B) 4B.6 Son Cephane (en güvenli)  C) 4B.7 Zayiat sonrası düzen
+ D) 4B.9 Savunmada Bounding     E) Projeyi kapat, stabilizasyon + dokümantasyon
+(4B.7 kısmen dispersion + gevşek formasyon ile örtüşüyor; 4B.3 Bounding v3 leapfrog ile örtüşüyor.)
+
+## REPO DOSYA LİSTESİ (hepsi kopyalanmalı)
+addons\danger\XEH_PREP.hpp   (PREP kayıtları: getUnitRole, buddyPairs, tacticalSmoke, isATUnit, atFire,
+  tacticsEvadeArmor, tacticsATEngage, tacticalUGL, tacticsBreakContact, dispersion, buddyBond, hasUGL,
+  roleStation + mevcutlar)
+addons\danger\functions\: fnc_commanderAssess, fnc_getUnitRole, fnc_isATUnit, fnc_atFire, fnc_hasUGL,
+  fnc_splitFireTeams, fnc_buddyPairs, fnc_tacticsBounding, fnc_tacticsRetreat, fnc_tacticsPeel,
+  fnc_tacticsEvadeArmor, fnc_tacticsATEngage, fnc_tacticsBreakContact, fnc_tacticalSmoke,
+  fnc_tacticalUGL, fnc_dispersion, fnc_buddyBond, fnc_roleStation, fnc_tactics, fnc_selectFormation,
+  fnc_orphanWatchdog, fnc_eliteCover
+addons\main\functions\: fnc_findCover.sqf, UnitAction\fnc_doCover.sqf
+(README.md depoda: değişiklik tablosu + karar önceliği.)
+
+## ASKERİ TATMİN PROJEKSİYONU
+v6.0'daki 10.2/10 skoru kodun KENDİ yazım zamanındaki testlerine dayanıyordu; kullanıcının sonraki
+geri bildirimleri (siper, geri çekilme, tek başına dolaşma) bunu aşağı çekti. v7.0 skoru
+RPT doğrulaması gelene kadar VERİLMEZ.
+
+## YENİ SOHBETTE DEVAM PROMPT'U
+Bu logu okuduktan sonra şu şekilde yanıt ver:
+
+"Şef, devir logunu okudum (v7.0). Mevcut durum:
+- v6.0 sonrası büyük revizyon repoda (arma3lambs/main): Retreat v13, Bounding v3 + overwatch, cover v4,
+  rol sistemi, zırhtan kaçış, AT taarruzu + escort, UGL, temas kes, dağılma, buddy bağı, rol istasyonu
+- Hepsi KOD olarak hazır, OYUNDA DOĞRULANMADI — sen test ediyorsun
+- Sıradaki: RPT'ni at, sentinel satırlarına ([DAGILMA]/[BUDDY]/[ROL]) ve hata satırlarına bakıp
+  düzelteyim; ardından Takım Lideri Sorumluluk Katmanı (FTL rolleri + diğer yapılar)
+- İstediğim dosyalar: yeni RPT, fnc_isForced/brain, doUGL/doSuppress/doSmoke, classifyVehicle/armorSupport
+
+RPT'yi atabilir misin şef?"
+
+============================================================
