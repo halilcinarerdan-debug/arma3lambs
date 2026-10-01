@@ -85,11 +85,12 @@ private _enemies = _nearAll select {
     alive _x
     && {!((side _x) == civilian)}
     && {(_mySide getFriend (side _x)) < 0.6}
+    && {(lifeState _x) isNotEqualTo "INCAPACITATED"}
     && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 70}}
 };
 
 // Hedef objeyse ve listede yoksa ekle
-if (_enemies isEqualTo [] && {_target isEqualType objNull} && {!isNull _target} && {alive _target}) then {
+if (_enemies isEqualTo [] && {_target isEqualType objNull} && {!isNull _target} && {alive _target} && {_target isKindOf "CAManBase"}) then {
     _enemies = [_target];
 };
 
@@ -138,7 +139,7 @@ private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else
         default          {1.0};
     });
     if (_r isEqualTo "MG") then {_enemyMg = _enemyMg + 1;};
-    if ((secondaryWeapon _x) isNotEqualTo "") then {_enemyAT = _enemyAT + 1;};
+    if ([_x] call _atFn) then {_enemyAT = _enemyAT + 1;};
 } forEach _enemySample;
 if (_enemyCount > 12) then {
     _enemyPower = _enemyPower * (_enemyCount / 12);
@@ -151,6 +152,7 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {!((side _x) == civilian)}
+    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
 };
 private _armorCount = count _armor;
 private _armorDist = 9999;
@@ -183,6 +185,13 @@ private _factorFirepower = linearConversion [0, 3, _firepower, 0.2, 1.0, true];
 private _initialCount = _group getVariable [QGVAR(cmdInitialCount), -1];
 if (isNil "_initialCount") then { _initialCount = -1; };
 if !(_initialCount isEqualType 0) then { _initialCount = -1; };
+
+// Baslangic sayisi taban cizgisi: grup buyudu (takviye / birlesme) ya da temas bitti ve uzun suredir
+// degerlendirme yok -> yeni taban (eski kayip sonsuza kadar WITHDRAW uretmesin)
+if (_initialCount >= 0 && {(_ownCount > _initialCount) || {((time - _sonZaman) > 300) && {time > (_group getVariable [QGVAR(contact), 0])}}}) then {
+    _initialCount = _ownCount;
+    _group setVariable [QGVAR(cmdInitialCount), _initialCount];
+};
 
 if (_initialCount < 0) then {
     _initialCount = _ownCount;
@@ -302,7 +311,7 @@ private _result = call {
     if (_ammoOran <= 0.1) exitWith {
         ["WITHDRAW", format ["cephane bitti (mermi/kisi: %1)", round _mermiPerKisi]]
     };
-    if (_ammoOran <= 0.25) exitWith {
+    if (_ammoOran <= 0.25 && {_closest > 40}) exitWith {
         ["HOLD", format ["cephane kritik (mermi/kisi: %1)", round _mermiPerKisi]]
     };
 
@@ -365,7 +374,7 @@ private _result = call {
     // =======================================================================
     // 5) TEHDIT SKORU + BASKI
     // =======================================================================
-    if (_threatScore >= 0.72 && {_closest > 40}) exitWith {
+    if (_threatScore >= 0.62 && {_closest > 40}) exitWith {
         ["DELAY", format ["tehdit skoru yuksek (%1)", _threatScore toFixed 2]]
     };
     if (_suppAvg >= 0.6) exitWith {
@@ -400,7 +409,7 @@ private _result = call {
     if (_enemyCount > 0 && {_pwrRatio <= 0.67}) exitWith {
         ["ASSAULT", format ["biz ustun (guc orani %1)", _pwrRatio toFixed 2]]
     };
-    if (_closest < 60) exitWith {
+    if (_closest < 60 && {_pwrRatio < 1.4}) exitWith {
         ["ASSAULT", format ["yakin mesafe %1m", round _closest]]
     };
     if (_pwrRatio >= 1.4) exitWith {
@@ -414,6 +423,8 @@ private _reason   = _result select 1;
 
 // PUSH kararlari hafiza / koordinasyon ile alternatife CEVRILMEZ (israrla bastir + hucum)
 private _push = (_reason select [0, 5]) isEqualTo "PUSH:";
+// Mesafe / zirh kaynakli kararlar da hafiza-koordinasyon ile degistirilmez (sebebi bu kararin kendisi)
+private _noSwap = _push || {(_reason select [0, 4]) in ["zirh", "uzak", "yaki"]};
 
 // ---------------------------------------------------------------------------
 // TAKTIK HAFIZASI + GRUP KOORDINASYONU
@@ -426,12 +437,14 @@ private _sonKararZaman = _group getVariable [QGVAR(cmdSonKararZaman), 0];
 private _tekrarMi = (_sonKarar isEqualTo _decision) && {(time - _sonKararZaman) < 30};
 
 private _digerAyni = false;
-if (!_tekrarMi && {!_push} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
+if (!_tekrarMi && {!_noSwap} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
     {
         if (
             _x isNotEqualTo _group
             && {side _x isEqualTo _mySide}
             && {count units _x >= 4}
+            && {!isNull (leader _x)}
+            && {(leader _x) distance2D _unit < 400}
         ) then {
             private _k = _x getVariable [QGVAR(cmdSonKarar), ""];
             private _z = _x getVariable [QGVAR(cmdSonKararZaman), 0];
@@ -442,7 +455,7 @@ if (!_tekrarMi && {!_push} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) t
     } forEach allGroups;
 };
 
-if ((_tekrarMi || _digerAyni) && {!_push} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
+if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK", "ASSAULT"]}) then {
     _decision = switch (_decision) do {
         case "BOUNDING": { "FLANK" };
         case "FLANK":    { "SUPPRESS_ASSAULT" };

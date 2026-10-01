@@ -38,6 +38,12 @@ params [["_unit", objNull, [objNull]], ["_target", objNull, [objNull]]];
 
 private _group = group _unit;
 
+// Gecersiz tehdit (olu / dost / sivil / bos): komutan beyni calismaz
+private _tehditGecerli = _target isEqualType objNull
+    && {!isNull _target}
+    && {alive _target}
+    && {((side _group) getFriend (side _target)) < 0.6};
+
 // Dagilma bilinci watchdog'u (yigilma = tek el bombasi / RPG hepsini oldurur) — ilk cagrida bir kez baslar
 if (isNil "lambs_danger_dispersionStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_dispersion", {false}]);
@@ -95,7 +101,7 @@ if (_group getVariable [QGVAR(isBounding), false] && {time - _bndTime > 200}) th
 // Karar fnc_commanderAssess.sqf'te verilir, burada sadece dispatch.
 // ---------------------------------------------------------------------------
 if (
-    !isNull _target
+    _tehditGecerli
     && {count (units _group) >= 4}
     && {!(_group getVariable [QGVAR(isBounding), false])}
     && {!(_group getVariable [QGVAR(isExecutingTactic), false])}
@@ -123,23 +129,16 @@ if (
             [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsATEngage", FUNC(tacticsFlank)]);
         };
         case "HOLD": {
+            // tacticsHold(_group, _delay): 2. parametre SURE (sn); kilidi ve enableAttack'i kendisi geri verir
             _group setVariable [QGVAR(isExecutingTactic), true];
-            [_group, _target] call FUNC(tacticsHold);
-            [_group, 20] spawn {
-                params ["_g", "_sure"];
-                sleep _sure;
-                if (!isNull _g) then { _g setVariable [QGVAR(isExecutingTactic), nil]; };
-            };
+            [_group, 20] call FUNC(tacticsHold);
         };
         case "DELAY": {
+            // tacticsHide(_group, _target, _antiTank, _delay): varsayilan 240 sn combatMode WHITE (ates yok) tutardi ->
+            // 25 sn; kilidi, combatMode / formasyon / enableAttack'i sure sonunda kendisi geri verir
             _group setVariable [QGVAR(isExecutingTactic), true];
-            [_group, _target] call FUNC(tacticsHide);
+            [_group, _target, false, 25] call FUNC(tacticsHide);
             [_group, _target, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
-            [_group, 25] spawn {
-                params ["_g", "_sure"];
-                sleep _sure;
-                if (!isNull _g) then { _g setVariable [QGVAR(isExecutingTactic), nil]; };
-            };
         };
         case "SUPPRESS_ASSAULT": {
             [_group, _target] call FUNC(tacticsSuppress);
@@ -171,7 +170,7 @@ if (
 // ---------------------------------------------------------------------------
 private _temasKes = false;
 if (
-    !isNull _target
+    _tehditGecerli
     && {((units _group) select {alive _x}) isNotEqualTo []}
     && {count ((units _group) select {alive _x}) < 4}
     && {!(_group getVariable [QGVAR(isExecutingTactic), false])}

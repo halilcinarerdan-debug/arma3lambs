@@ -11,7 +11,8 @@
  * 0: birimler <ARRAY of OBJECT>
  *
  * Return Value:
- * Ciftler <ARRAY>: [[a, b], [c, d, e], ...]  (her cift icinde index 0 = en guclu, son = en zayif)
+ * Ciftler <ARRAY>: [[a, b], [c, d, e], ...]  (her cift icinde index 0 = en guclu; 2'li ciftte son = en zayif,
+ *   3'lu ciftte index 1 = en zayif, index 2 = ortadaki (orta guc) asker)
  *
  * Example:
  * [units _group] call lambs_danger_fnc_buddyPairs;

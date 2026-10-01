@@ -68,7 +68,8 @@ if (_target isEqualType objNull) then {
     };
 };
 
-if (!_validTarget) exitWith {"WEDGE"};
+// TRAVEL / DEFENSE hedefsiz da gecerli; sadece hedef gerektiren baglamlar WEDGE'e duser
+if (!_validTarget && {_context in ["BOUNDING", "ASSAULT"]}) exitWith {"WEDGE"};
 
 // ---------------------------------------------------------------------------
 // ARAZI TESPIT POZISYONU — Lider degil, GRUP MERKEZI

@@ -25,6 +25,10 @@
 // Sadece server'da calissin
 if (!isServer) exitWith {};
 
+// Tekrar baslatma korumasi (iki sonsuz dongu olmasin)
+if (!isNil "lambs_danger_orphanStarted") exitWith {};
+lambs_danger_orphanStarted = true;
+
 private _WATCHDOG_INTERVAL = 8;    // Tarama araligi (sn)
 private _ORPHAN_DISTANCE   = 40;   // Leader'dan bu kadar uzaktaysa yetim say
 private _ENEMY_CLOSE_RANGE = 150;  // Bu mesafede dusman varsa dokunma
@@ -40,6 +44,7 @@ private _ENEMY_CLOSE_RANGE = 150;  // Bu mesafede dusman varsa dokunma
             // Bos/olu grup atla
             if (isNull _g) then { continue };
             if ((units _g) isEqualTo []) then { continue };
+            if (!local _g) then { continue };   // HC / baska makine grubu: doFollow / forceSpeed yerel birim ister
 
             // Leader kontrolu
             private _leader = leader _g;
@@ -70,6 +75,8 @@ private _ENEMY_CLOSE_RANGE = 150;  // Bu mesafede dusman varsa dokunma
                 if (!alive _birim) then { continue };
                 if (!isNull objectParent _birim) then { continue };
                 if (isPlayer _birim) then { continue };
+                // ACE medical AI: saglikci yaralisina gidiyor, yaralilar / baygin yatiyor -> yetim sayilmaz
+                if ((lifeState _birim) isEqualTo "INCAPACITATED" || {_birim getUnitTrait "medic"} || {(damage _birim) > 0.3}) then { continue };
 
                 // Leader'dan uzak mi?
                 private _mesafe = _birim distance2D _leaderPos;

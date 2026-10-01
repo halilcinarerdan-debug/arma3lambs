@@ -22,7 +22,7 @@ params ["_unit", ["_pos", [], [[]]], ["_enemy", objNull, [objNull, []]]];
 _unit setUnitPosWeak (["DOWN", "MIDDLE"] select ((stance _unit) isEqualTo "STAND"));
 
 // check if stopped or inside a building
-if (!(_unit checkAIFeature "PATH") || {(insideBuilding _unit) isEqualTo 1}) exitWith {false};
+if (!(_unit checkAIFeature "PATH") || {(insideBuilding _unit) >= 0.5}) exitWith {false};
 
 // 2026-10-01 FIX: dusman bilinmeden "siper" secilirdi (agacin hangi tarafinda oldugu
 // dusmanla ilgisizdi, BUSH da siper sayiliyordu). Artik dusman varsa findCover'dan
@@ -32,7 +32,7 @@ private _dusman = if (_enemy isEqualType objNull) then {
 } else {
     _enemy
 };
-private _dusmanVar = (_dusman isEqualType []) || {!isNull _dusman};
+private _dusmanVar = ((_dusman isEqualType []) && {(count _dusman) >= 2}) || {(_dusman isEqualType objNull) && {!isNull _dusman}};
 
 // Zaten gercek siperdeyse (yakinda engel + hat kapali) yerinde kal:
 // marjinal kazanc icin siperi terk edip acik araziye cikma.
@@ -63,16 +63,21 @@ if (_zatenKorunakli) exitWith {false};
 if (_pos isEqualTo []) then {
     if (_dusmanVar) then {
         // 2 sn onbellek: FSM her tick'te cagirir, her seferinde tarama yapma
-        private _onbellek = _unit getVariable [QGVAR(coverCache), [-10, []]];
-        if ((time - (_onbellek select 0)) < ELITE_COVER_CACHE_TIME && {(_onbellek select 1) isNotEqualTo []}) then {
+        // (bos sonuc da onbelleklenir: siper yokken her FSM tick'inde tam tarama yapilmaz;
+        //  onbellekte siper stance'i de tutulur ve tekrar uygulanir)
+        private _onbellek = _unit getVariable [QGVAR(coverCache), [-10, [], "MIDDLE"]];
+        if ((time - (_onbellek select 0)) < ELITE_COVER_CACHE_TIME) then {
             _pos = _onbellek select 1;
+            if (_pos isNotEqualTo []) then { _unit setUnitPosWeak (_onbellek param [2, "MIDDLE"]); };
         } else {
+            private _cStance = "MIDDLE";
             private _cover = [_unit, _dusman, 25, "ASCEND", 1] call FUNC(findCover);
             if (_cover isNotEqualTo []) then {
                 _pos = (_cover select 0) select 0;
-                _unit setUnitPosWeak ((_cover select 0) select 1);
-                _unit setVariable [QGVAR(coverCache), [time, _pos]];
+                _cStance = (_cover select 0) select 1;
+                _unit setUnitPosWeak _cStance;
             };
+            _unit setVariable [QGVAR(coverCache), [time, _pos, _cStance]];
         };
     };
 };

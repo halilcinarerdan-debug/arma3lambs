@@ -75,9 +75,14 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     // ---------------------------------------------------------------------
     // Aday objeler: sert (agac/bina/HIDE) + yumusak (cali/kucuk agac) + araclar
     // ---------------------------------------------------------------------
-    private _sert = nearestTerrainObjects [_unit, ["TREE", "HIDE", "BUILDING"], _range, false, true];
-    private _yumusak = nearestTerrainObjects [_unit, ["BUSH", "SMALL TREE"], _range, false, true];
+    // Mesafeye gore SIRALI; sert / yumusak AYRI kesilir (yogun bitkide en yakin 40 obje hep cali olup
+    // arkadaki sert siperi (agac / bina / kaya / duvar) disarida birakmasin)
+    private _sert = nearestTerrainObjects [_unit, ["TREE", "HIDE", "BUILDING", "ROCK", "WALL"], _range, true, true];
+    private _yumusak = nearestTerrainObjects [_unit, ["BUSH", "SMALL TREE"], _range, true, true];
+    _sert = _sert select [0, 30];
+    _yumusak = _yumusak select [0, 10];
     private _terrainObjects = _sert + _yumusak;
+    private _uz = (getPosASL _unit) select 2;
 
     // Murettebatli (hareketli / dost) arac siper sayilmaz; "building" cift sayilmaz
     private _vehicles = (nearestObjects [_unit, ["building", "Car"], _range]) select {
@@ -156,7 +161,13 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
         {
             private _pos = _x;
 
-            if (_degerlendirilen < 60 && {(_dangerPos distance2D _pos) > _minDist}) then {
+            // Su / ust kat / cati (> 4 m yukseklik farki) aday degil: ulasilamaz
+            if (
+                _degerlendirilen < 60
+                && {(_dangerPos distance2D _pos) > _minDist}
+                && {!surfaceIsWater _pos}
+                && {abs (((AGLToASL _pos) select 2) - _uz) < 4}
+            ) then {
                 private _posASL = AGLToASL _pos;
 
                 // DOWN gizli degilse aday degil
@@ -194,7 +205,9 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
 
                         // Omuz testi: govde genisligi (+-0.35m) — kenardan vurulmasin
                         {
-                            private _omuz = AGLToASL ((_pos getPos [0.35, _enemyDir + _x]) vectorAdd [0, 0, 0.75]);
+                            private _sp = _pos getPos [0.35, _enemyDir + _x];
+                            _sp set [2, (_pos select 2) + 0.75];
+                            private _omuz = AGLToASL _sp;
                             if ([_dangerPos, _omuz, _unit] call _gizli) then {
                                 _skor = _skor + 4;
                             } else {

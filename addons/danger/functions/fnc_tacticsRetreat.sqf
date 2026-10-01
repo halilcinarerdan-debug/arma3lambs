@@ -46,7 +46,7 @@ if ((_targetPos select 2) > 6) then { _targetPos set [2, 0.5]; };
 private _sonBitis = _group getVariable [QGVAR(retreatEndTime), -999];
 if ((time - _sonBitis) < 45) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
-    [_group, _target] call FUNC(tacticsHold);
+    [_group, 20] call FUNC(tacticsHold);
     [{
         params ["_g"];
         if (!isNull _g) then {
@@ -69,7 +69,7 @@ private _cqbUrban = (count _cqbBinalar) >= 3;
 
 if (_cqbMesafe < 40 && _cqbUrban) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
-    [_group, _target] call FUNC(tacticsHold);
+    [_group, 20] call FUNC(tacticsHold);
     [{
         params ["_g"];
         if (!isNull _g) then {

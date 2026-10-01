@@ -47,7 +47,7 @@ if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 // ---------------------------------------------------------------------------
 if ((time - (_group getVariable [QGVAR(evadeEndTime), -999])) < 30) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
-    [_group, _target] call FUNC(tacticsHold);
+    [_group, 20] call FUNC(tacticsHold);
     [{
         params ["_g"];
         if (!isNull _g) then {
