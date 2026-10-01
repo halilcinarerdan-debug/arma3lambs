@@ -48,6 +48,11 @@ if (isNil "lambs_danger_buddyBondStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_buddyBond", {false}]);
 };
 
+// Rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / saglikci gorev yeri) — ilk cagrida bir kez baslar
+if (isNil "lambs_danger_roleStationStarted") then {
+    [] call (missionNamespace getVariable ["lambs_danger_fnc_roleStation", {false}]);
+};
+
 if (EGVAR(main,debug_functions)) then {
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };

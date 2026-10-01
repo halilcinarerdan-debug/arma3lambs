@@ -15,6 +15,7 @@
  *     (findCover DEFEND; merkezden >= yaricap, baska dostun 4m icinde degil)
  *   - grup basina tikte en fazla 2 asker, asker basina 10 sn cooldown
  *   - ATLANIR: hareket ederken (forceMove / hizli), baski >= 0.6 (FSM siper alir), binada,
+ *     rol istasyonuna yeni gonderilen asker (fnc_roleStation, 25 sn),
  *     oyuncu, retreat / evade / temas kes / AT taarruz (kendi hareket duzenleri var)
  *   - doMove (kalici emir): asker oraya gider ve orada KALIR (formasyon slotuna geri cekilmez)
  *
@@ -67,6 +68,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 && {(speed _x) < 1.5}
                 && {(getSuppression _x) < 0.6}
                 && {(insideBuilding _x) < 0.5}
+                && {(time - (_x getVariable [QGVAR(stationLast), -999])) > 25}
             };
             if ((count _u) < 3) then { continue };
 

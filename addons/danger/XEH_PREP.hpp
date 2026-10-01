@@ -38,6 +38,8 @@ PREP(tacticsATEngage);
 PREP(tacticsBreakContact);
 PREP(dispersion);
 PREP(buddyBond);
+PREP(hasUGL);
+PREP(roleStation);
 PREP(tacticalUGL);
 PREP(isATUnit);
 PREP(atFire);

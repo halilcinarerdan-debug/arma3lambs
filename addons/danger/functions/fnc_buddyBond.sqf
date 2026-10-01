@@ -15,6 +15,7 @@
  *        - ES KOPMASI: esine uzaklik > cift limiti (sakin 25 m / catisma 30 m) -> esinin 5-9 m yanina
  *      (buddy rush koşucusu ~25-30m uzaklasir; es onu gecince cift yeniden kurulur)
  *   3) ATLANIR: Bounding / Retreat / Evade / Temas kes / AT taarruz (kendi hareket duzenleri var),
+ *      rol istasyonuna yeni gonderilen asker (fnc_roleStation, 25 sn),
  *      hareket eden (forceMove / hizli), binada (garrison), baski >= 0.5 (FSM siper alir),
  *      dusman 25m icinde (dovusur), oyuncu, arac
  *   - grup basina tikte en fazla 2 asker, asker basina 10 sn cooldown, doMove (kalici emir)
@@ -75,6 +76,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 && {(speed _x) < 1.5}
                 && {(getSuppression _x) < 0.5}
                 && {(insideBuilding _x) < 0.5}
+                && {(time - (_x getVariable [QGVAR(stationLast), -999])) > 25}
             };
             if (_u isEqualTo []) then { continue };
 
