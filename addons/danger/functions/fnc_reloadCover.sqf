@@ -17,6 +17,8 @@
  *                   (3 sn'de bir tazelenir) — reload eden korunur, ates kesilmez
  *   3) PEEK: sarjor doldu -> kisaca (2 sn) ayaga kalk, nisan al, sonra stance serbest (peek-reload-peek)
  *
+ *   KOSARKEN (hizli / forceMove / Retreat / Evade / Temas kes) DURMAZ: reload yolda yapilir (kosu bozulmaz).
+ *   Yakin dovus (< 20 m): siper icin sirt cevirmez, yerinde comelerek reload.
  *   ATLANIR: Retreat / Evade / Temas kes gruplari (kosuyorlar), forceMove (baska taktigin kosucusu),
  *            oyuncu, arac, baski >= 0.85 (FSM zaten yere yatirir -> sadece yatar), 15 sn cooldown
  *
@@ -166,8 +168,15 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                             private _hedef = getPosATL _u;
                             private _not = "zaten siperde";
                             if (!([_u, _e] call _siperdeFn)) then {
-                                private _cv = if (isNull _e) then {[]} else {[_u, _e, 20, "ASCEND", 4, "DEFEND"] call EFUNC(main,findCover)};
-                                if (_cv isNotEqualTo [] && {(getSuppression _u) < 0.85}) then {
+                                // DURUMA GORE: dusman < 20 m (yakin dovus) -> siper icin sirt cevirme, yerinde reload;
+                                // siper <= 15 m ve baski < 0.85 -> once siper; aksi halde (siper yok / uzak) yatarak
+                                private _yakinDusman = !isNull _e && {(_u distance2D _e) < 20};
+                                private _cv = if (isNull _e || {_yakinDusman}) then {[]} else {[_u, _e, 20, "ASCEND", 4, "DEFEND"] call EFUNC(main,findCover)};
+                                if (
+                                    _cv isNotEqualTo []
+                                    && {(getSuppression _u) < 0.85}
+                                    && {(_u distance2D ((_cv select 0) select 0)) <= 15}
+                                ) then {
                                     _hedef = (_cv select 0) select 0;
                                     _stance = (_cv select 0) select 1;
                                     if ((_u distance2D _hedef) > 2) then {
@@ -181,9 +190,9 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                         _not = "siper yanimda";
                                     };
                                 } else {
-                                    // Yakinda siper yok: acikta AYAKTA reload yok -> yat
-                                    _stance = "DOWN";
-                                    _not = "siper yok -> yatarak";
+                                    // Siper yok / uzak: acikta AYAKTA reload yok -> yat; yakin dovusta yerinde comelerek
+                                    _stance = ["DOWN", "MIDDLE"] select _yakinDusman;
+                                    _not = ["siper yok/uzak -> yatarak", "dusman yakin -> yerinde comelerek"] select _yakinDusman;
                                 };
                             };
                             if (_faz isEqualTo "HOLD") then { _u setUnitPosWeak _stance; };

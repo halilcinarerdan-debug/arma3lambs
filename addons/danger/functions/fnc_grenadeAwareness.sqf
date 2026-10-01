@@ -10,7 +10,8 @@
  * YEREL botlarinda, 60 m icindeki ELDEN / UGL BOMBASI (GrenadeCore; duman / flare / aydinlatma / flas haric)
  * mermilerini izler. Tehlike yaricapi (CfgAmmo indirectHitRange x 2.2, 10..25 m) icindeki her asker:
  *
- *   1) DOWN     hemen yere atar (setUnitPos DOWN + "Down" aksiyonu); 0.6 sn
+ *   1) DOWN     hemen yere atar (setUnitPos DOWN + "Down" aksiyonu); 0.6 sn (zaten yatiyorsa beklemeden kacis karari:
+ *               YATARKEN DE KACAR)
  *   2) KACIS    bomba FITILLI ise (el bombasi: explosionTime / ad kalibindan ~4 sn) ve yeterli sure varsa
  *               (kalan > 1.8 sn + mesafe / 5.5), CATISMAYI BIRAKIP yaricapin DISINA (+2 m) kosar:
  *               bombadan uzaga, dusmandan uzaga ve bombayla arasinda engel olan yonu tercih eder.
@@ -262,9 +263,11 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                     {
                         private _u = _x;
                         if ((_u getVariable [QGVAR(grState), []]) isEqualTo [] && {(_u distance2D _gp) < _rad}) then {
+                            // Zaten yatiyorsa dusme beklemesi yok: hemen kacis karari (yatarken de kacar)
+                            private _yatiyor = (stance _u) isEqualTo "PRONE";
                             _u setUnitPos "DOWN";
-                            _u playActionNow "Down";
-                            _u setVariable [QGVAR(grState), [_p, time, "DOWN", [], _gp, _son, _rad]];
+                            if (!_yatiyor) then { _u playActionNow "Down"; };
+                            _u setVariable [QGVAR(grState), [_p, [time, time - 0.7] select _yatiyor, "DOWN", [], _gp, _son, _rad]];
                             _u setVariable [QGVAR(grBasla), time];
                             _u setVariable [QGVAR(stationLast), time];
                             _aktif pushBackUnique _u;
