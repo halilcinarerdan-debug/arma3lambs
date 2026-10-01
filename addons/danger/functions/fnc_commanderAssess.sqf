@@ -21,7 +21,7 @@
  * Return Value:
  * Decision string <STRING>:
  *   "WITHDRAW" | "HOLD" | "DELAY" | "SUPPRESS_ASSAULT"
- *   | "FLANK" | "ASSAULT" | "BOUNDING" | "PEEL" | "EVADE_ARMOR"
+ *   | "FLANK" | "ASSAULT" | "BOUNDING" | "PEEL" | "EVADE_ARMOR" | "AT_ENGAGE"
  *
  * Debug HUD legend (systemChat):
  *   [CMD] <leader> [<own>v<enemy> P:<oran>] Cnt:Fir:Cas:Amm:Pos:Sup | THR:<score> | <decision> (<reason>)
@@ -318,8 +318,11 @@ private _result = call {
     // =======================================================================
     // 3) ZIRH TEHDIDI
     // =======================================================================
+    if (_armorCount > 0 && {_armorDist > 70} && {_armorDist <= 400}) exitWith {
+        ["AT_ENGAGE", format ["zirh %1m, AT taarruz + piyade korumasi", round _armorDist]]
+    };
     if (_armorCount > 0 && {_armorDist > 70}) exitWith {
-        ["FLANK", format ["zirh %1m, AT ile kanat", round _armorDist]]
+        ["FLANK", format ["zirh %1m, uzak - kanat", round _armorDist]]
     };
     if (_armorCount > 0) exitWith {
         ["HOLD", "zirh yakin, AT siperde"]

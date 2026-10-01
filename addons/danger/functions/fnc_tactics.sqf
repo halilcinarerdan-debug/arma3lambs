@@ -98,6 +98,10 @@ if (
             // AT'siz grup zirhtan sert siperlere kacar (fonksiyon kayitli degilse Retreat)
             [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsEvadeArmor", FUNC(tacticsRetreat)]);
         };
+        case "AT_ENGAGE": {
+            // AT zirha taarruz eder, piyadeler AT'nin yaninda dusman piyadeye karsi ortu verir
+            [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsATEngage", FUNC(tacticsFlank)]);
+        };
         case "HOLD": {
             _group setVariable [QGVAR(isExecutingTactic), true];
             [_group, _target] call FUNC(tacticsHold);

@@ -235,6 +235,7 @@ if (EGVAR(main,debug_functions)) then {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _sisFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}];
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
+    private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}];
 
     // -----------------------------------------------------------------------
     // YARDIMCI KODLAR
@@ -321,6 +322,10 @@ if (EGVAR(main,debug_functions)) then {
                         if ((_x knowsAbout _odak) > ([1, 0.5] select (_rol isEqualTo "MG"))) then {
                             _x doFire _odak;
                         };
+                        // UGL BOOST: piyade hedefe 40mm (hat kapali / binada / kume / %50; 5 sn cooldown)
+                        if (_odak isKindOf "CAManBase") then {
+                            [_x, _odak] call _uglFn;
+                        };
                     };
                 };
             };
@@ -402,13 +407,20 @@ if (EGVAR(main,debug_functions)) then {
 
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
         private _komutanKarar = [_group, _target] call FUNC(commanderAssess);
-        if (_komutanKarar in ["WITHDRAW", "PEEL", "EVADE_ARMOR"]) exitWith {
+        if (_komutanKarar in ["WITHDRAW", "PEEL", "EVADE_ARMOR", "AT_ENGAGE"]) exitWith {
             [_group] call _bndTemizle;
-            if (_komutanKarar isEqualTo "EVADE_ARMOR") then {
-                // AT'siz grup zirhtan kacar (fonksiyon kayitli degilse Retreat)
-                [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsEvadeArmor", FUNC(tacticsRetreat)]);
-            } else {
-                [_group, _target] call FUNC(tacticsRetreat);
+            switch (_komutanKarar) do {
+                case "EVADE_ARMOR": {
+                    // AT'siz grup zirhtan kacar (fonksiyon kayitli degilse Retreat)
+                    [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsEvadeArmor", FUNC(tacticsRetreat)]);
+                };
+                case "AT_ENGAGE": {
+                    // AT zirha taarruz + piyade eskort (fonksiyon kayitli degilse Flank)
+                    [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsATEngage", FUNC(tacticsFlank)]);
+                };
+                default {
+                    [_group, _target] call FUNC(tacticsRetreat);
+                };
             };
         };
 

@@ -34,6 +34,8 @@ PREP(armorSupport);
 PREP(tacticsRetreat);
 PREP(tacticsPeel);
 PREP(tacticsEvadeArmor);
+PREP(tacticsATEngage);
+PREP(tacticalUGL);
 PREP(orphanWatchdog);
 PREP(tacticsAssault);
 PREP(tacticsBounding);
