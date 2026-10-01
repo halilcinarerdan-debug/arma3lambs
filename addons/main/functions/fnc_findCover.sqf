@@ -190,6 +190,11 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         };
                     };
 
+                    // Siper-arkasi atis (hull-down): MIDDLE gizli, UP acik = korunup ates edebilir
+                    if (_mode isEqualTo "DEFEND" && {"MIDDLE" in _stances} && {!("UP" in _stances)}) then {
+                        _skor = _skor + 6;
+                    };
+
                     // Yumusak obje (calı) mermi durdurmaz
                     if (_yumusakMi) then {
                         _skor = _skor - 10;

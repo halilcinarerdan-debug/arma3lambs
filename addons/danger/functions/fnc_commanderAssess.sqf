@@ -47,6 +47,9 @@ if ((units _group) isEqualTo []) exitWith {"BOUNDING"};
 private _unit = leader _group;
 if (isNull _unit) exitWith {"BOUNDING"};
 
+// Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden her asker TUFEKLI sayilir
+private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+
 // ---------------------------------------------------------------------------
 // HEDEF NORMALIZE
 // ---------------------------------------------------------------------------
@@ -104,7 +107,7 @@ private _ownPower = 0;
 private _ownMg = 0;
 private _ownAT = 0;
 {
-    private _r = [_x] call FUNC(getUnitRole);
+    private _r = [_x] call _rolFn;
     _ownPower = _ownPower + (switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};
@@ -125,7 +128,7 @@ private _enemyMg = 0;
 private _enemyAT = 0;
 private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else {_enemies};
 {
-    private _r = [_x] call FUNC(getUnitRole);
+    private _r = [_x] call _rolFn;
     _enemyPower = _enemyPower + (switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};

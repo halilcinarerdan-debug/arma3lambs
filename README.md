@@ -18,6 +18,7 @@ Dosyalar orijinal proje yollarıyla aynı yerleşimde; ilgili `.sqf` dosyaların
 | `addons/danger/functions/fnc_selectFormation.sqf` | Retreat FILE kilidi, mükerrer blok silindi |
 | `addons/main/functions/fnc_findCover.sqf` | **v3 puanlamalı siper**: koruma seviyesi, yan açılardan (±25°) ve diğer bilinen düşmanlardan gizlilik, arazi gizlemesi, mesafe/yaklaşma cezası, yumuşak obje (çalı) cezası, askerler arası rezerv (aynı ağaca yığılma yok). Modlar: DEFEND / ADVANCE / OVERWATCH |
 | `addons/main/functions/UnitAction/fnc_doCover.sqf` | Düşmana göre gerçek cover (findCover + 2 sn önbellek) |
+| `addons/danger/functions/fnc_tacticsPeel.sqf` | Artık sadece `tacticsRetreat`'i çağırır (eski Peel askerleri `PATH/MOVE` kilidiyle dondurabiliyordu; Zeus test komutu doğrudan Peel'e gidiyordu) |
 | `addons/danger/functions/fnc_getUnitRole.sqf` | **YENİ** — rol tespiti (MG / AT / MARKSMAN / MEDIC / RIFLE). MG şarjör kapasitesiyle (≥75) bulunur; eski `CfgWeapons >> type in [4,5]` kontrolü hiç eşleşmiyordu |
 | `addons/danger/functions/fnc_tacticalSmoke.sqf` | **YENİ** — taktik sis: COVER_MOVE (düşmana doğru, hareketin önüne) / BREAK_CONTACT (geri çekilme perdesi, 2 atıcı), rüzgâr telafisi, 45 sn cooldown, sadece beyaz sis. Bounding, Retreat ve DELAY'de kullanılır |
 | `addons/danger/XEH_PREP.hpp` | `getUnitRole` ve `tacticalSmoke` kaydı eklendi |

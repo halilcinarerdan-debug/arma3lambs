@@ -119,20 +119,29 @@ _group setVariable [QGVAR(rallyIndex), 0];
     };
 };
 
+// Tani icin BASLA / TAMAM satirlari debug kapaliyken de RPT'ye yazilir
+private _msgBasla = format [
+    "[GERI-CEKILME-BASLA] %1 | tehdit:%2m | ANA:%3 ALT:%4 NIHAI:%5",
+    groupId _group, round (_unit distance2D _targetPos),
+    _rallyAna, _rallyAlt, _rallyNihai
+];
+diag_log _msgBasla;
 if (EGVAR(main,debug_functions)) then {
-    private _msg = format [
-        "[GERI-CEKILME-BASLA] %1 | tehdit:%2m | ANA:%3 ALT:%4 NIHAI:%5",
-        groupId _group, round (_unit distance2D _targetPos),
-        _rallyAna, _rallyAlt, _rallyNihai
-    ];
-    systemChat _msg;
-    diag_log _msg;
+    systemChat _msgBasla;
 };
 
 [_group, _unit, _targetPos, _rallyAna, _baslangic] spawn {
     params ["_group", "_unit", "_targetPos", "_rallyAna", "_baslangic"];
 
     private _origCombat = combatMode _group;
+
+    // Eski kilitleri temizle: onceki Peel/Retreat PATH/MOVE/TARGET'i kapali birakmis olabilir
+    {
+        _x enableAI "PATH";
+        _x enableAI "MOVE";
+        _x enableAI "TARGET";
+        _x enableAI "AUTOTARGET";
+    } forEach (units _group);
 
     _group setFormation "FILE";
     _group setFormDir (_unit getDir _targetPos);
@@ -177,12 +186,10 @@ if (EGVAR(main,debug_functions)) then {
         _x setAnimSpeedCoef 1.15;
     } forEach _tumBirimler;
 
-    if (EGVAR(main,debug_functions)) then {
-        diag_log format [
-            "[GERI-CEKILME] %1 takimlar | FSE:%2 MVR:%3 RES:%4",
-            groupId _group, count _fse, count _maneuver, count _reserve
-        ];
-    };
+    diag_log format [
+        "[GERI-CEKILME] %1 takimlar | FSE:%2 MVR:%3 RES:%4",
+        groupId _group, count _fse, count _maneuver, count _reserve
+    ];
 
     // Takimi hedefe kadar (en fazla _azamiSure sn) 4 sn'de bir moveTo ile surer
     private _hareket = {
@@ -198,8 +205,12 @@ if (EGVAR(main,debug_functions)) then {
         };
     };
 
-    // SIS PERDESI: grup ile dusman arasina (derin perde icin 2 atici)
-    [_group, _targetPos, "BREAK_CONTACT"] call FUNC(tacticalSmoke);
+    // SIS PERDESI (AYRI thread + fonksiyon yoksa sessizce atla: sis hatasi geri cekilmeyi durdurmasin)
+    [_group, _targetPos] spawn {
+        params ["_g", "_tp"];
+        private _sisFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}];
+        [_g, _tp, "BREAK_CONTACT"] call _sisFn;
+    };
 
     // FAZ 1 - RESERVE
     if (EGVAR(main,debug_functions)) then {
@@ -244,9 +255,7 @@ if (EGVAR(main,debug_functions)) then {
             };
         } forEach (units _group);
 
-        if (EGVAR(main,debug_functions)) then {
-            diag_log format ["[GERI-CEKILME-TAMAM] %1", groupId _group];
-        };
+        diag_log format ["[GERI-CEKILME-TAMAM] %1", groupId _group];
     };
 };
 

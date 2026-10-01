@@ -34,6 +34,31 @@ private _dusman = if (_enemy isEqualType objNull) then {
 };
 private _dusmanVar = (_dusman isEqualType []) || {!isNull _dusman};
 
+// Zaten gercek siperdeyse (yakinda engel + hat kapali) yerinde kal:
+// marjinal kazanc icin siperi terk edip acik araziye cikma.
+private _zatenKorunakli = false;
+if (_dusmanVar && {_pos isEqualTo []}) then {
+    private _dusmanGoz = if (_dusman isEqualType objNull) then {
+        eyePos _dusman
+    } else {
+        AGLToASL (_dusman vectorAdd [0, 0, 1.6])
+    };
+    private _benimASL = (getPosASL _unit) vectorAdd [0, 0, 0.75];
+    private _hatYon = vectorNormalized (_dusmanGoz vectorDiff _benimASL);
+    _zatenKorunakli =
+        (lineIntersects [_benimASL, _benimASL vectorAdd (_hatYon vectorMultiply 5), _unit])
+        && {(lineIntersects [_dusmanGoz, _benimASL, _unit]) || {terrainIntersectASL [_dusmanGoz, _benimASL]}};
+
+    if (_zatenKorunakli) then {
+        // ayakta da gizliyse UP, degilse MIDDLE
+        private _ayakta = (getPosASL _unit) vectorAdd [0, 0, 1.45];
+        _unit setUnitPosWeak (["MIDDLE", "UP"] select (
+            (lineIntersects [_dusmanGoz, _ayakta, _unit]) || {terrainIntersectASL [_dusmanGoz, _ayakta]}
+        ));
+    };
+};
+if (_zatenKorunakli) exitWith {false};
+
 // find cover
 if (_pos isEqualTo []) then {
     if (_dusmanVar) then {

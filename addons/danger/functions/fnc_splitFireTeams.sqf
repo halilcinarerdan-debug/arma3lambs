@@ -21,6 +21,9 @@ params [["_group", grpNull, [grpNull, objNull]]];
 if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {[[], [], []]};
 
+// Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden her asker TUFEKLI sayilir
+private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+
 private _units = (units _group) select {alive _x && {isNull objectParent _x}};
 private _count = count _units;
 if (_count < 4) exitWith {[_units, [], []]};
@@ -51,7 +54,7 @@ private _rifles = [];
 
 {
     if (_x isNotEqualTo _leader) then {
-        switch ([_x] call FUNC(getUnitRole)) do {
+        switch ([_x] call _rolFn) do {
             case "MG":       { _mgs pushBack _x; };
             case "MARKSMAN": { _marks pushBack _x; };
             case "AT":       { _ats pushBack _x; };
@@ -112,7 +115,7 @@ if (EGVAR(main,debug_functions)) then {
     diag_log format [
         "[FIRETEAM] %1 (%2 kisi) -> FSE:%3 (MG:%4) MVR:%5 RES:%6",
         groupId _group, _count, count _fse,
-        {([_x] call FUNC(getUnitRole)) isEqualTo "MG"} count _fse,
+        {([_x] call _rolFn) isEqualTo "MG"} count _fse,
         count _maneuver, count _reserve
     ];
 };

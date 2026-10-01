@@ -34,6 +34,7 @@ params [
 
 if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
+private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 if (GVAR(disableAutonomousSmokeGrenades)) exitWith {false};
 
 // cooldown
@@ -66,7 +67,7 @@ private _aticilar = (units _group) select {
     alive _x
     && {isNull objectParent _x}
     && {!isPlayer _x}
-    && {([_x] call FUNC(getUnitRole)) isNotEqualTo "MG"}
+    && {([_x] call _rolFn) isNotEqualTo "MG"}
     && {[_x] call _sisliMi}
 };
 if (_aticilar isEqualTo []) exitWith {false};

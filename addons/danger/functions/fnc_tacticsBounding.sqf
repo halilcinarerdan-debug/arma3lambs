@@ -220,6 +220,10 @@ if (EGVAR(main,debug_functions)) then {
 
     private _cycleCount = 0;
 
+    // Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden devam: rol=TUFEKLI, sis=yok
+    private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+    private _sisFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}];
+
     // Kosucu hareketi: ADVANCE modunda siperli ileri sicrama; siper yoksa SINIRLI (20m) atilim
     // (eskiden siper yoksa dogrudan dusman pozisyonuna kosuyordu)
     private _kosanHareket = {
@@ -262,7 +266,7 @@ if (EGVAR(main,debug_functions)) then {
     };
 
     // Taktik sis: dusmana dogru, hareket eden birligin onune (tacticalSmoke cooldown'u var)
-    [_group, _target, "COVER_MOVE"] call FUNC(tacticalSmoke);
+    [_group, _target, "COVER_MOVE"] call _sisFn;
 
     // FORMASYON ZORLAMA
     [_group] spawn {
@@ -288,7 +292,7 @@ if (EGVAR(main,debug_functions)) then {
 
         // Siste periyodik sis (cooldown 45 sn icinde)
         if ((_cycleCount % 3) isEqualTo 2) then {
-            [_group, _target, "COVER_MOVE"] call FUNC(tacticalSmoke);
+            [_group, _target, "COVER_MOVE"] call _sisFn;
         };
 
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
@@ -352,7 +356,7 @@ if (EGVAR(main,debug_functions)) then {
                 _x setVariable [QEGVAR(main,currentTask), "Bound/Suppress", EGVAR(main,debug_functions)];
 
                 // MG / nisanci: gorusu olan KORUNAKLI atis pozisyonu (cycle 1, 5, 9...)
-                if ((_cycleCount % 4) isEqualTo 1 && {([_x] call FUNC(getUnitRole)) in ["MG", "MARKSMAN"]}) then {
+                if ((_cycleCount % 4) isEqualTo 1 && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
                     if (_ow isNotEqualTo []) then {
                         private _owPos = (_ow select 0) select 0;
@@ -383,7 +387,7 @@ if (EGVAR(main,debug_functions)) then {
                 private _skor = 0;
 
                 // MG artik kapasiteyle tespit edilir (eski CfgWeapons>>type kontrolu hic eslesmiyordu)
-                _skor = _skor + (switch ([_birim] call FUNC(getUnitRole)) do {
+                _skor = _skor + (switch ([_birim] call _rolFn) do {
                     case "MG":       {100};
                     case "AT":       {80};
                     case "MARKSMAN": {70};
@@ -463,7 +467,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
 
                     // MG kosmaz (atis ussu); sadece MG'lerden olusan ciftte hepsi aday
-                    private _kosanAdaylari = _siraliCift select {([_x] call FUNC(getUnitRole)) isNotEqualTo "MG"};
+                    private _kosanAdaylari = _siraliCift select {([_x] call _rolFn) isNotEqualTo "MG"};
                     if (_kosanAdaylari isEqualTo []) then {
                         _kosanAdaylari = +_siraliCift;
                     };
