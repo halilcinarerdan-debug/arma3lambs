@@ -73,3 +73,52 @@ SUBPREP(ZEN,showHasRadio);
 SUBPREP(ZEN,showReinforcement);
 SUBPREP(ZEN,showSetDisableAI);
 SUBPREP(ZEN,showSetDisableGroupAI);
+
+// ===========================================================================
+// ELITE-BOOT — dagitim dogrulamasi + watchdog'lari ilk temasi beklemeden baslat
+// (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
+//  LAMBS debug acik olmasa da gorunur)
+// ===========================================================================
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.2 yuklendi (XEH_PREP preInit)";
+[{
+    // sadece sunucu / headless (AI'lar orada yerel)
+    if (isServer || {!hasInterface}) then {
+        private _fns = [
+            "tactics", "commanderAssess", "tacticsBounding", "tacticsRetreat", "tacticsEvadeArmor", "tacticsATEngage",
+            "tacticsBreakContact", "roleStation", "buddyBond", "dispersion", "reloadCover", "grenadeAwareness",
+            "tacticalUGL", "tacticalSmoke", "getUnitRole", "buddyPairs"
+        ];
+        diag_log format [
+            "[ELITE-BOOT] makine: isServer=%1 hasInterface=%2 | fonksiyonlar: %3",
+            isServer, hasInterface,
+            _fns apply {format ["%1=%2", _x, !isNil (format ["lambs_danger_fnc_%1", _x])]}
+        ];
+
+        // watchdog'lar ilk temasta degil, acilista baslasin
+        {
+            [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
+        } forEach ["dispersion", "buddyBond", "roleStation", "reloadCover", "grenadeAwareness"];
+
+        // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
+        [] spawn {
+            while {true} do {
+                sleep 60;
+                private _gr = allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x} && {({alive _x} count units _x) > 0}};
+                if (_gr isNotEqualTo []) then {
+                    diag_log format [
+                        "[ELITE-HB] t=%1 | yerel AI grup:%2 | temasta:%3 | bounding:%4 retreat:%5 evade:%6 atEngage:%7 breakContact:%8 | disableGroupAI:%9 | lambs_debug:%10",
+                        round time, count _gr,
+                        {(_x getVariable ["lambs_danger_contact", 0]) > time} count _gr,
+                        {_x getVariable ["lambs_danger_isBounding", false]} count _gr,
+                        {_x getVariable ["lambs_danger_isRetreating", false]} count _gr,
+                        {_x getVariable ["lambs_danger_isEvading", false]} count _gr,
+                        {_x getVariable ["lambs_danger_isATEngage", false]} count _gr,
+                        {_x getVariable ["lambs_danger_isBreakingContact", false]} count _gr,
+                        {_x getVariable ["lambs_danger_disableGroupAI", false]} count _gr,
+                        missionNamespace getVariable ["lambs_main_debug_Functions", "ayar yok"]
+                    ];
+                };
+            };
+        };
+    };
+}, [], 8] call CBA_fnc_waitAndExecute;

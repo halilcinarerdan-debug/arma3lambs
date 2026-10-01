@@ -329,3 +329,16 @@ BILINEN KALANLAR (bilinçli birakildi)
 - doSuppress/doSmoke/findReadyUnits imzalari lambs_main'de (repoda yok) hala dogrulanmadi
 - AI sarjoru ancak bitince doldurur (erken reload tetiklenemez); fireAtTarget ile UGL ateslemesi oyunda dogrulanmali
 SENTINEL (ilk temasta): [DAGILMA] [BUDDY] [ROL] [RELOAD] [EL-BOMBASI] ... baslatildi
+
+## [v7.3] LOG SORUNU (2026-10-02 02:33 sunucu RPT'si)
+- RPT'de LAMBS'a ait HICBIR satir yoktu (ne debug ne sentinel). Oturum ~7 dk, mission seferalicinar2 / Lythium.
+  @lambscinar\addons\lambs_danger.pbo yuklu (2.6.2.1) ama hangi build oldugu RPT'den okunamaz.
+- Muhtemel nedenler: (1) AI temasi olmadi — watchdog'lar ilk temasta basliyordu; (2) sunucuya eski PBO gitti;
+  (3) LAMBS serverMod: CBA ayar menusu istemcide YOK -> "LAMBS debug" istemciden acilamaz; sunucu cba_settings.sqf'e
+  `force force lambs_main_debug_Functions = true;` yazilmali (yeni loglar zaten debug'dan bagimsiz).
+- Cozum (v7.3): XEH_PREP.hpp sonuna ELITE-BOOT blogu: acilista [ELITE-BOOT] satirlari (build + 16 fonksiyonun kayit durumu),
+  watchdog'lari acilista baslatir, 60 sn'de bir [ELITE-HB] nabzi (yerel AI grup / temasta / bounding / retreat ... / lambs_debug).
+- Yorum: [ELITE-BOOT] satiri YOK -> yeni XEH_PREP.hpp yuklenmemis (eski build). Var ama fonksiyonlar =false -> PREP/dosya eksik.
+  [ELITE-HB] "temasta:0" hep -> LAMBS FSM tactics'e hic girmiyor (AI temas algilamiyor / CF_BAI / GroupAI kapali).
+- Not: RPT'de CF_BAI detect XEH_preInit 'LOG_1 too few parameters' preprocessor hatasi var (CF_BAI alpha4); LAMBS ile ilgisiz ama
+  AI algisini etkiliyor olabilir.
