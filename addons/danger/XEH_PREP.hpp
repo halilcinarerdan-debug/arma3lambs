@@ -40,6 +40,7 @@ PREP(dispersion);
 PREP(buddyBond);
 PREP(hasUGL);
 PREP(roleStation);
+PREP(reloadCover);
 PREP(tacticalUGL);
 PREP(isATUnit);
 PREP(atFire);

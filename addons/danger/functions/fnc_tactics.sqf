@@ -53,6 +53,11 @@ if (isNil "lambs_danger_roleStationStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_roleStation", {false}]);
 };
 
+// Sarjor korumasi (once siper / buddy korur / peek-reload-peek) — ilk cagrida bir kez baslar
+if (isNil "lambs_danger_reloadCoverStarted") then {
+    [] call (missionNamespace getVariable ["lambs_danger_fnc_reloadCover", {false}]);
+};
+
 if (EGVAR(main,debug_functions)) then {
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };
@@ -69,11 +74,11 @@ if (_group getVariable [QGVAR(disableGroupAI), false]) exitWith {false};
 private _contactState = _group getVariable [QGVAR(contact), 0];
 if (_contactState < time) exitWith {[_unit, _target] call FUNC(contact)};
 
-// KILIT KURTARMA: isBounding 120 sn'den eskiyse sifirla
+// KILIT KURTARMA: isBounding 200 sn'den eskiyse sifirla (cycle'lar siper omru + cift yakinlasma ile uzadi)
 private _bndTime = _group getVariable [QGVAR(boundingStartTime), 0];
-if (_group getVariable [QGVAR(isBounding), false] && {time - _bndTime > 120}) then {
+if (_group getVariable [QGVAR(isBounding), false] && {time - _bndTime > 200}) then {
     if (EGVAR(main,debug_functions)) then {
-        diag_log format ["[BND] KILIT KURTARMA: %1 (120 sn asildi)", _group];
+        diag_log format ["[BND] KILIT KURTARMA: %1 (200 sn asildi)", _group];
     };
     _group setVariable [QGVAR(isBounding), nil];
     _group setVariable [QGVAR(isExecutingTactic), nil];

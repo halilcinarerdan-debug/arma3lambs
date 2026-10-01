@@ -10,6 +10,11 @@
  *   - Buddy ciftleri: 2'li (en guclu + en zayif), MG kosmaz, tek kalan ilerler
  *   - combatMode RED (bitince geri yuklenir), lider jest + callout
  *   - Siper yok / ileri degilse yanal acili 25m atilim (capraz ates)
+ * 2026-10-01 v3.1 — SIPERDEN SIPERE
+ *   - Siper secimi MESAFE + YOL ACIKLIGI hesabi (6 aday; dusmanin gordugu yol ornekleri cezali)
+ *   - Cift ayni / cok yakin siperde: kosucu varinca esi 2-8 m yanina gelir (BND-YAKIN)
+ *   - Siper omru: en az ~4-5 sn kal, baski varsa uzar, sonunda PEEK (kalk-nisan-ol)
+ *   - Guncel dusman yonu: cycle basinda ve yolda odak kayarsa hedef / siper yenilenir (BND-YON)
 */
 
 params ["_group", "_target", ["_units", []], ["_delay", 180]];
@@ -333,32 +338,57 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _birimler;
     };
 
-    // Kosucu hareketi: ADVANCE modunda ILERI siperli sicrama; siper yoksa / ileri degilse
-    // yanal acili 25m atilim (capraz ates + dagilma). Siper stance'i VARISTA uygulanir
-    // (eskiden yatarak/cokerek yola cikiyordu -> yavas ve gorunmez).
-    // Doner: [birim, hedefPos, varisStance] veya []
+    // Kosucu hareketi: ADVANCE modunda ILERI siperli sicrama. SIPER SECIMI mesafe + YOL ACIKLIGI hesabi:
+    //   - findCover'in ilk 6 adayi tek tek degerlendirilir (eskiden sadece 1.)
+    //   - atilim <= 40 m ve en az 6 m ileri kazanc
+    //   - yol aciklik: kosucudan siperine giden hat boyunca 5 m'de bir ornek; dusmanin GORDUGU ornek 'acik'
+    //   - puan = -4 x findCover sirasi - 7 x acik ornek - 1.5 x (atilim - 30 m)  -> kisa, korunakli yol kazanir
+    // Siper yoksa yanal acili 25 m atilim (capraz ates + dagilma). Siper stance'i VARISTA uygulanir.
+    // Doner: [birim, hedefPos, varisStance, atilimMetre, acikOrnek] veya []
     private _kosanHareket = {
         params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil", "_gorev"];
         if (!alive _kosan || {!isNull objectParent _kosan}) exitWith {[]};
 
         private _mesafe = _kosan distance2D _hedef;
-        private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 1, "ADVANCE"] call EFUNC(main,findCover);
+        private _kPos = getPosATL _kosan;
+        private _eASL = AGLToASL (_hedef vectorAdd [0, 0, 1.6]);
+        private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
         private _movePos = [];
         private _stance = "MIDDLE";
+        private _hop = 0;
+        private _acik = 0;
 
-        if (_cover isNotEqualTo []) then {
-            private _cp = (_cover select 0) select 0;
-            // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin)
-            if ((_mesafe - (_cp distance2D _hedef)) >= 6) then {
-                _movePos = _cp;
-                _stance = (_cover select 0) select 1;
+        private _enIyi = -999999;
+        {
+            private _cp = _x select 0;
+            private _atilim = _kPos distance2D _cp;
+            // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin); cok uzak atilim da sayilmaz
+            if ((_mesafe - (_cp distance2D _hedef)) >= 6 && {_atilim <= 40}) then {
+                private _n = (floor (_atilim / 5)) max 1;
+                private _a = 0;
+                for "_k" from 1 to _n do {
+                    private _p = _kPos vectorAdd ((_cp vectorDiff _kPos) vectorMultiply (_k / _n));
+                    private _pASL = AGLToASL (_p vectorAdd [0, 0, 1]);
+                    if (!(terrainIntersectASL [_eASL, _pASL]) && {!(lineIntersects [_eASL, _pASL, objNull, objNull])}) then {
+                        _a = _a + 1;
+                    };
+                };
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 30) max 0));
+                if (_skor > _enIyi) then {
+                    _enIyi = _skor;
+                    _movePos = _cp;
+                    _stance = _x select 1;
+                    _hop = _atilim;
+                    _acik = _a;
+                };
             };
-        };
+        } forEach _cover;
 
         if (_movePos isEqualTo []) then {
             private _kayma = [-25, 25] select ((((units (group _kosan)) find _kosan) max 0) % 2);
             private _kalan = (_mesafe - _hucumMenzil) max 0;
-            _movePos = (getPosATL _kosan) getPos [(25 min _kalan), ((_kosan getDir _hedef) + _kayma)];
+            _hop = 25 min _kalan;
+            _movePos = _kPos getPos [_hop, ((_kosan getDir _hedef) + _kayma)];
             _stance = "MIDDLE";
         };
 
@@ -369,7 +399,7 @@ if (EGVAR(main,debug_functions)) then {
         _kosan doWatch _hedef;
         _kosan forceSpeed -1;
 
-        [_kosan, _movePos, _stance]
+        [_kosan, _movePos, _stance, _hop, _acik]
     };
 
     diag_log format [
@@ -469,12 +499,28 @@ if (EGVAR(main,debug_functions)) then {
 
         private _odak = [_group] call _odakSec;
 
+        // GUNCEL DUSMAN YONU: odak dusman hedeften 25 m'den fazla kaydiysa hedef (siper / sektor / mesafe) guncellenir
+        if (!isNull _odak) then {
+            private _op = getPosATL _odak;
+            _op set [2, 0.5];
+            if ((_op distance2D _target) > 25) then {
+                diag_log format [
+                    "[BND-YON] %1 | cycle:%2 | hedef %3 m kaydi, yon %4 -> %5 derece (odak: %6)",
+                    groupId _group, _cycleCount, round (_op distance2D _target),
+                    round ((leader _group) getDir _target), round ((leader _group) getDir _op), name _odak
+                ];
+                _target = _op;
+                _targetASL = AGLToASL _target;
+            };
+        };
+
         // -------------------------------------------------------------------
         // HANGI EKIP HAREKET EDIYOR?
         // -------------------------------------------------------------------
         private _fseSicrama = ((_cycleCount % 3) isEqualTo 0) && {(count _maneuver) >= 2} && {(count _fse) > 0};
         private _hareketEdecek = [];
         private _kapsama = [];
+        private _ciftYakinla = [];   // [kosan, [destekler]] — kosucu siperine varinca esi yanina gelir
 
         if (_fseSicrama) then {
             // FSE (+reserve) ileri sicrar; maneuver ortu atesi verir
@@ -498,6 +544,7 @@ if (EGVAR(main,debug_functions)) then {
                     private _kosan = _adaylar select (_cycleCount % (count _adaylar));
                     _kosanlar pushBack _kosan;
                     _destekTum append (_cift - [_kosan]);
+                    _ciftYakinla pushBack [_kosan, _cift - [_kosan]];
                 };
             } forEach _ciftler;
 
@@ -616,12 +663,14 @@ if (EGVAR(main,debug_functions)) then {
 
             // Gozlem: her cycle bir satir (debug kapaliyken de). kapi = ates ustunlugu bekleme suresi (max 5)
             diag_log format [
-                "[BND] %1 | cycle:%2 | %3 | hareket:%4 kapsama:%5 | kapi:%6s | odak:%7 %8m baski:%9",
+                "[BND] %1 | cycle:%2 | %3 | hareket:%4 kapsama:%5 | kapi:%6s | odak:%7 %8m baski:%9 | atilim:%10 acik:%11",
                 groupId _group, _cycleCount, ["buddy", "FSE-sicrama"] select _fseSicrama,
                 count _hareketler, count _kapsama, (time - _atesBasi) toFixed 1,
                 if (isNull _odak) then {"yok"} else {name _odak},
                 if (isNull _odak) then {0} else {round ((leader _group) distance2D _odak)},
-                if (isNull _odak) then {"-"} else {(getSuppression _odak) toFixed 2}
+                if (isNull _odak) then {"-"} else {(getSuppression _odak) toFixed 2},
+                _hareketler apply {round (_x param [3, 0])},
+                _hareketler apply {_x param [4, 0]}
             ];
         };
 
@@ -633,9 +682,38 @@ if (EGVAR(main,debug_functions)) then {
         { _maxSupp = _maxSupp max (getSuppression _x); } forEach (_hareketEdecek select {alive _x});
         private _bekleBitis = time + 9 + (_maxSupp * 4);
         private _inen = [];
+        private _yenidenSecti = [];
+        private _yonKontrol = time;
 
         waitUntil {
             sleep 0.5;
+
+            // DUSMAN YONU DEGISTI (yolda): odak 40 m'den fazla kaydiysa varmamis kosucular siperini yeniden secer
+            if ((time - _yonKontrol) > 3) then {
+                _yonKontrol = time;
+                private _oN = [_group] call _odakSec;
+                if (!isNull _oN) then {
+                    private _np = getPosATL _oN;
+                    _np set [2, 0.5];
+                    if ((_np distance2D _target) > 40) then {
+                        diag_log format [
+                            "[BND-YON] %1 | cycle:%2 | YOLDA hedef %3 m kaydi -> siper yeniden seciliyor",
+                            groupId _group, _cycleCount, round (_np distance2D _target)
+                        ];
+                        _target = _np;
+                        _targetASL = AGLToASL _target;
+                        {
+                            private _rb = _x select 0;
+                            if (alive _rb && {!(_rb in _inen)} && {!(_rb in _yenidenSecti)}) then {
+                                _yenidenSecti pushBack _rb;
+                                private _yh = [_rb, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, "Bound/YonDegisti"] call _kosanHareket;
+                                if (_yh isNotEqualTo []) then { _hareketler set [_forEachIndex, _yh]; };
+                            };
+                        } forEach _hareketler;
+                    };
+                };
+            };
+
             {
                 _x params ["_b", "_p", "_s"];
                 if (alive _b && {!(_b in _inen)} && {(_b distance2D _p) < 4}) then {
@@ -667,12 +745,131 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _hareketler;
 
         // -------------------------------------------------------------------
+        // 2b) CIFT YAKINLASMA — kosucu siperde iken esi AYNI siperin 2-8 m yanina gelir
+        //     (cift ayni / cok yakin siperde: birbirini korur, aralarinda 25 m bosluk kalmaz)
+        // -------------------------------------------------------------------
+        private _yakinlasan = [];
+        private _yMes = [];
+        {
+            _x params ["_kosan", "_destekler"];
+            private _hi = _hareketler findIf {(_x select 0) isEqualTo _kosan};
+            if (alive _kosan && {_hi > -1}) then {
+                private _cp = (_hareketler select _hi) select 1;
+                if ((_kosan distance2D _cp) < 12) then {
+                    {
+                        private _d = _x;
+                        if (
+                            alive _d && {isNull objectParent _d}
+                            && {(getSuppression _d) < 0.6}
+                            && {(_d distance2D _cp) > 8}
+                            && {(_d distance2D _cp) < 50}
+                        ) then {
+                            private _dPos = [];
+                            private _dStance = "MIDDLE";
+                            private _cv = [_d, _target, 40, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
+                            private _ci = _cv findIf {
+                                private _dd = (_x select 0) distance2D _cp;
+                                _dd >= 2 && {_dd <= 8}
+                            };
+                            if (_ci > -1) then {
+                                _dPos = (_cv select _ci) select 0;
+                                _dStance = (_cv select _ci) select 1;
+                            } else {
+                                // Yakinda ayri siper yok: kosucunun yaninda 3-6 m (yanal) bosluk
+                                private _yan = [-90, 90] select (_forEachIndex % 2);
+                                _dPos = _cp getPos [3 + (random 3), (_target getDir _cp) + _yan];
+                            };
+                            if (!surfaceIsWater _dPos) then {
+                                _yMes pushBack (round (_d distance2D _dPos));
+                                _d setVariable [QGVAR(forceMove), true];
+                                _d setUnitPosWeak "UP";
+                                _d moveTo _dPos;
+                                _d doWatch _target;
+                                _d forceSpeed -1;
+                                _yakinlasan pushBack [_d, _dPos, _dStance];
+                            };
+                        };
+                    } forEach _destekler;
+                };
+            };
+        } forEach _ciftYakinla;
+
+        if (_yakinlasan isNotEqualTo []) then {
+            private _yBitis = time + 7;
+            private _yInen = [];
+            waitUntil {
+                sleep 0.5;
+                {
+                    _x params ["_b", "_p", "_s"];
+                    if (alive _b && {!(_b in _yInen)} && {((_b distance2D _p) < 3) || {(getSuppression _b) >= 0.85}}) then {
+                        _yInen pushBack _b;
+                        _b setVariable [QGVAR(forceMove), nil];
+                        _b setUnitPosWeak ([_s, "DOWN"] select ((getSuppression _b) >= 0.85));
+                    };
+                } forEach _yakinlasan;
+                isNull _group
+                || {!(_group getVariable [QGVAR(isBounding), false])}
+                || {time > _yBitis}
+                || {(_yakinlasan findIf {alive (_x select 0) && {!((_x select 0) in _yInen)}}) isEqualTo -1}
+            };
+            {
+                _x params ["_b", "_p", "_s"];
+                if (alive _b) then {
+                    _b setVariable [QGVAR(forceMove), nil];
+                    _b setUnitPosWeak _s;
+                };
+            } forEach _yakinlasan;
+            diag_log format [
+                "[BND-YAKIN] %1 | cycle:%2 | esi yanina gelen:%3 | atilim:%4",
+                groupId _group, _cycleCount, count _yakinlasan, _yMes
+            ];
+        };
+
+        // -------------------------------------------------------------------
         // 3) ORTAK ATES — kosanlar siperde, herkes baski + odak ates
         // -------------------------------------------------------------------
         private _odak2 = [_group] call _odakSec;
         [(_hareketEdecek + _kapsama) select {alive _x}, _target, _targetASL, _odak2, "Bound/Fire"] call _atesEt;
 
-        sleep (_BND_CYCLE_BASE + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL));
+        // -------------------------------------------------------------------
+        // 4) SIPER OMRU — siperde en az BASE+1.5 .. +RAND sn kal (hemen kalkma); baski varsa 3 sn uzar;
+        //    suresinin sonunda, baskida degilse PEEK: kisaca kalkip nisan al, sonra siper stance'ine don
+        // -------------------------------------------------------------------
+        private _siperde = (_hareketler + _yakinlasan) select {alive (_x select 0)};
+        private _omurBitis = time + _BND_CYCLE_BASE + 1.5 + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL);
+        private _uzatildi = false;
+        private _peekte = false;
+        private _siperGeri = {
+            { if (alive (_x select 0)) then { (_x select 0) setUnitPosWeak (_x select 2); }; } forEach _this;
+        };
+
+        while {
+            time < _omurBitis
+            && {!isNull _group}
+            && {_group getVariable [QGVAR(isBounding), false]}
+        } do {
+            sleep 0.5;
+            private _baskiMax = 0;
+            { _baskiMax = _baskiMax max (getSuppression (_x select 0)); } forEach (_siperde select {alive (_x select 0)});
+
+            if (_baskiMax >= 0.5 && {!_uzatildi}) then {
+                _uzatildi = true;
+                _omurBitis = _omurBitis + 3;
+            };
+            if (_peekte && {_baskiMax >= 0.5}) then {
+                _peekte = false;
+                _siperde call _siperGeri;
+            };
+            if (!_peekte && {_baskiMax < 0.4} && {time > (_omurBitis - 2.2)} && {time < (_omurBitis - 0.5)}) then {
+                _peekte = true;
+                {
+                    if (alive (_x select 0) && {(_x select 2) isNotEqualTo "UP"}) then {
+                        (_x select 0) setUnitPosWeak "UP";
+                    };
+                } forEach _siperde;
+            };
+        };
+        _siperde call _siperGeri;
     };
 
     if (!isNull _group) then {

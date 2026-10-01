@@ -1,6 +1,6 @@
 ============================================================
 ARMA 3 AI PROJE — DEVİR LOGU v7.0
-Tarih: 2026-10-01 (sohbet devri)
+Tarih: 2026-10-01 / 02 (sohbet devri) — v7.1 eklemeleri aşağıda işaretli [v7.1]
 Devam eden: Cinar
 Son Güncelleme: v6.0 sonrası ELITE fork büyük revizyon — Retreat v13, Bounding v3, cover v4,
 rol sistemi, zırh kaçışı, AT taarruzu, UGL, temas kesme, dağılma, buddy bağı, rol istasyonu.
@@ -53,6 +53,10 @@ cd /d "C:\Users\Cinar\Desktop\LambsDanger-2.6.2 (1)\LambsDanger-2.6.2" && hemtt 
 11. SONRAKİ (test + RPT sonrası): TEAM LEADER her takımın rollerinden SORUMLU olsun, "bunun gibi
     diğer yapılar" için de (bkz. SIRADAKİ ADIMLAR -> Takım Lideri Sorumluluk Katmanı)
 12. Devir logu güncellensin (bu dosya)
+13. [v7.1] Cover-to-cover güçlendirme: siper seçiminde MESAFE + YOL AÇIKLIĞI hesabı, çift aynı/çok yakın
+    siperde, SİPER ÖMRÜ (kal + peek), güncel düşman yönü
+14. [v7.1] Şarjör değişimi: bitince ilk siper (yoksa yatarak, açıkta reload yok), eşi korusun,
+    peek-reload-peek
 
 ## v6.0 FAZLARININ GÜNCEL DURUMU
 - Faz 1 Komutan Beyni: commanderAssess v2 (aşağıda). Eskiden "RPT'de onaylandı" — v2 yeniden yazıldı.
@@ -88,6 +92,8 @@ cd /d "C:\Users\Cinar\Desktop\LambsDanger-2.6.2 (1)\LambsDanger-2.6.2" && hemtt 
 | Dağılma bilinci (yığılma = tek el bombası/RPG) | fnc_dispersion | [DAGILMA] |
 | Buddy bağı (uzakta tek başına dolaşmasın) | fnc_buddyBond | [BUDDY] |
 | Rol istasyonu (formasyon sırası + MG/nişancı/UGL/AT/sağlıkçı yeri+görev) | fnc_roleStation | [ROL] [ROL-SIRA] [ROL-GOREV] |
+| [v7.1] Bounding v3.1: siper puanı (6 aday, yol açıklığı, atılım<=40 m), çift yakınlaşma, siper ömrü+PEEK, yön yenileme | fnc_tacticsBounding | [BND] ... atilim:.. acik:.. , [BND-YAKIN], [BND-YON] |
+| [v7.1] Şarjör koruması (siper ilk / buddy korur / peek) | fnc_reloadCover | [RELOAD] |
 | Dispatch + lazy başlatmalar | fnc_tactics | [TACTICS-CAGRI] (debug) |
 | Formasyon seçimi (FILE/DIAMOND LAMBS bastırmayı kapatır -> kaldırıldı) | fnc_selectFormation | [FORMASYON] |
 | Cover v4 (mermi geometrisi, modlar DEFEND/ADVANCE/OVERWATCH/EVADE/SURVIVE) | main\fnc_findCover | - |
@@ -99,6 +105,11 @@ Sentinel (dağıtım doğrulama) satırları — sunucu RPT'de açılışta/ilk 
   [DAGILMA] dagilma bilinci watchdog baslatildi
   [BUDDY]   buddy bagi (cohesion) watchdog baslatildi
   [ROL]     rol istasyonu (formasyon sirasi + ...) watchdog baslatildi
+  [RELOAD]  sarjor korumasi (once siper / buddy korur / peek-reload-peek) watchdog baslatildi
+NOT: watchdog'lar İLK TEMASTA başlar (fnc_tactics lazy start). Temas olmadan RPT'de görünmezler.
+[v7.1] 2026-10-02 01:46 sunucu RPT'si incelendi: @lambscinar (lambs_danger 2.6.2.1) yüklü, ~3 dk oturum,
+  AI teması yok -> sentinel satırı YOK (beklenen). LAMBS kaynaklı SQF hatası YOK. Tek hata mission
+  scriptinden (Pre_Flight_Inspection\restrictions.sqf:28 setHitPointDamage String) — LAMBS ile ilgisiz.
 Görünmüyorsa: XEH_PREP.hpp eski kalmış / dosya yanlış yere kopyalanmış. (Eksik PREP hata VERMEZ,
 özellik sessizce devre dışı kalır — tüm yeni fonksiyon çağrıları getVariable ile korumalı.)
 
@@ -145,6 +156,15 @@ Zeus zorla: [_g,_t] call lambs_danger_fnc_tacticsBounding;
 ## RPT FİLTRESİ (PowerShell — GÜNCEL)
 Get-Content (Get-ChildItem "$env:LOCALAPPDATA\Arma 3\Arma3_x64_*.rpt" | Sort LastWriteTime | Select -Last 1) | Select-String "GERI-CEKILME|ZIRH-KAC|AT-TAARRUZ|TEMAS-KES|BND|OVERWATCH|DAGILMA|BUDDY|ROL|FIRETEAM|CMD\]|SIS\]|Error in expression|Undefined|not defined" | Set-Content "$env:USERPROFILE\Desktop\test_log.txt"
 (Sunucu RPT için aynı Select-String'i sunucu .rpt yoluna uygulayın.)
+
+## [v7.1] BOUNDING v3.1 / ŞARJÖR DETAYI
+- Siper puanı = -4 x findCover sırası - 7 x açık örnek (düşmanın gördüğü 5 m'lik yol örnekleri) - 1.5 x (atılım-30).
+- Çift yakınlaşma: koşucu siperine varınca eşi onun 2-8 m yanındaki siperi (yoksa 3-6 m yanal nokta) alır.
+- Siper ömrü: BASE+1.5+rand sn, baskı varsa +3 sn, sonunda baskı<0.4 ise 2 sn PEEK. KILIT KURTARMA 120->200 sn.
+- Yön yenileme: cycle başı odak 25 m kaydıysa hedef güncellenir; yolda 40 m kayarsa varmamış koşucular yeniden seçer.
+- Şarjör: tetik mermi <= max(3, kapasite x %25) ve yedek var; siper ilk (20 m), yoksa DOWN; buddy doTarget/doFire +
+  doSuppress; bitince 2 sn UP peek. 15 sn cooldown. Retreat/Evade/Temas kes ve forceMove atlanır.
+- Doğrulanmadı: AI'ın reload'u erken tetiklenemez (engine mermi bitince yapar) — bu yüzden düşük şarjörde siperе çekilir.
 
 ## KRİTİK TEKNİK NOTLAR (aynı hatalara düşmemek için)
 SQF:
