@@ -35,6 +35,7 @@ PREP(tacticsRetreat);
 PREP(tacticsPeel);
 PREP(tacticsEvadeArmor);
 PREP(tacticsATEngage);
+PREP(tacticsBreakContact);
 PREP(tacticalUGL);
 PREP(isATUnit);
 PREP(atFire);

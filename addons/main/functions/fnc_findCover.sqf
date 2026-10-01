@@ -29,7 +29,8 @@
  * 2: Range to find cover, default ELITE_COVER_RANGE <NUMBER>
  * 3: Sort mode <STRING>, default "ASCEND" (aday toplama sirasi): ASCEND, DESCEND, RANDOM
  * 4: Max Results <Number>, default ELITE_COVER_MAX_RESULTS, -1 for all
- * 5: Mode <STRING>, default "DEFEND": "DEFEND" | "ADVANCE" | "OVERWATCH" | "EVADE"
+ * 5: Mode <STRING>, default "DEFEND": "DEFEND" | "ADVANCE" | "OVERWATCH" | "EVADE" | "SURVIVE"
+ *    SURVIVE: EN YAKIN sert siper (en az 1 yukseklikte mermi durduran engel), mesafe 0.9/m, uzaklasma bonusu / yaklasma cezasi 0.5/m (tek kalan asker / temas kesme)
  *
  * Return Value:
  * Array of format [[_posAGL, _stance], ...] SKORA GORE sirali (en iyi ilk);
@@ -64,7 +65,12 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     private _group = group _unit;
     private _simdi = time;
     private _evade = _mode isEqualTo "EVADE";
-    private _minDist = if (_evade) then {ELITE_COVER_MIN_DIST max 40} else {ELITE_COVER_MIN_DIST};
+    private _survive = _mode isEqualTo "SURVIVE";
+    private _minDist = if (_evade) then {
+        ELITE_COVER_MIN_DIST max 40
+    } else {
+        if (_survive) then {20} else {ELITE_COVER_MIN_DIST}
+    };
 
     // ---------------------------------------------------------------------
     // Aday objeler: sert (agac/bina/HIDE) + yumusak (cali/kucuk agac) + araclar
@@ -166,7 +172,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                     } forEach [0.1, 0.75, 1.45];
 
                     // EVADE: sadece sert siper (en az 2 yukseklikte mermi durduran engel)
-                    if (!_evade || {_sertSayi >= 2}) then {
+                    if ((!_evade || {_sertSayi >= 2}) && {!_survive || {_sertSayi >= 1}}) then {
 
                         private _stances = ["DOWN"];
                         if ([_dangerPos, _posASL vectorAdd [0, 0, 0.75], _unit] call _gizli) then {
@@ -214,7 +220,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         } forEach _digerTehditler;
 
                         // Uzaklik maliyeti
-                        _skor = _skor - ((_unit distance2D _pos) * ([0.5, 0.25] select _evade));
+                        _skor = _skor - ((_unit distance2D _pos) * (if (_evade) then {0.25} else {if (_survive) then {0.9} else {0.5}}));
 
                         // Dusmana yaklasma: ADVANCE bonus, EVADE uzaklasma bonusu, digerleri ceza
                         private _yaklasma = _unitEnemyDist - _enemyDist;
@@ -224,8 +230,13 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                             if (_evade) then {
                                 _skor = _skor + ((((-_yaklasma) min 40) max -40) * 0.9);
                             } else {
-                                if (_yaklasma > 0) then {
-                                    _skor = _skor - (_yaklasma * 0.8);
+                                if (_survive) then {
+                                    // en yakin siper; dusmandan uzaklasan +, yaklasan - (0.5/m)
+                                    _skor = _skor + ((((-_yaklasma) min 30) max -30) * 0.5);
+                                } else {
+                                    if (_yaklasma > 0) then {
+                                        _skor = _skor - (_yaklasma * 0.8);
+                                    };
                                 };
                             };
                         };

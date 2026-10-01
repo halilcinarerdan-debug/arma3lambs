@@ -145,6 +145,22 @@ if (
     true
 };
 
+// ---------------------------------------------------------------------------
+// KUCUK GRUP / TEK KALAN ASKER (< 4): komutan beyni yok -> TEMAS KES
+// (eskiden LAMBS'in duz akisina dusup catismaya devam ediyordu)
+// ---------------------------------------------------------------------------
+private _temasKes = false;
+if (
+    !isNull _target
+    && {((units _group) select {alive _x}) isNotEqualTo []}
+    && {count ((units _group) select {alive _x}) < 4}
+    && {!(_group getVariable [QGVAR(isExecutingTactic), false])}
+    && {!isPlayer (leader _group)}
+) then {
+    _temasKes = [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsBreakContact", {false}]);
+};
+if (_temasKes) exitWith {true};
+
 // ai profiles ~ here is where AI profiles will be extrapolated - nkenny
 // if (_unit call FUNC(tacticsProfiles)) exitWith {true};
 

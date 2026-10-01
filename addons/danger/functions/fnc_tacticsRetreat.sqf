@@ -197,9 +197,9 @@ if (EGVAR(main,debug_functions)) then {
         groupId _group, count _alpha, count _bravo
     ];
 
-    // Genel kilitler: LAMBS FSM reaksiyonlari (dodge/cover/panik) emri bozmasin, kacma YOK
+    // Genel ayarlar: kacma YOK. forceMove burada TUM askerlere konmaz (ates altinda siper
+    // alamiyorlardi); sadece HAREKET EDERKEN konur (_sicra icinde), varinca kalkar.
     {
-        _x setVariable [QGVAR(forceMove), true];
         _x allowFleeing 0;
         _x setBehaviour "AWARE";
         _x setAnimSpeedCoef 1.15;
@@ -245,6 +245,7 @@ if (EGVAR(main,debug_functions)) then {
                     _x disableAI "AUTOTARGET";
                     _x disableAI "AUTOCOMBAT";
                     _x disableAI "COVER";
+                    _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
                     private _p = _ciftNokta getPos [random 3, random 360];
@@ -256,9 +257,24 @@ if (EGVAR(main,debug_functions)) then {
 
         // 3) Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
         private _bitis = time + 14;
+        private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
+            // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
+            {
+                private _b = _x select 0;
+                if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= 0.85}) then {
+                    _pinned pushBack _b;
+                    _b setVariable [QGVAR(forceMove), nil];
+                    _b enableAI "AUTOCOMBAT";
+                    _b enableAI "COVER";
+                    _b setUnitPosWeak "DOWN";
+                };
+            } forEach _varis;
+
             private _gelmeyen = _varis select {
-                alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) > 9}
+                alive (_x select 0)
+                && {!((_x select 0) in _pinned)}
+                && {((_x select 0) distance2D (_x select 1)) > 9}
             };
             if (_gelmeyen isEqualTo []) exitWith {};
             { (_x select 0) moveTo (_x select 1); } forEach _gelmeyen;
@@ -269,8 +285,11 @@ if (EGVAR(main,debug_functions)) then {
         {
             private _b = _x select 0;
             if (alive _b) then {
+                _b setVariable [QGVAR(forceMove), nil];
                 _b enableAI "TARGET";
                 _b enableAI "AUTOTARGET";
+                _b enableAI "AUTOCOMBAT";
+                _b enableAI "COVER";
                 _b setUnitPosWeak "MIDDLE";
                 [_b, _hedefASL] call EFUNC(main,doSuppress);
             };

@@ -216,6 +216,9 @@ diag_log format [
     {
         private _b = _x select 0;
         if (alive _b) then {
+            _b setVariable [QGVAR(forceMove), nil];
+            _b enableAI "AUTOCOMBAT";
+            _b enableAI "COVER";
             _b setUnitPosWeak "DOWN";
             _b doWatch _tehditPos;
         };

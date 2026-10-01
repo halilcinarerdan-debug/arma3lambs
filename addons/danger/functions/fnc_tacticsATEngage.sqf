@@ -250,8 +250,11 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     {
         _x params ["_b", "_p", "_s"];
         if (alive _b) then {
+            _b setVariable [QGVAR(forceMove), nil];
             _b enableAI "TARGET";
             _b enableAI "AUTOTARGET";
+            _b enableAI "AUTOCOMBAT";
+            _b enableAI "COVER";
             _b setUnitPosWeak _s;
         };
     } forEach _varis;

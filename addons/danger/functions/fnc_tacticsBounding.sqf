@@ -173,8 +173,9 @@ _group setCombatMode "RED";
 _units allowGetIn false;
 _units doWatch _target;
 
+// forceMove burada TUM askerlere konmaz: LAMBS reaksiyonlarini (cover/dodge) tamamen susturuyor ve
+// ates altinda askerler siper alamiyordu. Sadece HAREKET EDEN askerde (kosan) gecici olarak konur.
 {
-    _x setVariable [QGVAR(forceMove), true];
     _x forceSpeed -1;
 } forEach (_units select {isNull objectParent _x});
 
@@ -362,6 +363,7 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         _kosan setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
+        _kosan setVariable [QGVAR(forceMove), true];
         _kosan setUnitPosWeak "UP";
         _kosan moveTo _movePos;
         _kosan doWatch _hedef;
@@ -378,7 +380,9 @@ if (EGVAR(main,debug_functions)) then {
         params ["_g"];
         while {!isNull _g && {_g getVariable ["lambs_danger_isBounding", false]}} do {
             private _df = _g getVariable ["lambs_danger_dangerFormation", ""];
-            if (_df isNotEqualTo "" && {formation _g isNotEqualTo _df}) then {
+            // Baski altinda (>= 0.4) formasyon ZORLANMAZ: gercek catismada esner, siper icin bozulur
+            private _baskida = ((units _g) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
+            if (!_baskida && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df}) then {
                 _g setFormation _df;
             };
             sleep 0.5;
@@ -427,7 +431,8 @@ if (EGVAR(main,debug_functions)) then {
         // FORMASYON KORUMA
         private _bndFormation = _group getVariable [QGVAR(dangerFormation), "WEDGE"];
         private _mevcutFormation = formation _group;
-        if (_mevcutFormation isNotEqualTo _bndFormation) then {
+        private _grupBaskida = ((units _group) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
+        if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}) then {
             _group setFormation _bndFormation;
         };
 
@@ -510,6 +515,7 @@ if (EGVAR(main,debug_functions)) then {
                         private _owPos = (_ow select 0) select 0;
                         private _owStance = (_ow select 0) select 1;
                         if ((_x distance2D _owPos) > 4) then {
+                            _x setVariable [QGVAR(forceMove), true];
                             _x setUnitPosWeak "UP";
                             _x moveTo _owPos;
                             _kurulum pushBack [_x, _owPos, _owStance];
@@ -525,7 +531,10 @@ if (EGVAR(main,debug_functions)) then {
                 sleep 0.5;
                 {
                     _x params ["_b", "_p", "_s"];
-                    if (alive _b && {(_b distance2D _p) < 4}) then { _b setUnitPosWeak _s; };
+                    if (alive _b && {(_b distance2D _p) < 4}) then {
+                        _b setVariable [QGVAR(forceMove), nil];
+                        _b setUnitPosWeak _s;
+                    };
                 } forEach _kurulum;
                 isNull _group
                 || {!(_group getVariable [QGVAR(isBounding), false])}
@@ -534,7 +543,10 @@ if (EGVAR(main,debug_functions)) then {
             };
             {
                 _x params ["_b", "_p", "_s"];
-                if (alive _b) then { _b setUnitPosWeak _s; };
+                if (alive _b) then {
+                    _b setVariable [QGVAR(forceMove), nil];
+                    _b setUnitPosWeak _s;
+                };
             } forEach _kurulum;
 
             if (_kurulum isNotEqualTo []) then {
@@ -619,7 +631,15 @@ if (EGVAR(main,debug_functions)) then {
                 _x params ["_b", "_p", "_s"];
                 if (alive _b && {!(_b in _inen)} && {(_b distance2D _p) < 4}) then {
                     _inen pushBack _b;
+                    _b setVariable [QGVAR(forceMove), nil];
                     _b setUnitPosWeak _s;
+                } else {
+                    // Baski >= 0.85: kosucu ezildi -> forceMove birakilir, FSM siper alir
+                    if (alive _b && {!(_b in _inen)} && {(getSuppression _b) >= 0.85}) then {
+                        _inen pushBack _b;
+                        _b setVariable [QGVAR(forceMove), nil];
+                        _b setUnitPosWeak "DOWN";
+                    };
                 };
             } forEach _hareketler;
             isNull _group
@@ -631,7 +651,10 @@ if (EGVAR(main,debug_functions)) then {
         // Varamayanlar da siper stance'ine gecsin
         {
             _x params ["_b", "_p", "_s"];
-            if (alive _b) then { _b setUnitPosWeak _s; };
+            if (alive _b) then {
+                _b setVariable [QGVAR(forceMove), nil];
+                _b setUnitPosWeak _s;
+            };
         } forEach _hareketler;
 
         // -------------------------------------------------------------------
