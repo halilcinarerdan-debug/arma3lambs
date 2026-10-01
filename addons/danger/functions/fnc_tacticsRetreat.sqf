@@ -1,15 +1,26 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * Kademeli Geri Cekilme - NATO/USMC piyade doktrini
- * 2026-10-01 FIX v12
- *   - moveTo (LAMBS FSM ezemez), varana kadar 4 sn'de bir tazelenir
- *   - Takimlar splitFireTeams'ten (FSE gercekten FSE: son cikar, o zamana kadar ates eder)
- *   - Cekilme sonrasi 45 sn cooldown (arka arkaya cekilme dongusu yok)
- *   - Guvenlik valfi sadece KENDI cekilmesini temizler
- *   - Orijinal combatMode saklanir/geri yuklenir (eskiden BLUE -> YELLOW zorlaniyordu)
- *   - Rally noktalari suya dusmez
- *   - Skill SABIT (sadece animasyon hizi degisir)
+ * Kademeli Geri Cekilme — iki takim, 40m'lik DONUSUMLU sicramalar (bounding retreat)
+ * 2026-10-01 v13
+ *
+ * Sorunlar (v11/v12):
+ *   - "olduğu yerde durma": takimlar 0 / 25 / 50 sn'de sirayla kalkiyordu, bekleyenler ATES BILE ETMIYORDU
+ *   - "rastgele kosma": forceMove yoktu, allowFleeing 1 + AUTOCOMBAT acikti -> LAMBS dodge/cover/panik
+ *     reaksiyonlari emri eziyordu
+ *
+ * v13:
+ *   - ALPHA (maneuver + reserve) ve BRAVO (FSE: MG'ler) dönüşümlü sıçrar:
+ *       sicrama 1: ALPHA -> 40m   (BRAVO ortu atesi)
+ *       sicrama 2: BRAVO -> 80m   (ALPHA ortu atesi)
+ *       sicrama 3: ALPHA -> 120m  (BRAVO ortu atesi)
+ *       sicrama 4: BRAVO -> 120m  (ALPHA ortu atesi)
+ *     Hareket etmeyen takim doSuppress ile ates eder -> kimse bos durmaz.
+ *   - Hareket eden askerlerde forceMove + AUTOCOMBAT/COVER/TARGET kapali + allowFleeing 0:
+ *     LAMBS reaksiyonlari emri bozamaz, rastgele kosma yok.
+ *   - Her asker kendi varis noktasina (waypoint etrafinda 7m) gider -> yigilma yok.
+ *   - 45 sn cooldown, orijinal combatMode geri yuklenir, guvenlik valfi sadece KENDI cekilmesini temizler.
+ *   - BASLA / sicrama / TAMAM satirlari debug kapaliyken de RPT'ye yazilir (tani icin).
 */
 
 params [
@@ -69,7 +80,7 @@ if (_cqbMesafe < 40 && _cqbUrban) exitWith {
 };
 
 // ---------------------------------------------------------------------------
-// RALLY NOKTALARI — dusmandan uzaga, suya dusmesin
+// WAYPOINT'LER — dusmandan uzaga, suya dusmesin
 // ---------------------------------------------------------------------------
 private _leaderPos = getPosATL _unit;
 private _threatDir = [_targetPos, _leaderPos] call BIS_fnc_dirTo;
@@ -84,18 +95,18 @@ private _suKontrol = {
     _p
 };
 
-private _rallyAna   = [_leaderPos getPos [120, _threatDir], _leaderPos] call _suKontrol;
-private _rallyAlt   = [_rallyAna getPos [80, _threatDir + 45], _leaderPos] call _suKontrol;
-private _rallyNihai = [_leaderPos getPos [250, _threatDir], _leaderPos] call _suKontrol;
+private _wp1 = [_leaderPos getPos [40, _threatDir], _leaderPos] call _suKontrol;
+private _wp2 = [_leaderPos getPos [80, _threatDir], _leaderPos] call _suKontrol;
+private _wp3 = [_leaderPos getPos [120, _threatDir], _leaderPos] call _suKontrol;
+private _wps = [_wp1, _wp2, _wp3, _wp3];
 
 private _baslangic = time;
 _group setVariable [QGVAR(isRetreating), true];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(retreatStartTime), _baslangic];
-_group setVariable [QGVAR(rallyIndex), 0];
 
 // ---------------------------------------------------------------------------
-// GUVENLIK VALFI — sadece bu cekilmenin bayraklarini temizler
+// GUVENLIK VALFI — sadece bu cekilmenin bayraklarini + AI kilitlerini temizler
 // ---------------------------------------------------------------------------
 [_group, _baslangic, time + 130] spawn {
     params ["_g", "_start", "_limit"];
@@ -109,31 +120,38 @@ _group setVariable [QGVAR(rallyIndex), 0];
             _g enableAttack true;
             {
                 if (alive _x) then {
+                    _x enableAI "PATH";
+                    _x enableAI "MOVE";
                     _x enableAI "TARGET";
                     _x enableAI "AUTOTARGET";
+                    _x enableAI "AUTOCOMBAT";
+                    _x enableAI "COVER";
+                    _x setVariable [QGVAR(forceMove), nil];
                     _x allowFleeing 0;
                     _x setAnimSpeedCoef 1.0;
+                    _x setUnitPos "AUTO";
                 };
             } forEach (units _g);
+            diag_log format ["[GERI-CEKILME-VALF] %1 guvenlik valfi temizledi", groupId _g];
         };
     };
 };
 
-// Tani icin BASLA / TAMAM satirlari debug kapaliyken de RPT'ye yazilir
+// Tani icin BASLA / sicrama / TAMAM satirlari debug kapaliyken de RPT'ye yazilir
 private _msgBasla = format [
-    "[GERI-CEKILME-BASLA] %1 | tehdit:%2m | ANA:%3 ALT:%4 NIHAI:%5",
-    groupId _group, round (_unit distance2D _targetPos),
-    _rallyAna, _rallyAlt, _rallyNihai
+    "[GERI-CEKILME-BASLA] %1 | tehdit:%2m | WP1:%3 WP2:%4 WP3:%5",
+    groupId _group, round (_unit distance2D _targetPos), _wp1, _wp2, _wp3
 ];
 diag_log _msgBasla;
 if (EGVAR(main,debug_functions)) then {
     systemChat _msgBasla;
 };
 
-[_group, _unit, _targetPos, _rallyAna, _baslangic] spawn {
-    params ["_group", "_unit", "_targetPos", "_rallyAna", "_baslangic"];
+[_group, _unit, _targetPos, _wps, _baslangic] spawn {
+    params ["_group", "_unit", "_targetPos", "_wps", "_baslangic"];
 
     private _origCombat = combatMode _group;
+    private _targetASL = AGLToASL _targetPos;
 
     // Eski kilitleri temizle: onceki Peel/Retreat PATH/MOVE/TARGET'i kapali birakmis olabilir
     {
@@ -141,6 +159,8 @@ if (EGVAR(main,debug_functions)) then {
         _x enableAI "MOVE";
         _x enableAI "TARGET";
         _x enableAI "AUTOTARGET";
+        _x enableAI "AUTOCOMBAT";
+        _x enableAI "COVER";
     } forEach (units _group);
 
     _group setFormation "FILE";
@@ -150,59 +170,111 @@ if (EGVAR(main,debug_functions)) then {
 
     private _tumBirimler = (units _group) select {alive _x && {isNull objectParent _x}};
 
-    // 3 TAKIM — splitFireTeams ile ayni mantik
+    // -----------------------------------------------------------------------
+    // TAKIMLAR — ALPHA = maneuver + reserve (once sicrar), BRAVO = FSE (MG'ler, ortu atesi)
+    // -----------------------------------------------------------------------
     private _takimlar = [_group] call FUNC(splitFireTeams);
     _takimlar params ["_fse", "_maneuver", "_reserve"];
 
-    // Yedek: splitFireTeams bos dondururse (4 kisiden az) 3'e bol
-    if (_fse isEqualTo [] || {_maneuver isEqualTo []}) then {
-        _fse = [];
-        _maneuver = [];
-        _reserve = [];
+    private _alpha = _reserve + _maneuver;
+    private _bravo = +_fse;
+
+    // Yedek: bir takim bos kalirsa (4 kisiden az vb.) ikiye bol
+    if (_alpha isEqualTo [] || {_bravo isEqualTo []}) then {
+        _alpha = [];
+        _bravo = [];
         {
-            private _m = _forEachIndex % 3;
-            if (_m isEqualTo 0) then {
-                _reserve pushBack _x;
+            if ((_forEachIndex % 2) isEqualTo 0) then {
+                _alpha pushBack _x;
             } else {
-                if (_m isEqualTo 1) then {
-                    _maneuver pushBack _x;
-                } else {
-                    _fse pushBack _x;
-                };
+                _bravo pushBack _x;
             };
         } forEach _tumBirimler;
     };
 
-    // FSM SUSTUR + ANIMASYON HIZLANDIR (skill SABIT kalir)
-    // FSE son cikar: o zamana kadar hedef alip ates etmeye devam eder.
-    {
-        _x disableAI "TARGET";
-        _x disableAI "AUTOTARGET";
-    } forEach (_reserve + _maneuver);
-
-    {
-        _x setBehaviour "AWARE";
-        _x allowFleeing 1;
-        _x setAnimSpeedCoef 1.15;
-    } forEach _tumBirimler;
-
     diag_log format [
-        "[GERI-CEKILME] %1 takimlar | FSE:%2 MVR:%3 RES:%4",
-        groupId _group, count _fse, count _maneuver, count _reserve
+        "[GERI-CEKILME] %1 takimlar | ALPHA:%2 BRAVO(FSE):%3",
+        groupId _group, count _alpha, count _bravo
     ];
 
-    // Takimi hedefe kadar (en fazla _azamiSure sn) 4 sn'de bir moveTo ile surer
-    private _hareket = {
-        params ["_grup", "_birimler", "_pos", "_azamiSure"];
-        private _bitis = time + _azamiSure;
+    // Genel kilitler: LAMBS FSM reaksiyonlari (dodge/cover/panik) emri bozmasin, kacma YOK
+    {
+        _x setVariable [QGVAR(forceMove), true];
+        _x allowFleeing 0;
+        _x setBehaviour "AWARE";
+        _x setAnimSpeedCoef 1.15;
+        _x forceSpeed -1;
+    } forEach _tumBirimler;
+
+    // Buddy ciftleri (2'li, en guclu + en zayif); fonksiyon yoksa takim tek grup sayilir
+    private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
+
+    // -----------------------------------------------------------------------
+    // SICRAMA — kapsama takimi ates eder, hareket eden takim 2'li CIFTLER halinde kosar
+    // -----------------------------------------------------------------------
+    private _sicra = {
+        params ["_grup", "_hareketEdenler", "_kapsama", "_wp", "_hedefASL", "_no"];
+
+        diag_log format [
+            "[GERI-CEKILME] %1 sicrama %2 | hareket:%3 kapsama:%4",
+            groupId _grup, _no, count _hareketEdenler, count _kapsama
+        ];
+
+        // 1) Kapsama: hedef alanina baski atesi (kimse bos durmaz)
+        {
+            if (alive _x && {isNull objectParent _x}) then {
+                _x enableAI "TARGET";
+                _x enableAI "AUTOTARGET";
+                _x setUnitPosWeak "MIDDLE";
+                [_x, _hedefASL] call EFUNC(main,doSuppress);
+            };
+        } forEach _kapsama;
+
+        sleep 1.5;
+
+        // 2) Hareket: 2'li BUDDY CIFTLERI — her cift ayni noktaya (ciftin icinde 3m), ciftler
+        //    waypoint etrafinda 12m'e yayilir: kimse tek basina kosmaz, yigilma da yok
+        private _varis = [];
+        private _ciftler = [_hareketEdenler] call _pairFn;
+        {
+            private _cift = _x;
+            private _ciftNokta = _wp getPos [random 12, random 360];
+            {
+                if (alive _x && {isNull objectParent _x}) then {
+                    _x disableAI "TARGET";
+                    _x disableAI "AUTOTARGET";
+                    _x disableAI "AUTOCOMBAT";
+                    _x disableAI "COVER";
+                    _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
+                    _x setUnitPosWeak "UP";
+                    private _p = _ciftNokta getPos [random 3, random 360];
+                    _varis pushBack [_x, _p];
+                    _x moveTo _p;
+                };
+            } forEach _cift;
+        } forEach _ciftler;
+
+        // 3) Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
+        private _bitis = time + 14;
         while {time < _bitis && {!isNull _grup}} do {
-            private _gelmeyen = _birimler select {
-                alive _x && {isNull objectParent _x} && {(_x distance2D _pos) > 8}
+            private _gelmeyen = _varis select {
+                alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) > 9}
             };
             if (_gelmeyen isEqualTo []) exitWith {};
-            { _x moveTo _pos; } forEach _gelmeyen;
-            sleep 4;
+            { (_x select 0) moveTo (_x select 1); } forEach _gelmeyen;
+            sleep 3;
         };
+
+        // 4) Vardilar: siperde alcal, artik ortu atesi veren takima katilirlar
+        {
+            private _b = _x select 0;
+            if (alive _b) then {
+                _b enableAI "TARGET";
+                _b enableAI "AUTOTARGET";
+                _b setUnitPosWeak "MIDDLE";
+                [_b, _hedefASL] call EFUNC(main,doSuppress);
+            };
+        } forEach _varis;
     };
 
     // SIS PERDESI (AYRI thread + fonksiyon yoksa sessizce atla: sis hatasi geri cekilmeyi durdurmasin)
@@ -212,29 +284,29 @@ if (EGVAR(main,debug_functions)) then {
         [_g, _tp, "BREAK_CONTACT"] call _sisFn;
     };
 
-    // FAZ 1 - RESERVE
-    if (EGVAR(main,debug_functions)) then {
-        diag_log format ["[GERI-CEKILME] FAZ 1: RESERVE -> ANA (%1 kisi)", count _reserve];
-    };
-    [_group, _reserve, _rallyAna, 25] call _hareket;
+    private _sira = [
+        [_alpha, _bravo, 0],
+        [_bravo, _alpha, 1],
+        [_alpha, _bravo, 2],
+        [_bravo, _alpha, 3]
+    ];
 
-    // FAZ 2 - MANEUVER
-    if (EGVAR(main,debug_functions)) then {
-        diag_log format ["[GERI-CEKILME] FAZ 2: MANEUVER -> ANA (%1 kisi)", count _maneuver];
-    };
-    [_group, _maneuver, _rallyAna, 25] call _hareket;
-
-    // FAZ 3 - FSE (en son, kosarken ates etmez)
-    if (EGVAR(main,debug_functions)) then {
-        diag_log format ["[GERI-CEKILME] FAZ 3: FSE -> ANA (%1 kisi)", count _fse];
-    };
     {
-        _x disableAI "TARGET";
-        _x disableAI "AUTOTARGET";
-    } forEach _fse;
-    [_group, _fse, _rallyAna, 30] call _hareket;
+        _x params ["_hareket", "_kapsama", "_wpIdx"];
+        if (isNull _group) exitWith {};
+        [
+            _group,
+            _hareket select {alive _x},
+            _kapsama select {alive _x},
+            _wps select _wpIdx,
+            _targetASL,
+            _wpIdx + 1
+        ] call _sicra;
+    } forEach _sira;
 
+    // -----------------------------------------------------------------------
     // TEMIZLIK
+    // -----------------------------------------------------------------------
     if (!isNull _group && {((_group getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _baslangic)}) then {
         _group setVariable [QGVAR(isRetreating), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
@@ -245,12 +317,19 @@ if (EGVAR(main,debug_functions)) then {
 
         {
             if (alive _x) then {
+                _x enableAI "PATH";
+                _x enableAI "MOVE";
                 _x enableAI "TARGET";
                 _x enableAI "AUTOTARGET";
+                _x enableAI "AUTOCOMBAT";
+                _x enableAI "COVER";
+                _x setVariable [QGVAR(forceMove), nil];
+                _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
                 _x setBehaviour "AWARE";
                 _x allowFleeing 0;
                 _x setAnimSpeedCoef 1.0;
                 _x setUnitPos "AUTO";
+                _x doWatch objNull;
                 _x doFollow (leader _x);
             };
         } forEach (units _group);

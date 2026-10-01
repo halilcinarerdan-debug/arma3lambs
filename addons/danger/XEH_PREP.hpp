@@ -27,6 +27,7 @@ PREP(tactics);
 PREP(commanderAssess);
 PREP(splitFireTeams);
 PREP(getUnitRole);
+PREP(buddyPairs);
 PREP(tacticalSmoke);
 PREP(classifyVehicle);
 PREP(armorSupport);

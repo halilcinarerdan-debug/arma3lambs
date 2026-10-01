@@ -2,7 +2,14 @@
 /*
  * Author: Cinar (ELITE fork)
  * Grup, USMC doktrinine uygun "Bounding Overwatch" manevrasi yapar.
- * 2026-10-01 FIX v2 - Overwatch agresif + hizli cycle
+ * 2026-10-01 v3 — OLUMCUL + GOZLE GORULUR
+ *   - Her cycle 3 faz: ATES (1.5 sn) -> HAREKET (varisa kadar) -> ORTAK ATES
+ *   - Hareket sprint (UP) ile; siper stance'i VARISTA (eskiden yatarak yola cikiyordu)
+ *   - ODAK ATES: tum kapsama ekibi ayni dusmana (doTarget/doFire) + alana baski
+ *   - Her 3. cycle FSE ileri sicrar, maneuver ortu verir (gercek leapfrog)
+ *   - Buddy ciftleri: 2'li (en guclu + en zayif), MG kosmaz, tek kalan ilerler
+ *   - combatMode RED (bitince geri yuklenir), lider jest + callout
+ *   - Siper yok / ileri degilse yanal acili 25m atilim (capraz ates)
 */
 
 params ["_group", "_target", ["_units", []], ["_delay", 180]];
@@ -11,11 +18,11 @@ params ["_group", "_target", ["_units", []], ["_delay", 180]];
 // Lokal bounding sabitleri (USMC doktrini)
 // ---------------------------------------------------------------------------
 private _BND_ASSAULT_RANGE   = 55;
-private _BND_CYCLE_BASE      = 5;
-private _BND_CYCLE_RAND      = 3;
+private _BND_CYCLE_BASE      = 2.5;   // ortak ates bekleme (sn)
+private _BND_CYCLE_RAND      = 1.5;
 private _BND_SUPPRESSION_MUL = 3;
-private _BND_MAX_CYCLES      = 12;
-private _BND_COVER_RANGE     = 15;
+private _BND_MAX_CYCLES      = 14;
+private _BND_COVER_RANGE     = 30;    // ileri siper arama menzili (m)
 
 // ---------------------------------------------------------------------------
 // Grup / lider dogrulama
@@ -78,6 +85,7 @@ _group setVariable [QGVAR(bndToken), _bndToken];
         if (!isNull _group && {(_group getVariable [QGVAR(bndToken), ""]) isEqualTo _token}) then {
             _group setVariable [QGVAR(bndToken), nil];
             _group enableAttack true;
+            _group setCombatMode (_group getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
             (units _group) allowGetIn true;
             _group setVariable [QGVAR(isExecutingTactic), nil];
             _group setVariable [QGVAR(isBounding), nil];
@@ -159,6 +167,9 @@ _group setFormation _formation;
 _group setVariable [QGVAR(dangerFormation), _formation];
 
 _group enableAttack false;
+// Olumculuk: serbest ates (combatMode RED); bitince orijinal geri yuklenir
+_group setVariable [QGVAR(bndOrigCombat), combatMode _group];
+_group setCombatMode "RED";
 _units allowGetIn false;
 _units doWatch _target;
 
@@ -223,33 +234,13 @@ if (EGVAR(main,debug_functions)) then {
     // Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden devam: rol=TUFEKLI, sis=yok
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _sisFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}];
+    private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
 
-    // Kosucu hareketi: ADVANCE modunda siperli ileri sicrama; siper yoksa SINIRLI (20m) atilim
-    // (eskiden siper yoksa dogrudan dusman pozisyonuna kosuyordu)
-    private _kosanHareket = {
-        params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil"];
-        if (!alive _kosan || {!isNull objectParent _kosan}) exitWith {};
+    // -----------------------------------------------------------------------
+    // YARDIMCI KODLAR
+    // -----------------------------------------------------------------------
 
-        private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 1, "ADVANCE"] call EFUNC(main,findCover);
-        private _movePos = [];
-        private _stance  = "AUTO";
-
-        if (_cover isNotEqualTo []) then {
-            _movePos = (_cover select 0) select 0;
-            _stance  = (_cover select 0) select 1;
-        } else {
-            private _kalan = ((_kosan distance2D _hedef) - _hucumMenzil) max 0;
-            _movePos = (getPosATL _kosan) getPos [(20 min _kalan), (_kosan getDir _hedef)];
-        };
-
-        _kosan setVariable [QEGVAR(main,currentTask), "BuddyRush/Move", EGVAR(main,debug_functions)];
-        _kosan setUnitPosWeak _stance;
-        _kosan moveTo _movePos;
-        _kosan doWatch _hedef;
-        _kosan forceSpeed -1;
-    };
-
-    // Bounding'i temiz bitirir (bayraklar + enableAttack/allowGetIn/doWatch geri)
+    // Bounding'i temiz bitirir (bayraklar + enableAttack/allowGetIn/doWatch/combatMode geri)
     private _bndTemizle = {
         params ["_g"];
         _g setVariable [QGVAR(bndToken), nil];
@@ -257,12 +248,77 @@ if (EGVAR(main,debug_functions)) then {
         _g setVariable [QGVAR(isExecutingTactic), nil];
         _g setVariable [QEGVAR(main,currentTactic), nil];
         _g enableAttack true;
+        _g setCombatMode (_g getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
         (units _g) allowGetIn true;
         {
             _x setVariable [QGVAR(forceMove), nil];
             _x doWatch objNull;
             _x setUnitPos "AUTO";
         } forEach (units _g);
+    };
+
+    // ODAK: grubun bildigi en yakin dusman (hepsi AYNI hedefe ates eder = yogun ates)
+    private _odakSec = {
+        params ["_g"];
+        private _l = leader _g;
+        private _e = _l findNearestEnemy _l;
+        if (isNull _e || {!alive _e} || {(_l distance2D _e) > 450}) then {objNull} else {_e}
+    };
+
+    // ATES: kapsama ekibi alana baski + ODAK dusmana nisan (bilinen dusmana doFire)
+    private _atesEt = {
+        params ["_birimler", "_hedef", "_hedefASL", "_odak", "_gorev"];
+        {
+            if (alive _x && {isNull objectParent _x}) then {
+                _x setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
+                _x doWatch _hedef;
+                [_x, _hedefASL] call EFUNC(main,doSuppress);
+                if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
+                    _x doTarget _odak;
+                    if ((_x knowsAbout _odak) > 1) then {
+                        _x doFire _odak;
+                    };
+                };
+            };
+        } forEach _birimler;
+    };
+
+    // Kosucu hareketi: ADVANCE modunda ILERI siperli sicrama; siper yoksa / ileri degilse
+    // yanal acili 25m atilim (capraz ates + dagilma). Siper stance'i VARISTA uygulanir
+    // (eskiden yatarak/cokerek yola cikiyordu -> yavas ve gorunmez).
+    // Doner: [birim, hedefPos, varisStance] veya []
+    private _kosanHareket = {
+        params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil", "_gorev"];
+        if (!alive _kosan || {!isNull objectParent _kosan}) exitWith {[]};
+
+        private _mesafe = _kosan distance2D _hedef;
+        private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 1, "ADVANCE"] call EFUNC(main,findCover);
+        private _movePos = [];
+        private _stance = "MIDDLE";
+
+        if (_cover isNotEqualTo []) then {
+            private _cp = (_cover select 0) select 0;
+            // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin)
+            if ((_mesafe - (_cp distance2D _hedef)) >= 6) then {
+                _movePos = _cp;
+                _stance = (_cover select 0) select 1;
+            };
+        };
+
+        if (_movePos isEqualTo []) then {
+            private _kayma = [-25, 25] select ((((units (group _kosan)) find _kosan) max 0) % 2);
+            private _kalan = (_mesafe - _hucumMenzil) max 0;
+            _movePos = (getPosATL _kosan) getPos [(25 min _kalan), ((_kosan getDir _hedef) + _kayma)];
+            _stance = "MIDDLE";
+        };
+
+        _kosan setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
+        _kosan setUnitPosWeak "UP";
+        _kosan moveTo _movePos;
+        _kosan doWatch _hedef;
+        _kosan forceSpeed -1;
+
+        [_kosan, _movePos, _stance]
     };
 
     // Taktik sis: dusmana dogru, hareket eden birligin onune (tacticalSmoke cooldown'u var)
@@ -280,6 +336,11 @@ if (EGVAR(main,debug_functions)) then {
         };
     };
 
+    // =======================================================================
+    // ANA DONGU — her cycle: ATES (1.5 sn) -> HAREKET (varisa kadar) -> ORTAK ATES
+    //   normal cycle : maneuver BUDDY RUSH (ciftlerde kosan), FSE + reserve + destekler ates eder
+    //   her 3. cycle : FSE (+reserve) ILERI sicrar, maneuver ortu atesi verir  (takim leapfrog)
+    // =======================================================================
     while {
         !isNull _group
         && {(_group getVariable [QGVAR(isBounding), false])}
@@ -296,8 +357,6 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
-        // (fnc_tactics bounding sirasinda komutani cagirmadigi icin eskiden
-        //  agir kayipta bile cekilme hic tetiklenmiyordu)
         private _komutanKarar = [_group, _target] call FUNC(commanderAssess);
         if (_komutanKarar in ["WITHDRAW", "PEEL"]) exitWith {
             [_group] call _bndTemizle;
@@ -309,12 +368,9 @@ if (EGVAR(main,debug_functions)) then {
         private _mevcutFormation = formation _group;
         if (_mevcutFormation isNotEqualTo _bndFormation) then {
             _group setFormation _bndFormation;
-            if (EGVAR(main,debug_functions)) then {
-                ["[FORMASYON-KORU] %1 | zorla:%2 | onceki:%3", _group, _bndFormation, _mevcutFormation] call EFUNC(main,debugLog);
-            };
         };
 
-        // ARAC DEGERLENDIRME
+        // FORMASYON GUNCELLEME (arazi degisti mi)
         private _sonPos = _group getVariable [QGVAR(bndSonPos), [0,0,0]];
         private _simdiPos = getPosATL (leader _group);
         private _uzaklik = _sonPos distance2D _simdiPos;
@@ -325,10 +381,6 @@ if (EGVAR(main,debug_functions)) then {
             if (_yeniFormasyon isNotEqualTo _bndFormation) then {
                 _group setVariable [QGVAR(dangerFormation), _yeniFormasyon];
                 _group setFormation _yeniFormasyon;
-                if (EGVAR(main,debug_functions)) then {
-                    ["[FORMASYON-GUNCELLE] %1 | eski:%2 | yeni:%3 | hareket:%4m",
-                        _group, _bndFormation, _yeniFormasyon, round _uzaklik] call EFUNC(main,debugLog);
-                };
             };
         };
 
@@ -344,19 +396,50 @@ if (EGVAR(main,debug_functions)) then {
             _maneuver pushBack (_reserve deleteAt 0);
         };
 
-        private _suppressors = _fse;
-        private _bounders    = _maneuver;
-        private _bekleyenler = _reserve;
+        private _odak = [_group] call _odakSec;
 
         // -------------------------------------------------------------------
-        // SUPPRESS kanadi — AGRESIF OVERWATCH
+        // HANGI EKIP HAREKET EDIYOR?
         // -------------------------------------------------------------------
-        {
-            if (alive _x && {isNull objectParent _x}) then {
-                _x setVariable [QEGVAR(main,currentTask), "Bound/Suppress", EGVAR(main,debug_functions)];
+        private _fseSicrama = ((_cycleCount % 3) isEqualTo 0) && {(count _maneuver) >= 2} && {(count _fse) > 0};
+        private _hareketEdecek = [];
+        private _kapsama = [];
 
-                // MG / nisanci: gorusu olan KORUNAKLI atis pozisyonu (cycle 1, 5, 9...)
-                if ((_cycleCount % 4) isEqualTo 1 && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
+        if (_fseSicrama) then {
+            // FSE (+reserve) ileri sicrar; maneuver ortu atesi verir
+            _hareketEdecek = _fse + _reserve;
+            _kapsama = +_maneuver;
+        } else {
+            // BUDDY RUSH: maneuver 2'li cift (en guclu + en zayif), ciftlerde bir kosar, biri ortu verir
+            private _ciftler = [_maneuver] call _pairFn;
+
+            private _kosanlar = [];
+            private _destekTum = [];
+            {
+                private _cift = _x;
+                if ((count _cift) isEqualTo 1) then {
+                    // tek kalan bounder FSE ates ederken ilerler
+                    _kosanlar pushBack (_cift select 0);
+                } else {
+                    // MG kosmaz; sadece MG'lerden olusan ciftte hepsi aday
+                    private _adaylar = _cift select {([_x] call _rolFn) isNotEqualTo "MG"};
+                    if (_adaylar isEqualTo []) then { _adaylar = +_cift; };
+                    private _kosan = _adaylar select (_cycleCount % (count _adaylar));
+                    _kosanlar pushBack _kosan;
+                    _destekTum append (_cift - [_kosan]);
+                };
+            } forEach _ciftler;
+
+            _hareketEdecek = _kosanlar;
+            _kapsama = _fse + _reserve + _destekTum;
+        };
+
+        // -------------------------------------------------------------------
+        // 1) ATES FAZI — kapsama ekibi ates acar, MG/nisanci korunakli atis pozisyonuna
+        // -------------------------------------------------------------------
+        if ((_cycleCount % 4) isEqualTo 1) then {
+            {
+                if (alive _x && {isNull objectParent _x} && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
                     if (_ow isNotEqualTo []) then {
                         private _owPos = (_ow select 0) select 0;
@@ -366,164 +449,77 @@ if (EGVAR(main,debug_functions)) then {
                         _x setUnitPosWeak ((_ow select 0) select 1);
                     };
                 };
-                _x doWatch _target;
-                [_x, _targetASL] call EFUNC(main,doSuppress);
+            } forEach _kapsama;
+        };
 
-                // EK: dusmani bul ve kilitle
-                private _dusman = _x findNearestEnemy _x;
-                if (!isNull _dusman && {_x distance2D _dusman < 400}) then {
-                    _x doTarget _dusman;
-                };
-            };
-        } forEach _suppressors;
+        [_kapsama, _target, _targetASL, _odak, if (_fseSicrama) then {"Bound/Cover(Maneuver)"} else {"Bound/Suppress"}] call _atesEt;
+        sleep 1.5;
 
         // -------------------------------------------------------------------
-        // BOUND kanadi — BUDDY RUSH
+        // 2) HAREKET FAZI — kosanlar siperli ileri sicrama
         // -------------------------------------------------------------------
-        if (_bounders isNotEqualTo []) then {
+        private _hareketler = [];
+        {
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"BuddyRush/Move"}] call _kosanHareket;
+            if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
+        } forEach _hareketEdecek;
 
-            private _oncelikHesapla = {
-                params ["_birim"];
-                private _skor = 0;
-
-                // MG artik kapasiteyle tespit edilir (eski CfgWeapons>>type kontrolu hic eslesmiyordu)
-                _skor = _skor + (switch ([_birim] call _rolFn) do {
-                    case "MG":       {100};
-                    case "AT":       {80};
-                    case "MARKSMAN": {70};
-                    case "MEDIC":    {50};
-                    default          {0};
-                });
-
-                if (_birim isEqualTo (leader (group _birim))) then { _skor = _skor + 60; };
-                if (_birim isEqualTo (leader _group)) then { _skor = _skor + 40; };
-
-                _skor
+        // Gozle gorulur: lider jest + callout (30 sn'de bir)
+        if (_hareketler isNotEqualTo []) then {
+            [leader _group, ["gestureGo"]] call EFUNC(main,doGesture);
+            private _sonCycleCallout = _group getVariable [QGVAR(bndSonCycleCallout), 0];
+            if ((time - _sonCycleCallout) > 30) then {
+                [leader _group, "combat", "Advance", 125] call EFUNC(main,doCallout);
+                _group setVariable [QGVAR(bndSonCycleCallout), time];
             };
 
-            private _sirali = [];
-            private _gecici = +_bounders;
-            while {_gecici isNotEqualTo []} do {
-                private _enIyiIdx = 0;
-                private _enIyiSkor = -1;
-                {
-                    private _s = [_x] call _oncelikHesapla;
-                    if (_s > _enIyiSkor) then {
-                        _enIyiSkor = _s;
-                        _enIyiIdx = _forEachIndex;
-                    };
-                } forEach _gecici;
-                _sirali pushBack (_gecici select _enIyiIdx);
-                _gecici deleteAt _enIyiIdx;
+            if (EGVAR(main,debug_functions)) then {
+                diag_log format [
+                    "[BUDDY-RUSH] %1 | cycle:%2 | %3 | hareket:%4 kapsama:%5 | odak:%6",
+                    groupId _group, _cycleCount, ["buddy", "FSE-sicrama"] select _fseSicrama,
+                    count _hareketler, count _kapsama,
+                    if (isNull _odak) then {"yok"} else {name _odak}
+                ];
             };
-
-            // BUDDY ESLESTIRME (2026-10-01): en guclu + en zayif (agir silah + tufekli).
-            // Eskiden ardisik siralama MG+AT ve tufekli+tufekli ciftleri uretiyordu.
-            private _ciftler = [];
-            private _n = count _sirali;
-            for "_p" from 0 to ((floor (_n / 2)) - 1) do {
-                _ciftler pushBack [_sirali select _p, _sirali select (_n - 1 - _p)];
-            };
-            if ((_n % 2) isEqualTo 1) then {
-                private _orta = _sirali select (floor (_n / 2));
-                if (_ciftler isNotEqualTo []) then {
-                    (_ciftler select ((count _ciftler) - 1)) pushBack _orta;
-                } else {
-                    _ciftler pushBack [_orta];
-                };
-            };
-
-            {
-                private _cift = _x;
-                private _ciftIdx = _forEachIndex;
-                private _ciftBoyut = count _cift;
-
-                if (_ciftBoyut isEqualTo 1) then {
-                    // Tek kalan bounder FSE suppress ederken ilerler (eskiden hic ilerlemiyordu)
-                    private _tek = _cift select 0;
-                    [_tek, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE] call _kosanHareket;
-
-                    if (EGVAR(main,debug_functions)) then {
-                        diag_log format [
-                            "[BUDDY-RUSH] %1 | cycle:%2 | cift:%3 | tek:%4 | kosuyor",
-                            groupId _group, _cycleCount, _ciftIdx, name _tek
-                        ];
-                    };
-                } else {
-                    private _siraliCift = [];
-                    private _geciciCift = +_cift;
-                    while {_geciciCift isNotEqualTo []} do {
-                        private _enKotuIdx = 0;
-                        private _enKotuSkor = 99999;
-                        {
-                            private _s = [_x] call _oncelikHesapla;
-                            if (_s < _enKotuSkor) then {
-                                _enKotuSkor = _s;
-                                _enKotuIdx = _forEachIndex;
-                            };
-                        } forEach _geciciCift;
-                        _siraliCift pushBack (_geciciCift select _enKotuIdx);
-                        _geciciCift deleteAt _enKotuIdx;
-                    };
-
-                    // MG kosmaz (atis ussu); sadece MG'lerden olusan ciftte hepsi aday
-                    private _kosanAdaylari = _siraliCift select {([_x] call _rolFn) isNotEqualTo "MG"};
-                    if (_kosanAdaylari isEqualTo []) then {
-                        _kosanAdaylari = +_siraliCift;
-                    };
-                    private _kosan = _kosanAdaylari select (_cycleCount % (count _kosanAdaylari));
-                    private _destekler = _siraliCift - [_kosan];
-
-                    // KOSAN — moveTo ile guclu hareket
-                    [_kosan, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE] call _kosanHareket;
-
-                    // DESTEKLER
-                    {
-                        if (alive _x && {isNull objectParent _x}) then {
-                            _x setVariable [QEGVAR(main,currentTask), "BuddyRush/Overwatch", EGVAR(main,debug_functions)];
-                            _x doWatch _target;
-                            [_x, _targetASL] call EFUNC(main,doSuppress);
-
-                            private _dusman = _x findNearestEnemy _x;
-                            if (!isNull _dusman && {_x distance2D _dusman < 400}) then {
-                                _x doTarget _dusman;
-                            };
-                        };
-                    } forEach _destekler;
-
-                    if (EGVAR(main,debug_functions)) then {
-                        diag_log format [
-                            "[BUDDY-RUSH] %1 | cycle:%2 | cift:%3 | boyut:%4 | kosan:%5 | destek:%6",
-                            groupId _group, _cycleCount, _ciftIdx, _ciftBoyut,
-                            if (isNull _kosan) then {"yok"} else {name _kosan},
-                            count _destekler
-                        ];
-                    };
-                };
-            } forEach _ciftler;
         };
 
         // Araclar
         { _x doMove _target; } forEach _vehicles;
 
-        // Adaptif zamanlama
-        private _maxSuppression = 0;
-        {
-            private _sup = getSuppression _x;
-            if (_sup > _maxSuppression) then {_maxSuppression = _sup;};
-        } forEach _bounders;
+        // Varisa kadar bekle (9 sn + baski kadar ek), varan askere siper stance'i
+        private _maxSupp = 0;
+        { _maxSupp = _maxSupp max (getSuppression _x); } forEach (_hareketEdecek select {alive _x});
+        private _bekleBitis = time + 9 + (_maxSupp * 4);
+        private _inen = [];
 
-        private _sleepTime = _BND_CYCLE_BASE
-                           + random _BND_CYCLE_RAND
-                           + (_maxSuppression * _BND_SUPPRESSION_MUL);
-
-        sleep _sleepTime;
-
-        private _sonCycleCallout = _group getVariable [QGVAR(bndSonCycleCallout), 0];
-        if ((time - _sonCycleCallout > 90) && RND(0.5)) then {
-            [leader _group, "combat", "Advance", 125] call EFUNC(main,doCallout);
-            _group setVariable [QGVAR(bndSonCycleCallout), time];
+        waitUntil {
+            sleep 0.5;
+            {
+                _x params ["_b", "_p", "_s"];
+                if (alive _b && {!(_b in _inen)} && {(_b distance2D _p) < 4}) then {
+                    _inen pushBack _b;
+                    _b setUnitPosWeak _s;
+                };
+            } forEach _hareketler;
+            isNull _group
+            || {!(_group getVariable [QGVAR(isBounding), false])}
+            || {time > _bekleBitis}
+            || {(_hareketler findIf {alive (_x select 0) && {!((_x select 0) in _inen)}}) isEqualTo -1}
         };
+
+        // Varamayanlar da siper stance'ine gecsin
+        {
+            _x params ["_b", "_p", "_s"];
+            if (alive _b) then { _b setUnitPosWeak _s; };
+        } forEach _hareketler;
+
+        // -------------------------------------------------------------------
+        // 3) ORTAK ATES — kosanlar siperde, herkes baski + odak ates
+        // -------------------------------------------------------------------
+        private _odak2 = [_group] call _odakSec;
+        [(_hareketEdecek + _kapsama) select {alive _x}, _target, _targetASL, _odak2, "Bound/Fire"] call _atesEt;
+
+        sleep (_BND_CYCLE_BASE + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL));
     };
 
     // Dongu bitti — token eslesiyorsa bu bounding hala bizim (Retreat devralmadi)

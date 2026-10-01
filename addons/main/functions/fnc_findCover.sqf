@@ -8,7 +8,7 @@
  *   + yan acilardan (+-25 derece) de gizli olma (+8 / acilar) -> ikinci dusman / manevra
  *   + arazi (tepe/cukur) gizlemesi dahil (terrainIntersectASL)
  *   - uzaklik (0.5 / m)
- *   - dusmana yaklasma (DEFEND/OVERWATCH: -0.8 / m;  ADVANCE: yaklasma BONUS +0.5 / m)
+ *   - dusmana yaklasma (DEFEND/OVERWATCH: -0.8 / m;  ADVANCE: yaklasma BONUS +0.9 / m)
  *   - yumusak obje (calı / kucuk agac: mermi durdurmaz) -10
  *   - baska askerin 8 sn icinde rezerve ettigi nokta -20
  *   - 2.2m icinde dost kalabaligi -8 / kisi
@@ -174,7 +174,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                     // Dusmana yaklasma: ADVANCE bonus, digerleri ceza
                     private _yaklasma = _unitEnemyDist - _enemyDist;
                     if (_mode isEqualTo "ADVANCE") then {
-                        _skor = _skor + (((_yaklasma min 25) max -25) * 0.5);
+                        _skor = _skor + (((_yaklasma min 30) max -30) * 0.9);
                     } else {
                         if (_yaklasma > 0) then {
                             _skor = _skor - (_yaklasma * 0.8);
