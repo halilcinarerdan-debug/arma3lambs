@@ -21,7 +21,7 @@
  * Return Value:
  * Decision string <STRING>:
  *   "WITHDRAW" | "HOLD" | "DELAY" | "SUPPRESS_ASSAULT"
- *   | "FLANK" | "ASSAULT" | "BOUNDING" | "PEEL"
+ *   | "FLANK" | "ASSAULT" | "BOUNDING" | "PEEL" | "EVADE_ARMOR"
  *
  * Debug HUD legend (systemChat):
  *   [CMD] <leader> [<own>v<enemy> P:<oran>] Cnt:Fir:Cas:Amm:Pos:Sup | THR:<score> | <decision> (<reason>)
@@ -288,6 +288,14 @@ private _enemyInBuilding = false;
 private _result = call {
 
     // =======================================================================
+    // 0) ZIRH + AT YOK -> KACIS (en yuksek oncelik): AT'siz piyade tank/APC'ye karsi
+    //    acikta savasmaz; SERT siper + gorus hatti kirma (tacticsEvadeArmor)
+    // =======================================================================
+    if (_armorCount > 0 && {_ownAT <= 0}) exitWith {
+        ["EVADE_ARMOR", format ["zirh %1m, AT yok - sert siperden kac", round _armorDist]]
+    };
+
+    // =======================================================================
     // 1) CEPHANE — doktrin: mermisi olmayan asker cekilir
     // =======================================================================
     if (_ammoOran <= 0.1) exitWith {
@@ -310,12 +318,6 @@ private _result = call {
     // =======================================================================
     // 3) ZIRH TEHDIDI
     // =======================================================================
-    if (_armorCount > 0 && {_ownAT <= 0} && {_armorDist < 150}) exitWith {
-        ["WITHDRAW", format ["zirh %1m, AT yok", round _armorDist]]
-    };
-    if (_armorCount > 0 && {_ownAT <= 0}) exitWith {
-        ["DELAY", format ["zirh %1m, AT yok - temas kes", round _armorDist]]
-    };
     if (_armorCount > 0 && {_armorDist > 70}) exitWith {
         ["FLANK", format ["zirh %1m, AT ile kanat", round _armorDist]]
     };

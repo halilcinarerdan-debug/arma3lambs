@@ -94,6 +94,10 @@ if (
             // (Peel dosyasi korunuyor, ileride geri acilabilir)
             [_group, _target] call FUNC(tacticsRetreat);
         };
+        case "EVADE_ARMOR": {
+            // AT'siz grup zirhtan sert siperlere kacar (fonksiyon kayitli degilse Retreat)
+            [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsEvadeArmor", FUNC(tacticsRetreat)]);
+        };
         case "HOLD": {
             _group setVariable [QGVAR(isExecutingTactic), true];
             [_group, _target] call FUNC(tacticsHold);

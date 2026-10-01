@@ -265,18 +265,62 @@ if (EGVAR(main,debug_functions)) then {
         if (isNull _e || {!alive _e} || {(_l distance2D _e) > 450}) then {objNull} else {_e}
     };
 
-    // ATES: kapsama ekibi alana baski + ODAK dusmana nisan (bilinen dusmana doFire)
+    // ATES (OLUMCUL OVERWATCH): kapsama ekibi
+    //   - SEKTOR YELPAZESI: her asker hedefin -12 / 0 / +12 derece sapmasina baski atar
+    //     (eskiden hepsi ayni noktayi doviyordu -> cephe taranmiyordu)
+    //   - ODAK: bilinen en yakin dusmana doTarget; MG icin doFire esigi dusuk (surekli ates)
+    //   - AT: 40-450m bilinen ZIRHA roket (selectWeapon launcher + doTarget + doFire)
     private _atesEt = {
         params ["_birimler", "_hedef", "_hedefASL", "_odak", "_gorev"];
+
+        private _l = leader _group;
+        private _mySide = side _l;
+        private _zirhlar = (_l nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
+            alive _x
+            && {(_mySide getFriend (side _x)) < 0.6}
+            && {!((side _x) == civilian)}
+        };
+        private _zirh = objNull;
+        if (_zirhlar isNotEqualTo []) then {
+            _zirh = ([_zirhlar, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+        };
+
         {
             if (alive _x && {isNull objectParent _x}) then {
+                private _rol = [_x] call _rolFn;
+
+                // Sektor: -12 / 0 / +12 derece
+                private _ofs = [-12, 0, 12] select (_forEachIndex % 3);
+                private _mes = (_x distance2D _hedef) max 20;
+                private _sekPos = (getPosATL _x) getPos [_mes, ((_x getDir _hedef) + _ofs)];
+                _sekPos set [2, 0.5];
+
                 _x setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
-                _x doWatch _hedef;
-                [_x, _hedefASL] call EFUNC(main,doSuppress);
-                if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
-                    _x doTarget _odak;
-                    if ((_x knowsAbout _odak) > 1) then {
-                        _x doFire _odak;
+                _x doWatch _sekPos;
+                [_x, AGLToASL _sekPos] call EFUNC(main,doSuppress);
+
+                // AT: zirha roket
+                private _atAtti = false;
+                if (_rol isEqualTo "AT" && {!isNull _zirh}) then {
+                    private _d = _x distance2D _zirh;
+                    if (_d > 40 && {_d < 450} && {(_x knowsAbout _zirh) > 0.5}) then {
+                        _x selectWeapon (secondaryWeapon _x);
+                        _x doTarget _zirh;
+                        _x doFire _zirh;
+                        _atAtti = true;
+                    };
+                };
+
+                if (!_atAtti) then {
+                    // AT piyadeye ates ederken ana silaha don
+                    if (_rol isEqualTo "AT" && {(currentWeapon _x) isEqualTo (secondaryWeapon _x)}) then {
+                        _x selectWeapon (primaryWeapon _x);
+                    };
+                    if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
+                        _x doTarget _odak;
+                        if ((_x knowsAbout _odak) > ([1, 0.5] select (_rol isEqualTo "MG"))) then {
+                            _x doFire _odak;
+                        };
                     };
                 };
             };
@@ -358,9 +402,14 @@ if (EGVAR(main,debug_functions)) then {
 
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
         private _komutanKarar = [_group, _target] call FUNC(commanderAssess);
-        if (_komutanKarar in ["WITHDRAW", "PEEL"]) exitWith {
+        if (_komutanKarar in ["WITHDRAW", "PEEL", "EVADE_ARMOR"]) exitWith {
             [_group] call _bndTemizle;
-            [_group, _target] call FUNC(tacticsRetreat);
+            if (_komutanKarar isEqualTo "EVADE_ARMOR") then {
+                // AT'siz grup zirhtan kacar (fonksiyon kayitli degilse Retreat)
+                [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsEvadeArmor", FUNC(tacticsRetreat)]);
+            } else {
+                [_group, _target] call FUNC(tacticsRetreat);
+            };
         };
 
         // FORMASYON KORUMA
@@ -435,25 +484,85 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         // -------------------------------------------------------------------
-        // 1) ATES FAZI — kapsama ekibi ates acar, MG/nisanci korunakli atis pozisyonuna
+        // 0) ATES USSU KURULUMU (OVERWATCH)
+        //    cycle 1: FSE'NIN TAMAMI korunakli + gorusu olan atis pozisyonuna (findCover OVERWATCH),
+        //             varana kadar BEKLENIR; maneuver ancak ates ussu kurulunca kalkar
+        //    cycle 5, 9..: MG / nisanci pozisyonu tazelenir (beklemeden)
         // -------------------------------------------------------------------
-        if ((_cycleCount % 4) isEqualTo 1) then {
+        if (_cycleCount isEqualTo 1) then {
+            private _kurulum = [];
             {
-                if (alive _x && {isNull objectParent _x} && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
+                if (alive _x && {isNull objectParent _x}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
                     if (_ow isNotEqualTo []) then {
                         private _owPos = (_ow select 0) select 0;
+                        private _owStance = (_ow select 0) select 1;
                         if ((_x distance2D _owPos) > 4) then {
+                            _x setUnitPosWeak "UP";
                             _x moveTo _owPos;
+                            _kurulum pushBack [_x, _owPos, _owStance];
+                        } else {
+                            _x setUnitPosWeak _owStance;
                         };
-                        _x setUnitPosWeak ((_ow select 0) select 1);
                     };
                 };
-            } forEach _kapsama;
+            } forEach _fse;
+
+            private _kurBitis = time + 8;
+            waitUntil {
+                sleep 0.5;
+                {
+                    _x params ["_b", "_p", "_s"];
+                    if (alive _b && {(_b distance2D _p) < 4}) then { _b setUnitPosWeak _s; };
+                } forEach _kurulum;
+                isNull _group
+                || {!(_group getVariable [QGVAR(isBounding), false])}
+                || {time > _kurBitis}
+                || {(_kurulum findIf {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) >= 4}}) isEqualTo -1}
+            };
+            {
+                _x params ["_b", "_p", "_s"];
+                if (alive _b) then { _b setUnitPosWeak _s; };
+            } forEach _kurulum;
+
+            if (_kurulum isNotEqualTo []) then {
+                diag_log format ["[OVERWATCH] %1 | ates ussu kuruldu: %2 asker", groupId _group, count _kurulum];
+            };
+        } else {
+            if ((_cycleCount % 4) isEqualTo 1) then {
+                {
+                    if (alive _x && {isNull objectParent _x} && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
+                        private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                        if (_ow isNotEqualTo []) then {
+                            private _owPos = (_ow select 0) select 0;
+                            if ((_x distance2D _owPos) > 4) then {
+                                _x moveTo _owPos;
+                            };
+                            _x setUnitPosWeak ((_ow select 0) select 1);
+                        };
+                    };
+                } forEach _kapsama;
+            };
         };
 
+        // -------------------------------------------------------------------
+        // 1) ATES FAZI — kapsama ekibi ates acar; ATES USTUNLUGU KAPISI:
+        //    kosucular odak dusman BASTIRILDIKTAN sonra (baski >= 0.25) kalkar; en fazla 5 sn,
+        //    odak yoksa / oldu ise 1.5 sn. Dusman ates ediyorken koşulmaz.
+        // -------------------------------------------------------------------
+        private _atesBasi = time;
         [_kapsama, _target, _targetASL, _odak, if (_fseSicrama) then {"Bound/Cover(Maneuver)"} else {"Bound/Suppress"}] call _atesEt;
-        sleep 1.5;
+
+        waitUntil {
+            sleep 0.5;
+            isNull _group
+            || {!(_group getVariable [QGVAR(isBounding), false])}
+            || {(time - _atesBasi) >= 5}
+            || {
+                ((time - _atesBasi) >= 1.5)
+                && {isNull _odak || {!alive _odak} || {(getSuppression _odak) >= 0.25}}
+            }
+        };
 
         // -------------------------------------------------------------------
         // 2) HAREKET FAZI — kosanlar siperli ileri sicrama

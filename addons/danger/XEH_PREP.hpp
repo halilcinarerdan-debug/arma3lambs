@@ -33,6 +33,7 @@ PREP(classifyVehicle);
 PREP(armorSupport);
 PREP(tacticsRetreat);
 PREP(tacticsPeel);
+PREP(tacticsEvadeArmor);
 PREP(orphanWatchdog);
 PREP(tacticsAssault);
 PREP(tacticsBounding);
