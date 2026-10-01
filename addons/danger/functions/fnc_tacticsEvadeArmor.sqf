@@ -41,6 +41,8 @@ if (isNull _unit) exitWith {false};
 
 if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
+if (_group getVariable [QGVAR(isATEngage), false]) exitWith {false};
+if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // COOLDOWN — 30 sn dolmadiysa kacma, saklandigin yerde tut
@@ -48,12 +50,7 @@ if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 if ((time - (_group getVariable [QGVAR(evadeEndTime), -999])) < 30) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
     [_group, 20] call FUNC(tacticsHold);
-    [{
-        params ["_g"];
-        if (!isNull _g) then {
-            _g setVariable [QGVAR(isExecutingTactic), nil];
-        };
-    }, [_group], 20] call CBA_fnc_waitAndExecute;
+    // (kilit + enableAttack geri verme tacticsHold'un kendi 20 sn callback'inde)
     false
 };
 
@@ -65,7 +62,11 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 700]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {!((side _x) == civilian)}
+    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
 };
+
+// Zirh yoksa ve verilen hedef zirh degilse kacilmaz (piyadeden kacip ates kesmek YANLIS)
+if (_armor isEqualTo [] && {!(_target isEqualType objNull && {(_target isKindOf "Tank") || {_target isKindOf "Wheeled_APC_F"}})}) exitWith {false};
 
 private _tehdit = _target;
 if (_armor isNotEqualTo []) then {
@@ -75,8 +76,10 @@ if (_armor isNotEqualTo []) then {
 
 private _tehditPos = _tehdit call CBA_fnc_getPos;
 if ((_tehditPos select 2) > 6) then { _tehditPos set [2, 0.5]; };
+if (_tehditPos isEqualTo [0, 0, 0]) exitWith {false};
 
 private _baslangic = time;
+_group setVariable [QGVAR(evadeOrigCombat), combatMode _group];
 _group setVariable [QGVAR(isEvading), true];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(evadeStartTime), _baslangic];
@@ -94,6 +97,7 @@ _group setVariable [QGVAR(evadeStartTime), _baslangic];
             _g setVariable [QGVAR(evadeEndTime), time];
             _g setSpeedMode "NORMAL";
             _g enableAttack true;
+            _g setCombatMode (_g getVariable [QGVAR(evadeOrigCombat), "YELLOW"]);
             {
                 if (alive _x) then {
                     _x enableAI "PATH";
@@ -125,7 +129,7 @@ diag_log format [
 [_group, _tehdit, _tehditPos, _baslangic] spawn {
     params ["_group", "_tehdit", "_tehditPos", "_baslangic"];
 
-    private _origCombat = combatMode _group;
+    private _origCombat = _group getVariable [QGVAR(evadeOrigCombat), combatMode _group];
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
 
     // Eski kilitleri temizle
@@ -191,7 +195,8 @@ diag_log format [
 
             {
                 if (alive _x && {isNull objectParent _x}) then {
-                    private _p = _hedef getPos [random 5, random 360];
+                    // Onculer tam siper noktasina; es biraz yaninda (siper arkasindan disari dagilmasin)
+                    private _p = if (_x isEqualTo _oncu && {_cover isNotEqualTo []}) then {_hedef} else {_hedef getPos [1 + (random 1.5), random 360]};
                     _varis pushBack [_x, _p];
                     _x setVariable [QEGVAR(main,currentTask), "EvadeArmor/Move", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
@@ -217,6 +222,8 @@ diag_log format [
         private _b = _x select 0;
         if (alive _b) then {
             _b setVariable [QGVAR(forceMove), nil];
+            _b enableAI "TARGET";
+            _b enableAI "AUTOTARGET";
             _b enableAI "AUTOCOMBAT";
             _b enableAI "COVER";
             _b setUnitPosWeak "DOWN";

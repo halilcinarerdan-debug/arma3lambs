@@ -46,15 +46,7 @@ if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 12) exitWith {false};
 private _w = primaryWeapon _unit;
 if (_w isEqualTo "") exitWith {false};
 
-private _onbellek = _unit getVariable [QGVAR(glCache), ["", ""]];
-private _gl = "";
-if ((_onbellek select 0) isEqualTo _w) then {
-    _gl = _onbellek select 1;
-} else {
-    private _m = (getArray (configFile >> "CfgWeapons" >> _w >> "muzzles")) select {_x isNotEqualTo "this"};
-    if (_m isNotEqualTo []) then { _gl = _m select 0; };
-    _unit setVariable [QGVAR(glCache), [_w, _gl]];
-};
+private _gl = [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}]);
 if (_gl isEqualTo "") exitWith {false};
 if ((_unit ammo _gl) <= 0) exitWith {false};
 
@@ -63,6 +55,9 @@ if ((_unit ammo _gl) <= 0) exitWith {false};
 // ---------------------------------------------------------------------------
 private _d = _unit distance2D _target;
 if (_d < 40 || {_d > 320}) exitWith {false};
+
+// Dost atesi: hedefin 12 m cevresinde dost varsa atma (escort / ilerleyen birlik)
+if (((_target nearEntities ["CAManBase", 12]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // UYGUN MU: hat kapali / binada / kume / %50
@@ -108,7 +103,10 @@ _unit selectWeapon _gl;
     };
     [{
         params ["_u2"];
-        if (alive _u2) then { _u2 selectWeapon (primaryWeapon _u2); };
+        if (alive _u2) then {
+            _u2 selectWeapon (primaryWeapon _u2);
+            _u2 doWatch objNull;
+        };
     }, [_u], 2] call CBA_fnc_waitAndExecute;
 }, [_unit, _target, _gl], 1.5] call CBA_fnc_waitAndExecute;
 

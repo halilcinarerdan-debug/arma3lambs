@@ -26,8 +26,14 @@ private _onbellek = _unit getVariable [QGVAR(glCache), ["", ""]];
 if ((_onbellek select 0) isEqualTo _w) exitWith {_onbellek select 1};
 
 private _gl = "";
+// GL muzzle = magazinleri bombali (GrenadeBase) olan ilk ek muzzle (ek muzzle'in her zaman GL olduguna guvenme)
 private _m = (getArray (configFile >> "CfgWeapons" >> _w >> "muzzles")) select {_x isNotEqualTo "this"};
-if (_m isNotEqualTo []) then { _gl = _m select 0; };
+{
+    private _mz = _x;
+    if (((getArray (configFile >> "CfgWeapons" >> _w >> _mz >> "magazines")) findIf {
+        (getText (configFile >> "CfgMagazines" >> _x >> "ammo")) isKindOf ["GrenadeBase", configFile >> "CfgAmmo"]
+    }) > -1) exitWith { _gl = _mz; };
+} forEach _m;
 _unit setVariable [QGVAR(glCache), [_w, _gl]];
 
 _gl

@@ -36,9 +36,12 @@ private _unit = leader _group;
 if (isNull _unit) exitWith {false};
 
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
+if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
+if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
 
 private _targetPos = _target call CBA_fnc_getPos;
 if ((_targetPos select 2) > 6) then { _targetPos set [2, 0.5]; };
+if (_targetPos isEqualTo [0, 0, 0]) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // COOLDOWN — cekilme biteli 45 sn dolmadiysa tekrar kacma, pozisyon tut
@@ -47,12 +50,7 @@ private _sonBitis = _group getVariable [QGVAR(retreatEndTime), -999];
 if ((time - _sonBitis) < 45) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
     [_group, 20] call FUNC(tacticsHold);
-    [{
-        params ["_g"];
-        if (!isNull _g) then {
-            _g setVariable [QGVAR(isExecutingTactic), nil];
-        };
-    }, [_group], 20] call CBA_fnc_waitAndExecute;
+    // (kilit + enableAttack geri verme tacticsHold'un kendi 20 sn callback'inde)
     false
 };
 
@@ -70,12 +68,7 @@ private _cqbUrban = (count _cqbBinalar) >= 3;
 if (_cqbMesafe < 40 && _cqbUrban) exitWith {
     _group setVariable [QGVAR(isExecutingTactic), true];
     [_group, 20] call FUNC(tacticsHold);
-    [{
-        params ["_g"];
-        if (!isNull _g) then {
-            _g setVariable [QGVAR(isExecutingTactic), nil];
-        };
-    }, [_group], 20] call CBA_fnc_waitAndExecute;
+    // (kilit + enableAttack geri verme tacticsHold'un kendi 20 sn callback'inde)
     false
 };
 
@@ -239,6 +232,7 @@ if (EGVAR(main,debug_functions)) then {
         {
             private _cift = _x;
             private _ciftNokta = _wp getPos [random 12, random 360];
+            if (surfaceIsWater _ciftNokta) then { _ciftNokta = _wp; };
             {
                 if (alive _x && {isNull objectParent _x}) then {
                     _x disableAI "TARGET";
@@ -249,6 +243,7 @@ if (EGVAR(main,debug_functions)) then {
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
                     private _p = _ciftNokta getPos [random 4, random 360];
+                    if (surfaceIsWater _p) then { _p = _ciftNokta; };
                     _varis pushBack [_x, _p];
                     _x moveTo _p;
                 };

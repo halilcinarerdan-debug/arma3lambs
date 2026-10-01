@@ -58,8 +58,8 @@ private _sisliMi = {
         private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
         (_ammo isNotEqualTo "")
         && {_ammo isKindOf ["SmokeShell", configFile >> "CfgAmmo"]}
-        && {(_ammo find "Red") < 0} && {(_ammo find "Green") < 0} && {(_ammo find "Blue") < 0}
-        && {(_ammo find "Yellow") < 0} && {(_ammo find "Purple") < 0} && {(_ammo find "Orange") < 0}
+        && {private _a = toLower _ammo; ((_a find "red") < 0) && {(_a find "green") < 0} && {(_a find "blue") < 0}
+            && {(_a find "yellow") < 0} && {(_a find "purple") < 0} && {(_a find "orange") < 0}}
     }) > -1
 };
 
@@ -68,6 +68,7 @@ private _aticilar = (units _group) select {
     && {isNull objectParent _x}
     && {!isPlayer _x}
     && {([_x] call _rolFn) isNotEqualTo "MG"}
+    && {(_mode isNotEqualTo "COVER_MOVE") || {([_x] call _rolFn) isNotEqualTo "AT"}}   // AT yaklasirken sis atmaz
     && {[_x] call _sisliMi}
 };
 if (_aticilar isEqualTo []) exitWith {false};
@@ -104,7 +105,11 @@ private _mod = _mode;
 
         // ruzgar telafisi: sis ruzgar yonune kayar -> ruzgar ustune nisan al
         private _ruzgar = wind;
-        _sisPos = _sisPos vectorAdd [-(_ruzgar select 0) * 3, -(_ruzgar select 1) * 3, 0];
+        private _ofs = [-(_ruzgar select 0) * 3, -(_ruzgar select 1) * 3, 0];
+        if ((vectorMagnitude _ofs) > 8) then { _ofs = (vectorNormalized _ofs) vectorMultiply 8; };
+        _sisPos = _sisPos vectorAdd _ofs;
+        // sis atici ile hedef arasinda kalsin (ruzgar dostun ustune de, menzil disina da tasimasin)
+        _sisPos = _aticiPos getPos [(((_aticiPos distance2D _sisPos) max 12) min 38), _aticiPos getDir _sisPos];
         _sisPos set [2, 0];
 
         if (!surfaceIsWater _sisPos) then {

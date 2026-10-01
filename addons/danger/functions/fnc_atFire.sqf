@@ -34,8 +34,11 @@ if (isNull _unit || {!alive _unit} || {isNull _target} || {!alive _target}) exit
 
 private _launcher = secondaryWeapon _unit;
 if (_launcher isEqualTo "") exitWith {false};
+// Mermi yok / menzil disi: bos ya da cok uzak hedefe doFire spam'i yapma
+if ((_unit ammo _launcher) <= 0 && {(currentWeapon _unit) isEqualTo _launcher}) exitWith {false};
+if ((_unit distance2D _target) > 400) exitWith {false};
 
-_unit setUnitPosWeak "MIDDLE";
+_unit setUnitPosWeak "UP";   // roket icin ayakta gorus (MIDDLE'da siperin arkasindan zirhi goremeyebilir)
 _unit doTarget _target;
 
 if ((currentWeapon _unit) isNotEqualTo _launcher) then {

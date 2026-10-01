@@ -50,7 +50,7 @@ if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
 if (_group getVariable [QGVAR(isATEngage), false]) exitWith {false};
-if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < 20) exitWith {false};
+if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < 75) exitWith {false};   // kalici tetik (kayip %50 / tek asker): 75 sn sonra tekrar
 
 // ---------------------------------------------------------------------------
 // TETIK DEGERLENDIRMESI
@@ -85,6 +85,7 @@ if (_mesafe < 25 || {_mesafe > 400}) exitWith {false};
 // BASLA
 // ---------------------------------------------------------------------------
 private _baslangic = time;
+_group setVariable [QGVAR(bcOrigCombat), combatMode _group];
 _group setVariable [QGVAR(isBreakingContact), true];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(bcStartTime), _baslangic];
@@ -100,6 +101,7 @@ _group setVariable [QGVAR(bcStartTime), _baslangic];
             _g setVariable [QGVAR(bcEndTime), time];
             _g setSpeedMode "NORMAL";
             _g enableAttack true;
+            _g setCombatMode (_g getVariable [QGVAR(bcOrigCombat), "YELLOW"]);
             {
                 if (alive _x) then {
                     _x enableAI "PATH";
@@ -127,7 +129,7 @@ diag_log format [
 [_group, _target, _tehditPos, _baslangic] spawn {
     params ["_group", "_tehdit", "_tehditPos", "_baslangic"];
 
-    private _origCombat = combatMode _group;
+    private _origCombat = _group getVariable [QGVAR(bcOrigCombat), combatMode _group];
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
 
     // Eski kilitleri temizle
@@ -141,6 +143,11 @@ diag_log format [
     } forEach (units _group);
 
     private _birimler = (units _group) select {alive _x && {isNull objectParent _x}};
+    if (_birimler isEqualTo []) exitWith {
+        _group setVariable [QGVAR(isBreakingContact), nil];
+        _group setVariable [QGVAR(isExecutingTactic), nil];
+        _group setVariable [QGVAR(bcEndTime), time];
+    };
     _group setSpeedMode "FULL";
     _group enableAttack false;
 
@@ -160,6 +167,10 @@ diag_log format [
 
         if (!isNull _oncu && {alive _oncu}) then {
             private _cover = [_oncu, _tehdit, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
+            // Siper tehdide, bulundugumuz yerden 5 m'den fazla YAKINSA siper sayma (dusmana dogru kosma)
+            if (_cover isNotEqualTo [] && {(((_cover select 0) select 0) distance2D _tehditPos) < ((_oncu distance2D _tehditPos) - 5)}) then {
+                _cover = [];
+            };
             if (_cover isNotEqualTo []) then {
                 _hedef = (_cover select 0) select 0;
                 _stance = (_cover select 0) select 1;
@@ -174,7 +185,12 @@ diag_log format [
 
             {
                 if (alive _x && {isNull objectParent _x}) then {
-                    private _p = _hedef getPos [random 5, random 360];
+                    // Onculer tam siper noktasina; es biraz yaninda. Siper yoksa (kacis noktasi) 5 m'ye yayilir
+                    private _p = if (_cover isEqualTo []) then {
+                        _hedef getPos [random 5, random 360]
+                    } else {
+                        [_hedef getPos [1 + (random 1.5), random 360], _hedef] select (_x isEqualTo _oncu)
+                    };
                     _varis pushBack [_x, _p, _stance];
                     // SADECE KOSARKEN: LAMBS reaksiyonlari emri bozmasin, kacma yok
                     _x setVariable [QGVAR(forceMove), true];

@@ -43,6 +43,9 @@ if (isNull _unit) exitWith {false};
 if (_group getVariable [QGVAR(isATEngage), false]) exitWith {false};
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
+if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
+// Bitis cooldown'u: zirh hayattayken sure dolunca hemen yeniden atilma
+if ((time - (_group getVariable [QGVAR(atEndTime), -999])) < 20) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // ZIRH + AT'LER
@@ -52,6 +55,7 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {!((side _x) == civilian)}
+    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
 };
 if (_armor isEqualTo []) exitWith {false};
 _armor = [_armor, [], {_unit distance2D _x}, "ASCEND"] call BIS_fnc_sortBy;
@@ -69,6 +73,7 @@ _ats = [_ats, [], {_x distance2D _zirh}, "ASCEND"] call BIS_fnc_sortBy;
 _ats = _ats select [0, 2 min (count _ats)];
 
 private _baslangic = time;
+_group setVariable [QGVAR(atOrigCombat), combatMode _group];
 _group setVariable [QGVAR(isATEngage), true];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(atEngageStart), _baslangic];
@@ -83,7 +88,9 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
         if (_g getVariable [QGVAR(isATEngage), false]) then {
             _g setVariable [QGVAR(isATEngage), nil];
             _g setVariable [QGVAR(isExecutingTactic), nil];
+            _g setVariable [QGVAR(atEndTime), time];
             _g enableAttack true;
+            _g setCombatMode (_g getVariable [QGVAR(atOrigCombat), "YELLOW"]);
             {
                 if (alive _x) then {
                     _x enableAI "PATH";
@@ -106,7 +113,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
 [_group, _zirh, _ats, _baslangic] spawn {
     params ["_group", "_zirh", "_ats", "_baslangic"];
 
-    private _origCombat = combatMode _group;
+    private _origCombat = _group getVariable [QGVAR(atOrigCombat), combatMode _group];
     private _leader = leader _group;
     private _mySide = side _leader;
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}];
@@ -211,7 +218,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
         _at disableAI "COVER";
         _at setUnitPosWeak "UP";
         _at moveTo _atPos;
-        _varis pushBack [_at, _atPos, "MIDDLE"];
+        _varis pushBack [_at, _atPos, "UP"];   // roket icin ayakta gorus gerekir (OVERWATCH siperi ayakta gorus verir)
     } forEach _atHedefler;
 
     private _eskortSay = 0;
@@ -234,6 +241,11 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
             _eskortSay = _eskortSay + 1;
         } forEach _buEskort;
     } forEach _atHedefler;
+
+    // Atanmamis eskortlar (AT'sinin 80 m'sinden uzakta): forceMove KALMASIN, normal FSM'ye donsun
+    {
+        _x setVariable [QGVAR(forceMove), nil];
+    } forEach (_eskortlar - _atanan);
 
     // Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
     private _bitis = time + 14;
@@ -311,6 +323,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     if (!isNull _group && {((_group getVariable [QGVAR(atEngageStart), -1]) isEqualTo _baslangic)}) then {
         _group setVariable [QGVAR(isATEngage), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
+        _group setVariable [QGVAR(atEndTime), time];
         _group enableAttack true;
         _group setCombatMode _origCombat;
 
