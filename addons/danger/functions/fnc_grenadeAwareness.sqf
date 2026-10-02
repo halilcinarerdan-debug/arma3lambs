@@ -263,8 +263,12 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             if (_birimler isEqualTo []) then { continue };
 
             // v7.5: nearObjects TEK BASINA YETMIYORDU (RPT'de hic tepki yok) -> Fired listesi (fnc_firedHub) + tarama
-            private _bombalar = ((getPosATL _leader) nearObjects ["GrenadeCore", 60])
-                + ((missionNamespace getVariable ["lambs_danger_grenadeList", []]) select {!isNull _x && {(_x distance2D _leader) < 60}});
+            // v7.27: tarama LIDERIN etrafinda 60 m idi -> grup yayiliysa / bomba baska askerin yanina dustuyse (Zeus atisi RPT'de HIC tespit edilmedi:
+            // [EL-BOMBASI-GORDU] yoktu) hic gorulmuyordu. Artik grubun en uzak askerine kadar (+30 m, en fazla 150 m) taranir; bomba tek tek
+            // askere olan mesafeye gore degerlendirilir (zaten asagida yaricap kontrolu var).
+            private _tarR = (((selectMax (_birimler apply {_x distance2D _leader})) + 30) max 60) min 150;
+            private _bombalar = ((getPosATL _leader) nearObjects ["GrenadeCore", _tarR])
+                + ((missionNamespace getVariable ["lambs_danger_grenadeList", []]) select {!isNull _x && {(_x distance2D _leader) < _tarR}});
             _bombalar = _bombalar arrayIntersect _bombalar;
             if (_bombalar isEqualTo []) then { continue };
 

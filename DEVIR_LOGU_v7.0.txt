@@ -464,3 +464,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.26 ===
 - DELAY (tacticsHide) 30 sn kilit: LAMBS tacticsHide her cagrida TakeCover bagiriyordu, RPT de 5 sn arayla tekrarlaniyordu
 - firedHub: [GRENADE-ATIS] tani logu (AI el bombasi/40mm, ilk 60)
+
+=== v7.27 ===
+- grenadeAwareness: tarama lider etrafinda sabit 60 m idi (RPT: Zeus bombasi hic gorulmedi); artik grubun en uzak askeri + 30 m (60..150 m)
