@@ -264,7 +264,7 @@ if (EGVAR(main,debug_functions)) then {
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
                     _varis pushBack [_x, _p];
-                    _x moveTo _p;
+                    _x doMove _p;
                 };
             } forEach _cift;
         } forEach _ciftler;
@@ -298,7 +298,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b setBehaviour "AWARE";
                     _b setVariable [QGVAR(forceMove), true];
                     _b setUnitPosWeak "UP";
-                    _b moveTo (_x select 1);
+                    _b doMove (_x select 1);
                 };
             } forEach _varis;
 
@@ -308,7 +308,7 @@ if (EGVAR(main,debug_functions)) then {
                 && {((_x select 0) distance2D (_x select 1)) > 9}
             };
             if (_gelmeyen isEqualTo [] && {(_pinned select {alive _x}) isEqualTo []}) exitWith {};
-            { (_x select 0) moveTo (_x select 1); } forEach _gelmeyen;
+            { (_x select 0) doMove (_x select 1); } forEach _gelmeyen;
             sleep 3;
         };
 
