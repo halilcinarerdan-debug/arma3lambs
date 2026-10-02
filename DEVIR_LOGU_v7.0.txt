@@ -772,3 +772,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 === v8.25b HARITA / MOD UYUMU (kullanici: JBAD / CUP Terrains / RHS?) ===
 - Fork harita bagimsiz: motor komutlari (nearestTerrainObjects tur adlari, buildingPos, terrainIntersectASL, surfaceType). Risk: modun nesneleri dogru tur / simulation tasimiyorsa (BUSH / SMALL TREE / HOUSE) yaprak kirici ve siper adaylari azalir -> [YAPRAK-TANI] acilista sayilari yazar.
 - Doktrin haritasina CUP fraksiyonlari eklendi: cup_b_us -> ABD, cup_o_ru -> RUS, cup_i_tk_gue / tk_gue / cup_o_chdkz / chdkz / cup_i_napa -> DUZENSIZ (tahmin; kendi fraksiyonun farkliysa lambs_danger_doktrinHaritasi).
+=== v8.26 CQB: GERIDE DURMA + MUZZLE FLASH RISKI (kullanici: 'ekle gitsin') ===
+- findCover FAZ 2 (iceride, atis modu): DERINLIK = dusmana dogru 0.8 / 1.6 / 2.4 m kayinca hala gorunen adim sayisi (0..3) -> +3 / adim.
+- MUZZLE FLASH RISKI = (gorunen aci / 5) x (1 + 1.5 x gece) x silah flas katsayisi (primaryWeaponItems[0] AmmoCoef.visibleFire, yoksa 1) x (1 - 0.25 x derinlik); puana -10 x risk.
+- GERIDE DURMA: gorunen aci > 0 ve derinlik < 3 ise secilen nokta dusmandan uzaga 1.6 / 1.0 m kaydirilir (cati altinda, aradan duvar yok [ray], dusmani hala gorebiliyor) +4. Log [CQB-POZ]: aci, derinlik, flas riski (gece / katsayi), geriye kaydirildi.
+- Sinir: gercek pencere / kapi nesnesi tespiti yok (dolayli olcu); kaydirilan nokta bina geometrisine gore gecersiz olabilir (ray testi yalniz gorus hatti / duvar arasi); gece ic mekan aydinligi hesaplanmiyor (yalniz gunes / ay).

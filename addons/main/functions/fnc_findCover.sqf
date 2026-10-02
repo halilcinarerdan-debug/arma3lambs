@@ -382,20 +382,48 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                             private _yp = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd (_perpC vectorMultiply _x);
                             if (!([_dangerPos, _yp, _unit] call _gizli)) then { _gorunen = _gorunen + 1; };
                         } forEach [-0.8, -0.4, 0, 0.4, 0.8];
-                        private _geri = 0;
+                        // DERINLIK: dusmana dogru 0.8 / 1.6 / 2.4 m kayinca hala gorunen en derin adim = pencere / kapidan GERI mesafesi (0..3)
+                        private _derin = 0;
                         if (_gorunen > 0) then {
-                            private _on = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd ([sin _eDir, cos _eDir, 0] vectorMultiply 1.6);
-                            if (!([_dangerPos, _on, _unit] call _gizli)) then { _geri = 1; };
+                            { 
+                                private _on = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd ([sin _eDir, cos _eDir, 0] vectorMultiply _x);
+                                if (!([_dangerPos, _on, _unit] call _gizli)) then { _derin = _derin + 1; };
+                            } forEach [0.8, 1.6, 2.4];
                         };
+                        // MUZZLE FLASH GORUNURLUGU: gorunen aci orani x (1 + 1.5 x gece) x silah flas katsayisi (susturucu / flas gizleyici AmmoCoef.visibleFire < 1 azaltir)
+                        //   dar aci + derin = dusuk risk; pencere onu + gece + flas gizleyicisiz = yuksek risk
+                        private _mzItem = (primaryWeaponItems _unit) param [0, ""];
+                        private _vf = 1;
+                        if (_mzItem isNotEqualTo "") then { private _v = getNumber (configFile >> "CfgWeapons" >> _mzItem >> "ItemInfo" >> "AmmoCoef" >> "visibleFire"); if (_v > 0) then { _vf = _v min 1; }; };
+                        private _geceF = (1 - sunOrMoon) max 0;
+                        private _flasRisk = (_gorunen / 5) * (1 + (1.5 * _geceF)) * _vf * (1 - (0.25 * _derin));
+                        private _geri = [0, 1] select (_derin >= 2);
                         private _cqbP = 0;
                         if (_gorunen in [1, 2]) then { _cqbP = _cqbP + 10; };
                         if (_gorunen isEqualTo 5) then { _cqbP = _cqbP - 8; };
-                        if (_geri isEqualTo 1) then { _cqbP = _cqbP + 6; };
+                        _cqbP = _cqbP + (3 * _derin) - (10 * _flasRisk);
+                        // GERIDE DURMA: secilen nokta pencereye yakinsa (derin < 3) dusmandan UZAGA (1.0 / 1.6 m) kaydir; kayan nokta cati altinda, duvarsiz, hala dusmani gorebiliyorsa kabul
+                        if (_gorunen > 0 && {_derin < 3}) then {
+                            {
+                                private _kp = _pos getPos [_x, _eDir + 180];
+                                _kp set [2, _pos select 2];
+                                private _kASL = AGLToASL _kp;
+                                if (
+                                    !surfaceIsWater _kp
+                                    && {lineIntersects [_kASL vectorAdd [0, 0, 1.6], _kASL vectorAdd [0, 0, 25], _unit]}
+                                    && {!(lineIntersects [_posASL vectorAdd [0, 0, 1.0], _kASL vectorAdd [0, 0, 1.0], _unit])}
+                                    && {!([_dangerPos, _kASL vectorAdd [0, 0, 1.4], _unit] call _gizli)}
+                                ) exitWith {
+                                    _a set [1, _kp];
+                                    _cqbP = _cqbP + 4;
+                                };
+                            } forEach [1.6, 1.0];
+                        };
                         _a set [0, (_a select 0) + _cqbP];
                         if (isNil "lambs_main_cqbLogN") then { lambs_main_cqbLogN = 0; };
                         if (lambs_main_cqbLogN < 40) then {
                             lambs_main_cqbLogN = lambs_main_cqbLogN + 1;
-                            diag_log format ["[CQB-POZ] %1 | iceride | aci genisligi:%2/5 | pencereden >= 1.6 m geride:%3 | puan degisimi:%4 | dusman %5 m", name _unit, _gorunen, _geri isEqualTo 1, _cqbP, round _eDist];
+                            diag_log format ["[CQB-POZ] %1 | iceride | aci genisligi:%2/5 | derinlik:%3/3 | flas riski:%4 (gece %5, flas katsayisi %6) | geriye kaydirildi:%7 | puan degisimi:%8 | dusman %9 m", name _unit, _gorunen, _derin, _flasRisk toFixed 2, _geceF toFixed 2, _vf toFixed 2, (_a select 1) isNotEqualTo _pos, round _cqbP, round _eDist];
                         };
                     };
                 };
