@@ -27,6 +27,11 @@ params [
 if (_unit isEqualType grpNull) then {_unit = leader _unit;};
 if (isNull _unit) exitWith {"WEDGE"};
 
+// TEK KARAR MERKEZI: grup temastaysa BOUNDING / ASSAULT dahil HER baglam komutanin COMBAT kararina baglanir
+// (eskiden BOUNDING "LINE", COMBAT "WEDGE" derdi ve formasyon surekli gidip gelirdi)
+if (_context in ["BOUNDING", "ASSAULT"] && {((group _unit) getVariable [QGVAR(contact), 0]) > time}) then { _context = "COMBAT"; };
+private _cmbVeriYok = false;
+
 // ---------------------------------------------------------------------------
 // PEEL KONTROLU — Peel aktifken FILE'dan baska formasyon secme
 // ---------------------------------------------------------------------------
@@ -181,6 +186,8 @@ switch (_context) do {
             if (_validTarget && {_targetPos isNotEqualTo [0,0,0]}) then { _closest = _leaderPos distance2D _targetPos; };
         };
 
+        if (_closest >= 9999) then { _cmbVeriYok = true; };
+
         if (_arm > 0 && {_closest < 300}) then {
             _formation = "VEE";
             _reason = "zirh - dagilmis V (tek patlama hepsini almasin)";
@@ -278,7 +285,7 @@ private _histGrp = group _unit;
 if (!isNull _histGrp) then {
     private _sonF = _histGrp getVariable [QGVAR(selFormSon), ""];
     private _sonT = _histGrp getVariable [QGVAR(selFormT), -999];
-    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {time < (_sonT + ([60, 25] select (_context isEqualTo "COMBAT")))}) then {
+    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {(time < (_sonT + ([60, 45] select (_context isEqualTo "COMBAT")))) || {_cmbVeriYok}}) then {
         _formation = _sonF;
     } else {
         if (_sonF isNotEqualTo _formation) then {

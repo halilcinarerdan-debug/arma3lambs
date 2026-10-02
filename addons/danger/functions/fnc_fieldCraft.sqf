@@ -130,6 +130,17 @@ private _fnLog = {
                 } forEach _us;
             };
 
+            // ---------- E) TEK KALAN ASKER: savasma, kac / saklan (temas kes) ----------
+            if (_temas && {(_tick % 2) isEqualTo 0} && {count ((units _g) select {alive _x}) isEqualTo 1} && {!(_g getVariable [QGVAR(isBreakingContact), false])}) then {
+                private _tk = (units _g) select {alive _x};
+                private _tu = _tk select 0;
+                private _te = _tu findNearestEnemy _tu;
+                if (!isNull _te && {alive _te} && {(_tu distance2D _te) < 400}) then {
+                    private _ok = [_g, _te] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsBreakContact", {false}]);
+                    if (_ok) then { [format ["[SAHA] %1 | tek kalan %2 -> kaciyor / saklaniyor", groupId _g, name _tu]] call _log; };
+                };
+            };
+
             if (_agirTaktik) then { continue };
 
             // ---------- C) 360 GUVENLIK ----------

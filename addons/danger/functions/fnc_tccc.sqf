@@ -55,7 +55,7 @@ diag_log format [
         params ["_u"];
         if (isNil "ace_medical_status_fnc_getBloodLoss") then {0} else {[_u] call ace_medical_status_fnc_getBloodLoss}
     };
-    private _malzeme = createHashMapFromArray [
+    lambs_danger_tcccMalzeme = createHashMapFromArray [
         ["packingbandage", ["ace_packingbandage"]], ["elasticbandage", ["ace_elasticbandage"]],
         ["fielddressing", ["ace_fielddressing"]], ["pressurebandage", ["ace_fielddressing", "ace_elasticbandage"]],
         ["quikclot", ["ace_quikclot"]], ["applytourniquet", ["ace_tourniquet"]],
@@ -63,16 +63,16 @@ diag_log format [
         ["bloodiv", ["ace_bloodiv"]], ["bloodiv_500", ["ace_bloodiv_500"]], ["bloodiv_250", ["ace_bloodiv_250"]],
         ["salineiv", ["ace_salineiv"]], ["salineiv_500", ["ace_salineiv_500"]]
     ];
-    private _varMi = {
+    lambs_danger_tcccVarMi = {
         params ["_m", "_cls"];
-        private _l = _malzeme getOrDefault [toLower _cls, []];
+        private _l = lambs_danger_tcccMalzeme getOrDefault [toLower _cls, []];
         _l isEqualTo [] || {((items _m) findIf {(toLower _x) in _l}) > -1}
     };
 
     // Tek tedavi adimi: true = envanter degisti (uygulandi)
     private _tx = {
         params ["_m", "_c", "_part", "_cls"];
-        if !([_m, _cls] call _varMi) exitWith {false};
+        if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {false};
         private _once = count (items _m);
         _m playActionNow "MedicOther";
         if (isNil "ace_medical_treatment_fnc_treatment") then {
@@ -99,7 +99,7 @@ diag_log format [
     };
 
     private _tedavi = {
-        params ["_g", "_m", "_c"];
+        params ["_g", "_m", "_c", "_baygin", "_birak", "_tx", "_kanKaybi"];
         private _t0 = time;
         _m setVariable [QGVAR(tcccBusy), time + 150];
         _m setVariable [QGVAR(forceMove), true];
@@ -248,7 +248,7 @@ diag_log format [
                     private _en = _m findNearestEnemy _m;
                     if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 50}}) then { continue };
                 };
-                [_g, _m, _c] spawn _tedavi;
+                [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
             } forEach _yaralilar;
         } forEach (allGroups select {local _x && {!isNull leader _x}});
     };

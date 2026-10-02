@@ -525,7 +525,7 @@ if (EGVAR(main,debug_functions)) then {
         if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}
             && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}
             && {time > (_group getVariable [QGVAR(formKorumaT), 0])}) then {
-            _group setVariable [QGVAR(formKorumaT), time + 20];
+            _group setVariable [QGVAR(formKorumaT), time + 45];
             _group setFormation _bndFormation;
         };
 

@@ -438,7 +438,8 @@ private _reason   = _result select 1;
 // PUSH kararlari hafiza / koordinasyon ile alternatife CEVRILMEZ (israrla bastir + hucum)
 private _push = (_reason select [0, 5]) isEqualTo "PUSH:";
 // Mesafe / zirh kaynakli kararlar da hafiza-koordinasyon ile degistirilmez (sebebi bu kararin kendisi)
-private _noSwap = _push || {(_reason select [0, 4]) in ["zirh", "uzak", "yaki"]};
+// KARAR ISTIKRARI: "alternatif / farkli grup" degisimi KAPALI (ayni durumda taktik surekli degisiyordu) -> _noSwap hep true
+private _noSwap = true;
 
 // ---------------------------------------------------------------------------
 // TAKTIK HAFIZASI + GRUP KOORDINASYONU
@@ -480,6 +481,19 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
         "hafiza: alternatif"
     } else {
         "koord: farkli grup"
+    };
+};
+
+// KARAR TAAHHUDU: hucum ailesi (BOUNDING / FLANK / ASSAULT / SUPPRESS_ASSAULT) arasinda karar en az 20 sn SABIT kalir;
+// kritik kararlar (WITHDRAW / HOLD / DELAY / PEEL / zirh vb.) ve PUSH aninda gecer
+private _aile = ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"];
+private _karBas = _group getVariable [QGVAR(cmdKarBas), -999];
+if (_decision isNotEqualTo _sonKarar) then {
+    if (!_push && {_decision in _aile} && {_sonKarar in _aile} && {(time - _karBas) < 20}) then {
+        _decision = _sonKarar;
+        _reason = "taahhut: karar korunuyor";
+    } else {
+        _group setVariable [QGVAR(cmdKarBas), time];
     };
 };
 

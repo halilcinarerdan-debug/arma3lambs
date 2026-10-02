@@ -399,3 +399,12 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
         emirlerin yeniden verilmesi, formasyon / tactic sifirlama. Not: lider arkaya alindi (v7.10) -> olum olasiligi zaten azaldi.
   [TCCC KALANLAR] ACM havayolu (A) / solunum-pnomotoraks (R) / hipotermi (H) adimlari; ACE / ACM fonksiyon imzalari oyunda dogrulanacak
         (ace_medical_treatment_fnc_treatment, ace_dragging_fnc_startDrag/dropObject, ace_medical_status_fnc_getBloodLoss).
+
+=== v7.12 — KARAR / FORMASYON ISTIKRARI + TEK KALAN + TCCC DUZELTME ===
+  - fnc_selectFormation: temastaki grupta BOUNDING / ASSAULT baglami da COMBAT kararina baglanir (iki baglam LINE <-> WEDGE gidip geliyordu);
+    COMBAT histerezis 25 -> 45 sn; hedef/durum verisi yoksa (d:9999) onceki secim korunur. fnc_tacticsBounding: formasyon koruma 20 -> 45 sn.
+  - fnc_commanderAssess: "taktik hafizasi: ayni karar 30 sn icinde tekrarlanirsa alternatif" KAPATILDI (ASSAULT<->BOUNDING<->FLANK surekli degisiyordu);
+    yerine KARAR TAAHHUDU: hucum ailesi karari en az 20 sn sabit; kritik kararlar (WITHDRAW/HOLD/DELAY/PEEL/zirh) ve PUSH aninda gecer.
+  - fnc_tacticsBreakContact: TEK KALAN asker artik savasmaz: kacar, varinca yatar + STEALTH + combatMode GREEN ile 60 sn saklanir (dusman 20 m'ye girerse savasir);
+    cooldown 8 sn, guvenlik valfi 130 sn. fnc_fieldCraft (E): tek kalan + temas -> breakContact'i dogrudan tetikler. RPT: [SAHA] tek kalan.
+  - fnc_tccc: "_baygin / _birak undefined" hatasi (spawn kapsami) duzeltildi.

@@ -50,7 +50,7 @@ if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
 if (_group getVariable [QGVAR(isATEngage), false]) exitWith {false};
-if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < ([75, 25] select (_alive isEqualTo 1))) exitWith {false};   // tek kalan: kisa cooldown   // kalici tetik (kayip %50 / tek asker): 75 sn sonra tekrar
+if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < ([75, 8] select (_alive isEqualTo 1))) exitWith {false};   // tek kalan: kisa cooldown   // kalici tetik (kayip %50 / tek asker): 75 sn sonra tekrar
 
 // ---------------------------------------------------------------------------
 // TETIK DEGERLENDIRMESI
@@ -109,7 +109,7 @@ _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(bcStartTime), _baslangic];
 
 // Guvenlik valfi — sadece bu kacisin bayraklarini + AI kilitlerini temizler
-[_group, _baslangic, time + 70] spawn {
+[_group, _baslangic, time + ([70, 130] select (_alive isEqualTo 1))] spawn {
     params ["_g", "_start", "_limit"];
     waitUntil { time > _limit || {isNull _g} };
     if (!isNull _g && {((_g getVariable [QGVAR(bcStartTime), -1]) isEqualTo _start)}) then {
@@ -269,12 +269,25 @@ diag_log format [
             _b doWatch _tehditPos;
         };
     } forEach _varis;
-    _group setCombatMode "YELLOW";
+    // TEK KALAN ASKER: savasma, SAKLAN — yatar, gizlenir, ates yok (GREEN); dusman 20 m'ye girerse (kosede kisti) savasir.
+    private _tek = (count ((units _group) select {alive _x})) isEqualTo 1;
+    private _yakinMesafe = [25, 20] select _tek;
+    if (_tek) then {
+        _group setCombatMode "GREEN";
+        {
+            if (alive _x) then {
+                _x setBehaviour "STEALTH";
+                _x setUnitPosWeak "DOWN";
+            };
+        } forEach (units _group);
+    } else {
+        _group setCombatMode "YELLOW";
+    };
 
-    diag_log format ["[TEMAS-KES] %1 sipere vardi, 25 sn bekleniyor", groupId _group];
+    diag_log format ["[TEMAS-KES] %1 sipere vardi, %2 sn bekleniyor%3", groupId _group, [25, 60] select _tek, ["", " (tek kalan: saklaniyor, ates yok)"] select _tek];
 
-    // 25 sn bekle; dusman 25m icine girerse savas (bekleme biter)
-    private _holdBitis = time + 25;
+    // 25 sn (tek kalan: 60 sn) bekle; dusman yakin mesafeye girerse savas (bekleme biter)
+    private _holdBitis = time + ([25, 60] select _tek);
     waitUntil {
         sleep 1;
         isNull _group
@@ -283,7 +296,7 @@ diag_log format [
             ((units _group) findIf {
                 alive _x && {
                     private _e = _x findNearestEnemy _x;
-                    !isNull _e && {(_x distance2D _e) < 25}
+                    !isNull _e && {(_x distance2D _e) < _yakinMesafe}
                 }
             }) > -1
         }
