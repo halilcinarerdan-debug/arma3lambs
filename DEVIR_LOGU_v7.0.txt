@@ -424,3 +424,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.16 ===
 - moveAssist SIKISMA: 0.5-2 sn dur-kalk sebebi. Artik sadece temas/taktik yokken, komutan haric, forceMove yokken; tekrar bekleme 25 sn
+
+=== v7.17 ===
+- fireLine: temasta 0.5 sn dongusunde dost hatta ise yan adim + ates kesme felc yaratiyordu. Artik taktik/komutan/baskida/hareket halinde atlanir, bekleme 20 sn (basarisiz 8 sn), ates (TARGET) kapatilmaz

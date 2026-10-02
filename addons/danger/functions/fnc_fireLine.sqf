@@ -70,6 +70,14 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
             if (_u getVariable [QGVAR(forceMove), false]) then { continue };
             if ((_u getVariable [QGVAR(grState), []]) isNotEqualTo []) then { continue };
             if (((group _u) getVariable [QGVAR(contact), 0]) < time) then { continue };
+            // FELC ONLEME: taktik (bounding / cekilme / temas kesme / herhangi taktik), komutan, baskida olan veya hareket halindeki asker
+            // yan adim ATMAZ (yan adim asil emri eziyor, takimi durduruyordu)
+            private _fg = group _u;
+            if (
+                (_fg getVariable [QGVAR(isBounding), false]) || {_fg getVariable [QGVAR(isExecutingTactic), false]}
+                || {_fg getVariable [QGVAR(isRetreating), false]} || {_fg getVariable [QGVAR(isBreakingContact), false]}
+                || {_u isEqualTo (leader _u)} || {(getSuppression _u) >= 0.25} || {(speed _u) > 2}
+            ) then { continue };
 
             private _t = assignedTarget _u;
             if (isNull _t || {!alive _t}) then {
@@ -118,13 +126,9 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
             } forEach [4.5, 7];
 
             if (_secildi isNotEqualTo []) then {
-                _u setVariable [QGVAR(flLast), time + 4];
-                _mover setVariable [QGVAR(flLast), time + 4];
+                _u setVariable [QGVAR(flLast), time + 20];
+                _mover setVariable [QGVAR(flLast), time + 20];
                 _mover setVariable [QGVAR(flUntil), time + 2.5];
-                if (_mover isEqualTo _u) then {
-                    _u disableAI "TARGET";
-                    _u disableAI "AUTOTARGET";
-                };
                 _mover doMove _secildi;
                 if (lambs_danger_flLogN < 30) then {
                     lambs_danger_flLogN = lambs_danger_flLogN + 1;
@@ -134,7 +138,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
                     ];
                 };
             } else {
-                _u setVariable [QGVAR(flLast), time + 2];
+                _u setVariable [QGVAR(flLast), time + 8];
             };
         } forEach (allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
