@@ -131,3 +131,13 @@ a. yerel guvenlik; b. ates unsuru atanmis konumlara cekilir; c. her unsura ates 
 5. **Arka koruma:** son direnis (tek kisinin ayrilmasi) kaynakta YOK; rear guard = tek manga / ates timi + arka nokta, ana govdeyi geciktirir -> tasarim "arka grup" (>= 2 kisi) olmali, tek kisi degil.
 6. **Savunma mevzi araligi 5-20 m** (VBS #6 hendek / mevzi icin).
 7. **Sabit sayilar** (cekilKayip 0.30, 220 m, 90 sn, 140 m kanat noktasi, +-85 derece) kaynakta olmayan tasarim secimleri: dokumanda "tasarim" etiketi, dogrulanmis sanilmasin.
+
+### H7) H6 YAPILACAKLAR — DURUM (v8.37)
+1. Retreat LOS bitisi + yon degistirme: YAPILDI (v8.34). Dagilanlar son RP'ye: toparlanma noktasi = lider konumu; dagilan (> 40 m) sayisi [TOPLAN] BASLA logunda (v8.37), ayri kod yok.
+2. Toparlanma H2 sirasi: YAPILDI (v8.34, fnc_toparlan). Pusu sonrasi toparlanma: YAPILDI (v8.35).
+3. Feint: YAPILDI (v8.37, fnc_hqFeint): kumanda kararidir, kanat manevrasinin ana cabasini destekler, 'ayni siddet' ile on cepheye sinirli hedefli yaklasma + ayrilma kriterleri (kayip %25 / bastirma 0.7 / 100 sn / ana saldiri). Demonstration (temassiz gosteri) YAPILMADI: Arma AI gordugu her seye ates eder. Gerileme taklidi kaynakta YOK, yapilmadi.
+4. Kanat ates kaydirma: YAPILDI (v8.34).
+5. Arka grup (rear guard): AYRI KOD EKLENMEDI. Kaynak (MCWP 3-11.1): 'normalde tek manga; ates timi arka nokta + kalan arka grup, ana govde destegi gelene kadar geciktirir'. Retreat'imizin alternatif nobetci kapsama takimi (ALPHA / BRAVO; son sicramada kapsama veren takim en geride kalir) bu islevi gordugu icin yinelenen kod yazilmadi; tek kisinin ayrilip kale savunmasi kaynakta yok (fnc_sonDirenis <= 3 kisilik SON CARE, farkli).
+6. Formasyon aralik varsayimlari: KOD DEGISMEDI. MCWP 3-11.2: 'exact distances and intervals not important as long as control not lost; sight or voice contact'. Mevcut buddyBond esikleri (calm 25 / 40 m) 'kontrol / gorus teması' ilkesine aykiri degil; rakamlar TASARIM.
+7. Pusu doktrini: YAPILDI (v8.35). Kapi / oda: YAPILDI (v8.36). Rota zinciri: YAPILDI (v8.36).
+KALAN: hendek / mevzi (VBS #6; mevzi araligi 5-20 m, MCWP 3-11.2 ates timi icinde).

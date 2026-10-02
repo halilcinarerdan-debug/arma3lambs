@@ -876,3 +876,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   ESZAMANLI giris: 1. asker en az direnc (gorus hatti acik) kosesine, 2. asker ZIT kosesine (koseler +-90 derece / 2.8 m, en yakin gecerli bina pozisyonuna oturtulur), hakimiyet noktasinda MIDDLE + karsi koseye donuk 2 sn tarama, sonra 'CLEAR' ([ODA] log + olay OdaTemiz). Bombali giris YOK (ROE / sivil riski).
 - DOGRULANMADI: Door_N_trigger bellek noktasinin Jbad / mod binalarinda bulunmasi (yoksa yigilma fallback); koselerin dogru oda koselerine oturmasi (bina pozisyonu seyrekse ayni nokta); AI'nin forceMove olmadan doMove ile ayni anda girmesi; zincirin bounding'de gozle gorulur fark yaratmasi (maruziyet ort).
 - Kalan: hendek / mevzi (VBS #6), sonra doktrin isleri (hqFeint, arka grup, retreat son RP, formasyon).
+=== v8.37 DOKTRIN ISLERI: FEINT MODULU + TOPLANMA DAGILAN SAYIMI (kullanici: 'vbs kalanlar, sonra doktrin isleri') ===
+- hqFeint (kumanda modulu, MCWP 3-11.1 s. 6-10 / 6-11): aktif KANAT manevrasi varken 3. musait grup (>= 4 kisi, 80 - hqKanatM) dusmanin 150 m'sine, sabitleyen ekseninden +-20 derece (TASARIM) on cepheden yaklasir (tacticsReinforce yurutucusu, emir FEINT).
+  Ayrilma kriterleri (TASARIM): kayip >= %25 / bastirma >= 0.7 / 100 sn / kanat SALDIRI emri; kayip / bastirmada kontrollu retreat, aksi LAMBS'a serbest (emir FEINT_BIRAK). Es zamanli 1 feint; sabitleyen basina 240 sn'de bir; dusman >= 3 kisi, oran <= 1.15. Log [HQ-FEINT] EMIR / BIRAK.
+  Zeus modul penceresine 'Feint' secenegi (lambs_danger_hqFeintV1, varsayilan acik). Demonstration YOK (Arma AI'si temassiz gosteriyi guvenilir tasimaz); gerileme taklidi YOK (kaynakta yok).
+- [TOPLAN] BASLA: dagilan (> 40 m) sayisi.
+- 5 (arka grup) ve 7 (formasyon aralik) icin KOD EKLENMEDI; gerekce DOKTRIN_KAYNAKLARI.md H7.
+- DOGRULANMADI: feint'in kanat manevrasiyla zamanlamasi (feint grubu varista ayni anda sabitleyene mi yigiliyor), ayrilma retreat'inin tetiklenmesi, Zeus penceresinde 7 secenek (showDialog).
+- KALAN: hendek / mevzi (VBS #6). Tum yeni kodlar (v8.32 - v8.37) icin oyun testi bekleniyor.

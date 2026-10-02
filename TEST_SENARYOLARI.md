@@ -85,3 +85,10 @@ Kurulum: bir grup (>= 6 kisi) yol kenari, digeri (>= 4 kisi) yola dogru yuruyor 
 2. Kapi / oda: catisma sonrasi (28 sn sakin) yakinda bina (>= 2 pozisyon). Log: `[BINA-TEMIZLE] BASLA`, `[ODA] ... kapi:... (Door_N_trigger | bina pozisyonu) | yigilma yani:...`, ardindan `[ODA] ... oda i/N CLEAR`.
 3. Gorsel: giris timi kapinin YANINDA duvara yigilmali (onunde degil); iki asker odaya ayni anda girip zit koselere gitmeli ve oda icine bakmali.
 4. Sorun isaretleri: askerlerin ayni noktaya gitmesi (kose = oda noktasi), kapi disinda duvara takilma, bina disina yigilma.
+
+## v8.37 FEINT testi (Zeus modulu acik, Feint secili)
+Kurulum: ayni tarafin 4 grubu: biri dusmanla sabit temasta (>= 3 dusman), uc grup 100-900 m'de musait (>= 4 kisi).
+1. Beklenen: `[HQ-KANAT] EMIR` (kanat grubu), ardindan `[HQ-FEINT] EMIR: ana cabasi = kanat manevrasi ... feint G -> on cephe ...`. Feint grubu dusmana ON'den (sabitleyen eksenine yakin) 150 m'ye yaklasmali, kanat grubu yandan gelmeli.
+2. `[HQ-FEINT] BIRAK ... neden:` kayip / bastirma / 100 sn / ana saldiri. Kayip ya da bastirmada feint grubu retreat etmeli (`[GERI-CEKILME-BASLA]`).
+3. Zeus modul penceresinde 7 secenek gorunmeli (Feint dahil).
+4. Sorun isaretleri: feint grubunun dogrudan sabitleyenin yanina yigilmasi, feint'in hic birakilmamasi (sure kriteri), kayipli feint'in ayrilmamasi.

@@ -7,6 +7,8 @@
  *   TAKVIYE  veri [hedef pozisyon, yardim isteyen grup adi]  -> LAMBS tacticsReinforce (kanattan yaklasma / CQB'de saldiri); LAMBS'in grup bayragi (enableGroupReinforce) EMIR SONRASI ESKI HALINE DONER
  *            (yoksa grup sonradan upstream telsiz olayiyla kumandayi atlayip kendi basina kosardi)
  *   KANAT    veri [kanat noktasi, istek sahibi grup adi]  -> ayni yurutucu (kanat noktasina hareket); varista kumanda SALDIRI verir
+ *   FEINT    veri [feint noktasi, istek sahibi grup adi]  -> ayni yurutucu (on cepheye yaklasma; sinirli hedefli yanilticisi saldiri, fnc_hqFeint)
+ *   FEINT_BIRAK veri neden  -> feint grubunu serbest birak
  *   SALDIRI  veri [dusman pozisyonu]  -> LAMBS tacticsAssault (kanattan hucum)
  *   ATES_KAYDIR veri [nokta]  -> grubun tum askerleri doSuppressiveFire nokta (doktrin: destek ateşi hazirlik sinyali ile kaydirilir / kesilir; hucum eden dost unsura ates gitmesin)
  *
@@ -27,7 +29,7 @@ if (isNull _g || {_ad isEqualTo ""} || {!alive (leader _g)}) exitWith {false};
 private _ok = false;
 
 // TAKVIYE / KANAT: bir noktaya (kanat hedefi / yardim noktasi) hareket (LAMBS tacticsReinforce)
-if (_ad in ["TAKVIYE", "KANAT"]) then {
+if (_ad in ["TAKVIYE", "KANAT", "FEINT"]) then {
     _veri params [["_hedef", [0, 0, 0], [[]]], ["_istekAd", "", [""]]];
     if (_hedef isNotEqualTo [0, 0, 0] && {!isNil "lambs_danger_fnc_tacticsReinforce"}) then {
         private _eskiF = _g getVariable ["lambs_danger_enableGroupReinforce", false];
@@ -38,6 +40,13 @@ if (_ad in ["TAKVIYE", "KANAT"]) then {
         [{ params ["_grp"]; if (!isNull _grp) then { _grp enableAttack true; }; }, _g, 70] call CBA_fnc_waitAndExecute;
         _ok = true;
     };
+};
+
+// FEINT_BIRAK: feint grubunu serbest birak (LAMBS normal taktik; enableAttack acik)
+if (_ad isEqualTo "FEINT_BIRAK") then {
+    _g enableAttack true;
+    _g setVariable ["lambs_danger_isExecutingTactic", nil];
+    _ok = true;
 };
 
 // SALDIRI: kanat konumundan dusman noktasina hucum (LAMBS tacticsAssault)

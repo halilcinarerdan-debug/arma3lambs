@@ -7,7 +7,7 @@
  * KATMANLAR:
  *   GRUP BEYNI (var)   fnc_commanderAssess  : tek grubun taktik karari (BOUNDING / PEEL / WITHDRAW / PUSH ...)
  *   KUMANDA (bu dosya) fnc_hq               : taraf (west / east / independent) basina DURUM TAHTASI + moduller; gruplar arasi kararlar
- *   MODULLER (v8.32)   hqTakviye (dinamik takviye), hqMedevac (hekimi olmayan gruba baska gruptan hekim; TCCC ile entegre)
+ *   MODULLER (v8.32)   hqTakviye (dinamik takviye), hqFeint (v8.37: kanat manevrasina destek yanilticisi saldiri), hqMedevac (hekimi olmayan gruba baska gruptan hekim; TCCC ile entegre)
  *                      fnc_hq<Ad>           : lambs_danger_hqModuller listesi; her biri [taraf, tahta] alir; kapatma: lambs_danger_hq<Ad>V1 = false
  *   EMIR KANALI        fnc_hqEmir           : [grup, ad, veri] -> grup degiskeni hqEmir + olay "HQEmir" + yurutucu (ornek: TAKVIYE -> LAMBS tacticsReinforce)
  *   RAPOR KANALI       olay veriyolu (fnc_olayGonder): gruplar RetreatBitti / SonDirenis / InContact / AllClear gonderir; kumanda [HQ-RAPOR] olarak kaydeder
@@ -32,7 +32,7 @@ lambs_danger_hqStarted = true;
 
 // MODUL LISTESI: [ad, aralik sn] — yeni modul eklemek = fnc_hq<Ad>.sqf + buraya satir
 if (isNil "lambs_danger_hqModuller") then {
-    lambs_danger_hqModuller = [["istihbarat", 5], ["takviye", 8], ["kanat", 7], ["medevac", 6]];
+    lambs_danger_hqModuller = [["istihbarat", 5], ["takviye", 8], ["kanat", 7], ["feint", 9], ["medevac", 6]];
 };
 
 diag_log format ["[HQ] kumanda cekirdegi baslatildi | moduller: %1", lambs_danger_hqModuller apply {_x select 0}];

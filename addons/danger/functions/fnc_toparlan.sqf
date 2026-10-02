@@ -129,10 +129,13 @@ _group setVariable [QGVAR(disableGroupAI), true];
 // lider: tehdit yonune bakar, merkezde
 if (_tehditVar) then { _lider doWatch _tehditPos; };
 
+// TC 3-21.76 Break Contact adim 11: 'Elements and Soldiers that become disrupted stay together and move to the last designated rally point' -> toplanma noktasi = lider konumu; dagilanlar (> 40 m) sayilir, halka noktalarina zaten oraya gelir
+private _dagilan = {(_x distance2D _merkez) > 40} count _us;
 diag_log format [
-    "[TOPLAN] %1 | BASLA | %2 kisi (halka %3, OP %4) | tehdit yonu %5 | yaricap %6 m | sure %7 sn | silah sektorleri: %8",
+    "[TOPLAN] %1 | BASLA | %2 kisi (halka %3, OP %4) | tehdit yonu %5 | yaricap %6 m | sure %7 sn | dagilan (>40 m, son RP'ye): %9 | silah sektorleri: %8",
     groupId _group, count _us, _n, count _op, round _tehditYon, _R, _sure,
-    _atamalar apply {format ["%1:%2@%3", _x select 3, name (_x select 0), round (_x select 2)]}
+    _atamalar apply {format ["%1:%2@%3", _x select 3, name (_x select 0), round (_x select 2)]},
+    _dagilan
 ];
 
 [_group, _atamalar, _lider, _tehditPos, _tehditVar, _eskiDGA, _sure, count (units _group)] spawn {
