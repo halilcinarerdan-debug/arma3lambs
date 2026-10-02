@@ -31,6 +31,8 @@
  *   baskiKirmaEsik 0.5, baskiKirmaMaxS 14   retreat: ort. baski bu esikten yuksekse once siper + karsi ates (en fazla N sn), sonra sicrama
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
  *   DUZENSIZ (Taliban-tipi): vur-kac, erken temas kesme, pusu agirlikli (haritada taliban / lop_am / lop_ists / insurgent ...)
+ *   yorgunlukEtki 1 (bound uzunlugunu yorgunluga gore kisaltma carpani; 0 = kapali)
+ *   teslim true, teslimEsik 0.15   moral endeksi bu esigin altina duserse (+ umutsuz kosullar) teslim; DUZENSIZ: teslim yok
  *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
  *
  * YENI ORDU EKLEME (kod degistirmeden, misyon init'te):
@@ -67,7 +69,8 @@ private _p = createHashMapFromArray [
     ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6],
     ["cekilGuvenM", 220], ["cekilEkSicrama", 4], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
-    ["kamuflaj", true], ["kamuflajMin", 0.6]
+    ["kamuflaj", true], ["kamuflajMin", 0.6],
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---
@@ -84,7 +87,7 @@ private _tanim = [
     ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]],
     // DUZENSIZ / TALIBAN-tipi isyanci (TAHMIN, kaynak dogrulanmadi): vur-kac, pusu agirlikli, kucuk dagitik takimlar, ates ustunlugu yoksa ERKEN temas keser,
     //   yakin mesafeden hucum, daha iyi gizlenme (camouflageCoef alt siniri 0.55), uzun dagilarak cekilme
-    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55]]]
+    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]]
 ];
 // misyon / kullanici tanimlari (ayni ad = ustune yazar)
 { _tanim pushBack _x; } forEach (missionNamespace getVariable ["lambs_danger_doktrinTanimlari", []]);

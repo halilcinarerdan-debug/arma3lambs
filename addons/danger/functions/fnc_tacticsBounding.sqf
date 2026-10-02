@@ -413,7 +413,20 @@ if (EGVAR(main,debug_functions)) then {
         // bantlar doktrin profilinden: [[mesafe_ustu, atilimMax, kazancMin], ...] buyukten kucuge
         private _bantlar = [group _kosan, "bantlar", [[200, 70, 15], [100, 40, 12], [0, 25, 8]]] call FUNC(dk);
         private _bnd = _bantlar select (((_bantlar findIf {_mesafe > (_x select 0)}) max 0) min ((count _bantlar) - 1));
-        private _atMax = _bnd select 1;
+        // v8.21 YORGUNLUK DUYARLI ATILIM: ACE advanced fatigue (anReserve, ~2300 J tam) varsa onun, yoksa vanilla getFatigue; rezerv dustukce atilim kisalir (en az x0.5)
+        private _yorgunluk = 0;
+        private _anR = _kosan getVariable ["ace_advanced_fatigue_anReserve", -1];
+        if (_anR >= 0) then { _yorgunluk = 1 - ((_anR / 2300) min 1); } else { _yorgunluk = (getFatigue _kosan) min 1; };
+        private _yorgCarpan = 1 - (0.5 * ([group _kosan, "yorgunlukEtki", 1] call FUNC(dk)) * _yorgunluk);
+        private _atMax = ((_bnd select 1) * _yorgCarpan) max 12;
+        if (_yorgunluk > 0.3) then {
+            if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
+            if (lambs_danger_yorgLogN < 40) then {
+                lambs_danger_yorgLogN = lambs_danger_yorgLogN + 1;
+                diag_log format ["[YORGUNLUK] %1 | %2 | yorgunluk:%3 (%4) | atilim siniri %5 -> %6 m", groupId (group _kosan), name _kosan, _yorgunluk toFixed 2, ["vanilla", "ACE"] select (_anR >= 0), round (_bnd select 1), round _atMax];
+            };
+        };
+
         private _kazMin = _bnd select 2;
         _siperMenzil = _siperMenzil min (_atMax + 10);
         private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
