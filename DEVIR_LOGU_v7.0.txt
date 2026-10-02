@@ -415,3 +415,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - Cekilme sonrasi 90 sn hucum ailesi yasak (DELAY)
 - fnc_atisGuvenli: RPG/UGL icin dost, geri patlama, cali/dal sekmesi, hat engeli kontrolu
 - Bound yaklasim acisi: kosucular +30/-30/0 derece dönüşümlü, siper puanina aci uyumu (0.2/derece)
+
+=== v7.14 ===
+- selectFormation: arazi Schmitt tetik (urban gir>=8/cik<3, orman gir>=25/cik<12), mesafe bandi histerezisi (50/150 m +10/+15), degisim bekleme 90 sn (zirh/agir kayip: 20 sn)

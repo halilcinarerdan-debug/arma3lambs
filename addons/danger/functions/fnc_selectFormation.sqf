@@ -125,8 +125,17 @@ private _trees = nearestTerrainObjects [
 private _treeCount = count _trees;
 
 // 3) Arazi tipi — ONCELIK SIRASI onemli
-private _isUrban  = _buildingCount >= 5;    // 8 → 5 (koyu de yakalar)
-private _isForest = !_isUrban && {_treeCount >= 20};   // 12 → 20, sadece urban degilse
+// ARAZI HISTEREZISI (Schmitt tetik): grup yururken sayim esikte oynar (4 <-> 6 bina) ve formasyon LINE <-> STAG COLUMN gidip gelirdi.
+// Girmek icin YUKSEK, cikmak icin DUSUK esik: urban gir >= 8 / cik < 3; orman gir >= 25 / cik < 12. Durum grupta saklanir.
+private _gA = group _unit;
+private _onceUrban  = !isNull _gA && {_gA getVariable [QGVAR(selUrban), false]};
+private _onceForest = !isNull _gA && {_gA getVariable [QGVAR(selForest), false]};
+private _isUrban  = if (_onceUrban) then {_buildingCount >= 3} else {_buildingCount >= 8};
+private _isForest = !_isUrban && {if (_onceForest) then {_treeCount >= 12} else {_treeCount >= 25}};
+if (!isNull _gA) then {
+    _gA setVariable [QGVAR(selUrban), _isUrban];
+    _gA setVariable [QGVAR(selForest), _isForest];
+};
 private _isOpen   = !_isUrban && {!_isForest};
 
 // Debug icin: yeni esikleri logla
@@ -188,6 +197,14 @@ switch (_context) do {
 
         if (_closest >= 9999) then { _cmbVeriYok = true; };
 
+        // MESAFE BANDI HISTEREZISI: 50 / 150 m esiginde mesafe titreyince bant degismesin (onceki banda +10 / +15 m pay)
+        private _bandOnce = _grup getVariable [QGVAR(selBand), 1];
+        private _t1 = [50, 60] select (_bandOnce <= 0);
+        private _t2 = [150, 165] select (_bandOnce <= 1);
+        if (!_cmbVeriYok) then {
+            _grup setVariable [QGVAR(selBand), [2, [1, 0] select (_closest < _t1)] select (_closest < _t2)];
+        };
+
         if (_arm > 0 && {_closest < 300}) then {
             _formation = "VEE";
             _reason = "zirh - dagilmis V (tek patlama hepsini almasin)";
@@ -200,11 +217,11 @@ switch (_context) do {
                     _formation = ["VEE", "STAG COLUMN"] select _isUrban;
                     _reason = "dusman MG - dagilmis (MG tek seritle kirmasin)";
                 } else {
-                    if (_closest < 50) then {
+                    if (_closest < _t1) then {
                         _formation = ["LINE", "STAG COLUMN"] select _isUrban;
                         _reason = "yakin temas - maksimum ates / bina kenari";
                     } else {
-                        if (_closest < 150) then {
+                        if (_closest < _t2) then {
                             _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {"LINE"}};
                             _reason = "orta mesafe temas - arazi + cephe";
                         } else {
@@ -280,12 +297,14 @@ if (EGVAR(main,debug_functions)) then {
     ] call EFUNC(main,debugLog);
 };
 
-// HISTEREZIS: formasyon degisimi en az 60 sn arayla (VEE <-> LINE <-> WEDGE dongusunu onler; agac / bina sayimi yuruyuste oynar)
+// KRITIK sebepler (zirh / agir kayip-ustun dusman) beklemeyi 20 sn'ye indirir; digerleri 90 sn
+private _kritik = ((_reason select [0, 4]) in ["zirh", "kayi"]);
+// HISTEREZIS: formasyon degisimi en az 90 sn arayla (VEE <-> LINE <-> WEDGE dongusunu onler; agac / bina sayimi yuruyuste oynar)
 private _histGrp = group _unit;
 if (!isNull _histGrp) then {
     private _sonF = _histGrp getVariable [QGVAR(selFormSon), ""];
     private _sonT = _histGrp getVariable [QGVAR(selFormT), -999];
-    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {(time < (_sonT + ([60, 45] select (_context isEqualTo "COMBAT")))) || {_cmbVeriYok}}) then {
+    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {((time < (_sonT + 90) && {!(_kritik && {time > (_sonT + 20)})}) || {_cmbVeriYok})}) then {
         _formation = _sonF;
     } else {
         if (_sonF isNotEqualTo _formation) then {
