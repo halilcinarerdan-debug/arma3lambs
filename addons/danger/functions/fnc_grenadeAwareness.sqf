@@ -249,10 +249,9 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
         {
             private _g = _x;
             if (isNull _g) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 20)) then { continue };
-
             private _leader = leader _g;
-            if (isNull _leader) then { continue };
+            if (isNull _leader || {isPlayer _leader}) then { continue };
+            if (!(local _leader)) then { continue };
 
             private _birimler = (units _g) select {
                 alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
@@ -262,7 +261,17 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             };
             if (_birimler isEqualTo []) then { continue };
 
-            private _bombalar = (getPosATL _leader) nearObjects ["GrenadeCore", 60];
+            // v7.5: nearObjects TEK BASINA YETMIYORDU (RPT'de hic tepki yok) -> Fired listesi (fnc_firedHub) + tarama
+            private _bombalar = ((getPosATL _leader) nearObjects ["GrenadeCore", 60])
+                + ((missionNamespace getVariable ["lambs_danger_grenadeList", []]) select {!isNull _x && {(_x distance2D _leader) < 60}});
+            _bombalar = _bombalar arrayIntersect _bombalar;
+            if (_bombalar isEqualTo []) then { continue };
+
+            // Dost bombasi (kendi tarafimiz / muttefik atti) -> kacma
+            _bombalar = _bombalar select {
+                private _atan = (getShotParents _x) param [1, objNull];
+                isNull _atan || {((side _g) getFriend (side (group _atan))) < 0.6}
+            };
             {
                 private _p = _x;
                 private _cfg = [typeOf _p] call _cfgFn;

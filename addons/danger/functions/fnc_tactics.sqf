@@ -38,6 +38,9 @@ params [["_unit", objNull, [objNull]], ["_target", objNull, [objNull]]];
 
 private _group = group _unit;
 
+// Keskin nisanci takimi (fnc_sniperTeam): komutan beyni / temas kes / tum bu taktikler uygulanmaz
+if (_group getVariable [QGVAR(sniperTeam), false]) exitWith {false};
+
 // Gecersiz tehdit (olu / dost / sivil / bos): komutan beyni calismaz
 private _tehditGecerli = _target isEqualType objNull
     && {!isNull _target}
@@ -68,6 +71,13 @@ if (isNil "lambs_danger_grenadeAwareStarted") then {
 if (isNil "lambs_danger_reloadCoverStarted") then {
     [] call (missionNamespace getVariable ["lambs_danger_fnc_reloadCover", {false}]);
 };
+
+// v7.5 katmanlari (acilista baslamadiysa ilk cagrida)
+{
+    if (isNil format ["lambs_danger_%1Started", _x]) then {
+        [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
+    };
+} forEach ["leaderSync", "cqbReflex", "sniperTeam", "firedHub", "buddyDebug"];
 
 if (EGVAR(main,debug_functions)) then {
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];

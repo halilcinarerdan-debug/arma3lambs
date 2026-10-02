@@ -43,6 +43,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
         {
             private _g = _x;
             if (isNull _g) then { continue };
+            if (_g getVariable [QGVAR(sniperTeam), false]) then { continue };
             if ((count (units _g)) < 2) then { continue };
 
             private _leader = leader _g;

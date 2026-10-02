@@ -85,7 +85,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 || {(vehicle _x) isKindOf "Tank"}
                 || {(vehicle _x) isKindOf "Wheeled_APC_F"}
             }) > -1;
-            private _yaricap = [5, 8] select _buyukTehdit;
+            private _yaricap = [9, 14] select _buyukTehdit;   // v7.5: 5/8 -> 9/14 (tek RPG / el bombasi hepsini almasin)
 
             // Komsu sayilari
             private _komsuSay = _u apply {
@@ -129,7 +129,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                     private _dir = _merkez getDir _apos;
 
                     // Hedef: merkezden uzaga 7-10m; yakinda siper varsa orayi tercih et
-                    private _hedef = _apos getPos [(_yaricap + 2) max 7, _dir + ((random 40) - 20)];
+                    private _hedef = _apos getPos [(_yaricap + 3) max 12, _dir + ((random 40) - 20)];
 
                     private _dusman = _a findNearestEnemy _a;
                     if (!isNull _dusman && {_butce > 0}) then {

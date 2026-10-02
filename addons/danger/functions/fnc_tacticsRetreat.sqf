@@ -185,9 +185,24 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _tumBirimler;
     };
 
+    // v7.5: "sadece lider cekiliyor, digerleri catismaya devam ediyor" duzeltmesi:
+    //   - <= 4 asker: BOLME YOK, herkes birlikte (cift cift) cekilir (eskiden 3 kisilik grupta biri ates ediyordu)
+    //   - > 4 asker: ortu takimi en fazla n/3 (MG'ler), geri kalan herkes sicrar
+    private _nCek = count _tumBirimler;
+    if (_nCek <= 4) then {
+        _alpha = +_tumBirimler;
+        _bravo = [];
+    } else {
+        private _bMax = ceil (_nCek / 3);
+        if (count _bravo > _bMax) then {
+            _alpha append (_bravo select [_bMax, count _bravo]);
+            _bravo = _bravo select [0, _bMax];
+        };
+    };
+
     diag_log format [
-        "[GERI-CEKILME] %1 takimlar | ALPHA:%2 BRAVO(FSE):%3",
-        groupId _group, count _alpha, count _bravo
+        "[GERI-CEKILME] %1 takimlar | ALPHA:%2 BRAVO(FSE):%3 | toplam:%4",
+        groupId _group, count _alpha, count _bravo, _nCek
     ];
 
     // Genel ayarlar: kacma YOK. forceMove burada TUM askerlere konmaz (ates altinda siper
@@ -276,6 +291,14 @@ if (EGVAR(main,debug_functions)) then {
             sleep 3;
         };
 
+        // Sicrama sonucu (diagnostik): kac asker gercekten vardi
+        diag_log format [
+            "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5",
+            groupId _grup, _no,
+            count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 9}}),
+            count _varis, count _pinned
+        ];
+
         // 4) Vardilar: siperde alcal, artik ortu atesi veren takima katilirlar
         {
             private _b = _x select 0;
@@ -298,16 +321,25 @@ if (EGVAR(main,debug_functions)) then {
         [_g, _tp, "BREAK_CONTACT"] call _sisFn;
     };
 
-    private _sira = [
-        [_alpha, _bravo, 0],
-        [_bravo, _alpha, 1],
-        [_alpha, _bravo, 2],
-        [_bravo, _alpha, 3]
-    ];
+    private _sira = if (_bravo isEqualTo []) then {
+        [
+            [_alpha, [], 0],
+            [_alpha, [], 1],
+            [_alpha, [], 2]
+        ]
+    } else {
+        [
+            [_alpha, _bravo, 0],
+            [_bravo, _alpha, 1],
+            [_alpha, _bravo, 2],
+            [_bravo, _alpha, 3]
+        ]
+    };
 
     {
         _x params ["_hareket", "_kapsama", "_wpIdx"];
         if (isNull _group) exitWith {};
+        if ((_hareket select {alive _x}) isEqualTo []) then { continue };
         [
             _group,
             _hareket select {alive _x},

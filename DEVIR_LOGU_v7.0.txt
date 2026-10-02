@@ -353,3 +353,24 @@ SENTINEL (ilk temasta): [DAGILMA] [BUDDY] [ROL] [RELOAD] [EL-BOMBASI] ... baslat
   Retreat/Evade/BreakContact/ATEngage/FLANK/ASSAULT atlanir. RPT: [KOMUTAN-BEKLE].
 - XEH_PREP.hpp: leaderSync PREP + boot (v7.4).
 - main/XEH_PREP.hpp: stok dosya (danger icerigi yanlislikla main'e kopyalanmisti).
+
+
+=== v7.5 — RPT TESHISI + SES/PARLAMA + KESKIN NISANCI + CQB + SIPER ===
+RPT bulgulari (03:24 oturumu): AI'lar Zeus'tan olusturuldugu icin ISTEMCIDE yerel; sunucu RPT'si neredeyse bos.
+  - leaderSync istemcide baslamamisti (lazy start eksik) -> eklendi; boot artik HER makinede (watchdog'lar sadece yerel gruplara dokunur).
+  - El bombasi: tek tepki logu yok -> nearObjects tek basina yetmiyordu; Fired olay listesi eklendi (fnc_firedHub), temas kapisi kaldirildi,
+    dost bombasi (getShotParents) atlanir.
+  - Geri cekilme "sadece lider cekiliyor": <=4 askerde ALPHA/BRAVO bolmesi biri ates ederken digerinin kacmasina yol aciyordu.
+    Artik <=4 asker BIRLIKTE cekilir; >4'te ortu takimi en fazla n/3; bos sicramalar atlanir; sicrama sonucu loglanir.
+Yeni:
+  - fnc_firedHub: Fired olayi tek yerde (el bombasi listesi, ses/parlama, MG flas gizleyici otomatik takma, oyuncu atisi remoteExec ile).
+  - fnc_soundAwareness: tabanca/tufek/MG/roketatar/40mm menzilleri, susturucu (audibleFire katsayisi + supersonik catlama), parlama (gece 700 / gun 120 m,
+    visibleFire katsayisi), roket arka alevi/duman, surekli ates. Sadece reveal + yaklasik yon (hile yok). RPT: [SES].
+  - MG flas gizleyici: namlusunda aksesuar yoksa uyumlu en iyi flas gizleyici takilir.
+  - fnc_cqbReflex: bilinen dusman <=28 m: don/hedef al/ates, roketatar->tufek, diz coker, nisan beceri tabani (geri alinir);
+    baski>=0.35 acikta ayaktaysa 12 m icinde siper ya da yatar. RPT: [CQB].
+  - fnc_sniperTeam + fnc_isSniper: keskin nisanci (+gozlemci) ana timdan ayri "<grup> SNIPER" grubu: buddy/dagilma/rol/bounding/komutan disi;
+    baris: arka-yan 70 m formasyonu izler; temas: LOS'lu 140-700 m yuksek/ortulu pozisyon, yatar + STEALTH, gozlemci GREEN ve hedef bildirir,
+    yanarsa yer degistirir, dusman <=70 m ana komutanin arkasina cekilir. RPT: [SNIPER].
+  - fnc_buddyDebug (istemci Draw3D): buddy cizgileri (yesil/sari/kirmizi), rol + mesafe etiketi, sniper cizgisi. lambs_danger_buddyDebug = true/false.
+  - Dagilma yaricapi 5/8 -> 9/14 m, tasima mesafesi 12+ m.
