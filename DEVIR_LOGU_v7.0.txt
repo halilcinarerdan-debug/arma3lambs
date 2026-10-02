@@ -680,3 +680,10 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   Kullanim (v1): tacticsBounding cycle 1 - MG / nisanci icin 45 m icinde HAKIM NOKTA (>= 2.5 m yuksek, tehdidi yatikken goren, ufukta olmayan) varsa gozetleme pozisyonu oradadir ([ARAZI-KOMUTAN]).
   SONRAKI: komutan kararlarinda aciklik / olu arazi (acikta HOLD yerine ortulu yaklasma, kapali arazide kisa bound), rota planlamada olu arazi koridoru, hold pozisyonu secimi.
 - Log etiketleri: [ARAZI], [ARAZI-KOMUTAN], [KAMUFLAJ], [KAMUFLAJ-YER]; rpt_ozet 'KAMUFLAJ / ARAZI BILINCI' bolumu.
+=== v8.14 SAGLIK / ANOMALI + ORTAM BECERI DUSUSU + retreat ek sicrama adimi ===
+- fnc_saglik: 5 sn'de bir tarar, sorunlari [ANOMALI] kod | grup | detay ile ISARETLER (60 sn'de bir / anahtar): BAYRAK-TAKILI, AI-KAPALI-SIZINTI, BIRIM-AI-KAPALI, KILIT-UZUN, YURUMUYOR (MOVE ama duruyor), LIDER-YALNIZ, GRUP-EZILMIS, TEMAS-YOK-COMBAT; 60 sn'de bir [SAGLIK] ozet.
+- rpt_ozet: ANOMALI bolumu; --anomali (sadece anomali + saglik ozeti), --grup "Alpha 1-1" (zaman cizelgesi, tekrarlar birlesik), --aralik HH:MM:SS-HH:MM:SS. DURUM-GRUP'a AMB (pusu) bayragi eklendi.
+- fnc_ortamSkill (in-the-box, CF_BAI benzeri; kaynak kodu degil README / arama ozeti temel alindi): spotDistance / spotTime / aimingAccuracy / aimingShake / aimingSpeed taban x carpan: gece (NVG'siz 0.45 / NVG'li 0.10), sis, yagmur, bitki ortusu (X^2), baski, yara, yorgunluk; alt sinir x0.35.
+  CF_BAI yuklu ise CAKISMA onleme icin KAPALI baslar (lambs_danger_ortamSkillZorla = true ile zorla). Kapatma: lambs_danger_ortamSkillV1 = false; olcek lambs_danger_ortamSkillOlcek (1). Log [ORTAM-SKILL].
+  DIKKAT: CF_BAI'yi birakip bunu kullanirsan ayni anda iki skill modu calistirma; CF_BAI'deki 'follow-up shots' (arka arkaya atis) bu surumde YOK.
+- Retreat ek sicrama: nokta artik grubun ARKASINDAN (en uzak asker) olculur, adim >= 35 m. Neden: RPT 13:09'da sicrama 1 sn'de 'vardi 4/4' ile bitiyor, mesafe 101-103 m'de kaliyordu.

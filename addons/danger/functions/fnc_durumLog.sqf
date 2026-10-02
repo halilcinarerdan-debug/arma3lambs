@@ -85,7 +85,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
             private _bayrak = [];
             { if (_g getVariable [_x select 0, false]) then { _bayrak pushBack (_x select 1); }; } forEach [
                 [QGVAR(isBounding), "BND"], [QGVAR(isRetreating), "RET"], [QGVAR(isEvading), "EVD"],
-                [QGVAR(isBreakingContact), "BRK"], [QGVAR(isExecutingTactic), "TAK"], [QGVAR(isATEngage), "ATE"]
+                [QGVAR(isBreakingContact), "BRK"], [QGVAR(isAmbushing), "AMB"], [QGVAR(isExecutingTactic), "TAK"], [QGVAR(isATEngage), "ATE"]
             ];
 
             diag_log format [

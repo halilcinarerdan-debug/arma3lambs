@@ -558,7 +558,12 @@ if (EGVAR(main,debug_functions)) then {
         if ((_group getVariable [QGVAR(contact), 0]) <= time) exitWith {};
         _targetPos = _tp;
         _targetASL = AGLToASL _tp;
-        private _o = getPosATL _ld;
+        // v8.14: ek sicrama GRUBUN ARKASINDAN olculur (en uzak asker) ve adim >= 35 m (RPT 13:09: lider onde oldugu icin nokta zaten askerlerin 12 m icindeydi,
+        //   sicrama 1 sn'de "vardi 4/4" bitiyor, mesafe 101-103 m'de kaliyordu = retreat mesafe kazanmiyordu)
+        private _arka = _ld;
+        { if ((_x distance2D _tp) > (_arka distance2D _tp)) then { _arka = _x; }; } forEach _canli;
+        _adimBoy = _adimBoy max 35;
+        private _o = getPosATL _arka;
         private _wpE = [_o, _tp getDir _o] call _wpSec;
         _wpE = [_wpE, _o] call _suKontrol;
         private _ciftMi = (_ekNo % 2) isEqualTo 0;

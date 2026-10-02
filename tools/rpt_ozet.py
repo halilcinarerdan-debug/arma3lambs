@@ -3,6 +3,9 @@
 """
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
+           --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
+           --grup "Alpha 1-1"   o grubun ZAMAN CIZELGESI (olay / bounding / retreat / pusu / karar / anomali, tekrarlar birlestirilir)
+           --aralik 12:50:00-12:55:00   cizelgeyi / anomaliyi zaman araligiyla sinirla
 
 Her RPT icin tek ekranlik ozet: build, etiket sayilari, spam tespiti, komutan kararlari, bounding, retreat, doktrin puani,
 el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
@@ -10,7 +13,7 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
@@ -125,6 +128,14 @@ def ozet(path):
     print("  stealth yer degistirme (ufuk cizgisinden cekilme):", len([1 for l in satirlar if "[KAMUFLAJ-YER]" in l]))
     az = [l for l in satirlar if "[ARAZI] " in l]
     print("  arazi analizi:", len(az), "| hakim nokta bulunan:", len([1 for l in az if "hakim:+" in l]), "| komutan gozetleme hakim nokta:", len([1 for l in satirlar if "[ARAZI-KOMUTAN]" in l]))
+    an = [l for l in satirlar if "[ANOMALI]" in l]
+    print("\n-- ANOMALI (saglik izleyicisi) --")
+    if an:
+        kod = collections.Counter(re.search(r"\[ANOMALI\] ([A-Z-]+)", l).group(1) for l in an if re.search(r"\[ANOMALI\] ([A-Z-]+)", l))
+        print("  ", dict(kod))
+        for l in an[:8]: print("   ", re.sub(r"^\s*", "", l)[:170])
+    else:
+        print("  yok (saglik izleyicisi: v8.14+; sorun bulunmadi)")
     ps = [l for l in satirlar if "[PUSU]" in l]
     print("\n-- PUSU / ATES EMRI --")
     if ps:
@@ -176,9 +187,68 @@ def ozet(path):
     else:
         print("  yok")
 
+def zaman_cizelgesi(path, grup, aralik):
+    """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
+    ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
+            "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "PUSU", "CMD", "DURUM-GRUP", "ANOMALI", "ROTA", "KAMUFLAJ-YER", "SIS", "KOMUTAN-BEKLE")
+    t0, t1 = 0, 99999999
+    if aralik:
+        a, b = aralik.split("-")
+        t0, t1 = sn(a), sn(b)
+    onceki, tekrar = None, 0
+    for l in open(path, encoding="utf-8", errors="replace").read().splitlines():
+        m = re.match(r'\s*(\d+:\d\d:\d\d)\s+"?\[([A-Z0-9-]+)\]', l)
+        if not m or m.group(2) not in ETIK or grup not in l:
+            continue
+        t = sn(m.group(1))
+        if t < t0 or t > t1:
+            continue
+        govde = re.sub(r"^\s*\d+:\d\d:\d\d\s*", "", l).strip('" ')
+        anahtar = re.sub(r"[0-9.]+", "#", govde)[:90]
+        if anahtar == onceki:
+            tekrar += 1
+            continue
+        if tekrar:
+            print("      (x%d benzer satir)" % tekrar)
+        onceki, tekrar = anahtar, 0
+        print("%s  %s" % (m.group(1), govde[:200]))
+    if tekrar:
+        print("      (x%d benzer satir)" % tekrar)
+
+def anomali_listesi(path, aralik):
+    t0, t1 = 0, 99999999
+    if aralik:
+        a, b = aralik.split("-")
+        t0, t1 = sn(a), sn(b)
+    for l in open(path, encoding="utf-8", errors="replace").read().splitlines():
+        m = re.match(r'\s*(\d+:\d\d:\d\d)\s+"?\[(ANOMALI|SAGLIK)\]', l)
+        if m and t0 <= sn(m.group(1)) <= t1:
+            print(re.sub(r"^\s*", "", l)[:220])
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+    grup = aralik = None
+    sadece_anomali = False
+    yollar = []
+    i = 0
+    while i < len(args):
+        if args[i] == "--grup" and i + 1 < len(args):
+            grup = args[i + 1]; i += 2
+        elif args[i] == "--aralik" and i + 1 < len(args):
+            aralik = args[i + 1]; i += 2
+        elif args[i] == "--anomali":
+            sadece_anomali = True; i += 1
+        else:
+            yollar.append(args[i]); i += 1
+    if not yollar:
         print(__doc__)
         sys.exit(1)
-    for p in sys.argv[1:]:
-        ozet(p)
+    for p in yollar:
+        if grup:
+            print("=" * 78); print(p, "| grup:", grup, "| aralik:", aralik or "tum")
+            zaman_cizelgesi(p, grup, aralik)
+        elif sadece_anomali:
+            print("=" * 78); print(p)
+            anomali_listesi(p, aralik)
+        else:
+            ozet(p)
