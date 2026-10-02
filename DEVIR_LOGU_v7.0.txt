@@ -859,3 +859,13 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 === v8.34b (RPT 2026-10-03 00:07, v8.34; kullanici: 'modul gozukmuyor') ===
 - RPT: v8.34 yuklu, tum fonksiyonlar true, [HQ] cekirdegi basladi; modul Zeus'ta YOK. KOK NEDEN: Zeus yalniz config.cpp CfgPatches units[] listesindeki modulleri gosterir (upstream: SetRadio, DisableAI, ConfigureGroupAI); GVAR(Kumanda) eklenmemisti.
   Duzeltme: addons/danger/config.cpp (upstream kopyasi + Kumanda). Kullanicinin agacinda config.cpp farkliysa YALNIZ units[] satirina QGVAR(Kumanda) eklenmeli.
+=== v8.35 PUSU DOKTRIN v2 (kullanici: 'vbs ozelliklerini ekleyelim'; kalan VBS4: pusu security unsuru, rota ara nokta zinciri, kapi / oda, hendek / mevzi; once PUSU cunku TC 3-21.76 metni elimizde) ===
+- Kaynak: TC 3-21.76 s. 7-10 ... 7-14 (Hasty / Deliberate Ambush; kaynaklar_doktrin/). Dogrulanan ilkeler: security unsurlari yan + arkayi kollar ('move a given distance, set up, rejoin after ambush'; squad seviyesinde dis ekipler yan guvenlik + kill zone'a ates);
+  'not initiated until the majority of the enemy is in the kill zone'; en buyuk etkili silahla ates; ates kaydirma / kesme sinyali; 'PL determines if enemy force is too large'; sonda kontrollu cekilme + sayim + reorganizasyon + rapor.
+- Eski pusu: ilk dusman pusuAtesM (70 m)'ye girince ates (yani 'cogunluk' degil, 'ilk adam'); security yok; dusman buyuklugu kontrolu yok; pusu sonrasi yok.
+- v8.35 (fnc_pusu): (1) SECURITY: >= 5 kisi: en sol / en sag asker yan guvenlik (eksen +-90 derece, 22 m, TASARIM), >= 7 kisi arka guvenlik (20 m); dis yana bakar. Log [PUSU-GUVENLIK].
+  (2) ATES: bilinen dusman >= 3 ise >= pusuCogunluk (0.6, TASARIM) kill zone'da (yaricap pusuKzYaricap 35 m, merkez pusuAtesM'de, TASARIM); <= 2 dusmanda en yakin <= pusuAtesM; ek: en yakin <= 35 m / ele verildi. Log [PUSU-KZ] (5 sn'de bir).
+  (3) IPTAL: bilinen dusman (lider + guvenlik gozu, nearTargets 400 m, knowsAbout >= 0.4; takipciler dahil) > kendi sayi x pusuBuyukOran (2.0, TASARIM) ise 'IPTAL:dusman cok buyuk'.
+  (4) PUSU SONRASI: ates + 8 sn sonra, temas koptugunda (<= 100 sn) fnc_toparlan (sayim / rapor / halka guvenligi).
+- DOGRULANMADI: guvenlik askerlerinin dogru kanat konumuna gidip pusuyu bozmamasi (hareket gurultusu / gorulme); cogunluk hesabinin gercek yuruyen kolonda cok gec ates ettirip ettirmemesi (kill zone merkezi sabit); nearTargets knowsAbout esigi; toparlan'in pusu sonrasi kullanimi.
+- Kalan VBS4: rota ara nokta zinciri, kapi / oda temizleme (kapi selectionPosition + yigilma), hendek / mevzi (VBS #6; mevzi araligi 5-20 m MCWP 3-11.2; ACE trench nesneleri + AI giremez siniri).

@@ -71,3 +71,11 @@ Yaprak testi icin konsol: `lambs_danger_yaprakTest = true;` (ilk 400 degerlendir
 2. Gorsel: retreat bittikten sonra askerler lider etrafinda halka olup DISA bakmali (tehdit yonune MG / AT), bir kisi 30-45 m onde gizli gozetleme noktasinda; dusman cikarsa toparlanma bitmeli ve komutan yeni karar vermeli. 90 sn icinde otomatik hucum olmamali.
 3. Kanat: hucum baslayinca (`[HQ-KANAT] SALDIRI`) sabitleyen grubun atesi dusmanin otesine kaymali (yakin kanatta dost atesi olursa yaz).
 4. Sorun isaretleri: retreat cok erken bitiyor mu ('gozlem yok' ile 20-30 sn'de), halkada askerlerin binanin / duvarin icine dusmesi, toparlanma sonrasi askerlerin kaybolmasi (doFollow).
+
+## v8.35 PUSU DOKTRIN v2 testi
+Kurulum: bir grup (>= 6 kisi) yol kenari, digeri (>= 4 kisi) yola dogru yuruyor (90-260 m, temas yok).
+1. Beklenen log: `[PUSU] BASLADI`, `[PUSU-GUVENLIK] ... SOL / SAG (ARKA >= 7 kisi)`, `[PUSU-KZ] bilinen:N | kill zone icinde:K` (5 sn'de bir). Gorsel: iki asker kanatlara gidip disa bakmali.
+2. Ates `ATES:cogunluk kill zone'da (K / N)` ile baslamali (ilk adam 70 m'ye girince degil); az dusmanda (<= 2) `ATES:kill-box`.
+3. Cok kalabalik dusman (> kendi sayinin 2 kati): `IPTAL:dusman cok buyuk` ve pusu ateş acmamali.
+4. Ates sonrasi temas kopunca `[TOPLAN] BASLA` (halka + rapor) gorulmeli.
+5. Sorun isaretleri: guvenlik askeri pusuyu ele veriyor (dusman erken doner), cogunluk kriteri cok gec ates (dusman gecip gidiyor).
