@@ -13,6 +13,8 @@
  *   sis f     : normal / NVG 1 - 0.55 f | termal 1 - 0.25 f
  *   yagmur r  : normal 1 - 0.25 r | NVG 1 - 0.35 r (parazit / hale) | termal 1 - 0.20 r (su sogurur)
  * spotTime  = 1 - 0.6 x (1 - spotDistance carpani);  aimingAccuracy = 1 - 0.3 x (1 - spotDistance carpani);  alt sinir x0.25
+ * TABAN = askerin O ANKI becerisi (misyon / Zeus / zorluk / baska mod ne verdiyse); BU FORK VARSAYILAN BECERI ATAMAZ. Taban ilk dokunusta bir kez okunur;
+ *   sonradan elle degistirirsen lambs_danger_ortamTabanSifirla = true (taban yeniden okunur). cqbReflex aktifken o birime dokunulmaz.
  * Cihaz tipi sinif basina onbellekte (hashmap). Olcek: lambs_danger_ortamSkillOlcek (1 varsayilan, 0 etkisiz).
  *
  * CF_BAI (ya da baska beceri modu) yuklu ise CAKISMA olmasin diye KAPALI baslar (RPT'de uyari);
@@ -74,6 +76,9 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
 
         for "_i" from 0 to (_kesit - 1) do {
             private _u = _askerler select ((_indeks + _i) mod _n);
+            // cqbReflex gecici beceri artirir (aimingSpeed / aimingAccuracy) ve eski degeri geri yazar: o sirada dokunma (taban bozulmasin)
+            if ((_u getVariable [QGVAR(cqbSkill), []]) isNotEqualTo []) then { continue };
+            if (missionNamespace getVariable ["lambs_danger_ortamTabanSifirla", false]) then { _u setVariable [QGVAR(ortamTaban), nil]; };
             private _taban = _u getVariable [QGVAR(ortamTaban), []];
             if (_taban isEqualTo []) then {
                 _taban = _beceriler apply {_u skill _x};
@@ -113,11 +118,12 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
                 if (isNil "lambs_danger_ortamLogN") then { lambs_danger_ortamLogN = 0; };
                 if (lambs_danger_ortamLogN < 40) then {
                     lambs_danger_ortamLogN = lambs_danger_ortamLogN + 1;
-                    diag_log format ["[ORTAM-SKILL] %1 | isik:%2 cihaz:%3 (%4) sis:%5 yagmur:%6 | carpan spotD:%7 spotT:%8 aim:%9", name _u, _isik toFixed 2, _cihaz, ["normal", "NVG", "termal"] select _cihaz, _sis toFixed 2, _yagmur toFixed 2, _mSD toFixed 2, _mST toFixed 2, _mAA toFixed 2];
+                    diag_log format ["[ORTAM-SKILL] %1 | isik:%2 cihaz:%3 (%4) sis:%5 yagmur:%6 | carpan spotD:%7 spotT:%8 aim:%9 | taban spotD:%10 aim:%11 | yazilan spotD:%12 okunan spotD:%13", name _u, _isik toFixed 2, _cihaz, ["normal", "NVG", "termal"] select _cihaz, _sis toFixed 2, _yagmur toFixed 2, _mSD toFixed 2, _mST toFixed 2, _mAA toFixed 2, (_taban select 0) toFixed 2, (_taban select 2) toFixed 2, (_yeni select 0) toFixed 2, (_u skill "spotDistance") toFixed 2];
                 };
             };
         };
         _indeks = _indeks + _kesit;
+        if (missionNamespace getVariable ["lambs_danger_ortamTabanSifirla", false] && {_indeks >= _n}) then { missionNamespace setVariable ["lambs_danger_ortamTabanSifirla", false]; diag_log "[ORTAM-SKILL] taban degerleri sifirlandi (yeniden okunacak)"; };
     };
 };
 

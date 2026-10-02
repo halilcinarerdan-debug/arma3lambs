@@ -707,3 +707,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - rpt_ozet --karne: TOPLU TEST KARNESI (SURUM, SCRIPT HATASI, RETREAT, ROTA, PUSU, KAMUFLAJ, ARAZI, ORTAM SKILL, YAPRAK, SAGLIK, OLAY, DOKTRIN, UGL; OK / KONTROL / YOK + kanit). BEKLENEN_SURUM sabiti her surumde guncellenir.
 - TEST_SENARYOLARI.md: TOPLU TEST PLANI (A-F bloklari).
 - Bilinen risk / varsayim: forgetTarget'in motor tarafindan hemen yeniden kazanilmasi (cift basina 4 sn bekleme ile sinirli); cim tespiti yuzey sinifi adina bagli (haritaya gore 'grass' gecmeyebilir); nearestTerrainObjects BUSH / SMALL TREE harita sinifina bagli ([YAPRAK-TANI] dogrular).
+=== v8.16b ORTAM SKILL: TABAN NASIL BELIRLENIR (kullanici sorusu) ===
+- Bu fork VARSAYILAN BECERI ATAMAZ. Taban = askerin o anki 'skill' degeri (misyon, Zeus, zorluk ayari, baska mod); ilk dokunusta bir kez saklanir, sonra her zaman taban x carpan uygulanir.
+- Cakisma bulgusu: fnc_cqbReflex aimingSpeed / aimingAccuracy'yi gecici artirip geri yazar; ortamSkill onu ezebilirdi -> cqbSkill aktifken o birime dokunulmaz. Elle degisiklik icin lambs_danger_ortamTabanSifirla = true.
+- Log [ORTAM-SKILL]'e taban + yazilan + OKUNAN spotDistance eklendi: motor setSkill degerini zorluk olcegiyle degistirip geri okuyabilir (yazilan != okunan ise rapor ET).
