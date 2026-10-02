@@ -605,3 +605,12 @@ Siralama: 1) Siper + atis analizi v2 (faz 1 yazildi; test: cover_acik_alan)  2) 
 3) Pusu davranisi + ates emri ROE (test: pusu_yol)  4) Olay mesajlari (v8.4 yazildi; test: olay_temas)  5) Kapi / oda temizleme (kapi_oda)
 6) Hendek / mevzi (hendek_hatti)  7) Yorgunluk duyarli bound (yorgunluk_yaklasma)  8) Teslimiyet / moral (teslimiyet_kusatma)
 HIBRIT DUZEN: her testte yeni ozellik + retreat dogrulamasi (retreat_kayipli). Senaryo adlari TEST_SENARYOLARI.md'de.
+
+
+=== v8.5 RETREAT SICRAMA PENCERESI (RPT 12:02 analizi) ===
+- RPT 6f03b798 (v8.4): hata 0, doktrin puani ort 77, bounding hareket orani %47, siper v2 %15 degisim, [OLAY] 37 satir (InContact/Casualty/Bounding/Retreat ciftleri tutarli; AllClear hic olusmadi = temas kesilmedi).
+- Retreat Alpha 1-4 (8 kisi): 40 sn'de 4 sicrama, bu pencerede KAYIP YOK, grup 8 kisi ayrildi -> fiilen calisti. 'vardi' olcumu yaniltici: BRAVO 43-62 m uzaktan basladi, 12 sn yetmedi (0/3).
+  Duzeltme: sicrama penceresi = clamp(en uzak mesafe/3.5 + 4, 12, 26) sn; taktik kilidi 32 sn.
+- Retreat Alpha 1-1 (5 kisi, dusman 118 m): 8->1 kisi; dusman 43 m'ye kadar takip etti (PEEL 3 kisiyle) -> cok az kisiyle cekilme kacinilmaz zayiat; ayri bug degil.
+- Birim duzeyi disableAI: retreat sirasinda LAMBS FLANK/Group Suppress gorulmedi (FLANK ancak retreat bittikten sonra 12:08:07) -> v8.3 dogrulandi.
+- Dogrulanamayan: AllClear guvenlik agi (temas kesilmedi), GrenadeAlgilandi (4 atis 'ilk tepki YOK' - menzil disi olabilir; ayrica incelenecek).

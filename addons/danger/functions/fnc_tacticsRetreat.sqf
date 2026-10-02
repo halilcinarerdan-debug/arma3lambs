@@ -281,7 +281,7 @@ if (EGVAR(main,debug_functions)) then {
     private _sicra = {
         params ["_grup", "_hareketEdenler", "_kapsama", "_wp", "_hedefASL", "_no"];
         // HAREKET ARBITRAJI: retreat'e katilan herkes taktik kilidinde (diger watchdog'lar hareket emri vermez)
-        { if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 25]; }; } forEach (units _grup);
+        { if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 32]; }; } forEach (units _grup);
 
         diag_log format [
             "[GERI-CEKILME] %1 sicrama %2 | hareket:%3 kapsama:%4",
@@ -332,7 +332,11 @@ if (EGVAR(main,debug_functions)) then {
         // 3) Varisa kadar bekle (en fazla 16 sn, %75 vardiysa erken cik); sadece TAKILANA (3.5 sn ilerleyemeyen) emri tazele —
         //    her 3 sn'de doMove tekrari yol hesabini sifirlayip askeri yerinde tutuyordu
         private _t0 = time;
-        private _bitis = time + 12;
+        // Pencere MESAFEYE gore: en uzaktaki hareket eden / ~3.5 m/s + 4 sn kalkis (yatis/comelmeden kalkma), 12..26 sn
+        // (RPT 12:07: BRAVO 43-62 m uzaktan basladi, 12 sn yetmedi -> vardi 0/3 gorunuyordu)
+        private _uzak = 0;
+        { _uzak = _uzak max ((_x select 0) distance2D (_x select 1)); } forEach _varis;
+        private _bitis = time + ((12 max ((_uzak / 3.5) + 4)) min 26);
         private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
