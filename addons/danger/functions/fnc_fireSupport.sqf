@@ -120,8 +120,9 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                 if (isNull _e || {!alive _e} || {!isNull objectParent _e}) then { continue };
                 if ((_u distance2D _e) > 100) then { continue };
                 if (captive _e || {(animationState _e) find "sdr" >= 0} || {(animationState _e) find "surrender" >= 0}) then { continue };
-                if (!([_e] call _silahsiz)) then { continue };
-                if (lineIntersects [eyePos _u, eyePos _e, _u, _e]) then { continue };
+                // <= 6 m: silah durumuna bakmadan (LAMBS assault / "Enemy Detected" dongusunde 2-3 m'de ates etmeden bekleme)
+                if ((_u distance2D _e) > 6 && {!([_e] call _silahsiz)}) then { continue };
+                if ((_u distance2D _e) > 3 && {lineIntersects [eyePos _u, eyePos _e, _u, _e]}) then { continue };
 
                 _u setVariable [QGVAR(unarmedT), time + 6];
                 _u reveal [_e, 4];
