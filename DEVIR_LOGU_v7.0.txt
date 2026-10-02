@@ -889,3 +889,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - DUZELTME: (1) selectFormation: setFormDir yalniz sapma > 35 derece VE son uygulamadan >= 40 sn (selFdirV / selFdirT; ilk seferde uygulanir). (2) tacticsBounding baslangic setFormDir ayni histerezis (ortak degiskenler). (3) commanderFormation: aralik 12 -> 25 sn (basliktaki gibi) + grupta bastirma >= 0.3 olan asker varsa formasyona dokunmaz.
 - DOGRULANMADI: etkisizligin tek sebebi bu mu (RPT'de BOSTA-HAREKET 4 / TEMAS-YOK-COMBAT 4 / YURUMUYOR 9 ayri inceleme gerektirir); retreat varis 0/20 ve [GERI-CEKILME-BITIS] logunun ek-sicrama bitisinde yazilmamasi bu surumde DUZELTILMEDI.
 - NOT: 'Destroy waypoint not linked to a target' spami misyon tarafi (Destroy waypoint'e hedef bagla ya da SAD / Move kullan). KUMANDA modulu bu RPT'de yerlestirilmemis -> HQ hala oyun testi bekliyor.
+=== v8.39 SIPERDE YIGILMA (kullanici: 'tek bir building varsa herkes o covera giriyor, cok sik pozisyon aliyorlar') ===
+- NEDEN: fnc_eliteCover birim basina bagimsiz puanliyordu; tek bina / yikinti varsa hepsi ayni en iyi noktayi secti. fnc_coverHug dost mesafesi yalniz 0.9 m idi.
+- DUZELTME: eliteCover: 40 m'deki dostlarin konumu + son 25 sn'de sectikleri siper noktasi (eliteCoverPos); adayin 4 m'sinde her dost -45 puan (en fazla 3). coverHug: yeni noktanin 2.5 m'sinde dost varsa reddet.
+- DOKTRIN: MCWP 3-11.1 'disperse the effects of enemy fire' (genel ilke); 4 m / 2.5 m / 45 puan TASARIM sayilari (kaynakta sayi yok).
+- DOGRULANMADI: yalniz ONCEKI (zaten yigilmis) askerler dagilmaz; el bombasi / UGL / RPG atici konumlanmasi (fireSupport) ayri incelenmedi; tek duvarda hat boyunca dizilme gorsel olarak makul mu.

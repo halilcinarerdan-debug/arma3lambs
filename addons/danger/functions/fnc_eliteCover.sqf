@@ -76,6 +76,17 @@ private _bakisYonu = _unitPos getDir _enemyPos;
 
 private _adaylar = [];
 
+// v8.39: DAGILMA — tek bina / yikinti varsa herkes ayni siper noktasini secip yigiliyordu (doktrin: dusman atesinin etkisini dagit;
+//   tek el bombasi / RPG hepsini almasin). Yakindaki dostlarin konumu + son 25 sn'de sectikleri siper noktasi: ayni noktaya (4 m) her dost -45 puan
+private _dostNoktalar = [];
+{
+    if (_x isNotEqualTo _unit && {alive _x}) then {
+        _dostNoktalar pushBack (getPosATL _x);
+        private _kl = _x getVariable [QGVAR(eliteCoverPos), []];
+        if (_kl isNotEqualTo [] && {(time - (_kl select 1)) < 25}) then { _dostNoktalar pushBack (_kl select 0); };
+    };
+} forEach ((_unit nearEntities ["CAManBase", 40]) select {(side group _x) isEqualTo (side group _unit)});
+
 for "_i" from 0 to _yonMax do {
     private _yon = _i * _yonAdim;
     for "_m" from 1 to _mesafeMax do {
@@ -111,6 +122,9 @@ for "_i" from 0 to _yonMax do {
                     private _yaklasma = (_unitPos distance2D _enemyPos) - (_adayPos distance2D _enemyPos);
                     if (_yaklasma > 0) then { _puan = _puan - (_yaklasma * 3); };
 
+                    private _yigilma = {(_x distance2D _adayPos) < 4} count _dostNoktalar;
+                    if (_yigilma > 0) then { _puan = _puan - ((_yigilma min 3) * 45); };
+
                     _adaylar pushBack [_puan, _adayPos, _mesafe, _aciFarki];
                 };
             };
@@ -123,6 +137,7 @@ if (_adaylar isEqualTo []) exitWith {[]};
 _adaylar sort false;
 private _enIyi = _adaylar select 0;
 private _coverPos = _enIyi select 1;
+_unit setVariable [QGVAR(eliteCoverPos), [_coverPos, time]];
 
 if (_forceMove) then {
     _unit doMove _coverPos;

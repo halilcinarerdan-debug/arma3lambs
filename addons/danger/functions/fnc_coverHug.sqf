@@ -119,10 +119,10 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 private _kayma = (getPosATL _u) distance2D _t;
                 private _yapisik = _kayma < 0.15;
 
-                // yeni nokta gecerli mi: su yok, 0.9 m icinde dost yok, kayma <= 2.2 m, yon dusmana dogru
+                // yeni nokta gecerli mi: su yok, 2.5 m icinde dost yok (v8.39: 0.9 -> 2.5, siperde yigilma yok), kayma <= 2.2 m, yon dusmana dogru
                 if (!_yapisik) then {
                     if (_kayma > 4 || {surfaceIsWater _t}) then { _sayac set ["reddedildi", (_sayac get "reddedildi") + 1]; continue };
-                    if (((_u nearEntities ["CAManBase", 3]) findIf {_x isNotEqualTo _u && {(_x distance2D _t) < 0.9}}) > -1) then { _sayac set ["reddedildi", (_sayac get "reddedildi") + 1]; continue };
+                    if (((_u nearEntities ["CAManBase", 5]) findIf {_x isNotEqualTo _u && {(_x distance2D _t) < 2.5}}) > -1) then { _sayac set ["reddedildi", (_sayac get "reddedildi") + 1]; continue };
                 };
 
                 // durus: bas + iki omuz dusmandan gizli en yuksek stance
