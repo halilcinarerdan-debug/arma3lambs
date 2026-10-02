@@ -687,3 +687,9 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   CF_BAI yuklu ise CAKISMA onleme icin KAPALI baslar (lambs_danger_ortamSkillZorla = true ile zorla). Kapatma: lambs_danger_ortamSkillV1 = false; olcek lambs_danger_ortamSkillOlcek (1). Log [ORTAM-SKILL].
   DIKKAT: CF_BAI'yi birakip bunu kullanirsan ayni anda iki skill modu calistirma; CF_BAI'deki 'follow-up shots' (arka arkaya atis) bu surumde YOK.
 - Retreat ek sicrama: nokta artik grubun ARKASINDAN (en uzak asker) olculur, adim >= 35 m. Neden: RPT 13:09'da sicrama 1 sn'de 'vardi 4/4' ile bitiyor, mesafe 101-103 m'de kaliyordu.
+=== v8.14b ORTAM BECERI DUSUSU v2 (SADELESTIRME; CF_BAI kaynak incelemesi) ===
+- CF_BAI (veteran29/cf_bai, GPL-3.0, arsivlenmis) kaynagindan okunanlar: 3 modul. SUBSKILLS: askerin 25 m cevresinde agac/cali sayisi (30 = tam), kayip X^2: carpan = 1 - (1 - min) x x^2; 9 alt beceri; min: spotDist 0.35, aimAcc 0.41, digerleri 0.5, general 1.0; 30 sn'de bir; oyuncu-gruplu dusman etkisi (0.5 / 0.5 harman).
+  SUPPRESSION: mermi basina 0.1, 20 sn tutma, sonra sonum; tam baskida carpan spotDist 0.5, aim 0.2, hiz 0.2, reload 0.5, commanding 0.2, spotTime 0.5, courage 0.2, shake 0.2, general 0.5. BOOST: 5 mermiden sonra en fazla x1.10 (>= 300 m, 2 sn aralik, hedef 50 m'den fazla oynamazsa).
+  Gece / yagmur / sis: Workshop aciklamasi iddia ediyor ama okudigim kaynak dosyalarinda (getEnemyImpact, terrainCount, setGroupTerrainImpact, updateUnitPipelineSkills) gorulmedi -> dogrulanamadi.
+- Bizim v1 (7 etken, 5 beceri) CF_BAI'den KARMASIKTI ve motor / ACE ile cift sayiyordu. v2: 3 etken (bitki X^2 = CF_BAI rakamlari; gorus kosulu gece NVG'siz / sis; hafif baski), 4 alt beceri (spotDistance, spotTime, aimingAccuracy, aimingShake), alt sinir x0.30.
+  Bilerek alinmayanlar: courage / commanding / reloadSpeed / general (FSM + komutan beynimiz var), yara + yorgunluk (ACE / motor), yagmur, boost (x1.10 ihmal edilebilir).

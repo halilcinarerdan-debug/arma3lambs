@@ -1,21 +1,20 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * ORTAM BECERI DUSUSU (in-the-box; CF_BAI benzeri) — AI alt becerileri ortam kosullarina gore dinamik azalir:
- *   gece (NVG'siz agir, NVG'li az), sis, yagmur, bitki ortusu (X^2, CF_BAI'deki gibi dogrusal degil), baski, yara, yorgunluk.
+ * ORTAM BECERI DUSUSU v2 (in-the-box; CF_BAI'den SADELESTIRILMIS) — 3 etken, 4 alt beceri:
  *
- * Etkilenen alt beceriler (taban deger ilk dokunusta saklanir, her zaman TABAN x carpan uygulanir):
- *   spotDistance, spotTime, aimingAccuracy, aimingShake, aimingSpeed
+ *   1) BITKI ORTUSU (CF_BAI ile ayni fikir ve rakamlar): askerin 25 m cevresindeki agac / cali sayisi, 30 nesne = tam; kayip X^2:
+ *        carpan = 1 - (1 - min) x x^2   (x = min(sayi/30, 1));  min: spotDistance 0.35, aimingAccuracy 0.41
+ *   2) GORUS KOSULU (gece NVG'siz / sis): spotDistance ve spotTime icin
+ *        gece n = 1 - sunOrMoon;  NVG'siz: spotDistance 1 - 0.6 n, spotTime 1 - 0.4 n;  NVG'li: 1 - 0.1 n
+ *        sis f = fog: spotDistance x (1 - 0.5 f), spotTime x (1 - 0.25 f)
+ *   3) BASKI (hafif; motor zaten nisani dusurur): min(getSuppression, 1) -> aimingAccuracy x (1 - 0.35 s), aimingShake x (1 - 0.30 s)
+ *   alt sinir taban x 0.30
  *
- * Carpanlar (S = lambs_danger_ortamSkillOlcek, varsayilan 1):
- *   gece    : n = 1 - sunOrMoon; ceza = n x (NVG varsa 0.10, yoksa 0.45) x S
- *   sis     : fog x 0.5 (spotDistance), x 0.2 (nisan)
- *   yagmur  : rain x 0.15 (spotDistance)
- *   bitki   : (min(25 m'deki agac/cali sayisi / 18, 1))^2 x 0.30 x S   (CF_BAI'daki gibi: yarim yogunluk %25 dusurur)
- *   baski   : min(getSuppression, 1) x 0.45 (nisan), x 0.31 (titreme)
- *   yara    : damage x 0.5 (nisan)       yorgunluk: getFatigue x 0.3 (titreme / hiz)
- *   alt sinir: taban x 0.35
+ * CF_BAI'den BILEREK ALINMAYANLAR: courage / commanding / reloadSpeed / general (FSM ve komutan beynimiz var), yara + yorgunluk (ACE / motor zaten),
+ *   yagmur (etkisi kucuk), arka arkaya atis boost'u (en fazla x1.10, ihmal edilebilir), oyuncu gruplarina gore ozel etki.
  *
+ * Taban deger ilk dokunusta saklanir; her zaman TABAN x carpan uygulanir. Olcek: lambs_danger_ortamSkillOlcek (1 = varsayilan, 0 = etkisiz).
  * CF_BAI (ya da baska beceri modu) yuklu ise CAKISMA olmasin diye KAPALI baslar (RPT'de uyari);
  * lambs_danger_ortamSkillZorla = true ile zorla acilir. Genel kapatma: lambs_danger_ortamSkillV1 = false.
  * Her 3 sn'de en fazla 25 yerel, oyuncusuz AI askeri (donusumlu). Log: [ORTAM-SKILL] (ilk 40 degisim).
@@ -34,7 +33,7 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
 [_cfbai] spawn {
     params ["_cfbai"];
     private _indeks = 0;
-    private _beceriler = ["spotDistance", "spotTime", "aimingAccuracy", "aimingShake", "aimingSpeed"];
+    private _beceriler = ["spotDistance", "spotTime", "aimingAccuracy", "aimingShake"];
     while {true} do {
         sleep 3;
         if (!(missionNamespace getVariable ["lambs_danger_ortamSkillV1", true])) then { continue };
@@ -43,7 +42,6 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
         private _S = missionNamespace getVariable ["lambs_danger_ortamSkillOlcek", 1];
         private _gece = (1 - sunOrMoon) max 0;
         private _sis = (fog min 1) max 0;
-        private _yagmur = (rain min 1) max 0;
 
         private _askerler = [];
         {
@@ -66,19 +64,16 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
             };
 
             private _nvg = (hmd _u) isNotEqualTo "";
-            private _geceCeza = _gece * ([0.45, 0.10] select _nvg) * _S;
             private _nesne = count (nearestTerrainObjects [_u, ["TREE", "SMALL TREE", "BUSH"], 25, false, true]);
-            private _bitki = (((_nesne / 18) min 1) ^ 2) * 0.30 * _S;
-            private _bsk = (getSuppression _u) min 1;
-            private _yara = (damage _u) min 1;
-            private _yorgun = (getFatigue _u) min 1;
+            private _x2 = (((_nesne / 30) min 1) ^ 2) * _S;
+            private _bsk = ((getSuppression _u) min 1) * _S;
+            private _gCeza = _gece * ([0.6, 0.1] select _nvg) * _S;
 
-            private _mSD = (1 - _geceCeza) * (1 - (_sis * 0.5 * _S)) * (1 - (_yagmur * 0.15 * _S)) * (1 - _bitki);
-            private _mST = (1 - (_geceCeza * 0.7)) * (1 - (_sis * 0.25 * _S)) * (1 - (_bitki * 0.5));
-            private _mAA = (1 - (_geceCeza * 0.6)) * (1 - (_sis * 0.2 * _S)) * (1 - _bitki) * (1 - (_bsk * 0.45 * _S)) * (1 - (_yara * 0.5));
-            private _mSH = (1 - (_geceCeza * 0.3)) * (1 - (_bsk * 0.31 * _S)) * (1 - (_yorgun * 0.3)) * (1 - (_yara * 0.25));
-            private _mSP = (1 - (_geceCeza * 0.4)) * (1 - (_yorgun * 0.3)) * (1 - (_bsk * 0.22 * _S));
-            private _carpanlar = [_mSD, _mST, _mAA, _mSH, _mSP] apply {_x max 0.35};
+            private _mSD = (1 - ((1 - 0.35) * _x2)) * (1 - _gCeza) * (1 - (_sis * 0.5 * _S));
+            private _mST = (1 - (_gCeza * 0.67)) * (1 - (_sis * 0.25 * _S));
+            private _mAA = (1 - ((1 - 0.41) * _x2)) * (1 - (_bsk * 0.35));
+            private _mSH = (1 - (_bsk * 0.30));
+            private _carpanlar = [_mSD, _mST, _mAA, _mSH] apply {_x max 0.30};
 
             private _son = _u getVariable [QGVAR(ortamSon), _taban];
             private _yeni = [];
@@ -99,7 +94,7 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
                 if (isNil "lambs_danger_ortamLogN") then { lambs_danger_ortamLogN = 0; };
                 if (lambs_danger_ortamLogN < 40) then {
                     lambs_danger_ortamLogN = lambs_danger_ortamLogN + 1;
-                    diag_log format ["[ORTAM-SKILL] %1 | gece:%2 nvg:%3 sis:%4 yagmur:%5 bitki:%6 (%7 nesne) baski:%8 yara:%9 | carpan spotD:%10 aim:%11 shake:%12", name _u, _gece toFixed 2, _nvg, _sis toFixed 2, _yagmur toFixed 2, _bitki toFixed 2, _nesne, _bsk toFixed 2, _yara toFixed 2, _mSD toFixed 2, _mAA toFixed 2, _mSH toFixed 2];
+                    diag_log format ["[ORTAM-SKILL] %1 | gece:%2 nvg:%3 sis:%4 | bitki:%5 nesne x^2:%6 | baski:%7 | carpan spotD:%8 spotT:%9 aim:%10 shake:%11", name _u, _gece toFixed 2, _nvg, _sis toFixed 2, _nesne, _x2 toFixed 2, _bsk toFixed 2, _mSD toFixed 2, _mST toFixed 2, _mAA toFixed 2, _mSH toFixed 2];
                 };
             };
         };
