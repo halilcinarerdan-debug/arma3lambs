@@ -343,6 +343,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
             private _bas = _adaylar select [0, _k];
             private _ilkPos = (_bas select 0) select 1;
             private _atisModu = _mode in ["DEFEND", "OVERWATCH", "ADVANCE"];
+            private _rolC = [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}]);
             {
                 private _a = _x;
                 private _pos = _a select 1;
@@ -369,40 +370,73 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                     };
                 };
 
-                // CQB ICERIDE ATIS POZISYONU (v8.25, VBS #5 baslangici; kullanici: "pencere / kapi / ic acilari GERIDEN ve muzzle flasi gizleyecek sekilde"):
-                //   iceride (ustte cati var) ve atis modunda: dusman yonune dik 5 yanal ornek (-0.8..+0.8 m, govde 1.4 m) hangileri dusmandan GORULUYOR (aci genisligi)
-                //   dar aci (1-2 / 5 gorunuyor) = pencere / kapidan GERIDE, silueti ve namlu parlamasi disaridan zor gorunur -> +10; hic gorunmuyor 0;
-                //   5 / 5 gorunuyor = pencerenin TAM onunde, acikta -> -8;  1.6 m one (dusmana dogru) kayinca da gorunuyorsa pencereye >= 1.6 m geride -> +6
-                if (_atisModu) then {
-                    private _ustCati = lineIntersects [_posASL vectorAdd [0, 0, 1.6], _posASL vectorAdd [0, 0, 25], _unit];
-                    if (_ustCati) then {
+                // BINA / CQB (v8.27; kullanici: "bina kullanimi agresif", "pencere arkasi calisiyor ama aci yoksa aciyi kendisi ayarlasin, sadece geri durmasin PEEK atsin, yakinlasabilir",
+                //   "marksman ust kat, MG ve AT cikmasin", "muzzle flash sadece STEALTH"):
+                //   ICERI = ustte cati (1.6 m -> 25 m isin kesisir). ETAJ = round(yerden yukseklik / 3).
+                //   ROL (FM 3-06.11 / M136 guvenlik): MARKSMAN ust kat +6 / kat (en fazla 2); MG alt kat tercih (yer seviyesi grazing atesi) -6 / kat; AT ust kat -15 / kat, icerde -12 ve
+                //   arkada (dusmanin tersine) 5 m icinde duvar varsa -20 (backblast).  AGRESIF BINA: iceri +6 (lambs_main_binaAgresif).
+                private _ustCati = lineIntersects [_posASL vectorAdd [0, 0, 1.6], _posASL vectorAdd [0, 0, 25], _unit];
+                if (_ustCati) then {
+                    private _etaj = round (((_pos select 2) max 0) / 3);
+                    private _cqbP = 0;
+                    if (missionNamespace getVariable ["lambs_main_binaAgresif", true]) then { _cqbP = _cqbP + 6; };
+                    switch (_rolC) do {
+                        case "MARKSMAN": { _cqbP = _cqbP + (6 * (_etaj min 2)); };
+                        case "MG": { _cqbP = _cqbP - (6 * _etaj); };
+                        case "AT": {
+                            _cqbP = _cqbP - (15 * _etaj) - 12;
+                            private _arka = _posASL vectorAdd ([-(sin _eDir), -(cos _eDir), 0] vectorMultiply 5);
+                            if (lineIntersects [_posASL vectorAdd [0, 0, 1.2], _arka vectorAdd [0, 0, 1.2], _unit]) then { _cqbP = _cqbP - 20; };
+                        };
+                        default {};
+                    };
+                    // ACI GENISLIGI (atis modu): dusmana dik 5 yanal ornek hangileri dusmandan gorunuyor
+                    private _gorunen = 0;
+                    private _derin = 0;
+                    private _peek = false;
+                    if (_atisModu) then {
                         private _perpC = [cos (_eDir), -(sin (_eDir)), 0];
-                        private _gorunen = 0;
                         {
                             private _yp = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd (_perpC vectorMultiply _x);
                             if (!([_dangerPos, _yp, _unit] call _gizli)) then { _gorunen = _gorunen + 1; };
                         } forEach [-0.8, -0.4, 0, 0.4, 0.8];
-                        // DERINLIK: dusmana dogru 0.8 / 1.6 / 2.4 m kayinca hala gorunen en derin adim = pencere / kapidan GERI mesafesi (0..3)
-                        private _derin = 0;
+                        if (_gorunen in [1, 2]) then { _cqbP = _cqbP + 10; };
+                        if (_gorunen isEqualTo 5) then { _cqbP = _cqbP - 8; };
                         if (_gorunen > 0) then {
                             { 
                                 private _on = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd ([sin _eDir, cos _eDir, 0] vectorMultiply _x);
                                 if (!([_dangerPos, _on, _unit] call _gizli)) then { _derin = _derin + 1; };
                             } forEach [0.8, 1.6, 2.4];
+                            _cqbP = _cqbP + (3 * _derin);
+                        } else {
+                            // PEEK / ACI AYARI: bu noktadan hedef gorulmuyor -> yanal (0.6 / 1.2 / 1.8 m) ve one (0.8..3.2 m) kayarak EN YAKIN gorus acisini bul;
+                            //   cati altinda, aradan duvar yok (ray), hedefi goruyor; ayakta ("UP") peek
+                            private _perpP = [cos (_eDir), -(sin (_eDir)), 0];
+                            private _dirP = [sin _eDir, cos _eDir, 0];
+                            private _adaylarP = [];
+                            { private _l = _x; { _adaylarP pushBack [(abs _l) + _x, _l, _x]; } forEach [0, 0.8, 1.6, 2.4, 3.2]; } forEach [0, 0.6, -0.6, 1.2, -1.2, 1.8, -1.8];
+                            _adaylarP sort true;
+                            {
+                                _x params ["_mS", "_lat", "_ile"];
+                                if (_mS > 0) then {
+                                    private _kP = _pos vectorAdd (_perpP vectorMultiply _lat) vectorAdd (_dirP vectorMultiply _ile);
+                                    _kP set [2, _pos select 2];
+                                    private _kA = AGLToASL _kP;
+                                    if (
+                                        !surfaceIsWater _kP
+                                        && {lineIntersects [_kA vectorAdd [0, 0, 1.6], _kA vectorAdd [0, 0, 25], _unit]}
+                                        && {!(lineIntersects [_posASL vectorAdd [0, 0, 1.0], _kA vectorAdd [0, 0, 1.0], _unit])}
+                                        && {!([_dangerPos, _kA vectorAdd [0, 0, 1.4], _unit] call _gizli)}
+                                    ) exitWith {
+                                        _a set [1, _kP];
+                                        _a set [2, "UP"];
+                                        _peek = true;
+                                        _cqbP = _cqbP + 8;
+                                    };
+                                };
+                            } forEach _adaylarP;
                         };
-                        // MUZZLE FLASH GORUNURLUGU: gorunen aci orani x (1 + 1.5 x gece) x silah flas katsayisi (susturucu / flas gizleyici AmmoCoef.visibleFire < 1 azaltir)
-                        //   dar aci + derin = dusuk risk; pencere onu + gece + flas gizleyicisiz = yuksek risk
-                        private _mzItem = (primaryWeaponItems _unit) param [0, ""];
-                        private _vf = 1;
-                        if (_mzItem isNotEqualTo "") then { private _v = getNumber (configFile >> "CfgWeapons" >> _mzItem >> "ItemInfo" >> "AmmoCoef" >> "visibleFire"); if (_v > 0) then { _vf = _v min 1; }; };
-                        private _geceF = (1 - sunOrMoon) max 0;
-                        private _flasRisk = (_gorunen / 5) * (1 + (1.5 * _geceF)) * _vf * (1 - (0.25 * _derin));
-                        private _geri = [0, 1] select (_derin >= 2);
-                        private _cqbP = 0;
-                        if (_gorunen in [1, 2]) then { _cqbP = _cqbP + 10; };
-                        if (_gorunen isEqualTo 5) then { _cqbP = _cqbP - 8; };
-                        _cqbP = _cqbP + (3 * _derin) - (10 * _flasRisk);
-                        // GERIDE DURMA: secilen nokta pencereye yakinsa (derin < 3) dusmandan UZAGA (1.0 / 1.6 m) kaydir; kayan nokta cati altinda, duvarsiz, hala dusmani gorebiliyorsa kabul
+                        // GERIDE DURMA (aci var, pencereye yakin): dusmandan uzaga 1.6 / 1.0 m, gorus korunuyorsa
                         if (_gorunen > 0 && {_derin < 3}) then {
                             {
                                 private _kp = _pos getPos [_x, _eDir + 180];
@@ -419,12 +453,21 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                                 };
                             } forEach [1.6, 1.0];
                         };
-                        _a set [0, (_a select 0) + _cqbP];
-                        if (isNil "lambs_main_cqbLogN") then { lambs_main_cqbLogN = 0; };
-                        if (lambs_main_cqbLogN < 40) then {
-                            lambs_main_cqbLogN = lambs_main_cqbLogN + 1;
-                            diag_log format ["[CQB-POZ] %1 | iceride | aci genisligi:%2/5 | derinlik:%3/3 | flas riski:%4 (gece %5, flas katsayisi %6) | geriye kaydirildi:%7 | puan degisimi:%8 | dusman %9 m", name _unit, _gorunen, _derin, _flasRisk toFixed 2, _geceF toFixed 2, _vf toFixed 2, (_a select 1) isNotEqualTo _pos, round _cqbP, round _eDist];
-                        };
+                    };
+                    // MUZZLE FLASH: yalniz STEALTH / temas YOK iken (catismada hesaplanmaz)
+                    private _flasRisk = 0;
+                    if (_atisModu && {_gorunen > 0} && {((behaviour _unit) isEqualTo "STEALTH") || {(_group getVariable ["lambs_danger_contact", 0]) < time}}) then {
+                        private _mzItem = (primaryWeaponItems _unit) param [0, ""];
+                        private _vf = 1;
+                        if (_mzItem isNotEqualTo "") then { private _v = getNumber (configFile >> "CfgWeapons" >> _mzItem >> "ItemInfo" >> "AmmoCoef" >> "visibleFire"); if (_v > 0) then { _vf = _v min 1; }; };
+                        _flasRisk = (_gorunen / 5) * (1 + (1.5 * ((1 - sunOrMoon) max 0))) * _vf * (1 - (0.25 * _derin));
+                        _cqbP = _cqbP - (10 * _flasRisk);
+                    };
+                    _a set [0, (_a select 0) + _cqbP];
+                    if (isNil "lambs_main_cqbLogN") then { lambs_main_cqbLogN = 0; };
+                    if (lambs_main_cqbLogN < 60) then {
+                        lambs_main_cqbLogN = lambs_main_cqbLogN + 1;
+                        diag_log format ["[CQB-POZ] %1 (%2) | iceride | etaj:%3 | aci genisligi:%4/5 | derinlik:%5/3 | PEEK:%6 | flas riski (yalniz stealth):%7 | geriye kaydirildi:%8 | puan degisimi:%9 | dusman %10 m", name _unit, _rolC, _etaj, _gorunen, _derin, _peek, _flasRisk toFixed 2, (_a select 1) isNotEqualTo _pos, round _cqbP, round _eDist];
                     };
                 };
                 // atis edebilme

@@ -183,7 +183,7 @@ private _fnLog = {
                 private _u = _x;
                 if (
                     !((lifeState _u) in ["HEALTHY", "INJURED"]) || {(insideBuilding _u) > 0.5}
-                    || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {_u getVariable [QGVAR(tcccBusy), false]}
+                    || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {(_u getVariable [QGVAR(tcccBusy), 0]) > time}
                     || {!((_u getVariable [QGVAR(grState), []]) isEqualTo [])}
                 ) then { continue };
 

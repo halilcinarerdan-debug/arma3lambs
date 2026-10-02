@@ -76,3 +76,12 @@ Dogrulanan (arama ozetinde):
 3. Traveling overwatch: temas muhtemelken one giden takim (>= 50 m) — rota planlama ile birlikte.
 4. Rus profili: ates destek grubu sabit; hucumda 6-8 m skirmish araligi (doktrin anahtari `skirmishAralik`).
 5. Profil rakamlarini kaynak PDF'lerden dogrula (ozellikle Cin: ATP 7-100.3 okunmadi).
+
+## G) Bina / kent muharebesi: rol bazli kat tercihi (v8.27)
+Kaynaklar (arama ozetleri; tam metin okunmadi): [FM 3-06.11 Ch.5](https://www.globalsecurity.org/military/library/policy/army/fm/3-06-11/ch5.htm), [FM 3-06.11 Ch.7](https://www.globalsecurity.org/military/library/policy/army/fm/3-06-11/ch7.htm),
+[FM 3-06.11 Ch.6](https://www.globalsecurity.org/military/library/policy/army/fm/3-06-11/ch6.htm), [ATP 3-06.11 (2024)](https://rdl.train.army.mil/catalog-ws/view/100.ATSC/0B25D897-7E1C-4D09-A2C5-E50BE2A25378-1729554858673/ATP3_06x11.pdf), [FM 3-21.21 Ch.6](https://www.globalsecurity.org/military/library/policy/army/fm/3-21-21/chap6.htm).
+- **Makineli (MG / SAW):** mumkun olan **en alt seviyede** konumlanir (grazing atesi); zemin molozu / engel grazing atesini kesiyorsa **ust katlara** (2.-3. kat mazgal) cikarilir. -> kod: MG ust kat -6 / kat.
+- **AT (M136 AT4 vb.):** arka tehlike alani 100 m / 90 derece; kapali yerden **yalniz baska taktik secenek yokken** atilir; ic mekan icin en az ~15x12 ft taban, 7 ft tavan, arkada >= 20 sq ft havalandirma, arkada 5 m icinde duvar / buyuk agac olmamali.
+  -> kod: AT ust kat -15 / kat, icerde -12, arkada (dusmanin tersi) 5 m icinde duvar -20.
+- **Nisanci / marksman:** cati zirvesi / ust katlar gorus alani ve menzili artirir; silueti onlemek icin golgede / pencereden geride, bacadan vb. kucuk hedef. -> kod: MARKSMAN ust kat +6 / kat (en fazla 2).
+- Siper kurali: silueti dusurmek, acik alanlardan kacinmak, golgeden ates.

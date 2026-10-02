@@ -25,10 +25,10 @@
 
 if (!isNil "lambs_danger_moveAssistStarted") exitWith {false};
 lambs_danger_moveAssistStarted = true;
-if (isNil "lambs_danger_turnCoef") then { lambs_danger_turnCoef = 1.2; };
+if (isNil "lambs_danger_turnCoef") then { lambs_danger_turnCoef = 1.38; };
 lambs_danger_mvLogN = 0;
 
-diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korumasi + sikisma adimi)";
+diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.38 [+%15, kullanici istegi] + duvar korumasi + sikisma adimi)";
 
 [] spawn {
     private _birakAnim = ["aovr", "ladder", "climb", "vault", "ainv", "adth", "acts", "apanp", "amov_pro", "abdl"];
@@ -54,7 +54,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
             private _donuyor = ((toLower (animationState _u)) find "turn") >= 0;
             private _g = group _u;
             private _tabanAnim = if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]}) then {1.15} else {1.0};
-            private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]} else {_tabanAnim};
+            private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.38]} else {_tabanAnim};
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
             // uygulanmiyordu. Artik deger degisince VEYA en geç 1.5 sn'de bir yeniden uygulanir; remoteExec ile TUM makinelerde
             // (setAnimSpeedCoef etkisi yerel: oyuncu istemcisi bot animasyonunu hizlanmis gormezdi).
