@@ -85,3 +85,49 @@ Kaynaklar (arama ozetleri; tam metin okunmadi): [FM 3-06.11 Ch.5](https://www.gl
   -> kod: AT ust kat -15 / kat, icerde -12, arkada (dusmanin tersi) 5 m icinde duvar -20.
 - **Nisanci / marksman:** cati zirvesi / ust katlar gorus alani ve menzili artirir; silueti onlemek icin golgede / pencereden geride, bacadan vb. kucuk hedef. -> kod: MARKSMAN ust kat +6 / kat (en fazla 2).
 - Siper kurali: silueti dusurmek, acik alanlardan kacinmak, golgeden ates.
+
+## H) BIRINCIL KAYNAK DOGRULAMASI (PDF metinleri; 2026-10-02) — kaynak dosyalar: `kaynaklar_doktrin/`
+Okunan: **MCWP 3-11.1** Infantry Company Operations (6 Oct 2014), **TC 3-21.76** Ranger Handbook (26 Apr 2017), **MCWP 3-11.2** Marine Rifle Squad (27 Nov 2002, Ch 1; eski baski, OCR'li, sayfa no guvenilmez).
+Okunmadi: FM 3-21.75, ATP 3-21.8, FM 3-90-1, ADP 3-90, FM 3-13.4 (Gemini'nin bu belgelerden verdigi sayilar DOGRULANMADI, kullanilmiyor).
+
+### H1) BREAK CONTACT savas tatbikati (TC 3-21.76, Battle Drill 07-3-D9505, s. 8-10 ... 8-14)
+- Standart: "breaks contact using fire and movement, and continues to move until the enemy cannot observe or place fire on them"; lider temasi ust komutaya raporlar.
+- Adimlar: (1) bir unsur dusmani bastirir (2) araclar destekler / yoksa bir manga ya da ates timi bastirir (3) lider **mesafe + yon, arazi noktasi ya da son toplanma noktasi (RP)** verir (4) dolayli ates (5) hareket eden unsur gozetleme konumuna gider, **duman (M320, dolayli, diger) ile hareketi perdeler; gerekirse parca / sok bombasi** (6) ates unsuru bastirmaya devam (7) hareket eden unsur konumda ates eder (8) ates unsuru sonraki kapali konuma gecer (zemine ve dusman atesine gore "ates ve hareket") (9) **su kosul olana kadar sicra: temas koptu / ust seviye ates destek konumundan gecti / unsurlar sonraki gorev konumunda** (10) **temas kopunca hareket yonunu DEGISTIRMEYI dusun: dusmanin etkili dolayli ates getirmesini zorlastirir** (11) dagilan unsur / askerler birlikte kalir ve **son belirlenen RP'ye** gider (12) sayim, rapor, gerekirse reorganizasyon, gorev devam.
+- **SAYI YOK:** sicra uzunlugu / guvenli mesafe metre olarak verilmiyor. (Gemini'nin "bound basina 10-20 m" iddiasi kaynakta YOK; bizim retreatAdim [25,40,60] ve cekilGuvenM 220 = tasarim secimi, doktrin degil.)
+- Devriye icin (TC 3-21.76 Ch 13, Sekil 13-5): devriye lideri RP (on ve/veya arka) belirler, **haberlesme + piroteknik sinyal** ve **sis**; araclar karsilikli (alternating) yer degistirir.
+- Eski Marine kitabi (MCWP 3-11.2): "bir kisim ates eder, diger kisim sicrayarak uzaklasir"; **saat sistemi: lider yon + mesafe bagirir ("Ten o'clock — two hundred"), 12 = hareket yonu**; formasyon bozulmamali (reorganizasyon kolaylasir). Pusuya dusunce: yakin (<= 50 m: saldirabilir sinir) / uzak (> 50 m).
+
+### H2) TOPARLANMA = CONSOLIDATE AND REORGANIZE (TC 3-21.76 Battle Drill, s. 8-9 / 8-10; sira onemli)
+a. yerel guvenlik; b. ates unsuru atanmis konumlara cekilir; c. her unsura ates sektoru; d. **kritik silahlar en tehlikeli yaklasma yonunu kapatir**; e. cephane ikmali koordinasyonu; f. **hizli mevzi (hasty fighting positions)**; g. hizli ates plani; h. **gozetleme noktalari (karsi saldiri uyarisi)**; i. komuta zinciri yeniden kurulur; j. cephane yeniden dagitimi; k. **ekip silahlari once doldurulur (mans crew-served first)**; l. kritik teçhizat (telsiz, NVD) yeniden dagitilir; m. **yaralilar tedavi / degerlendirme**; n. bos kilit gorevler doldurulur; (o. esir islemleri); lider cephane / kayip / teçhizat raporunu birlestirir ve ust komutaya bildirir.
+- MCWP 3-11.1 (s. 6-18/6-19): consolidation = pozisyonu duzenleme / guclendirme (once savunma durusu); **reorganization = savas sonrasi ic haberlesmeyi ve duzeni geri kurma: konum + durum raporu, personel ve cephane yeniden dagitimi, CASEVAC, ikmal, kontrol ve haberlesmenin yenilenmesi**; birbirini destekler: "basarili reorganizasyon, ilk savunma cabalarinin saglayacagi guvenlik ister"; savunmada konsolidasyon / reorganizasyon sirasinda **her zaman yerel guvenlik ve durum farkindaligi** (s. 7).
+- **90 sn "hucum yok" ve 20-45 sn konsolidasyon penceresi** kaynakta SAYI olarak YOK (tasarim secimi).
+
+### H3) GERI CEKILME TURLERI ve CIKIS KRITERI (MCWP 3-11.1 s. 7-10 / 7-11, 7-14 / 7-15)
+- **Retrograde = delay / withdrawal / retirement.** Withdrawal: "temasta olan kuvvetin dusmandan ayrilmasi; kuvveti korumak, yeni goreve birakmak, kotu kosulda savasi onlemek, yeniden konumlanmak icin". Yetkili ust komutan onaylar. Delay: "mekan karsiliginda zaman kazanir, yok edici karsilasma olmadan maksimum hasar". Retirement: temasta olmayan kuvvet dusmandan uzaklasir; arada baska birlik / guvenlik.
+- **Disengagement kriterleri her duruma ozgudur, "asla birimin SOP'sinin parcasi degildir"** (s. 7-14). Basarili ayrilma icin dusman etkili dogrudan ve dolayli ates getirememeli; **en etkili yol: savunan ates unsurunun dogrudan atesi**; kendi ates unsuru icin sicramalarin dikkatli sirasi gerekir. Amac: sabitlenmemek / karar verilmis cakismaya girmemek; "hareket avantaji" belirleyici.
+- **Arka koruma (rear guard):** normalde TEK MANGA; ates timi buyuklugunde arka nokta (guvenlik / erken uyari) + manga geri kalani arka grup (gerekirse arka noktayi destekler, **ana govde destegi gelene kadar dusman saldirilarini geciktirir**) (MCWP 3-11.1 yaklasan hareket / yurush bolumu). **"Kuvvetin 1/3'u" iddiasi kaynakta YOK.**
+- **%30 kayip = muharebe etkinligi kaybi iddiasi bu uc kitapta YOK** ("combat ineffective" yalniz hastalik / yenmis duzeni anlaminda geciyor); bizim cekilKayip 0.30 = tasarim secimi (FM 3-90-1 okunmadi).
+
+### H4) FEINT / DEMONSTRATION (MCWP 3-11.1 s. 6-10 / 6-11) — ONEMLI: PLANLADIGIMIZ "FAKE" DOKTRINE UYMUYOR
+- **Feint = sinirli kapsamli, cok belirli hedefli SALDIRI**: dusmani belirli tepki vermeye (yeniden konumlanma, yedegi surme, atis kaydirma) ya da tepkiyi geciktirmeye zorlar. "Bir piyade bolugu kendi harekati icinde feint yapmasi **olasi degil**"; ust komutanlik (HHQ) gorev ve amaci (hangi dusman tepkisi tetiklenecek) verir.
+- Planlama: kuvveti koruma niyeti, **ayrilma (disengagement) kriterleri ve plani**, sinirli derinlik / ulasilabilir hedef, ana saldiriyi sonradan degerlendirme icin net emirler. **"Feint ancak dusman tam olcekli saldiri oldugunu saniyorsa basarilidir -> ayni hassasiyet ve siddet"**. En etkili: dusmanin beklentisini pekistirirse / birkac gecerli plan varsa.
+- **Demonstration = ana saldirinin YERI hakkinda aldatmak icin saldiri gorunumu; dost kuvvet dusmanla TEMAS KURMAZ**; ekonomi-of-force olabilir.
+- SONUC: "gerileme taklidi / tuzak" (fake retreat) bu kaynaklarda YOK. Aldatma kumanda (HQ) karari olmali: sabitleyen grup + sinirli hedefli feint (ayrilma kriteri ile) ya da temassiz gosteri; tek grubun kendi basina "fake" yapmasi doktrine aykiri. fnc_hqKanat zaten bu yone yakin (sabitle + kanattan saldiri).
+
+### H5) DIGER DOGRULANAN / DUZELTILEN
+- **Formasyon aralik:** MCWP 3-11.2 "ates timleri / bireyler arasi kesin mesafe ve aralik onemli degil, kontrol kaybedilmedikce; gorus / ses temasi korunur". **Standart 10 m iddiasi bu kitapta YOK**; kama: iyi kontrol, her yone guvenlik, esnek, her yone yeterli ates (rol yerleri degisebilir). Dagilim: "dagilmamis manga daha kolay tespit edilir / vurulur; adamlar / ekipler / mangalar arasi mesafe belirlenmeli ve uygulanmali".
+- **Siper (fighting hole) araligi:** ates timi icinde **5-20 m** (MCWP 3-11.2, savunma); otomatik tufek bolugun omurgasi, mevzi onunla baslar. ("18 inc derinlik" iddiasi YOK.)
+- **Hizli mevzi ve sektor:** TC 3-21.76 H2'de a-h.
+- **Ates kaydirma / kesme (fix & flank):** hucum desteginin atesini **hazirlik sinyali** ile kaydirma / kesme (TC 3-21.76: "supporting fire team shifts direct fires to the opposite flank of the enemy position" on prearranged signal; "handover of responsibility for direct fires from support to assault element is critical to prevent fratricide"); MCWP 3-11.2: **Final Coordination Line (FCL)** kaydirma / kesme icin kontrol hatti, sabit degil, kaplama atesi mumkun oldugunca surer; hucum birligi komutani ates kaydirir / keser. **"15 derece" iddiasi YOK.** El bombasi tesir yaricapi 5 m; son 35 m'de bombaatar tehlikeli (MCWP 3-11.2).
+- **Raporlama:** TC 3-21.76: her savas tatbikatinin sonunda lider temas raporu ust komutaya; SALUTE (genel bilgi, bu metinlerde tam tablo okunmadi).
+- **Yaralilari geride birakma kurali** bu kitaplarda YOK ("left behind" yalniz baska anlamda); Gemini'nin FM 4-02 alintisi dogrulanmadi.
+- **Pusu kill-zone boyutu (metre)** bu kitaplarda YOK ("50 m" = yakin / uzak pusu siniri, farkli sey). Bizim pusuAtesM 70 tasarim secimi.
+
+### H6) KOD ICIN SONUCLAR (yapilacaklar; henuz uygulanmadi)
+1. **Retreat bitisi LOS tabanli:** "dusman gozlem / ates edemiyor" (mevcut: mesafe 220 m ust sinir); + **temas koptuktan sonra YON DEGISTIR** (adim 10) + dagilan askerler **son RP'ye** (adim 11) + RP'de sayim / rapor (adim 12).
+2. **Toparlanma modulu (kumanda karari ile baglanir):** H2 sirasi birebir: guvenlik -> sektor -> kritik silah tehlikeli yone -> mevzi -> OP -> kume silahi once doldur / cephane dagit -> yaralilar -> lider yoksa komuta devri.
+3. **Feint / demonstration:** kumanda modulu (hqFeint): sabitleyen / manevra ayrimi + ayrilma kriteri + temassiz demonstration; "fake retreat" YOK.
+4. **Kanat modulu:** destek grubunun atesini hazirlik sinyali ile kaydirma / kesme (FCL benzeri), kanat grubu hucumunu baslatinca sabitleyen "kaydir" (dost ates onlemi).
+5. **Arka koruma:** son direnis (tek kisinin ayrilmasi) kaynakta YOK; rear guard = tek manga / ates timi + arka nokta, ana govdeyi geciktirir -> tasarim "arka grup" (>= 2 kisi) olmali, tek kisi degil.
+6. **Savunma mevzi araligi 5-20 m** (VBS #6 hendek / mevzi icin).
+7. **Sabit sayilar** (cekilKayip 0.30, 220 m, 90 sn, 140 m kanat noktasi, +-85 derece) kaynakta olmayan tasarim secimleri: dokumanda "tasarim" etiketi, dogrulanmis sanilmasin.
