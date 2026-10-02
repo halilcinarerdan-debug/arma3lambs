@@ -148,8 +148,8 @@ switch (_context) do {
     case "BOUNDING": {
         // 2026-10-01: DIAMOND/FILE sikisik ve LAMBS brainEngage bu formasyonlarda bastirmayi kapatiyor
         if (_isUrban) then {
-            _formation = "WEDGE";
-            _reason = "meskun mahal - esnek, her yone bakis";
+            _formation = "STAG COLUMN";
+            _reason = "meskun mahal - sokak/bina kenari sasirtmali kolon (doktrin)";
         } else {
             if (_isForest) then {
                 _formation = "VEE";
@@ -164,8 +164,8 @@ switch (_context) do {
     // ASSAULT
     case "ASSAULT": {
         if (_isUrban) then {
-            _formation = "WEDGE";
-            _reason = "CQB - hizli ilerleme";
+            _formation = "STAG COLUMN";
+            _reason = "CQB - sasirtmali kolon, bina kenari (doktrin)";
         } else {
             _formation = "LINE";
             _reason = "acik arazi - ates gucu";
