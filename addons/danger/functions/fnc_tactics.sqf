@@ -41,6 +41,14 @@ private _group = group _unit;
 // Keskin nisanci takimi (fnc_sniperTeam): komutan beyni / temas kes / tum bu taktikler uygulanmaz
 if (_group getVariable [QGVAR(sniperTeam), false]) exitWith {false};
 
+// ARAC EKIBI: lider (ya da surucu / nisanci / komutan) aracin icindeyse komutan beyni / piyade taktikleri
+// uygulanmaz (allowGetIn false / doMove / cekilme araci terk ettiriyordu); arac davranisi LAMBS'a kalir
+if (!isNull objectParent (leader _group)) exitWith {false};
+if (((units _group) findIf {
+    alive _x && {!isNull objectParent _x}
+    && {((assignedVehicleRole _x) param [0, ""]) in ["driver", "gunner", "commander", "Turret"]}
+}) > -1) exitWith {false};
+
 // Gecersiz tehdit (olu / dost / sivil / bos): komutan beyni calismaz
 private _tehditGecerli = _target isEqualType objNull
     && {!isNull _target}
@@ -188,7 +196,7 @@ if (
     _tehditGecerli
     && {((units _group) select {alive _x}) isNotEqualTo []}
     && {count ((units _group) select {alive _x}) < 4}
-    && {!(_group getVariable [QGVAR(isExecutingTactic), false])}
+    && {!(_group getVariable [QGVAR(isExecutingTactic), false]) || {count ((units _group) select {alive _x}) isEqualTo 1}}   // tek kalan: eski taktik kilidi kacisi engellemesin
     && {!isPlayer (leader _group)}
 ) then {
     _temasKes = [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsBreakContact", {false}]);

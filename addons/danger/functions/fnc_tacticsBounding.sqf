@@ -179,7 +179,7 @@ _group enableAttack false;
 // Olumculuk: serbest ates (combatMode RED); bitince orijinal geri yuklenir
 _group setVariable [QGVAR(bndOrigCombat), combatMode _group];
 _group setCombatMode "RED";
-_units allowGetIn false;
+(_units select {isNull objectParent _x}) allowGetIn false;   // aractakiler (surucu / nisanci) araci terk etmesin
 _units doWatch _target;
 
 // forceMove burada TUM askerlere konmaz: LAMBS reaksiyonlarini (cover/dodge) tamamen susturuyor ve

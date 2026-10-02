@@ -50,7 +50,7 @@ if (_group getVariable [QGVAR(isBreakingContact), false]) exitWith {false};
 if (_group getVariable [QGVAR(isRetreating), false]) exitWith {false};
 if (_group getVariable [QGVAR(isEvading), false]) exitWith {false};
 if (_group getVariable [QGVAR(isATEngage), false]) exitWith {false};
-if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < 75) exitWith {false};   // kalici tetik (kayip %50 / tek asker): 75 sn sonra tekrar
+if ((time - (_group getVariable [QGVAR(bcEndTime), -999])) < ([75, 25] select (_alive isEqualTo 1))) exitWith {false};   // tek kalan: kisa cooldown   // kalici tetik (kayip %50 / tek asker): 75 sn sonra tekrar
 
 // ---------------------------------------------------------------------------
 // TETIK DEGERLENDIRMESI
@@ -69,7 +69,7 @@ _baski = _baski / _alive;
 private _yarali = (_birimler findIf {(damage _x) > 0.3}) > -1;
 
 private _kac =
-    (_alive isEqualTo 1 && {_init >= 2 || _yarali})
+    (_alive isEqualTo 1)   // TEK KALAN ASKER her zaman kacar (cmdInitialCount sonradan 1 olarak yazilmis olabiliyordu)
     || {_kayip >= 0.5}
     || {_baski >= 0.7};
 if (!_kac) exitWith {false};
@@ -79,7 +79,7 @@ private _tehditPos = _target call CBA_fnc_getPos;
 if ((_tehditPos select 2) > 6) then { _tehditPos set [2, 0.5]; };
 private _mesafe = 99999;
 { _mesafe = _mesafe min (_x distance2D _tehditPos); } forEach _birimler;
-if (_mesafe < 25 || {_mesafe > 400}) exitWith {false};
+if (_mesafe < ([25, 10] select (_alive isEqualTo 1)) || {_mesafe > 400}) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // BASLA
