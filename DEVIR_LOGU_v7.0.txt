@@ -711,3 +711,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Bu fork VARSAYILAN BECERI ATAMAZ. Taban = askerin o anki 'skill' degeri (misyon, Zeus, zorluk ayari, baska mod); ilk dokunusta bir kez saklanir, sonra her zaman taban x carpan uygulanir.
 - Cakisma bulgusu: fnc_cqbReflex aimingSpeed / aimingAccuracy'yi gecici artirip geri yazar; ortamSkill onu ezebilirdi -> cqbSkill aktifken o birime dokunulmaz. Elle degisiklik icin lambs_danger_ortamTabanSifirla = true.
 - Log [ORTAM-SKILL]'e taban + yazilan + OKUNAN spotDistance eklendi: motor setSkill degerini zorluk olcegiyle degistirip geri okuyabilir (yazilan != okunan ise rapor ET).
+=== v8.17 VARSAYILAN BECERI (kullanici: 'zeus / editor birimleri icin commanding full, general full, accuracy 65-70; sonra ortam dussun') ===
+- fnc_varsayilanSkill: CBA CAManBase init (retroaktif; editor + Zeus + script spawn) -> 0.5 sn sonra tablo uygulanir. Tablo lambs_danger_skillVarsayilan [beceri, min, max]: commanding 1.0, general 1.0, aimingAccuracy 0.65..0.70 (rastgele); digerleri misyonun verdigi gibi.
+- Atlanir: oyuncu, yerel olmayan, birim init'inde lambs_danger_skillElle = true, zaten ayarli. Elle: [_u] call lambs_danger_fnc_varsayilanSkill. Kapatma lambs_danger_skillVarsayilanV1 = false.
+- ortamSkill, varsayilan beceri atanana kadar o birimin tabanini ALMAZ (sira: varsayilan -> taban -> ortam carpani). Log [SKILL-VARSAYILAN] (ilk 40 birim: onceki -> yeni), [SKILL-OZET] (60 sn). rpt_ozet karne: SKILL VARSAYILAN.

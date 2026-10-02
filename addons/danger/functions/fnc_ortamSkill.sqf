@@ -76,6 +76,8 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
 
         for "_i" from 0 to (_kesit - 1) do {
             private _u = _askerler select ((_indeks + _i) mod _n);
+            // varsayilan beceri sistemi aciksa, o birime ATANANA kadar taban ALMA (yanlis taban saklanmasin)
+            if ((missionNamespace getVariable ["lambs_danger_skillVarsayilanV1", true]) && {!(isNil "lambs_danger_skillVarsayilanStarted")} && {!(_u getVariable [QGVAR(skillAyarli), false])} && {!(_u getVariable ["lambs_danger_skillElle", false])} && {(_u getVariable [QGVAR(ortamTaban), []]) isEqualTo []}) then { continue };
             // cqbReflex gecici beceri artirir (aimingSpeed / aimingAccuracy) ve eski degeri geri yazar: o sirada dokunma (taban bozulmasin)
             if ((_u getVariable [QGVAR(cqbSkill), []]) isNotEqualTo []) then { continue };
             if (missionNamespace getVariable ["lambs_danger_ortamTabanSifirla", false]) then { _u setVariable [QGVAR(ortamTaban), nil]; };

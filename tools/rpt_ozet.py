@@ -14,10 +14,10 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.16"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.17"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -247,6 +247,16 @@ def karne(path):
     oc = say("ORTAM-SKILL")
     cf = "CF_BAI algilandi:True" in t
     ekle("ORTAM SKILL", "OK" if oc else ("KONTROL" if cf else "YOK"), ("%d degisim" % oc) if oc else ("CF_BAI yuklu -> kapali" if cf else "degisim yok (hava / isik / cihaz sabit olabilir)"))
+    # varsayilan beceri
+    sv = [l for l in L if "[SKILL-VARSAYILAN] " in l and "onceki:" in l]
+    so = [l for l in L if "[SKILL-OZET]" in l]
+    if sv or so:
+        son = so[-1] if so else ""
+        m = re.search(r"uygulandi=(\d+)", son)
+        ekle("SKILL VARSAYILAN", "OK" if (sv or (m and int(m.group(1)) > 0)) else "KONTROL", "%d birim logu%s" % (len(sv), (" | " + re.sub(r"^.*\[SKILL-OZET\] ", "", son)[:110]) if son else ""))
+    else:
+        ekle("SKILL VARSAYILAN", "YOK", "sistem logu yok (v8.17+)")
+
     # yaprak
     ypo = [l for l in L if "[YAPRAK-OZET]" in l]
     if ypo:
