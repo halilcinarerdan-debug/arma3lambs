@@ -438,3 +438,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.20 ===
 - UGL hic atmiyordu: (1) magazineWell kullanan silahlarda sarjor listesi bos cikiyordu (yeni fnc_uglMags); (2) taktik aktifken roleStation atlandigi icin UGL gorevi calismiyordu (artik taktikte de, cekilme/evade/temas kes haric); (3) atisGuvenli UGL icin hat engelini kontrol etmez (yayli atar)
+
+=== v7.21 ===
+- hasUGL: silah basina bir kez [UGL-TESPIT] tani logu (RHS vb.)

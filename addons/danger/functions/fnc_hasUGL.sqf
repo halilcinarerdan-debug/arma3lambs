@@ -35,5 +35,11 @@ private _m = (getArray (configFile >> "CfgWeapons" >> _w >> "muzzles")) select {
     }) > -1) exitWith { _gl = _mz; };
 } forEach _m;
 _unit setVariable [QGVAR(glCache), [_w, _gl]];
+// Tani: silah basina bir kez RPT'ye (RHS / mod UGL tespiti dogru mu?)
+if (isNil "lambs_danger_uglLogSet") then { lambs_danger_uglLogSet = []; };
+if (!(_w in lambs_danger_uglLogSet)) then {
+    lambs_danger_uglLogSet pushBack _w;
+    diag_log format ["[UGL-TESPIT] %1 | muzzle'lar: %2 | UGL: '%3' | uyumlu sarjor: %4", _w, _m, _gl, if (_gl isEqualTo "") then {[]} else {[_w, _gl] call FUNC(uglMags)}];
+};
 
 _gl
