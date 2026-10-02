@@ -63,6 +63,7 @@ PREP(tacticsBounding);
 PREP(selectFormation);
 PREP(commanderFormation);
 PREP(moveAssist);
+PREP(fireLine);
 PREP(tacticsAssess);
 PREP(tacticsAttack);
 PREP(tacticsCQB);
@@ -93,7 +94,7 @@ SUBPREP(ZEN,showSetDisableGroupAI);
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.9 (hizli retreat + donus x1.2 + duvar korumasi + sikisma + komutan formasyon + lider arkada) yuklendi (XEH_PREP preInit)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.10 (ates hatti + hizli retreat + donus x1.2 + duvar korumasi + sikisma + komutan formasyon + lider arkada) yuklendi (XEH_PREP preInit)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {
@@ -111,7 +112,7 @@ diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.9 (hizli retreat + donus x1.2
         // watchdog'lar ilk temasta degil, acilista baslasin
         {
             [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
-        } forEach ["firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist"];
+        } forEach ["firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine"];
 
         // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
         [] spawn {
