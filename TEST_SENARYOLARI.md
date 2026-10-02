@@ -23,3 +23,19 @@ Yuklenen surum `[ELITE-BOOT] ... build vX` satirindan dogrulanir.
 - LAMBS taban FSM'i (Dodge, sympathetic assault, Checking bodies) derlenmis pbo'da; sadece `disableGroupAI` ve `forceMove` ile bastirilabilir.
 - El bombasi ATISI (AI'nin bomba atmasi) LAMBS tabanindadir; bu fork yalnizca tepkiyi ve tanilari yonetir.
 - Mod hatalari (`setHitPointDamage`, `fnc_throwWeapon`, `Bone ...`) bu fork'a ait degildir; `rpt_ozet` bunlari ayiklar.
+
+
+## VBS4 ilhamli ozellik senaryolari (test ortami adlari)
+Her senaryo 3-5 dk; RPT kaydederken senaryo adini ve saatini not et. **Retreat her turda en az bir senaryoda ayrica dogrulanir (hibrit duzen).**
+
+| Ad | Ozellik | Kurulum | Beklenen / bakilacak |
+|----|---------|---------|----------------------|
+| `cover_acik_alan` | Siper ve atis analizi v2 | Agac / duvar / kaya olan acik alan, 8-10 kisi, dusman 150-250 m | `[SIPER-ANALIZ]` faz2 degisim orani %5-50; askerler gercek (mermi durduran) siperde, hedefi gorebiliyor; pasiflesme yok (hareket orani) |
+| `rota_hedgerow` | Taktik rota planlama (gizli yaklasma) | Tarlalar + agac sirasi (hedgerow), dusman karsi uc | Grup agac hattini kullaniyor mu / acik tarla maruziyeti (`[ROTA]` loglari, yazildiginda) |
+| `pusu_yol` | Pusu davranisi + ates emri (ROE) | Yol kenari, grup gizli, dusman devriye / konvoy | Ilk ates zamani (emir / ates altinda), killbox yonu, lider gozlem |
+| `kapi_oda` | Kapi yigilma + oda temizleme | Tek kat bina, kapi + 2 oda, icinde 2 dusman, 4 kisilik ekip | Kapida iki yana yigilma, giris sirasi |
+| `hendek_hatti` | Mevzi / hendek | Hendek hatti (mod nesneleri), savunma + hucum | Mevzilere yerlesme, mevzi arasi geri cekilme |
+| `yorgunluk_yaklasma` | Yorgunluk duyarli bound | ACE fatigue acik, uzun yaklasma (> 500 m) | Atilim boylari / bekleme yuke gore degisiyor |
+| `teslimiyet_kusatma` | Teslimiyet / moral | Kayipli, kusatilmis kucuk grup | Teslim karari (esikler profile gore) |
+| `retreat_kayipli` | Retreat dogrulamasi (sabit) | 5-8 kisi, %40 kayip, dusman 100-150 m | `vardi:` toplam >= %50, retreat'te `TACTICS FLANK` / `Group Suppress` yok, `RetreatBasla/Bitti` cifti |
+| `olay_temas` | Grup olaylari | Herhangi catisma | `[OLAY] InContact/AllClear` cifti, `Casualty` = olu sayisi, `AllClear guvenlik agi` YOK |

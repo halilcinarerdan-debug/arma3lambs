@@ -599,3 +599,9 @@ DEVIR NOTU (bundan sonrasi icin tek sayfa durum)
 - Uretici baglantilari: tacticsRetreat (RetreatBasla/Bitti), tacticsBounding (BoundingBasla/Bitti), grenadeAwareness (GrenadeAlgilandi).
 - rpt_ozet: GRUP OLAYLARI bolumu; TEST_SENARYOLARI.md senaryo 13.
 - HIBRIT TEST DUZENI (kullanici karari): her testte yeni ozellik + retreat dogrulamasi birlikte; hata artarsa oncelik yeniden belirlenir.
+
+=== ONCELIK (VBS4 GORSELLERINE GORE, kullanici onayli) ===
+Siralama: 1) Siper + atis analizi v2 (faz 1 yazildi; test: cover_acik_alan)  2) Taktik rota planlama (tasarim: ROTA_PLANLAMA_TASARIM.md; test: rota_hedgerow)
+3) Pusu davranisi + ates emri ROE (test: pusu_yol)  4) Olay mesajlari (v8.4 yazildi; test: olay_temas)  5) Kapi / oda temizleme (kapi_oda)
+6) Hendek / mevzi (hendek_hatti)  7) Yorgunluk duyarli bound (yorgunluk_yaklasma)  8) Teslimiyet / moral (teslimiyet_kusatma)
+HIBRIT DUZEN: her testte yeni ozellik + retreat dogrulamasi (retreat_kayipli). Senaryo adlari TEST_SENARYOLARI.md'de.
