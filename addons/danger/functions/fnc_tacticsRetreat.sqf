@@ -572,6 +572,7 @@ if (EGVAR(main,debug_functions)) then {
     private _ekGuvenM = [_group, "cekilGuvenM", 220] call FUNC(dk);
     private _ekMax = [_group, "cekilEkSicrama", 4] call FUNC(dk);
     private _ekNo = 0;
+    private _ekNeden = "";
     while {!isNull _group && {_ekNo < _ekMax} && {time < (_baslangic + 150)}} do {
         private _canli = (units _group) select {alive _x && {isNull objectParent _x}};
         if (_canli isEqualTo []) exitWith {};
@@ -579,8 +580,20 @@ if (EGVAR(main,debug_functions)) then {
         private _dus = _ld findNearestEnemy _ld;
         private _tp = [getPosATL _dus, _targetPos] select (isNull _dus);
         private _d = (getPosATL _ld) distance2D _tp;
-        if (_d >= _ekGuvenM) exitWith {};
-        if ((_group getVariable [QGVAR(contact), 0]) <= time) exitWith {};
+        if (_d >= _ekGuvenM) exitWith { _ekNeden = "guvenli mesafe"; };
+        if ((_group getVariable [QGVAR(contact), 0]) <= time) then { _ekNeden = "temas kesildi"; };
+        // v8.34 DOKTRIN (TC 3-21.76 Break Contact standardi, s. 8-11: "continues to move until the enemy cannot observe or place fire on them"):
+        //   bitis kriteri GORUS: dusman biliniyor, >= 100 m (TASARIM: tufek etkili atis alt siniri) ve askerlerin >= %80'i dusmandan siperli (arazi / nesne) ise dur.
+        //   Maliyet: ek sicrama basina asker sayisi kadar 2 isin sorgusu (~12-20), ihmal edilebilir.
+        if (_ekNeden isEqualTo "" && {!isNull _dus} && {_d >= 100}) then {
+            private _eEye = AGLToASL ((getPosATL _dus) vectorAdd [0, 0, 1.6]);
+            private _gizliN = {
+                private _uEye = AGLToASL ((getPosATL _x) vectorAdd [0, 0, 1.0]);
+                terrainIntersectASL [_eEye, _uEye] || {lineIntersects [_eEye, _uEye, _dus, _x]}
+            } count _canli;
+            if (_gizliN >= (ceil (0.8 * (count _canli)))) then { _ekNeden = "gozlem yok"; };
+        };
+        if (_ekNeden isNotEqualTo "") exitWith {};
         _targetPos = _tp;
         _targetASL = AGLToASL _tp;
         // v8.14: ek sicrama GRUBUN ARKASINDAN olculur (en uzak asker) ve adim >= 35 m (RPT 13:09: lider onde oldugu icin nokta zaten askerlerin 12 m icindeydi,
@@ -601,6 +614,25 @@ if (EGVAR(main,debug_functions)) then {
         [_group, _hr, _kp select {alive _x}, _wpE, _targetASL, (count _sira) + _ekNo] call _sicra;
     };
 
+    // v8.34 DOKTRIN (TC 3-21.76 s. 8-14, adim 10: "consider changing the unit's direction of movement once contact is broken"; dusmanin izi surmesini / etkili dolayli ates getirmesini zorlastirir):
+    //   temas koptu / dusman gozlem yapamiyor ise TEK BIR toplu ek sicrama, geri eksenden +-55 derece (TASARIM) sapma ile (en gizli aday _wpSec ile secilir).
+    if (!isNull _group && {_ekNeden in ["temas kesildi", "gozlem yok"]} && {time < (_baslangic + 140)}) then {
+        private _canliY = (units _group) select {alive _x && {isNull objectParent _x}};
+        if ((count _canliY) >= 3) then {
+            private _arkaY = _canliY select 0;
+            { if ((_x distance2D _targetPos) > (_arkaY distance2D _targetPos)) then { _arkaY = _x; }; } forEach _canliY;
+            private _oY = getPosATL _arkaY;
+            private _yon = (_targetPos getDir _oY) + (selectRandom [55, -55]);
+            private _wpY = [_oY, _yon] call _wpSec;
+            _wpY = [_wpY, _oY] call _suKontrol;
+            diag_log format ["[GERI-CEKILME-YON] %1 | neden:%2 | yon degistirme sicramasi (eksen %3 derece) | dusman son bilinen %4 m", groupId _group, _ekNeden, round (_yon - (_targetPos getDir _oY)), round (_oY distance2D _targetPos)];
+            [_group, _canliY, [], _wpY, _targetASL, (count _sira) + _ekNo + 1] call _sicra;
+        };
+    };
+    if (_ekNeden isNotEqualTo "") then {
+        diag_log format ["[GERI-CEKILME-BITIS] %1 | neden:%2 | ek sicrama:%3 | sure:%4 sn", groupId _group, _ekNeden, _ekNo, round (time - _baslangic)];
+    };
+
     // -----------------------------------------------------------------------
     // TEMIZLIK
     // -----------------------------------------------------------------------
@@ -617,7 +649,8 @@ if (EGVAR(main,debug_functions)) then {
             [_group, _eskiDGAk, _konsS] spawn {
                 params ["_g", "_e", "_s"];
                 sleep _s;
-                if (!isNull _g && {!(_g getVariable [QGVAR(isRetreating), false])}) then {
+                // v8.34: toparlanma modulu (fnc_toparlan) calisiyorsa eski degeri O geri verir
+                if (!isNull _g && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isToparlan), false])}) then {
                     _g setVariable [QGVAR(disableGroupAI), [nil, true] select _e];
                     diag_log format ["[GERI-CEKILME-TOPLAN] %1 | toparlanma bitti, LAMBS grup taktigi geri acildi", groupId _g];
                 };
@@ -658,6 +691,8 @@ if (EGVAR(main,debug_functions)) then {
 
         [_group, "RetreatBitti", ""] call FUNC(olayGonder);
         diag_log format ["[GERI-CEKILME-TAMAM] %1", groupId _group];
+        // v8.34 DOKTRIN: toparlanma = consolidate and reorganize (TC 3-21.76 s. 8-9 / 8-10; fnc_toparlan). Baslarsa LAMBS grup taktigi eski degeri toparlanma bitince geri gelir.
+        [_group, _targetPos, _eskiDGAk] call FUNC(toparlan);
     };
 };
 

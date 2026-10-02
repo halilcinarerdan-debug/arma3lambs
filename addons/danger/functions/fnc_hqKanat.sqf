@@ -49,6 +49,10 @@ private _kaldir = [];
             private _sit = _iG getVariable ["lambs_danger_cmdSit", []];
             private _hp = if (_sit isEqualType [] && {(count _sit) >= 8} && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0, 0, 0]}) then {_sit select 7} else {_enP};
             [_yG, "SALDIRI", [_hp]] call FUNC(hqEmir);
+            // DOKTRIN (TC 3-21.76 / MCWP 3-11.2): hucum baslarken destek ates unsuru atesi dusmanin OBUR kanadina KAYDIRIR (dost atesi onlemi, "handover of responsibility for direct fires").
+            //   Arma karsiligi: sabitleyen grup, kanattan gelenin ters yonunde dusmanin 35 m ilerisine bastirma atesi (TASARIM mesafe). Hucum eden dusmana yaklasinca AI kendi hedeflemesiyle yine ates edebilir (kisitli kontrol).
+            private _kayPos = _hp getPos [35, _hedef getDir _hp];
+            [_iG, "ATES_KAYDIR", [_kayPos]] call FUNC(hqEmir);
             _m set [5, "SALDIRI"];
             _m set [4, time];
             diag_log format ["[HQ-KANAT] %1 | SALDIRI %2 (kanat noktasi %3 m'de) -> hedef %4", _taraf, groupId _yG, round ((leader _yG) distance2D _hedef), mapGridPosition _hp];

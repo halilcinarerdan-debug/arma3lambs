@@ -72,7 +72,7 @@ private _p = createHashMapFromArray [
     ["cekilGuvenM", 220], ["cekilEkSicrama", 4], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
-    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 45]
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 45], ["toparlan", true]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---

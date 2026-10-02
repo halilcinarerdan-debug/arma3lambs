@@ -65,3 +65,9 @@ Yaprak testi icin konsol: `lambs_danger_yaprakTest = true;` (ilk 400 degerlendir
 1. ISTIHBARAT: 3+ grup (birbirine < 1500 m). Biri dusmani gorsun. Beklenen: `[HQ-ISTIHBARAT] muhbir G1 -> alici G2 | hedef ...` ve diger gruplarin dusman yonune donmesi / mesafe kapatmasi. Oyuncu ekibi hedefse `OYUNCU` yazar.
 2. KANAT: 3 grup, biri sabit temasta (ayakta mesafeli atis), ikisi 100-900 m'de musait. Beklenen: `[HQ-KANAT] EMIR ... cift kusatma` ardindan yaklasik 40-150 sn sonra `[HQ-KANAT] SALDIRI`; gruplar dusmanin yanlarindan gelmeli.
 3. Dostca ates: sabitleyen grup kanattan hucum eden dostuna ates etmemeli (kanat noktasi sabitleyenin ates hattina dik); gorulurse nerede oldugunu yaz.
+
+## v8.34 DOKTRIN testi (retreat + toparlanma)
+1. Kayipli bir grubu retreat ettir. Log sirasi: `[GERI-CEKILME-BASLA]` ... `[GERI-CEKILME-BITIS] neden:gozlem yok | temas kesildi | guvenli mesafe`; temas koptuysa `[GERI-CEKILME-YON]` (tek sicrama, eksenden +-55 derece sapma); `[GERI-CEKILME-TAMAM]`; hemen ardindan `[TOPLAN] BASLA` (halka, OP, silah sektorleri), `[TOPLAN-RAPOR]`, `[TOPLAN] BITTI neden:...`.
+2. Gorsel: retreat bittikten sonra askerler lider etrafinda halka olup DISA bakmali (tehdit yonune MG / AT), bir kisi 30-45 m onde gizli gozetleme noktasinda; dusman cikarsa toparlanma bitmeli ve komutan yeni karar vermeli. 90 sn icinde otomatik hucum olmamali.
+3. Kanat: hucum baslayinca (`[HQ-KANAT] SALDIRI`) sabitleyen grubun atesi dusmanin otesine kaymali (yakin kanatta dost atesi olursa yaz).
+4. Sorun isaretleri: retreat cok erken bitiyor mu ('gozlem yok' ile 20-30 sn'de), halkada askerlerin binanin / duvarin icine dusmesi, toparlanma sonrasi askerlerin kaybolmasi (doFollow).

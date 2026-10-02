@@ -8,6 +8,7 @@
  *            (yoksa grup sonradan upstream telsiz olayiyla kumandayi atlayip kendi basina kosardi)
  *   KANAT    veri [kanat noktasi, istek sahibi grup adi]  -> ayni yurutucu (kanat noktasina hareket); varista kumanda SALDIRI verir
  *   SALDIRI  veri [dusman pozisyonu]  -> LAMBS tacticsAssault (kanattan hucum)
+ *   ATES_KAYDIR veri [nokta]  -> grubun tum askerleri doSuppressiveFire nokta (doktrin: destek ateşi hazirlik sinyali ile kaydirilir / kesilir; hucum eden dost unsura ates gitmesin)
  *
  * Her emir: grup degiskeni lambs_danger_hqEmir = [ad, zaman, veri]; lambs_danger_hqGorevT = zaman; olay "HQEmir" (veri = ad); RPT [HQ-EMIR] (ilk 200 satir)
  *
@@ -44,6 +45,15 @@ if (_ad isEqualTo "SALDIRI") then {
     _veri params [["_hedef", [0, 0, 0], [[]]]];
     if (_hedef isNotEqualTo [0, 0, 0] && {!isNil "lambs_danger_fnc_tacticsAssault"}) then {
         [_g, _hedef] call FUNC(tacticsAssault);
+        _ok = true;
+    };
+};
+
+// ATES_KAYDIR: sabitleyen grup ateşini bir noktaya kaydirir (hucum eden dost unsurdan uzaga)
+if (_ad isEqualTo "ATES_KAYDIR") then {
+    _veri params [["_poz", [0, 0, 0], [[]]]];
+    if (_poz isNotEqualTo [0, 0, 0]) then {
+        { if (alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}) then { _x doSuppressiveFire _poz; }; } forEach (units _g);
         _ok = true;
     };
 };

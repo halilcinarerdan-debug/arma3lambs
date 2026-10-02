@@ -14,10 +14,10 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.33"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.34"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -294,6 +294,21 @@ def karne(path):
     ekle("KUMANDA (HQ)", "OK" if hqmod else ("KONTROL" if any("[HQ] kumanda" in l for l in L) else "KONTROL"),
          ("modul: %s | tahta:%d takviye:%d kanat emri:%d (saldiri:%d) istihbarat bildirimi:%d medevac:%d" % (hqmod[-1].split("[HQ-MODUL]")[1].strip()[:60], len(hqb), len(hqt), len(hqk), len(hqs), len(hqi), len(hqm))) if hqmod else "Zeus 'ELITE Kumanda (HQ)' modulu yerlestirilmemis (kumanda KAPALI — beklenen)" )
     ekle("RETREAT TOPARLANMA", "OK" if any("[GERI-CEKILME-TOPLAN]" in l for l in L) else "YOK", "%d toparlanma" % len([1 for l in L if "[GERI-CEKILME-TOPLAN]" in l and "toparlanma:" not in l and "geri acildi" not in l]))
+    tb = [l for l in L if "[TOPLAN]" in l and "BASLA" in l]
+    tr = [l for l in L if "[TOPLAN-RAPOR]" in l]
+    tt = [l for l in L if "[TOPLAN]" in l and "BITTI" in l]
+    yb = [l for l in L if "[GERI-CEKILME-BITIS]" in l]
+    yy = [l for l in L if "[GERI-CEKILME-YON]" in l]
+    neden = {}
+    for l in tt:
+        m = re.search(r"neden:([^|]+)", l)
+        if m: neden[m.group(1).strip()[:28]] = neden.get(m.group(1).strip()[:28], 0) + 1
+    bn = {}
+    for l in yb:
+        m = re.search(r"neden:([^|]+)", l)
+        if m: bn[m.group(1).strip()] = bn.get(m.group(1).strip(), 0) + 1
+    ekle("TOPLANMA (DOKTRIN: consolidate+reorganize)", "OK" if tb else "YOK", ("basla:%d rapor:%d bitis:%s" % (len(tb), len(tr), neden)) if tb else "retreat sonrasi toparlanma baslamadi (retreat olmadi mi / toparlan kapali?)")
+    ekle("RETREAT BITIS KRITERI (gorus)", "OK" if yb else "YOK", ("bitis nedenleri: %s | yon degistirme sicramasi:%d" % (bn, len(yy))) if yb else "ek sicrama bitisi kaydi yok")
     # varsayilan beceri
     sv = [l for l in L if "[SKILL-VARSAYILAN] " in l and "onceki:" in l]
     so = [l for l in L if "[SKILL-OZET]" in l]
