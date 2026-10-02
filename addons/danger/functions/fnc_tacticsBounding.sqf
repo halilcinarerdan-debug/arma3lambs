@@ -522,7 +522,10 @@ if (EGVAR(main,debug_functions)) then {
         private _bndFormation = _group getVariable [QGVAR(dangerFormation), "WEDGE"];
         private _mevcutFormation = formation _group;
         private _grupBaskida = ((units _group) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
-        if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}) then {
+        if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}
+            && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}
+            && {time > (_group getVariable [QGVAR(formKorumaT), 0])}) then {
+            _group setVariable [QGVAR(formKorumaT), time + 20];
             _group setFormation _bndFormation;
         };
 
@@ -534,7 +537,8 @@ if (EGVAR(main,debug_functions)) then {
         if (_cycleCount isEqualTo 1 || {_uzaklik > 5}) then {
             _group setVariable [QGVAR(bndSonPos), _simdiPos];
             private _yeniFormasyon = [leader _group, _target, "BOUNDING"] call FUNC(selectFormation);
-            if (_yeniFormasyon isNotEqualTo _bndFormation) then {
+            if (_yeniFormasyon isNotEqualTo _bndFormation && {time > (_group getVariable [QGVAR(formKorumaT), 0])}) then {
+                _group setVariable [QGVAR(formKorumaT), time + 20];
                 _group setVariable [QGVAR(dangerFormation), _yeniFormasyon];
                 _group setFormation _yeniFormasyon;
             };
