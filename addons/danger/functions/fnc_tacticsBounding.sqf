@@ -388,10 +388,12 @@ if (EGVAR(main,debug_functions)) then {
     //   - atilim <= 40 m ve en az 6 m ileri kazanc
     //   - yol aciklik: kosucudan siperine giden hat boyunca 5 m'de bir ornek; dusmanin GORDUGU ornek 'acik'
     //   - puan = -4 x findCover sirasi - 7 x acik ornek - 1.5 x (atilim - 30 m)  -> kisa, korunakli yol kazanir
+    // YAKLASIM ACISI (_aci): hedefe dogru hattin +-derece sapmasi; siper puanina aci uyumu eklenir (0.2/derece),
+    //   boylece kosucular tek hat yerine yelpaze seklinde ilerler ve kapsama ekibiyle capraz ates olusur
     // Siper yoksa yanal acili 25 m atilim (capraz ates + dagilma). Siper stance'i VARISTA uygulanir.
     // Doner: [birim, hedefPos, varisStance, atilimMetre, acikOrnek] veya []
     private _kosanHareket = {
-        params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil", "_gorev"];
+        params ["_kosan", "_hedef", "_siperMenzil", "_hucumMenzil", "_gorev", ["_aci", 0]];
         if (!alive _kosan || {!isNull objectParent _kosan}) exitWith {[]};
 
         private _mesafe = _kosan distance2D _hedef;
@@ -418,7 +420,8 @@ if (EGVAR(main,debug_functions)) then {
                         _a = _a + 1;
                     };
                 };
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 45) max 0));
+                private _aciFark = abs ((((_kPos getDir _cp) - ((_kosan getDir _hedef) + _aci)) + 540) % 360 - 180);
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 45) max 0)) - (0.2 * _aciFark);
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
@@ -430,7 +433,7 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _cover;
 
         if (_movePos isEqualTo []) then {
-            private _kayma = [-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2);
+            private _kayma = if (_aci isNotEqualTo 0) then {_aci} else {[-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2)};
             private _kalan = (_mesafe - _hucumMenzil) max 0;
             _hop = 35 min _kalan;
             _movePos = _kPos getPos [_hop, ((_kosan getDir _hedef) + _kayma)];
@@ -737,7 +740,7 @@ if (EGVAR(main,debug_functions)) then {
         // -------------------------------------------------------------------
         private _hareketler = [];
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"BuddyRush/Move"}] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"BuddyRush/Move"}, [30, -30, 0] select ((_forEachIndex + _cycleCount) % 3)] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 

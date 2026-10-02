@@ -414,3 +414,4 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - Komutan sicramaya katilmaz (kapsama ekibinden yonetir)
 - Cekilme sonrasi 90 sn hucum ailesi yasak (DELAY)
 - fnc_atisGuvenli: RPG/UGL icin dost, geri patlama, cali/dal sekmesi, hat engeli kontrolu
+- Bound yaklasim acisi: kosucular +30/-30/0 derece dönüşümlü, siper puanina aci uyumu (0.2/derece)
