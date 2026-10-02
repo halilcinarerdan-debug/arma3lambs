@@ -81,8 +81,8 @@ if (!_uygun) exitWith {false};
 // ---------------------------------------------------------------------------
 // YUKLU 40mm SARJOR HE MI? (flare / duman / aydinlatma ATILMAZ)
 // ---------------------------------------------------------------------------
-private _glMags = getArray (configFile >> "CfgWeapons" >> _w >> _gl >> "magazines");
-private _yuklu = (primaryWeaponMagazine _unit) select {_x in _glMags};
+private _glMags = [_w, _gl] call FUNC(uglMags);
+private _yuklu = (primaryWeaponMagazine _unit) select {(toLower _x) in _glMags};
 if (_yuklu isEqualTo []) exitWith {false};
 
 private _magAd = _yuklu select 0;

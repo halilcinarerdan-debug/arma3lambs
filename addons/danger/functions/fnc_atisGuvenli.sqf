@@ -67,13 +67,15 @@ private _bas = AGLToASL (_uPos vectorAdd [0, 0, 1.4]);
 private _yaku = false;
 {
     private _basS = AGLToASL ((_unit getPos [0.7, _dir + (_x select 1)]) vectorAdd [0, 0, 1.4]);
-    private _son = AGLToASL (_unit getPos [12, _dir + (_x select 2)]);
+    private _son = AGLToASL (_unit getPos [([8, 12] select _rpg), _dir + (_x select 2)]);
     _son set [2, (_basS select 2) + ((((AGLToASL _tPos) select 2) + 1.2 - (_basS select 2)) * (12 / (_d max 12)))];
     if (terrainIntersectASL [_basS, _son] || {(lineIntersectsSurfaces [_basS, _son, _unit, objNull, true, 1, "FIRE", "VIEW"]) isNotEqualTo []}) exitWith { _yaku = true; };
 } forEach [[12, 0, 0], [12, 90, 0], [12, -90, 0]];
 if (_yaku) exitWith {["onunde cali/dal/engel (sekme)"] call _gorev};
 
-// 4) hat engeli: hedefin 8 m oncesine kadar
+// 4) hat engeli (SADECE RPG: duz giden roket). UGL yayli atar — hat kapali olsa bile (siperin / duvarin arkasi) atmasi tam da amaci;
+//    UGL icin sadece yakin engel (3) ve dost (2) kontrolu yapilir
+if (!_rpg) exitWith {true};
 private _hedefASL = AGLToASL (_tPos vectorAdd [0, 0, 1.2]);
 private _bitis = _bas vectorAdd (((_hedefASL vectorDiff _bas) vectorMultiply (((_d - 8) max 1) / (_d max 1))));
 if ((lineIntersectsSurfaces [_bas, _bitis, _unit, objNull, true, 1, "FIRE", "VIEW"]) isNotEqualTo []) exitWith {["hat kapali (engel)"] call _gorev};

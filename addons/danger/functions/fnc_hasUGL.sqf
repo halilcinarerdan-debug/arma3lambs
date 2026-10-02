@@ -30,7 +30,7 @@ private _gl = "";
 private _m = (getArray (configFile >> "CfgWeapons" >> _w >> "muzzles")) select {_x isNotEqualTo "this"};
 {
     private _mz = _x;
-    if (((getArray (configFile >> "CfgWeapons" >> _w >> _mz >> "magazines")) findIf {
+    if ((([_w, _mz] call FUNC(uglMags)) findIf {
         (getText (configFile >> "CfgMagazines" >> _x >> "ammo")) isKindOf ["GrenadeBase", configFile >> "CfgAmmo"]
     }) > -1) exitWith { _gl = _mz; };
 } forEach _m;

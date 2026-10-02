@@ -89,6 +89,31 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
             if (isNull _leader || {!alive _leader} || {!(local _leader)} || {isPlayer _leader}) then { continue };
             if (((units _g) findIf {isPlayer _x}) > -1) then { continue };
 
+            // UGL HER TAKTIKTE: bounding / hucum / hold sirasinda istasyon mantigi atlanir ama bombaatar 40mm gorevini yapar
+            // (eskiden taktik aktifken UGL hic atmiyordu). Cekilme / evade / temas kes: atis yok.
+            if (
+                ((_g getVariable [QGVAR(contact), 0]) > time)
+                && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])}
+                && {!(_g getVariable [QGVAR(isBreakingContact), false])}
+            ) then {
+                {
+                    private _gu = _x;
+                    if (
+                        alive _gu && {local _gu} && {!isPlayer _gu} && {isNull objectParent _gu}
+                        && {(speed _gu) < 1.5} && {(getSuppression _gu) < 0.5}
+                        && {!(_gu getVariable [QGVAR(forceMove), false])}
+                        && {([_gu] call _glFn) isNotEqualTo ""}
+                    ) then {
+                        private _ge = _gu findNearestEnemy _gu;
+                        if (!isNull _ge && {alive _ge} && {_ge isKindOf "CAManBase"}) then {
+                            if ([_gu, _ge] call _uglFn) then {
+                                diag_log format ["[ROL-GOREV] %1 | %2 | UGL (taktikte) -> %3 (%4m)", groupId _g, name _gu, name _ge, round (_gu distance2D _ge)];
+                            };
+                        };
+                    };
+                } forEach (units _g);
+            };
+
             // Kendi hareket duzeni olan taktikler: atla
             if (
                 (_g getVariable [QGVAR(isBounding), false])
