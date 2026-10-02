@@ -369,6 +369,36 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                     };
                 };
 
+                // CQB ICERIDE ATIS POZISYONU (v8.25, VBS #5 baslangici; kullanici: "pencere / kapi / ic acilari GERIDEN ve muzzle flasi gizleyecek sekilde"):
+                //   iceride (ustte cati var) ve atis modunda: dusman yonune dik 5 yanal ornek (-0.8..+0.8 m, govde 1.4 m) hangileri dusmandan GORULUYOR (aci genisligi)
+                //   dar aci (1-2 / 5 gorunuyor) = pencere / kapidan GERIDE, silueti ve namlu parlamasi disaridan zor gorunur -> +10; hic gorunmuyor 0;
+                //   5 / 5 gorunuyor = pencerenin TAM onunde, acikta -> -8;  1.6 m one (dusmana dogru) kayinca da gorunuyorsa pencereye >= 1.6 m geride -> +6
+                if (_atisModu) then {
+                    private _ustCati = lineIntersects [_posASL vectorAdd [0, 0, 1.6], _posASL vectorAdd [0, 0, 25], _unit];
+                    if (_ustCati) then {
+                        private _perpC = [cos (_eDir), -(sin (_eDir)), 0];
+                        private _gorunen = 0;
+                        {
+                            private _yp = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd (_perpC vectorMultiply _x);
+                            if (!([_dangerPos, _yp, _unit] call _gizli)) then { _gorunen = _gorunen + 1; };
+                        } forEach [-0.8, -0.4, 0, 0.4, 0.8];
+                        private _geri = 0;
+                        if (_gorunen > 0) then {
+                            private _on = (_posASL vectorAdd [0, 0, 1.4]) vectorAdd ([sin _eDir, cos _eDir, 0] vectorMultiply 1.6);
+                            if (!([_dangerPos, _on, _unit] call _gizli)) then { _geri = 1; };
+                        };
+                        private _cqbP = 0;
+                        if (_gorunen in [1, 2]) then { _cqbP = _cqbP + 10; };
+                        if (_gorunen isEqualTo 5) then { _cqbP = _cqbP - 8; };
+                        if (_geri isEqualTo 1) then { _cqbP = _cqbP + 6; };
+                        _a set [0, (_a select 0) + _cqbP];
+                        if (isNil "lambs_main_cqbLogN") then { lambs_main_cqbLogN = 0; };
+                        if (lambs_main_cqbLogN < 40) then {
+                            lambs_main_cqbLogN = lambs_main_cqbLogN + 1;
+                            diag_log format ["[CQB-POZ] %1 | iceride | aci genisligi:%2/5 | pencereden >= 1.6 m geride:%3 | puan degisimi:%4 | dusman %5 m", name _unit, _gorunen, _geri isEqualTo 1, _cqbP, round _eDist];
+                        };
+                    };
+                };
                 // atis edebilme
                 if (_atisModu) then {
                     if ((_a select 2) isNotEqualTo "UP") then {

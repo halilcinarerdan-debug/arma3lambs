@@ -765,3 +765,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Elenen nedenler: leaderSync (retreat'te devre disi; [KOMUTAN-BEKLE] satiri yok), DUVAR-KORUMA / SIKISMA satiri yok, baski yok (pinned degil), yaralanma yok.
 - Duzeltme / tani: takilma blogu (3.5 sn'de < 1.5 m) artik [GERI-CEKILME-TAKILI] (komut, hiz, stance, beh, unitReady, expectedDestination, takilma sayaci, binada, yakin nesne sayisi) loglar; her takilmada PATH / MOVE / ANIM acilir, sert UP, FULL hiz;
   2. takilmada DOSTOP + 0.3 sn + yeni nokta (+-25 derece sapmali). Neden belirsiz: bir sonraki RPT'de TAKILI satirlari kaynagi gostermeli.
+=== v8.25 CQB POZISYON PUANI v1 (hibrit duzen: retreat dogrulama + yeni ozellik; VBS #5 baslangici) ===
+- findCover FAZ 2 (atis modu: DEFEND / OVERWATCH / ADVANCE): iceride (ustte cati: 1.6 m -> 25 m isin kesisir) aday icin dusmana dik 5 yanal ornek (-0.8..+0.8 m) hangileri dusmandan gorunuyor = ACI GENISLIGI:
+  1-2 / 5 (dar aci, pencere / kapidan geride) +10; 5 / 5 (pencerenin tam onunde) -8; 1.6 m dusmana dogru kayinca da gorunuyorsa pencereye >= 1.6 m geride +6. Log [CQB-POZ] (ilk 40).
+- Sinir: kapi / pencere gercek tespiti YOK (aci genisligi dolayli olcu); muzzle flash gece iceride gorunurlugu hesaplanmiyor; parsel / avlu icinde bekleme + sirayla cikma, oda temizleme sirasi (stack / pie) YOK = sonraki adim.
