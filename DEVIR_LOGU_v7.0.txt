@@ -732,3 +732,5 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Neden (kod incelemesi, RPT'de dogrulanmadi): fnc_roleStation sakin halde formasyon sirasini role gore duzenler (roleOrderSig != birim sayisi + temas > 20 sn once); yeni spawn / Zeus ile birim eklenen gruplarda ilk anda calisir ve
   her birimi joinSilent ile yeni grup -> eski grup tasiyarak slotlari yeniden dagitir -> askerler yeni slota yurur. Duzeltme: yalniz lider YURURKEN (> 2.5 km/s) duzenlenir.
 - Dogrulama: [ROL-SIRA] satiri duran grupta artik cikmamali; [ANOMALI] BOSTA-HAREKET sayisi dusmeli. Hala varsa o satirin gorev / buddy / rol istasyonu zamanlari kaynagi gosterir.
+=== v8.20b DUZELTME: 'icimizden gectiler' = AI oyunculari PARCA PARCA ETTI (ben 'fark etmeden gecti' sandim) ===
+- v8.19'daki yakin mesafe tabani (ortamSkill 30 m ceza yok, kamuflaj 25 m >= 0.9) GERI ALINDI: AI'yi yakinda daha olumcul yapiyordu. Denge icin lambs_danger_ortamSkillOlcek (> 1 = AI daha cok zayiflar), varsayilan beceri tablosu (aimingAccuracy 0.65-0.70), kamuflajMin.

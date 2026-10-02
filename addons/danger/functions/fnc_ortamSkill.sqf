@@ -101,9 +101,6 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
             private _mAA = 1 - (0.3 * (1 - _mSD));
             private _carpanlar = [_mSD, _mST, _mAA] apply {_x max 0.25};
 
-            // YAKIN MESAFE TABANI (v8.19, kullanici: "yeni spawnlayip bekledigimde AI icimizden gecti"): 30 m icinde dusman varsa ortam cezasi UYGULANMAZ (yakindakini hep fark eder)
-            private _yakinD = (_u nearEntities ["CAManBase", 30]) findIf {alive _x && {((side group _u) getFriend (side group _x)) < 0.6}} > -1;
-            if (_yakinD) then { _carpanlar = [1, 1, 1]; };
             private _son = _u getVariable [QGVAR(ortamSon), _taban];
             private _yeni = [];
             private _degisti = false;
