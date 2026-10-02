@@ -55,9 +55,16 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
             private _g = group _u;
             private _tabanAnim = if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]}) then {1.15} else {1.0};
             private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]} else {_tabanAnim};
-            if ((_u getVariable [QGVAR(mvAnim), -1]) isNotEqualTo _istenen) then {
+            // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
+            // uygulanmiyordu. Artik deger degisince VEYA en geç 1.5 sn'de bir yeniden uygulanir; remoteExec ile TUM makinelerde
+            // (setAnimSpeedCoef etkisi yerel: oyuncu istemcisi bot animasyonunu hizlanmis gormezdi).
+            if (
+                ((_u getVariable [QGVAR(mvAnim), -1]) isNotEqualTo _istenen)
+                || {time > (_u getVariable [QGVAR(mvAnimT), 0])}
+            ) then {
                 _u setVariable [QGVAR(mvAnim), _istenen];
-                _u setAnimSpeedCoef _istenen;
+                _u setVariable [QGVAR(mvAnimT), time + 1.5];
+                [_u, _istenen] remoteExecCall ["setAnimSpeedCoef", 0];
             };
 
             if (_agir) then {

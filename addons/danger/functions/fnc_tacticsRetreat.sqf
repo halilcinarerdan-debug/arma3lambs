@@ -381,6 +381,9 @@ if (EGVAR(main,debug_functions)) then {
                 _b enableAI "COVER";
                 _b setBehaviour "COMBAT";   // vardi: siper al, AWARE'de ayakta durma
                 _b setUnitPosWeak "MIDDLE";
+                // DOSTOP: varan asker kendi sicrama noktasinda KALIR (aksi halde formasyon slotuna, yani liderin eski konumuna,
+                // geri yuruyordu = "geri git ileri git, ayni yolu tekrar gidiyorlar")
+                doStop _b;
                 [_b, _hedefASL] call EFUNC(main,doSuppress);
             };
         } forEach _varis;
