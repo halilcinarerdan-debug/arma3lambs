@@ -401,7 +401,8 @@ if (EGVAR(main,debug_functions)) then {
                 !((_x select 0) in _pinned)
                 && {((_x select 0) distance2D (_x select 1)) > 12}
             };
-            if (_gelmeyen isEqualTo [] && {(_pinned select {alive _x}) isEqualTo []}) exitWith {};
+            // v8.8: kalan herkes baski altinda yere yapistiysa (ezilen) pencerenin sonunu BEKLEME (RPT 12:53: 22-26 sn bosa gidiyordu); sonraki sicrama baslar
+            if (_gelmeyen isEqualTo [] && {(time - _t0) >= 6 || {(_pinned select {alive _x}) isEqualTo []}}) exitWith {};
             if ((time - _t0) >= 3 && {_canli isNotEqualTo []} && {(count _vardi) >= ((count _canli) * 0.6)}) exitWith {};
             sleep 1;
         };

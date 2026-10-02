@@ -641,3 +641,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Log: [ROTA] grup | hedef m | sapma | maruziyet direkt% -> plan% | ortu | sure ms (ilk 80). rpt_ozet: ROTA PLANLAMA + RETREAT EK SICRAMA bolumleri.
 - Olcut (rota_hedgerow): plan maruziyeti direkt hattin %60'i altinda; sure ort < 15 ms; sapma != 0 orani %20-60 (hep sapma = sorun, hic sapma = sorun).
 - SINIR: rota sadece YONELIM acisi verir (ara nokta zinciri degil); motor siperler arasi yolu yine kendi secer. Sonraki surum: nearestTerrainObjects agac SIRASI hatti + onceden planli ara nokta listesi.
+=== v8.8 (RPT 12:50, v8.7) ===
+- ROTA DOGRULANDI: 3 plan, hepsinde sapma (+20/-40/-60), maruziyet direkt %100 -> plan %14-36, hesap 1-2 ms. (Sapma hep != 0: acik alan haritasinda beklenen; ormanlik/engebede sapma orani gozlenecek.)
+- Retreat (OPFOR Alpha 1-1, 7v11, baski 0.88, tehdit 229 m): EK sicramalar calisti (7 sicrama, 130 sn) ama mesafe kazanilamadi (194-214 m): grup acikta baski altinda (baski 0.83-1.25) yere yapisti, 7 -> 2 kisi.
+  Bu kod hatasi degil, asiri guc (11 USMC, 12-13 baski noktasi) + acik arazi + sis yok. Karar tarafi: baski >= 0.6 + acik + >60 m -> DELAY/PEEL (v8.x) acikta kosmaya yol aciyor; yeniden degerlendirilecek (once siper al, baski dusunce cekil).
+- Duzeltme: kalan hareket edenlerin hepsi ezilmisse sicrama penceresi 6 sn sonra biter (eskiden 22-26 sn bosa). [TACTICS-CAGRI] logu grup basina 10 sn'de 1 satir (49 satir/RPT spam'i).

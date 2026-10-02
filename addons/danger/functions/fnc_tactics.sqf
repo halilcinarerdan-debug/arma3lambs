@@ -87,7 +87,8 @@ if (isNil "lambs_danger_reloadCoverStarted") then {
     };
 } forEach ["leaderSync", "cqbReflex", "sniperTeam", "firedHub", "buddyDebug"];
 
-if (EGVAR(main,debug_functions)) then {
+if (EGVAR(main,debug_functions) && {(time - (_group getVariable [QGVAR(cagriLogT), -99])) > 10}) then {
+    _group setVariable [QGVAR(cagriLogT), time];
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };
 
