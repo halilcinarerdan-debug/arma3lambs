@@ -14,6 +14,10 @@
  *      once, ust katlar sonra), her odada tarama, temiz isareti, cikista disaridaki halkaya katilma.
  *   3) TOPLANMA: binalar bitince 360 derece savunma (konsolidasyon), sonra gruba don (doFollow).
  *
+ * v8.36 DOKTRIN (TC 3-21.76 Ranger Handbook, Battle Drill 'Enter and clear a room' s. 8-18 ... 8-21; kaynaklar_doktrin/):
+ *   - KAPI YIGILMASI: giris takimi kapinin TAM ONUNDE degil (ölüm hunisi / fatal funnel, s. A-9), kapi YANINDA duvar boyunca yiginir (kapi noktasi: bina 'Door_N_trigger' bellek noktasi, yoksa bina pozisyonu).
+ *   - GIRIS: ilk iki asker NEREDEYSE ESZAMANLI girer; 1. asker en az direnc yolu ile iki kosenin birine, 2. asker ZIT kosesine hakimiyet noktasina gider (bina pozisyonlarina oturtulur), odaya dönük bakar ('point of domination').
+ *   - TEMIZ: oda sonunda 'CLEAR' bildirimi ([ODA] log + olay OdaTemiz); sonraki odaya giris noktasi bir onceki oda.  Bombali giris YOK (ROE / sivil riski; doktrin 'consistent with ROE and building structure').
  * ABORT (aninda temizlik): dusman < 120 m, baski >= 0.45, baska taktik (bounding / geri cekilme /
  * evade / temas kes / AT taarruz), oyuncu lider, < 3 canli piyade, kapatma anahtari
  * (lambs_danger_buildingClearOff = true), 300 sn toplam sure sinirdir.
@@ -182,6 +186,34 @@ private _bekle = {
 // ---------------------------------------------------------------------------
 // ANA AKIS
 // ---------------------------------------------------------------------------
+// v8.36: bina kapi noktasi (Door_N_trigger bellek noktasi; AGL) — yoksa []
+private _kapiBul = {
+    params ["_b", "_ref"];
+    private _en = [];
+    private _enD = 9999;
+    for "_n" from 1 to 8 do {
+        private _sp = _b selectionPosition [format ["Door_%1_trigger", _n], "Memory"];
+        if (_sp isNotEqualTo [0, 0, 0]) then {
+            private _w = _b modelToWorld _sp;
+            private _d = _w distance2D _ref;
+            if (_d < _enD && {((_w select 2) < 2.5)}) then { _enD = _d; _en = _w; };
+        };
+    };
+    _en
+};
+// v8.36: oda kosesi (hakimiyet noktasi): giris eksenine dik +-90 derece, 2.8 m; en yakin GECERLI bina pozisyonuna oturtulur (disari tasmasin)
+private _koseSec = {
+    params ["_poz", "_brg", "_isaret", "_poslar"];
+    private _ideal = _poz getPos [2.8, _brg + (90 * _isaret)];
+    private _en = +_poz;
+    private _enD = 4.5;
+    {
+        private _d = _x distance2D _ideal;
+        if (_d < _enD && {(_x distance2D _poz) > 1.2}) then { _enD = _d; _en = _x; };
+    } forEach _poslar;
+    _en
+};
+
 private _govde = {
     private _lider = leader _g;
     private _merkez = getPosATL _lider;
@@ -225,6 +257,11 @@ private _govde = {
         private _poslar = _b buildingPos -1;
         private _girisAdaylari = [_poslar select {(_x select 2) < 2.2}, [], {_x distance2D _lider}, "ASCEND"] call BIS_fnc_sortBy;
         private _giris = if (_girisAdaylari isEqualTo []) then { _poslar select 0 } else { _girisAdaylari select 0 };
+        private _kapi = [_b, _lider] call _kapiBul;
+        // kapi noktasi yoksa: giris bina pozisyonunun 3.5 m DISINDA (eski davranisa yakin; bina icine yigilmasin)
+        private _disYon = if (_kapi isEqualTo []) then {_bPos getDir _giris} else {_bPos getDir _kapi};
+        private _kapiPos = if (_kapi isEqualTo []) then {_giris getPos [3.5, _disYon]} else {+_kapi};
+        private _yigYan = selectRandom [90, -90];
         private _sirali = [_poslar, [], {((round ((_x select 2) / 3)) * 1000) + (_x distance2D _giris)}, "ASCEND"] call BIS_fnc_sortBy;
         private _secilen = [];
         {
@@ -264,14 +301,20 @@ private _govde = {
             count _disarda, count _secilen
         ];
 
-        // 1) Emniyet halkasi + kapi onunde yigilma
+        // 1) Emniyet halkasi + KAPI YANINDA yigilma (kapinin onunde degil: fatal funnel); takim 1 bir yanda, takim 2 karsi yanda, duvar boyunca dizili
         {
-            if (alive _x) then {
-                _x setBehaviour "COMBAT";
-                _x setUnitPos "UP";
-                _x doMove (_giris getPos [4, _bPos getDir _giris]);
-            };
-        } forEach _icerde;
+            private _tkY = _x;
+            private _yanY = [_yigYan, -_yigYan] select (_forEachIndex % 2);
+            {
+                if (alive _x) then {
+                    private _sp = (_kapiPos getPos [0.8 + (0.9 * _forEachIndex), _disYon]) getPos [1.3, _disYon + _yanY];
+                    _x setBehaviour "COMBAT";
+                    _x setUnitPos "UP";
+                    _x doMove _sp;
+                };
+            } forEach _tkY;
+        } forEach _takimlar;
+        diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
         [12, _postlar] call _bekle;
         if (call _iptalMi) exitWith {};
 
@@ -286,19 +329,37 @@ private _govde = {
             private _hedefler = [];
             {
                 private _tk = _x;
-                private _lst = _listeler select _forEachIndex;
-                if (_i < (count _lst)) then { _hedefler pushBack [_tk, _lst select _i]; };
+                private _ti = _forEachIndex;
+                private _lst = _listeler select _ti;
+                if (_i < (count _lst)) then {
+                    private _poz = _lst select _i;
+                    private _onc = if (_i == 0) then {_kapiPos} else {_lst select (_i - 1)};
+                    private _brg = _onc getDir _poz;
+                    // en az direnc: engelsiz (gorus hatti acik) kose 1. askere
+                    private _k1 = [_poz, _brg, 1, _poslar] call _koseSec;
+                    private _k2 = [_poz, _brg, -1, _poslar] call _koseSec;
+                    private _o = AGLToASL (_onc vectorAdd [0, 0, 1.4]);
+                    private _b1 = lineIntersects [_o, AGLToASL (_k1 vectorAdd [0, 0, 1.4]), objNull, objNull];
+                    private _b2 = lineIntersects [_o, AGLToASL (_k2 vectorAdd [0, 0, 1.4]), objNull, objNull];
+                    if (_b1 && {!_b2}) then { private _t = _k1; _k1 = _k2; _k2 = _t; };
+                    // atamalar: 1. asker _k1, 2. asker ZIT kose _k2 (varsa 3. / 4. ayni iki koseden zit sirayla)
+                    private _atama = [];
+                    { _atama pushBack [_x, [_k1, _k2] select (_forEachIndex % 2), [_k2, _k1] select (_forEachIndex % 2)]; } forEach _tk;
+                    _hedefler pushBack [_tk, _poz, _atama];
+                };
             } forEach _takimlar;
 
+            // ESZAMANLI GIRIS: ilk iki asker ayni anda hakimiyet noktalarina hareket (TC 3-21.76: 'enter the room almost simultaneously')
             {
-                _x params ["_tk", "_poz"];
+                _x params ["_tk", "_poz", "_atama"];
                 {
-                    if (alive _x) then {
-                        _x setBehaviour "COMBAT";
-                        _x setUnitPos "UP";
-                        _x doMove (_poz getPos [random 1.2, random 360]);
+                    _x params ["_u", "_kp", "_karsi"];
+                    if (alive _u) then {
+                        _u setBehaviour "COMBAT";
+                        _u setUnitPos "UP";
+                        _u doMove _kp;
                     };
-                } forEach _tk;
+                } forEach _atama;
             } forEach _hedefler;
 
             private _bekBit = time + 14;
@@ -308,19 +369,31 @@ private _govde = {
                 (time > _bekBit)
                 || {call _iptalMi}
                 || {(_hedefler findIf {
-                    _x params ["_tk", "_poz"];
-                    (_tk findIf {alive _x && {(_x distance _poz) > 3.5}}) > -1
+                    _x params ["_tk", "_poz", "_atama"];
+                    (_atama findIf {alive (_x select 0) && {((_x select 0) distance (_x select 1)) > 2.5}}) > -1
                 }) < 0}
             };
             if (call _iptalMi) exitWith {};
 
-            // oda taramasi (kisa) + temiz
+            // HAKIMIYET NOKTASINDA tarama: her asker ZIT koseye / oda icine donuk (stance MIDDLE); 2 sn tarama, sonra CLEAR
             {
-                _x params ["_tk", "_poz"];
-                { if (alive _x) then { _x doWatch (_poz getPos [5, random 360]); }; } forEach _tk;
+                _x params ["_tk", "_poz", "_atama"];
+                {
+                    _x params ["_u", "_kp", "_karsi"];
+                    if (alive _u) then {
+                        _u setUnitPos "MIDDLE";
+                        _u doWatch _karsi;
+                    };
+                } forEach _atama;
             } forEach _hedefler;
             sleep 2;
             _odaSayi = _odaSayi + 1;
+            {
+                _x params ["_tk", "_poz", "_atama"];
+                private _canliN = {alive (_x select 0)} count _atama;
+                diag_log format ["[ODA] %1 | BINA %2 | oda %3/%4 CLEAR | tim:%5 asker | z:%6 m", _grpAd, typeOf _b, _odaSayi, count _secilen, _canliN, (_poz select 2) toFixed 1];
+                [_g, "OdaTemiz", _odaSayi] call FUNC(olayGonder);
+            } forEach _hedefler;
         };
 
         diag_log format [

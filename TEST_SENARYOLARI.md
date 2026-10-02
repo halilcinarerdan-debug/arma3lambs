@@ -79,3 +79,9 @@ Kurulum: bir grup (>= 6 kisi) yol kenari, digeri (>= 4 kisi) yola dogru yuruyor 
 3. Cok kalabalik dusman (> kendi sayinin 2 kati): `IPTAL:dusman cok buyuk` ve pusu ateş acmamali.
 4. Ates sonrasi temas kopunca `[TOPLAN] BASLA` (halka + rapor) gorulmeli.
 5. Sorun isaretleri: guvenlik askeri pusuyu ele veriyor (dusman erken doner), cogunluk kriteri cok gec ates (dusman gecip gidiyor).
+
+## v8.36 ROTA ZINCIRI + KAPI / ODA testi
+1. Rota: dusmana 150-400 m, ortulu hat (agac sirasi / cali) olan arazide bounding. Log: `[ROTA] ... sapma:..`, `[ROTA-ZINCIR] ... N bacak ... noktalar:[...]`. Gorsel: grup tek yone dogru ilerlemeli, 20 sn'de bir sag / sol degistirmemeli.
+2. Kapi / oda: catisma sonrasi (28 sn sakin) yakinda bina (>= 2 pozisyon). Log: `[BINA-TEMIZLE] BASLA`, `[ODA] ... kapi:... (Door_N_trigger | bina pozisyonu) | yigilma yani:...`, ardindan `[ODA] ... oda i/N CLEAR`.
+3. Gorsel: giris timi kapinin YANINDA duvara yigilmali (onunde degil); iki asker odaya ayni anda girip zit koselere gitmeli ve oda icine bakmali.
+4. Sorun isaretleri: askerlerin ayni noktaya gitmesi (kose = oda noktasi), kapi disinda duvara takilma, bina disina yigilma.
