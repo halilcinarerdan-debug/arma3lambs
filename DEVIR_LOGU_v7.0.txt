@@ -421,3 +421,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.15 ===
 - Bounding jest+cagri 45 sn (her cycle degil); leaderSync: bounding/hucum kararinda devre disi, her birakistan sonra 40 sn (sure dolunca 60 sn) sogum, tetik orani 0.4
+
+=== v7.16 ===
+- moveAssist SIKISMA: 0.5-2 sn dur-kalk sebebi. Artik sadece temas/taktik yokken, komutan haric, forceMove yokken; tekrar bekleme 25 sn

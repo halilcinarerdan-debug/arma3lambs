@@ -109,7 +109,15 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
                     };
                 };
             } else {
-                if ((speed _u) < 1 && {(stance _u) in ["STAND", "CROUCH"]} && {time > (_u getVariable [QGVAR(sideLast), 0])}) then {
+                // TEMAS / TAKTIK / KOMUTAN: sikisma adimi SADECE sakin intikalde (temasta siperde bekleyen cift, bound bekleyen, komutan "dur-kalk" yapmasin)
+if (
+    (speed _u) < 1 && {(stance _u) in ["STAND", "CROUCH"]} && {time > (_u getVariable [QGVAR(sideLast), 0])}
+    && {_u isNotEqualTo (leader _u)}
+    && {((_g getVariable [QGVAR(contact), 0]) < time)}
+    && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])}
+    && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
+    && {isNil {_u getVariable QGVAR(forceMove)}}
+) then {
                     private _ed = expectedDestination _u;
                     private _d = _ed select 0;
                     private _mode = toLower (_ed select 1);
@@ -147,7 +155,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
                                     if (_secildi isNotEqualTo []) then {
                                         _u setVariable [QGVAR(sideDest), _d];
                                         _u setVariable [QGVAR(sideUntil), time + 2.2];
-                                        _u setVariable [QGVAR(sideLast), time + 6];
+                                        _u setVariable [QGVAR(sideLast), time + 25];
                                         _u doMove _secildi;
                                         if (lambs_danger_mvLogN < 25) then {
                                             lambs_danger_mvLogN = lambs_danger_mvLogN + 1;
