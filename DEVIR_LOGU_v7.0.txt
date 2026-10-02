@@ -491,3 +491,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.35 ===
 - Tani: [CAGRI] (doCallout), [JEST] (doGesture), [KOMUT] (currentCommand gecisleri), [DURUM] satirina komut/anim/katsayi/yon
+
+=== v7.36 ===
+- RHS el bombalari GrenadeCore degil (RPT: rhs_ammo_rgd5 GrenadeCore:false sim:shotgrenade): firedHub + grenadeAwareness simulation=shotgrenade ile yakalar
+- moveAssist duvar koruma grace 6 -> 15 sn (retreat lideri bina yaninda geri alinip takiliyordu)

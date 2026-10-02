@@ -252,7 +252,18 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
         // her yeni mermi sinifi bir kez RPT'ye yazilir: [EL-BOMBASI-TARAMA]
         if (time > (missionNamespace getVariable ["lambs_danger_grTarT", 0])) then {
             lambs_danger_grTarT = time + 1;
-            lambs_danger_grTum = (allMissionObjects "GrenadeCore") select {!isNull _x};
+            // RHS bombalari GrenadeCore degil: tum mermi nesneleri ("Default") arasindan simulation == shotgrenade olanlar (tur basina onbellekli)
+            lambs_danger_grTum = (allMissionObjects "Default") select {
+                private _t = typeOf _x;
+                private _k = "lambs_danger_grSim_" + _t;
+                private _v = missionNamespace getVariable [_k, ""];
+                if (_v isEqualTo "") then {
+                    _v = toLower (getText (configFile >> "CfgAmmo" >> _t >> "simulation"));
+                    if (_v isEqualTo "") then { _v = "-"; };
+                    missionNamespace setVariable [_k, _v];
+                };
+                _v isEqualTo "shotgrenade"
+            };
             {
                 private _tn = typeOf _x;
                 if (_tn isNotEqualTo "" && {!(_tn in (missionNamespace getVariable ["lambs_danger_grTurler", []]))}) then {

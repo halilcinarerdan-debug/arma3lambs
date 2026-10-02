@@ -42,7 +42,8 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
         };
 
         // 1) El bombasi listesi
-        if (!isNull _proj && {_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]}) then {
+        // RHS el bombalari (rhs_ammo_rgd5 / m67...) GrenadeCore'un ALTINDA DEGIL (RPT: GrenadeCore:false, sim:shotgrenade) -> simulation ile de yakala
+        if (!isNull _proj && {(_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]) || {_simTani isEqualTo "shotgrenade"}}) then {
             // tani: el bombasi / 40mm atisi (ilk 60). Zeus uzaktan kontrol / oyuncu atislari da (isPlayer filtresi kaldirildi)
             if (true) then {
                 if (isNil "lambs_danger_grLogN") then { lambs_danger_grLogN = 0; };
