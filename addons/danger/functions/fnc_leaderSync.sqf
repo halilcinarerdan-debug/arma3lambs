@@ -4,9 +4,9 @@
  * KOMUTAN BEKLE — komutan timini geride birakip tek basina ilerlemesin.
  *
  * Catisma / taktik halindeki gruplarda (3 sn'de bir) komutanin hareket yonune gore
- * "arkada kalan" askerleri olcer. Komutan kosarken timin buyuk kismi >25 m geride ise:
+ * "arkada kalan" askerleri olcer. Komutan kosarken timin buyuk kismi >12 m geride ise:
  *   - KADEME 1 (yavasla): komutan yuruyus hizina duser (forceSpeed 1.8)
- *   - KADEME 2 (bekle)  : takim >45 m geride ise komutanin PATH'i max 20 sn kapatilir
+ *   - KADEME 2 (bekle)  : takim >30 m geride ise komutanin PATH'i max 20 sn kapatilir
  *     (emri iptal olmaz; tim yetisince PATH acilir ve ayni hedefe devam eder)
  *   - birakma: tim yetisti / komutan baskida veya dusman <40 m / sure doldu
  *   - bekleme sonrasi 25 sn cooldown (komutan sonsuza kadar donmasin)
@@ -43,7 +43,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
     };
 
     while {true} do {
-        sleep 3;
+        sleep 1.5;
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };
@@ -92,7 +92,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 private _arka = -((_fark select 0) * (_yon select 0) + (_fark select 1) * (_yon select 1));
                 // yon yoksa (komutan duruyor) mesafe kullan
                 if (_hiz <= 0.4) then { _arka = _x distance2D _l; };
-                if (_arka > 25) then { _gerideSayi = _gerideSayi + 1; _gerideMesafe pushBack _arka; };
+                if (_arka > 12) then { _gerideSayi = _gerideSayi + 1; _gerideMesafe pushBack _arka; };
             } forEach _takim;
             private _oran = _gerideSayi / (count _takim);
             private _enGeri = if (_gerideMesafe isEqualTo []) then {0} else {selectMax _gerideMesafe};
@@ -109,7 +109,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                     if (_sureDoldu) then { _g setVariable [QGVAR(syncSoguma), time + 25]; };
                 } else {
                     // yavastan beklemeye yukselt
-                    if ((_oran >= 0.5) && {_enGeri > 45} && {!(_g getVariable [QGVAR(syncHold), false])} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
+                    if ((_oran >= 0.5) && {_enGeri > 30} && {!(_g getVariable [QGVAR(syncHold), false])} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
                         _l disableAI "PATH";
                         _g setVariable [QGVAR(syncHold), true];
                         _g setVariable [QGVAR(syncBasla), time];
@@ -120,9 +120,9 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
             };
 
             // --- tetik ---
-            if (_hiz > 0.8 && {_oran >= 0.4} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
+            if (_hiz > 0.8 && {_oran >= 0.25} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
                 _g setVariable [QGVAR(syncLeader), _l];
-                if ((_oran >= 0.5) && {_enGeri > 45}) then {
+                if ((_oran >= 0.5) && {_enGeri > 30}) then {
                     _l disableAI "PATH";
                     _g setVariable [QGVAR(syncHold), true];
                     _g setVariable [QGVAR(syncBasla), time];
