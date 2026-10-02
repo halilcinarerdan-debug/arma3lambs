@@ -96,6 +96,9 @@ private _mesafe = 99999;
 { _mesafe = _mesafe min (_x distance2D _tehditPos); } forEach _birimler;
 if (_mesafe < ([25, 10] select (_alive isEqualTo 1)) || {_mesafe > 400}) exitWith {false};
 
+// KACIS MODU: tek kalan veya kayip >= %75 -> siperde bekleme, dusmandan UZAGA kos (150 m)
+private _kacisModu = (_alive isEqualTo 1) || {_kayip >= 0.75};
+
 // ---------------------------------------------------------------------------
 // BASLA
 // ---------------------------------------------------------------------------
@@ -137,12 +140,12 @@ _group setVariable [QGVAR(bcStartTime), _baslangic];
 };
 
 diag_log format [
-    "[TEMAS-KES-BASLA] %1 | kalan:%2/%3 | kayip:%4%% | baski:%5 | tehdit:%6m",
-    groupId _group, _alive, _init, round (_kayip * 100), _baski toFixed 2, round _mesafe
+    "[TEMAS-KES-BASLA] %1 | kalan:%2/%3 | kayip:%4%% | baski:%5 | tehdit:%6m | kacis:%7",
+    groupId _group, _alive, _init, round (_kayip * 100), _baski toFixed 2, round _mesafe, _kacisModu
 ];
 
-[_group, _target, _tehditPos, _baslangic] spawn {
-    params ["_group", "_tehdit", "_tehditPos", "_baslangic"];
+[_group, _target, _tehditPos, _baslangic, _kacisModu] spawn {
+    params ["_group", "_tehdit", "_tehditPos", "_baslangic", "_kacisModu"];
 
     private _origCombat = _group getVariable [QGVAR(bcOrigCombat), combatMode _group];
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
@@ -181,7 +184,7 @@ diag_log format [
         private _stance = "MIDDLE";
 
         if (!isNull _oncu && {alive _oncu}) then {
-            private _cover = [_oncu, _tehdit, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
+            private _cover = if (_kacisModu) then {[]} else {[_oncu, _tehdit, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover)};
             // Siper tehdide, bulundugumuz yerden 5 m'den fazla YAKINSA siper sayma (dusmana dogru kosma)
             if (_cover isNotEqualTo [] && {(((_cover select 0) select 0) distance2D _tehditPos) < ((_oncu distance2D _tehditPos) - 5)}) then {
                 _cover = [];
@@ -192,7 +195,7 @@ diag_log format [
             } else {
                 // Sert siper yok: dusmandan 60m uzaklas (dik acilarla)
                 private _yan = [-40, 40] select (_ciftIdx % 2);
-                _hedef = (getPosATL _oncu) getPos [60, _kacisYonu + _yan];
+                _hedef = (getPosATL _oncu) getPos [[60, 150] select _kacisModu, _kacisYonu + _yan];
                 if (surfaceIsWater _hedef) then {
                     _hedef = (getPosATL _oncu) getPos [30, _kacisYonu];
                 };
@@ -217,7 +220,7 @@ diag_log format [
                     _x setVariable [QEGVAR(main,currentTask), "BreakContact/Move", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
                     _x forceSpeed -1;
-                    _x moveTo _p;
+                    _x doMove _p;
                 };
             } forEach _cift;
         };
@@ -226,11 +229,11 @@ diag_log format [
     // Varisa kadar bekle (en fazla 18 sn); gelmeyenlere emri 3 sn'de bir tazele.
     // Baski >= 0.85 ezilen kosmaya devam etmez: forceMove birakilir -> FSM hemen siper alir.
     private _pinned = [];
-    private _bitis = time + 18;
+    private _bitis = time + ([18, 45] select _kacisModu);
     while {time < _bitis && {!isNull _group}} do {
         {
             private _b = _x select 0;
-            if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= 0.85}) then {
+            if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= ([0.85, 0.97] select _kacisModu)}) then {
                 _pinned pushBack _b;
                 _b setVariable [QGVAR(forceMove), nil];
                 _b enableAI "AUTOCOMBAT";
@@ -247,7 +250,7 @@ diag_log format [
             && {((_x select 0) distance2D (_x select 1)) > 6}
         };
         if (_gelmeyen isEqualTo []) exitWith {};
-        { (_x select 0) moveTo (_x select 1); } forEach _gelmeyen;
+        { (_x select 0) doMove (_x select 1); } forEach _gelmeyen;
         sleep 3;
     };
 
