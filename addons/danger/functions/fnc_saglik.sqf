@@ -12,6 +12,7 @@
  *   LIDER-YALNIZ     : lider en yakin astindan > 80 m, > 10 sn
  *   GRUP-EZILMIS     : askerlerin >= %50'si baski >= 0.85, > 10 sn
  *   BOSTA-HAREKET    : temas > 30 sn yok, lider duruyor ama >= 2 asker yuruyor (> 10 sn)  -> formasyonda surekli hareket suphesi (gorev / buddy / rol istasyonu zamanlari ile)
+ *   FORMASYON-FELC   : temas var + LINE / COLUMN / FILE / ECH formasyonunda >= %70 asker ayakta ve duruyor (> 20 sn) -> formasyon felci suphesi
  *   TEMAS-YOK-COMBAT : temas > 60 sn yok ama lider COMBAT ve taktik bayragi yok (uzun sure COMBAT'ta kalma)
  * Her 60 sn: [SAGLIK] ozet satiri (grup / asker sayisi, anomali sayilari). Kapatma: lambs_danger_saglikOff = true.
  *
@@ -160,6 +161,22 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                 _g setVariable [QGVAR(telsizLog), true];
                 diag_log format ["[TELSIZ-GRUP] %1 | taraf:%2 | enableGroupReinforce:%3 | hasRadio:%4 | disableGroupAI:%5 | grup degiskenleri(reinforce/radio): %6", groupId _g, side _g, _g getVariable ["lambs_danger_enableGroupReinforce", "yok"], _g getVariable ["lambs_danger_dangerRadio", "yok"], _g getVariable [QGVAR(disableGroupAI), false], (allVariables _g) select {(_x find "einforce") >= 0 || {(_x find "adio") >= 0}}];
             };
+            // FORMASYON-FELC (kullanici: "form line / column felc ediyor"): temas var, formasyon LINE / COLUMN / FILE / ECH, >= %70 asker AYAKTA ve duruyor (< 0.5 km/s, baski < 0.2), > 20 sn
+            if ((_g getVariable [QGVAR(contact), 0]) > time && {!(_g getVariable [QGVAR(isAmbushing), false])} && {(formation _g) in ["LINE", "COLUMN", "FILE", "STAG COLUMN", "ECH LEFT", "ECH RIGHT"]}) then {
+                private _atil = _us select {(speed _x) < 0.5 && {(stance _x) isEqualTo "STAND"} && {(getSuppression _x) < 0.2}};
+                if ((count _atil) >= ceil ((count _us) * 0.7)) then {
+                    if ((_g getVariable [QGVAR(saglikFelcT), -1]) < 0) then { _g setVariable [QGVAR(saglikFelcT), time]; };
+                    if ((time - (_g getVariable [QGVAR(saglikFelcT), time])) > 20) then {
+                        private _enF = _l findNearestEnemy _l;
+                        ["FORMASYON-FELC", _g, format ["formasyon:%1 | %2 / %3 asker ayakta ve duruyor | %4 sn | dusman:%5 m | karar:%6 | bayrak:%7 | gorevler:%8", formation _g, count _atil, count _us, round (time - (_g getVariable [QGVAR(saglikFelcT), time])), if (isNull _enF) then {"-"} else {round (_l distance2D _enF)}, _g getVariable [QGVAR(cmdLastDecision), "-"], _bStr, (_atil apply {_x getVariable [QEGVAR(main,currentTask), "-"]}) select [0, 3 min (count _atil)]]] call _isaretle;
+                    };
+                } else {
+                    _g setVariable [QGVAR(saglikFelcT), -1];
+                };
+            } else {
+                _g setVariable [QGVAR(saglikFelcT), -1];
+            };
+
             // TEMAS-YOK-COMBAT
             if (!_bayrakVar && {(_g getVariable [QGVAR(contact), 0]) < (time - 60)} && {(behaviour _l) isEqualTo "COMBAT"}) then {
                 ["TEMAS-YOK-COMBAT", _g, format ["temas %1 sn once bitti ama lider COMBAT | combatMode:%2 | formasyon:%3", round (time - (_g getVariable [QGVAR(contact), 0])), combatMode _g, formation _g]] call _isaretle;
