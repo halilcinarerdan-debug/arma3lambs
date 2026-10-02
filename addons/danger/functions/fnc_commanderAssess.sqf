@@ -198,6 +198,20 @@ if (_initialCount < 0) then {
     _group setVariable [QGVAR(cmdInitialCount), _initialCount];
 };
 
+// ZEUS / SILINEN / GRUPTAN AYRILAN birimler KAYIP SAYILMAZ (sadece OLEN birim kayiptir): taban sayiyi dusur
+private _bilinenEski = _group getVariable [QGVAR(cmdKnown), []];
+if !(_bilinenEski isEqualType []) then { _bilinenEski = []; };
+private _silinen = 0;
+{
+    if (!(_x in _aliveUnits) && {isNull _x || {alive _x}}) then { _silinen = _silinen + 1; };
+} forEach _bilinenEski;
+if (_silinen > 0) then {
+    _initialCount = (_initialCount - _silinen) max _ownCount;
+    _group setVariable [QGVAR(cmdInitialCount), _initialCount];
+    diag_log format ["[KAYIP-DUZELT] %1 | %2 birim silindi/ayrildi (olu degil): taban %3", groupId _group, _silinen, _initialCount];
+};
+_group setVariable [QGVAR(cmdKnown), +_aliveUnits];
+
 private _lossRatio = 0;
 if (_initialCount > 0) then {
     _lossRatio = (_initialCount - _ownCount) / _initialCount;
