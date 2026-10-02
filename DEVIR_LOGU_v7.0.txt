@@ -734,3 +734,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Dogrulama: [ROL-SIRA] satiri duran grupta artik cikmamali; [ANOMALI] BOSTA-HAREKET sayisi dusmeli. Hala varsa o satirin gorev / buddy / rol istasyonu zamanlari kaynagi gosterir.
 === v8.20b DUZELTME: 'icimizden gectiler' = AI oyunculari PARCA PARCA ETTI (ben 'fark etmeden gecti' sandim) ===
 - v8.19'daki yakin mesafe tabani (ortamSkill 30 m ceza yok, kamuflaj 25 m >= 0.9) GERI ALINDI: AI'yi yakinda daha olumcul yapiyordu. Denge icin lambs_danger_ortamSkillOlcek (> 1 = AI daha cok zayiflar), varsayilan beceri tablosu (aimingAccuracy 0.65-0.70), kamuflajMin.
+=== v8.20c DOKTRIN KAYNAKLARI (kullanici: 'iki taraf ve kaynaklari iyice arastir, US Army doktrinleri, kitaplar') ===
+- DOKTRIN_KAYNAKLARI.md: ABD (FM / ATP 3-21.8, MCRP 3-10A.4, break contact, pusu), Rus (ATP 7-100.1), Cin (ATP 7-100.3), duzensiz / Taliban (CSI, RAND, Meyerle) kaynaklari + arama ozetlerinden dogrulanan maddeler + kodla karsilastirma + yol haritasi.
+- UYARI: tam kitaplar cogunlukla ag kisitindan DOGRUDAN okunamadi (arama ozetleri); sayilar kaynak PDF'ten teyit edilmeli. Profil rakamlari hala tahmin.
+- buddyBond sakin limit 25 / 40 m'ye GERI alindi (kama 10 m aralik doktrini; spawn hareketinin asil nedeni roleStation siralamasiydi).

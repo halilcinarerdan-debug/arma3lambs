@@ -61,9 +61,9 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
             ) then { continue };
 
             private _savasta = (_g getVariable [QGVAR(contact), 0]) > time;
-            // v8.19: SAKIN halde (temas yok) gevsek limit: formasyonda surekli "yanina don" hareketi olmasin (kullanici gozlemi)
-            private _ciftLimit = [45, 30] select _savasta;
-            private _izoLimit  = [70, 45] select _savasta;
+            // v8.20b: kama formasyonu 10 m aralik doktrini (FM 3-21.8) -> sakin halde 25 m (v8.19 gevsetmesi geri alindi; spawn hareketinin asil nedeni roleStation siralamasiydi)
+            private _ciftLimit = [25, 30] select _savasta;
+            private _izoLimit  = [40, 45] select _savasta;
 
             // Tum canli piyade + hareket edebilir (uygun) olanlar
             private _tum = (units _g) select {alive _x && {isNull objectParent _x}};
