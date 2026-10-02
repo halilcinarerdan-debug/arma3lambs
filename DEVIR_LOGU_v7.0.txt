@@ -470,3 +470,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.28 ===
 - moveAssist: setAnimSpeedCoef yerel dogrudan uygulanir + diger makinelere remoteExec (v7.22 sadece remoteExec idi: CfgRemoteExec engelleyebilir)
+
+=== v7.29 ===
+- fnc_durumLog: [DURUM-GRUP] / [DURUM] (her asker) / [DOKTRIN] (puan) tani loglari; kapatma lambs_danger_durumLogOff=true
