@@ -328,6 +328,17 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                     if ([_yan, _posASL vectorAdd [0, 0, 0.75], _unit] call _gizli) then { _gizliSay = _gizliSay + 1; };
                 } forEach [-40, -20, -10, 10, 20, 40];
                 _a set [0, (_a select 0) + (_gizliSay * 2)];
+                // UFUK CIZGISI (v8.12): siper gokyuzu / ufuk arkasinda ise (egim tepesi, sirt) silueti en gorunur olur -> -10 (yatik / comelmis yuksekligiyle)
+                if (_eDist >= 60) then {
+                    private _hh = [1.7, 1.0, 0.4] select ((["UP", "MIDDLE", "DOWN"] find (_a select 2)) max 0);
+                    private _bsh = AGLToASL (_pos vectorAdd [0, 0, _hh]);
+                    private _eg = AGLToASL (_enemyPos vectorAdd [0, 0, 1.6]);
+                    private _d2 = vectorNormalized (_bsh vectorDiff _eg);
+                    private _s2 = _bsh vectorAdd (_d2 vectorMultiply 300);
+                    if (!(terrainIntersectASL [_bsh, _s2]) && {!(lineIntersects [_bsh, _s2, objNull, objNull])}) then {
+                        _a set [0, (_a select 0) - 10];
+                    };
+                };
 
                 // atis edebilme
                 if (_atisModu) then {

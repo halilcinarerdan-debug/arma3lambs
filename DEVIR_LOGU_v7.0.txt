@@ -665,3 +665,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - IPTAL: 150 sn, dusman 15 sn kayip / > 320 m, grup tukendi. Bitince tum bayraklar eski haline doner.
 - Doktrin anahtarlari: pusu, pusuAtesM, pusuMaxS, pusuMinKisi. Kapatma: lambs_danger_pusuV1 = false. Olaylar: AmbushBasla / AmbushAtes / AmbushBitti. Log: [PUSU].
 - Dogrulanacak: tetik sikligi (cok sik = esik sert), kill-box'ta ayni anda ates, 'ele verildi' orani, pusu sonrasi taktige donus (bounding / retreat) ve AllClear guvenlik agi.
+=== v8.12 KAMUFLAJ BILINCI (kullanici istegi) ===
+- KULLANICI BILGISI: ortaminda cali / cimen arkasi gorusu kapatan bir mod zaten var ve cok etkili -> bu fork yaprak arkasi gorusune DOKUNMAZ (iki kat bastirma AI'yi asiri gorunmez yapar).
+- fnc_ufukMu: [gozlemciASL, poz, yukseklik] -> pozisyon ufuk / gokyuzu arkasinda mi (300 m isin).
+- fnc_kamuflaj (watcher 2 sn, tick basina 25 yerel AI): camouflageCoef (setUnitTrait) = 1 -0.1 durma +0.1 kosma +0.2 ufukta -0.1 alaca (04:30-07:30 / 18:00-20:30) -0.15 gece -0.1 x sis, sinir [kamuflajMin 0.6, 1.2].
+  STEALTH + temas yok + dusman 60-400 m + bos asker: yatar; ufuk cizgisindeyse 8-16 m cevrede ufuk disi + dusman gozunden gizli noktaya gecer (30 sn'de bir). Log [KAMUFLAJ] / [KAMUFLAJ-YER].
+- findCover FAZ 2: siper ufuk cizgisinde (siluet) ise -10 puan (stance yuksekligiyle). Kapatma: lambs_danger_kamuflajV1 = false / doktrin kamuflaj = false.
+- ARAZI BILINCI (kullanici istegi, SIRADA): hem KOMUTAN (anahtar arazi: hakim tepe, olu arazi, bogaz, gizli yaklasma kuloiru; mevzi / gozetleme / yaklasma secimi) hem BIREYSEL (mikro relief: cukur, ters egim, sirt; stance / yer secimi).
+  Tasarim: fnc_araziAnaliz [merkez, yaricap, tehditPos] -> profil (egim, aciklik, ortu yogunlugu, olu arazi orani, hakim nokta adaylari, ufuk riski); komutan: rota / overwatch / hold bunu kullanir; birey: findCover'a arazi kivrimi aday turu.

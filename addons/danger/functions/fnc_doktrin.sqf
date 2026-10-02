@@ -30,6 +30,7 @@
  *   cekilGuvenM 220, cekilEkSicrama 4     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
  *   baskiKirmaEsik 0.5, baskiKirmaMaxS 14   retreat: ort. baski bu esikten yuksekse once siper + karsi ates (en fazla N sn), sonra sicrama
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
+ *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
  *
  * YENI ORDU EKLEME (kod degistirmeden, misyon init'te):
  *   lambs_danger_doktrinTanimlari = [["ADIM", "UST_PROFIL", [["assaultM", 55], ["bantlar", [[200,60,12],[100,40,10],[0,30,8]]]]]];
@@ -64,7 +65,8 @@ private _p = createHashMapFromArray [
     ["uglUzakM", 200], ["uglUzakAralik", 25], ["uglRezerv", 3], ["uglRezervM", 120],
     ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6],
     ["cekilGuvenM", 220], ["cekilEkSicrama", 4], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
-    ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4]
+    ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
+    ["kamuflaj", true], ["kamuflajMin", 0.6]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---
