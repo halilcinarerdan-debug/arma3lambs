@@ -503,3 +503,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - HEMTT SPE2 DUZELTME: moveAssist v7.36 duvar grace satirinda // yorumu ayni satirdaki kodu yutmustu (eksik }) -> moveAssist hic derlenmiyordu
 - tacticalUGL: _salvo ic CBA blogunda tanimsizdi (HEMTT L-S13) -> arguman olarak gecirildi
 - Retreat sicrama noktalari siper hedefli: dusmandan gizli +35, agac/kaya/cali/duvar 3 m +10, bina -25, 3 yaricap x 7 aci = 21 aday (eskiden ROCK/WALL/FENCE cezaliydi = siperden kaciyordu)
+
+=== v7.39 ===
+- Bounding: lider koşucu degil ama ekip agirlik merkezinin 8 m gerisine ilerler (10 sn aralik); RPT: 6 cycle 329->315 m
+- UGL: >200 m 25 sn aralik, elde <3 mermi kaldiysa >120 m atis yok

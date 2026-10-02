@@ -576,6 +576,26 @@ if (EGVAR(main,debug_functions)) then {
 
         private _odak = [_group] call _odakSec;
 
+        // KOMUTAN TAKIP: lider koşucu degil ama bound ekiplerinin ARKASINDAN ilerler (RPT: 6 cycle'da lider hedefe 329 -> 315 m = sadece 14 m,
+        // ekipler 42 m'lik atilimlarla ilerlerken lider yerinde kaliyordu). Hedef: ekip agirlik merkezinden 8 m geride; en fazla 10 sn'de bir emir.
+        private _ldrT = leader _group;
+        if (
+            alive _ldrT && {isNull objectParent _ldrT} && {!isPlayer _ldrT}
+            && {time > (_group getVariable [QGVAR(bndLiderT), 0])}
+        ) then {
+            private _uyeler = (units _group) select {alive _x && {_x isNotEqualTo _ldrT} && {isNull objectParent _x}};
+            if (count _uyeler >= 2) then {
+                private _mrk = [0, 0, 0];
+                { _mrk = _mrk vectorAdd (getPosATL _x); } forEach _uyeler;
+                _mrk = _mrk vectorMultiply (1 / (count _uyeler));
+                private _gerid = _mrk getPos [8, _target getDir _mrk];
+                if ((_ldrT distance2D _gerid) > 15 && {!surfaceIsWater _gerid}) then {
+                    _group setVariable [QGVAR(bndLiderT), time + 10];
+                    _ldrT doMove _gerid;
+                };
+            };
+        };
+
         // GUNCEL DUSMAN YONU: odak dusman hedeften 25 m'den fazla kaydiysa hedef (siper / sektor / mesafe) guncellenir
         if (!isNull _odak) then {
             private _op = getPosATL _odak;

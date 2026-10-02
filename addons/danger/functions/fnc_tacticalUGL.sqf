@@ -57,6 +57,8 @@ if ((_unit ammo _gl) <= 0) exitWith {false};
 // ---------------------------------------------------------------------------
 private _d = _unit distance2D _target;
 if (_d < 40 || {_d > 320}) exitWith {false};
+// UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
+if (_d > 200 && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < 25}) exitWith {false};
 
 // Dost atesi: hedefin 12 m cevresinde dost varsa atma (escort / ilerleyen birlik)
 if (((_target nearEntities ["CAManBase", 12]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {false};
@@ -82,6 +84,9 @@ if (!_uygun) exitWith {false};
 // YUKLU 40mm SARJOR HE MI? (flare / duman / aydinlatma ATILMAZ)
 // ---------------------------------------------------------------------------
 private _glMags = [_w, _gl] call FUNC(uglMags);
+// MERMI REZERVI: elde 3'ten az 40mm kaldiysa 120 m'den uzaga atilmaz (yakin tehdit / bina icin sakla)
+private _glKalan = ({(toLower _x) in _glMags} count (magazines _unit)) + ([0, 1] select ((_unit ammo _gl) > 0));
+if (_glKalan < 3 && {_d > 120}) exitWith {false};
 private _yuklu = (primaryWeaponMagazine _unit) select {(toLower _x) in _glMags};
 if (_yuklu isEqualTo []) exitWith {false};
 
