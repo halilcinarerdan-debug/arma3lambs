@@ -884,3 +884,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - 5 (arka grup) ve 7 (formasyon aralik) icin KOD EKLENMEDI; gerekce DOKTRIN_KAYNAKLARI.md H7.
 - DOGRULANMADI: feint'in kanat manevrasiyla zamanlamasi (feint grubu varista ayni anda sabitleyene mi yigiliyor), ayrilma retreat'inin tetiklenmesi, Zeus penceresinde 7 secenek (showDialog).
 - KALAN: hendek / mevzi (VBS #6). Tum yeni kodlar (v8.32 - v8.37) icin oyun testi bekleniyor.
+=== v8.38 FORMASYON LOOPU DUZELTMESI (kullanici RPT b364ab09: 'formasyon loopu askerleri etkisiz kiliyor') ===
+- NEDEN: fnc_commanderFormation temasta her 12 sn COMBAT analizi cagirir; fnc_selectFormation COMBAT dali her cagrida (arazi / dusman noktasi titreyince) setFormDir ile formasyon yonunu yeniden verir. Her setFormDir tum askerleri yeni slotlarina kosturur: ates kesilir, siperden cikilir ('etkisiz').
+- DUZELTME: (1) selectFormation: setFormDir yalniz sapma > 35 derece VE son uygulamadan >= 40 sn (selFdirV / selFdirT; ilk seferde uygulanir). (2) tacticsBounding baslangic setFormDir ayni histerezis (ortak degiskenler). (3) commanderFormation: aralik 12 -> 25 sn (basliktaki gibi) + grupta bastirma >= 0.3 olan asker varsa formasyona dokunmaz.
+- DOGRULANMADI: etkisizligin tek sebebi bu mu (RPT'de BOSTA-HAREKET 4 / TEMAS-YOK-COMBAT 4 / YURUMUYOR 9 ayri inceleme gerektirir); retreat varis 0/20 ve [GERI-CEKILME-BITIS] logunun ek-sicrama bitisinde yazilmamasi bu surumde DUZELTILMEDI.
+- NOT: 'Destroy waypoint not linked to a target' spami misyon tarafi (Destroy waypoint'e hedef bagla ya da SAD / Move kullan). KUMANDA modulu bu RPT'de yerlestirilmemis -> HQ hala oyun testi bekliyor.

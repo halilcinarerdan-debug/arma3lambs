@@ -234,10 +234,23 @@ switch (_context) do {
         };
 
         // Formasyon yonu: dusmana
+        // v8.38: yon HISTEREZISI — her setFormDir tum askerleri yeni slotuna kosturur (ates kesilir = "formasyon loopu").
+        //   Yalniz sapma > 35 derece VE son uygulamadan >= 40 sn ise uygula (ya da hic uygulanmadiysa).
+        private _yeniYon = -1;
         if (_sit isNotEqualTo [] && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then {
-            _grup setFormDir (_leaderPos getDir (_sit select 7));
+            _yeniYon = _leaderPos getDir (_sit select 7);
         } else {
-            if (_validTarget && {_targetPos isNotEqualTo [0,0,0]}) then { _grup setFormDir (_leaderPos getDir _targetPos); };
+            if (_validTarget && {_targetPos isNotEqualTo [0,0,0]}) then { _yeniYon = _leaderPos getDir _targetPos; };
+        };
+        if (_yeniYon >= 0) then {
+            private _eskiYon = _grup getVariable [QGVAR(selFdirV), -1];
+            private _eskiYonT = _grup getVariable [QGVAR(selFdirT), -999];
+            private _sapma = if (_eskiYon < 0) then {360} else {abs (((_yeniYon - _eskiYon + 540) mod 360) - 180)};
+            if (_sapma > 35 && {(time - _eskiYonT) >= 40}) then {
+                _grup setFormDir _yeniYon;
+                _grup setVariable [QGVAR(selFdirV), _yeniYon];
+                _grup setVariable [QGVAR(selFdirT), time];
+            };
         };
         _reason = format ["%1 | d:%2 m e:%3 MG:%4 zirh:%5 oran:%6 kayip:%7", _reason, round _closest, _eCnt, _eMg, _arm, _ratio toFixed 2, round (_loss * 100)];
     };

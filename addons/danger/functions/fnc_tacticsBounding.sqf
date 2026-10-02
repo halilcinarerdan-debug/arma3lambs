@@ -171,7 +171,15 @@ if (time - _sonCallout > 60) then {
 // ---------------------------------------------------------------------------
 // Grubu hazirla
 // ---------------------------------------------------------------------------
-_group setFormDir (_unit getDir _target);
+// v8.38: yon histerezisi (selectFormation ile ortak): sapma > 35 derece ve >= 40 sn, yoksa slotlara yeniden kosma (ates kesilir)
+private _bndYon = _unit getDir _target;
+private _bndEski = _group getVariable [QGVAR(selFdirV), -1];
+private _bndSapma = if (_bndEski < 0) then {360} else {abs (((_bndYon - _bndEski + 540) mod 360) - 180)};
+if (_bndSapma > 35 && {(time - (_group getVariable [QGVAR(selFdirT), -999])) >= 40}) then {
+    _group setFormDir _bndYon;
+    _group setVariable [QGVAR(selFdirV), _bndYon];
+    _group setVariable [QGVAR(selFdirT), time];
+};
 
 // Bitiste geri verilecek orijinal degerler
 _group setVariable [QGVAR(bndOrigForm), formation _group];

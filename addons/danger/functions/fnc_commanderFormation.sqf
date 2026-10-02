@@ -43,7 +43,8 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
             private _sonKarar = _g getVariable [QGVAR(cfSon), -999];
 
             if (_contact > time) then {
-                if ((time - _sonKarar) > 12) then {
+                // v8.38: 25 sn aralik (baslikta da oyle) + ates altindaki / bastirilmis grupta formasyona dokunma (slota kosma = etkisizlik)
+                if ((time - _sonKarar) > 25 && {((units _g) findIf {alive _x && {(getSuppression _x) >= 0.3}}) < 0}) then {
                     _g setVariable [QGVAR(cfSon), time];
                     private _f = [_g, [0, 0, 0], "COMBAT"] call (missionNamespace getVariable ["lambs_danger_fnc_selectFormation", {""}]);
                     if (_f isNotEqualTo "" && {(formation _g) isNotEqualTo _f}) then {
