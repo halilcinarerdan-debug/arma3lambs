@@ -693,3 +693,9 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   Gece / yagmur / sis: Workshop aciklamasi iddia ediyor ama okudigim kaynak dosyalarinda (getEnemyImpact, terrainCount, setGroupTerrainImpact, updateUnitPipelineSkills) gorulmedi -> dogrulanamadi.
 - Bizim v1 (7 etken, 5 beceri) CF_BAI'den KARMASIKTI ve motor / ACE ile cift sayiyordu. v2: 3 etken (bitki X^2 = CF_BAI rakamlari; gorus kosulu gece NVG'siz / sis; hafif baski), 4 alt beceri (spotDistance, spotTime, aimingAccuracy, aimingShake), alt sinir x0.30.
   Bilerek alinmayanlar: courage / commanding / reloadSpeed / general (FSM + komutan beynimiz var), yara + yorgunluk (ACE / motor), yagmur, boost (x1.10 ihmal edilebilir).
+=== v8.15 ORTAM BECERI DUSUSU v3 (kullanici: 'LAMBS supression kullaniyorum, sadece ortama gore; spotDistance NVG / termale gore degissin; yagmur falan') ===
+- Baski ve bitki ortusu KALDIRILDI (baski LAMBS'te; bitki ortusu gorusu kullanici modunda). Yalniz ORTAM: isik + gorus cihazi + hava.
+- Gorus cihazi: askerin gozlugu (hmd) + birincil silah optigi; sinifin visionMode / OpticsModes'inden: 'Ti' -> TERMAL, 'NVG' -> NVG, yoksa normal (hashmap onbellek).
+- spotDistance carpani = (1 - isik x cihaz katsayisi) x (1 - sis x ...) x (1 - yagmur x ...): isik normal 0.60 / NVG 0.15 / termal 0; sis 0.55 / 0.55 / 0.25; yagmur 0.25 / 0.35 / 0.20.
+  isik n = (1 - sunOrMoon) + 0.25 x overcast x sunOrMoon. spotTime = 1 - 0.6 x (1 - spotD carpani), aimingAccuracy = 1 - 0.3 x (1 - spotD carpani); alt sinir x0.25. Log [ORTAM-SKILL] isik / cihaz / sis / yagmur / carpan.
+- Varsayim (dogrulanmadi): NVG'de yagmur / sis parazit-hale yuzunden daha agir; termalde yagmur / sis hafif. Katsayilar tahmindir, gozlemle ayarlanacak.
