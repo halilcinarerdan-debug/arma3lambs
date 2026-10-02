@@ -92,7 +92,8 @@ private _suKontrol = {
 // Her sicrama kendi oncekinden 40 m; dusman yonunun tersinde +-75 derece kon icinde acik / engelsiz aday secilir.
 // MESAFEYE GORE SICRAMA BOYU (doktrin: yakin temasta kisa/hizli sicrama + sis, uzakta daha uzun):
 //   tehdit < 100 m : 20 m | 100-200 m : 30 m | > 200 m : 50 m  (kisa, hizli atilim; acikta uzun kosu olum)
-private _adimBoy = if (_cqbMesafe < 100) then {20} else {if (_cqbMesafe < 200) then {30} else {50}};
+private _retAdim = [_group, "retreatAdim", [20, 30, 50]] call FUNC(dk);
+private _adimBoy = _retAdim select ([2, [1, 0] select (_cqbMesafe < 100)] select (_cqbMesafe < 200));
 // SIPER HEDEFLI SICRAMA (v7.38): her sicrama noktasi artik rastgele "acik nokta" degil, dusmandan GIZLI / dogal siperli (agac, kaya, cali, duvar) aday;
 //   - dusman -> nokta gorus hatti kesiliyorsa (+35)  : gercekten siper arkasi
 //   - 3 m'de agac / kaya / cali / duvar / siper varsa (+10)

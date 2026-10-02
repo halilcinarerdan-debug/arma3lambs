@@ -528,3 +528,8 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - Lint: gereksiz Not (!(a isEqualTo b) -> a isNotEqualTo b, side != civilian), dosya sonu satir sonu.
 - Tum .sqf dosyalari parantez dengesi kontrolunden gecti (HEMTT SPE2 hatasi giderildi).
 - Dogrulanmamis (oyunda test bekliyor): retreat varis orani, bomba tepki suresi (v7.40-41), hareket arbitraji etkisi.
+
+=== v8.1 DOKTRIN CERCEVESI ===
+- fnc_doktrin (profil cozucu, kalitim: GENEL -> ust -> ordu) + fnc_dk (anahtar okuyucu). Profiller: GENEL, USMC, ABD, RUS, CHN, PESHMERGA (BASLANGIC TAHMINLERI, nizamnamelerle dogrulanmali)
+- Baglananlar: commanderAssess (assaultM, cekilKayip, peelOran/Kayip, kucukEkip, yakinM), tacticsBounding (bndBitisM, bndMaxCycle, owKurulumS, bantlar), tacticsRetreat (retreatAdim), tacticalUGL (uglUzakM/Aralik, uglRezerv/M), rearGuard (arkaGuvenlik/MinKisi)
+- Misyondan genisletme: lambs_danger_doktrinTanimlari / lambs_danger_doktrinHaritasi. Dokuman: DOKTRIN_CERCEVESI.md

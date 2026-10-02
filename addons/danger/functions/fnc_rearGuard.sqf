@@ -62,7 +62,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                 || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(sniperTeam), false]}
                 || {_g getVariable [QGVAR(disableGroupAI), false]};
             private _canli = (units _g) select {alive _x && {isNull objectParent _x}};
-            if (_gec || {(count _canli) < 6}) then {
+            if (_gec || {!([_g, "arkaGuvenlik", true] call FUNC(dk))} || {(count _canli) < ([_g, "arkaGuvenlikMinKisi", 6] call FUNC(dk))}) then {
                 if (!isNull _u) then { [_g, _u] call _birak; };
                 continue;
             };

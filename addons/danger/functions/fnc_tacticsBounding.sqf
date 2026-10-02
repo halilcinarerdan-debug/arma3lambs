@@ -36,6 +36,10 @@ if (isNull _group) exitWith {false};
 if (_group isEqualType objNull) then {_group = group _group;};
 if ((units _group) isEqualTo []) exitWith {false};
 private _unit = leader _group;
+// DOKTRIN PROFILI: bounding bitis mesafesi / cycle siniri / overwatch kurulum suresi fraksiyona gore
+_BND_ASSAULT_RANGE = [_group, "bndBitisM", _BND_ASSAULT_RANGE] call FUNC(dk);
+_BND_MAX_CYCLES = [_group, "bndMaxCycle", _BND_MAX_CYCLES] call FUNC(dk);
+private _dkOwKurulum = [_group, "owKurulumS", 5] call FUNC(dk);
 
 // ---------------------------------------------------------------------------
 // Hedefi normalize et
@@ -407,8 +411,11 @@ if (EGVAR(main,debug_functions)) then {
         //   > 200 m : kazanc >= 15, atilim <= 70   (uzak, dusman etkisiz)
         //   100-200 : kazanc >= 12, atilim <= 40
         //   < 100 m : kazanc >= 8,  atilim <= 25   (yakin temas: kisa, hizli atilim)
-        private _atMax = if (_mesafe > 200) then {70} else {if (_mesafe > 100) then {40} else {25}};
-        private _kazMin = if (_mesafe > 200) then {15} else {if (_mesafe > 100) then {12} else {8}};
+        // bantlar doktrin profilinden: [[mesafe_ustu, atilimMax, kazancMin], ...] buyukten kucuge
+        private _bantlar = [group _kosan, "bantlar", [[200, 70, 15], [100, 40, 12], [0, 25, 8]]] call FUNC(dk);
+        private _bnd = _bantlar select (((_bantlar findIf {_mesafe > (_x select 0)}) max 0) min ((count _bantlar) - 1));
+        private _atMax = _bnd select 1;
+        private _kazMin = _bnd select 2;
         _siperMenzil = _siperMenzil min (_atMax + 10);
         private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
         private _movePos = [];
@@ -704,7 +711,7 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _fse;
 
-            private _kurBitis = time + 5;   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
+            private _kurBitis = time + _dkOwKurulum;   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
             waitUntil {
                 sleep 0.5;
                 {

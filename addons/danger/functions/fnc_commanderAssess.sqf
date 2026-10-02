@@ -45,6 +45,13 @@ if (isNull _group) exitWith {"BOUNDING"};
 if ((units _group) isEqualTo []) exitWith {"BOUNDING"};
 
 private _unit = leader _group;
+// DOKTRIN PROFILI (fraksiyona gore ordu degerleri; GENEL = eski sabitler)
+private _dkAssault = [_group, "assaultM", 45] call FUNC(dk);
+private _dkCekilKayip = [_group, "cekilKayip", 0.4] call FUNC(dk);
+private _dkPeelOran = [_group, "peelOran", 1.6] call FUNC(dk);
+private _dkPeelKayip = [_group, "peelKayip", 0.1] call FUNC(dk);
+private _dkKucuk = [_group, "kucukEkip", 3] call FUNC(dk);
+private _dkYakin = [_group, "yakinM", 60] call FUNC(dk);
 if (isNull _unit) exitWith {"BOUNDING"};
 
 // Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden her asker TUFEKLI sayilir
@@ -351,7 +358,7 @@ private _result = call {
     // =======================================================================
     // 2) AGIR KAYIP / BASKIN GUC
     // =======================================================================
-    if (_lossRatio >= 0.4) exitWith {
+    if (_lossRatio >= _dkCekilKayip) exitWith {
         ["WITHDRAW", format ["agir kayip %1%%", round (_lossRatio * 100)]]
     };
     if (_pwrRatio >= 2.5 && {_lossRatio >= 0.2}) exitWith {
@@ -374,8 +381,8 @@ private _result = call {
     // =======================================================================
     // 4) PEEL — 1.6x guc dezavantaji + %10 kayip + yakin temas (NATO doktrini)
     // =======================================================================
-    if (_pwrRatio >= 1.6
-        && {_lossRatio >= 0.1}
+    if (_pwrRatio >= _dkPeelOran
+        && {_lossRatio >= _dkPeelKayip}
         && {_closest <= 250}
         && {_closest >= 25}) exitWith {
         ["PEEL", format ["%1x guc dezavantaji + kayip %2%%", _pwrRatio toFixed 1, round (_lossRatio * 100)]]
@@ -436,13 +443,13 @@ private _result = call {
     };
     // DOKTRIN: ustun olsak bile 60 m'den UZAKTA duz hucum yok (ates-manevra: BOUNDING ile yaklas); ASSAULT yalniz son 60 m
     if (_enemyCount > 0 && {_pwrRatio <= 0.67}) exitWith {
-        if (_closest < 45) then {
+        if (_closest < _dkAssault) then {
             ["ASSAULT", format ["biz ustun (guc orani %1), mesafe %2m", _pwrRatio toFixed 2, round _closest]]
         } else {
             ["BOUNDING", format ["biz ustun (guc orani %1), mesafe %2m: ates-manevra ile yaklas", _pwrRatio toFixed 2, round _closest]]
         }
     };
-    if (_closest < 45 && {_pwrRatio < 1.4}) exitWith {
+    if (_closest < _dkAssault && {_pwrRatio < 1.4}) exitWith {
         ["ASSAULT", format ["yakin mesafe %1m", round _closest]]
     };
     if (_pwrRatio >= 1.4) exitWith {
@@ -505,7 +512,7 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
 
 // KUCUK EKIP / YAKIN TEMAS: cekilme (koşarak kacma) ONERILMEZ — 60 m'den yakin dusmana sirt cevirmek olum; <= 3 kisi acikta kosamaz.
 // Cephane bitmedikce WITHDRAW / PEEL yerine DELAY (siper al + sis + temas kes) uygulanir.
-if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < 60) || {_ownCount <= 3}} && {(_reason select [0, 7]) isNotEqualTo "cephane"} && {_ownCount > 0}) then {
+if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < _dkYakin) || {_ownCount <= _dkKucuk}} && {(_reason select [0, 7]) isNotEqualTo "cephane"} && {_ownCount > 0}) then {
     _reason = format ["%1 -> DELAY (%2 kisi, dusman %3m: kosarak kacilmaz, siper al + sis)", _decision, _ownCount, round _closest];
     _decision = "DELAY";
 };
