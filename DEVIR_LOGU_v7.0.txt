@@ -625,3 +625,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   [ ] E. Duman icinde dagilma onleme: sis perdesi sonrasi yan yana toplanma ve kor ates yerine ciftli yer degistirme
   [ ] F. Dolayli tespit: ses/duman/tracer yonune goz atma, kayip alan arama (LKP search), tek yone kilitlenmeme
   [ ] G. Tehdit onceligi ve dikkat dagitma: tek oyuncuya karsi tum grubun ayni yone bakmasi yerine sektorlere dagilma
+=== v8.6 RETREAT: EK SICRAMA + KAPSAMA LIDERI (RPT 12:36, v8.5) ===
+- v8.5 DOGRULANDI: retreat artik calisiyor (vardi 9/21, onceki 0-4); yeni ugl salvo 6, ROL-GOREV UGL 3, olay cifti tutarli, hata 0.
+- Kullanici gozlemi 'tam olacakken duruyor': 2 neden bulundu.
+  1) Retreat SABIT 4 sicramada (~90 m) bitiyordu; dusman hala 120-160 m'deydi -> TEMAS-KES'e gecince yakalaniyorlardi.
+     Cozum: [GERI-CEKILME-EK] ek sicramalar: dusman < cekilGuvenM (220 m, doktrin) ve temas suruyor ve sure < 150 sn ise en fazla cekilEkSicrama (4) kez daha (ALPHA/BRAVO nobetlese). Guvenlik valfi 175 sn.
+  2) Kapsama veren LIDER doStop almadigi icin grup/gorev waypoint'ine yuruyordu (13351->13311, digerleri 100 m geride, dusmana 50 m'ye kadar girip el bombasi atti).
+     Cozum: kapsama takimina doSuppress'ten once doStop.
+- Dogrulanamayan: kapsama doStop sonrasi doSuppress komutunun korunmasi; ek sicrama sonunda TEMAS-KES gecisi; 0 km/s MOVE (yurumeyen) askerler (13 sn'de 15 m) hala gozlemlenecek.

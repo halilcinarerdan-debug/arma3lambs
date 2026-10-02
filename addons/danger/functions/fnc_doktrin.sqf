@@ -27,6 +27,7 @@
  *   uglUzakM 200, uglUzakAralik 25, uglRezerv 3, uglRezervM 120   40mm kullanim kurallari
  *   --- saha ---
  *   arkaGuvenlik true, arkaGuvenlikMinKisi 6    CQB / kent arka guvenlik askeri
+ *   cekilGuvenM 220, cekilEkSicrama 4     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
  *
  * YENI ORDU EKLEME (kod degistirmeden, misyon init'te):
  *   lambs_danger_doktrinTanimlari = [["ADIM", "UST_PROFIL", [["assaultM", 55], ["bantlar", [[200,60,12],[100,40,10],[0,30,8]]]]]];
@@ -59,7 +60,8 @@ private _p = createHashMapFromArray [
     ["assaultM", 45], ["bndBitisM", 40], ["bantlar", [[200, 70, 15], [100, 40, 12], [0, 25, 8]]], ["owKurulumS", 5], ["bndMaxCycle", 10],
     ["retreatAdim", [20, 30, 50]], ["cekilKayip", 0.4], ["peelOran", 1.6], ["peelKayip", 0.1], ["kucukEkip", 3], ["yakinM", 60],
     ["uglUzakM", 200], ["uglUzakAralik", 25], ["uglRezerv", 3], ["uglRezervM", 120],
-    ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6]
+    ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6],
+    ["cekilGuvenM", 220], ["cekilEkSicrama", 4]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---

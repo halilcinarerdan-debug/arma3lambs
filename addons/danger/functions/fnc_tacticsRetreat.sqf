@@ -150,7 +150,7 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
 // ---------------------------------------------------------------------------
 // GUVENLIK VALFI — sadece bu cekilmenin bayraklarini + AI kilitlerini temizler
 // ---------------------------------------------------------------------------
-[_group, _baslangic, time + 130] spawn {
+[_group, _baslangic, time + 175] spawn {
     params ["_g", "_start", "_limit"];
     waitUntil { time > _limit || {isNull _g} };
     if (!isNull _g && {((_g getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _start)}) then {
@@ -197,8 +197,8 @@ if (EGVAR(main,debug_functions)) then {
     systemChat _msgBasla;
 };
 
-[_group, _unit, _targetPos, _wps, _baslangic] spawn {
-    params ["_group", "_unit", "_targetPos", "_wps", "_baslangic"];
+[_group, _unit, _targetPos, _wps, _baslangic, _wpSec, _suKontrol, _adimBoy] spawn {
+    params ["_group", "_unit", "_targetPos", "_wps", "_baslangic", "_wpSec", "_suKontrol", "_adimBoy"];
 
     private _origCombat = combatMode _group;
     private _origBeh = behaviour (leader _group);   // v7.5b: bitince AWARE'de KALMASIN
@@ -291,6 +291,9 @@ if (EGVAR(main,debug_functions)) then {
         // 1) Kapsama: hedef alanina baski atesi (kimse bos durmaz)
         {
             if (alive _x && {isNull objectParent _x}) then {
+                // v8.6: kapsama veren (ozellikle LIDER) durdurulmazsa grup/gorev waypoint'ine yurur = dusmana dogru kosuyordu
+                // (RPT 12:38: lider 13351->13311, digerleri 100 m geride). Once doStop, sonra ortu atesi.
+                doStop _x;
                 _x enableAI "TARGET";
                 _x enableAI "AUTOTARGET";
                 _x setBehaviour "COMBAT";
@@ -465,6 +468,37 @@ if (EGVAR(main,debug_functions)) then {
             _wpIdx + 1
         ] call _sicra;
     } forEach _sira;
+
+    // -----------------------------------------------------------------------
+    // EK SICRAMALAR (v8.6): sabit 4 sicrama ~90 m'de bitiyordu, dusman hala 120-160 m'deydi (RPT 12:39: 'tam olacakken duruyor').
+    // Dusman guvenli mesafeye (cekilGuvenM) ulasana, temas kesilene, sure dolana ya da ek sicrama siniri bitene kadar surer.
+    // -----------------------------------------------------------------------
+    private _ekGuvenM = [_group, "cekilGuvenM", 220] call FUNC(dk);
+    private _ekMax = [_group, "cekilEkSicrama", 4] call FUNC(dk);
+    private _ekNo = 0;
+    while {!isNull _group && {_ekNo < _ekMax} && {time < (_baslangic + 150)}} do {
+        private _canli = (units _group) select {alive _x && {isNull objectParent _x}};
+        if (_canli isEqualTo []) exitWith {};
+        private _ld = [leader _group, _canli select 0] select (isNull (leader _group) || {!alive (leader _group)});
+        private _dus = _ld findNearestEnemy _ld;
+        private _tp = [getPosATL _dus, _targetPos] select (isNull _dus);
+        private _d = (getPosATL _ld) distance2D _tp;
+        if (_d >= _ekGuvenM) exitWith {};
+        if ((_group getVariable [QGVAR(contact), 0]) <= time) exitWith {};
+        _targetPos = _tp;
+        _targetASL = AGLToASL _tp;
+        private _o = getPosATL _ld;
+        private _wpE = [_o, _tp getDir _o] call _wpSec;
+        _wpE = [_wpE, _o] call _suKontrol;
+        private _ciftMi = (_ekNo % 2) isEqualTo 0;
+        private _hr = if (_bravo isEqualTo []) then {_alpha} else {[_bravo, _alpha] select _ciftMi};
+        private _kp = if (_bravo isEqualTo []) then {[]} else {[_alpha, _bravo] select _ciftMi};
+        _hr = _hr select {alive _x};
+        if (_hr isEqualTo []) then { _hr = _canli; _kp = []; };
+        _ekNo = _ekNo + 1;
+        diag_log format ["[GERI-CEKILME-EK] %1 | ek sicrama %2/%3 | dusman:%4 m (guvenli:%5)", groupId _group, _ekNo, _ekMax, round _d, _ekGuvenM];
+        [_group, _hr, _kp select {alive _x}, _wpE, _targetASL, (count _sira) + _ekNo] call _sicra;
+    };
 
     // -----------------------------------------------------------------------
     // TEMIZLIK
