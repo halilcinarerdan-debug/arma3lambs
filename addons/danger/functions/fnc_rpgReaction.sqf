@@ -62,7 +62,7 @@ private _sayi = 0;
     {
         private _u = _x;
         private _rol = [_u] call _rolFn;
-        _u reveal [_atici, 4];
+        _u reveal [_atici, 1.5];   // tam bilgi (4) degil: roketin geldigi yon bilinir, kesin konum degil
         _u setVariable [QGVAR(hugT), time + 8];
 
         // 2) oncelikli baski: AT roketatar ekibine tufek + MG

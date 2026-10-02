@@ -431,3 +431,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.18 ===
 - Bound atilimi mesafeye gore: >200 m kazanc>=15/atilim<=70, 100-200 m 12/40, <100 m 8/25
 - Retreat sicrama boyu mesafeye gore: <100 m 30, 100-200 m 40, >200 m 60
+
+=== v7.19 ===
+- fnc_rearGuard: CQB/yogun urban, >=6 kisilik grupta sade tufekli (MG/AT/nisanci/medic/UGL/lider/SERGEANT+ degil) arkayi kollar
+- Hile kapatma: commanderAssess 70 m icinde bilinmeyen dusmani saymaz (knowsAbout>=0.4); rpgReaction reveal 4 -> 1.5

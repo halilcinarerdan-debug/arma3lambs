@@ -67,6 +67,7 @@ PREP(fireLine);
 PREP(tccc);
 PREP(fieldCraft);
 PREP(atisGuvenli);
+PREP(rearGuard);
 PREP(tacticsAssess);
 PREP(tacticsAttack);
 PREP(tacticsCQB);
@@ -97,14 +98,14 @@ SUBPREP(ZEN,showSetDisableGroupAI);
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.18 (mesafeye gore bound/cekilme boyu + ates hatti yan adimi felc etmez + sikisma adimi sadece sakin intikal + spam kesildi: jest 45 sn + komutan bekle sogumasi + formasyon histerezisi: arazi Schmitt + mesafe bandi + 90 sn bekleme + uzun bound + komutan arkada kosmaz + cekilme sonrasi kilit + atis guvenligi RPG/UGL + karar+formasyon istikrari + tek kalan saklan + TCCC fix + once siper sonra ates + TCCC + saha ustaligi + ates hatti + hizli retreat + donus x1.2 + duvar korumasi + sikisma + komutan formasyon + lider arkada) yuklendi (XEH_PREP preInit)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.19 (arka guvenlik + hile kapatma + mesafeye gore bound/cekilme boyu + ates hatti yan adimi felc etmez + sikisma adimi sadece sakin intikal + spam kesildi: jest 45 sn + komutan bekle sogumasi + formasyon histerezisi: arazi Schmitt + mesafe bandi + 90 sn bekleme + uzun bound + komutan arkada kosmaz + cekilme sonrasi kilit + atis guvenligi RPG/UGL + karar+formasyon istikrari + tek kalan saklan + TCCC fix + once siper sonra ates + TCCC + saha ustaligi + ates hatti + hizli retreat + donus x1.2 + duvar korumasi + sikisma + komutan formasyon + lider arkada) yuklendi (XEH_PREP preInit)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {
         private _fns = [
             "tactics", "commanderAssess", "tacticsBounding", "tacticsRetreat", "tacticsEvadeArmor", "tacticsATEngage",
             "tacticsBreakContact", "roleStation", "buddyBond", "dispersion", "reloadCover", "grenadeAwareness",
-            "leaderSync", "firedHub", "soundAwareness", "cqbReflex", "isSniper", "sniperTeam", "buildingClear", "buildingClearRun", "coverHug", "rpgReaction", "fireSupport", "buddyDebug", "tacticalUGL", "tacticalSmoke", "getUnitRole", "buddyPairs", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "atisGuvenli"
+            "leaderSync", "firedHub", "soundAwareness", "cqbReflex", "isSniper", "sniperTeam", "buildingClear", "buildingClearRun", "coverHug", "rpgReaction", "fireSupport", "buddyDebug", "tacticalUGL", "tacticalSmoke", "getUnitRole", "buddyPairs", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "atisGuvenli", "rearGuard"
         ];
         diag_log format [
             "[ELITE-BOOT] makine: isServer=%1 hasInterface=%2 | fonksiyonlar: %3",
@@ -115,7 +116,7 @@ diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.18 (mesafeye gore bound/cekil
         // watchdog'lar ilk temasta degil, acilista baslasin
         {
             [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
-        } forEach ["firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft"];
+        } forEach ["firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "rearGuard"];
 
         // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
         [] spawn {

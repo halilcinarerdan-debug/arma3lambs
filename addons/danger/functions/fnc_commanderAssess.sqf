@@ -86,7 +86,8 @@ private _enemies = _nearAll select {
     && {!((side _x) == civilian)}
     && {(_mySide getFriend (side _x)) < 0.6}
     && {(lifeState _x) isNotEqualTo "INCAPACITATED"}
-    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 70}}
+    // 70 m icindeki dusman da ancak az da olsa BILINIYORSA sayilir (eskiden duvar arkasini / gormedigi dusmani da sayiyordu = hile)
+    && {((_group knowsAbout _x) >= 1.2) || {((_x distance2D _unit) < 70) && {(_group knowsAbout _x) >= 0.4}}}
 };
 
 // Hedef objeyse ve listede yoksa ekle
