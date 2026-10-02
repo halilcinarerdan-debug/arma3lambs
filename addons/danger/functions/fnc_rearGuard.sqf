@@ -74,7 +74,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
             private _yakinDusman = !isNull _en && {(_en distance2D _l) < 50};
             private _urban = (_bina >= 8) || {(insideBuilding _l) > 0.5} || {_yakinDusman && {_bina >= 5}};
             private _hareketVar = ((speed _l) > 1) || {(_g getVariable [QGVAR(contact), 0]) > (time - 90)};
-            if (_urban && {_hareketVar}) then {
+            if (_urban && {_hareketVar} && {time > (_g getVariable [QGVAR(rearBekle), 0])}) then {
                 _g setVariable [QGVAR(rearAktifT), time];
             };
             private _aktif = (time - (_g getVariable [QGVAR(rearAktifT), -999])) < 20;
@@ -108,6 +108,13 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                 };
             };
             if (isNull _u) then { continue };
+            // lidere > 45 m uzaksa (lider hucumda hizli gitti) arka guvenlik DEGIL, kopuk: gruba don, 60 sn yeniden secilme
+            if ((_u distance2D _l) > 45) then {
+                [_g, _u] call _birak;
+                _g setVariable [QGVAR(rearAktifT), -999];
+                _g setVariable [QGVAR(rearBekle), time + 60];
+                continue
+            };
             if ((getSuppression _u) >= 0.6) then { continue };   // ezilen siper alir, FSM yonetsin
 
             // --- on yon: dusman > lider hareket yonu > lider bakis yonu ---

@@ -449,3 +449,10 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.23 ===
 - Bounding: iki ekip kesin donusumlu (tek cycle ALPHA=maneuver+reserve hareket / BRAVO=FSE overwatch, cift cycle tersi); varan asker doStop; max 10 cycle
 - atisGuvenli: UGL icin hatta-dost koridoru yok, yakin engel sadece 4 m tek serit (RPT: UGL hatta dost 300 m ile hic atamiyordu); RPG ayni
+
+=== v7.24 ===
+- fireLine varsayilan KAPALI (RPT: 13 kisilik grup surekli yan adim = felc); lambs_danger_fireLineOn=true ile acilir
+- leaderSync: temasta/taktikte komutan beklemez
+- commanderAssess: biz ustunken 60 m ustu ASSAULT yok -> BOUNDING (ates-manevra); ASSAULT sadece <60 m
+- atisGuvenli UGL: yakin engel 2.5 m, sadece FIRE geometri (cali/dal VIEW degil)
+- rearGuard: lidere >45 m uzaksa birak, 60 sn bekle

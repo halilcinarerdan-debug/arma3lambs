@@ -68,9 +68,9 @@ private _bas = AGLToASL (_uPos vectorAdd [0, 0, 1.4]);
 private _yaku = false;
 {
     private _basS = AGLToASL ((_unit getPos [0.7, _dir + (_x select 1)]) vectorAdd [0, 0, 1.4]);
-    private _son = AGLToASL (_unit getPos [([4, 12] select _rpg), _dir + (_x select 2)]);
+    private _son = AGLToASL (_unit getPos [([2.5, 12] select _rpg), _dir + (_x select 2)]);
     _son set [2, (_basS select 2) + ((((AGLToASL _tPos) select 2) + 1.2 - (_basS select 2)) * (12 / (_d max 12)))];
-    if (terrainIntersectASL [_basS, _son] || {(lineIntersectsSurfaces [_basS, _son, _unit, objNull, true, 1, "FIRE", "VIEW"]) isNotEqualTo []}) exitWith { _yaku = true; };
+    if (terrainIntersectASL [_basS, _son] || {(lineIntersectsSurfaces [_basS, _son, _unit, objNull, true, 1, "FIRE", ["FIRE", "VIEW"] select _rpg]) isNotEqualTo []}) exitWith { _yaku = true; };
 } forEach ([[[12, 0, 0]], [[12, 0, 0], [12, 90, 0], [12, -90, 0]]] select _rpg);
 if (_yaku) exitWith {["onunde cali/dal/engel (sekme)"] call _gorev};
 

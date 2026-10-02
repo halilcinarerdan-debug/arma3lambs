@@ -66,6 +66,9 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
 
         {
             private _u = _x;
+            // VARSAYILAN KAPALI: RPT'de 13 kisilik grubun hemen herkesi temasta surekli yan adim atiyordu (formasyon / taktik felci). Motor zaten
+            // dost atesinden kacinir. Acmak icin: lambs_danger_fireLineOn = true
+            if (!(missionNamespace getVariable ["lambs_danger_fireLineOn", false])) then { continue };
             if (time < (_u getVariable [QGVAR(flLast), 0])) then { continue };
             if (_u getVariable [QGVAR(forceMove), false]) then { continue };
             if ((_u getVariable [QGVAR(grState), []]) isNotEqualTo []) then { continue };

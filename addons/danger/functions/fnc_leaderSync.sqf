@@ -61,9 +61,12 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 || {_g getVariable [QGVAR(isATEngage), false]}
                 || {_g getVariable [QGVAR(isBounding), false]}
                 || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}};
-            private _aktif = ((_g getVariable [QGVAR(contact), 0]) > time)
-                || {_g getVariable [QGVAR(isBounding), false]}
-                || {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 45};
+            // TEMASTA / TAKTIKTE KOMUTAN BEKLEMEZ (RPT: temasta lider PATH kapali 13 sn donuyor = takim felci). Sadece sakin intikalde:
+            // temas biteli 20 sn gecmis ve taktik yok.
+            private _aktif = ((time - (_g getVariable [QGVAR(contact), 0])) > 20)
+                && {!(_g getVariable [QGVAR(isBounding), false])}
+                && {!(_g getVariable [QGVAR(isExecutingTactic), false])}
+                && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) > 20};
 
             if (_gecersiz || {_kendiDuzen} || {!_aktif} || {(count (units _g)) < 3}) then {
                 if (_tutuyor) then {
