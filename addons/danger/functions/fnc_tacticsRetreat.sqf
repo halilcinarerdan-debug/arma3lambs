@@ -276,6 +276,8 @@ if (EGVAR(main,debug_functions)) then {
             if (surfaceIsWater _ciftNokta) then { _ciftNokta = _wp; };
             {
                 if (alive _x && {isNull objectParent _x}) then {
+                    _x enableAI "PATH";    // baska watchdog (komutan bekle vb.) PATH / MOVE kapatmis olabilir -> kosamazdi
+                    _x enableAI "MOVE";
                     _x disableAI "TARGET";
                     _x disableAI "AUTOTARGET";
                     _x disableAI "AUTOCOMBAT";
@@ -295,7 +297,7 @@ if (EGVAR(main,debug_functions)) then {
         // 3) Varisa kadar bekle (en fazla 16 sn, %75 vardiysa erken cik); sadece TAKILANA (3.5 sn ilerleyemeyen) emri tazele —
         //    her 3 sn'de doMove tekrari yol hesabini sifirlayip askeri yerinde tutuyordu
         private _t0 = time;
-        private _bitis = time + 8;
+        private _bitis = time + 12;
         private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
@@ -383,7 +385,7 @@ if (EGVAR(main,debug_functions)) then {
                 _b setUnitPosWeak "MIDDLE";
                 // DOSTOP: varan asker kendi sicrama noktasinda KALIR (aksi halde formasyon slotuna, yani liderin eski konumuna,
                 // geri yuruyordu = "geri git ileri git, ayni yolu tekrar gidiyorlar")
-                doStop _b;
+                if ((_b distance2D (_x select 1)) <= 12) then { doStop _b; };   // SADECE varanlar: varamayan durdurulursa hic ilerlemez (RPT: vardi 0/N, 40 sn'de lider kipirdamadi)
                 [_b, _hedefASL] call EFUNC(main,doSuppress);
             };
         } forEach _varis;

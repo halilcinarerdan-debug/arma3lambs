@@ -473,3 +473,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.29 ===
 - fnc_durumLog: [DURUM-GRUP] / [DURUM] (her asker) / [DOKTRIN] (puan) tani loglari; kapatma lambs_danger_durumLogOff=true
+
+=== v7.30 ===
+- Retreat: doStop SADECE varanlara (varamayan durdurulunca ilerlemiyordu), sicrama bekleme 12 sn, kosan askerde PATH/MOVE acik
