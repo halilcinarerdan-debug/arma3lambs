@@ -44,6 +44,16 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
     private _isSn = missionNamespace getVariable ["lambs_danger_fnc_isSniper", {false}];
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
+    // Gozlemci OLAMAYACAKLAR: otomatik tufekci (IAR / SAW / AR), MG, bombaatar (UGL), saglikci, AT
+    private _gozlemciDegil = {
+        params ["_u"];
+        private _t = toLower (typeOf _u);
+        private _w = toLower (primaryWeapon _u);
+        ((["autorifleman", "_ar_", "_ar", "machinegunner", "_mg", "grenadier", "_gl", "medic", "_lat", "_at"] findIf {(_t find _x) >= 0}) > -1)
+        || {(["m27", "iar", "lsw", "rpk", "saw", "minimi", "m249", "m60", "mk48", "pkm", "negev", "lmg"] findIf {(_w find _x) >= 0}) > -1}
+        || {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}])) isNotEqualTo ""}
+    };
+
     // Hedef onceligi
     private _oncelik = {
         params ["_e", "_ref"];
@@ -127,7 +137,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                 _sp = _spAd select 0;
             } else {
                 private _riflemen = _gA select {
-                    (([_x] call _rolFn) isEqualTo "RIFLE") && {(_x distance2D _s) < 20}
+                    (([_x] call _rolFn) isEqualTo "RIFLE") && {(_x distance2D _s) < 20} && {!([_x] call _gozlemciDegil)}
                 };
                 if (_riflemen isNotEqualTo []) then {
                     _sp = ([_riflemen, [], {_x distance2D _s}, "ASCEND"] call BIS_fnc_sortBy) select 0;
