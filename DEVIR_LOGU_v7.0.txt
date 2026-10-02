@@ -479,3 +479,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.31 ===
 - commanderAssess: 250-500 m FLANK yerine BOUNDING; FLANK sadece 500 m ustu
+
+=== v7.32 ===
+- Bounding: hareket eden ekip toplamin yarisini gecmez (13 kisiden 8 kosuyordu); [BND-CIKIS] logu (komutan karari yuzunden yarida kalma)

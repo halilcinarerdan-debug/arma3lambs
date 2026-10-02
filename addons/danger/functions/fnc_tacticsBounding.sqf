@@ -505,6 +505,8 @@ if (EGVAR(main,debug_functions)) then {
         // KAYIP KONTROLU — komutan her cycle'da yeniden degerlendirir.
         private _komutanKarar = [_group, _target] call FUNC(commanderAssess);
         if (_komutanKarar in ["WITHDRAW", "PEEL", "EVADE_ARMOR", "AT_ENGAGE", "HOLD", "DELAY"]) exitWith {
+            // tani: bounding neden yarida kesildi? (RPT: cycle 2'de, sebebi logda yoktu)
+            diag_log format ["[BND-CIKIS] %1 | cycle:%2 | komutan karari: %3 | durum(zaman,yakin,dusman,MG,zirh,oran,kayip): %4", groupId _group, _cycleCount, _komutanKarar, _group getVariable [QGVAR(cmdSit), []]];
             [_group] call _bndTemizle;
             switch (_komutanKarar) do {
                 case "EVADE_ARMOR": {
@@ -601,6 +603,21 @@ if (EGVAR(main,debug_functions)) then {
         // (Eskiden: her 3. cycle FSE, digerlerinde her cift icinden sadece biri -> herkes bir arada kalkip duruyordu)
         private _alphaE = (_maneuver + _reserve) select {alive _x};
         private _bravoE = _fse select {alive _x};
+        // DENGE: hareket eden ekip toplamin yarisini gecmesin (RPT: 13 kisilik grupta 8 kisi ayni anda kosarken ates altinda 13 -> 4'e dustu).
+        // Fazla kisiler (once MG olmayanlar) digerine gecer: iki ekip ~esit, biri kosarken digeri (>= yari) ates eder.
+        private _yarim = ceil (((count _alphaE) + (count _bravoE)) / 2);
+        while {(count _alphaE) > _yarim && {(count _alphaE) > 1}} do {
+            private _gk = _alphaE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            private _kk = if (_gk isEqualTo []) then {_alphaE select ((count _alphaE) - 1)} else {_gk select ((count _gk) - 1)};
+            _alphaE = _alphaE - [_kk];
+            _bravoE pushBack _kk;
+        };
+        while {(count _bravoE) > _yarim && {(count _bravoE) > 1}} do {
+            private _gk = _bravoE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            private _kk = if (_gk isEqualTo []) then {_bravoE select ((count _bravoE) - 1)} else {_gk select ((count _gk) - 1)};
+            _bravoE = _bravoE - [_kk];
+            _alphaE pushBack _kk;
+        };
         private _fseSicrama = ((_cycleCount % 2) isEqualTo 0) && {_bravoE isNotEqualTo []} && {_alphaE isNotEqualTo []};
         private _hareketEdecek = [];
         private _kapsama = [];
