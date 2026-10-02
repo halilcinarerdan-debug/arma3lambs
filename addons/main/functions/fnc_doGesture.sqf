@@ -28,7 +28,7 @@ if (GVAR(disableAIGestures) && {!_force}) exitWith {false};
 // not for players
 if (isPlayer _unit) exitWith {false};
 
-// ELITE: jest spami onleme — birim basina 6 sn, grup basina 2.5 sn (zorunlu degilse)
+// ELITE: jest spami onleme — birim basina 12 sn, grup basina 5 sn (zorunlu degilse)
 private _grp = group _unit;
 if (
     !_force
@@ -38,8 +38,8 @@ if (
     }
 ) exitWith {false};
 if (!_force) then {
-    _unit setVariable ["lambs_main_gestureZaman", time + 6];
-    _grp setVariable ["lambs_main_gestureGrupZaman", time + 2.5];
+    _unit setVariable ["lambs_main_gestureZaman", time + 12];
+    _grp setVariable ["lambs_main_gestureGrupZaman", time + 5];
 };
 
 // sort gestures

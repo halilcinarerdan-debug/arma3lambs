@@ -38,7 +38,7 @@ if (_time >= time) exitWith {
 };
 
 // ELITE: grup bazli konusma kisitlamasi (komutan / grup surekli ayni seyi bagirmasin)
-//   - grupta herhangi biri 9 sn icinde konustuysa sus
+//   - grupta herhangi biri 16 sn icinde konustuysa sus
 //   - ayni cagri ayni grupta 40 sn icinde tekrar edilmez (olum / panik / yaralanma haric)
 private _grp = group _unit;
 private _acil = (toLowerANSI _callout) in ["mandown", "panic", "eject", "grenadeout"];
@@ -151,5 +151,5 @@ if (GVAR(debug_functions)) then {
 
 // set time until next callout
 _unit setVariable [QGVAR(calloutTime), time + 4, true];
-_grp setVariable ["lambs_main_calloutGrupZaman", time + 9];
+_grp setVariable ["lambs_main_calloutGrupZaman", time + 16];
 _grp setVariable [format ["lambs_main_callout_%1", toLowerANSI _callout], time + 40];

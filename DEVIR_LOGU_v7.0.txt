@@ -806,3 +806,12 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   LAMBS kapali, RED, varista doStop + MIDDLE + doWatch; 240 sn / dusman 45 sn yok -> biter. Log [SON-DIRENIS] BASLADI / ATAMA / BITTI. Hook: fnc_tacticsBreakContact (kacis modundan once).
 - v8.30 RETREAT TOPARLANMA: retreat sonrasi konsolidasyonS (45 sn; DUZENSIZ 20) boyunca disableGroupAI acik kalir (LAMBS FLANK / ASSAULT yok), sonra eski deger. Log [GERI-CEKILME-TOPLAN].
 - Sonraki (kullanici sirasi): CQB guclendirme, sonra doktrine gore FAKE / aldatma (feint), hendek / mevzi (VBS #6).
+=== v8.31 (RPT a1852a2f 18:55, v8.30; kullanici: 'komutan sayikliyor + loop, retreat tam olacakken saldirmaya karar verdi') ===
+- v8.30 DOGRULANDI: hata 0, retreat 16/24 (%67), 8 sicrama + 4 ek, SON DIRENIS tetiklendi (2 asker, 26 m dusman, ayri ic pozisyon; ikisi de ~60 sn'de olduruldu), toparlanma 20 sn calisti.
+- KOK NEDEN (saldiri): retreat 6v10'da basladi (PEEL, P:1.35); 19:03:03 bitti, 19:03:37 komutan 'ASSAULT (PUSH: 6v4)' verdi. (1) PUSH 90 sn cekilme-sonrasi kilidinden MUAFTI; (2) temas kopunca gorunen dusman 10 -> 4'e dustu, 'ustunuz' yanilgisi.
+  Duzeltme: kilit PUSH'i de kapsar (-> DELAY); WITHDRAW / PEEL sebebi olan dusman sayisi 180 sn hatirlanir (PUSH: kendi sayi > max(gorunen, hatirlanan)).
+- KOK NEDEN (sayiklama): tacticsBounding her cycle'da (~9 sn) gestureGo + gestureGoB (callout 60 sn'de bir ama jest kisitsizdi); LAMBS tacticsHold 'KeepFocused / StayAlert' (iki farkli isim -> ayni-isim kilidini asiyor) + doShareInformation 'HandSignalRadio' ~10-15 sn'de bir.
+  Duzeltme: bounding jesti 35 sn'de bir; doGesture birim 12 sn / grup 5 sn (eskiden 6 / 2.5); doCallout grup-geneli 16 sn (eskiden 9).
+- Dogrulanmadi: 'loop' yorumum (komutan jest / callout tekrari + Alpha 1-4 10 kisi 35 sn 'Assault (sympathetic)' MOVE'da duruyor, hareket %10) kullanicinin duydugu sey mi; Alpha 1-4 duruyorsa kok neden ayri (LAMBS sympathetic assault, binadaki dusmana yaklasma) acik.
+- Gozlem: BAYRAK-TAKILI RET 200 sn (retreat 153 sn surdu) -> bayrak retreat baslamadan once set ediliyor olabilir, bakilacak.
+- Bekleyen fikir (kullanici): tek sikisan asker gruptan AYRILIP kale savunmasi, kalanlar kacar (rear-guard / sacrificial delay). Retreat dogrulaninca ele alinacak; doktrin degerlendirmesi sohbette.

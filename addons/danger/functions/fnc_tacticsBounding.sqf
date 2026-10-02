@@ -155,8 +155,12 @@ _group setVariable [QEGVAR(main,currentTactic), "Bounding Overwatch", EGVAR(main
 // ---------------------------------------------------------------------------
 // Jest + callout
 // ---------------------------------------------------------------------------
-[_unit, ["gestureGo"]] call EFUNC(main,doGesture);
-[_units select -1, "gestureGoB"] call EFUNC(main,doGesture);
+// (v8.31: her cycle'da jest = komutan "sayiklama" spami; 35 sn'de bir)
+if ((time - (_group getVariable [QGVAR(bndSonJest), 0])) > 35) then {
+    _group setVariable [QGVAR(bndSonJest), time];
+    [_unit, ["gestureGo"]] call EFUNC(main,doGesture);
+    [_units select -1, "gestureGoB"] call EFUNC(main,doGesture);
+};
 
 private _sonCallout = _group getVariable [QGVAR(bndSonCallout), 0];
 if (time - _sonCallout > 60) then {

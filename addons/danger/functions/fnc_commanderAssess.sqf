@@ -342,9 +342,11 @@ private _result = call {
     //     "cok az degilsek": >= 4 kisi, kayip < %80, cephane yeterli (yukarida), zirh yok.
     //     (WITHDRAW / PEEL kurallarindan ONCE: ustunken kayip verince kacmak yerine bitir.)
     // =======================================================================
+    // cekilme sonrasi temas kopunca gorunen dusman sayisi DUSER (6v10 -> 6v4): "ustunuz" yanilgisi -> son cekilme sebebi olan sayi 180 sn hatirlanir
+    private _cekilDusman = if ((time - (_group getVariable [QGVAR(cmdCekilZaman), -999])) < 180) then {_group getVariable [QGVAR(cmdCekilDusman), 0]} else {0};
     if (_enemyCount > 0
         && {_ownCount >= 4}
-        && {_ownCount > _enemyCount}
+        && {_ownCount > (_enemyCount max _cekilDusman)}
         && {_pwrRatio <= 1.0}
         && {_lossRatio >= 0.15}
         && {_lossRatio < 0.8}
@@ -519,8 +521,10 @@ if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < _dkYakin) || {_ownCount <=
 
 // CEKILME SONRASI KILIT: cekilme biteli 90 sn dolmadan hucum ailesine GERI DONME (cekil -> hemen dusmana kos -> olum dongusu);
 // guc ustunlugu (PUSH) disinda DELAY (siper al, temas kes) uygulanir
-if (!_push && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]}
+// (v8.31: PUSH da KILITLI — RPT a1852a2f: cekilme biteli 34 sn sonra 6v4 "PUSH" ile hucum, oysa cekilme sebebi 6v10'du)
+if (_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]
     && {(time - (_group getVariable [QGVAR(retreatEndTime), -999])) < 90}) then {
+    _push = false;
     _decision = "DELAY";
     _reason = "cekilme sonrasi: 90 sn hucum yok, siper al";
 };
@@ -536,6 +540,12 @@ if (_decision isNotEqualTo _sonKarar) then {
     } else {
         _group setVariable [QGVAR(cmdKarBas), time];
     };
+};
+
+// cekilme sebebi olan dusman sayisini kaydet (PUSH yanilgisini onler)
+if (_decision in ["WITHDRAW", "PEEL"] && {_enemyCount > 0}) then {
+    _group setVariable [QGVAR(cmdCekilDusman), _enemyCount];
+    _group setVariable [QGVAR(cmdCekilZaman), time];
 };
 
 // Karari kaydet (hafiza + koordinasyon icin)
