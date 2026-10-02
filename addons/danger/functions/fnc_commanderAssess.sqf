@@ -406,8 +406,14 @@ private _result = call {
     // =======================================================================
     // 7) HAREKET / TAARRUZ
     // =======================================================================
+    // 250-500 m: acik arazide hizli FLANK yuruyusu yerine BOUNDING (RPT: iki grup 391 m'de FLANK + LINE ile acikta yurudu, biri 60 sn'de 8 -> 1'e dustu);
+    // 500 m ustu: FLANK (yaklasma / kanat)
     if (_distance > 250) exitWith {
-        ["FLANK", format ["uzak mesafe %1m", round _distance]]
+        if (_distance <= 500) then {
+            ["BOUNDING", format ["uzak mesafe %1m: ates-manevra ile yaklas (acikta duz yuruyus yok)", round _distance]]
+        } else {
+            ["FLANK", format ["cok uzak mesafe %1m", round _distance]]
+        }
     };
     if (_enemyMg >= 2 && {_isOpen}) exitWith {
         ["FLANK", format ["%1 MG acik arazide - cepheden saldirma", _enemyMg]]

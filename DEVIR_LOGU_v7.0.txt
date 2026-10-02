@@ -476,3 +476,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.30 ===
 - Retreat: doStop SADECE varanlara (varamayan durdurulunca ilerlemiyordu), sicrama bekleme 12 sn, kosan askerde PATH/MOVE acik
+
+=== v7.31 ===
+- commanderAssess: 250-500 m FLANK yerine BOUNDING; FLANK sadece 500 m ustu
