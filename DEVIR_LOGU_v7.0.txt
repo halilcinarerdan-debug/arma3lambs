@@ -798,3 +798,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   brainForced ATTACK komutunda doAssaultSpeed + setUnitPosWeak (MIDDLE / DOWN) cagirir: doAssaultSpeed forceSpeed 3-4 m/s (LIDER ve moral < 0 icin -1, hedefe < 5 m icin -1) birakir -> LIDER kosarken yavas (2-3 m/s) kalir. 'Attacking' gorevi buradan gelir.
   Duzeltme: retreat _sicra her sicramada forceSpeed -1 + setSpeedMode FULL (v8.29). TAKILI logu checkAIFeature PATH / MOVE / ANIM / FSM da yazar.
 - doSuppress (main): LOS / 200 m / min mesafe / dost kontrolu (findNearbyFriendlies, sivil dahil: getFriend); doSuppressiveFire; currentCommand 'Suppress' ise cikar.
+=== v8.30 (RPT 18:32, v8.29; kullanici: 'retreat gorsel olarak sorunsuz 😃; tek kalanlar eve garrison atsin, kale savunmasi, max 3; geri donen Amerikalilar fake mi?') ===
+- v8.29 DOGRULANDI: RETREAT 14/22 (%64, en iyisi), ek sicrama 4, hata 0, 8 sicrama; TAKILI birkac satir (expectedDestination 'LEADER PLANNED' + hiz 0 kisa sureli) ama retreat tamamlandi.
+- 'Geri donen Amerikalilar': retreat bitiminde (18:37:43) komutan karari SUPPRESS_ASSAULT (PUSH: 5v1 ustun guc, kayip %55) + LAMBS 'TACTICS FLANK' 197 m, ayni saniye -> FAKE / TUZAK DEGIL, normal komutan yeniden degerlendirmesi; ama gercekci degil (toparlanma yok).
+  Fake / aldatma (feint) YOK; doktrine gore sonra eklenecek (kullanici: 'once duzgun calistiralim').
+- v8.30 SON DIRENIS: <= 3 asker, kayip >= %50 + dusman <= 150 m (ya da kayip >= %60), dusman 25-250 m, <= 70 m'de >= 2 pozisyonlu bina (dusmana yaklastirmayan) -> her asker ayri ic pozisyon (dusmani goren +25, zemin / 1. kat +8),
+  LAMBS kapali, RED, varista doStop + MIDDLE + doWatch; 240 sn / dusman 45 sn yok -> biter. Log [SON-DIRENIS] BASLADI / ATAMA / BITTI. Hook: fnc_tacticsBreakContact (kacis modundan once).
+- v8.30 RETREAT TOPARLANMA: retreat sonrasi konsolidasyonS (45 sn; DUZENSIZ 20) boyunca disableGroupAI acik kalir (LAMBS FLANK / ASSAULT yok), sonra eski deger. Log [GERI-CEKILME-TOPLAN].
+- Sonraki (kullanici sirasi): CQB guclendirme, sonra doktrine gore FAKE / aldatma (feint), hendek / mevzi (VBS #6).

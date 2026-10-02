@@ -96,6 +96,9 @@ private _mesafe = 99999;
 { _mesafe = _mesafe min (_x distance2D _tehditPos); } forEach _birimler;
 if (_mesafe < ([25, 10] select (_alive isEqualTo 1)) || {_mesafe > 400}) exitWith {false};
 
+// v8.30 SON DIRENIS: <= 3 asker, kacis imkansiz (kayip >= %50 + dusman <= 150 m ya da kayip >= %60) ve yakinda bina varsa KALE SAVUNMASI (fnc_sonDirenis)
+if ([_group, _tehditPos] call FUNC(sonDirenis)) exitWith {true};
+
 // KACIS MODU: tek kalan veya kayip >= %75 -> siperde bekleme, dusmandan UZAGA kos (150 m)
 private _kacisModu = (_alive isEqualTo 1) || {_kayip >= 0.75};
 

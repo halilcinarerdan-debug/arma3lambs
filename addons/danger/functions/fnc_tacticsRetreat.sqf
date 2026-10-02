@@ -607,7 +607,24 @@ if (EGVAR(main,debug_functions)) then {
     if (!isNull _group && {((_group getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _baslangic)}) then {
         { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _group);
         _group setVariable [QGVAR(isRetreating), nil];
-        _group setVariable [QGVAR(disableGroupAI), [nil, true] select (_group getVariable [QGVAR(retreatEskiDGA), false])];
+        // v8.30 TOPLANMA (RPT 18:37: retreat biter bitmez LAMBS "TACTICS FLANK" ile hemen geri dondu): konsolidasyonS (45 sn) boyunca grup LAMBS grup taktigi KAPALI kalir,
+        //   sonra eski degere doner (gercekte temas kesildikten sonra toparlanma: yeniden duzen, kayip / cephane sayimi)
+        private _eskiDGAk = _group getVariable [QGVAR(retreatEskiDGA), false];
+        private _konsS = [_group, "konsolidasyonS", 45] call FUNC(dk);
+        if (_konsS > 0 && {({alive _x} count (units _group)) >= 2}) then {
+            _group setVariable [QGVAR(disableGroupAI), true];
+            diag_log format ["[GERI-CEKILME-TOPLAN] %1 | %2 sn toparlanma: LAMBS grup taktigi kapali (hemen geri hucum yok)", groupId _group, _konsS];
+            [_group, _eskiDGAk, _konsS] spawn {
+                params ["_g", "_e", "_s"];
+                sleep _s;
+                if (!isNull _g && {!(_g getVariable [QGVAR(isRetreating), false])}) then {
+                    _g setVariable [QGVAR(disableGroupAI), [nil, true] select _e];
+                    diag_log format ["[GERI-CEKILME-TOPLAN] %1 | toparlanma bitti, LAMBS grup taktigi geri acildi", groupId _g];
+                };
+            };
+        } else {
+            _group setVariable [QGVAR(disableGroupAI), [nil, true] select _eskiDGAk];
+        };
         _group setVariable [QGVAR(retreatEskiDGA), nil];
         {
             _x setVariable [QGVAR(disableAI), [nil, true] select (_x getVariable [QGVAR(retreatEskiDAI), false])];
