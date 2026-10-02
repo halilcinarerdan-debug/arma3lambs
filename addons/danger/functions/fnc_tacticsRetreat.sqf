@@ -137,6 +137,13 @@ _group setVariable [QGVAR(isRetreating), true];
 // Retreat boyunca grup LAMBS reaksiyonlarina kapatilir (disableGroupAI); bitisinde / valfte ESKI degere donulur.
 _group setVariable [QGVAR(retreatEskiDGA), _group getVariable [QGVAR(disableGroupAI), false]];
 _group setVariable [QGVAR(disableGroupAI), true];
+// RPT (11:53): disableGroupAI = true iken bile retreat sirasinda LAMBS "TACTICS FLANK", gestureGo, "OnYourFeet" ve "Group Suppress (Move)"
+// gorevi calisti (vardi:0/7). Grup bayragi FSM'in birim duzeyindeki tepkilerini durdurmuyor -> BIRIM DUZEYI bayrak: lambs_danger_disableAI
+// (LAMBS API: o birimde Danger FSM tamamen kapali). Retreat bitince / guvenlik valfinde birim basina ESKI deger geri verilir.
+{
+    _x setVariable [QGVAR(retreatEskiDAI), _x getVariable [QGVAR(disableAI), false]];
+    _x setVariable [QGVAR(disableAI), true];
+} forEach (units _group);
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(retreatStartTime), _baslangic];
 
@@ -151,6 +158,10 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
             _g setVariable [QGVAR(isRetreating), nil];
             _g setVariable [QGVAR(disableGroupAI), [nil, true] select (_g getVariable [QGVAR(retreatEskiDGA), false])];
             _g setVariable [QGVAR(retreatEskiDGA), nil];
+            {
+                _x setVariable [QGVAR(disableAI), [nil, true] select (_x getVariable [QGVAR(retreatEskiDAI), false])];
+                _x setVariable [QGVAR(retreatEskiDAI), nil];
+            } forEach (units _g);
             _g setVariable [QGVAR(isExecutingTactic), nil];
             _g setVariable [QGVAR(retreatEndTime), time];
             _g setSpeedMode "NORMAL";
@@ -458,6 +469,10 @@ if (EGVAR(main,debug_functions)) then {
         _group setVariable [QGVAR(isRetreating), nil];
         _group setVariable [QGVAR(disableGroupAI), [nil, true] select (_group getVariable [QGVAR(retreatEskiDGA), false])];
         _group setVariable [QGVAR(retreatEskiDGA), nil];
+        {
+            _x setVariable [QGVAR(disableAI), [nil, true] select (_x getVariable [QGVAR(retreatEskiDAI), false])];
+            _x setVariable [QGVAR(retreatEskiDAI), nil];
+        } forEach (units _group);
         _group setVariable [QGVAR(isExecutingTactic), nil];
         _group setVariable [QGVAR(retreatEndTime), time];
         _group setSpeedMode "NORMAL";

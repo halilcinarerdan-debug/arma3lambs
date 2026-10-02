@@ -586,3 +586,9 @@ DEVIR NOTU (bundan sonrasi icin tek sayfa durum)
 - RPT (11:40 stres testi): tacticsBounding spawn blogunda "_dkOwKurulum" tanimsiz -> 270x _kurBitis hatasi, bounding cycle dongusu calismiyordu ([BND] 0 satir). Neden: v8.1 doktrin baglamasinda spawn disinda tanimli degisken spawn icinde kullanilmisti.
   Duzeltme: spawn icinde dogrudan [_group,"owKurulumS",5] call FUNC(dk). DERS: spawn / CBA blok icinde dis kapsam degiskeni KULLANMA; arguman olarak gec veya blok icinde yeniden oku.
 - Dogrulandi: el bombasi tepkisi (fitil kalan ort 3.8 sn), doktrin profil eslesmesi (rhs_faction_usarmy_d->ABD, lop_pesh->PESHMERGA, lop_ists_opf->GENEL), siper v2 faz2 ilk secimi %15 degistirdi.
+
+=== v8.3 RETREAT: BIRIM DUZEYI LAMBS KAPATMA ===
+- RPT 11:51 (v8.2.1): retreat varis 0/7. disableGroupAI:1 iken bile 11:53:37 retreat sirasinda LAMBS "TACTICS FLANK", gestureGo, OnYourFeet ve "Group Suppress (Move)" gorevi calisti. Grup bayragi yetmiyor.
+  Cozum: retreat suresince BIRIM duzeyi lambs_danger_disableAI = true (LAMBS Danger FSM o birimde kapali); bitis / guvenlik valfinde birim basina eski deger.
+- Dogrulandi (v8.2.1): bounding cycle dongusu calisiyor ([BND] satirlari), hata 0, UGL ROL-GOREV 3, SIS 16, siper v2 %15 degisim, doktrin profili (rhs_faction_usmc_d -> USMC).
+- Bounding komutan cikislari mantikliydi: WITHDRAW (2.6x guc dezavantaji + kayip %38), EVADE_ARMOR (zirh 1).
