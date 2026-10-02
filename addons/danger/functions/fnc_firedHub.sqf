@@ -29,6 +29,7 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
     "Fired",
     {
         params ["_unit", "_weapon", "_muzzle", "_mode", "_ammo", "_mag", "_proj"];
+        _unit setVariable [QGVAR(sonAtisT), time];   // v8.16: yaprak gorus kirici (hedef son 4 sn ates ettiyse unutturulmaz)
 
         // 0) GENIS TANI: patlayici / firlatilan her mermi (simulation: shotGrenade, shotShell, shotMine, shotSmoke, shotSubmunitions...) bir kez / sinif
         private _simTani = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));

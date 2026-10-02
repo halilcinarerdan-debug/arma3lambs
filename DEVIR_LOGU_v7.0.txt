@@ -699,3 +699,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - spotDistance carpani = (1 - isik x cihaz katsayisi) x (1 - sis x ...) x (1 - yagmur x ...): isik normal 0.60 / NVG 0.15 / termal 0; sis 0.55 / 0.55 / 0.25; yagmur 0.25 / 0.35 / 0.20.
   isik n = (1 - sunOrMoon) + 0.25 x overcast x sunOrMoon. spotTime = 1 - 0.6 x (1 - spotD carpani), aimingAccuracy = 1 - 0.3 x (1 - spotD carpani); alt sinir x0.25. Log [ORTAM-SKILL] isik / cihaz / sis / yagmur / carpan.
 - Varsayim (dogrulanmadi): NVG'de yagmur / sis parazit-hale yuzunden daha agir; termalde yagmur / sis hafif. Katsayilar tahmindir, gozlemle ayarlanacak.
+=== v8.16 YAPRAK ARKASI GORUS KIRICI + GUCLU DEBUG + TOPLU TEST KARNESI (kullanici: 'cali modunu paketten cikardim, onu da ekle; debugu saglam yaz') ===
+- fnc_yaprakGorus: gozlemci (1.5 sn'de en fazla 8, otomatik cap 3..12) -> en yakin 3 bilinen dusman piyadesi (nearTargets 20-350 m); gozden hedef govdesine 8 m'de bir ornek, 1.4 m icindeki BUSH / SMALL TREE (isin yukseklik < 2.2 m) sayilir (nesne basina bir kez).
+  Uzun cimen: hedef yatik + yuzey 'grass' + > 40 m -> +1. GIZLI esik: ayakta 2, comelmis / yatik 1. GIZLI ise forgetTarget. Atlanir: hedef son 4 sn ates ettiyse (firedHub sonAtisT), gozlemci baski > 0.3, mesafe < 25 m, ayni cift 4 sn bekleme.
+- DEBUG: [YAPRAK-TANI] (acilis: harita + 150 m BUSH / SMALL TREE / TREE sayilari, sinif UYARISI), [YAPRAK] (her unutma: gozlemci -> hedef, mesafe, stance, kalinlik + tur, cim, knowsAbout), [YAPRAK-TEST] (lambs_danger_yaprakTest = true: her degerlendirme),
+  [YAPRAK-OZET] (60 sn: kontrol / gizli / unuttu / atlanan nedenler / tick ms / cap), [YAPRAK-PERF] (adaptif cap).
+- rpt_ozet --karne: TOPLU TEST KARNESI (SURUM, SCRIPT HATASI, RETREAT, ROTA, PUSU, KAMUFLAJ, ARAZI, ORTAM SKILL, YAPRAK, SAGLIK, OLAY, DOKTRIN, UGL; OK / KONTROL / YOK + kanit). BEKLENEN_SURUM sabiti her surumde guncellenir.
+- TEST_SENARYOLARI.md: TOPLU TEST PLANI (A-F bloklari).
+- Bilinen risk / varsayim: forgetTarget'in motor tarafindan hemen yeniden kazanilmasi (cift basina 4 sn bekleme ile sinirli); cim tespiti yuzey sinifi adina bagli (haritaya gore 'grass' gecmeyebilir); nearestTerrainObjects BUSH / SMALL TREE harita sinifina bagli ([YAPRAK-TANI] dogrular).

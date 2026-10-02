@@ -39,3 +39,18 @@ Her senaryo 3-5 dk; RPT kaydederken senaryo adini ve saatini not et. **Retreat h
 | `teslimiyet_kusatma` | Teslimiyet / moral | Kayipli, kusatilmis kucuk grup | Teslim karari (esikler profile gore) |
 | `retreat_kayipli` | Retreat dogrulamasi (sabit) | 5-8 kisi, %40 kayip, dusman 100-150 m | `vardi:` toplam >= %50, retreat'te `TACTICS FLANK` / `Group Suppress` yok, `RetreatBasla/Bitti` cifti |
 | `olay_temas` | Grup olaylari | Herhangi catisma | `[OLAY] InContact/AllClear` cifti, `Casualty` = olu sayisi, `AllClear guvenlik agi` YOK |
+
+
+## TOPLU TEST PLANI (v8.16)
+Tek oturumda tum yeni ozellikler; sonuc: `python tools/rpt_ozet.py <rpt> --karne` (OK / KONTROL / YOK karnesi), ayrintilar icin `--anomali`, `--grup "Alpha 1-1" --aralik HH:MM:SS-HH:MM:SS`.
+
+| Blok | Kurulum | Karnede beklenen |
+|------|---------|------------------|
+| A. Acik arazi 8v8, 250-300 m, engebeli | Ayni oturumun ilk 6 dk | ROTA (maruziyet dusus), ARAZI BILINCI, KAMUFLAJ (ufukta artis), OLAY, DOKTRIN >= 70 |
+| B. Yaklasan devriye (pusu) | Bir grup yol kenari, digeri yola dogru yuruyor (90-260 m, temas yok) | PUSU basladi > 0 ve ates > 0 (kill-box) |
+| C. Kayipli retreat | 5-8 kisi, %40 kayip, dusman 100-150 m (acikta + baskili bir tur daha) | RETREAT varis >= %50, ek sicrama > 0, baski-kirma > 0 (baskili turda) |
+| D. Cali / cimen | Dusman yatik cali arkasinda, 60-150 m; ayrica uzun cimende yatik | YAPRAK KIRICI kontrol > 0, gizli orani <= %70, tick ort < 12 ms; `lambs_danger_yaprakTest = true` ile tek tek karar |
+| E. Ortam | Gece + sis + yagmur; NVG'li, termalli ve gozluksuz askerler | ORTAM SKILL degisim > 0; `[ORTAM-SKILL]` satirlarinda cihaz farkli (normal / NVG / termal) ve carpan spotD farkli |
+| F. Saglik | Tum oturum | SAGLIK / ANOMALI: anomali yok; varsa kod + grup + detay (`--anomali`) |
+
+Yaprak testi icin konsol: `lambs_danger_yaprakTest = true;` (ilk 400 degerlendirme `[YAPRAK-TEST]`), kapatma `lambs_danger_yaprakV1 = false;`, esikler `lambs_danger_yaprakEsikAyakta` / `lambs_danger_yaprakEsikYatik`.

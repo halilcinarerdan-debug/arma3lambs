@@ -3,6 +3,7 @@
 """
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
+           --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
            --grup "Alpha 1-1"   o grubun ZAMAN CIZELGESI (olay / bounding / retreat / pusu / karar / anomali, tekrarlar birlestirilir)
            --aralik 12:50:00-12:55:00   cizelgeyi / anomaliyi zaman araligiyla sinirla
@@ -13,9 +14,10 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
+BEKLENEN_SURUM = "v8.16"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -128,6 +130,24 @@ def ozet(path):
     print("  stealth yer degistirme (ufuk cizgisinden cekilme):", len([1 for l in satirlar if "[KAMUFLAJ-YER]" in l]))
     az = [l for l in satirlar if "[ARAZI] " in l]
     print("  arazi analizi:", len(az), "| hakim nokta bulunan:", len([1 for l in az if "hakim:+" in l]), "| komutan gozetleme hakim nokta:", len([1 for l in satirlar if "[ARAZI-KOMUTAN]" in l]))
+    yp = [l for l in satirlar if "[YAPRAK] " in l]
+    ypo = [l for l in satirlar if "[YAPRAK-OZET]" in l]
+    print("\n-- YAPRAK ARKASI GORUS KIRICI --")
+    for l in satirlar:
+        if "[YAPRAK-TANI]" in l: print("  ", re.sub(r"^\s*\d+:\d\d:\d\d\s*", "", l)[:200])
+    if ypo:
+        top = {"kontrol": 0, "gizli": 0, "unuttu": 0}
+        for l in ypo:
+            for k in top:
+                m = re.search(k + r":(\d+)", l)
+                if m: top[k] += int(m.group(1))
+        ms = [float(m.group(1)) for l in ypo for m in [re.search(r"tick ort:([0-9.]+)", l)] if m]
+        print("  60 sn ozetleri: %d | toplam kontrol:%d gizli:%d unuttu:%d | gizli orani %.0f%% | tick ort %.1f ms (en yuksek %.1f)" % (len(ypo), top["kontrol"], top["gizli"], top["unuttu"], 100.0 * top["gizli"] / max(top["kontrol"], 1), statistics.mean(ms) if ms else 0, max(ms) if ms else 0))
+    elif yp:
+        print("  unutma kararlari:", len(yp), "(60 sn ozeti yok: oturum kisa)")
+    else:
+        print("  yok (kirici: v8.16+; ya da yakin dusman / cali yok)")
+    print("  PERF uyarilari:", len([1 for l in satirlar if "[YAPRAK-PERF]" in l]))
     an = [l for l in satirlar if "[ANOMALI]" in l]
     print("\n-- ANOMALI (saglik izleyicisi) --")
     if an:
@@ -187,6 +207,75 @@ def ozet(path):
     else:
         print("  yok")
 
+def karne(path):
+    """TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    t = "\n".join(L)
+    def say(etiket): return len([1 for l in L if ("[%s]" % etiket) in l])
+    def sayi(rx, grup=1): return [float(m.group(grup)) for l in L for m in [re.search(rx, l)] if m]
+    sat = []
+    def ekle(ad, durum, kanit): sat.append((ad, durum, kanit))
+    b = re.search(r"build (v[0-9.]+[A-Z-]*)", t)
+    ekle("SURUM", "OK" if b and b.group(1).startswith(BEKLENEN_SURUM) else "KONTROL", ("%s (beklenen %s)" % (b.group(1), BEKLENEN_SURUM)) if b else "boot satiri yok")
+    hata_say = 0
+    for i, l in enumerate(L):
+        if "Error in expression" in l or "Error position" in l or "Error Undefined" in l or "Error Type" in l or "Error Zero" in l:
+            if not any(n in " ".join(L[i:i + 3]) for n in NOISE):
+                hata_say += 1
+    ekle("SCRIPT HATASI", "OK" if hata_say == 0 else "KONTROL", "%d satir" % hata_say)
+    # retreat
+    vr = [(int(m.group(1)), int(m.group(2))) for l in L for m in [re.search(r"sonuc \| vardi:(\d+)/(\d+)", l)] if m]
+    if vr:
+        a_, b_ = sum(x for x, _ in vr), sum(y for _, y in vr)
+        ekle("RETREAT varis", "OK" if a_ >= 0.5 * b_ else "KONTROL", "%d/%d (%.0f%%), ek sicrama:%d, baski-kirma:%d" % (a_, b_, 100.0 * a_ / max(b_, 1), say("GERI-CEKILME-EK"), len([1 for l in L if "GERI-CEKILME-SIPER" in l])))
+    else:
+        ekle("RETREAT varis", "YOK", "retreat olmadi (senaryo: retreat_kayipli)")
+    # rota
+    dr, pl = sayi(r"direkt:(\d+)"), sayi(r"plan:(\d+)%")
+    if dr: ekle("ROTA", "OK" if (sum(pl) / len(pl)) < 0.8 * (sum(dr) / len(dr)) else "KONTROL", "%d plan, maruziyet %.0f%% -> %.0f%%" % (len(dr), sum(dr) / len(dr), sum(pl) / len(pl)))
+    else: ekle("ROTA", "YOK", "bounding 90-600 m yok")
+    # pusu
+    pb, pa = len([1 for l in L if "[PUSU]" in l and "BASLADI" in l]), len([1 for l in L if "[PUSU]" in l and "| ATES |" in l])
+    if pb: ekle("PUSU", "OK" if pa > 0 else "KONTROL", "basladi:%d ates:%d iptal:%d" % (pb, pa, len([1 for l in L if "[PUSU]" in l and "IPTAL" in l])))
+    else: ekle("PUSU", "YOK", "yaklasan piyade dusman + temas yok kosulu olusmadi")
+    # kamuflaj / arazi
+    kc = sayi(r"\[KAMUFLAJ\] .*coef:([0-9.]+)")
+    ekle("KAMUFLAJ", "OK" if kc else "YOK", ("%d degisim, ort %.2f, ufuktan cekilme:%d" % (len(kc), sum(kc) / len(kc), say("KAMUFLAJ-YER"))) if kc else "katsayi degisimi yok")
+    az = say("ARAZI")
+    ekle("ARAZI BILINCI", "OK" if az else "YOK", "analiz:%d, komutan hakim nokta:%d" % (az, say("ARAZI-KOMUTAN")))
+    # ortam
+    oc = say("ORTAM-SKILL")
+    cf = "CF_BAI algilandi:True" in t
+    ekle("ORTAM SKILL", "OK" if oc else ("KONTROL" if cf else "YOK"), ("%d degisim" % oc) if oc else ("CF_BAI yuklu -> kapali" if cf else "degisim yok (hava / isik / cihaz sabit olabilir)"))
+    # yaprak
+    ypo = [l for l in L if "[YAPRAK-OZET]" in l]
+    if ypo:
+        k = sum(int(m.group(1)) for l in ypo for m in [re.search(r"kontrol:(\d+)", l)] if m)
+        g = sum(int(m.group(1)) for l in ypo for m in [re.search(r"gizli:(\d+)", l)] if m)
+        ms = [float(m.group(1)) for l in ypo for m in [re.search(r"tick ort:([0-9.]+)", l)] if m]
+        oran = 100.0 * g / max(k, 1)
+        dur = "OK" if (k > 0 and oran <= 70 and (not ms or max(ms) < 12)) else "KONTROL"
+        ekle("YAPRAK KIRICI", dur, "kontrol:%d gizli:%d (%.0f%%), tick ort max %.1f ms" % (k, g, oran, max(ms) if ms else 0))
+    else:
+        ekle("YAPRAK KIRICI", "YOK", "60 sn ozeti yok (oturum kisa ya da kapali)")
+    # saglik
+    an = [l for l in L if "[ANOMALI]" in l]
+    if say("SAGLIK"):
+        kod = collections.Counter(re.search(r"\[ANOMALI\] ([A-Z-]+)", l).group(1) for l in an if re.search(r"\[ANOMALI\] ([A-Z-]+)", l))
+        ekle("SAGLIK / ANOMALI", "OK" if not an else "KONTROL", "anomali:%d %s" % (len(an), dict(kod) if an else ""))
+    else:
+        ekle("SAGLIK / ANOMALI", "YOK", "izleyici satiri yok")
+    # olay + doktrin + spam
+    oc2 = say("OLAY")
+    ekle("OLAY MESAJLARI", "OK" if oc2 else "YOK", "%d satir (InContact:%d Casualty:%d)" % (oc2, len([1 for l in L if "InContact" in l and "[OLAY]" in l]), len([1 for l in L if "Casualty" in l and "[OLAY]" in l])))
+    dp = sayi(r"PUAN:(\d+)/100")
+    ekle("DOKTRIN PUANI", "OK" if dp and sum(dp) / len(dp) >= 70 else ("KONTROL" if dp else "YOK"), ("ort %.0f" % (sum(dp) / len(dp))) if dp else "-")
+    ekle("UGL", "OK" if say("ATES-DESTEK") + say("ROL-GOREV") else "YOK", "ates-destek:%d rol-gorev:%d" % (say("ATES-DESTEK"), say("ROL-GOREV")))
+    print("=" * 78); print("TOPLU TEST KARNESI |", path)
+    for ad, d, k in sat:
+        print("  [%-7s] %-18s %s" % (d, ad, k))
+    print("  OK:%d  KONTROL:%d  YOK:%d" % tuple(len([1 for _, d, _ in sat if d == x]) for x in ("OK", "KONTROL", "YOK")))
+
 def zaman_cizelgesi(path, grup, aralik):
     """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
     ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
@@ -229,6 +318,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     grup = aralik = None
     sadece_anomali = False
+    karne_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -236,6 +326,8 @@ if __name__ == "__main__":
             grup = args[i + 1]; i += 2
         elif args[i] == "--aralik" and i + 1 < len(args):
             aralik = args[i + 1]; i += 2
+        elif args[i] == "--karne":
+            karne_modu = True; i += 1
         elif args[i] == "--anomali":
             sadece_anomali = True; i += 1
         else:
@@ -244,7 +336,9 @@ if __name__ == "__main__":
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if grup:
+        if karne_modu:
+            karne(p)
+        elif grup:
             print("=" * 78); print(p, "| grup:", grup, "| aralik:", aralik or "tum")
             zaman_cizelgesi(p, grup, aralik)
         elif sadece_anomali:
