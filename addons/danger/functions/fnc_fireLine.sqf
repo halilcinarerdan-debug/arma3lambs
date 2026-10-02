@@ -39,7 +39,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
         {
             if (!isNull _res) exitWith {};
             if (
-                !(_x isEqualTo _shooter) && {alive _x}
+                (_x isNotEqualTo _shooter) && {alive _x}
                 && {((side group _shooter) getFriend (side group _x)) >= 0.6}
             ) then {
                 private _ad = _a distance2D _x;
@@ -112,7 +112,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
                     private _c = _mPos getPos [_off, _dir + _x];
                     if (
                         !surfaceIsWater _c
-                        && {((_c nearEntities ["CAManBase", 1.3]) select {!(_x isEqualTo _mover)}) isEqualTo []}
+                        && {((_c nearEntities ["CAManBase", 1.3]) select {(_x isNotEqualTo _mover)}) isEqualTo []}
                         && {!(lineIntersects [AGLToASL (_mPos vectorAdd [0, 0, 0.9]), AGLToASL (_c vectorAdd [0, 0, 0.9]), _mover])}
                         && {(nearestTerrainObjects [_c, ["TREE", "WALL", "FENCE", "BUILDING", "HOUSE", "ROCK"], 0.9, false, true]) isEqualTo []}
                     ) then {

@@ -146,7 +146,7 @@ if (
                                 _u setVariable [QGVAR(blkT), 0];
                                 private _bdir = _u getDir _d;
                                 private _blk = (_u nearEntities ["CAManBase", 1.8]) select {
-                                    !(_x isEqualTo _u) && {alive _x} && {isNull objectParent _x}
+                                    (_x isNotEqualTo _u) && {alive _x} && {isNull objectParent _x}
                                     && {((side group _u) getFriend (side group _x)) >= 0.6}
                                     && {(abs ((((_u getDir _x) - _bdir) + 540) mod 360 - 180)) < 70}
                                     && {((speed _x) < 1) || {(_u distance2D _d) > (_x distance2D _d)}}
@@ -159,7 +159,7 @@ if (
                                         private _c = _u getPos [3.5, _bdir + _x];
                                         if (
                                             !surfaceIsWater _c
-                                            && {((_c nearEntities ["CAManBase", 1.3]) select {!(_x isEqualTo _u)}) isEqualTo []}
+                                            && {((_c nearEntities ["CAManBase", 1.3]) select {(_x isNotEqualTo _u)}) isEqualTo []}
                                             && {!(lineIntersects [_now vectorAdd [0, 0, 0.9], AGLToASL (_c vectorAdd [0, 0, 0.9]), _u, _b])}
                                             && {(nearestTerrainObjects [_c, ["TREE", "WALL", "FENCE", "BUILDING", "HOUSE", "ROCK"], 0.9, false, true]) isEqualTo []}
                                         ) exitWith { _secildi = _c; };

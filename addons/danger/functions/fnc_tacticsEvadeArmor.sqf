@@ -61,7 +61,7 @@ private _mySide = side _unit;
 private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 700]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
-    && {!((side _x) == civilian)}
+    && {((side _x) != civilian)}
     && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
 };
 
@@ -81,6 +81,7 @@ if (_tehditPos isEqualTo [0, 0, 0]) exitWith {false};
 private _baslangic = time;
 _group setVariable [QGVAR(evadeOrigCombat), combatMode _group];
 _group setVariable [QGVAR(isEvading), true];
+{ if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 45]; }; } forEach (units _group);   // hareket arbitraji kilidi
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(evadeStartTime), _baslangic];
 
@@ -92,6 +93,7 @@ _group setVariable [QGVAR(evadeStartTime), _baslangic];
     waitUntil { time > _limit || {isNull _g} };
     if (!isNull _g && {((_g getVariable [QGVAR(evadeStartTime), -1]) isEqualTo _start)}) then {
         if (_g getVariable [QGVAR(isEvading), false]) then {
+            { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _g);
             _g setVariable [QGVAR(isEvading), nil];
             _g setVariable [QGVAR(isExecutingTactic), nil];
             _g setVariable [QGVAR(evadeEndTime), time];
@@ -242,6 +244,7 @@ diag_log format [
     // TEMIZLIK
     // -----------------------------------------------------------------------
     if (!isNull _group && {((_group getVariable [QGVAR(evadeStartTime), -1]) isEqualTo _baslangic)}) then {
+        { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _group);
         _group setVariable [QGVAR(isEvading), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
         _group setVariable [QGVAR(evadeEndTime), time];

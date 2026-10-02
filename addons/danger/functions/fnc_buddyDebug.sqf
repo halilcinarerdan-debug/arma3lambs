@@ -27,7 +27,7 @@ diag_log "[BUDDY-DEBUG] gorsellestirme hazir (lambs_danger_buddyDebug = true / f
 
 addMissionEventHandler ["Draw3D", {
     private _acik = missionNamespace getVariable ["lambs_danger_buddyDebug", missionNamespace getVariable ["lambs_main_debug_Functions", false]];
-    if (!(_acik isEqualTo true)) exitWith {};
+    if ((_acik isNotEqualTo true)) exitWith {};
 
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _yakin = (allUnits select {

@@ -105,6 +105,7 @@ private _kacisModu = (_alive isEqualTo 1) || {_kayip >= 0.75};
 private _baslangic = time;
 _group setVariable [QGVAR(bcOrigCombat), combatMode _group];
 _group setVariable [QGVAR(isBreakingContact), true];
+{ if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 45]; }; } forEach (units _group);   // hareket arbitraji kilidi
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(bcStartTime), _baslangic];
 
@@ -114,6 +115,7 @@ _group setVariable [QGVAR(bcStartTime), _baslangic];
     waitUntil { time > _limit || {isNull _g} };
     if (!isNull _g && {((_g getVariable [QGVAR(bcStartTime), -1]) isEqualTo _start)}) then {
         if (_g getVariable [QGVAR(isBreakingContact), false]) then {
+            { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _g);
             _g setVariable [QGVAR(isBreakingContact), nil];
             _g setVariable [QGVAR(isExecutingTactic), nil];
             _g setVariable [QGVAR(bcEndTime), time];
@@ -162,6 +164,7 @@ diag_log format [
 
     private _birimler = (units _group) select {alive _x && {isNull objectParent _x}};
     if (_birimler isEqualTo []) exitWith {
+        { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _group);
         _group setVariable [QGVAR(isBreakingContact), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
         _group setVariable [QGVAR(bcEndTime), time];
@@ -306,6 +309,7 @@ diag_log format [
     // TEMIZLIK
     // -----------------------------------------------------------------------
     if (!isNull _group && {((_group getVariable [QGVAR(bcStartTime), -1]) isEqualTo _baslangic)}) then {
+        { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _group);
         _group setVariable [QGVAR(isBreakingContact), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
         _group setVariable [QGVAR(bcEndTime), time];

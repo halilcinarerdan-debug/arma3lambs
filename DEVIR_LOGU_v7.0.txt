@@ -519,3 +519,12 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.43 ===
 - HAREKET ARBITRAJI (taktik kilidi): bounding/retreat tum katilimcilara lambs_danger_taktikKilit (zaman damgasi) koyar; buddyBond, dispersion, roleStation, rearGuard, coverHug, fieldCraft, cqbReflex ve moveAssist sikisma kilitli askere hareket emri VERMEZ. UGL/ates gorevleri kilitten etkilenmez. Kilit tactic bitince / 25-30 sn sonra kalkar.
+
+=== v8.0 MUHUR (nihai) ===
+- Hareket arbitraji: bounding / retreat / evade / temas kes taktikleri katilimcilara taktik kilidi (lambs_danger_taktikKilit) koyar;
+  buddyBond, dispersion, roleStation, rearGuard, coverHug, fieldCraft, cqbReflex ve sikisma adimi kilitli askere hareket emri vermez.
+- Retreat: sirasinda LAMBS grup reaksiyonlari kapali (disableGroupAI), siper hedefli sicrama noktalari.
+- Arac: tools/rpt_ozet.py (RPT ozetleyici), TEST_SENARYOLARI.md (12 senaryo + gecme olcutleri).
+- Lint: gereksiz Not (!(a isEqualTo b) -> a isNotEqualTo b, side != civilian), dosya sonu satir sonu.
+- Tum .sqf dosyalari parantez dengesi kontrolunden gecti (HEMTT SPE2 hatasi giderildi).
+- Dogrulanmamis (oyunda test bekliyor): retreat varis orani, bomba tepki suresi (v7.40-41), hareket arbitraji etkisi.

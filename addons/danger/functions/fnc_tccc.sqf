@@ -228,7 +228,7 @@ diag_log format [
                 if (!_guvenli && {!([_c] call _baygin)}) then { continue };
 
                 private _adaylar = (units _g) select {
-                    !(_x isEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
+                    (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
                     && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call _baygin)}
                     && {time > (_x getVariable [QGVAR(tcccBusy), 0])}
                     && {!(_x getVariable [QGVAR(forceMove), false])}

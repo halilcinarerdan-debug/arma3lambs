@@ -336,7 +336,7 @@ if (EGVAR(main,debug_functions)) then {
         private _zirhlar = (_l nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
             alive _x
             && {(_mySide getFriend (side _x)) < 0.6}
-            && {!((side _x) == civilian)}
+            && {((side _x) != civilian)}
         };
         private _zirh = objNull;
         if (_zirhlar isNotEqualTo []) then {
