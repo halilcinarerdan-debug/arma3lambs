@@ -91,8 +91,8 @@ private _suKontrol = {
 // v14: noktalar BINA / DUVAR / CIT icine dusmesin (0/5 varis, 20 sn zaman asimi sorunu: nokta binanin icindeydi)
 // Her sicrama kendi oncekinden 40 m; dusman yonunun tersinde +-75 derece kon icinde acik / engelsiz aday secilir.
 // MESAFEYE GORE SICRAMA BOYU (doktrin: yakin temasta kisa/hizli sicrama + sis, uzakta daha uzun):
-//   tehdit < 100 m : 30 m | 100-200 m : 40 m | > 200 m : 60 m
-private _adimBoy = if (_cqbMesafe < 100) then {30} else {if (_cqbMesafe < 200) then {40} else {60}};
+//   tehdit < 100 m : 20 m | 100-200 m : 30 m | > 200 m : 50 m  (kisa, hizli atilim; acikta uzun kosu olum)
+private _adimBoy = if (_cqbMesafe < 100) then {20} else {if (_cqbMesafe < 200) then {30} else {50}};
 private _wpSec = {
     params ["_o", "_dir"];
     private _best = [];
@@ -295,7 +295,7 @@ if (EGVAR(main,debug_functions)) then {
         // 3) Varisa kadar bekle (en fazla 16 sn, %75 vardiysa erken cik); sadece TAKILANA (3.5 sn ilerleyemeyen) emri tazele —
         //    her 3 sn'de doMove tekrari yol hesabini sifirlayip askeri yerinde tutuyordu
         private _t0 = time;
-        private _bitis = time + 12;
+        private _bitis = time + 8;
         private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir

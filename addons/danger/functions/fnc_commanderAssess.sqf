@@ -490,6 +490,13 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
     };
 };
 
+// KUCUK EKIP / YAKIN TEMAS: cekilme (koşarak kacma) ONERILMEZ — 60 m'den yakin dusmana sirt cevirmek olum; <= 3 kisi acikta kosamaz.
+// Cephane bitmedikce WITHDRAW / PEEL yerine DELAY (siper al + sis + temas kes) uygulanir.
+if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < 60) || {_ownCount <= 3}} && {(_reason select [0, 7]) isNotEqualTo "cephane"} && {_ownCount > 0}) then {
+    _reason = format ["%1 -> DELAY (%2 kisi, dusman %3m: kosarak kacilmaz, siper al + sis)", _decision, _ownCount, round _closest];
+    _decision = "DELAY";
+};
+
 // CEKILME SONRASI KILIT: cekilme biteli 90 sn dolmadan hucum ailesine GERI DONME (cekil -> hemen dusmana kos -> olum dongusu);
 // guc ustunlugu (PUSH) disinda DELAY (siper al, temas kes) uygulanir
 if (!_push && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]}

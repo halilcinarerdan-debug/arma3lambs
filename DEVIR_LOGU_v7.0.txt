@@ -456,3 +456,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - commanderAssess: biz ustunken 60 m ustu ASSAULT yok -> BOUNDING (ates-manevra); ASSAULT sadece <60 m
 - atisGuvenli UGL: yakin engel 2.5 m, sadece FIRE geometri (cali/dal VIEW degil)
 - rearGuard: lidere >45 m uzaksa birak, 60 sn bekle
+
+=== v7.25 ===
+- commanderAssess: <=3 kisi veya dusman <60 m iken WITHDRAW/PEEL -> DELAY (siper al + sis), cephane bitti haric
+- Retreat atilim boylari 20/30/50 m, sicrama bekleme 12 -> 8 sn
