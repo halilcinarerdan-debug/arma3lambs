@@ -485,3 +485,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.33 ===
 - commanderAssess: baski>=0.6 + acikta (15 m siper yok) + dusman>60 m: HOLD yerine DELAY (siper al + sis)
+
+=== v7.34 ===
+- firedHub: [ATIS-TANI] her patlayici/firlatilan mermi sinifi icin (isPlayer filtresi yok); grenadeAwareness: allMissionObjects GrenadeCore taramasi + [EL-BOMBASI-TARAMA]

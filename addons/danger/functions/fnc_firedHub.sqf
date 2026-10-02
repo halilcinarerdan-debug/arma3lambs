@@ -30,10 +30,21 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
     {
         params ["_unit", "_weapon", "_muzzle", "_mode", "_ammo", "_mag", "_proj"];
 
+        // 0) GENIS TANI: patlayici / firlatilan her mermi (simulation: shotGrenade, shotShell, shotMine, shotSmoke, shotSubmunitions...) bir kez / sinif
+        private _simTani = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));
+        if ((_simTani in ["shotgrenade", "shotshell", "shotmine", "shotdirectionalbomb", "shotsmoke", "shotilluminating", "shotrocket", "shotmissile"]) || {_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]}) then {
+            if (isNil "lambs_danger_atisTani") then { lambs_danger_atisTani = []; };
+            private _anahtar = _weapon + "|" + _ammo;
+            if (!(_anahtar in lambs_danger_atisTani) && {(count lambs_danger_atisTani) < 80}) then {
+                lambs_danger_atisTani pushBack _anahtar;
+                diag_log format ["[ATIS-TANI] %1 | oyuncu:%2 | silah:%3 | muzzle:%4 | mermi:%5 | sim:%6 | GrenadeCore:%7", name _unit, isPlayer _unit, _weapon, _muzzle, _ammo, _simTani, _ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]];
+            };
+        };
+
         // 1) El bombasi listesi
         if (!isNull _proj && {_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]}) then {
-            // tani: AI el bombasi / 40mm atisi (ilk 60)
-            if (!isPlayer _unit) then {
+            // tani: el bombasi / 40mm atisi (ilk 60). Zeus uzaktan kontrol / oyuncu atislari da (isPlayer filtresi kaldirildi)
+            if (true) then {
                 if (isNil "lambs_danger_grLogN") then { lambs_danger_grLogN = 0; };
                 if (lambs_danger_grLogN < 60) then {
                     lambs_danger_grLogN = lambs_danger_grLogN + 1;

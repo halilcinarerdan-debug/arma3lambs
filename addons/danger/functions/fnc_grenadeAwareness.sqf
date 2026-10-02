@@ -247,6 +247,20 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
         // =================================================================
         // 2) YENI TEHDIT TARAMASI (son 20 sn'de catisan gruplar)
         // =================================================================
+        // v7.34: lider etrafinda nearObjects yetmiyordu (Zeus bombasi RPT'de HIC gorulmedi, log sistemi sessiz kaldi).
+        // Artik TUM mission nesneleri arasindan GrenadeCore / TimeBombCore / ShellBase sinifli mermiler (1 sn'de bir) alinir;
+        // her yeni mermi sinifi bir kez RPT'ye yazilir: [EL-BOMBASI-TARAMA]
+        if (time > (missionNamespace getVariable ["lambs_danger_grTarT", 0])) then {
+            lambs_danger_grTarT = time + 1;
+            lambs_danger_grTum = (allMissionObjects "GrenadeCore") select {!isNull _x};
+            {
+                private _tn = typeOf _x;
+                if (_tn isNotEqualTo "" && {!(_tn in (missionNamespace getVariable ["lambs_danger_grTurler", []]))}) then {
+                    lambs_danger_grTurler = (missionNamespace getVariable ["lambs_danger_grTurler", []]) + [_tn];
+                    diag_log format ["[EL-BOMBASI-TARAMA] mermi nesnesi goruldu: %1 | konum:%2 | atan:%3", _tn, round (_x distance2D player), if (isNull (getShotParents _x select 0)) then {"?"} else {name (getShotParents _x select 0)}];
+                };
+            } forEach lambs_danger_grTum;
+        };
         {
             private _g = _x;
             if (isNull _g) then { continue };
@@ -268,6 +282,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             // askere olan mesafeye gore degerlendirilir (zaten asagida yaricap kontrolu var).
             private _tarR = (((selectMax (_birimler apply {_x distance2D _leader})) + 30) max 60) min 150;
             private _bombalar = ((getPosATL _leader) nearObjects ["GrenadeCore", _tarR])
+                + ((missionNamespace getVariable ["lambs_danger_grTum", []]) select {!isNull _x && {(_x distance2D _leader) < _tarR}})
                 + ((missionNamespace getVariable ["lambs_danger_grenadeList", []]) select {!isNull _x && {(_x distance2D _leader) < _tarR}});
             _bombalar = _bombalar arrayIntersect _bombalar;
             if (_bombalar isEqualTo []) then { continue };
