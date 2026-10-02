@@ -100,7 +100,8 @@ private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", 
     ["rhs_faction_msv", "RUS"], ["rhs_faction_vdv", "RUS"], ["rhs_faction_rva", "RUS"], ["rhs_faction_tv", "RUS"],
     ["opf_t_f", "CHN"], ["_chn", "CHN"], ["_pla", "CHN"], ["china", "CHN"],
     ["peshmerga", "PESHMERGA"], ["kurd", "PESHMERGA"], ["_pesh", "PESHMERGA"],
-    ["taliban", "DUZENSIZ"], ["lop_am", "DUZENSIZ"], ["lop_ists", "DUZENSIZ"], ["_ists", "DUZENSIZ"], ["insurgent", "DUZENSIZ"], ["irregular", "DUZENSIZ"], ["_isis", "DUZENSIZ"], ["opf_g_f", "DUZENSIZ"], ["ind_g_f", "DUZENSIZ"]
+    ["taliban", "DUZENSIZ"], ["lop_am", "DUZENSIZ"], ["lop_ists", "DUZENSIZ"], ["_ists", "DUZENSIZ"], ["insurgent", "DUZENSIZ"], ["irregular", "DUZENSIZ"], ["_isis", "DUZENSIZ"], ["opf_g_f", "DUZENSIZ"], ["ind_g_f", "DUZENSIZ"],
+    ["cup_b_us", "ABD"], ["cup_o_ru", "RUS"], ["cup_i_tk_gue", "DUZENSIZ"], ["tk_gue", "DUZENSIZ"], ["cup_o_chdkz", "DUZENSIZ"], ["chdkz", "DUZENSIZ"], ["cup_i_napa", "DUZENSIZ"]
 ]];
 private _ad = "GENEL";
 {

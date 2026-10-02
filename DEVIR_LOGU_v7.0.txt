@@ -769,3 +769,6 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - findCover FAZ 2 (atis modu: DEFEND / OVERWATCH / ADVANCE): iceride (ustte cati: 1.6 m -> 25 m isin kesisir) aday icin dusmana dik 5 yanal ornek (-0.8..+0.8 m) hangileri dusmandan gorunuyor = ACI GENISLIGI:
   1-2 / 5 (dar aci, pencere / kapidan geride) +10; 5 / 5 (pencerenin tam onunde) -8; 1.6 m dusmana dogru kayinca da gorunuyorsa pencereye >= 1.6 m geride +6. Log [CQB-POZ] (ilk 40).
 - Sinir: kapi / pencere gercek tespiti YOK (aci genisligi dolayli olcu); muzzle flash gece iceride gorunurlugu hesaplanmiyor; parsel / avlu icinde bekleme + sirayla cikma, oda temizleme sirasi (stack / pie) YOK = sonraki adim.
+=== v8.25b HARITA / MOD UYUMU (kullanici: JBAD / CUP Terrains / RHS?) ===
+- Fork harita bagimsiz: motor komutlari (nearestTerrainObjects tur adlari, buildingPos, terrainIntersectASL, surfaceType). Risk: modun nesneleri dogru tur / simulation tasimiyorsa (BUSH / SMALL TREE / HOUSE) yaprak kirici ve siper adaylari azalir -> [YAPRAK-TANI] acilista sayilari yazar.
+- Doktrin haritasina CUP fraksiyonlari eklendi: cup_b_us -> ABD, cup_o_ru -> RUS, cup_i_tk_gue / tk_gue / cup_o_chdkz / chdkz / cup_i_napa -> DUZENSIZ (tahmin; kendi fraksiyonun farkliysa lambs_danger_doktrinHaritasi).
