@@ -760,3 +760,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Neden: 271 m'de dusman etkili ates menzilinde degil ama dönüsümlü sicrama (ALPHA hareket, BRAVO kapsama) her turda yarisini durduruyor (lider kapsamada = STOP); gorevlerde LAMBS 'Attacking / Dodge!' tepkileri (komut ATTACK) hala goruluyor.
   Duzeltme: dusman >= cekilTopluM (180 m, doktrin) ise kapsama takimi yok, herkes birlikte kosar; < 180 m ates-manevra sicramasi. Log: '[GERI-CEKILME] ... toplu kosu | dusman:N m'.
 - Acik: LAMBS 'Attacking' / 'Dodge!' retreat sirasinda birim bayragina ragmen gorulmeye devam ediyor (kaynak: ya birim bayragi sonradan kalkiyor ya engine ATTACK komutu = bizim doSuppress); sonraki adim: gorev adlarinin hangi birimlerde / ne zaman cikti tespiti.
+=== v8.24 RETREAT: LIDER 70 SN AYNI YERDE (RPT 17:48, v8.23) ===
+- Retreat 4/16 (%25): tek retreat (Alpha 1-1, 4 -> 1 kisi). Diger askerler vardi / kostu (Siddiqi 89 m uzaga), LIDER Abdullah Takhtar 16236,1436'da STAND / komut MOVE / forceMove / baski 0.00 ile > 70 sn kipirdamadi (anomali YURUMUYOR + LIDER-YALNIZ).
+- Elenen nedenler: leaderSync (retreat'te devre disi; [KOMUTAN-BEKLE] satiri yok), DUVAR-KORUMA / SIKISMA satiri yok, baski yok (pinned degil), yaralanma yok.
+- Duzeltme / tani: takilma blogu (3.5 sn'de < 1.5 m) artik [GERI-CEKILME-TAKILI] (komut, hiz, stance, beh, unitReady, expectedDestination, takilma sayaci, binada, yakin nesne sayisi) loglar; her takilmada PATH / MOVE / ANIM acilir, sert UP, FULL hiz;
+  2. takilmada DOSTOP + 0.3 sn + yeni nokta (+-25 derece sapmali). Neden belirsiz: bir sonraki RPT'de TAKILI satirlari kaynagi gostermeli.

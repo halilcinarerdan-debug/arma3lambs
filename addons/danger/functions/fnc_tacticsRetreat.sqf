@@ -417,10 +417,26 @@ if (EGVAR(main,debug_functions)) then {
                     } else {
                         if ((time - (_x select 3)) > 3.5) then {
                             _x set [4, (_x select 4) + 1];
+                            // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
+                            if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
+                            if (lambs_danger_retTakiliN < 40) then {
+                                lambs_danger_retTakiliN = lambs_danger_retTakiliN + 1;
+                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true])];
+                            };
+                            // her takilmada hareket bayraklari yeniden acilir
+                            _b enableAI "PATH";
+                            _b enableAI "MOVE";
+                            _b enableAI "ANIM";
+                            _b setUnitPos "UP";
+                            _b setSpeedMode "FULL";
+                            _b forceSpeed -1;
                             if ((_x select 4) >= 2) then {
-                                private _np = (getPosATL _b) getPos [18 + random 8, _hedefASL getDir (getPosATL _b)];
+                                // 2. takilma: dusmandan uzaga yeni nokta (18-26 m); once DOSTOP ile komut sifirlanir
+                                private _np = (getPosATL _b) getPos [18 + random 8, (_hedefASL getDir (getPosATL _b)) + ((random 50) - 25)];
                                 if (!surfaceIsWater _np) then { _x set [1, _np]; };
                                 _x set [4, 0];
+                                doStop _b;
+                                sleep 0.3;
                             };
                             _b doMove (_x select 1);
                             _x set [3, time];
