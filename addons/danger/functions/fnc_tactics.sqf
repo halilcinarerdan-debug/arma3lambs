@@ -99,6 +99,9 @@ if (EGVAR(main,debug_functions)) then {
 // check if group AI disabled
 if (_group getVariable [QGVAR(disableGroupAI), false]) exitWith {false};
 
+// ELITE HOTFIX: geri cekilme / temas kesme / evade sirasinda taban LAMBS taktikleri (ASSAULT/FLANK/sempatik) birimleri yeniden gorevlendirmesin
+if (_group getVariable [QGVAR(isRetreating), false] || {_group getVariable [QGVAR(isEvading), false]} || {_group getVariable [QGVAR(isBreakingContact), false]}) exitWith {false};
+
 // Initated contact?
 private _contactState = _group getVariable [QGVAR(contact), 0];
 if (_contactState < time) exitWith {[_unit, _target] call FUNC(contact)};

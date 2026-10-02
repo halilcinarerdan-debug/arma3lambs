@@ -216,12 +216,12 @@ if (EGVAR(main,debug_functions)) then {
     ] call EFUNC(main,debugLog);
 };
 
-// HISTEREZIS: formasyon degisimi en az 30 sn arayla (VEE <-> LINE <-> WEDGE dongusunu onler; agac / bina sayimi yuruyuste oynar)
+// HISTEREZIS: formasyon degisimi en az 60 sn arayla (VEE <-> LINE <-> WEDGE dongusunu onler; agac / bina sayimi yuruyuste oynar)
 private _histGrp = group _unit;
 if (!isNull _histGrp) then {
     private _sonF = _histGrp getVariable [QGVAR(selFormSon), ""];
     private _sonT = _histGrp getVariable [QGVAR(selFormT), -999];
-    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {time < (_sonT + 30)}) then {
+    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {time < (_sonT + 60)}) then {
         _formation = _sonF;
     } else {
         if (_sonF isNotEqualTo _formation) then {
