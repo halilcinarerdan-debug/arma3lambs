@@ -476,7 +476,15 @@ _group setVariable [QGVAR(cmdSonKararZaman), time];
 // ---------------------------------------------------------------------------
 // DEBUG — systemChat + diag_log
 // ---------------------------------------------------------------------------
-if (EGVAR(main,debug_functions)) then {
+// Ayni karar tekrar ediyorsa 25 sn'de bir yaz (systemChat + RPT spami olmasin)
+private _sonLogKarar = _group getVariable [QGVAR(cmdSonLogKarar), ""];
+private _sonLogZaman = _group getVariable [QGVAR(cmdSonLogZaman), -999];
+private _logYaz = (_decision isNotEqualTo _sonLogKarar) || {(time - _sonLogZaman) > 25};
+if (_logYaz) then {
+    _group setVariable [QGVAR(cmdSonLogKarar), _decision];
+    _group setVariable [QGVAR(cmdSonLogZaman), time];
+};
+if (EGVAR(main,debug_functions) && {_logYaz}) then {
     private _msg = format [
         "[CMD] %1 [%2v%3 P:%4] Cnt:%5 Fir:%6 Cas:%7 Amm:%8 Pos:%9 Sup:%10 | THR:%11 | %12 (%13)",
         name _unit,

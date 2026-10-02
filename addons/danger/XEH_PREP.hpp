@@ -38,6 +38,7 @@ PREP(tacticsATEngage);
 PREP(tacticsBreakContact);
 PREP(dispersion);
 PREP(buddyBond);
+PREP(leaderSync);
 PREP(hasUGL);
 PREP(roleStation);
 PREP(reloadCover);
@@ -79,14 +80,14 @@ SUBPREP(ZEN,showSetDisableGroupAI);
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.2 yuklendi (XEH_PREP preInit)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.4 yuklendi (XEH_PREP preInit)";
 [{
     // sadece sunucu / headless (AI'lar orada yerel)
     if (isServer || {!hasInterface}) then {
         private _fns = [
             "tactics", "commanderAssess", "tacticsBounding", "tacticsRetreat", "tacticsEvadeArmor", "tacticsATEngage",
             "tacticsBreakContact", "roleStation", "buddyBond", "dispersion", "reloadCover", "grenadeAwareness",
-            "tacticalUGL", "tacticalSmoke", "getUnitRole", "buddyPairs"
+            "leaderSync", "tacticalUGL", "tacticalSmoke", "getUnitRole", "buddyPairs"
         ];
         diag_log format [
             "[ELITE-BOOT] makine: isServer=%1 hasInterface=%2 | fonksiyonlar: %3",
@@ -97,7 +98,7 @@ diag_log "[ELITE-BOOT] lambs_danger ELITE build v7.2 yuklendi (XEH_PREP preInit)
         // watchdog'lar ilk temasta degil, acilista baslasin
         {
             [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
-        } forEach ["dispersion", "buddyBond", "roleStation", "reloadCover", "grenadeAwareness"];
+        } forEach ["dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness"];
 
         // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
         [] spawn {

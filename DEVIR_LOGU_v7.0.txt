@@ -342,3 +342,14 @@ SENTINEL (ilk temasta): [DAGILMA] [BUDDY] [ROL] [RELOAD] [EL-BOMBASI] ... baslat
   [ELITE-HB] "temasta:0" hep -> LAMBS FSM tactics'e hic girmiyor (AI temas algilamiyor / CF_BAI / GroupAI kapali).
 - Not: RPT'de CF_BAI detect XEH_preInit 'LOG_1 too few parameters' preprocessor hatasi var (CF_BAI alpha4); LAMBS ile ilgisiz ama
   AI algisini etkiliyor olabilir.
+
+
+=== v7.4 — KOMUTAN GEVEZELIGI + KOMUTAN SENKRONU ===
+- main/fnc_doCallout.sqf: grup basina 9 sn sessizlik + ayni cagri 40 sn tekrar etmez (mandown/panic/eject/grenadeout haric).
+- main/fnc_doGesture.sqf: jest spami: birim 6 sn, grup 2.5 sn (force haric).
+- danger/fnc_commanderAssess.sqf: [CMD] systemChat/RPT satiri ayni karar icin 25 sn'de bir (karar degisince hemen).
+- danger/fnc_leaderSync.sqf (YENI watchdog, 3 sn): komutan hareket yonune gore takimin >=%40'i 25 m geride ise yavasla (forceSpeed 1.8);
+  >=%50 ve en geri >45 m ise PATH kapat (max 20 sn, sonra 25 sn cooldown). Baski/dusman<40m/tim yetisince birakir.
+  Retreat/Evade/BreakContact/ATEngage/FLANK/ASSAULT atlanir. RPT: [KOMUTAN-BEKLE].
+- XEH_PREP.hpp: leaderSync PREP + boot (v7.4).
+- main/XEH_PREP.hpp: stok dosya (danger icerigi yanlislikla main'e kopyalanmisti).
