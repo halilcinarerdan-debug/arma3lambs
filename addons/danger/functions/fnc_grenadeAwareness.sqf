@@ -111,7 +111,8 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
     };
 
     while {true} do {
-        sleep 0.5;
+        // havada bomba varsa 0.2 sn'de bir (tepki gecikmesi), yoksa 0.5 sn
+        sleep ([0.5, 0.2] select ((count (missionNamespace getVariable ["lambs_danger_grenadeList", []])) > 0));
 
         // =================================================================
         // 1) MEVCUT TEPKILERI ILERLET

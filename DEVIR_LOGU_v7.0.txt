@@ -510,3 +510,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.40 ===
 - grenadeAwareness: ucustaki bombanin balistik inis noktasi tahmini (RPT: atis 11:00:44, tepki 11:00:47 = yere inince, fitil 1.4 sn kala)
+
+=== v7.41 ===
+- grenadeAwareness: bomba listesi doluysa tarama 0.2 sn (tepki gecikmesi)
