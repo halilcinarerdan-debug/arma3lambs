@@ -894,3 +894,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - DUZELTME: eliteCover: 40 m'deki dostlarin konumu + son 25 sn'de sectikleri siper noktasi (eliteCoverPos); adayin 4 m'sinde her dost -45 puan (en fazla 3). coverHug: yeni noktanin 2.5 m'sinde dost varsa reddet.
 - DOKTRIN: MCWP 3-11.1 'disperse the effects of enemy fire' (genel ilke); 4 m / 2.5 m / 45 puan TASARIM sayilari (kaynakta sayi yok).
 - DOGRULANMADI: yalniz ONCEKI (zaten yigilmis) askerler dagilmaz; el bombasi / UGL / RPG atici konumlanmasi (fireSupport) ayri incelenmedi; tek duvarda hat boyunca dizilme gorsel olarak makul mu.
+=== v8.40 CBA AYARI: TARAF BASINA DOKTRIN PROFILI (kullanici: 'cba ayari ekle, west east independent icin secebilelim') ===
+- XEH_PREP.hpp (preInit): 3 CBA LIST ayari (kategori 'LAMBS Danger' / 'ELITE doktrin', sunucu ayari): lambs_danger_doktrinWest / East / Ind; secenekler OTO, GENEL, USMC, ABD, RUS, CHN, PESHMERGA, DUZENSIZ. OTO = eski fraksiyon eslesmesi.
+- fnc_doktrin: grubun side'ina gore ayar okunur; OTO disi secim fraksiyon eslesmesini ezer; onbellek anahtari (imza) = fraksiyon|secim, ayar oyun ortasinda degisirse profil yeniden kurulur. Log [DOKTRIN-PROFIL].
+- DOGRULANMADI: ayarin oyunda gorunmesi (CBA_fnc_addSetting'in XEH_preInit icinde bu include'dan cagrisi; stringtable'siz duz metin), sunucu degerinin istemci / Zeus makinesine gecmesi, mid-mission degisimde onbellek yenilenmesi.

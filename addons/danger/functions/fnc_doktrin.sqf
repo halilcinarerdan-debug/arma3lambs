@@ -59,7 +59,16 @@ if (isNull _g) exitWith { createHashMap };
 
 private _onb = _g getVariable [QGVAR(doktrin), createHashMap];
 private _lider = leader _g;
-private _imza = if (isNull _lider) then {""} else {toLower (faction _lider)};
+private _fak = if (isNull _lider) then {""} else {toLower (faction _lider)};
+// v8.40: CBA ayari (taraf basina profil); "OTO" = fraksiyondan
+private _ovr = switch (side _g) do {
+    case west: { missionNamespace getVariable ["lambs_danger_doktrinWest", "OTO"] };
+    case east: { missionNamespace getVariable ["lambs_danger_doktrinEast", "OTO"] };
+    case independent: { missionNamespace getVariable ["lambs_danger_doktrinInd", "OTO"] };
+    default { "OTO" };
+};
+if !(_ovr isEqualType "") then { _ovr = "OTO"; };
+private _imza = _fak + "|" + _ovr;
 if ((count _onb) > 0 && {(_onb getOrDefault ["imza", ""]) isEqualTo _imza}) exitWith { _onb };
 
 // --- TABAN (GENEL) ---
@@ -106,8 +115,9 @@ private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", 
 ]];
 private _ad = "GENEL";
 {
-    if ((_imza find (_x select 0)) >= 0) exitWith { _ad = _x select 1; };
+    if ((_fak find (_x select 0)) >= 0) exitWith { _ad = _x select 1; };
 } forEach _harita;
+if (_ovr isNotEqualTo "OTO") then { _ad = _ovr; };
 
 // --- KALITIM ZINCIRI: ad -> ust -> ... -> GENEL; en uzaktan uygula, en son kendi degerleri ---
 private _zincir = [];
