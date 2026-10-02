@@ -14,10 +14,10 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.17"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.18"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -247,6 +247,16 @@ def karne(path):
     oc = say("ORTAM-SKILL")
     cf = "CF_BAI algilandi:True" in t
     ekle("ORTAM SKILL", "OK" if oc else ("KONTROL" if cf else "YOK"), ("%d degisim" % oc) if oc else ("CF_BAI yuklu -> kapali" if cf else "degisim yok (hava / isik / cihaz sabit olabilir)"))
+    mt = say("MEDIC-TASMA")
+    ekle("MEDIC TASMA", "OK" if mt else "YOK", ("%d geri cagirma" % mt) if mt else "saglikci onde kalmadi ya da temas yok")
+    ty = say("TEMAS-KES-YON")
+    if ty:
+        sp = sayi(r"sapma (\d+)")
+        gz = len([1 for l in L if "TEMAS-KES-YON" in l and "gizli:true" in l])
+        ekle("TEMAS KES YON", "OK" if sp and sum(sp) / len(sp) <= 60 and gz >= 0.5 * ty else "KONTROL", "%d hedef | gizli:%d | ort sapma %.0f derece" % (ty, gz, sum(sp) / max(len(sp), 1)))
+    else:
+        ekle("TEMAS KES YON", "YOK", "temas kesme olmadi (<4 kisi, kayip / baski)")
+
     # varsayilan beceri
     sv = [l for l in L if "[SKILL-VARSAYILAN] " in l and "onceki:" in l]
     so = [l for l in L if "[SKILL-OZET]" in l]

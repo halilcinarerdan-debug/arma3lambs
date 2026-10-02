@@ -176,7 +176,45 @@ diag_log format [
     // CIFTLER — her cift kendi EN YAKIN sert siperine
     // -----------------------------------------------------------------------
     private _ciftler = [_birimler] call _pairFn;
-    private _kacisYonu = _tehditPos getDir (getPosATL (_birimler select 0));
+    // v8.18: kacis yonu = tehditten GRUP MERKEZINE (ilk askere degil)
+    private _merkez = [0, 0, 0];
+    { _merkez = _merkez vectorAdd (getPosATL _x); } forEach _birimler;
+    _merkez = _merkez vectorMultiply (1 / (count _birimler));
+    private _kacisYonu = _tehditPos getDir _merkez;
+    // GIZLI KACIS ADAYI (v8.18, kullanici: "dusmanin TERS istikameti ve dusmanin GORMEDIGI noktadan yola ciksinlar"):
+    //   cevre 25 / 40 / 60 m x kacis yonunun +-0..80 derece; dusman gozunden (1.6 m) comelmis (1.0 m) asker GORUNMUYORSA +35 (yatik da gizliyse +8);
+    //   dusmana 10 m'den az uzaklasan aday elenir (-100); bina -25; sert ortu yakininda +8; sapma -0.15 / derece
+    //   doner: [pos, puan, gizliMi] ya da []
+    private _tehditGoz = AGLToASL (_tehditPos vectorAdd [0, 0, 1.6]);
+    private _gizliAday = {
+        params ["_o"];
+        private _eb = [];
+        private _ebS = -9999;
+        private _ebG = false;
+        private _oMes = _o distance2D _tehditPos;
+        {
+            private _r = _x;
+            {
+                private _c = _o getPos [_r, _kacisYonu + _x];
+                if (surfaceIsWater _c) then { continue };
+                private _s = -((abs _x) * 0.15);
+                if (((_c distance2D _tehditPos) - _oMes) < 10) then { _s = _s - 100; };
+                private _gc = AGLToASL (_c vectorAdd [0, 0, 1.0]);
+                private _gizli = terrainIntersectASL [_tehditGoz, _gc] || {lineIntersects [_tehditGoz, _gc, objNull, objNull]};
+                if (_gizli) then {
+                    _s = _s + 35;
+                    private _gy = AGLToASL (_c vectorAdd [0, 0, 0.4]);
+                    if (terrainIntersectASL [_tehditGoz, _gy] || {lineIntersects [_tehditGoz, _gy, objNull, objNull]}) then { _s = _s + 8; };
+                };
+                if ((count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE"], 6, false, true])) > 0) then { _s = _s - 25; };
+                if ((count (nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE"], 3, false, true])) > 0) then { _s = _s + 8; };
+                if (_s > _ebS) then { _ebS = _s; _eb = _c; _ebG = _gizli; };
+            } forEach [0, 20, -20, 40, -40, 60, -60, 80, -80];
+        } forEach [25, 40, 60];
+        if (_eb isEqualTo []) exitWith {[]};
+        [_eb, _ebS, _ebG]
+    };
+
     private _varis = [];
 
     {
@@ -188,6 +226,16 @@ diag_log format [
 
         if (!isNull _oncu && {alive _oncu}) then {
             private _cover = if (_kacisModu) then {[]} else {[_oncu, _tehdit, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover)};
+            // v8.18: gizli + ters yon aday varsa (dusman gozunden gorunmeyen, dusmandan >= 10 m uzaklasan) ONCELIKLI
+            private _ga = [getPosATL _oncu] call _gizliAday;
+            private _gaKullan = _ga isNotEqualTo [] && {_ga select 2} && {(_ga select 1) > 0};
+            private _coverGizli = false;
+            if (_cover isNotEqualTo []) then {
+                private _cc = AGLToASL (((_cover select 0) select 0) vectorAdd [0, 0, 1.0]);
+                _coverGizli = terrainIntersectASL [_tehditGoz, _cc] || {lineIntersects [_tehditGoz, _cc, objNull, objNull]};
+            };
+            if (_gaKullan && {!_coverGizli}) then { _cover = []; };
+
             // Siper tehdide, bulundugumuz yerden 5 m'den fazla YAKINSA siper sayma (dusmana dogru kosma)
             if (_cover isNotEqualTo [] && {(((_cover select 0) select 0) distance2D _tehditPos) < ((_oncu distance2D _tehditPos) - 5)}) then {
                 _cover = [];
@@ -196,11 +244,21 @@ diag_log format [
                 _hedef = (_cover select 0) select 0;
                 _stance = (_cover select 0) select 1;
             } else {
+                if (_gaKullan) then {
+                    _hedef = _ga select 0;
+                    _stance = "MIDDLE";
+                    if (isNil "lambs_danger_bcLogN") then { lambs_danger_bcLogN = 0; };
+                    if (lambs_danger_bcLogN < 40) then {
+                        lambs_danger_bcLogN = lambs_danger_bcLogN + 1;
+                        diag_log format ["[TEMAS-KES-YON] %1 | %2 | kacis yonu:%3 | hedef %4 m, sapma %5 | gizli:%6 puan:%7 | dusman %8 m", groupId _group, name _oncu, round _kacisYonu, round (_oncu distance2D _hedef), round (abs ((((_oncu getDir _hedef) - _kacisYonu) + 540) % 360 - 180)), _ga select 2, round (_ga select 1), round (_oncu distance2D _tehditPos)];
+                    };
+                } else {
                 // Sert siper yok: dusmandan 60m uzaklas (dik acilarla)
                 private _yan = [-40, 40] select (_ciftIdx % 2);
                 _hedef = (getPosATL _oncu) getPos [[60, 150] select _kacisModu, _kacisYonu + _yan];
                 if (surfaceIsWater _hedef) then {
                     _hedef = (getPosATL _oncu) getPos [30, _kacisYonu];
+                };
                 };
             };
 

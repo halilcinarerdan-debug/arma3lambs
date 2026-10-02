@@ -30,6 +30,7 @@
  *   cekilGuvenM 220, cekilEkSicrama 4     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
  *   baskiKirmaEsik 0.5, baskiKirmaMaxS 14   retreat: ort. baski bu esikten yuksekse once siper + karsi ates (en fazla N sn), sonra sicrama
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
+ *   DUZENSIZ (Taliban-tipi): vur-kac, erken temas kesme, pusu agirlikli (haritada taliban / lop_am / lop_ists / insurgent ...)
  *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
  *
  * YENI ORDU EKLEME (kod degistirmeden, misyon init'te):
@@ -80,7 +81,10 @@ private _tanim = [
     // Cin (PLA): merkezi, siki duzen, uclu hucum hucreleri; kisa kontrollu atilimlar
     ["CHN", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 55, 15], [100, 32, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 28, 45]], ["arkaGuvenlik", false]]],
     // Peshmerge: hafif / yari duzensiz, mevzi savunmasi + atik yerel hucum; gevsek bound, daha yakindan hucum
-    ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]]
+    ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]],
+    // DUZENSIZ / TALIBAN-tipi isyanci (TAHMIN, kaynak dogrulanmadi): vur-kac, pusu agirlikli, kucuk dagitik takimlar, ates ustunlugu yoksa ERKEN temas keser,
+    //   yakin mesafeden hucum, daha iyi gizlenme (camouflageCoef alt siniri 0.55), uzun dagilarak cekilme
+    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55]]]
 ];
 // misyon / kullanici tanimlari (ayni ad = ustune yazar)
 { _tanim pushBack _x; } forEach (missionNamespace getVariable ["lambs_danger_doktrinTanimlari", []]);
@@ -91,7 +95,8 @@ private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", 
     ["rhs_faction_usarmy", "ABD"], ["blu_f", "ABD"], ["blu_g_f", "ABD"],
     ["rhs_faction_msv", "RUS"], ["rhs_faction_vdv", "RUS"], ["rhs_faction_rva", "RUS"], ["rhs_faction_tv", "RUS"],
     ["opf_t_f", "CHN"], ["_chn", "CHN"], ["_pla", "CHN"], ["china", "CHN"],
-    ["peshmerga", "PESHMERGA"], ["kurd", "PESHMERGA"], ["_pesh", "PESHMERGA"]
+    ["peshmerga", "PESHMERGA"], ["kurd", "PESHMERGA"], ["_pesh", "PESHMERGA"],
+    ["taliban", "DUZENSIZ"], ["lop_am", "DUZENSIZ"], ["lop_ists", "DUZENSIZ"], ["_ists", "DUZENSIZ"], ["insurgent", "DUZENSIZ"], ["irregular", "DUZENSIZ"], ["_isis", "DUZENSIZ"], ["opf_g_f", "DUZENSIZ"], ["ind_g_f", "DUZENSIZ"]
 ]];
 private _ad = "GENEL";
 {
