@@ -39,6 +39,17 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 1b) RPG / roketatar tepkisi: karsi taraf gruplari oncelikli ates + dagilma (formasyon korunur)
+        if (
+            (getNumber (configFile >> "CfgWeapons" >> _weapon >> "type")) isEqualTo 4
+            && {_ammo isKindOf ["RocketBase", configFile >> "CfgAmmo"] || {_ammo isKindOf ["MissileBase", configFile >> "CfgAmmo"]}}
+        ) then {
+            [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_rpgReaction", {0}]);
+            if (isMultiplayer) then {
+                [_unit] remoteExecCall ["lambs_danger_fnc_rpgReaction", -clientOwner];
+            };
+        };
+
         // 2) Ses / parlama (roketatar ve 40mm hemen, digerleri 1.2 sn'de bir)
         private _glMuzzle = [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}]);
         private _agir = ((getNumber (configFile >> "CfgWeapons" >> _weapon >> "type")) isEqualTo 4)

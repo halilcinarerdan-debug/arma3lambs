@@ -20,6 +20,7 @@
  * 0: unit <OBJECT>
  * 1: dusman piyade <OBJECT>
  * 2: zorla (kontrolleri atla, her zaman at) <BOOL> default false
+ * 3: salvo (art arda 40mm sayisi, 1-3; 2. atis ~4 sn sonra, dogru yuklenmis ise) <NUMBER> default 1
  *
  * Return Value:
  * Atis denendi mi <BOOL>
@@ -33,12 +34,13 @@
 params [
     ["_unit", objNull, [objNull]],
     ["_target", objNull, [objNull]],
-    ["_force", false, [false]]
+    ["_force", false, [false]],
+    ["_salvo", 1, [0]]
 ];
 
 if (isNull _unit || {!alive _unit} || {isNull _target} || {!alive _target}) exitWith {false};
 if (!isNull objectParent _unit) exitWith {false};
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 12) exitWith {false};
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 9) exitWith {false};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
@@ -102,12 +104,29 @@ _unit selectWeapon _gl;
         _u fireAtTarget [_t, _muzzle];
     };
     [{
-        params ["_u2"];
-        if (alive _u2) then {
+        params ["_u2", "_s2"];
+        if (alive _u2 && {_s2 <= 1}) then {
             _u2 selectWeapon (primaryWeapon _u2);
             _u2 doWatch objNull;
         };
-    }, [_u], 2] call CBA_fnc_waitAndExecute;
+    }, [_u, _salvo], 2] call CBA_fnc_waitAndExecute;
 }, [_unit, _target, _gl], 1.5] call CBA_fnc_waitAndExecute;
+
+// SALVO: ikinci / ucuncu atis (yeniden yukleme sonrasi), ayni hedefe — ilk atis duzeltme, sonrakiler etki
+for "_i" from 1 to ((_salvo min 3) - 1) do {
+    [{
+        params ["_u", "_t", "_muzzle"];
+        if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0}) then {
+            _u selectWeapon _muzzle;
+            [{
+                params ["_u3", "_t3", "_m3"];
+                if (alive _u3 && {!isNull _t3} && {alive _t3} && {(_u3 ammo _m3) > 0}) then {
+                    _u3 fireAtTarget [_t3, _m3];
+                };
+                [{ params ["_u4"]; if (alive _u4) then { _u4 selectWeapon (primaryWeapon _u4); }; }, [_u3], 1.5] call CBA_fnc_waitAndExecute;
+            }, [_u, _t, _muzzle], 1] call CBA_fnc_waitAndExecute;
+        };
+    }, [_unit, _target, _gl], 4.5 * _i] call CBA_fnc_waitAndExecute;
+};
 
 true
