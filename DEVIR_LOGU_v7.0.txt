@@ -614,3 +614,14 @@ HIBRIT DUZEN: her testte yeni ozellik + retreat dogrulamasi (retreat_kayipli). S
 - Retreat Alpha 1-1 (5 kisi, dusman 118 m): 8->1 kisi; dusman 43 m'ye kadar takip etti (PEEL 3 kisiyle) -> cok az kisiyle cekilme kacinilmaz zayiat; ayri bug degil.
 - Birim duzeyi disableAI: retreat sirasinda LAMBS FLANK/Group Suppress gorulmedi (FLANK ancak retreat bittikten sonra 12:08:07) -> v8.3 dogrulandi.
 - Dogrulanamayan: AllClear guvenlik agi (temas kesilmedi), GrenadeAlgilandi (4 atis 'ilk tepki YOK' - menzil disi olabilir; ayrica incelenecek).
+
+=== YOL HARITASI EKI: OYUNCU ACIKLARI (kullanici karari, HILE YOK) ===
+Kural: yapay zeka dusmanin gercek konumunu bilmeden (knowsAbout / duyma / gorme) karar verir; acik kapatma 'ekstra bilgi' ile degil davranis ile yapilir.
+Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek), SONRA asagidaki aciklar. RPT gelmeden kodlamaya baslanmaz.
+  [ ] A. Cok yonlu yaklasma: yan/arka kol (flank) planlama - tek eksenden gelen oyuncuya karsi grubu ikiye bolme (rota planlama ile birlikte)
+  [ ] B. Gizli yaklasma (concealed approach): ormanlik/ceper/olu aci uzerinden rota, acik alani gecmeden once gozetleme
+  [ ] C. Pusu ve ates emri (ROE): ates serbest/tutulu, killbox, lider dürbünü, yol uzerinde bekleme
+  [ ] D. Cekilme sonrasi takip tespiti: cekilen grubun arkasini kollama (arka muhafiz) ve takipciye karsi geri atis sigara; 5 kisiden az grup icin kacis/saklanma
+  [ ] E. Duman icinde dagilma onleme: sis perdesi sonrasi yan yana toplanma ve kor ates yerine ciftli yer degistirme
+  [ ] F. Dolayli tespit: ses/duman/tracer yonune goz atma, kayip alan arama (LKP search), tek yone kilitlenmeme
+  [ ] G. Tehdit onceligi ve dikkat dagitma: tek oyuncuya karsi tum grubun ayni yone bakmasi yerine sektorlere dagilma
