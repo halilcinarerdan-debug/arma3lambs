@@ -10,7 +10,7 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
@@ -115,6 +115,16 @@ def ozet(path):
             statistics.mean(dr) if dr else 0, statistics.mean(pl) if pl else 0, statistics.mean(ms) if ms else 0, max(ms) if ms else 0))
     else:
         print("  yok (rota: tehdit 90-600 m + bounding gerekir)")
+    kmf = [l for l in satirlar if "[KAMUFLAJ] " in l and "coef:" in l]
+    print("\n-- KAMUFLAJ / ARAZI BILINCI --")
+    if kmf:
+        cs = [float(m.group(1)) for l in kmf for m in [re.search(r"coef:([0-9.]+)", l)] if m]
+        print("  kamuflaj katsayisi: %d degisim | ort %.2f | en dusuk %.2f | ufukta: %d" % (len(kmf), statistics.mean(cs), min(cs), len([1 for l in kmf if "ufukta:true" in l])))
+    else:
+        print("  kamuflaj: yok")
+    print("  stealth yer degistirme (ufuk cizgisinden cekilme):", len([1 for l in satirlar if "[KAMUFLAJ-YER]" in l]))
+    az = [l for l in satirlar if "[ARAZI] " in l]
+    print("  arazi analizi:", len(az), "| hakim nokta bulunan:", len([1 for l in az if "hakim:+" in l]), "| komutan gozetleme hakim nokta:", len([1 for l in satirlar if "[ARAZI-KOMUTAN]" in l]))
     ps = [l for l in satirlar if "[PUSU]" in l]
     print("\n-- PUSU / ATES EMRI --")
     if ps:

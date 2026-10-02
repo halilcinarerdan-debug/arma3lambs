@@ -673,3 +673,10 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - findCover FAZ 2: siper ufuk cizgisinde (siluet) ise -10 puan (stance yuksekligiyle). Kapatma: lambs_danger_kamuflajV1 = false / doktrin kamuflaj = false.
 - ARAZI BILINCI (kullanici istegi, SIRADA): hem KOMUTAN (anahtar arazi: hakim tepe, olu arazi, bogaz, gizli yaklasma kuloiru; mevzi / gozetleme / yaklasma secimi) hem BIREYSEL (mikro relief: cukur, ters egim, sirt; stance / yer secimi).
   Tasarim: fnc_araziAnaliz [merkez, yaricap, tehditPos] -> profil (egim, aciklik, ortu yogunlugu, olu arazi orani, hakim nokta adaylari, ufuk riski); komutan: rota / overwatch / hold bunu kullanir; birey: findCover'a arazi kivrimi aday turu.
+=== v8.13 ARAZI BILINCI v1 (kullanici istegi: hem komutan hem bireysel) ===
+- BIREYSEL: findCover'a ARAZI KIVRIMI adaylari (lambs_main_coverMikro, varsayilan acik): dusman >= 70 m, EVADE degil; askerin 6 / 14 m cevresinde 8 yon; yatik (0.4 m) dusman gozunden arazi ile gizliyse aday.
+  puan = 20 - 0.5 x r (+8 comelmis de gizli / atis modunda hull-down: yatik gizli + comelmis gorunur) (-10 ufuk cizgisi) (-10 yanda dost). Nesne siperi genelde daha yuksek skorlu: yalniz nesne YOKKEN ya da zayifken kazanir.
+- KOMUTAN: fnc_araziAnaliz [merkez, yaricap, tehdit] -> profil (egim ort/max, aciklik ACIK/KARISIK/KAPALI, olu arazi orani, HAKIM NOKTA, ufukRisk); 20 sn onbellek. Log [ARAZI].
+  Kullanim (v1): tacticsBounding cycle 1 - MG / nisanci icin 45 m icinde HAKIM NOKTA (>= 2.5 m yuksek, tehdidi yatikken goren, ufukta olmayan) varsa gozetleme pozisyonu oradadir ([ARAZI-KOMUTAN]).
+  SONRAKI: komutan kararlarinda aciklik / olu arazi (acikta HOLD yerine ortulu yaklasma, kapali arazide kisa bound), rota planlamada olu arazi koridoru, hold pozisyonu secimi.
+- Log etiketleri: [ARAZI], [ARAZI-KOMUTAN], [KAMUFLAJ], [KAMUFLAJ-YER]; rpt_ozet 'KAMUFLAJ / ARAZI BILINCI' bolumu.

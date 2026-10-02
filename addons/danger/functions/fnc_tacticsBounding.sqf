@@ -696,6 +696,15 @@ if (EGVAR(main,debug_functions)) then {
             {
                 if (alive _x && {isNull objectParent _x}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                    // v8.13 KOMUTAN ARAZI BILINCI: MG / nisanci icin HAKIM NOKTA (>= 2.5 m yuksek, tehdidi goren, ufukta olmayan) 45 m icindeyse oraya
+                    if (([_x] call _rolFn) in ["MG", "MARKSMAN"]) then {
+                        private _arz = [getPosATL _x, 45, _target] call FUNC(araziAnaliz);
+                        private _hk = _arz getOrDefault ["hakim", []];
+                        if (_hk isNotEqualTo []) then {
+                            _ow = [[_hk select 0, "DOWN"]];
+                            diag_log format ["[ARAZI-KOMUTAN] %1 | %2 hakim noktaya gozetleme: +%3 m yuksek", groupId _group, name _x, (_hk select 1) toFixed 1];
+                        };
+                    };
                     if (_ow isNotEqualTo []) then {
                         private _owPos = (_ow select 0) select 0;
                         private _owStance = (_ow select 0) select 1;

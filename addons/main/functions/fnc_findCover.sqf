@@ -294,6 +294,35 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     } forEach _allObjs;
 
     // ---------------------------------------------------------------------
+    // ARAZI KIVRIMI ADAYLARI (v8.13, BIREYSEL arazi bilinci): nesne siperi olmasa da arazinin kendisi (cukur, ters egim, kivrim) gizler.
+    // Askerin 6 / 14 m cevresinde 8 yon; yatik (0.4 m) dusman gozunden arazi ile gizliyse aday. Comelmis (1.0 m) de gizliyse +8 (daha iyi),
+    // atis modunda (DEFEND/OVERWATCH/ADVANCE) yatik gizli + comelmis GORUNUR = hull-down +8. Ufuk cizgisi -10. Dusman >= 70 m, EVADE degil.
+    // Nesne siperinden belirgin ustun degilse nesne kazanir (taban 20, nesneler genelde daha yuksek).
+    // ---------------------------------------------------------------------
+    if (!_evade && {_unitEnemyDist >= 70} && {missionNamespace getVariable ["lambs_main_coverMikro", true]}) then {
+        private _upos = getPosATL _unit;
+        private _egoz = AGLToASL (_enemyPos vectorAdd [0, 0, 1.6]);
+        private _atisM = _mode in ["DEFEND", "OVERWATCH", "ADVANCE"];
+        {
+            private _r = _x;
+            {
+                private _c = _upos getPos [_r, _x];
+                if (surfaceIsWater _c || {(_c distance2D _enemyPos) > (_unitEnemyDist + 10)}) then { continue };
+                private _hYat = [_egoz, AGLToASL (_c vectorAdd [0, 0, 0.4]), _unit] call _gizli;
+                if (!_hYat) then { continue };
+                private _hCom = [_egoz, AGLToASL (_c vectorAdd [0, 0, 1.0]), _unit] call _gizli;
+                private _sk = 20 - (_r * 0.5);
+                if (_atisM) then { if (!_hCom) then { _sk = _sk + 8; }; } else { if (_hCom) then { _sk = _sk + 8; }; };
+                private _bsh = AGLToASL (_c vectorAdd [0, 0, 0.4]);
+                private _dd = vectorNormalized (_bsh vectorDiff _egoz);
+                private _s3 = _bsh vectorAdd (_dd vectorMultiply 300);
+                if (!(terrainIntersectASL [_bsh, _s3]) && {!(lineIntersects [_bsh, _s3, objNull, objNull])}) then { _sk = _sk - 10; };
+                if ((count ((_c nearEntities ["CAManBase", 4]) - [_unit])) > 0) then { _sk = _sk - 10; };
+                _adaylar pushBack [_sk, _c, ["DOWN", "MIDDLE"] select _hCom];
+            } forEach [0, 45, 90, 135, 180, 225, 270, 315];
+        } forEach [6, 14];
+    };
+    // ---------------------------------------------------------------------
     // En iyiler (skora gore) + rezerv
     // ---------------------------------------------------------------------
     if (_adaylar isNotEqualTo []) then {
