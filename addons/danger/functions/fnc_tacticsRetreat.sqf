@@ -441,6 +441,49 @@ if (EGVAR(main,debug_functions)) then {
         [_g, _tp, "BREAK_CONTACT"] call _sisFn;
     };
 
+    // -----------------------------------------------------------------------
+    // BASKI KIRMA FAZI (v8.9): ates altinda (ort. baski >= esik) ve dusman >= 80 m ise ONCE siper al + karsi ates + sis,
+    // baski dusunce (< 0.4) ya da sure dolunca (en fazla baskiKirmaMaxS) sicramalar baslar. Acikta kosmak olum (RPT 12:53: 7 -> 2 kisi).
+    // -----------------------------------------------------------------------
+    private _baskiEsik = [_group, "baskiKirmaEsik", 0.5] call FUNC(dk);
+    private _baskiMaxS = [_group, "baskiKirmaMaxS", 14] call FUNC(dk);
+    private _baskiOrt = {
+        private _u = (units _group) select {alive _x && {isNull objectParent _x}};
+        if (_u isEqualTo []) exitWith {0};
+        private _t = 0;
+        { _t = _t + (getSuppression _x); } forEach _u;
+        _t / (count _u)
+    };
+    if ((call _baskiOrt) >= _baskiEsik && {((leader _group) distance2D _targetPos) >= 80}) then {
+        diag_log format ["[GERI-CEKILME-SIPER] %1 | baski:%2 | esik:%3 | dusman:%4 m | once siper, sonra cekil", groupId _group, (call _baskiOrt) toFixed 2, _baskiEsik, round ((leader _group) distance2D _targetPos)];
+        {
+            if (alive _x && {isNull objectParent _x}) then {
+                _x enableAI "TARGET";
+                _x enableAI "AUTOTARGET";
+                _x enableAI "AUTOCOMBAT";
+                _x enableAI "COVER";
+                _x setBehaviour "COMBAT";
+                _x setUnitPosWeak "DOWN";
+                private _cv = [_x, _targetPos, 25, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                if (_cv isNotEqualTo [] && {(_cv select 0) isNotEqualTo []}) then {
+                    private _cp = (_cv select 0) select 0;
+                    if ((getSuppression _x) < 0.85 && {(_x distance2D _cp) > 3}) then {
+                        _x setVariable [QGVAR(forceMove), true];
+                        _x doMove _cp;
+                    };
+                };
+                [_x, _targetASL] call EFUNC(main,doSuppress);
+            };
+        } forEach _tumBirimler;
+        private _bk0 = time;
+        waitUntil {
+            sleep 0.5;
+            ((time - _bk0) >= 4 && {(call _baskiOrt) < 0.4}) || {(time - _bk0) >= _baskiMaxS} || {isNull _group}
+        };
+        diag_log format ["[GERI-CEKILME-SIPER] %1 | baski kirma bitti: %2 sn, baski:%3", groupId _group, round (time - _bk0), (call _baskiOrt) toFixed 2];
+        { _x setVariable [QGVAR(forceMove), nil]; } forEach _tumBirimler;
+    };
+
     private _sira = if (_bravo isEqualTo []) then {
         [
             [_alpha, [], 0],

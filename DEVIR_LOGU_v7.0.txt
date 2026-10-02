@@ -646,3 +646,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Retreat (OPFOR Alpha 1-1, 7v11, baski 0.88, tehdit 229 m): EK sicramalar calisti (7 sicrama, 130 sn) ama mesafe kazanilamadi (194-214 m): grup acikta baski altinda (baski 0.83-1.25) yere yapisti, 7 -> 2 kisi.
   Bu kod hatasi degil, asiri guc (11 USMC, 12-13 baski noktasi) + acik arazi + sis yok. Karar tarafi: baski >= 0.6 + acik + >60 m -> DELAY/PEEL (v8.x) acikta kosmaya yol aciyor; yeniden degerlendirilecek (once siper al, baski dusunce cekil).
 - Duzeltme: kalan hareket edenlerin hepsi ezilmisse sicrama penceresi 6 sn sonra biter (eskiden 22-26 sn bosa). [TACTICS-CAGRI] logu grup basina 10 sn'de 1 satir (49 satir/RPT spam'i).
+=== v8.9 RETREAT: BASKI KIRMA FAZI (kullanici: 'sana birakiyorum') ===
+- Retreat basinda ortalama baski >= baskiKirmaEsik (0.5) ve dusman >= 80 m ise: herkes siper arar (findCover 25 m, baski < 0.85 olanlar), karsi ates (doSuppress), sis zaten atilir;
+  baski < 0.4 ya da baskiKirmaMaxS (14 sn) dolunca sicramalar baslar. Log: [GERI-CEKILME-SIPER] (baslangic + 'baski kirma bitti: N sn, baski:x').
+- Gerekce: RPT 12:53 acikta baski 0.83-1.25 altinda kosu denemesi 7 -> 2 kisi. Dogrulanacak: baski kirma suresi, sonrasi vardi orani, kayip.
+- Doktrin anahtarlari: baskiKirmaEsik, baskiKirmaMaxS (profil bazinda ayarlanabilir).
