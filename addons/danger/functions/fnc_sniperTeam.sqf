@@ -10,8 +10,11 @@
  *    Ana grup oldugunde / bosaldiginda ekip bagimsiz kalir (flag temizlenir).
  *
  * 2) DAVRANIS (3 sn'de bir):
- *    - BARIS (temas yok): ana komutanin ARKA-YAN tarafinda 70 m'de formasyonu izler (komutan yonune gore sag/sol
- *      yan sabit; 35 m'den fazla koparsa istasyona doner). Davranis AWARE.
+ *    - BARIS (temas yok) = KESIF: ana timin gidis yonunde ~150 m ONDE (sag/sol yan sabit) STEALTH ilerler, istasyonda
+ *      yatar ve cevreyi tarar. Ates YOK (combatMode GREEN). Dusman gorurse yatar, sessiz kalir ve ana komutana
+ *      bildirir (reveal) -> komutan karar verir.
+ *    - KOMUTAN EMRI: nisanci ancak komutanin son karari (cmdSonKarar, <= 40 sn) WITHDRAW / EVADE_ARMOR DEGILSE ates eder
+ *      (nisanci komutanin stratejik piyonu). Istisna: yakildiysa / dusman <= 150 m ve bizi biliyor -> kendini savunur.
  *    - TEMAS: bilinen en yakin dusmana LOS'lu, 140-700 m, yuksek / ortulu, dost 20 m'den uzak, ana komutandan
  *      <= 160 m, onceki (yanmis) pozisyonlardan >= 50 m, SEKTOR: ana timin onunde degil (yan / arka) nokta secer.
  *      Varinca YATAR (DOWN) + STEALTH + combatMode YELLOW. Gozlemci GREEN (ates etmez, yerini ele vermez),
@@ -141,8 +144,8 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             _ng setVariable [QGVAR(sniperTeam), true];
             _ng setVariable [QGVAR(sniperParent), _g];
             _ng setVariable [QGVAR(sniperSide), selectRandom [1, -1]];
-            _ng setBehaviour "AWARE";
-            _ng setCombatMode "YELLOW";
+            _ng setBehaviour "STEALTH";
+            _ng setCombatMode "GREEN";
             _ng setFormation "FILE";
             diag_log format [
                 "[SNIPER] %1 | nisanci:%2 (%3) | gozlemci:%4 | ana tim:%5 kisi",
@@ -184,24 +187,61 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             private _savas = ((_pg getVariable [QGVAR(contact), 0]) > time) && {!isNull _dusman} && {alive _dusman};
 
             // ---------------------------------------------------------
-            // BARIS: formasyonu izle (arka-yan 70 m)
+            // KESIF GOZLEMI: ekip dusman gorduyse ana komutana bildir (ates YOK, emir bekler)
+            // ---------------------------------------------------------
+            private _gorulen = [];
+            { _gorulen append ((_x targets [true, 700]) select {alive _x && {_x isKindOf "CAManBase"}}); } forEach _takim;
+            _gorulen = _gorulen arrayIntersect _gorulen;
+            if (_gorulen isNotEqualTo []) then {
+                _ng setVariable [QGVAR(snpKesifSon), time];
+                if ((time - (_ng getVariable [QGVAR(snpKesifRapor), -999])) > 6) then {
+                    _ng setVariable [QGVAR(snpKesifRapor), time];
+                    { _pl reveal [_x, ((_s knowsAbout _x) max 1.5)]; } forEach _gorulen;
+                    diag_log format ["[SNIPER-KESIF] %1 | %2 dusman gordu, komutana bildirdi (emir bekliyor)", groupId _ng, count _gorulen];
+                };
+            };
+            private _kesifAktif = (time - (_ng getVariable [QGVAR(snpKesifSon), -999])) < 15;
+
+            // ---------------------------------------------------------
+            // BARIS = KESIF: ana timin ONUNDE stealth ilerle, yat, tara
             // ---------------------------------------------------------
             if (!_savas) then {
-                // savastan cik: yatma / stealth birak (20 sn sonra)
+                // savastan cik: yatma birak, kesif moduna don (20 sn sonra)
                 if ((time - (_ng getVariable [QGVAR(snpSavasSon), -999])) > 20 && {(_ng getVariable [QGVAR(snpHoldPos), []]) isNotEqualTo []}) then {
                     _ng setVariable [QGVAR(snpHoldPos), []];
-                    _ng setBehaviour "AWARE";
-                    _ng setCombatMode "YELLOW";
+                    _ng setCombatMode "GREEN";
                     { _x setUnitPos "AUTO"; _x doWatch objNull; } forEach _takim;
                 };
                 if ((time - (_ng getVariable [QGVAR(snpSavasSon), -999])) > 20) then {
-                    private _yan = _ng getVariable [QGVAR(sniperSide), 1];
-                    private _yon = (getDir _pl) + 180 - (35 * _yan);
-                    private _istasyon = _lp getPos [70, _yon];
-                    if (!surfaceIsWater _istasyon && {(_s distance2D _istasyon) > 35}) then {
-                        if ((time - (_ng getVariable [QGVAR(snpMoveLast), -999])) > 8) then {
-                            _ng setVariable [QGVAR(snpMoveLast), time];
-                            _s doMove (_istasyon getPos [random 8, random 360]);
+                    _ng setCombatMode "GREEN";
+                    if (_kesifAktif) then {
+                        // dusman goruldu: dur, yat, sessiz kal, izle
+                        _ng setBehaviour "STEALTH";
+                        { _x setUnitPos "DOWN"; } forEach _takim;
+                        _s doWatch (getPosATL (_gorulen param [0, _s]));
+                    } else {
+                        private _yan = _ng getVariable [QGVAR(sniperSide), 1];
+                        private _ed = (expectedDestination _pl) select 0;
+                        private _gidis = if (_ed isNotEqualTo [0, 0, 0] && {(_pl distance2D _ed) > 30}) then {_pl getDir _ed} else {getDir _pl};
+                        private _istasyon = _lp getPos [150, _gidis + (25 * _yan)];
+                        if (surfaceIsWater _istasyon) then { _istasyon = _lp getPos [80, _gidis + (25 * _yan)]; };
+                        private _uzak = _s distance2D _istasyon;
+                        if (!surfaceIsWater _istasyon && {_uzak > 35}) then {
+                            // uzaktaysa AWARE ile hizli onde ol, yaklasinca STEALTH
+                            _ng setBehaviour (["AWARE", "STEALTH"] select (_uzak < 60));
+                            { _x setUnitPos "AUTO"; } forEach _takim;
+                            if ((time - (_ng getVariable [QGVAR(snpMoveLast), -999])) > 8) then {
+                                _ng setVariable [QGVAR(snpMoveLast), time];
+                                _s doMove (_istasyon getPos [random 8, random 360]);
+                            };
+                        } else {
+                            // istasyonda: yat + cevreyi tara (6 sn'de bir yon degistir)
+                            _ng setBehaviour "STEALTH";
+                            { _x setUnitPos "DOWN"; } forEach _takim;
+                            if ((time - (_ng getVariable [QGVAR(snpTaraLast), -999])) > 6) then {
+                                _ng setVariable [QGVAR(snpTaraLast), time];
+                                _s doWatch (_s getPos [300, _gidis + (random 140) - 70]);
+                            };
                         };
                     };
                 };
@@ -263,10 +303,21 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                 };
             };
 
+            // KOMUTAN EMRI: son karar taze (<= 40 sn) ve WITHDRAW / EVADE_ARMOR degilse ates serbest;
+            // yakildiysa kendini savunur
+            private _karar = _pg getVariable [QGVAR(cmdSonKarar), ""];
+            private _emir = ((time - (_pg getVariable [QGVAR(cmdSonKararZaman), -999])) < 40)
+                && {!(_karar in ["", "WITHDRAW", "EVADE_ARMOR"])};
+            private _ates = _emir || _yandik;
+            if (_ates isNotEqualTo (_ng getVariable [QGVAR(snpAtesEmri), false])) then {
+                _ng setVariable [QGVAR(snpAtesEmri), _ates];
+                diag_log format ["[SNIPER-EMIR] %1 | ates %2 (komutan karari: %3%4)", groupId _ng, ["YASAK", "SERBEST"] select _ates, _karar, if (_yandik) then {", yakildi"} else {""}];
+            };
+
             // Pozisyona vardi mi
             if (_hold isNotEqualTo [] && {(_s distance2D _hold) < 7}) then {
                 _ng setBehaviour "STEALTH";
-                _ng setCombatMode "YELLOW";
+                _ng setCombatMode (["GREEN", "YELLOW"] select _ates);
                 _s setUnitPos "DOWN";
                 if (!isNull _sp) then {
                     _sp setUnitPos "DOWN";
@@ -290,8 +341,10 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                     if ((time - (_s getVariable [QGVAR(snpTgtLast), -999])) > 4) then {
                         _s setVariable [QGVAR(snpTgtLast), time];
                         _s doWatch _best;
-                        _s doTarget _best;
-                        _s doFire _best;
+                        if (_ates) then {
+                            _s doTarget _best;
+                            _s doFire _best;
+                        };
                     };
                 } else {
                     _s doWatch _tp;
