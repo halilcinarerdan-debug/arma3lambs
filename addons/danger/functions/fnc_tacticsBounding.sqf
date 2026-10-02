@@ -23,11 +23,11 @@ params ["_group", "_target", ["_units", []], ["_delay", 180]];
 // Lokal bounding sabitleri (USMC doktrini)
 // ---------------------------------------------------------------------------
 private _BND_ASSAULT_RANGE   = 55;
-private _BND_CYCLE_BASE      = 2.5;   // ortak ates bekleme (sn)
-private _BND_CYCLE_RAND      = 1.5;
+private _BND_CYCLE_BASE      = 6;   // ortak ates bekleme (sn)
+private _BND_CYCLE_RAND      = 3;
 private _BND_SUPPRESSION_MUL = 3;
-private _BND_MAX_CYCLES      = 14;
-private _BND_COVER_RANGE     = 30;    // ileri siper arama menzili (m)
+private _BND_MAX_CYCLES      = 8;
+private _BND_COVER_RANGE     = 50;    // ileri siper arama menzili (m)
 
 // ---------------------------------------------------------------------------
 // Grup / lider dogrulama
@@ -408,7 +408,7 @@ if (EGVAR(main,debug_functions)) then {
             private _cp = _x select 0;
             private _atilim = _kPos distance2D _cp;
             // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin); cok uzak atilim da sayilmaz
-            if ((_mesafe - (_cp distance2D _hedef)) >= 6 && {_atilim <= 40}) then {
+            if ((_mesafe - (_cp distance2D _hedef)) >= 15 && {_atilim <= 60}) then {
                 private _n = (floor (_atilim / 5)) max 1;
                 private _a = 0;
                 for "_k" from 1 to _n do {
@@ -418,7 +418,7 @@ if (EGVAR(main,debug_functions)) then {
                         _a = _a + 1;
                     };
                 };
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 30) max 0));
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 45) max 0));
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
@@ -430,9 +430,9 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _cover;
 
         if (_movePos isEqualTo []) then {
-            private _kayma = [-25, 25] select ((((units (group _kosan)) find _kosan) max 0) % 2);
+            private _kayma = [-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2);
             private _kalan = (_mesafe - _hucumMenzil) max 0;
-            _hop = 25 min _kalan;
+            _hop = 35 min _kalan;
             _movePos = _kPos getPos [_hop, ((_kosan getDir _hedef) + _kayma)];
             if (surfaceIsWater _movePos) then { _movePos = _kPos; _hop = 0; };
             _stance = "MIDDLE";
@@ -616,6 +616,15 @@ if (EGVAR(main,debug_functions)) then {
 
             _hareketEdecek = _kosanlar;
             _kapsama = _fse + _reserve + _destekTum;
+        };
+
+        // KOMUTAN ONDE KOSMAZ: lider sicramaya katilmaz, kapsama ekibinde (geriden) ates eder ve yonetir;
+        // yalnizca baska kosacak kimse kalmadiysa kosar
+        private _ldrB = leader _group;
+        if ((_ldrB in _hareketEdecek) && {(count _hareketEdecek) > 1}) then {
+            _hareketEdecek = _hareketEdecek - [_ldrB];
+            _ciftYakinla = _ciftYakinla select {(_x select 0) isNotEqualTo _ldrB};
+            _kapsama pushBackUnique _ldrB;
         };
 
         // Kosacak kimse yoksa (manevra ekibi eridi / cift kurulamadi) FSE + rezerv sicrar; donga durmasin

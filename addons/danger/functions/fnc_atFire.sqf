@@ -38,6 +38,9 @@ if (_launcher isEqualTo "") exitWith {false};
 if ((_unit ammo _launcher) <= 0 && {(currentWeapon _unit) isEqualTo _launcher}) exitWith {false};
 if ((_unit distance2D _target) > 400) exitWith {false};
 
+// GUVENLIK: dost / geri patlama / engel (cali, dal) kontrolu — guvenli degilse ATMA
+if (!([_unit, _target, "RPG"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}]))) exitWith {false};
+
 _unit setUnitPosWeak "UP";   // roket icin ayakta gorus (MIDDLE'da siperin arkasindan zirhi goremeyebilir)
 _unit doTarget _target;
 
@@ -47,7 +50,7 @@ if ((currentWeapon _unit) isNotEqualTo _launcher) then {
         [_unit, _launcher] call CBA_fnc_selectWeapon;
         [{
             params ["_u", "_t"];
-            if (alive _u && {alive _t}) then {
+            if (alive _u && {alive _t} && {[_u, _t, "RPG"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
                 _u doFire _t;
             };
         }, [_unit, _target], 4] call CBA_fnc_waitAndExecute;

@@ -61,6 +61,9 @@ if (_d < 40 || {_d > 320}) exitWith {false};
 // Dost atesi: hedefin 12 m cevresinde dost varsa atma (escort / ilerleyen birlik)
 if (((_target nearEntities ["CAManBase", 12]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {false};
 
+// GUVENLIK: dost / engel (cali, dal) / sekme kontrolu — guvenli degilse ATMA
+if (!([_unit, _target, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}]))) exitWith {false};
+
 // ---------------------------------------------------------------------------
 // UYGUN MU: hat kapali / binada / kume / %50
 // ---------------------------------------------------------------------------
@@ -100,7 +103,7 @@ _unit selectWeapon _gl;
 
 [{
     params ["_u", "_t", "_muzzle"];
-    if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0}) then {
+    if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0} && {[_u, _t, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
         _u fireAtTarget [_t, _muzzle];
     };
     [{
@@ -120,7 +123,7 @@ for "_i" from 1 to ((_salvo min 3) - 1) do {
             _u selectWeapon _muzzle;
             [{
                 params ["_u3", "_t3", "_m3"];
-                if (alive _u3 && {!isNull _t3} && {alive _t3} && {(_u3 ammo _m3) > 0}) then {
+                if (alive _u3 && {!isNull _t3} && {alive _t3} && {(_u3 ammo _m3) > 0} && {[_u3, _t3, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
                     _u3 fireAtTarget [_t3, _m3];
                 };
                 [{ params ["_u4"]; if (alive _u4) then { _u4 selectWeapon (primaryWeapon _u4); }; }, [_u3], 1.5] call CBA_fnc_waitAndExecute;

@@ -408,3 +408,9 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
   - fnc_tacticsBreakContact: TEK KALAN asker artik savasmaz: kacar, varinca yatar + STEALTH + combatMode GREEN ile 60 sn saklanir (dusman 20 m'ye girerse savasir);
     cooldown 8 sn, guvenlik valfi 130 sn. fnc_fieldCraft (E): tek kalan + temas -> breakContact'i dogrudan tetikler. RPT: [SAHA] tek kalan.
   - fnc_tccc: "_baygin / _birak undefined" hatasi (spawn kapsami) duzeltildi.
+
+=== v7.13 ===
+- Bounding: siper omru 7.5-10.5 sn, atilim min 15 m (max 60), siper arama 50 m, max 8 cycle
+- Komutan sicramaya katilmaz (kapsama ekibinden yonetir)
+- Cekilme sonrasi 90 sn hucum ailesi yasak (DELAY)
+- fnc_atisGuvenli: RPG/UGL icin dost, geri patlama, cali/dal sekmesi, hat engeli kontrolu

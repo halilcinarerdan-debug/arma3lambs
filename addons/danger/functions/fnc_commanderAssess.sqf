@@ -484,6 +484,14 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
     };
 };
 
+// CEKILME SONRASI KILIT: cekilme biteli 90 sn dolmadan hucum ailesine GERI DONME (cekil -> hemen dusmana kos -> olum dongusu);
+// guc ustunlugu (PUSH) disinda DELAY (siper al, temas kes) uygulanir
+if (!_push && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]}
+    && {(time - (_group getVariable [QGVAR(retreatEndTime), -999])) < 90}) then {
+    _decision = "DELAY";
+    _reason = "cekilme sonrasi: 90 sn hucum yok, siper al";
+};
+
 // KARAR TAAHHUDU: hucum ailesi (BOUNDING / FLANK / ASSAULT / SUPPRESS_ASSAULT) arasinda karar en az 20 sn SABIT kalir;
 // kritik kararlar (WITHDRAW / HOLD / DELAY / PEEL / zirh vb.) ve PUSH aninda gecer
 private _aile = ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"];
