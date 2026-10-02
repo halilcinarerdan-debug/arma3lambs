@@ -151,6 +151,8 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     && {(_g getVariable [QGVAR(roleOrderSig), -1]) != (count _tum)}
                     && {(time - (_g getVariable [QGVAR(contact), 0])) > 20}
                     && {missionNamespace getVariable ["lambs_danger_roleReorder", true]}
+                    // v8.20: formasyon sirasi yalniz grup YURURKEN duzenlenir (duran / yeni spawn grupta joinSilent x2 herkesi yeni slota yuruttu: "nereye gecelim" hareketi)
+                    && {(speed _leader) > 2.5}
                     && {(_tum findIf {!(local _x) || {!((lifeState _x) in ["HEALTHY", "INJURED"])}}) isEqualTo -1}
                 ) then {
 
