@@ -270,7 +270,7 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _ciftler;
 
         // 3) Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
-        private _bitis = time + 14;
+        private _bitis = time + 20;
         private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
@@ -286,12 +286,28 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _varis;
 
+            // Ezilen asker baski dusunce (< 0.5) kosuya geri doner — yerinde birakilmaz (once: ezilen sicrama boyunca takili kaliyordu)
+            {
+                private _b = _x select 0;
+                if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.5}) then {
+                    _pinned = _pinned - [_b];
+                    _b disableAI "TARGET";
+                    _b disableAI "AUTOTARGET";
+                    _b disableAI "AUTOCOMBAT";
+                    _b disableAI "COVER";
+                    _b setBehaviour "AWARE";
+                    _b setVariable [QGVAR(forceMove), true];
+                    _b setUnitPosWeak "UP";
+                    _b moveTo (_x select 1);
+                };
+            } forEach _varis;
+
             private _gelmeyen = _varis select {
                 alive (_x select 0)
                 && {!((_x select 0) in _pinned)}
                 && {((_x select 0) distance2D (_x select 1)) > 9}
             };
-            if (_gelmeyen isEqualTo []) exitWith {};
+            if (_gelmeyen isEqualTo [] && {(_pinned select {alive _x}) isEqualTo []}) exitWith {};
             { (_x select 0) moveTo (_x select 1); } forEach _gelmeyen;
             sleep 3;
         };

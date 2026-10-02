@@ -13,6 +13,7 @@
  * C) SILAHSIZ DUSMAN: mermisi olan asker, silahsiz (veya mermisiz) fakat TESLIM OLMAMIS dusmani 100 m icinde
  *    gordugu halde ates etmiyorsa (LAMBS / motor "zararsiz hedef" yok sayar): reveal + doTarget + doFire +
  *    1 sn sonra fireAtTarget. 6 sn / birim. Esir (captive) ve teslim animasyonuna dokunmaz.
+ * D) MERMI BITTI: yedek sarjor yok -> yan silaha gec; yoksa 40 m icindeki olu askerden uyumlu sarjor al.
  *
  * KAPATMA ANAHTARI: lambs_danger_fireSupportOff = true     RPT: [ATES-DESTEK]
  *
@@ -136,6 +137,41 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                     };
                 }, [_u, _e], 1] call CBA_fnc_waitAndExecute;
                 diag_log format ["[ATES-DESTEK] %1 | %2 | silahsiz dusmana ates (%3 m)", groupId _g, name _u, round (_u distance2D _e)];
+            } forEach _uyeler;
+
+            // ---------------- D) MERMI BITTI: yedek sarjor yoksa sidearm / olu askerden mermi topla ----------------
+            {
+                private _u = _x;
+                if (time < (_u getVariable [QGVAR(scavT), 0])) then { continue };
+                private _pw = primaryWeapon _u;
+                if (_pw isEqualTo "") then { continue };
+                private _uyumlu = compatibleMagazines _pw;
+                if (((magazines _u) arrayIntersect _uyumlu) isNotEqualTo [] || {(_u ammo _pw) > 0}) then { continue };
+                _u setVariable [QGVAR(scavT), time + 4];
+
+                // 1) yan silah
+                private _hg = handgunWeapon _u;
+                if (_hg isNotEqualTo "" && {(_u ammo _hg) > 0}) then {
+                    _u selectWeapon _hg;
+                    continue
+                };
+
+                // 2) yakindaki olu askerden uyumlu sarjor (doktrin: ates gucu bitince cephane devral)
+                private _olu = (nearestObjects [_u, ["CAManBase"], 40]) select {
+                    !alive _x && {((magazines _x) arrayIntersect _uyumlu) isNotEqualTo []}
+                };
+                if (_olu isEqualTo []) then { continue };
+                private _hedef = _olu select 0;
+                if ((_u distance2D _hedef) > 2.5) then {
+                    _u doMove (getPosATL _hedef);
+                } else {
+                    private _mags = (magazines _hedef) select {_x in _uyumlu};
+                    {
+                        _hedef removeMagazine _x;
+                        _u addMagazine _x;
+                    } forEach (_mags select [0, 3]);
+                    diag_log format ["[ATES-DESTEK] %1 | %2 | mermi bitti: %3 sarjor olu askerden alindi", groupId _g, name _u, count (_mags select [0, 3])];
+                };
             } forEach _uyeler;
         } forEach allGroups;
     };
