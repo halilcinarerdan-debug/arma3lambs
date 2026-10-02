@@ -745,10 +745,11 @@ if (EGVAR(main,debug_functions)) then {
         } forEach _hareketEdecek;
 
         // Gozle gorulur: lider jest + callout (30 sn'de bir)
+        // JEST + CAGRI: her cycle DEGIL, 45 sn'de bir (surekli "ilerle / ilerle" spam'i olmasin)
         if (_hareketler isNotEqualTo []) then {
-            [leader _group, ["gestureGo"]] call EFUNC(main,doGesture);
             private _sonCycleCallout = _group getVariable [QGVAR(bndSonCycleCallout), 0];
-            if ((time - _sonCycleCallout) > 30) then {
+            if ((time - _sonCycleCallout) > 45) then {
+                [leader _group, ["gestureGo"]] call EFUNC(main,doGesture);
                 [leader _group, "combat", "Advance", 125] call EFUNC(main,doCallout);
                 _group setVariable [QGVAR(bndSonCycleCallout), time];
             };

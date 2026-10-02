@@ -418,3 +418,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.14 ===
 - selectFormation: arazi Schmitt tetik (urban gir>=8/cik<3, orman gir>=25/cik<12), mesafe bandi histerezisi (50/150 m +10/+15), degisim bekleme 90 sn (zirh/agir kayip: 20 sn)
+
+=== v7.15 ===
+- Bounding jest+cagri 45 sn (her cycle degil); leaderSync: bounding/hucum kararinda devre disi, her birakistan sonra 40 sn (sure dolunca 60 sn) sogum, tetik orani 0.4

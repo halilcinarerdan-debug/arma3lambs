@@ -40,6 +40,8 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
         };
         _g setVariable [QGVAR(syncHold), false];
         _g setVariable [QGVAR(syncSlow), false];
+        // HER birakistan sonra en az 40 sn yeniden tetiklenmez (dur / kalk / dur spam'i olmasin)
+        _g setVariable [QGVAR(syncSoguma), (time + 40) max (_g getVariable [QGVAR(syncSoguma), 0])];
     };
 
     while {true} do {
@@ -57,7 +59,8 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 || {_g getVariable [QGVAR(isEvading), false]}
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
-                || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}};
+                || {_g getVariable [QGVAR(isBounding), false]}
+                || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}};
             private _aktif = ((_g getVariable [QGVAR(contact), 0]) > time)
                 || {_g getVariable [QGVAR(isBounding), false]}
                 || {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 45};
@@ -106,7 +109,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 if (_bitis) then {
                     private _sureDoldu = (_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 20};
                     [_g, _l, format ["oran:%1 enGeri:%2m", _oran toFixed 2, round _enGeri]] call _birak;
-                    if (_sureDoldu) then { _g setVariable [QGVAR(syncSoguma), time + 25]; };
+                    if (_sureDoldu) then { _g setVariable [QGVAR(syncSoguma), time + 60]; };
                 } else {
                     // yavastan beklemeye yukselt
                     if ((_oran >= 0.5) && {_enGeri > 30} && {!(_g getVariable [QGVAR(syncHold), false])} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
@@ -120,7 +123,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
             };
 
             // --- tetik ---
-            if (_hiz > 0.8 && {_oran >= 0.25} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
+            if (_hiz > 0.8 && {_oran >= 0.4} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
                 _g setVariable [QGVAR(syncLeader), _l];
                 if ((_oran >= 0.5) && {_enGeri > 30}) then {
                     _l disableAI "PATH";
