@@ -513,3 +513,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.41 ===
 - grenadeAwareness: bomba listesi doluysa tarama 0.2 sn (tepki gecikmesi)
+
+=== v7.42 ===
+- Retreat: boyunca disableGroupAI true (LAMBS sympathetic assault/Advance ezmesin); bitis ve guvenlik valfinde eski degere donulur

@@ -132,6 +132,10 @@ private _wps = [_wp1, _wp2, _wp3, _wp3];
 
 private _baslangic = time;
 _group setVariable [QGVAR(isRetreating), true];
+// LAMBS taban "sympathetic assault / Advance" tepkileri retreat emrini eziyordu (RPT: RET sirasinda "TACTICS ASSAULT (... with 2 units)").
+// Retreat boyunca grup LAMBS reaksiyonlarina kapatilir (disableGroupAI); bitisinde / valfte ESKI degere donulur.
+_group setVariable [QGVAR(retreatEskiDGA), _group getVariable [QGVAR(disableGroupAI), false]];
+_group setVariable [QGVAR(disableGroupAI), true];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(retreatStartTime), _baslangic];
 
@@ -144,6 +148,8 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
     if (!isNull _g && {((_g getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _start)}) then {
         if (_g getVariable [QGVAR(isRetreating), false]) then {
             _g setVariable [QGVAR(isRetreating), nil];
+            _g setVariable [QGVAR(disableGroupAI), [nil, true] select (_g getVariable [QGVAR(retreatEskiDGA), false])];
+            _g setVariable [QGVAR(retreatEskiDGA), nil];
             _g setVariable [QGVAR(isExecutingTactic), nil];
             _g setVariable [QGVAR(retreatEndTime), time];
             _g setSpeedMode "NORMAL";
@@ -446,6 +452,8 @@ if (EGVAR(main,debug_functions)) then {
     // -----------------------------------------------------------------------
     if (!isNull _group && {((_group getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _baslangic)}) then {
         _group setVariable [QGVAR(isRetreating), nil];
+        _group setVariable [QGVAR(disableGroupAI), [nil, true] select (_group getVariable [QGVAR(retreatEskiDGA), false])];
+        _group setVariable [QGVAR(retreatEskiDGA), nil];
         _group setVariable [QGVAR(isExecutingTactic), nil];
         _group setVariable [QGVAR(retreatEndTime), time];
         _group setSpeedMode "NORMAL";
