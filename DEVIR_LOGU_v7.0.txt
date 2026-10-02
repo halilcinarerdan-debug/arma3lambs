@@ -657,3 +657,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Kullanici gozlemi: 'awarede bekleyen 1 kisi oldu' -> varan hareketliler pencere sonuna kadar AWARE/ayakta kaliyordu. Duzeltme: varir varmaz COMBAT + comelme + doStop + doSuppress (_erken listesi).
 - Kullanici: 'smokelar yetmiyor' -> BREAK_CONTACT 3 atici (2.5 sn arayla, yanlara +-14 derece = genis perde), cooldown 30 sn; retreat tek numarali sicramalarda (3,5,..) sisi tazeler.
 - Kullanici sorusu (acik arazide retreat basarisizligi dogal mi?): evet buyuk olcude. Acik arazide ates ustunlugu olan dusmandan yurume ile ayrilmak gercekte de en yuksek kayip anidir (Ukrayna dron goruntuleri: siperde bile geri cekilen mangalar). Hedef 'basarili retreat' degil, 'dogru olasilikli retreat' olmali: sis + ortu + kisa sicrama kayip orani dusurur, sifirlamaz.
+=== v8.11 PUSU DAVRANISI + ATES EMRI (ROE) v1 (VBS4 oncelik 3; hibrit) ===
+- fnc_pusu (watcher, 2 sn): TETIK = yerel / oyunculu olmayan grup, >= 4 piyade, taktik bayragi yok, son 6 sn temas yok, son pusudan 90 sn gecti, lider piyade dusmani BILIYOR (knowsAbout >= 1.2),
+  mesafe 90-260 m ve dusman YAKLASIYOR (3+ sn'de >= 4 m). Dusmanin bizi bilip bilmedigine bakilmaz (HILE YOK).
+- PUSU: ates politikasi TUTULU (combatMode GREEN), LAMBS bu grupta kapali (grup + birim bayragi), herkes dusmana donuk siper alir (findCover 25 m), STEALTH.
+- ATES (ayni anda, combatMode RED = SERBEST): dusman <= pusuAtesM (70 m kill-box) | grup ele verildi (baski > 0.15 / yara / kayip) | dusman <= 35 m. Ilk salvodan sonra 8 sn LAMBS kapali kalir.
+- IPTAL: 150 sn, dusman 15 sn kayip / > 320 m, grup tukendi. Bitince tum bayraklar eski haline doner.
+- Doktrin anahtarlari: pusu, pusuAtesM, pusuMaxS, pusuMinKisi. Kapatma: lambs_danger_pusuV1 = false. Olaylar: AmbushBasla / AmbushAtes / AmbushBitti. Log: [PUSU].
+- Dogrulanacak: tetik sikligi (cok sik = esik sert), kill-box'ta ayni anda ates, 'ele verildi' orani, pusu sonrasi taktige donus (bounding / retreat) ve AllClear guvenlik agi.

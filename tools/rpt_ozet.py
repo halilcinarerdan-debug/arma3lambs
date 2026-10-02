@@ -10,7 +10,7 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
@@ -115,6 +115,19 @@ def ozet(path):
             statistics.mean(dr) if dr else 0, statistics.mean(pl) if pl else 0, statistics.mean(ms) if ms else 0, max(ms) if ms else 0))
     else:
         print("  yok (rota: tehdit 90-600 m + bounding gerekir)")
+    ps = [l for l in satirlar if "[PUSU]" in l]
+    print("\n-- PUSU / ATES EMRI --")
+    if ps:
+        bas = len([1 for l in ps if "BASLADI" in l]); ates = len([1 for l in ps if "| ATES |" in l]); ipt = len([1 for l in ps if "IPTAL" in l])
+        print("  basladi:", bas, "| ates:", ates, "| iptal:", ipt)
+        nd = {}
+        for l in ps:
+            m = re.search(r"neden:(ATES:[^|]+)", l)
+            if m: nd[m.group(1).strip()] = nd.get(m.group(1).strip(), 0) + 1
+        print("  ates nedenleri:", nd)
+        for l in ps[:6]: print("  ", l.split('"')[1][:150] if '"' in l else l[:150])
+    else:
+        print("  yok (pusu: 90-260 m yaklasan piyade dusman + temas yok gerekir)")
     ek = [l for l in satirlar if "[GERI-CEKILME-EK]" in l]
     print("\n-- RETREAT EK SICRAMA --")
     print("  ek sicrama satiri:", len(ek))
