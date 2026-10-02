@@ -533,3 +533,51 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 - fnc_doktrin (profil cozucu, kalitim: GENEL -> ust -> ordu) + fnc_dk (anahtar okuyucu). Profiller: GENEL, USMC, ABD, RUS, CHN, PESHMERGA (BASLANGIC TAHMINLERI, nizamnamelerle dogrulanmali)
 - Baglananlar: commanderAssess (assaultM, cekilKayip, peelOran/Kayip, kucukEkip, yakinM), tacticsBounding (bndBitisM, bndMaxCycle, owKurulumS, bantlar), tacticsRetreat (retreatAdim), tacticalUGL (uglUzakM/Aralik, uglRezerv/M), rearGuard (arkaGuvenlik/MinKisi)
 - Misyondan genisletme: lambs_danger_doktrinTanimlari / lambs_danger_doktrinHaritasi. Dokuman: DOKTRIN_CERCEVESI.md
+
+=== v8.2 SIPER ANALIZI v2 (faz 1) + DEVIR NOTU ===
+YAPILAN
+- main/fnc_findCover.sqf FAZ 2: ilk 6 aday icin tehdit YELPAZESI (+-10/20/40 derece, +2/isin) ve ATIS EDEBILME analizi
+  (DEFEND/OVERWATCH/ADVANCE: ayakta acik +8, yandan 0.6 m egilip hedef gorulur +10, hedef hic gorulmuyor -15). Kapatma: lambs_main_coverV2 = false.
+  Tani: [SIPER-ANALIZ] (ilk 40 cagri). rpt_ozet.py "SIPER ANALIZI" bolumu ekledi.
+- Not: findCover v4 zaten mermi geometrisi (FIRE LOD), omuz testi, +-25 yan aci, diger tehditler, hull-down, rezerv, kalabalik cezasi iceriyor.
+  v2 bunlarin USTUNE binmistir, yerine gecmez.
+
+DEVIR NOTU (bundan sonrasi icin tek sayfa durum)
+1) MIMARI (katmanlar)
+   - Karar: fnc_commanderAssess (komutan beyni) -> kararlar: BOUNDING/FLANK/ASSAULT/SUPPRESS_ASSAULT/HOLD/DELAY/WITHDRAW/PEEL/EVADE_ARMOR/AT_ENGAGE/PUSH
+   - Dispatch: fnc_tactics -> tacticsBounding / tacticsRetreat / tacticsEvadeArmor / tacticsBreakContact / (LAMBS: Hold, Hide, Assault, Flank)
+   - Doktrin cercevesi (v8.1): fnc_doktrin (profil cozucu, kalitim) + fnc_dk (anahtar okuyucu); profiller GENEL/USMC/ABD/RUS/CHN/PESHMERGA
+     (degerler BASLANGIC TAHMINI; nizamnamelerle dogrulanmali). Dokuman: DOKTRIN_CERCEVESI.md
+   - Hareket arbitraji: lambs_danger_taktikKilit (zaman damgasi) — bounding/retreat/evade/temas kes katilimcilarina konur, watchdog'lar kilitli askere
+     hareket emri vermez (buddyBond, dispersion, roleStation, rearGuard, coverHug, fieldCraft, cqbReflex, sikisma)
+   - Watchdog'lar (yerel AI): roleStation, buddyBond, dispersion, reloadCover, grenadeAwareness, cqbReflex, sniperTeam, buildingClear, coverHug,
+     fireSupport, commanderFormation, moveAssist, fireLine (VARSAYILAN KAPALI), tccc, fieldCraft, rearGuard, durumLog, leaderSync, soundAwareness, firedHub
+   - LAMBS taban FSM'i derlenmis pbo'da; sadece bayraklarla bastirilabilir (disableGroupAI, forceMove). Retreat sirasinda disableGroupAI = true.
+2) TANI ALTYAPISI (RPT etiketleri): [DURUM-GRUP] [DURUM] [DOKTRIN] [KOMUT] [CAGRI] [JEST] [CMD] [BND*] [OVERWATCH] [GERI-CEKILME*] [TEMAS-KES*]
+   [ATIS-TANI] [GRENADE-ATIS] [EL-BOMBASI*] [ATIS-GUVENLIK] [DOKTRIN-PROFIL] [SIPER-ANALIZ]. Hizli ozet: python tools/rpt_ozet.py <rpt>.
+   Test listesi: TEST_SENARYOLARI.md (12 senaryo + gecme olcutleri).
+3) CALISMA KURALLARI
+   - Her degisiklikte: parantez denetimi (tum .sqf), XEH_PREP boot satiri surumu, bu log'a madde, commit + push (dal: claude/optimistic-turing-pr1x9w).
+   - Dosya satir sonlari: CRLF olan dosyalar CRLF kalmali (python newline='' ile yaz; bazi dosyalar LF).
+   - Yorum satiri KOD SATIRININ ICINDE olmamali (v7.36 olayi: // ayni satirdaki kodu yuttu -> moveAssist derlenmedi).
+   - CBA waitAndExecute bloklari dis degiskenleri GORMEZ: arguman olarak gec (tacticalUGL _salvo olayi).
+   - Tag push bu ortamda calismadi (v8.0-muhur yalniz yerelde); commit d3ba94b muhur sayilir.
+4) DOGRULANMAMIS (oyunda test bekliyor)
+   - Retreat varis orani (siper hedefli sicrama + LAMBS bastirma + arbitraj), el bombasi tepki suresi (v7.40-41), hareket arbitraji etkisi,
+     komutanin bounding'de takip etmesi (v7.39), siper analizi v2 (bu surum), UGL uzak mesafe/rezerv kurallari.
+5) YOL HARITASI (VBS4 ilhamli, Arma 3'e yedirilmis)
+   [x] 1. Siper ve atis pozisyonu analizi v2 — faz 1 (yelpaze + atis edebilme)
+   [ ] 1b. Siper onbellegi (bolge izgarasi, geometriden uretilen siper noktalari; tekrar taramayi azalt)
+   [ ] 2. Taktik rota planlama (gizli yaklasma): agac hatti / cali / duvar / cukur aday ara noktalari, tehdit gorusu ile gizlilik puani;
+          bounding sonraki atilim noktasi ve komutan ilerleme emri buna baglanacak (ayni gorus/maruziyet altyapisi)
+   [ ] 3. Olay mesajlari: InContact / AllClear / UnderFire / Casualty (CBA event veya grup degiskeni), davranis dinleyicileri; polling'i azalt
+   [ ] 4. Primitif kutuphane + veri tabanli davranis (Sequence/Selector calistiricisi), pusu / savunma / devriye; ates emri (ROE: SERBEST/EMIRLE/ATES_ALTINDA),
+          killbox, lider gozlem; doktrin profiline ates_politikasi
+   [ ] 5. Mevzi / hendek sistemi (Ukrayna senaryolari): hendek siniflari kaydi, her mevziye pozisyon noktalari, mevzi arasi geri cekilme
+   [ ] 6. Kapi / oda temizleme: kapi selectionPosition ile iki yana yigilma, giris yonu, oda temizleme sirasi (harita/mod bagimli)
+   [ ] 7. Doktrin cercevesi genisletme: formasyon tercihi, komuta stili (merkezi/merkezsiz), ates disiplini, takim yapisi (4'lu ekip / 3'lu hucum hucresi)
+   [ ] 8. Insan faktoru: kontrollu rastgelelik (jitter), kademeli reaksiyon (retreat'te baski>=0.6 olana LAMBS tepkisi geri), kilit serbest birakma
+          (yaralanan / baski>=0.85 / yakin dusman <15 m), yorgunluk duyarli bound, teslimiyet/moral modulu
+   [ ] 9. Lider devralma (rutbe), ates disiplini (mermi tasarrufu, hedef paylasimi)
+6) BILINEN SINIRLAR: Arma 3'te navmesh yok (yalniz ara nokta secilebilir); AI hendege/ic mekana dogal giremez; el bombasi ATISI LAMBS tabaninda
+   (bu fork tepki + tani yonetir); mod hatalari (setHitPointDamage, fnc_throwWeapon, Bone ...) bu fork'a ait degil.

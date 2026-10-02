@@ -298,6 +298,62 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     // ---------------------------------------------------------------------
     if (_adaylar isNotEqualTo []) then {
         _adaylar sort false;
+
+        // -----------------------------------------------------------------
+        // FAZ 2 — SIPER VE ATIS POZISYONU ANALIZI (v2, VBS4 "cover and firing position analysis" fikri)
+        //   Yalniz ilk 6 aday (pahali isinlar az): tehdit YELPAZESI + ATIS EDEBILME
+        //   + yelpaze: dusman +-10/20/40 derece kayarsa kac isin hala gizli  (0..6) -> +2 / isin   (sektor maruziyeti)
+        //   + atis  : DEFEND / OVERWATCH / ADVANCE'de siper HEDEFI de gorebilmeli:
+        //       - ayakta gorus varsa (UP acik)            : zaten atis edebilir                      +8
+        //       - ayakta gizli ama yandan 0.6 m eğilip hedef gorulur (lean)                          +10
+        //       - hicbir noktadan hedef gorulmuyor (siper kendi atisimizi da kesiyor)               -15
+        //   Kapatma: lambs_main_coverV2 = false
+        // -----------------------------------------------------------------
+        if (missionNamespace getVariable ["lambs_main_coverV2", true]) then {
+            private _k = 6 min (count _adaylar);
+            private _bas = _adaylar select [0, _k];
+            private _ilkPos = (_bas select 0) select 1;
+            private _atisModu = _mode in ["DEFEND", "OVERWATCH", "ADVANCE"];
+            {
+                private _a = _x;
+                private _pos = _a select 1;
+                private _posASL = AGLToASL _pos;
+                private _eDir = _pos getDir _enemyPos;
+                private _eDist = _pos distance2D _enemyPos;
+
+                // yelpaze
+                private _gizliSay = 0;
+                {
+                    private _yan = AGLToASL ((_pos getPos [_eDist, _eDir + _x]) vectorAdd [0, 0, 1.8]);
+                    if ([_yan, _posASL vectorAdd [0, 0, 0.75], _unit] call _gizli) then { _gizliSay = _gizliSay + 1; };
+                } forEach [-40, -20, -10, 10, 20, 40];
+                _a set [0, (_a select 0) + (_gizliSay * 2)];
+
+                // atis edebilme
+                if (_atisModu) then {
+                    if ((_a select 2) isNotEqualTo "UP") then {
+                        _a set [0, (_a select 0) + 8];                    // ayakta acik = hedefi gorur
+                    } else {
+                        private _lean = false;
+                        {
+                            private _pp = _pos getPos [0.6, _eDir + _x];
+                            _pp set [2, (_pos select 2) + 1.45];
+                            if (!([_dangerPos, AGLToASL _pp, _unit] call _gizli)) exitWith { _lean = true; };
+                        } forEach [90, -90];
+                        _a set [0, (_a select 0) + ([-15, 10] select _lean)];
+                    };
+                };
+            } forEach _bas;
+            _bas sort false;
+            _adaylar = _bas + (_adaylar select [_k, (count _adaylar) - _k]);
+
+            // tani: ilk 40 cagri (RPT: [SIPER-ANALIZ])
+            if (isNil "lambs_main_siperLogN") then { lambs_main_siperLogN = 0; };
+            if (lambs_main_siperLogN < 40) then {
+                lambs_main_siperLogN = lambs_main_siperLogN + 1;
+                diag_log format ["[SIPER-ANALIZ] %1 | mod:%2 | aday:%3 | faz2:%4 | ilk secim %5 (%6 m)", name _unit, _mode, count _adaylar, _k, if (((_adaylar select 0) select 1) isEqualTo _ilkPos) then {"ayni"} else {"DEGISTI"}, round (_unit distance2D ((_adaylar select 0) select 1))];
+            };
+        };
         private _adet = if (_maxResults isEqualTo -1) then {
             count _adaylar
         } else {
