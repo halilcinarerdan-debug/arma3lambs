@@ -167,6 +167,12 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                             { [_x] joinSilent _yeni; } forEach _sira;
                             { [_x] joinSilent _g; } forEach _sira;
                         };
+                        // Guvenlik: biri eski gruba donmediyse ZORLA geri al (ayri grupta MG/AT kalmasin)
+                        private _kopuk = _sira select {alive _x && {(group _x) isNotEqualTo _g}};
+                        if (_kopuk isNotEqualTo []) then {
+                            _kopuk joinSilent _g;
+                            diag_log format ["[ROL-SIRA-HATA] %1 | %2 asker gruptan kopmustu, geri alindi", groupId _g, count _kopuk];
+                        };
                         diag_log format [
                             "[ROL-SIRA] %1 | MG:%2 UGL:%3 tufek:%4 nisanci:%5 AT:%6 saglikci:%7 | formasyon sirasi role gore duzenlendi",
                             groupId _g, count _mg, count _gl, count _rif, count _mrk, count _at, count _med
