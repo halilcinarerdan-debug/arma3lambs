@@ -39,7 +39,6 @@ private _unit = leader _group;
 // DOKTRIN PROFILI: bounding bitis mesafesi / cycle siniri / overwatch kurulum suresi fraksiyona gore
 _BND_ASSAULT_RANGE = [_group, "bndBitisM", _BND_ASSAULT_RANGE] call FUNC(dk);
 _BND_MAX_CYCLES = [_group, "bndMaxCycle", _BND_MAX_CYCLES] call FUNC(dk);
-private _dkOwKurulum = [_group, "owKurulumS", 5] call FUNC(dk);
 
 // ---------------------------------------------------------------------------
 // Hedefi normalize et
@@ -711,7 +710,7 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _fse;
 
-            private _kurBitis = time + _dkOwKurulum;   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
+            private _kurBitis = time + ([_group, "owKurulumS", 5] call FUNC(dk));   // spawn icinde: dis kapsam degiskeni (_dkOwKurulum) GORUNMEZ -> dogrudan oku   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
             waitUntil {
                 sleep 0.5;
                 {

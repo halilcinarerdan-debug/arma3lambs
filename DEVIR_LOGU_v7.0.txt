@@ -581,3 +581,8 @@ DEVIR NOTU (bundan sonrasi icin tek sayfa durum)
    [ ] 9. Lider devralma (rutbe), ates disiplini (mermi tasarrufu, hedef paylasimi)
 6) BILINEN SINIRLAR: Arma 3'te navmesh yok (yalniz ara nokta secilebilir); AI hendege/ic mekana dogal giremez; el bombasi ATISI LAMBS tabaninda
    (bu fork tepki + tani yonetir); mod hatalari (setHitPointDamage, fnc_throwWeapon, Bone ...) bu fork'a ait degil.
+
+=== v8.2.1 HOTFIX ===
+- RPT (11:40 stres testi): tacticsBounding spawn blogunda "_dkOwKurulum" tanimsiz -> 270x _kurBitis hatasi, bounding cycle dongusu calismiyordu ([BND] 0 satir). Neden: v8.1 doktrin baglamasinda spawn disinda tanimli degisken spawn icinde kullanilmisti.
+  Duzeltme: spawn icinde dogrudan [_group,"owKurulumS",5] call FUNC(dk). DERS: spawn / CBA blok icinde dis kapsam degiskeni KULLANMA; arguman olarak gec veya blok icinde yeniden oku.
+- Dogrulandi: el bombasi tepkisi (fitil kalan ort 3.8 sn), doktrin profil eslesmesi (rhs_faction_usarmy_d->ABD, lop_pesh->PESHMERGA, lop_ists_opf->GENEL), siper v2 faz2 ilk secimi %15 degistirdi.
