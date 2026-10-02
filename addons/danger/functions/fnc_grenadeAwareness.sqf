@@ -73,6 +73,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             };
 
             _c = [!_isik && {_guc > 0}, _yaricap, _fitil];
+            diag_log format ["[EL-BOMBASI-CFG] %1 | gecerli:%2 | yaricap:%3 | fitil:%4 | guc:%5 | isik:%6", _ammo, !_isik && {_guc > 0}, _yaricap, _fitil, _guc, _isik];
             missionNamespace setVariable [_key, _c];
         };
         _c
@@ -267,11 +268,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             _bombalar = _bombalar arrayIntersect _bombalar;
             if (_bombalar isEqualTo []) then { continue };
 
-            // Dost bombasi (kendi tarafimiz / muttefik atti) -> kacma
-            _bombalar = _bombalar select {
-                private _atan = (getShotParents _x) param [1, objNull];
-                isNull _atan || {((side _g) getFriend (side (group _atan))) < 0.6}
-            };
+            // Dost bombasi da tehlikelidir (kendi tarafimiz atsa bile yaricap icindeyse kac) -> filtre YOK
             {
                 private _p = _x;
                 private _cfg = [typeOf _p] call _cfgFn;
