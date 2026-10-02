@@ -27,6 +27,35 @@ lambs_danger_durumLogStarted = true;
 
 diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, stance, hiz, gorev; grup: doktrin puani)";
 
+// KOMUT GECISLERI: "ilerle / dur" spam'ini gormek icin temasli gruplarin askerlerinde currentCommand degisimi (1 sn'de bir kontrol,
+// asker basina en fazla 3 sn'de bir satir, toplam 400 satir)
+[] spawn {
+    private _n = 0;
+    while {true} do {
+        sleep 1;
+        if (missionNamespace getVariable ["lambs_danger_durumLogOff", false]) then { continue };
+        {
+            private _g = _x;
+            if (isNull _g || {!local _g} || {isPlayer (leader _g)}) then { continue };
+            if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { continue };
+            {
+                private _u = _x;
+                if (!alive _u || {!isNull objectParent _u}) then { continue };
+                private _c = currentCommand _u;
+                private _o = _u getVariable [QGVAR(durumKomut), ""];
+                if (_c isNotEqualTo _o) then {
+                    _u setVariable [QGVAR(durumKomut), _c];
+                    if (_o isNotEqualTo "" && {_n < 400} && {time > (_u getVariable [QGVAR(durumKomutT), 0])}) then {
+                        _u setVariable [QGVAR(durumKomutT), time + 3];
+                        _n = _n + 1;
+                        diag_log format ["[KOMUT] %1 | %2 | %3 -> %4 | gorev:%5 | hiz:%6", groupId _g, name _u, _o, _c, _u getVariable [QEGVAR(main,currentTask), "-"], round (speed _u)];
+                    };
+                };
+            } forEach (units _g);
+        } forEach allGroups;
+    };
+};
+
 [] spawn {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
@@ -97,7 +126,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 if (_i < 16) then {
                     private _e = _u findNearestEnemy _u;
                     diag_log format [
-                        "[DURUM] %1 | %2%3 | %4 | poz:[%5,%6] | ileri:%7 yanal:%8 | lider:%9 m | %10 | %11 km/s | baski:%12 | sarjor:%13 | dusman:%14 m | gorev:%15 | %16",
+                        "[DURUM] %1 | %2%3 | %4 | poz:[%5,%6] | ileri:%7 yanal:%8 | lider:%9 m | %10 | %11 km/s | baski:%12 | sarjor:%13 | dusman:%14 m | gorev:%15 | %16 | komut:%17 | anim:%18 | katsayi:%19 | yon:%20",
                         groupId _g, name _u, ["", " (K)"] select (_u isEqualTo _l), [_u] call _rolFn,
                         round ((getPosATL _u) select 0), round ((getPosATL _u) select 1),
                         round _ileri, round _yanal, round (_u distance2D _l), _st, round (speed _u),
@@ -109,7 +138,11 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                             ["ist", (_u getVariable [QGVAR(stationPos), []]) isNotEqualTo []],
                             ["bomba", (_u getVariable [QGVAR(grState), []]) isNotEqualTo []],
                             ["arka", (_g getVariable [QGVAR(rearGuardU), objNull]) isEqualTo _u]
-                        ] select {_x select 1} apply {_x select 0}) joinString ","
+                        ] select {_x select 1} apply {_x select 0}) joinString ",",
+                        currentCommand _u,
+                        (animationState _u) select [((count (animationState _u)) - 16) max 0],
+                        _u getVariable [QGVAR(mvAnim), "-"],
+                        round (getDir _u)
                     ];
                 };
                 _i = _i + 1;

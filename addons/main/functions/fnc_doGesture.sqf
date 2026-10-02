@@ -47,6 +47,13 @@ if (_gesture isEqualType []) then {
     _gesture = selectRandom _gesture;
 };
 
+// tani (ELITE): jest kaydi (ilk 200 satir)
+if (isNil "lambs_main_jestLogN") then { lambs_main_jestLogN = 0; };
+if (lambs_main_jestLogN < 200) then {
+    lambs_main_jestLogN = lambs_main_jestLogN + 1;
+    diag_log format ["[JEST] %1 | %2 | %3 | zorla:%4", groupId _grp, name _unit, _gesture, _force];
+};
+
 // do it
 if (_force) then {_unit playActionNow _gesture;} else {_unit playAction _gesture;};
 

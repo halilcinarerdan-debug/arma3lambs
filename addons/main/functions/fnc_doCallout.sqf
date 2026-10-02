@@ -134,6 +134,12 @@ if (_cachedSounds isEqualTo []) exitWith {
 };
 
 private _sound = selectRandom _cachedSounds;
+// tani (ELITE): kim ne soyledi (ilk 300 satir) — "ilerle / dur / take cover" spam'ini RPT'den izlemek icin
+if (isNil "lambs_main_cagriLogN") then { lambs_main_cagriLogN = 0; };
+if (lambs_main_cagriLogN < 300) then {
+    lambs_main_cagriLogN = lambs_main_cagriLogN + 1;
+    diag_log format ["[CAGRI] %1 | %2 | cagri:%3 | davranis:%4 | mesafe:%5", groupId _grp, name _unit, _callout, _behavior, _distance];
+};
 playSound3D [_sound, _unit, isNull (objectParent _unit), eyePos _unit, 5, pitch _unit, _distance];
 [_unit, true] remoteExecCall ["setRandomLip", 0];
 [{

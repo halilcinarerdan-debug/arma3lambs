@@ -488,3 +488,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.34 ===
 - firedHub: [ATIS-TANI] her patlayici/firlatilan mermi sinifi icin (isPlayer filtresi yok); grenadeAwareness: allMissionObjects GrenadeCore taramasi + [EL-BOMBASI-TARAMA]
+
+=== v7.35 ===
+- Tani: [CAGRI] (doCallout), [JEST] (doGesture), [KOMUT] (currentCommand gecisleri), [DURUM] satirina komut/anim/katsayi/yon
