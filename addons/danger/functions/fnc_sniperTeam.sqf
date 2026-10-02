@@ -97,6 +97,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };
+            if (missionNamespace getVariable ["lambs_danger_sniperTeamOff", false]) then { continue };
             if (_g getVariable [QGVAR(sniperTeam), false]) then { continue };
             if ((count (units _g)) < 4) then { continue };
             private _l = leader _g;

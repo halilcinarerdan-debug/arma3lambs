@@ -374,3 +374,6 @@ Yeni:
     yanarsa yer degistirir, dusman <=70 m ana komutanin arkasina cekilir. RPT: [SNIPER].
   - fnc_buddyDebug (istemci Draw3D): buddy cizgileri (yesil/sari/kirmizi), rol + mesafe etiketi, sniper cizgisi. lambs_danger_buddyDebug = true/false.
   - Dagilma yaricapi 5/8 -> 9/14 m, tasima mesafesi 12+ m.
+
+v7.5a — Keskin nisanci tespiti daraltildi: SR-25 / MAR-10 / VSS gibi DMR'ler ayrilmaz (sadece "sniper" sinif adi veya bolt-action / buyuk kalibre).
+        Kapatma anahtari: lambs_danger_sniperTeamOff = true (yeni ayrilma durur; mevcut ayrilmis takimlar bagimsiz kalir).
