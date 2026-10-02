@@ -108,7 +108,8 @@ diag_log format [
         diag_log format ["[TCCC] %1 | hekim %2 -> yarali %3 | baygin:%4 | %5", groupId _g, name _m, name _c, [_c] call _baygin, ["ATES ALTINDA", "GUVENLI"] select ([_g] call _guvenliFn)];
 
         // 1) yaralıya git
-        private _bitis = time + 25;
+        // uzaktan gelen hekim (kumanda medevac): yuruyus suresi mesafeye gore (25 sn sabit uzak yaraliya yetmiyordu)
+        private _bitis = time + ((25 max (((_m distance2D _c) / 3) + 8)) min 100);
         _m setUnitPos "UP";
         _m doMove (getPosATL _c);
         waitUntil {
@@ -238,6 +239,14 @@ diag_log format [
                 private _hekim = _adaylar select {([_x] call _rolFn) isEqualTo "MEDIC" || {_x getUnitTrait "Medic"}};
                 if (_hekim isEqualTo []) then {
                     _hekim = _adaylar select {((items _x) findIf {(toLower _x) in ["ace_packingbandage", "ace_elasticbandage", "ace_fielddressing", "ace_quikclot", "ace_tourniquet", "firstaidkit"]}) > -1};
+                };
+                // KUMANDA MEDEVAC (fnc_hqMedevac): grupta hekim yoksa baska gruptan atanan hekim
+                if (_hekim isEqualTo []) then {
+                    private _hqM = _c getVariable [QGVAR(hqMedic), objNull];
+                    if (!isNull _hqM && {alive _hqM} && {local _hqM} && {!isPlayer _hqM} && {isNull objectParent _hqM}
+                        && {(lifeState _hqM) in ["HEALTHY", "INJURED"]} && {time > (_hqM getVariable [QGVAR(tcccBusy), 0])}) then {
+                        _hekim = [_hqM];
+                    };
                 };
                 if (_hekim isEqualTo []) then { continue };
                 _hekim = [_hekim, [], {_x distance2D _c}, "ASCEND"] call BIS_fnc_sortBy;

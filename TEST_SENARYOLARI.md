@@ -54,3 +54,8 @@ Tek oturumda tum yeni ozellikler; sonuc: `python tools/rpt_ozet.py <rpt> --karne
 | F. Saglik | Tum oturum | SAGLIK / ANOMALI: anomali yok; varsa kod + grup + detay (`--anomali`) |
 
 Yaprak testi icin konsol: `lambs_danger_yaprakTest = true;` (ilk 400 degerlendirme `[YAPRAK-TEST]`), kapatma `lambs_danger_yaprakV1 = false;`, esikler `lambs_danger_yaprakEsikAyakta` / `lambs_danger_yaprakEsikYatik`.
+
+## v8.32 KUMANDA (HQ) testi
+1. Ayni taraftan 3+ grup (2 grup birbirinden 100-600 m, biri temasa girsin). Log: `[HQ] kumanda cekirdegi baslatildi`, `[HQ-TAHTA]` (90 sn'de bir), temas + kayip %25 / guc oraninda `[HQ-TAKVIYE] ... -> destek ...` ve `[HQ-EMIR] ... TAKVIYE`. Destek grubu dusmanin kanadina yaklasmali (dusman noktasina duz kosmamali). Beklenen: bir turda en cok 1-2 grup, yardim isteyene 90 sn'de bir.
+2. Hekimsiz grup + baygin yarali (hekimi oldur), yakinda (< 350 m) baska musait grup + hekimi. Beklenen: `[HQ-MEDEVAC] ... <- hekim ...`, sonra `[TCCC] ... hekim ... -> yarali ...`; hekim tedaviden sonra kendi grubuna donmeli.
+3. Kontrol: Zeus'ta grup `lambs_danger_hqTakviyeKatilim=false` ise destek vermemeli; `lambs_danger_hqV1=false` tum HQ'yu kapatir.
