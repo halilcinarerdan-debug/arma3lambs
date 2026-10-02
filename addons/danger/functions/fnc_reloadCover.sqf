@@ -200,13 +200,13 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                             private _not = "zaten siperde";
                             if (!([_u, _e] call _siperdeFn)) then {
                                 // DURUMA GORE: dusman < 20 m (yakin dovus) -> siper icin sirt cevirme, yerinde reload;
-                                // siper <= 15 m ve baski < 0.85 -> once siper; aksi halde (siper yok / uzak) yatarak
+                                // siper <= 4 m (birkac adim, acikta kosu yok) ve baski < 0.85 -> siper; aksi halde yerinde cok eger/yatarak reload (reload SONRASI kosu yok)
                                 private _yakinDusman = !isNull _e && {(_u distance2D _e) < 20};
                                 private _cv = if (isNull _e || {_yakinDusman}) then {[]} else {[_u, _e, 20, "ASCEND", 4, "DEFEND"] call EFUNC(main,findCover)};
                                 if (
                                     _cv isNotEqualTo []
                                     && {(getSuppression _u) < 0.85}
-                                    && {(_u distance2D ((_cv select 0) select 0)) <= 15}
+                                    && {(_u distance2D ((_cv select 0) select 0)) <= 4}
                                 ) then {
                                     _hedef = (_cv select 0) select 0;
                                     _stance = (_cv select 0) select 1;
@@ -223,7 +223,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                 } else {
                                     // Siper yok / uzak: acikta AYAKTA reload yok -> yat; yakin dovusta yerinde comelerek
                                     _stance = ["DOWN", "MIDDLE"] select _yakinDusman;
-                                    _not = ["siper yok/uzak -> yatarak", "dusman yakin -> yerinde comelerek"] select _yakinDusman;
+                                    _not = ["siper uzak -> yerinde yatarak", "dusman yakin -> yerinde comelerek"] select _yakinDusman;
                                 };
                             };
                             if (_faz isEqualTo "HOLD") then { _u setUnitPosWeak _stance; };
