@@ -332,7 +332,7 @@ if (EGVAR(main,debug_functions)) then {
                     _x setBehaviour "AWARE";   // sadece kosarken
                     _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
-                    _x setUnitPosWeak "UP";
+                    _x setUnitPos "UP";   // v8.22: SERT durus (zayif "UP" yetmedi: RPT 17:30 lider 2 dk boyunca PRONE surunerek ilerledi)
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
                     _varis pushBack [_x, _p, getPosATL _x, time, 0];
@@ -361,7 +361,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b enableAI "AUTOCOMBAT";
                     _b enableAI "COVER";
                     _b setBehaviour "COMBAT";
-                    _b setUnitPosWeak "DOWN";
+                    _b setUnitPos "AUTO"; _b setUnitPosWeak "DOWN";
                 };
             } forEach _varis;
 
@@ -376,7 +376,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b disableAI "COVER";
                     _b setBehaviour "AWARE";
                     _b setVariable [QGVAR(forceMove), true];
-                    _b setUnitPosWeak "UP";
+                    _b setUnitPos "UP";
                     _b doMove (_x select 1);
                     _x set [2, getPosATL _b];
                     _x set [3, time];
@@ -394,7 +394,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b enableAI "AUTOCOMBAT";
                     _b enableAI "COVER";
                     _b setBehaviour "COMBAT";
-                    _b setUnitPosWeak "MIDDLE";
+                    _b setUnitPos "AUTO"; _b setUnitPosWeak "MIDDLE";
                     doStop _b;
                     [_b, _hedefASL] call EFUNC(main,doSuppress);
                 };
@@ -452,7 +452,7 @@ if (EGVAR(main,debug_functions)) then {
                 _b enableAI "AUTOCOMBAT";
                 _b enableAI "COVER";
                 _b setBehaviour "COMBAT";   // vardi: siper al, AWARE'de ayakta durma
-                _b setUnitPosWeak "MIDDLE";
+                _b setUnitPos "AUTO"; _b setUnitPosWeak "MIDDLE";
                 // DOSTOP: varan asker kendi sicrama noktasinda KALIR (aksi halde formasyon slotuna, yani liderin eski konumuna,
                 // geri yuruyordu = "geri git ileri git, ayni yolu tekrar gidiyorlar")
                 if ((_b distance2D (_x select 1)) <= 12) then { doStop _b; };   // SADECE varanlar: varamayan durdurulursa hic ilerlemez (RPT: vardi 0/N, 40 sn'de lider kipirdamadi)

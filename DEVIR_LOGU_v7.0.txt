@@ -749,3 +749,9 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Smoke: kullanici 'asiri degil, sadece ilk temasta' -> degistirilmedi (14 sis / 3 grup; BREAK_CONTACT 11, COVER_MOVE 3).
 - Muzzle flash / ses: fnc_soundAwareness + fnc_firedHub VAR (parlama gece 700 m / gun 120 m, LOS sart, flas gizleyici / susturucu azaltir; MG'ye otomatik flas gizleyici). YOK: askerin KENDI pozisyonunu flas / siluet icin secmesi (pencereden geride, karanlik oda).
 - CQB (VBS #5) tasarim notu: parsel / avlu icinde bekleme + sirayla cikma, pencere / kapi / ic aci degerlendirme, geriden + flas gizleyen pozisyon = SIRADAKI is (bina tabanli: BIS_fnc_buildingPositions + pencere / kapi tespiti + ray ile ic aci kapsami).
+=== v8.22 (RPT 17:14, v8.21; kullanici: 'retreat hala yavas, komutan inatla ayni yerde') ===
+- Karne OK:14 KONTROL:4 YOK:3, hata 0, ROTA maruziyet 49 -> 19%, MEDIC TASMA 22, YAPRAK 2654 kontrol / %4 gizli / 1.5 ms, ORTAM 51, MORAL 9 degisim (teslim 0), SKILL VARSAYILAN 29.
+- RETREAT 2/14 (%14): tek retreat (Alpha 1-1, 4 -> 1 kisi, 130 sn). Lider Abdullah Takhtar 2 DAKIKA PRONE (anim tpsraswrfldright) surunerek 4 m / 20 sn ilerledi (forceMove + komut MOVE + baski 0.00);
+  digeri (Faisal) ayakta 21 km/s kostu, 59 m onde (dusmandan uzakta). Neden: koşan askerlere setUnitPosWeak 'UP' (zayif) uygulaniyordu, AI yakin dusman gorerek yatis surdurdu. Duzeltme: kosarken SERT setUnitPos 'UP', varista / ezilince AUTO + zayif stance.
+- SIPER-YAPISMA: ayarlandi:0 acikta:620 -> coverHug v2 hic ayar yapmadi; sebep belirsiz (ya asker zaten yapisik degil + siper > 6 m, ya isin tespiti). [SIPER-YAPIS-TANI] (ilk 25 'acikta' karari: dusman mesafesi, yuzey var / yok, en yakin yuzey) eklendi.
+- Anomaliler: YURUMUYOR 14, TEMAS-YOK-COMBAT 3, BOSTA-HAREKET 2, BIRIM-AI-KAPALI 1.

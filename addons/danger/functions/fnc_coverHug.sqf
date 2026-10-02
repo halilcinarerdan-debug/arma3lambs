@@ -100,7 +100,16 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                         if (_dd < _d && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
                     };
                 } forEach [1.1, 0.4, 1.5];
-                if (_hP isEqualTo [] || {_d > 6}) then { _sayac set ["acikta", (_sayac get "acikta") + 1]; continue };
+                if (_hP isEqualTo [] || {_d > 6}) then {
+                    _sayac set ["acikta", (_sayac get "acikta") + 1];
+                    if (isNil "lambs_danger_hugAcikLogN") then { lambs_danger_hugAcikLogN = 0; };
+                    if (lambs_danger_hugAcikLogN < 25) then {
+                        lambs_danger_hugAcikLogN = lambs_danger_hugAcikLogN + 1;
+                        diag_log format ["[SIPER-YAPIS-TANI] %1 | %2 | dusman %3 m | yuzey: %4 | en yakin yuzey %5 m (esik 6) | stance:%6", groupId _g, name _u, round _ed, if (_hP isEqualTo []) then {"YOK (3 yukseklikte isin kesisimi yok)"} else {"var ama uzak"}, if (_hP isEqualTo []) then {"-"} else {_d toFixed 1}, stance _u];
+                    };
+                    continue
+                };
+
                 private _dir = vectorNormalized (_uASL vectorDiff _eASL);
                 private _tASL = _hP vectorAdd (_dir vectorMultiply (missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.35]));   // 45 -> 35 cm (kullanici: daha yapisik)
                 _tASL set [2, _pASL select 2];
