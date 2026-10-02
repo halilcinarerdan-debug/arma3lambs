@@ -64,7 +64,10 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
             ) then {
                 _u setVariable [QGVAR(mvAnim), _istenen];
                 _u setVariable [QGVAR(mvAnimT), time + 1.5];
-                [_u, _istenen] remoteExecCall ["setAnimSpeedCoef", 0];
+                // YEREL dogrudan uygula (remoteExec CfgRemoteExec ile engellenmis olabilir; v7.22'de sadece remoteExec vardi -> donus hizi hic uygulanmamis olabilir),
+                // sonra diger makinelere (oyuncu istemcisi) gonder
+                _u setAnimSpeedCoef _istenen;
+                if (isMultiplayer) then { [_u, _istenen] remoteExecCall ["setAnimSpeedCoef", -clientOwner]; };
             };
 
             if (_agir) then {

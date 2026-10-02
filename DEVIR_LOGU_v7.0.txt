@@ -467,3 +467,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.27 ===
 - grenadeAwareness: tarama lider etrafinda sabit 60 m idi (RPT: Zeus bombasi hic gorulmedi); artik grubun en uzak askeri + 30 m (60..150 m)
+
+=== v7.28 ===
+- moveAssist: setAnimSpeedCoef yerel dogrudan uygulanir + diger makinelere remoteExec (v7.22 sadece remoteExec idi: CfgRemoteExec engelleyebilir)
