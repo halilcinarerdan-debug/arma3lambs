@@ -102,7 +102,7 @@ _unit doTarget _target;
 _unit selectWeapon _gl;
 
 [{
-    params ["_u", "_t", "_muzzle"];
+    params ["_u", "_t", "_muzzle", "_salvo"];
     if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0} && {[_u, _t, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
         _u fireAtTarget [_t, _muzzle];
     };
@@ -113,7 +113,7 @@ _unit selectWeapon _gl;
             _u2 doWatch objNull;
         };
     }, [_u, _salvo], 2] call CBA_fnc_waitAndExecute;
-}, [_unit, _target, _gl], 1.5] call CBA_fnc_waitAndExecute;
+}, [_unit, _target, _gl, _salvo], 1.5] call CBA_fnc_waitAndExecute;   // _salvo ic bloga ARGUMAN olarak gecmeli (hemtt L-S13: tanimsiz degisken)
 
 // SALVO: ikinci / ucuncu atis (yeniden yukleme sonrasi), ayni hedefe — ilk atis duzeltme, sonrakiler etki
 for "_i" from 1 to ((_salvo min 3) - 1) do {

@@ -93,19 +93,33 @@ private _suKontrol = {
 // MESAFEYE GORE SICRAMA BOYU (doktrin: yakin temasta kisa/hizli sicrama + sis, uzakta daha uzun):
 //   tehdit < 100 m : 20 m | 100-200 m : 30 m | > 200 m : 50 m  (kisa, hizli atilim; acikta uzun kosu olum)
 private _adimBoy = if (_cqbMesafe < 100) then {20} else {if (_cqbMesafe < 200) then {30} else {50}};
+// SIPER HEDEFLI SICRAMA (v7.38): her sicrama noktasi artik rastgele "acik nokta" degil, dusmandan GIZLI / dogal siperli (agac, kaya, cali, duvar) aday;
+//   - dusman -> nokta gorus hatti kesiliyorsa (+35)  : gercekten siper arkasi
+//   - 3 m'de agac / kaya / cali / duvar / siper varsa (+10)
+//   - BINA icine dusmesin (-25 / bina): duvar korumasi + navmesh askeri kapida tutuyordu (RPT: retreat lideri 40 sn kipirdamadi)
+//   - aday hat boyunca yol engelliyse (-15); su (-500); dusmana yaklasma (-40: aday dusmana mevcut konumdan yakinsa)
+// 3 yaricap x 7 aci = 21 aday (adim boyu x 0.7 / 1.0 / 1.3)
 private _wpSec = {
     params ["_o", "_dir"];
     private _best = [];
     private _bestS = -9999;
+    private _eASL = AGLToASL (_targetPos vectorAdd [0, 0, 1.6]);
     {
-        private _c = _o getPos [_adimBoy, _dir + _x];
-        private _s = -((abs _x) * 0.05);
-        if (surfaceIsWater _c) then { _s = _s - 500; };
-        private _n = count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE", "CHURCH", "WALL", "FENCE", "ROCK", "FUELSTATION", "BUNKER"], 5, false, true]);
-        _s = _s - (_n * 25);
-        if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
-        if (_s > _bestS) then { _bestS = _s; _best = _c; };
-    } forEach [0, 25, -25, 50, -50, 75, -75];
+        private _r = _adimBoy * _x;
+        {
+            private _c = _o getPos [_r, _dir + _x];
+            private _s = -((abs _x) * 0.08) - (abs (_r - _adimBoy)) * 0.2;
+            if (surfaceIsWater _c) then { _s = _s - 500; };
+            private _bina = count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE", "CHURCH", "FUELSTATION", "BUNKER"], 6, false, true]);
+            _s = _s - (_bina * 25);
+            private _cASL = AGLToASL (_c vectorAdd [0, 0, 1.2]);
+            if (terrainIntersectASL [_eASL, _cASL] || {lineIntersects [_eASL, _cASL, objNull, objNull]}) then { _s = _s + 35; };
+            if ((count (nearestTerrainObjects [_c, ["TREE", "ROCK", "HIDE", "BUSH", "WALL"], 3, false, true])) > 0) then { _s = _s + 10; };
+            if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
+            if ((_c distance2D _targetPos) < (_o distance2D _targetPos)) then { _s = _s - 40; };
+            if (_s > _bestS) then { _bestS = _s; _best = _c; };
+        } forEach [0, 25, -25, 50, -50, 75, -75];
+    } forEach [1, 0.7, 1.3];
     _best
 };
 private _wp1 = [_leaderPos, _threatDir] call _wpSec;

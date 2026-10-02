@@ -498,3 +498,8 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.37 ===
 - Bounding hucum esigi 55 -> 40 m, commander ASSAULT 60 -> 45 m; overwatch kurulum tavani 8 -> 5 sn
+
+=== v7.38 ===
+- HEMTT SPE2 DUZELTME: moveAssist v7.36 duvar grace satirinda // yorumu ayni satirdaki kodu yutmustu (eksik }) -> moveAssist hic derlenmiyordu
+- tacticalUGL: _salvo ic CBA blogunda tanimsizdi (HEMTT L-S13) -> arguman olarak gecirildi
+- Retreat sicrama noktalari siper hedefli: dusmandan gizli +35, agac/kaya/cali/duvar 3 m +10, bina -25, 3 yaricap x 7 aci = 21 aday (eskiden ROCK/WALL/FENCE cezaliydi = siperden kaciyordu)

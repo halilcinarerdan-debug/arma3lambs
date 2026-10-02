@@ -95,7 +95,8 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.2 + duvar korum
                                 if ((time - (_u getVariable [QGVAR(mvFixT), -99])) > 2) then { _n = 1; };
                                 _u setVariable [QGVAR(mvFix), _n];
                                 _u setVariable [QGVAR(mvFixT), time];
-                                if (_n >= 3) then { _u setVariable [QGVAR(mvGrace), time + 15];   // 3 duzeltmeden sonra 15 sn dokunma: bina kapisi / sorunlu navmesh'te asker surekli geri alinip takiliyordu (RPT: retreat lideri bina yaninda 40 sn kipirdamadi) _u setVariable [QGVAR(mvFix), 0]; };
+                                // 3 duzeltmeden sonra 15 sn dokunma: bina kapisi / sorunlu navmesh'te asker surekli geri alinip takiliyordu (RPT: retreat lideri bina yaninda 40 sn kipirdamadi)
+                                if (_n >= 3) then { _u setVariable [QGVAR(mvGrace), time + 15]; _u setVariable [QGVAR(mvFix), 0]; };
                                 if (lambs_danger_mvLogN < 25) then {
                                     lambs_danger_mvLogN = lambs_danger_mvLogN + 1;
                                     diag_log format ["[DUVAR-KORUMA] %1 | %2 | %3 icinden gecmeye calisti -> geri alindi (%4)", groupId (group _u), name _u, typeOf _o, round (_mv * 100) / 100];
