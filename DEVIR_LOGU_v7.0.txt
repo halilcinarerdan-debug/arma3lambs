@@ -633,3 +633,11 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   2) Kapsama veren LIDER doStop almadigi icin grup/gorev waypoint'ine yuruyordu (13351->13311, digerleri 100 m geride, dusmana 50 m'ye kadar girip el bombasi atti).
      Cozum: kapsama takimina doSuppress'ten once doStop.
 - Dogrulanamayan: kapsama doStop sonrasi doSuppress komutunun korunmasi; ek sicrama sonunda TEMAS-KES gecisi; 0 km/s MOVE (yurumeyen) askerler (13 sn'de 15 m) hala gozlemlenecek.
+=== v8.7 TAKTIK ROTA PLANLAMA v1 (VBS4 oncelik 2; hibrit: retreat dogrulama + yeni ozellik) ===
+- fnc_rotaPlan: grup merkezinden hedefe 2 bacakli plan (bacak = mesafe*0.35, 30-70 m); aday sapma acilari 0/+-20/+-40/+-60; puan = -40 x maruziyet (dusman gozunden gorulen ray orani, 6 m ornek)
+  + 2 x ortu (agac/cali/duvar/kaya, en fazla 4) + 10 x ilerleme - 0.15 x |aci| - bina cezasi. Dogrudan hatta gore kazanc < 8 puan ise SAPMA YOK (gereksiz dolanma olmaz).
+- Entegrasyon: tacticsBounding hareket fazinda her cycle rotaPlan cagrilir (20 sn onbellek, hedef 40 m oynarsa yenilenir); sapma kosan yelpazesinin merkezi olur ([30,-30,0] + sapma, +-75 sinir).
+  Mesafe 90 m altinda / 600 m ustunde rota yok. Kapatma: lambs_danger_rotaV1 = false (varsayilan acik).
+- Log: [ROTA] grup | hedef m | sapma | maruziyet direkt% -> plan% | ortu | sure ms (ilk 80). rpt_ozet: ROTA PLANLAMA + RETREAT EK SICRAMA bolumleri.
+- Olcut (rota_hedgerow): plan maruziyeti direkt hattin %60'i altinda; sure ort < 15 ms; sapma != 0 orani %20-60 (hep sapma = sorun, hic sapma = sorun).
+- SINIR: rota sadece YONELIM acisi verir (ara nokta zinciri degil); motor siperler arasi yolu yine kendi secer. Sonraki surum: nearestTerrainObjects agac SIRASI hatti + onceden planli ara nokta listesi.

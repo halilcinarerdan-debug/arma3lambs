@@ -10,7 +10,7 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
@@ -104,6 +104,20 @@ def ozet(path):
         print("  cagri:", len(sa), "| faz2 ilk secimi degistirdi: %d (%.0f%%)" % (deg, 100.0 * deg / len(sa)))
     else:
         print("  yok (lambs_main_coverV2 kapali ya da siper cagrisi olmadi)")
+    print("\n-- ROTA PLANLAMA (v1) --")
+    rt = [l for l in satirlar if "[ROTA]" in l]
+    if rt:
+        sap = [int(m.group(1)) for l in rt for m in [re.search(r"sapma:(-?\d+)", l)] if m]
+        dr = [int(m.group(1)) for l in rt for m in [re.search(r"direkt:(\d+)", l)] if m]
+        pl = [int(m.group(1)) for l in rt for m in [re.search(r"plan:(\d+)", l)] if m]
+        ms = [int(m.group(1)) for l in rt for m in [re.search(r"sure:(\d+) ms", l)] if m]
+        print("  plan:", len(rt), "| sapma != 0:", len([1 for x in sap if x != 0]), "| maruziyet direkt ort %.0f%% -> plan %.0f%% | sure ort %.0f ms (en yuksek %d)" % (
+            statistics.mean(dr) if dr else 0, statistics.mean(pl) if pl else 0, statistics.mean(ms) if ms else 0, max(ms) if ms else 0))
+    else:
+        print("  yok (rota: tehdit 90-600 m + bounding gerekir)")
+    ek = [l for l in satirlar if "[GERI-CEKILME-EK]" in l]
+    print("\n-- RETREAT EK SICRAMA --")
+    print("  ek sicrama satiri:", len(ek))
     dp = [re.sub(r"^.*\[DOKTRIN-PROFIL\] ", "", l)[:90] for l in satirlar if "[DOKTRIN-PROFIL]" in l]
     if dp:
         print("\n-- DOKTRIN PROFILLERI --")

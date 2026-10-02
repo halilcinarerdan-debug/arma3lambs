@@ -787,8 +787,10 @@ if (EGVAR(main,debug_functions)) then {
         // 2) HAREKET FAZI — kosanlar siperli ileri sicrama
         // -------------------------------------------------------------------
         private _hareketler = [];
+        // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
+        private _rotaAci = [_group, _target] call FUNC(rotaPlan);
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"TeamBound/Move"}, [30, -30, 0] select ((_forEachIndex + _cycleCount) % 3)] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"TeamBound/Move"}, (_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 
