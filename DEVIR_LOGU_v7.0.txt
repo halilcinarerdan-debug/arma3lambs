@@ -755,3 +755,8 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   digeri (Faisal) ayakta 21 km/s kostu, 59 m onde (dusmandan uzakta). Neden: koşan askerlere setUnitPosWeak 'UP' (zayif) uygulaniyordu, AI yakin dusman gorerek yatis surdurdu. Duzeltme: kosarken SERT setUnitPos 'UP', varista / ezilince AUTO + zayif stance.
 - SIPER-YAPISMA: ayarlandi:0 acikta:620 -> coverHug v2 hic ayar yapmadi; sebep belirsiz (ya asker zaten yapisik degil + siper > 6 m, ya isin tespiti). [SIPER-YAPIS-TANI] (ilk 25 'acikta' karari: dusman mesafesi, yuzey var / yok, en yakin yuzey) eklendi.
 - Anomaliler: YURUMUYOR 14, TEMAS-YOK-COMBAT 3, BOSTA-HAREKET 2, BIRIM-AI-KAPALI 1.
+=== v8.23 RETREAT: UZAK MESAFEDE TOPLU KOSU (RPT 17:37, v8.22) ===
+- v8.22 sert 'UP' DOGRULANDI: lider artik ayakta (STAND) 18 km/s kosuyor (v8.21'de 2 dk PRONE surunuyordu). Ama retreat 0/9: dusman 271 m, 5 kisi, 4 sicrama / 64 sn, vardi 0/3, 0/2, 0/3, 0/1; ezilen 2 / 1 / 1 / 0.
+- Neden: 271 m'de dusman etkili ates menzilinde degil ama dönüsümlü sicrama (ALPHA hareket, BRAVO kapsama) her turda yarisini durduruyor (lider kapsamada = STOP); gorevlerde LAMBS 'Attacking / Dodge!' tepkileri (komut ATTACK) hala goruluyor.
+  Duzeltme: dusman >= cekilTopluM (180 m, doktrin) ise kapsama takimi yok, herkes birlikte kosar; < 180 m ates-manevra sicramasi. Log: '[GERI-CEKILME] ... toplu kosu | dusman:N m'.
+- Acik: LAMBS 'Attacking' / 'Dodge!' retreat sirasinda birim bayragina ragmen gorulmeye devam ediyor (kaynak: ya birim bayragi sonradan kalkiyor ya engine ATTACK komutu = bizim doSuppress); sonraki adim: gorev adlarinin hangi birimlerde / ne zaman cikti tespiti.

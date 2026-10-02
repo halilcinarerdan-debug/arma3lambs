@@ -31,6 +31,7 @@
  *   baskiKirmaEsik 0.5, baskiKirmaMaxS 14   retreat: ort. baski bu esikten yuksekse once siper + karsi ates (en fazla N sn), sonra sicrama
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
  *   DUZENSIZ (Taliban-tipi): vur-kac, erken temas kesme, pusu agirlikli (haritada taliban / lop_am / lop_ists / insurgent ...)
+ *   cekilTopluM 180   retreat: dusman bu mesafeden uzaksa kapsama takimi yok, herkes birlikte kosar (yakinda ates-manevra)
  *   yorgunlukEtki 1 (bound uzunlugunu yorgunluga gore kisaltma carpani; 0 = kapali)
  *   teslim true, teslimEsik 0.15   moral endeksi bu esigin altina duserse (+ umutsuz kosullar) teslim; DUZENSIZ: teslim yok
  *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
@@ -70,7 +71,7 @@ private _p = createHashMapFromArray [
     ["cekilGuvenM", 220], ["cekilEkSicrama", 4], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
-    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15]
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---

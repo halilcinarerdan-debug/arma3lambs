@@ -248,7 +248,14 @@ if (EGVAR(main,debug_functions)) then {
     //   - <= 4 asker: BOLME YOK, herkes birlikte (cift cift) cekilir (eskiden 3 kisilik grupta biri ates ediyordu)
     //   - > 4 asker: ortu takimi en fazla n/3 (MG'ler), geri kalan herkes sicrar
     private _nCek = count _tumBirimler;
-    if (_nCek <= 4) then {
+    // v8.23 TOPLU KOSU: dusman >= cekilTopluM (180 m) ise etkili ates menzili disinda: kapsama takimi gereksiz, herkes BIRLIKTE kosar (dönüsümlü sicrama hizi yariya indiriyordu;
+    //   RPT 17:41: dusman 271 m, 5 kisi, 4 sicrama / 64 sn, vardi 0/9). Yakin mesafede (< 180 m) ates-manevra sicramasi korunur.
+    private _topluM = [_group, "cekilTopluM", 180] call FUNC(dk);
+    private _topluKosu = (_unit distance2D _targetPos) >= _topluM;
+    if (_topluKosu) then {
+        diag_log format ["[GERI-CEKILME] %1 toplu kosu | dusman:%2 m >= %3 m | kapsama takimi yok, %4 kisi birlikte", groupId _group, round (_unit distance2D _targetPos), _topluM, _nCek];
+    };
+    if (_nCek <= 4 || {_topluKosu}) then {
         _alpha = +_tumBirimler;
         _bravo = [];
     } else {
