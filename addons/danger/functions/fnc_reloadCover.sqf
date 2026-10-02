@@ -215,7 +215,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                         _not = format ["siper %1 m", round (_u distance2D _hedef)];
                                         _u setVariable [QGVAR(forceMove), true];
                                         _u setUnitPosWeak "UP";
-                                        _u moveTo _hedef;
+                                        _u doMove _hedef;
                                         _u forceSpeed -1;
                                     } else {
                                         _not = "siper yanimda";

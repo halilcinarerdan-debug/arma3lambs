@@ -170,7 +170,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                                     _u allowFleeing 0;
                                     _u setUnitPos "UP";
                                     _u forceSpeed -1;
-                                    _u moveTo _hedef;
+                                    _u doMove _hedef;
                                     _st set [2, "ESCAPE"];
                                     _st set [3, _hedef];
                                     _st set [1, time];
@@ -192,7 +192,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                                         _u disableAI "AUTOCOMBAT";
                                         _u disableAI "COVER";
                                         _u setUnitPos "DOWN";
-                                        _u moveTo _sc;
+                                        _u doMove _sc;
                                         _st set [2, "ESCAPE"];
                                         _st set [3, _sc];
                                         _st set [1, time];
@@ -225,7 +225,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                             _u setUnitPos "DOWN";
                             _st set [2, "WAIT"];
                         } else {
-                            _u moveTo _esc;
+                            _u doMove _esc;
                         };
                     };
                 };
