@@ -59,3 +59,9 @@ Yaprak testi icin konsol: `lambs_danger_yaprakTest = true;` (ilk 400 degerlendir
 1. Ayni taraftan 3+ grup (2 grup birbirinden 100-600 m, biri temasa girsin). Log: `[HQ] kumanda cekirdegi baslatildi`, `[HQ-TAHTA]` (90 sn'de bir), temas + kayip %25 / guc oraninda `[HQ-TAKVIYE] ... -> destek ...` ve `[HQ-EMIR] ... TAKVIYE`. Destek grubu dusmanin kanadina yaklasmali (dusman noktasina duz kosmamali). Beklenen: bir turda en cok 1-2 grup, yardim isteyene 90 sn'de bir.
 2. Hekimsiz grup + baygin yarali (hekimi oldur), yakinda (< 350 m) baska musait grup + hekimi. Beklenen: `[HQ-MEDEVAC] ... <- hekim ...`, sonra `[TCCC] ... hekim ... -> yarali ...`; hekim tedaviden sonra kendi grubuna donmeli.
 3. Kontrol: Zeus'ta grup `lambs_danger_hqTakviyeKatilim=false` ise destek vermemeli; `lambs_danger_hqV1=false` tum HQ'yu kapatir.
+
+## v8.33 KOMUTAN (Zeus modulu) testi
+0. Zeus > 'LAMBS Danger' kategorisi > 'ELITE Kumanda (HQ)' modulunu herhangi bir yere yerlestir; pencerede 'Kumanda aktif' acik, 'LAMBS dynamic reinforcement'i kapat' acik birak; Tamam. RPT'de `[HQ-MODUL] kumanda AKTIF | ...`. Modul yerlestirmeden HICBIR `[HQ-...]` takviye / kanat / istihbarat satiri olmamali.
+1. ISTIHBARAT: 3+ grup (birbirine < 1500 m). Biri dusmani gorsun. Beklenen: `[HQ-ISTIHBARAT] muhbir G1 -> alici G2 | hedef ...` ve diger gruplarin dusman yonune donmesi / mesafe kapatmasi. Oyuncu ekibi hedefse `OYUNCU` yazar.
+2. KANAT: 3 grup, biri sabit temasta (ayakta mesafeli atis), ikisi 100-900 m'de musait. Beklenen: `[HQ-KANAT] EMIR ... cift kusatma` ardindan yaklasik 40-150 sn sonra `[HQ-KANAT] SALDIRI`; gruplar dusmanin yanlarindan gelmeli.
+3. Dostca ates: sabitleyen grup kanattan hucum eden dostuna ates etmemeli (kanat noktasi sabitleyenin ates hattina dik); gorulurse nerede oldugunu yaz.

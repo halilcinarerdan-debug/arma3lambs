@@ -17,7 +17,10 @@
  *   [zaman, enYakin, dusmanN, MG, zirh, guc orani, kayip, dusman pozisyonu]) | mesgul (taktik bayragi) | musait (destek verebilir)
  * MODUL TASLAGI: lambs_danger_fnc_hqTakviye gibi [taraf, tahta] call; donus degeri yok; emirleri hqEmir ile verir.
  *
- * Kapatma: lambs_danger_hqV1 = false (varsayilan acik).   Log: [HQ] [HQ-TAHTA] [HQ-RAPOR] [HQ-TAKVIYE] [HQ-EMIR]
+ * ACILIS (v8.33): kumanda YALNIZCA Zeus'ta "LAMBS Danger" kategorisindeki "ELITE Kumanda (HQ)" modulu yerlestirilince calisir (lambs_danger_hqAktif = true, herkese yayinlanir).
+ *   Modul secenekleri: modul bazli anahtarlar lambs_danger_hq<Ad>V1 ve "LAMBS dynamic reinforcement'i kapat" (lambs_danger_hqUpstreamKapat: grup bayragi enableGroupReinforce her turda false'a cekilir,
+ *   yoksa upstream telsiz olayi tum bayrakli gruplari kumandayi atlayip kosturur).  Acik degilken cekirdek hicbir sey yapmaz (grup bayragina bile dokunmaz).
+ * Kapatma: lambs_danger_hqAktif = false ya da lambs_danger_hqV1 = false.   Log: [HQ] [HQ-TAHTA] [HQ-RAPOR] [HQ-TAKVIYE] [HQ-KANAT] [HQ-ISTIHBARAT] [HQ-EMIR] [HQ-MODUL]
  *
  * Arguments: None
  * Return Value: Baslatildi mi <BOOL>
@@ -29,7 +32,7 @@ lambs_danger_hqStarted = true;
 
 // MODUL LISTESI: [ad, aralik sn] — yeni modul eklemek = fnc_hq<Ad>.sqf + buraya satir
 if (isNil "lambs_danger_hqModuller") then {
-    lambs_danger_hqModuller = [["takviye", 8], ["medevac", 6]];
+    lambs_danger_hqModuller = [["istihbarat", 5], ["takviye", 8], ["kanat", 7], ["medevac", 6]];
 };
 
 diag_log format ["[HQ] kumanda cekirdegi baslatildi | moduller: %1", lambs_danger_hqModuller apply {_x select 0}];
@@ -38,6 +41,7 @@ diag_log format ["[HQ] kumanda cekirdegi baslatildi | moduller: %1", lambs_dange
 if (!isNil "CBA_fnc_addEventHandler") then {
     ["lambs_danger_grupOlayi", {
         params ["_g", "_ad", "_veri"];
+        if !(missionNamespace getVariable ["lambs_danger_hqAktif", false]) exitWith {};
         if !(_ad in ["RetreatBitti", "SonDirenis", "InContact", "AllClear"]) exitWith {};
         _g setVariable ["lambs_danger_hqSonRapor", [_ad, time, _veri]];
         if (_ad in ["RetreatBitti", "SonDirenis"]) then {
@@ -102,11 +106,21 @@ private _tahtaKur = {
     private _modSon = createHashMap;
     while {true} do {
         sleep 4;
-        if (!(missionNamespace getVariable ["lambs_danger_hqV1", true])) then { continue };
+        if (!(missionNamespace getVariable ["lambs_danger_hqV1", true]) || {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then { continue };
         {
             private _taraf = _x;
             private _tahta = [_taraf] call _tahtaKur;
             if (_tahta isEqualTo []) then { continue };
+
+            // upstream (LAMBS) dynamic reinforcement ile cakisma: bayrak kapali tutulur (secenek: modul)
+            if (missionNamespace getVariable ["lambs_danger_hqUpstreamKapat", true]) then {
+                {
+                    private _gg = _x get "g";
+                    if (_gg getVariable ["lambs_danger_enableGroupReinforce", false]) then {
+                        _gg setVariable ["lambs_danger_enableGroupReinforce", false, true];
+                    };
+                } forEach _tahta;
+            };
 
             // moduller
             {
