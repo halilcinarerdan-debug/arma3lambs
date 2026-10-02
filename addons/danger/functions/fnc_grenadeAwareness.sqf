@@ -79,6 +79,22 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
         _c
     };
 
+    // v7.40: UCUSTAKI bombanin INIS NOKTASI tahmini (RPT: bomba atildi 11:00:44, tepki 11:00:47 = bomba yere inince, fitilin 1.4 sn'si kala;
+    // askerler 2-3 m'de yatabildi, kosamadi). Artik atildigi anda balistik inis noktasi (hiz + yukseklik) hesaplanir; tepki hemen baslar.
+    private _predFn = {
+        params ["_p"];
+        private _pos = getPosATL _p;
+        private _v = velocity _p;
+        private _hz = _pos select 2;
+        if ((vectorMagnitude _v) > 3 && {_hz > 0.3}) then {
+            private _vz = _v select 2;
+            private _tf = ((_vz + sqrt ((_vz * _vz) + (2 * 9.81 * _hz))) / 9.81) min 3;
+            _pos = _pos vectorAdd [(_v select 0) * _tf, (_v select 1) * _tf, 0];
+            _pos set [2, 0];
+        };
+        _pos
+    };
+
     // Serbest birak: AI kilitleri, forceMove, stance
     private _birakFn = {
         params ["_u"];
@@ -107,7 +123,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             _st params ["_p", "_t0", "_faz", "_esc", "_gPos", "_son", "_rad"];
 
             if (!isNull _p) then {
-                _gPos = getPosATL _p;
+                _gPos = [_p] call _predFn;
                 _st set [4, _gPos];
             };
             private _gecen = time - _t0;
@@ -312,7 +328,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                         diag_log format ["[EL-BOMBASI-GORDU] %1 | lider %2 | %3 m | yaricap:%4 fitil:%5 | grup %6", typeOf _p, name _leader, round (_p distance2D _leader), _rad, _fitil, groupId _g];
                     };
                     private _son = [0, _gorulme + _fitil] select (_fitil > 0);
-                    private _gp = getPosATL _p;
+                    private _gp = [_p] call _predFn;
 
                     {
                         private _u = _x;

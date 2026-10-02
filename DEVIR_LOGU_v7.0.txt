@@ -507,3 +507,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.39 ===
 - Bounding: lider koşucu degil ama ekip agirlik merkezinin 8 m gerisine ilerler (10 sn aralik); RPT: 6 cycle 329->315 m
 - UGL: >200 m 25 sn aralik, elde <3 mermi kaldiysa >120 m atis yok
+
+=== v7.40 ===
+- grenadeAwareness: ucustaki bombanin balistik inis noktasi tahmini (RPT: atis 11:00:44, tepki 11:00:47 = yere inince, fitil 1.4 sn kala)
