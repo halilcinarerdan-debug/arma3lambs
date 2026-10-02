@@ -84,7 +84,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
             };
 
             // --- aday sec (yoksa / oldu / gecersizse) ---
-            if (isNull _u || {!alive _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getVariable [QGVAR(forceMove), false]}) then {
+            if (isNull _u || {!alive _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}) then {
                 if (!isNull _u && {alive _u}) then { [_g, _u] call _birak; };
                 _u = objNull;
                 private _adaylar = _canli select {
@@ -95,7 +95,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                     && {(rankId _x) < 3}                                   // 3 = SERGEANT; takim lideri / astsubay / subay degil
                     && {(secondaryWeapon _x) isEqualTo ""}
                     && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
-                    && {!(_x getVariable [QGVAR(forceMove), false])}
+                    && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
                     && {(getSuppression _x) < 0.5}
                 };
                 if ((count _adaylar) >= 3) then {

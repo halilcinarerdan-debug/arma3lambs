@@ -245,7 +245,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     !(local _u)
                     || {isPlayer _u}
                     || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
-                    || {_u getVariable [QGVAR(forceMove), false]}
+                    || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
                     || {(speed _u) > 1.5}
                     || {(getSuppression _u) >= 0.5}
                     || {(insideBuilding _u) >= 0.5}

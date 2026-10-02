@@ -128,6 +128,7 @@ if (
     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])}
     && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
     && {isNil {_u getVariable QGVAR(forceMove)}}
+    && {(_u getVariable [QGVAR(taktikKilit), 0]) <= time}
 ) then {
                     private _ed = expectedDestination _u;
                     private _d = _ed select 0;

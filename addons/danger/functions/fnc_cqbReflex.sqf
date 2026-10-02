@@ -52,7 +52,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                 if (
                     alive _u && {local _u} && {!isPlayer _u} && {isNull objectParent _u}
                     && {(lifeState _u) in ["HEALTHY", "INJURED"]}
-                    && {!(_u getVariable [QGVAR(forceMove), false])}
+                    && {!(_u getVariable [QGVAR(forceMove), false])} && {(_u getVariable [QGVAR(taktikKilit), 0]) <= time}
                     && {(_u getVariable [QGVAR(reloadState), []]) isEqualTo []}
                     && {(_u getVariable [QGVAR(grState), []]) isEqualTo []}
                     && {(_u getVariable [QGVAR(stationPos), []]) isEqualTo []}

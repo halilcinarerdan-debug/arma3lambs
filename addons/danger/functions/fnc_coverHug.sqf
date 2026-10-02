@@ -60,7 +60,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 if (
                     !alive _u || {!local _u} || {isPlayer _u} || {!isNull objectParent _u}
                     || {(speed _u) >= 0.6} || {(insideBuilding _u) > 0.5}
-                    || {_u getVariable [QGVAR(forceMove), false]}
+                    || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
                     || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                     || {time < (_u getVariable [QGVAR(hugT), 0])}
                 ) then { continue };

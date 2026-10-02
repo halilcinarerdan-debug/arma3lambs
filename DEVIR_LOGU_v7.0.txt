@@ -516,3 +516,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.42 ===
 - Retreat: boyunca disableGroupAI true (LAMBS sympathetic assault/Advance ezmesin); bitis ve guvenlik valfinde eski degere donulur
+
+=== v7.43 ===
+- HAREKET ARBITRAJI (taktik kilidi): bounding/retreat tum katilimcilara lambs_danger_taktikKilit (zaman damgasi) koyar; buddyBond, dispersion, roleStation, rearGuard, coverHug, fieldCraft, cqbReflex ve moveAssist sikisma kilitli askere hareket emri VERMEZ. UGL/ates gorevleri kilitten etkilenmez. Kilit tactic bitince / 25-30 sn sonra kalkar.

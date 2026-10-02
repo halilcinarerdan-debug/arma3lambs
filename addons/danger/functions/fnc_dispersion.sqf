@@ -67,7 +67,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 && {isNull objectParent _x}
                 && {!isPlayer _x}
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
-                && {!(_x getVariable [QGVAR(forceMove), false])}
+                && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
                 && {(speed _x) < 1.5}
                 && {(getSuppression _x) < 0.6}
                 && {(insideBuilding _x) < 0.5}

@@ -155,7 +155,7 @@ private _fnLog = {
                             private _taban = getDir _l;
                             private _n = count _us;
                             {
-                                if (!(_x getVariable [QGVAR(forceMove), false]) && {_x isNotEqualTo _l || {_n >= 4}}) then {
+                                if (!(_x getVariable [QGVAR(forceMove), false]) && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {_x isNotEqualTo _l || {_n >= 4}}) then {
                                     _x doWatch (_x getPos [80, _taban + (_forEachIndex * (360 / _n))]);
                                 };
                             } forEach _us;
@@ -183,7 +183,7 @@ private _fnLog = {
                 private _u = _x;
                 if (
                     !((lifeState _u) in ["HEALTHY", "INJURED"]) || {(insideBuilding _u) > 0.5}
-                    || {_u getVariable [QGVAR(forceMove), false]} || {_u getVariable [QGVAR(tcccBusy), false]}
+                    || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {_u getVariable [QGVAR(tcccBusy), false]}
                     || {!((_u getVariable [QGVAR(grState), []]) isEqualTo [])}
                 ) then { continue };
 

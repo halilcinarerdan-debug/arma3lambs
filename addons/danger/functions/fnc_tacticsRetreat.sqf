@@ -267,6 +267,8 @@ if (EGVAR(main,debug_functions)) then {
     // -----------------------------------------------------------------------
     private _sicra = {
         params ["_grup", "_hareketEdenler", "_kapsama", "_wp", "_hedefASL", "_no"];
+        // HAREKET ARBITRAJI: retreat'e katilan herkes taktik kilidinde (diger watchdog'lar hareket emri vermez)
+        { if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 25]; }; } forEach (units _grup);
 
         diag_log format [
             "[GERI-CEKILME] %1 sicrama %2 | hareket:%3 kapsama:%4",
@@ -451,6 +453,7 @@ if (EGVAR(main,debug_functions)) then {
     // TEMIZLIK
     // -----------------------------------------------------------------------
     if (!isNull _group && {((_group getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _baslangic)}) then {
+        { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _group);
         _group setVariable [QGVAR(isRetreating), nil];
         _group setVariable [QGVAR(disableGroupAI), [nil, true] select (_group getVariable [QGVAR(retreatEskiDGA), false])];
         _group setVariable [QGVAR(retreatEskiDGA), nil];

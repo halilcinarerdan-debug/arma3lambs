@@ -265,6 +265,7 @@ if (EGVAR(main,debug_functions)) then {
     private _bndTemizle = {
         params ["_g"];
         _g setVariable [QGVAR(bndToken), nil];
+        { _x setVariable [QGVAR(taktikKilit), nil]; } forEach (units _g);   // HAREKET KILIDI (arbitraj) birak
         _g setVariable [QGVAR(isBounding), nil];
         _g setVariable [QGVAR(isExecutingTactic), nil];
         _g setVariable [QEGVAR(main,currentTactic), nil];
@@ -496,6 +497,9 @@ if (EGVAR(main,debug_functions)) then {
         && {_cycleCount < _BND_MAX_CYCLES}
     } do {
         _cycleCount = _cycleCount + 1;
+        // HAREKET ARBITRAJI: bounding'e katilan HER askere (koşucu + overwatch) taktik kilidi — buddyBond / dispersion / roleStation / rearGuard /
+        // coverHug / fieldCraft / cqbReflex bu askerlere hareket emri vermez (RPT: bounding / retreat sirasinda "[BUDDY] ... yanina donuyor")
+        { if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 30]; }; } forEach (units _group);
 
         // Siste periyodik sis (cooldown 45 sn icinde)
         if ((_cycleCount % 3) isEqualTo 2) then {
