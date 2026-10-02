@@ -482,3 +482,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 
 === v7.32 ===
 - Bounding: hareket eden ekip toplamin yarisini gecmez (13 kisiden 8 kosuyordu); [BND-CIKIS] logu (komutan karari yuzunden yarida kalma)
+
+=== v7.33 ===
+- commanderAssess: baski>=0.6 + acikta (15 m siper yok) + dusman>60 m: HOLD yerine DELAY (siper al + sis)

@@ -393,7 +393,14 @@ private _result = call {
         ["DELAY", format ["tehdit skoru yuksek (%1)", _threatScore toFixed 2]]
     };
     if (_suppAvg >= 0.6) exitWith {
-        ["HOLD", format ["baski altinda (%1) - hareket yok", _suppAvg toFixed 2]]
+        // ACIKTA (15 m'de siper / agac / bina / duvar yok) ve dusman > 60 m: HOLD = acikta durup olmek (RPT: 8 -> 3 kisi).
+        // Siper al + sis (DELAY: tacticsHide + BREAK_CONTACT sisi); siper varsa HOLD kalir.
+        private _acikta = (nearestTerrainObjects [getPosATL _unit, ["TREE", "ROCK", "WALL", "BUILDING", "HOUSE", "BUSH", "FENCE"], 15, false, true]) isEqualTo [];
+        if (_acikta && {_closest > 60}) then {
+            ["DELAY", format ["baski altinda (%1), ACIKTA: durmak yerine siper al + sis", _suppAvg toFixed 2]]
+        } else {
+            ["HOLD", format ["baski altinda (%1) - hareket yok", _suppAvg toFixed 2]]
+        }
     };
 
     // =======================================================================
