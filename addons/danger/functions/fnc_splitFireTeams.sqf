@@ -68,8 +68,10 @@ private _fse = [];
 private _maneuver = [];
 private _reserve = [];
 
-// 1) Lider maneuver'a
-if (_leader in _units) then {
+// 1) Lider: >= 5 kisilik grupta ARKADA (reserve'in en sonu) — komutan ilk olarak olmesin, karar verme / ates
+//    yonetimi surmesin. Kucuk grupta (< 5) maneuver'a (zorunlu).
+private _liderArkada = (_count >= 5) && {_leader in _units};
+if ((_leader in _units) && {!_liderArkada}) then {
     _maneuver pushBack _leader;
 };
 
@@ -101,6 +103,7 @@ while {(count _fse) < _fseSize && {_rifles isNotEqualTo []}} do {
 
 // 4) Reserve = artan (saglikci dahil)
 _reserve = _medics + _rifles + _ats + _marks + _mgs;
+if (_liderArkada) then { _reserve pushBack _leader; };   // en sonda: takviye gerekirse en son o one cekilir
 
 // 5) Guvenlik: FSE veya Maneuver bos/az ise reserve'den ekle
 if (_fse isEqualTo [] && {_reserve isNotEqualTo []}) then {

@@ -161,6 +161,63 @@ switch (_context) do {
         };
     };
 
+    // COMBAT — KOMUTAN ZEKASI: durum analizine (mesafe / dusman gucu / MG / zirh / kayip / arazi) gore formasyon
+    case "COMBAT": {
+        private _sit = _grup getVariable [QGVAR(cmdSit), []];
+        private _closest = 9999;
+        private _eCnt = 0;
+        private _eMg = 0;
+        private _arm = 0;
+        private _ratio = 1;
+        private _loss = 0;
+        if (_sit isNotEqualTo [] && {(time - (_sit select 0)) < 25}) then {
+            _closest = _sit select 1;
+            _eCnt = _sit select 2;
+            _eMg = _sit select 3;
+            _arm = _sit select 4;
+            _ratio = _sit select 5;
+            _loss = _sit select 6;
+        } else {
+            if (_validTarget && {_targetPos isNotEqualTo [0,0,0]}) then { _closest = _leaderPos distance2D _targetPos; };
+        };
+
+        if (_arm > 0 && {_closest < 300}) then {
+            _formation = "VEE";
+            _reason = "zirh - dagilmis V (tek patlama hepsini almasin)";
+        } else {
+            if (_loss >= 0.4 || {_ratio >= 1.6}) then {
+                _formation = "WEDGE";
+                _reason = "kayip / ustun dusman - toplu, karsilikli destek";
+            } else {
+                if (_eMg >= 1 && {_closest > 60}) then {
+                    _formation = ["VEE", "STAG COLUMN"] select _isUrban;
+                    _reason = "dusman MG - dagilmis (MG tek seritle kirmasin)";
+                } else {
+                    if (_closest < 50) then {
+                        _formation = ["LINE", "STAG COLUMN"] select _isUrban;
+                        _reason = "yakin temas - maksimum ates / bina kenari";
+                    } else {
+                        if (_closest < 150) then {
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {"LINE"}};
+                            _reason = "orta mesafe temas - arazi + cephe";
+                        } else {
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {"WEDGE"}};
+                            _reason = "uzak temas - esnek intikal";
+                        };
+                    };
+                };
+            };
+        };
+
+        // Formasyon yonu: dusmana
+        if (_sit isNotEqualTo [] && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then {
+            _grup setFormDir (_leaderPos getDir (_sit select 7));
+        } else {
+            if (_validTarget && {_targetPos isNotEqualTo [0,0,0]}) then { _grup setFormDir (_leaderPos getDir _targetPos); };
+        };
+        _reason = format ["%1 | d:%2 m e:%3 MG:%4 zirh:%5 oran:%6 kayip:%7", _reason, round _closest, _eCnt, _eMg, _arm, _ratio toFixed 2, round (_loss * 100)];
+    };
+
     // ASSAULT
     case "ASSAULT": {
         if (_isUrban) then {
@@ -221,7 +278,7 @@ private _histGrp = group _unit;
 if (!isNull _histGrp) then {
     private _sonF = _histGrp getVariable [QGVAR(selFormSon), ""];
     private _sonT = _histGrp getVariable [QGVAR(selFormT), -999];
-    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {time < (_sonT + 60)}) then {
+    if (_sonF isNotEqualTo "" && {_sonF isNotEqualTo _formation} && {time < (_sonT + ([60, 25] select (_context isEqualTo "COMBAT")))}) then {
         _formation = _sonF;
     } else {
         if (_sonF isNotEqualTo _formation) then {

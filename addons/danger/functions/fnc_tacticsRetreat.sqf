@@ -88,9 +88,29 @@ private _suKontrol = {
     _p
 };
 
-private _wp1 = [_leaderPos getPos [40, _threatDir], _leaderPos] call _suKontrol;
-private _wp2 = [_leaderPos getPos [80, _threatDir], _leaderPos] call _suKontrol;
-private _wp3 = [_leaderPos getPos [120, _threatDir], _leaderPos] call _suKontrol;
+// v14: noktalar BINA / DUVAR / CIT icine dusmesin (0/5 varis, 20 sn zaman asimi sorunu: nokta binanin icindeydi)
+// Her sicrama kendi oncekinden 40 m; dusman yonunun tersinde +-75 derece kon icinde acik / engelsiz aday secilir.
+private _wpSec = {
+    params ["_o", "_dir"];
+    private _best = [];
+    private _bestS = -9999;
+    {
+        private _c = _o getPos [40, _dir + _x];
+        private _s = -((abs _x) * 0.05);
+        if (surfaceIsWater _c) then { _s = _s - 500; };
+        private _n = count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE", "CHURCH", "WALL", "FENCE", "ROCK", "FUELSTATION", "BUNKER"], 5, false, true]);
+        _s = _s - (_n * 25);
+        if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
+        if (_s > _bestS) then { _bestS = _s; _best = _c; };
+    } forEach [0, 25, -25, 50, -50, 75, -75];
+    _best
+};
+private _wp1 = [_leaderPos, _threatDir] call _wpSec;
+private _wp2 = [_wp1, _threatDir] call _wpSec;
+private _wp3 = [_wp2, _threatDir] call _wpSec;
+_wp1 = [_wp1, _leaderPos] call _suKontrol;
+_wp2 = [_wp2, _wp1] call _suKontrol;
+_wp3 = [_wp3, _wp2] call _suKontrol;
 private _wps = [_wp1, _wp2, _wp3, _wp3];
 
 private _baslangic = time;
@@ -241,7 +261,7 @@ if (EGVAR(main,debug_functions)) then {
             };
         } forEach _kapsama;
 
-        sleep 1.5;
+        sleep 0.4;
 
         // 2) Hareket: 2'li BUDDY CIFTLERI — her cift ayni noktaya (ciftin icinde 3m), ciftler
         //    waypoint etrafinda 12m'e yayilir: kimse tek basina kosmaz, yigilma da yok
@@ -263,14 +283,16 @@ if (EGVAR(main,debug_functions)) then {
                     _x setUnitPosWeak "UP";
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
-                    _varis pushBack [_x, _p];
+                    _varis pushBack [_x, _p, getPosATL _x, time, 0];
                     _x doMove _p;
                 };
             } forEach _cift;
         } forEach _ciftler;
 
-        // 3) Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
-        private _bitis = time + 20;
+        // 3) Varisa kadar bekle (en fazla 16 sn, %75 vardiysa erken cik); sadece TAKILANA (3.5 sn ilerleyemeyen) emri tazele —
+        //    her 3 sn'de doMove tekrari yol hesabini sifirlayip askeri yerinde tutuyordu
+        private _t0 = time;
+        private _bitis = time + 12;
         private _pinned = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
@@ -286,7 +308,7 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _varis;
 
-            // Ezilen asker baski dusunce (< 0.5) kosuya geri doner — yerinde birakilmaz (once: ezilen sicrama boyunca takili kaliyordu)
+            // Ezilen asker baski dusunce (< 0.5) kosuya geri doner
             {
                 private _b = _x select 0;
                 if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.5}) then {
@@ -299,24 +321,49 @@ if (EGVAR(main,debug_functions)) then {
                     _b setVariable [QGVAR(forceMove), true];
                     _b setUnitPosWeak "UP";
                     _b doMove (_x select 1);
+                    _x set [2, getPosATL _b];
+                    _x set [3, time];
                 };
             } forEach _varis;
 
-            private _gelmeyen = _varis select {
-                alive (_x select 0)
-                && {!((_x select 0) in _pinned)}
-                && {((_x select 0) distance2D (_x select 1)) > 9}
+            // Takilma tespiti: 3.5 sn'de < 1.5 m ilerleyen, hedefe uzak asker -> emri tazele; 2. takilmada dusmandan uzaga yeni nokta
+            {
+                private _b = _x select 0;
+                if (alive _b && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12}) then {
+                    if ((_b distance2D (_x select 2)) > 1.5) then {
+                        _x set [2, getPosATL _b];
+                        _x set [3, time];
+                    } else {
+                        if ((time - (_x select 3)) > 3.5) then {
+                            _x set [4, (_x select 4) + 1];
+                            if ((_x select 4) >= 2) then {
+                                private _np = (getPosATL _b) getPos [18 + random 8, _hedefASL getDir (getPosATL _b)];
+                                if (!surfaceIsWater _np) then { _x set [1, _np]; };
+                                _x set [4, 0];
+                            };
+                            _b doMove (_x select 1);
+                            _x set [3, time];
+                        };
+                    };
+                };
+            } forEach _varis;
+
+            private _vardi = _varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}};
+            private _canli = _varis select {alive (_x select 0)};
+            private _gelmeyen = _canli select {
+                !((_x select 0) in _pinned)
+                && {((_x select 0) distance2D (_x select 1)) > 12}
             };
             if (_gelmeyen isEqualTo [] && {(_pinned select {alive _x}) isEqualTo []}) exitWith {};
-            { (_x select 0) doMove (_x select 1); } forEach _gelmeyen;
-            sleep 3;
+            if ((time - _t0) >= 3 && {_canli isNotEqualTo []} && {(count _vardi) >= ((count _canli) * 0.6)}) exitWith {};
+            sleep 1;
         };
 
         // Sicrama sonucu (diagnostik): kac asker gercekten vardi
         diag_log format [
             "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5",
             groupId _grup, _no,
-            count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 9}}),
+            count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}}),
             count _varis, count _pinned
         ];
 

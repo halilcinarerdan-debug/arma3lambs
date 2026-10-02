@@ -68,6 +68,20 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
     true
 ] call CBA_fnc_addClassEventHandler;
 
+// 1c) ACE Advanced Throwing: atilan bomba Fired mermisi DEGIL, ace_throwableThrown olayiyla gelir (listeye ekle)
+{
+    [_x, {
+        params ["_unit", "_thr"];
+        if (!isNull _thr) then {
+            lambs_danger_grenadeList = lambs_danger_grenadeList select {!isNull _x};
+            if ((count lambs_danger_grenadeList) < 60) then {
+                lambs_danger_grenadeList pushBack _thr;
+                _thr setVariable [QGVAR(grSeen), time];
+            };
+        };
+    }] call CBA_fnc_addEventHandler;
+} forEach ["ace_throwableThrown", "ace_advanced_throwing_throwableThrown"];
+
 // 3) MG flas gizleyici (yerel AI MG'ler)
 [] spawn {
     private _kuralFn = {

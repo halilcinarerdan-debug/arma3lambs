@@ -521,6 +521,8 @@ if (EGVAR(main,debug_functions) && {_logYaz}) then {
 // ---------------------------------------------------------------------------
 _group setVariable [QGVAR(cmdLastThreat),   _threatScore];
 _group setVariable [QGVAR(cmdLastDecision), _decision];
+// Durum raporu: formasyon zekasi (selectFormation "COMBAT" / fnc_commanderFormation) bunu okur
+_group setVariable [QGVAR(cmdSit), [time, _closest, _enemyCount, _enemyMg, _armorCount, _pwrRatio, _lossRatio, _targetPos]];
 _group setVariable [QGVAR(cmdFactors), [
     _factorCount, _factorFirepower, _factorCasualty, _factorAmmo, _factorPosition, _factorSupp
 ]];
