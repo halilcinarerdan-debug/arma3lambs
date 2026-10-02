@@ -53,13 +53,14 @@ private _dostlar = (allUnits select {
 // 2) hedef etrafinda dost
 if ((_dostlar findIf {(_x distance2D _tPos) < _yaricap}) > -1) exitWith {["hedef cevresinde dost"] call _gorev};
 
-// atis hatti koridoru (4 m): hatta (unit -> hedef) dik uzaklik
+// atis hatti koridoru (4 m): hatta (unit -> hedef) dik uzaklik. SADECE RPG (duz giden roket); UGL yayli ucar —
+// hedef alanindaki dost (yukarida) ve namlu onundeki engel kontrolu yeterli (RPT: UGL "hatta dost (300 m)" ile hic atamiyordu)
 private _dir = _unit getDir _tPos;
-private _hat = _dostlar findIf {
+private _hat = if (!_rpg) then {-1} else { _dostlar findIf {
     private _dx = (_x distance2D _unit);
     private _a = (_unit getDir _x) - _dir;
     _dx > 1.5 && {_dx < (_d + 5)} && {(abs (sin _a)) * _dx < 4} && {(cos _a) > 0}
-};
+}};
 if (_hat > -1) exitWith {["hatta dost"] call _gorev};
 
 // 3) yakin engel: ilk 12 m, gogus yuksekliginde 3 serit
@@ -67,10 +68,10 @@ private _bas = AGLToASL (_uPos vectorAdd [0, 0, 1.4]);
 private _yaku = false;
 {
     private _basS = AGLToASL ((_unit getPos [0.7, _dir + (_x select 1)]) vectorAdd [0, 0, 1.4]);
-    private _son = AGLToASL (_unit getPos [([8, 12] select _rpg), _dir + (_x select 2)]);
+    private _son = AGLToASL (_unit getPos [([4, 12] select _rpg), _dir + (_x select 2)]);
     _son set [2, (_basS select 2) + ((((AGLToASL _tPos) select 2) + 1.2 - (_basS select 2)) * (12 / (_d max 12)))];
     if (terrainIntersectASL [_basS, _son] || {(lineIntersectsSurfaces [_basS, _son, _unit, objNull, true, 1, "FIRE", "VIEW"]) isNotEqualTo []}) exitWith { _yaku = true; };
-} forEach [[12, 0, 0], [12, 90, 0], [12, -90, 0]];
+} forEach ([[[12, 0, 0]], [[12, 0, 0], [12, 90, 0], [12, -90, 0]]] select _rpg);
 if (_yaku) exitWith {["onunde cali/dal/engel (sekme)"] call _gorev};
 
 // 4) hat engeli (SADECE RPG: duz giden roket). UGL yayli atar — hat kapali olsa bile (siperin / duvarin arkasi) atmasi tam da amaci;

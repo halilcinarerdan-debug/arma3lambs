@@ -26,7 +26,7 @@ private _BND_ASSAULT_RANGE   = 55;
 private _BND_CYCLE_BASE      = 6;   // ortak ates bekleme (sn)
 private _BND_CYCLE_RAND      = 3;
 private _BND_SUPPRESSION_MUL = 3;
-private _BND_MAX_CYCLES      = 8;
+private _BND_MAX_CYCLES      = 10;
 private _BND_COVER_RANGE     = 50;    // ileri siper arama menzili (m)
 
 // ---------------------------------------------------------------------------
@@ -300,6 +300,9 @@ if (EGVAR(main,debug_functions)) then {
                 if ((_b distance2D _p) > 8) then {"AUTO"} else {_s}
             }
         );
+        // VARDI: sipernin yerinde KAL (doStop) — aksi halde AI formasyon slotuna (liderin yanina) geri yuruyup "ileri-geri" yapiyor.
+        // Bounding bitince / sonraki sicramada doMove zaten yeni emir verir; en sonda doFollow gruba doner.
+        if ((_b distance2D _p) <= 8 && {(getSuppression _b) < 0.85}) then { doStop _b; };
     };
 
     // ODAK: grubun bildigi en yakin dusman (hepsi AYNI hedefe ates eder = yogun ates)
@@ -588,44 +591,31 @@ if (EGVAR(main,debug_functions)) then {
         // -------------------------------------------------------------------
         // HANGI EKIP HAREKET EDIYOR?
         // -------------------------------------------------------------------
-        private _fseSicrama = ((_cycleCount % 3) isEqualTo 0) && {(count _maneuver) >= 2} && {(count _fse) > 0};
+        // DOKTRIN — BOUNDING OVERWATCH (FM 3-21.8): IKI EKIP kesin dönüşümlü: bir ekip HAREKET EDERKEN diger ekip DURUP ates eder.
+        //   tek cycle : ALPHA (maneuver + reserve) hareket, BRAVO (FSE: MG / nisanci) overwatch
+        //   cift cycle: BRAVO hareket, ALPHA overwatch
+        // Hareket eden ekibin TUMU ayni anda kalkar (ekip icinde farkli acilardan), diger ekip tamamen durur.
+        // (Eskiden: her 3. cycle FSE, digerlerinde her cift icinden sadece biri -> herkes bir arada kalkip duruyordu)
+        private _alphaE = (_maneuver + _reserve) select {alive _x};
+        private _bravoE = _fse select {alive _x};
+        private _fseSicrama = ((_cycleCount % 2) isEqualTo 0) && {_bravoE isNotEqualTo []} && {_alphaE isNotEqualTo []};
         private _hareketEdecek = [];
         private _kapsama = [];
-        private _ciftYakinla = [];   // [kosan, [destekler]] — kosucu siperine varinca esi yanina gelir
+        private _ciftYakinla = [];   // eski cift yakinlasma: ekip bound'unda gerek yok (bos kalir)
 
         if (_fseSicrama) then {
-            // FSE (+reserve) ileri sicrar; maneuver ortu atesi verir
-            // (MG kosmaz: MG'ler kapsama ekibinde kalir; yoksa hepsi kosar)
-            private _fseTum = _fse + _reserve;
-            private _fseKosan = _fseTum select {([_x] call _rolFn) isNotEqualTo "MG"};
-            if (_fseKosan isEqualTo []) then { _fseKosan = +_fseTum; };
-            _hareketEdecek = _fseKosan;
-            _kapsama = _maneuver + (_fseTum - _fseKosan);
+            // BRAVO ileri sicrar (MG kosmaz, kapsamada kalir); ALPHA durup ates eder
+            private _bk = _bravoE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            if (_bk isEqualTo []) then { _bk = +_bravoE; };
+            _hareketEdecek = _bk;
+            _kapsama = _alphaE + (_bravoE - _bk);
         } else {
             _rushN = _rushN + 1;
-            // BUDDY RUSH: maneuver 2'li cift (en guclu + en zayif), ciftlerde bir kosar, biri ortu verir
-            private _ciftler = [_maneuver] call _pairFn;
-
-            private _kosanlar = [];
-            private _destekTum = [];
-            {
-                private _cift = _x;
-                if ((count _cift) isEqualTo 1) then {
-                    // tek kalan bounder FSE ates ederken ilerler
-                    _kosanlar pushBack (_cift select 0);
-                } else {
-                    // MG kosmaz; sadece MG'lerden olusan ciftte hepsi aday
-                    private _adaylar = _cift select {([_x] call _rolFn) isNotEqualTo "MG"};
-                    if (_adaylar isEqualTo []) then { _adaylar = +_cift; };
-                    private _kosan = _adaylar select (_rushN % (count _adaylar));
-                    _kosanlar pushBack _kosan;
-                    _destekTum append (_cift - [_kosan]);
-                    _ciftYakinla pushBack [_kosan, _cift - [_kosan]];
-                };
-            } forEach _ciftler;
-
-            _hareketEdecek = _kosanlar;
-            _kapsama = _fse + _reserve + _destekTum;
+            // ALPHA ileri sicrar (MG kosmaz); BRAVO durup ates eder
+            private _ak = _alphaE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            if (_ak isEqualTo []) then { _ak = +_alphaE; };
+            _hareketEdecek = _ak;
+            _kapsama = _bravoE + (_alphaE - _ak);
         };
 
         // KOMUTAN ONDE KOSMAZ: lider sicramaya katilmaz, kapsama ekibinde (geriden) ates eder ve yonetir;
@@ -747,7 +737,7 @@ if (EGVAR(main,debug_functions)) then {
         // -------------------------------------------------------------------
         private _hareketler = [];
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"BuddyRush/Move"}, [30, -30, 0] select ((_forEachIndex + _cycleCount) % 3)] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"TeamBound/Move"}, [30, -30, 0] select ((_forEachIndex + _cycleCount) % 3)] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 

@@ -445,3 +445,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.22 ===
 - moveAssist: donus hizi senkronu (retreat/evade setAnimSpeedCoef yazinca onbellek bayatliyordu) -> 1.5 sn yeniden uygulama + remoteExec global
 - Retreat: varan asker doStop ile sicrama noktasinda kalir (formasyon slotuna / liderin eski yerine geri yuruyordu)
+
+=== v7.23 ===
+- Bounding: iki ekip kesin donusumlu (tek cycle ALPHA=maneuver+reserve hareket / BRAVO=FSE overwatch, cift cycle tersi); varan asker doStop; max 10 cycle
+- atisGuvenli: UGL icin hatta-dost koridoru yok, yakin engel sadece 4 m tek serit (RPT: UGL hatta dost 300 m ile hic atamiyordu); RPG ayni
