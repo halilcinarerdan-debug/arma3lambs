@@ -31,6 +31,7 @@ params [
 if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
 if ((units _group) isEqualTo []) exitWith {false};
+if (({alive _x} count (units _group)) < 1) exitWith {false};   // v8.10: bos (hepsi olu) grup retreat baslatmaz (RPT: toplam:0)
 
 private _unit = leader _group;
 if (isNull _unit) exitWith {false};
@@ -288,6 +289,14 @@ if (EGVAR(main,debug_functions)) then {
             groupId _grup, _no, count _hareketEdenler, count _kapsama
         ];
 
+        // v8.10: sis perdesi sadece basta degil, tek numarali sicramalarda da tazelenir (cooldown 30 sn korur)
+        if (_no > 1 && {(_no % 2) isEqualTo 1}) then {
+            [_grup, ASLToAGL _hedefASL] spawn {
+                params ["_g", "_tp"];
+                [_g, _tp, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
+            };
+        };
+
         // 1) Kapsama: hedef alanina baski atesi (kimse bos durmaz)
         {
             if (alive _x && {isNull objectParent _x}) then {
@@ -341,6 +350,7 @@ if (EGVAR(main,debug_functions)) then {
         { _uzak = _uzak max ((_x select 0) distance2D (_x select 1)); } forEach _varis;
         private _bitis = time + ((12 max ((_uzak / 3.5) + 4)) min 26);
         private _pinned = [];
+        private _erken = [];
         while {time < _bitis && {!isNull _grup}} do {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
             {
@@ -370,6 +380,23 @@ if (EGVAR(main,debug_functions)) then {
                     _b doMove (_x select 1);
                     _x set [2, getPosATL _b];
                     _x set [3, time];
+                };
+            } forEach _varis;
+
+            // v8.10 ERKEN VARIS: varan asker pencerenin sonunu AWARE / ayakta BEKLEMEZ (RPT 13:08: awarede beklerken oldu) -> hemen COMBAT, comelme, ortu atesi
+            {
+                private _b = _x select 0;
+                if (alive _b && {!(_b in _erken)} && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) <= 12}) then {
+                    _erken pushBack _b;
+                    _b setVariable [QGVAR(forceMove), nil];
+                    _b enableAI "TARGET";
+                    _b enableAI "AUTOTARGET";
+                    _b enableAI "AUTOCOMBAT";
+                    _b enableAI "COVER";
+                    _b setBehaviour "COMBAT";
+                    _b setUnitPosWeak "MIDDLE";
+                    doStop _b;
+                    [_b, _hedefASL] call EFUNC(main,doSuppress);
                 };
             } forEach _varis;
 

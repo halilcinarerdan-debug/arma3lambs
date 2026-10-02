@@ -38,7 +38,8 @@ private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {
 if (GVAR(disableAutonomousSmokeGrenades)) exitWith {false};
 
 // cooldown
-if ((time - (_group getVariable [QGVAR(smokeLast), -999])) < 45) exitWith {false};
+// v8.10: temas kesmede perde daha sik tazelenir (30 sn), diger modlarda 45 sn
+if ((time - (_group getVariable [QGVAR(smokeLast), -999])) < ([45, 30] select (_mode isEqualTo "BREAK_CONTACT"))) exitWith {false};
 
 private _targetPos = _target call CBA_fnc_getPos;
 if ((_targetPos select 2) > 6) then {_targetPos set [2, 0];};
@@ -82,7 +83,8 @@ private _mod = _mode;
 [_aticilar, _targetPos, _mod] spawn {
     params ["_aticilar", "_targetPos", "_mod"];
 
-    private _atisSayisi = if (_mod isEqualTo "BREAK_CONTACT") then { 2 min (count _aticilar) } else { 1 };
+    // v8.10: temas kesmede 3 atici (derin + GENIS perde: yanlara +-14 derece), 2.5 sn arayla (eskiden 2 atici, 5 sn: sis yetmiyordu)
+    private _atisSayisi = if (_mod isEqualTo "BREAK_CONTACT") then { 3 min (count _aticilar) } else { 1 };
 
     for "_i" from 0 to (_atisSayisi - 1) do {
         private _atici = _aticilar select _i;
@@ -90,7 +92,7 @@ private _mod = _mode;
 
         private _aticiPos = getPosATL _atici;
         private _hedefMesafe = _atici distance2D _targetPos;
-        private _yon = _aticiPos getDir _targetPos;
+        private _yon = (_aticiPos getDir _targetPos) + ([0, -14, 14] select (_i min 2));
 
         // El bombasi menzili ~38m
         private _atisMesafe = if (_mod isEqualTo "BREAK_CONTACT") then {
@@ -99,7 +101,7 @@ private _mod = _mode;
             ((_hedefMesafe * 0.65) max 22) min 38
         };
         // 2. sis biraz daha yakin = derin perde
-        if (_i > 0) then { _atisMesafe = (_atisMesafe - 8) max 15; };
+        if (_i > 0) then { _atisMesafe = (_atisMesafe - (6 * _i)) max 15; };
 
         private _sisPos = _aticiPos getPos [_atisMesafe, _yon];
 
@@ -123,7 +125,7 @@ private _mod = _mode;
             };
         };
 
-        if (_i < (_atisSayisi - 1)) then { sleep 5; };
+        if (_i < (_atisSayisi - 1)) then { sleep 2.5; };
     };
 };
 

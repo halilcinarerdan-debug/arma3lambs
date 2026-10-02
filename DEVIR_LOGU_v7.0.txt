@@ -651,3 +651,9 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
   baski < 0.4 ya da baskiKirmaMaxS (14 sn) dolunca sicramalar baslar. Log: [GERI-CEKILME-SIPER] (baslangic + 'baski kirma bitti: N sn, baski:x').
 - Gerekce: RPT 12:53 acikta baski 0.83-1.25 altinda kosu denemesi 7 -> 2 kisi. Dogrulanacak: baski kirma suresi, sonrasi vardi orani, kayip.
 - Doktrin anahtarlari: baskiKirmaEsik, baskiKirmaMaxS (profil bazinda ayarlanabilir).
+=== v8.10 (RPT 13:04, v8.9) ===
+- v8.9 SONUC: retreat varis 30/50 (%60; once 9/21, 2/17), 3 retreat, hata 0. ROTA 5 plan (direkt %97 -> plan %60, 1 ms). Baski kirma fazi TETIKLENMEDI (retreatlar 91-113 m'de basladi, esik ortalama baski 0.5 / >= 80 m: baski dusuktu) -> dogrulanamadi.
+- Alpha 1-2: 8 kisi 3 sn'de olunce 'toplam:0' ile retreat basladi (bos grup; zararsiz ama gereksiz).
+- Kullanici gozlemi: 'awarede bekleyen 1 kisi oldu' -> varan hareketliler pencere sonuna kadar AWARE/ayakta kaliyordu. Duzeltme: varir varmaz COMBAT + comelme + doStop + doSuppress (_erken listesi).
+- Kullanici: 'smokelar yetmiyor' -> BREAK_CONTACT 3 atici (2.5 sn arayla, yanlara +-14 derece = genis perde), cooldown 30 sn; retreat tek numarali sicramalarda (3,5,..) sisi tazeler.
+- Kullanici sorusu (acik arazide retreat basarisizligi dogal mi?): evet buyuk olcude. Acik arazide ates ustunlugu olan dusmandan yurume ile ayrilmak gercekte de en yuksek kayip anidir (Ukrayna dron goruntuleri: siperde bile geri cekilen mangalar). Hedef 'basarili retreat' degil, 'dogru olasilikli retreat' olmali: sis + ortu + kisa sicrama kayip orani dusurur, sifirlamaz.
