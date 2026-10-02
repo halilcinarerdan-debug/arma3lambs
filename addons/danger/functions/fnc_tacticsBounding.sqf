@@ -22,7 +22,7 @@ params ["_group", "_target", ["_units", []], ["_delay", 180]];
 // ---------------------------------------------------------------------------
 // Lokal bounding sabitleri (USMC doktrini)
 // ---------------------------------------------------------------------------
-private _BND_ASSAULT_RANGE   = 55;
+private _BND_ASSAULT_RANGE   = 40;   // bounding hucuma bu mesafede devreder (eskiden 55: 93 m'de sadece 2 cycle kaliyordu)
 private _BND_CYCLE_BASE      = 6;   // ortak ates bekleme (sn)
 private _BND_CYCLE_RAND      = 3;
 private _BND_SUPPRESSION_MUL = 3;
@@ -680,7 +680,7 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _fse;
 
-            private _kurBitis = time + 8;
+            private _kurBitis = time + 5;   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
             waitUntil {
                 sleep 0.5;
                 {

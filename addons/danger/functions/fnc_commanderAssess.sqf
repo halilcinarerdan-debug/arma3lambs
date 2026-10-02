@@ -436,13 +436,13 @@ private _result = call {
     };
     // DOKTRIN: ustun olsak bile 60 m'den UZAKTA duz hucum yok (ates-manevra: BOUNDING ile yaklas); ASSAULT yalniz son 60 m
     if (_enemyCount > 0 && {_pwrRatio <= 0.67}) exitWith {
-        if (_closest < 60) then {
+        if (_closest < 45) then {
             ["ASSAULT", format ["biz ustun (guc orani %1), mesafe %2m", _pwrRatio toFixed 2, round _closest]]
         } else {
             ["BOUNDING", format ["biz ustun (guc orani %1), mesafe %2m: ates-manevra ile yaklas", _pwrRatio toFixed 2, round _closest]]
         }
     };
-    if (_closest < 60 && {_pwrRatio < 1.4}) exitWith {
+    if (_closest < 45 && {_pwrRatio < 1.4}) exitWith {
         ["ASSAULT", format ["yakin mesafe %1m", round _closest]]
     };
     if (_pwrRatio >= 1.4) exitWith {

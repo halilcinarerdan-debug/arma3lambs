@@ -495,3 +495,6 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.36 ===
 - RHS el bombalari GrenadeCore degil (RPT: rhs_ammo_rgd5 GrenadeCore:false sim:shotgrenade): firedHub + grenadeAwareness simulation=shotgrenade ile yakalar
 - moveAssist duvar koruma grace 6 -> 15 sn (retreat lideri bina yaninda geri alinip takiliyordu)
+
+=== v7.37 ===
+- Bounding hucum esigi 55 -> 40 m, commander ASSAULT 60 -> 45 m; overwatch kurulum tavani 8 -> 5 sn
