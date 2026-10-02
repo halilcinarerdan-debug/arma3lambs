@@ -330,6 +330,8 @@ if (EGVAR(main,debug_functions)) then {
             if (surfaceIsWater _ciftNokta) then { _ciftNokta = _wp; };
             {
                 if (alive _x && {isNull objectParent _x}) then {
+                    _x forceSpeed -1;      // v8.29: LAMBS doAssaultSpeed (brainForced: ATTACK komutunda) lider icin forceSpeed 2-3 m/s birakir; her sicramada sifirla
+                    _x setSpeedMode "FULL";
                     _x enableAI "PATH";    // baska watchdog (komutan bekle vb.) PATH / MOVE kapatmis olabilir -> kosamazdi
                     _x enableAI "MOVE";
                     _x disableAI "TARGET";
@@ -421,7 +423,7 @@ if (EGVAR(main,debug_functions)) then {
                             if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
                             if (lambs_danger_retTakiliN < 40) then {
                                 lambs_danger_retTakiliN = lambs_danger_retTakiliN + 1;
-                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true])];
+                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13 | AI PATH:%14 MOVE:%15 ANIM:%16 FSM:%17", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true]), _b checkAIFeature "PATH", _b checkAIFeature "MOVE", _b checkAIFeature "ANIM", _b checkAIFeature "FSM"];
                             };
                             // her takilmada hareket bayraklari yeniden acilir
                             _b enableAI "PATH";
