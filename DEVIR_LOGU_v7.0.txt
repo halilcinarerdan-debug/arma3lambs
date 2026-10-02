@@ -381,3 +381,21 @@ v7.5a — Keskin nisanci tespiti daraltildi: SR-25 / MAR-10 / VSS gibi DMR'ler a
 v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlikler AWARE'de KALIYORDU (temas suruyorsa bile) -> artik temas varsa COMBAT,
         yoksa cekilme oncesi davranisa donerler (guvenlik valfleri dahil). Diger taktikler (BreakContact, ATEngage, Bounding) behaviour'a dokunmaz.
         Kalan setBehaviour AWARE kullanimlari bilerek: cekilme / kacis SIRASINDA (kosu), sniper barisi, sesten uyanma (SAFE -> AWARE).
+
+=== v7.11 — SAHA USTALIGI + TCCC + ONCE SIPER ===
+  - fnc_fieldCraft: (A) acikta olan asker 7 m icinde siper bulursa ilk atesi atmadan once siperin arka yuzune gecer, varis+2.5 sn ates kapali (TARGET/AUTOTARGET),
+    sonra ates; (B) 12+ atis / 6+ sn ayni yerden -> 6-9 m yana yer degistirir; (C) halt'te 8 sn sonra 360 derece guvenlik (her asker farkli yone doWatch);
+    (D) gece NVG + IR lazer + fener kapali / NVG'siz fener AUTO. RPT: [SAHA]. Kapatma: lambs_danger_fieldCraftOff = true.
+  - fnc_tccc: ACE Medical / ACM uyumlu (ozellik tespitli) tibbi bakim: temas bitince / guvenliyken medik (rol > trait > malzeme) yaraliya gider,
+    bilinci kapaliysa siper tarafina surukler (ace_dragging), M (kanama/turnike) -> C -> IV / morfin / CPR. RPT: [TCCC].
+  - fnc_tactics: ASSAULT / SUPPRESS_ASSAULT / FLANK oncesi COVER_MOVE dumani (tacticalSmoke, 45 sn grup bekleme).
+  - El bombasi (ofansif) LAMBS'te zaten var -> yapilmadi.
+
+=== YAPILACAKLAR (TODO) ===
+  [KESINLIKLE LAZIM] 2) ATES DISIPLINI: cephane ekonomisi (az mermide kisa seri / dur), sektor paylasimi (herkes ayni hedefe atmasin),
+        "ates kes / ates serbest" komutu (komutan emri, gorunmeyen hedefe ates yok), MG icin seri uzunlugu doktrini.
+  [MUTLAKA LAZIM] 1) LIDER OLUMU / DEVRALMA: onceden planlanmis yedek lider — RUTBE'ye gore (rank), esitlikte skill (command/general) ile;
+        lider olunce yedek ANINDA selectLeader, kisa toparlanma gecikmesi (cmdLastEval = time + gecikme; gecikme komuta skill / rutbe ile azalir),
+        emirlerin yeniden verilmesi, formasyon / tactic sifirlama. Not: lider arkaya alindi (v7.10) -> olum olasiligi zaten azaldi.
+  [TCCC KALANLAR] ACM havayolu (A) / solunum-pnomotoraks (R) / hipotermi (H) adimlari; ACE / ACM fonksiyon imzalari oyunda dogrulanacak
+        (ace_medical_treatment_fnc_treatment, ace_dragging_fnc_startDrag/dropObject, ace_medical_status_fnc_getBloodLoss).

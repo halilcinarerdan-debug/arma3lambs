@@ -167,6 +167,7 @@ if (
             [_group, _target, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
         };
         case "SUPPRESS_ASSAULT": {
+            [_group, _target, "COVER_MOVE"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
             [_group, _target] call FUNC(tacticsSuppress);
             [{
                 params ["_g", "_t"];
@@ -176,9 +177,11 @@ if (
             }, [_group, _target], 4] call CBA_fnc_waitAndExecute;
         };
         case "FLANK": {
+            [_group, _target, "COVER_MOVE"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
             [_group, _target] call FUNC(tacticsFlank);
         };
         case "ASSAULT": {
+            [_group, _target, "COVER_MOVE"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
             [_group, _target] call FUNC(tacticsAssault);
         };
         default {
