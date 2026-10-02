@@ -856,3 +856,6 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - Karne: TOPLANMA (DOKTRIN), RETREAT BITIS KRITERI. BEKLENEN_SURUM v8.34.
 - DOGRULANMADI (oyunda calistirilmadi): gorus testinin retreat'i cok erken bitirmesi (>= %80 siperli + >= 100 m); yon degistirme sicramasinin LAMBS / navmesh ile sorunsuz calismasi; halka konumlarinin bina / engel icine dusmesi; toparlanma ile commanderAssess 90 sn kilidinin birlikte davranisi; ATES_KAYDIR'in dost atesini gercekten azaltmasi.
 - SIRADA (H6): hqFeint (kumanda: sabitle + sinirli hedefli feint + ayrilma kriteri / temassiz demonstration; 'fake retreat' YOK), arka grup (>= 2 kisi, rear guard) tasarimi, mevzi araligi 5-20 m (VBS #6), formasyon 'kesin 10 m' varsayimlarini gevset.
+=== v8.34b (RPT 2026-10-03 00:07, v8.34; kullanici: 'modul gozukmuyor') ===
+- RPT: v8.34 yuklu, tum fonksiyonlar true, [HQ] cekirdegi basladi; modul Zeus'ta YOK. KOK NEDEN: Zeus yalniz config.cpp CfgPatches units[] listesindeki modulleri gosterir (upstream: SetRadio, DisableAI, ConfigureGroupAI); GVAR(Kumanda) eklenmemisti.
+  Duzeltme: addons/danger/config.cpp (upstream kopyasi + Kumanda). Kullanicinin agacinda config.cpp farkliysa YALNIZ units[] satirina QGVAR(Kumanda) eklenmeli.
