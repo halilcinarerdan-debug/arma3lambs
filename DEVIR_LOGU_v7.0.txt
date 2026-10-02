@@ -377,3 +377,7 @@ Yeni:
 
 v7.5a — Keskin nisanci tespiti daraltildi: SR-25 / MAR-10 / VSS gibi DMR'ler ayrilmaz (sadece "sniper" sinif adi veya bolt-action / buyuk kalibre).
         Kapatma anahtari: lambs_danger_sniperTeamOff = true (yeni ayrilma durur; mevcut ayrilmis takimlar bagimsiz kalir).
+
+v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlikler AWARE'de KALIYORDU (temas suruyorsa bile) -> artik temas varsa COMBAT,
+        yoksa cekilme oncesi davranisa donerler (guvenlik valfleri dahil). Diger taktikler (BreakContact, ATEngage, Bounding) behaviour'a dokunmaz.
+        Kalan setBehaviour AWARE kullanimlari bilerek: cekilme / kacis SIRASINDA (kosu), sniper barisi, sesten uyanma (SAFE -> AWARE).

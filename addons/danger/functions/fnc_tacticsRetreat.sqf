@@ -120,6 +120,7 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
                     _x enableAI "AUTOCOMBAT";
                     _x enableAI "COVER";
                     _x setVariable [QGVAR(forceMove), nil];
+                    _x setBehaviour (if ((_g getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {"AWARE"});
                     _x allowFleeing 0;
                     _x setAnimSpeedCoef 1.0;
                     _x setUnitPos "AUTO";
@@ -144,6 +145,7 @@ if (EGVAR(main,debug_functions)) then {
     params ["_group", "_unit", "_targetPos", "_wps", "_baslangic"];
 
     private _origCombat = combatMode _group;
+    private _origBeh = behaviour (leader _group);   // v7.5b: bitince AWARE'de KALMASIN
     private _targetASL = AGLToASL _targetPos;
 
     // Eski kilitleri temizle: onceki Peel/Retreat PATH/MOVE/TARGET'i kapali birakmis olabilir
@@ -371,7 +373,8 @@ if (EGVAR(main,debug_functions)) then {
                 _x enableAI "COVER";
                 _x setVariable [QGVAR(forceMove), nil];
                 _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
-                _x setBehaviour "AWARE";
+                // temas suruyorsa COMBAT (siper arar / yatar), degilse cekilme oncesi davranis
+                _x setBehaviour (if ((_group getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {_origBeh});
                 _x allowFleeing 0;
                 _x setAnimSpeedCoef 1.0;
                 _x setUnitPos "AUTO";
