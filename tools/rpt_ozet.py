@@ -14,10 +14,10 @@ el bombasi tepki suresi, UGL kullanimi, hatalar (mod gurultusu ayiklanir).
 import re, sys, collections, statistics
 
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
-        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
+        "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "SIPER-YAPIS-OZET", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.18"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.19"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -256,6 +256,18 @@ def karne(path):
         ekle("TEMAS KES YON", "OK" if sp and sum(sp) / len(sp) <= 60 and gz >= 0.5 * ty else "KONTROL", "%d hedef | gizli:%d | ort sapma %.0f derece" % (ty, gz, sum(sp) / max(len(sp), 1)))
     else:
         ekle("TEMAS KES YON", "YOK", "temas kesme olmadi (<4 kisi, kayip / baski)")
+
+    sy = [l for l in L if "[SIPER-YAPIS-OZET]" in l]
+    if sy:
+        aj = sum(int(m.group(1)) for l in sy for m in [re.search(r"ayarlandi:(\d+)", l)] if m)
+        ac = sum(int(m.group(1)) for l in sy for m in [re.search(r"acikta:(\d+)", l)] if m)
+        ekle("SIPER YAPISMA", "OK" if aj > 0 else "KONTROL", "ayarlandi:%d acikta:%d | %s" % (aj, ac, re.sub(r"^.*\[SIPER-YAPIS-OZET\] ", "", sy[-1])[:90]))
+    else:
+        ekle("SIPER YAPISMA", "YOK", "60 sn ozeti yok (temas / oturum kisa)")
+    bh = len([1 for l in L if "[ANOMALI] BOSTA-HAREKET" in l])
+    ekle("BOSTA HAREKET", "OK" if bh == 0 else "KONTROL", "%d anomali (formasyonda surekli hareket suphesi)" % bh)
+    tg = [l for l in L if "[TELSIZ-GRUP]" in l]
+    ekle("TELSIZ / REINFORCE", "OK" if tg else "YOK", ("%d grup tanisi; reinforce acik: %d" % (len(tg), len([1 for l in tg if "enableGroupReinforce:true" in l]))) if tg else "tani yok (v8.19+)")
 
     # varsayilan beceri
     sv = [l for l in L if "[SKILL-VARSAYILAN] " in l and "onceki:" in l]

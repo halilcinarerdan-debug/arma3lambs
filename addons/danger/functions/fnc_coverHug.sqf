@@ -37,10 +37,18 @@ lambs_danger_coverHugStarted = true;
 diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchdog baslatildi";
 
 [] spawn {
+    private _sayac = createHashMapFromArray [["ayarlandi", 0], ["acikta", 0], ["reddedildi", 0], ["kaymaTop", 0], ["UP", 0], ["MIDDLE", 0], ["DOWN", 0]];
+    private _sonOzet = time;
     while {true} do {
         sleep 1.5;
+        if ((time - _sonOzet) >= 60) then {
+            _sonOzet = time;
+            private _a = _sayac get "ayarlandi";
+            diag_log format ["[SIPER-YAPIS-OZET] 60 sn: ayarlandi:%1 (ort kayma %2 m) | acikta:%3 reddedildi:%4 | durus UP:%5 MIDDLE:%6 DOWN:%7", _a, ((_sayac get "kaymaTop") / (_a max 1)) toFixed 2, _sayac get "acikta", _sayac get "reddedildi", _sayac get "UP", _sayac get "MIDDLE", _sayac get "DOWN"];
+            { _sayac set [_x, 0]; } forEach (keys _sayac);
+        };
         if (missionNamespace getVariable ["lambs_danger_coverHugOff", false]) then { continue };
-        private _butce = 5;
+        private _butce = 8;   // v8.19: 5 -> 8 asker / tik
 
         {
             private _g = _x;
@@ -74,22 +82,27 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 private _ed = _u distance2D _en;
                 if (_ed < 6 || {_ed > 400}) then { continue };
 
-                _u setVariable [QGVAR(hugT), time + 4];
+                _u setVariable [QGVAR(hugT), time + 3];
                 _butce = _butce - 1;
 
                 private _eASL = eyePos _en;
                 private _pASL = getPosASL _u;
+                // v8.19: 3 yukseklikte (alcak duvar 0.4 / govde 1.1 / omuz 1.5) en YAKIN sert yuzey; mesafe 6 m'ye kadar
                 private _uASL = _pASL vectorAdd [0, 0, 1.1];
-
-                // dusman -> asker hattindaki ILK sert yuzey (mermi durduran geometri)
-                private _hit = lineIntersectsSurfaces [_eASL, _uASL, _en, _u, true, 1, "FIRE", "NONE"];
-                if (_hit isEqualTo []) then { continue };   // acikta: siper yok
-                private _hP = (_hit select 0) select 0;
-                private _d = _uASL distance _hP;
-                if (_d > 3.5 || {_d < 0.01}) then { continue };
-
+                private _hP = [];
+                private _d = 99;
+                {
+                    private _uH = _pASL vectorAdd [0, 0, _x];
+                    private _hh = lineIntersectsSurfaces [_eASL, _uH, _en, _u, true, 1, "FIRE", "NONE"];
+                    if (_hh isNotEqualTo []) then {
+                        private _hp = (_hh select 0) select 0;
+                        private _dd = _uH distance _hp;
+                        if (_dd < _d && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
+                    };
+                } forEach [1.1, 0.4, 1.5];
+                if (_hP isEqualTo [] || {_d > 6}) then { _sayac set ["acikta", (_sayac get "acikta") + 1]; continue };
                 private _dir = vectorNormalized (_uASL vectorDiff _eASL);
-                private _tASL = _hP vectorAdd (_dir vectorMultiply 0.45);
+                private _tASL = _hP vectorAdd (_dir vectorMultiply (missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.35]));   // 45 -> 35 cm (kullanici: daha yapisik)
                 _tASL set [2, _pASL select 2];
                 private _t = ASLToATL _tASL;
                 _t set [2, (getPosATL _u) select 2];
@@ -99,21 +112,38 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
 
                 // yeni nokta gecerli mi: su yok, 0.9 m icinde dost yok, kayma <= 2.2 m, yon dusmana dogru
                 if (!_yapisik) then {
-                    if (_kayma > 2.2 || {surfaceIsWater _t}) then { continue };
-                    if (((_u nearEntities ["CAManBase", 3]) findIf {_x isNotEqualTo _u && {(_x distance2D _t) < 0.9}}) > -1) then { continue };
-                    [_u, getPosATL _u, _t] spawn {
-                        params ["_a", "_p0", "_p1"];
-                        for "_k" from 1 to 5 do {
-                            if (!alive _a) exitWith {};
-                            _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 5)));
-                            sleep 0.06;
-                        };
-                    };
+                    if (_kayma > 4 || {surfaceIsWater _t}) then { _sayac set ["reddedildi", (_sayac get "reddedildi") + 1]; continue };
+                    if (((_u nearEntities ["CAManBase", 3]) findIf {_x isNotEqualTo _u && {(_x distance2D _t) < 0.9}}) > -1) then { _sayac set ["reddedildi", (_sayac get "reddedildi") + 1]; continue };
                 };
 
                 // durus: bas + iki omuz dusmandan gizli en yuksek stance
                 private _perp = [-(_dir select 1), _dir select 0, 0];
                 private _zeminASL = _pASL select 2;
+                // v8.19 YANAL INCE AYAR: 5 yanal sapma (0, +-0.3, +-0.6 m) icin en yuksek gizli stance; en iyi nokta (esitlikte en kucuk sapma) secilir
+                private _enIyiOfs = 0;
+                private _enIyiSk = -1;
+                {
+                    private _ofs = _x;
+                    private _tO = _tASL vectorAdd (_perp vectorMultiply _ofs);
+                    private _sk = 0;
+                    {
+                        _x params ["_ad", "_h", "_puan"];
+                        private _bas = [_tO select 0, _tO select 1, (_pASL select 2) + _h];
+                        private _gz = true;
+                        {
+                            private _nokta = _bas vectorAdd (_perp vectorMultiply _x);
+                            if (!((lineIntersects [_nokta, _eASL, _u, _en]) || {terrainIntersectASL [_nokta, _eASL]})) exitWith { _gz = false; };
+                        } forEach [0, 0.3, -0.3];
+                        if (_gz) exitWith { _sk = _puan; };
+                    } forEach [["UP", 1.62, 3], ["MIDDLE", 1.08, 2], ["DOWN", 0.38, 1]];
+                    if (_sk > _enIyiSk || {_sk isEqualTo _enIyiSk && {(abs _ofs) < (abs _enIyiOfs)}}) then { _enIyiSk = _sk; _enIyiOfs = _ofs; };
+                } forEach [0, 0.3, -0.3, 0.6, -0.6];
+                if (_enIyiOfs isNotEqualTo 0) then {
+                    _tASL = _tASL vectorAdd (_perp vectorMultiply _enIyiOfs);
+                    _t = ASLToATL _tASL;
+                    _t set [2, (getPosATL _u) select 2];
+                };
+
                 private _durus = "DOWN";
                 {
                     _x params ["_ad", "_h"];
@@ -126,6 +156,18 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     if (_gizli) exitWith { _durus = _ad; };
                 } forEach [["UP", 1.62], ["MIDDLE", 1.08], ["DOWN", 0.38]];
 
+                // TEK yumusak kayma: son nokta (yuzey + 35 cm + yanal ince ayar); en fazla 4.5 m, 8 adim
+                if (!surfaceIsWater _t && {((getPosATL _u) distance2D _t) >= 0.15} && {((getPosATL _u) distance2D _t) <= 4.5}) then {
+                    [_u, getPosATL _u, _t] spawn {
+                        params ["_a", "_p0", "_p1"];
+                        for "_k" from 1 to 8 do {
+                            if (!alive _a) exitWith {};
+                            _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 8)));
+                            sleep 0.06;
+                        };
+                    };
+                };
+
                 // baski altinda bir kademe alcal
                 if ((getSuppression _u) > 0.35) then {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; case "MIDDLE": {"DOWN"}; default {"DOWN"} };
@@ -133,6 +175,9 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 _u setUnitPosWeak _durus;
                 _u doWatch _en;
 
+                _sayac set ["ayarlandi", (_sayac get "ayarlandi") + 1];
+                _sayac set ["kaymaTop", (_sayac get "kaymaTop") + _kayma];
+                _sayac set [_durus, (_sayac getOrDefault [_durus, 0]) + 1];
                 _u setVariable [QGVAR(hugPos), _t];
                 _u setVariable [QGVAR(hugAt), time];
 

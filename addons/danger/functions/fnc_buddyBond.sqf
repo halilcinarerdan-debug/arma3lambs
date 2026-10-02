@@ -61,8 +61,9 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
             ) then { continue };
 
             private _savasta = (_g getVariable [QGVAR(contact), 0]) > time;
-            private _ciftLimit = [25, 30] select _savasta;
-            private _izoLimit  = [40, 45] select _savasta;
+            // v8.19: SAKIN halde (temas yok) gevsek limit: formasyonda surekli "yanina don" hareketi olmasin (kullanici gozlemi)
+            private _ciftLimit = [45, 30] select _savasta;
+            private _izoLimit  = [70, 45] select _savasta;
 
             // Tum canli piyade + hareket edebilir (uygun) olanlar
             private _tum = (units _g) select {alive _x && {isNull objectParent _x}};
@@ -171,6 +172,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                             private _p = (getPosATL _hedefDost) getPos [5 + (random 4), _yonB];
                             if (!surfaceIsWater _p) then {
                                 _m setVariable [QGVAR(bondLast), time];
+                                _g setVariable [QGVAR(buddyLast), time];
                                 _tasinan = _tasinan + 1;
                                 _m doMove _p;
                                 diag_log format [

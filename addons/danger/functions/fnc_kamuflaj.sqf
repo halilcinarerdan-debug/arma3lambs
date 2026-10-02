@@ -75,6 +75,8 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
             };
             _c = _c - _isikBonus;
             _c = (_c max _minC) min 1.2;
+            // v8.19: dusman 25 m icindeyse gizlenme avantaji kalkar (>= 0.9): yakindaki asker gorulur
+            if (_enVar && {(_u distance2D _en) < 25}) then { _c = _c max 0.9; };
 
             private _eski = _u getVariable [QGVAR(kamuflajC), 1];
             if ((abs (_c - _eski)) >= 0.05) then {

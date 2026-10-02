@@ -11,6 +11,7 @@
  *   YURUMUYOR        : komut MOVE ama hiz < 0.8 km/s, > 15 sn (ezilmis / baski >= 0.85 haric)
  *   LIDER-YALNIZ     : lider en yakin astindan > 80 m, > 10 sn
  *   GRUP-EZILMIS     : askerlerin >= %50'si baski >= 0.85, > 10 sn
+ *   BOSTA-HAREKET    : temas > 30 sn yok, lider duruyor ama >= 2 asker yuruyor (> 10 sn)  -> formasyonda surekli hareket suphesi (gorev / buddy / rol istasyonu zamanlari ile)
  *   TEMAS-YOK-COMBAT : temas > 60 sn yok ama lider COMBAT ve taktik bayragi yok (uzun sure COMBAT'ta kalma)
  * Her 60 sn: [SAGLIK] ozet satiri (grup / asker sayisi, anomali sayilari). Kapatma: lambs_danger_saglikOff = true.
  *
@@ -139,6 +140,26 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                 _g setVariable [QGVAR(saglikEzT), -1];
             };
 
+            // BOSTA-HAREKET (kullanici: "formasyonda surekli hareket eden AI"): temas >= 30 sn yok, lider duruyor (< 1 km/s) ama >= 2 asker yuruyor (> 3 km/s), > 10 sn
+            if (!_bayrakVar && {(_g getVariable [QGVAR(contact), 0]) < (time - 30)} && {(speed _l) < 1}) then {
+                private _yuruyen = _us select {_x isNotEqualTo _l && {(speed _x) > 3}};
+                if ((count _yuruyen) >= 2) then {
+                    if ((_g getVariable [QGVAR(saglikBostaT), -1]) < 0) then { _g setVariable [QGVAR(saglikBostaT), time]; };
+                    if ((time - (_g getVariable [QGVAR(saglikBostaT), time])) > 10) then {
+                        ["BOSTA-HAREKET", _g, format ["%1 / %2 asker yuruyor, lider duruyor | formasyon:%3 beh:%4 | gorevler:%5 | buddy son:%6 sn once | rol istasyonu son:%7 sn once", count _yuruyen, count _us, formation _g, behaviour _l, (_yuruyen apply {_x getVariable [QEGVAR(main,currentTask), "-"]}) select [0, 3 min (count _yuruyen)], round (time - (_g getVariable [QGVAR(buddyLast), -999])), round (time - ((_yuruyen select 0) getVariable [QGVAR(stationLast), -999]))]] call _isaretle;
+                    };
+                } else {
+                    _g setVariable [QGVAR(saglikBostaT), -1];
+                };
+            } else {
+                _g setVariable [QGVAR(saglikBostaT), -1];
+            };
+
+            // TELSIZ / REINFORCE TANISI: grup basina bir kez (LAMBS takviye bayragi + telsiz degiskenleri; "dynamic reinforcement calismadi" icin ham veri)
+            if (!(_g getVariable [QGVAR(telsizLog), false])) then {
+                _g setVariable [QGVAR(telsizLog), true];
+                diag_log format ["[TELSIZ-GRUP] %1 | taraf:%2 | enableGroupReinforce:%3 | hasRadio:%4 | disableGroupAI:%5 | grup degiskenleri(reinforce/radio): %6", groupId _g, side _g, _g getVariable ["lambs_danger_enableGroupReinforce", "yok"], _g getVariable ["lambs_danger_dangerRadio", "yok"], _g getVariable [QGVAR(disableGroupAI), false], (allVariables _g) select {(_x find "einforce") >= 0 || {(_x find "adio") >= 0}}];
+            };
             // TEMAS-YOK-COMBAT
             if (!_bayrakVar && {(_g getVariable [QGVAR(contact), 0]) < (time - 60)} && {(behaviour _l) isEqualTo "COMBAT"}) then {
                 ["TEMAS-YOK-COMBAT", _g, format ["temas %1 sn once bitti ama lider COMBAT | combatMode:%2 | formasyon:%3", round (time - (_g getVariable [QGVAR(contact), 0])), combatMode _g, formation _g]] call _isaretle;
