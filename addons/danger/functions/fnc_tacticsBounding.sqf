@@ -399,6 +399,13 @@ if (EGVAR(main,debug_functions)) then {
         private _mesafe = _kosan distance2D _hedef;
         private _kPos = getPosATL _kosan;
         private _eASL = AGLToASL (_hedef vectorAdd [0, 0, 1.6]);
+        // MESAFEYE GORE ATILIM (doktrin: ates altinda 3-5 sn / 15-30 m atilim; uzak ve ortulu arazide daha uzun):
+        //   > 200 m : kazanc >= 15, atilim <= 70   (uzak, dusman etkisiz)
+        //   100-200 : kazanc >= 12, atilim <= 40
+        //   < 100 m : kazanc >= 8,  atilim <= 25   (yakin temas: kisa, hizli atilim)
+        private _atMax = if (_mesafe > 200) then {70} else {if (_mesafe > 100) then {40} else {25}};
+        private _kazMin = if (_mesafe > 200) then {15} else {if (_mesafe > 100) then {12} else {8}};
+        _siperMenzil = _siperMenzil min (_atMax + 10);
         private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
         private _movePos = [];
         private _stance = "MIDDLE";
@@ -410,7 +417,7 @@ if (EGVAR(main,debug_functions)) then {
             private _cp = _x select 0;
             private _atilim = _kPos distance2D _cp;
             // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin); cok uzak atilim da sayilmaz
-            if ((_mesafe - (_cp distance2D _hedef)) >= 15 && {_atilim <= 60}) then {
+            if ((_mesafe - (_cp distance2D _hedef)) >= _kazMin && {_atilim <= _atMax}) then {
                 private _n = (floor (_atilim / 5)) max 1;
                 private _a = 0;
                 for "_k" from 1 to _n do {
@@ -421,7 +428,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
                 };
                 private _aciFark = abs ((((_kPos getDir _cp) - ((_kosan getDir _hedef) + _aci)) + 540) % 360 - 180);
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - 45) max 0)) - (0.2 * _aciFark);
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark);
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
@@ -435,7 +442,7 @@ if (EGVAR(main,debug_functions)) then {
         if (_movePos isEqualTo []) then {
             private _kayma = if (_aci isNotEqualTo 0) then {_aci} else {[-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2)};
             private _kalan = (_mesafe - _hucumMenzil) max 0;
-            _hop = 35 min _kalan;
+            _hop = (_atMax * 0.6) min _kalan;
             _movePos = _kPos getPos [_hop, ((_kosan getDir _hedef) + _kayma)];
             if (surfaceIsWater _movePos) then { _movePos = _kPos; _hop = 0; };
             _stance = "MIDDLE";

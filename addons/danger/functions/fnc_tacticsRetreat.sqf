@@ -90,12 +90,15 @@ private _suKontrol = {
 
 // v14: noktalar BINA / DUVAR / CIT icine dusmesin (0/5 varis, 20 sn zaman asimi sorunu: nokta binanin icindeydi)
 // Her sicrama kendi oncekinden 40 m; dusman yonunun tersinde +-75 derece kon icinde acik / engelsiz aday secilir.
+// MESAFEYE GORE SICRAMA BOYU (doktrin: yakin temasta kisa/hizli sicrama + sis, uzakta daha uzun):
+//   tehdit < 100 m : 30 m | 100-200 m : 40 m | > 200 m : 60 m
+private _adimBoy = if (_cqbMesafe < 100) then {30} else {if (_cqbMesafe < 200) then {40} else {60}};
 private _wpSec = {
     params ["_o", "_dir"];
     private _best = [];
     private _bestS = -9999;
     {
-        private _c = _o getPos [40, _dir + _x];
+        private _c = _o getPos [_adimBoy, _dir + _x];
         private _s = -((abs _x) * 0.05);
         if (surfaceIsWater _c) then { _s = _s - 500; };
         private _n = count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE", "CHURCH", "WALL", "FENCE", "ROCK", "FUELSTATION", "BUNKER"], 5, false, true]);
