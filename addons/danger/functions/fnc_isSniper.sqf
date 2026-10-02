@@ -25,9 +25,10 @@ if ((_c select 0) isEqualTo _w) exitWith {_c select 1};
 private _ad = toLower _w;
 private _tip = toLower (typeOf _unit);
 // Sadece GERCEK keskin nisanci: sinif adinda "sniper" ya da bolt-action / buyuk kalibre nisanci tufegi.
+// NOT: duz "m24" araniyorsa M240 / M249 (MG) de eslesirdi -> MG'ler 'nisanci' sanilip ayri gruba aliniyordu (duzeltildi: m24sws / _m24_ / _m24a)
 // DMR / semi-auto nisanci tufekleri (SR-25, M110, EBR, MK14, SVD, MAR-10, RSASS...) SAYILMAZ -> tim icinde kalir.
 private _sn = ((_tip find "sniper") >= 0)
-    || {(["srifle_lrr", "srifle_gm6", "srifle_m200", "m24", "m40a", "m40_", "xm2010", "t5000", "m107", "m82", "as50", "blaser", "sv98", "ksvk", "orsis", "awm", "l115", "l96", "_lrr", "_gm6", "rhs_weap_m24", "rhs_weap_m40"] findIf {(_ad find _x) >= 0}) > -1};
+    || {(["srifle_lrr", "srifle_gm6", "srifle_m200", "m24sws", "srifle_m24", "_m24_", "_m24a", "m40a", "m40_", "xm2010", "t5000", "m107", "m82", "as50", "blaser", "sv98", "ksvk", "orsis", "awm", "l115", "l96", "_lrr", "_gm6", "rhs_weap_m40a"] findIf {(_ad find _x) >= 0}) > -1};
 // ELITE kapatma anahtari: lambs_danger_sniperTeamOff = true
 if (missionNamespace getVariable ["lambs_danger_sniperTeamOff", false]) then { _sn = false; };
 
