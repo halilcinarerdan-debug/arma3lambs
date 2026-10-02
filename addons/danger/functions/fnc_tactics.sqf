@@ -162,9 +162,14 @@ if (
         case "DELAY": {
             // tacticsHide(_group, _target, _antiTank, _delay): varsayilan 240 sn combatMode WHITE (ates yok) tutardi ->
             // 25 sn; kilidi, combatMode / formasyon / enableAttack'i sure sonunda kendisi geri verir
-            _group setVariable [QGVAR(isExecutingTactic), true];
-            [_group, _target, false, 25] call FUNC(tacticsHide);
-            [_group, _target, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
+            // 30 sn'de BIR KEZ: LAMBS tacticsHide her cagrida "TakeCover!" bagirip herkesi yeniden saklanma noktasina yolluyor;
+            // RPT'de 5 sn arayla tekrarlaniyordu (take cover spam'i + hareket felci)
+            if ((time - (_group getVariable [QGVAR(delayBasT), -999])) > 30) then {
+                _group setVariable [QGVAR(delayBasT), time];
+                _group setVariable [QGVAR(isExecutingTactic), true];
+                [_group, _target, false, 25] call FUNC(tacticsHide);
+                [_group, _target, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
+            };
         };
         case "SUPPRESS_ASSAULT": {
             [_group, _target, "COVER_MOVE"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);

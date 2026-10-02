@@ -521,9 +521,12 @@ if (EGVAR(main,debug_functions)) then {
                     [_group, 20] call FUNC(tacticsHold);
                 };
                 case "DELAY": {
-                    _group setVariable [QGVAR(isExecutingTactic), true];
-                    [_group, _target, false, 25] call FUNC(tacticsHide);
-                    [_group, _target, "BREAK_CONTACT"] call _sisFn;
+                    if ((time - (_group getVariable [QGVAR(delayBasT), -999])) > 30) then {
+                        _group setVariable [QGVAR(delayBasT), time];
+                        _group setVariable [QGVAR(isExecutingTactic), true];
+                        [_group, _target, false, 25] call FUNC(tacticsHide);
+                        [_group, _target, "BREAK_CONTACT"] call _sisFn;
+                    };
                 };
                 default {
                     [_group, _target] call FUNC(tacticsRetreat);

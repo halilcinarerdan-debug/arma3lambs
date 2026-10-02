@@ -460,3 +460,7 @@ v7.5b — Davranis (AWARE) denetimi: geri cekilme / zirhtan kacma bitince birlik
 === v7.25 ===
 - commanderAssess: <=3 kisi veya dusman <60 m iken WITHDRAW/PEEL -> DELAY (siper al + sis), cephane bitti haric
 - Retreat atilim boylari 20/30/50 m, sicrama bekleme 12 -> 8 sn
+
+=== v7.26 ===
+- DELAY (tacticsHide) 30 sn kilit: LAMBS tacticsHide her cagrida TakeCover bagiriyordu, RPT de 5 sn arayla tekrarlaniyordu
+- firedHub: [GRENADE-ATIS] tani logu (AI el bombasi/40mm, ilk 60)

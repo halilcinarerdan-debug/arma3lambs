@@ -32,6 +32,15 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
 
         // 1) El bombasi listesi
         if (!isNull _proj && {_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]}) then {
+            // tani: AI el bombasi / 40mm atisi (ilk 60)
+            if (!isPlayer _unit) then {
+                if (isNil "lambs_danger_grLogN") then { lambs_danger_grLogN = 0; };
+                if (lambs_danger_grLogN < 60) then {
+                    lambs_danger_grLogN = lambs_danger_grLogN + 1;
+                    private _grEn = _unit findNearestEnemy _unit;
+                    diag_log format ["[GRENADE-ATIS] %1 | %2 | %3 | dusman %4 m", name _unit, _weapon, _ammo, if (isNull _grEn) then {"?"} else {round (_unit distance2D _grEn)}];
+                };
+            };
             lambs_danger_grenadeList = lambs_danger_grenadeList select {!isNull _x};
             if ((count lambs_danger_grenadeList) < 60) then {
                 lambs_danger_grenadeList pushBack _proj;
