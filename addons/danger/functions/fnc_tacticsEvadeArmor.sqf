@@ -229,6 +229,7 @@ diag_log format [
             _b enableAI "AUTOTARGET";
             _b enableAI "AUTOCOMBAT";
             _b enableAI "COVER";
+            _b setBehaviour "COMBAT";   // sigindiktan sonra AWARE'de ayakta durma
             _b setUnitPosWeak "DOWN";
             _b doWatch _tehditPos;
         };

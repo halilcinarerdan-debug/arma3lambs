@@ -211,7 +211,7 @@ if (EGVAR(main,debug_functions)) then {
     // alamiyorlardi); sadece HAREKET EDERKEN konur (_sicra icinde), varinca kalkar.
     {
         _x allowFleeing 0;
-        _x setBehaviour "AWARE";
+        _x setBehaviour "COMBAT";   // hareket etmeyen/ortu veren AWARE'de ayakta durmasin; kosarken _sicra AWARE yapar
         _x setAnimSpeedCoef 1.15;
         _x forceSpeed -1;
     } forEach _tumBirimler;
@@ -235,6 +235,7 @@ if (EGVAR(main,debug_functions)) then {
             if (alive _x && {isNull objectParent _x}) then {
                 _x enableAI "TARGET";
                 _x enableAI "AUTOTARGET";
+                _x setBehaviour "COMBAT";
                 _x setUnitPosWeak "MIDDLE";
                 [_x, _hedefASL] call EFUNC(main,doSuppress);
             };
@@ -256,6 +257,7 @@ if (EGVAR(main,debug_functions)) then {
                     _x disableAI "AUTOTARGET";
                     _x disableAI "AUTOCOMBAT";
                     _x disableAI "COVER";
+                    _x setBehaviour "AWARE";   // sadece kosarken
                     _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPosWeak "UP";
@@ -279,6 +281,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b setVariable [QGVAR(forceMove), nil];
                     _b enableAI "AUTOCOMBAT";
                     _b enableAI "COVER";
+                    _b setBehaviour "COMBAT";
                     _b setUnitPosWeak "DOWN";
                 };
             } forEach _varis;
@@ -310,6 +313,7 @@ if (EGVAR(main,debug_functions)) then {
                 _b enableAI "AUTOTARGET";
                 _b enableAI "AUTOCOMBAT";
                 _b enableAI "COVER";
+                _b setBehaviour "COMBAT";   // vardi: siper al, AWARE'de ayakta durma
                 _b setUnitPosWeak "MIDDLE";
                 [_b, _hedefASL] call EFUNC(main,doSuppress);
             };
