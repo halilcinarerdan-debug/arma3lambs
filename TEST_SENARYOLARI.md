@@ -16,6 +16,7 @@ Yuklenen surum `[ELITE-BOOT] ... build vX` satirindan dogrulanir.
 | 9 | **Formasyon** | 5 dk temaslı yuruyus | `[KOMUTAN-FORM]` / `[FORMASYON]` | Ayni grupta 90 sn icinde formasyon degisimi yok (zirh/agir kayip haric 20 sn) |
 | 10 | **Felc / spam** | Herhangi uzun catisma | `rpt_ozet` -> SPAM TESPITI | "yok"; `[KOMUT]` gecisleri asker basina >= 3 sn aralikli; `[CAGRI]` ayni cagri 40 sn'de bir |
 | 11 | **Arka guvenlik** | Kent (>= 8 bina), grup >= 6 kisi, >= 3 sade tufekli | `[ARKA-GUVENLIK] ... arkayi kollamaya atandi` | MG/AT/nisanci/saglikci/UGL secilmez |
+| 13 | **Grup olaylari** | Herhangi catisma + retreat | `[OLAY] ... InContact / AllClear / Casualty / RetreatBasla / RetreatBitti / BoundingBasla / BoundingBitti / GrenadeAlgilandi` | Her temasin InContact + AllClear cifti var; `AllClear guvenlik agi` satiri YOK (varsa bir taktik anormal bitiyor) |
 | 12 | **Doktrin puani** | Her senaryo | `[DOKTRIN]` | Ortalama >= 70; `komutan_onde:true` orani <= %30 |
 
 ## Bilinen sinirlar

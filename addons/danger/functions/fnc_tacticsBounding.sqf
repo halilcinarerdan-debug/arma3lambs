@@ -472,6 +472,7 @@ if (EGVAR(main,debug_functions)) then {
         "[BND-BASLA] %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5",
         groupId _group, round ((leader _group) distance2D _target), count _fse, count _maneuver, count _reserve
     ];
+    [_group, "BoundingBasla", round ((leader _group) distance2D _target)] call FUNC(olayGonder);
 
     // Taktik sis: dusmana dogru, hareket eden birligin onune (tacticalSmoke cooldown'u var)
     [_group, _target, "COVER_MOVE"] call _sisFn;
@@ -1032,6 +1033,7 @@ if (EGVAR(main,debug_functions)) then {
             groupId _group, _cycleCount, round ((leader _group) distance2D _target),
             (_group getVariable [QGVAR(bndToken), ""]) isEqualTo _bndToken
         ];
+        [_group, "BoundingBitti", [_cycleCount, round ((leader _group) distance2D _target)]] call FUNC(olayGonder);
     };
 
     // Dongu bitti — token eslesiyorsa bu bounding hala bizim (Retreat devralmadi)

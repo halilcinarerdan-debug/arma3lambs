@@ -12,7 +12,7 @@ import re, sys, collections, statistics
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
         "GERI-CEKILME-BASLA", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
-        "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL"]
+        "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -109,6 +109,17 @@ def ozet(path):
         print("\n-- DOKTRIN PROFILLERI --")
         for d in dp[:6]:
             print("  ", d)
+
+    ol = collections.Counter()
+    for l in satirlar:
+        m = re.search(r"\[OLAY\] [^|]+\| ([A-Za-z]+) \|", l)
+        if m:
+            ol[m.group(1)] += 1
+    print("\n-- GRUP OLAYLARI --")
+    print("  ", dict(ol) if ol else "yok")
+    gn = len([1 for l in satirlar if "AllClear guvenlik agi" in l])
+    if gn:
+        print("   !! guvenlik agi %d kez bayrak temizledi (taktik kilidi / disableAI kalintisi: bir taktik anormal bitiyor olabilir)" % gn)
 
     print("\n-- UGL / RPG --")
     print("  UGL salvo:", len([1 for l in satirlar if "UGL salvo" in l]), "| ROL-GOREV UGL:", len([1 for l in satirlar if "ROL-GOREV" in l and "UGL" in l]),

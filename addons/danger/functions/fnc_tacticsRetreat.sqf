@@ -192,6 +192,7 @@ private _msgBasla = format [
     groupId _group, round (_unit distance2D _targetPos), _wp1, _wp2, _wp3
 ];
 diag_log _msgBasla;
+[_group, "RetreatBasla", round (_unit distance2D _targetPos)] call FUNC(olayGonder);
 if (EGVAR(main,debug_functions)) then {
     systemChat _msgBasla;
 };
@@ -499,6 +500,7 @@ if (EGVAR(main,debug_functions)) then {
             };
         } forEach (units _group);
 
+        [_group, "RetreatBitti", ""] call FUNC(olayGonder);
         diag_log format ["[GERI-CEKILME-TAMAM] %1", groupId _group];
     };
 };

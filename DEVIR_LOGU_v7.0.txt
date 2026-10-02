@@ -592,3 +592,10 @@ DEVIR NOTU (bundan sonrasi icin tek sayfa durum)
   Cozum: retreat suresince BIRIM duzeyi lambs_danger_disableAI = true (LAMBS Danger FSM o birimde kapali); bitis / guvenlik valfinde birim basina eski deger.
 - Dogrulandi (v8.2.1): bounding cycle dongusu calisiyor ([BND] satirlari), hata 0, UGL ROL-GOREV 3, SIS 16, siper v2 %15 degisim, doktrin profili (rhs_faction_usmc_d -> USMC).
 - Bounding komutan cikislari mantikliydi: WITHDRAW (2.6x guc dezavantaji + kayip %38), EVADE_ARMOR (zirh 1).
+
+=== v8.4 OLAY MESAJLARI (yol haritasi madde 3) ===
+- fnc_olayGonder: [grup, ad, veri] -> CBA yerel olayi "lambs_danger_grupOlayi", grupta son olay (lambs_danger_olaySon) ve sayaclar, RPT [OLAY] (ilk 300).
+- fnc_olay: uretici watcher (InContact / AllClear 20 sn / Casualty) + yerlesik dinleyici (AllClear guvenlik agi: kalan taktik kilitlerini ve retreat disableAI kalintisini temizler).
+- Uretici baglantilari: tacticsRetreat (RetreatBasla/Bitti), tacticsBounding (BoundingBasla/Bitti), grenadeAwareness (GrenadeAlgilandi).
+- rpt_ozet: GRUP OLAYLARI bolumu; TEST_SENARYOLARI.md senaryo 13.
+- HIBRIT TEST DUZENI (kullanici karari): her testte yeni ozellik + retreat dogrulamasi birlikte; hata artarsa oncelik yeniden belirlenir.

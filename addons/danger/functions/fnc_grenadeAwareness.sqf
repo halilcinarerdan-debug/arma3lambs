@@ -326,6 +326,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                     if (_gorulme < 0) then {
                         _gorulme = time;
                         _p setVariable [QGVAR(grSeen), time];
+                        [_g, "GrenadeAlgilandi", typeOf _p] call FUNC(olayGonder);
                         diag_log format ["[EL-BOMBASI-GORDU] %1 | lider %2 | %3 m | yaricap:%4 fitil:%5 | grup %6", typeOf _p, name _leader, round (_p distance2D _leader), _rad, _fitil, groupId _g];
                     };
                     private _son = [0, _gorulme + _fitil] select (_fitil > 0);
