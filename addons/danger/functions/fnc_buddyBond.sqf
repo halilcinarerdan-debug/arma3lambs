@@ -129,7 +129,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
             private _tasinan = 0;
             {
                 private _m = _x;
-                if (_tasinan < 2 && {_m in _u} && {(time - (_m getVariable [QGVAR(bondLast), -999])) > 10}) then {
+                if (_tasinan < 2 && {_m in _u} && {(time - (_m getVariable [QGVAR(bondLast), -999])) > (10 max (_m getVariable [QGVAR(bondBekle), 0]))}) then {
 
                     // en yakin dost
                     private _enYakin = objNull;
@@ -171,6 +171,23 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                             private _yonB = if (isNull _dusman) then {random 360} else {((_dusman getDir _hedefDost) + ((random 120) - 60))};
                             private _p = (getPosATL _hedefDost) getPos [5 + (random 4), _yonB];
                             if (!surfaceIsWater _p) then {
+                                // v8.43: ILERLEME KONTROLU — onceki emirden beri >= 10 m yaklasmadiysa (takili / mission'in sabitledigi / ulasilamayan asker)
+                                //   3. denemeden sonra 120 sn beklet + bir kez logla (RPT 5ef891c1: ayni asker cifti 2.5 saat 119 m'de, 4214 BUDDY satiri, her 10 sn doMove)
+                                private _oncekiMes = _m getVariable [QGVAR(bondOncekiMes), -1];
+                                if (_oncekiMes >= 0 && {(time - (_m getVariable [QGVAR(bondLast), -999])) < 90} && {_mes > (_oncekiMes - 10)}) then {
+                                    _m setVariable [QGVAR(bondBasarisiz), (_m getVariable [QGVAR(bondBasarisiz), 0]) + 1];
+                                } else {
+                                    _m setVariable [QGVAR(bondBasarisiz), 0];
+                                    _m setVariable [QGVAR(bondBekle), 0];
+                                };
+                                _m setVariable [QGVAR(bondOncekiMes), _mes];
+                                if ((_m getVariable [QGVAR(bondBasarisiz), 0]) >= 3) then {
+                                    _m setVariable [QGVAR(bondBekle), 120];
+                                    _m setVariable [QGVAR(bondBasarisiz), 0];
+                                    _m setVariable [QGVAR(bondLast), time];
+                                    diag_log format ["[BUDDY-TAKILI] %1 | %2 | 3 emirde ilerleme yok (%3 m) -> 120 sn beklet", groupId _g, name _m, round _mes];
+                                    continue
+                                };
                                 _m setVariable [QGVAR(bondLast), time];
                                 _g setVariable [QGVAR(buddyLast), time];
                                 _tasinan = _tasinan + 1;
