@@ -1,0 +1,195 @@
+ATP 3-21.8 Infantry Rifle Platoon and Squad (11 Jan 2024) - DOGRULANMIS ALINTILAR
+(Kullanici yapistirmasi, 3.6 MB tam metin; sadece ilgili paragraflar. Kaynak: kullanici PDF'i.)
+
+== Hareket formasyonlari (para 3-38, 3-41, 3-42) ==
+composed of two variables: lateral frontage, represented by the line formation; and
+depth, represented by the column formation. The advantages attributed to one of these
+variables are disadvantages to the other. Leaders combine the elements of lateral
+frontage and depth to determine the best formation for their situation. In addition to the
+line and column/file, the other five types of formations—box, vee, wedge, diamond, and
+echelon—combine these elements to varying degrees. Each does so with different
+degrees of emphasis resulting in unique advantages and disadvantages.
+MOVEMENT CONSIDERATIONS
+...
+with more than one lead element, as a general rule, are better for achieving fire
+superiority—the dominating fires of one force over another force that permits that force
+to maneuver at a given time and place without prohibitive interference by the other
+(FM 3-90)—to the front but are more difficult to control. Conversely, the formations
+with only one lead element are easier to control but are not as useful for achieving fire
+superiority to the front.
+3-42. Leaders attempt to maintain flexibility in their formations. Doing so enables them
+to react when unexpected enemy actions occur. The line, echelon, and column
+formations are the least flexible of the seven formations. The line formation masses fires
+to the front but has vulnerable flanks. The echelon is optimized for a flank threat,
+something units want to avoid. The column has difficulty reinforcing an element in
+contact. Leaders using these formations should consider ways to reduce the risks
+associated with their general lack of flexibility. For example, by expanding or
+contracting the formation depending on the terrain.
+3-43. During movement, every squad and Soldier has a standard position within a
+
+== Fire team wedge (3-46/47): aralik normalde 10 m, arazide daralir ==
+3-46. The wedge (see figure 3-2) is the basic formation of the fire team. The interval
+between Soldiers in the wedge formation is normally 10 meters. The wedge expands and
+contracts depending on the terrain. Fire teams modify the wedge when encountering
+rough terrain, poor visibility, or other factors make control of the wedge difficult. The
+normal interval is reduced so all team members still can see their team leader and all
+team leaders still can see their squad leader. The sides of the wedge can contract to the
+point where the wedge resembles a single file. Soldiers expand or resume their original
+positions when moving in less rugged terrain where control is easier.
+
+== Squad column (3-53): intikal icin ana formasyon; squad line (3-54): saldiri/on-saldiri ==
+11 January 2024 ATP 3-21.8 3-15
+Squad Column
+3-53. The squad column is the squad’s main formation for movement unless preparing
+for an assault—a short and violent well-ordered attack against a local objective
+(FM 3-90). (See figure 3-4.) It provides good dispersion both laterally and in-depth
+without sacrificing control. It also facilitates maneuver. The lead fire team is the base
+fire team. Squads can move in either a column wedge (squad column-team wedge) or a
+modified column wedge. A modified column wedge occurs when rough terrain, poor
+visibility, and other factors require the squad to modify the wedge into a file for control
+purposes. As the terrain becomes less rugged and control becomes easier, the Soldiers
+resume their original positions.
+
+== Disengagement / displacement (5-35..5-42) ==
+DISENGAGEMENT CRITERIA
+5-35. Disengagement criteria are the protocols that specify those circumstances where
+a friendly force must break contact with the direct fire and observed indirect fire to avoid
+becoming decisively engaged or to preserve friendly combat power (FM 3-90). It
+dictates to subordinate elements the circumstances, in which they will displace to
+alternate, supplementary, or subsequent positions. The criteria are tied to an enemy
+action, such as an enemy unit advancing past a certain phase line. They also are linked
+to the friendly situation. For example, the criteria might depend on whether artillery or
+an overwatch element can engage the enemy. Disengagement criteria are developed for
+each specific situation.
+DISPLACEMENT CRITERIA
+5-36. Displacement criteria define triggers for planned withdrawals, passage of lines, or
+reconnaissance handovers (battle handover for security operations) between units. As
+with engagement, disengagement, and bypass criteria, the conditions and parameters set
+in displacement criteria integrate the leader’s intent with tactical feasibility. Conditions
+and parameters are event-driven, time-driven, or enemy-driven. Displacement criteria
+conditions and parameters are key rehearsal events due to the criticality of identifying
+the triggers to anticipate during the mission. An example of event-driven conditions and
+parameters are associated priority intelligence requirements (PIRs) being met, enemy
+contact not expected in the area, and observed named area of interest (NAI) or avenue
+of approach denied to the enemy. Time-driven conditions and parameters ensure the
+time triggers are met (for example, latest time information is of value). An observation
+post compromised by threat or local civilian contact is a threat-driven condition. Failure
+to dictate conditions and parameters of displacement, nested within the higher scheme
+of maneuver, results in mission failure.
+DISENGAGEMENT AND DISPLACEMENT PLANNING
+5-37. Disengagement and displacement allow the platoon to retain its flexibility and
+tactical agility in the defense. For example, retrogrades (see section IV) are conducted
+to improve a tactical situation or preventing a worse situation from developing. Platoons
+usually conduct retrogrades as part of a larger force but may conduct independent
+Defense
+11 January 2024 ATP 3-21.8 5-11
+retrogrades (withdrawal) as required during defensive operations. The ultimate goals of
+disengagement and displacement are to enable the platoon to avoid being fixed or
+decisively engaged by the enemy. The overarching factor in a displacement is to
+maintain a mobility advantage over the enemy. The platoon leader must consider several
+important factors in displacement planning. These factors include, among others:
+ The enemy situation, for example, an enemy attack with one company-size
+enemy unit might prevent the platoon from disengaging.
+ Disengagement criteria (see paragraph 5-35).
+ Availability of direct fire suppression that can support disengagement by
+suppressing or disrupting the enemy.
+ Availability of cover and concealment, indirect fires, and obscurants to assist
+disengagement.
+ Obstacle integration, including situational obstacles.
+ Positioning of forces on terrain that provides an advantage to the disengaging
+elements such as linear obstacles.
+ Identification of displacement routes and times when disengagement or
+displacement will take place. Routes and times are rehearsed.
+ The size of the friendly force that must be available to engage the enemy in
+support of the displacing unit.
+
+== Withdrawal (5-183..5-201) ==
+WITHDRAWAL
+5-183. Withdraw is to disengage from an enemy force and move in a direction away
+from the enemy (ADP 3-90). Withdrawal is a planned retrograde operation, which a
+force in contact disengages from an enemy force and moves away from the enemy.
+Although the leader avoids withdrawing from action under enemy pressure, it is not
+always possible. Withdrawal is used to preserve the force or release it for a new mission.
+5-184. Withdrawals are inherently dangerous. They involve moving units to the rear
+and away from what is usually a stronger enemy force. The heavier the previous fighting
+and closer the contact with the enemy, the more difficult the withdrawal. Units usually
+confine rearward movement to times and conditions when the advancing enemy force
+cannot observe the activity or easily detect the operation. Operations security is critical,
+particularly during the initial stages of a withdrawal when most of the functional and
+sustainment forces displace. (See ATP 3-21.10 for additional information.)
+Defense
+11 January 2024 ATP 3-21.8 5-65
+PLANNING A WITHDRAWAL
+...
+WITHDRAWAL UNDER PRESSURE
+5-193. In a withdrawal under enemy pressure, all units withdraw simultaneously when
+available routes allow, using delaying tactics to fight their way to the rear. When
+simultaneous withdrawal of all forces is not practical, (for example, when the platoon
+cannot prepare and position the security force, it conducts a fighting withdrawal) the
+platoon leader decides the order of withdrawal. Soldiers and squads not in contact are
+withdrawn first to provide suppressive fire and to allow Soldiers and squads (or teams)
+in contact to withdraw. Several factors influence this decision:
+ Subsequent missions.
+ Availability of transportation assets and routes.
+ Disposition of friendly and enemy forces.
+ Level and nature of enemy pressure.
+ Degree of urgency associated with the withdrawal.
+METHODS OF DISENGAGEMENT
+5-194. Based on the OPORD, the unit may be required to retain defensive positions
+and to remain and fight for a certain amount of time, or it may be required to
+disengage—a tactical mission task in which a unit breaks contact with an enemy to
+conduct another mission or to avoid becoming decisively engaged (FM 3-90)—and
+displace to subsequent positions. A platoon, as part of a company, may disengage to
+defend from another battle position, prepare for a counterattack, delay, withdraw, or
+prepare for another mission.
+Fire and Movement
+5-195. Fire and movement to the rear is the basic method for disengaging. All available
+fires are used to slow the enemy and allow platoons to move away. The company
+commander may move subordinate platoons and mass fires to stop or slow the enemy
+advance before beginning the movement away from the enemy.
+5-196. Using bounding overwatch, a base of fire is formed to cover platoons or squads
+moving away from the enemy. One platoon or squad acts as the base of fire, delaying
+the enemy with fire or retaining terrain blocking the advance, while other platoons or
+squads disengage (see figure 5-18).
+5-197. Moving platoons or squads get to their next position and provide a base of fire
+to cover the rearward movement of forward platoons and squads. Fire and movement is
+repeated until contact with the enemy is broken, the platoons pass through a different
+base-of-fire force, or the platoons are in position to resume their defense.
+Defense
+11 January 2024 ATP 3-21.8 5-69
+Figure 5-18. Bounding overwatch to the rear
+Plan for Disengagement
+5-198. Tactics used by the platoon to disengage from the enemy differ according to the
+company commander’s plan for disengagement, how the platoon is deployed, and other
+factors. The following actions apply in all cases:
+ Maximum use is made of the terrain to cover rearward movement. Squads
+back out of position and move, attempting to keep a terrain feature between
+them and the enemy.
+ Rapid movement and effective base of fire enhance mobility and are key to a
+successful disengagement.
+5-199. Plans for disengagement may be part of any defensive plan. When squads are
+separated, there are three ways they can disengage: by squads and fire teams; by thinning
+the lines when they must cover their own movement; or simultaneously when they are
+covered by another force.
+Squads and Fire Teams
+5-200. When the rifle platoon must cover their own movement, (for example) two
+squads may stay in position as a base of fire. The third squad and weapons squad then
+move to the rear (crew-served weapons move based on the platoon leader’s assessment
+of when they could best move). The squads left in position must fire into the entire
+element’s sector to cover the movement of the other squad(s). Sectors of fire are adjusted
+for better coverage of the element’s sector. The moving squad may displace by squad or
+as fire teams depending on the enemy’s effective fires or because there are two squads
+Chapter 5
+5-70 ATP 3-21.8 11 January 2024
+covering their movement. The squads left in position sequentially disengage. Movement
+to the rear by alternating squads continues until contact is broken.
+Thinning the Lines
+5-201. When disengaging by thinning the lines, selected Soldiers from each fire team
+(usually one Soldier from each fighting position) disengage and move to the rear (see
+figure 5-19). The Soldiers still in position become the base of fire to cover the
+movement.
+Figure 5-19. Disengagement by thinning the lines
+
+== NOT ==
+- Echelon LEFT/RIGHT yonu bu belgede TANIMLI DEGIL (sadece "echelon yan tehdit icin optimize", 3-42).
+- Geri cekilme icin sayisal mesafe/sure YOK (450 m / 300 sn / 90 sn kodda TASARIM kalir).

@@ -4,3 +4,4 @@ Kaynak doktrin metinleri (kullanicinin PDF'lerden metne cevirdigi; hepsi "Approv
 - MCWP_3-11.2_Marine_Rifle_Squad_2002_Ch1.txt       (USMC, 27 Nov 2002, Ch 1 — ESKI baski, OCR'li, sayfa numaralari bozuk)
 Arama: grep -n -i "break contact" dosya.txt   |   Bulgular: DOKTRIN_KAYNAKLARI.md bolum H
 Eksik: FM 3-21.75 (kullanici henuz metne cevirmedi).
+- ATP_3-21.8_2024_alintilar.txt                     (US Army, 11 Jan 2024 — formasyon, disengagement, withdrawal alintilari)
