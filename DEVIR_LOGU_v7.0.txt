@@ -901,3 +901,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 === v8.41 CBA AYARI TANI SATIRI (RPT 8b0d127c: 'cba ayarlari yok') ===
 - RPT'de boot v8.39: v8.40 paketi YUKLENMEMIS (v8.40 gecen satir 0) -> ayarin yoklugu kodun hatasi olarak KANITLANMADI. XEH_PREP.hpp preStart'ta da include edilir; orada CBA_fnc_addSetting yok -> blok atlanir, preInit'te calismali.
 - v8.41: [ELITE-CBA] tani satiri (kaydedildi / CBA_fnc_addSetting yok). Beklenen: preInit'te 'doktrin ayarlari kaydedildi'.
+=== v8.42 ACIL: PRESTART COKMESI (RPT 2829485b + CrashReporter: 18:43:49 ve 18:44:29 iki cokme) ===
+- BULGU: oyun acilista (PreStart, 18:44:29) EXCEPTION_ACCESS_VIOLATION (C0000005, Arma3_x64.exe) ile coktu; calisan v8.39 RPT'sinde ACE refuel uyarilarindan hemen sonra [ELITE-BOOT] satiri geliyordu, cokenin RPT'sinde TAM orada kesildi. v8.40/v8.41'de XEH_PREP.hpp'ye eklenen CBA_fnc_addSetting blogu XEH_preStart'ta da calisir (preStart XEH_PREP.hpp'yi include eder) ve ayar altyapisi orada yok.
+- NEDEN KESIN DEGIL: motor cokmesinin ic mekanizmasini gormuyorum; zamanlama (cokme tam bu kod noktasinda, v8.39'da yok) guclu kanit ama ispat degil.
+- DUZELTME: blok yalniz CBA_settings_default doluysa (preInit) calisir. (CBA_settings_default adi CBA kaynagindan hafizayla; yanlissa ayar hic kaydolmaz -> [ELITE-CBA] 'altyapi yok' satiri preInit'te de gelir.)
