@@ -5,9 +5,9 @@
  *
  * Doktrin (MCWP 3-11.1 "Air attack" drill, UA/UAS mentions): hava tehdidinde piyade dagilir, ortuye girer, hava savunma silahi olan ates eder.
  * Sayisal esikler yoktur (TASARIM):
- *   - Dusman silahli helikopter <= 900 m veya silahli dron <= 700 m (grup tarafindan biliniyorsa: knowsAbout >= 1.5): grup bina varsa GARRISON (42 m),
+ *   - Dusman silahli helikopter <= 1200 m veya silahli dron <= 900 m (gozlemci dron 700 m; knowsAbout >= 0.8, lambs_danger_havaBilgiEsik ile ayarlanir): grup bina varsa GARRISON (42 m),
  *     yoksa HIDE (dagil + ates kes), 120 sn. Hava savunma fuzesi olan asker (Stinger / Strela / Igla / AA) hedefe doTarget + doFire.
- *   - Silahsiz dron (gozlemci) <= 600 m: grup gizlenir (pozisyon verme) ama sadece temas yoksa; 90 sn.
+ *   - Silahsiz dron (gozlemci) <= 700 m: grup gizlenir (pozisyon verme) ama sadece temas yoksa; 90 sn.
  *   - Silahsiz tasima helikopteri: sadece uyari (reveal), saklanma yok.
  *   - Grup basina 120 sn bekleme. ATLANIR: oyuncu lider, arac, retreat / evade / breakContact / bounding / isExecutingTactic.
  * Kapatma: lambs_danger_havaFarkOff = true.
@@ -52,13 +52,13 @@ diag_log "[HAVA-FARK] dron / helikopter farkindaligi watchdog baslatildi";
             {
                 private _v = _x;
                 private _d = _lp distance2D _v;
-                if (_d > 900) then { continue };
+                if (_d > 1200) then { continue };
                 if ((_taraf getFriend (side (group (effectiveCommander _v)))) >= 0.6) then { continue };
-                if ((_g knowsAbout _v) < 1.5) then { continue };
+                if ((_g knowsAbout _v) < (missionNamespace getVariable ["lambs_danger_havaBilgiEsik", 0.8])) then { continue };
                 private _arm = ((_v weaponsTurret [-1]) isNotEqualTo []) || {(_v weaponsTurret [0]) isNotEqualTo []};
                 private _uav = unitIsUAV _v;
-                if (_uav && {!_arm} && {_d > 600}) then { continue };
-                if (_uav && {_arm} && {_d > 700}) then { continue };
+                if (_uav && {!_arm} && {_d > 700}) then { continue };
+                if (_uav && {_arm} && {_d > 900}) then { continue };
                 if (!_uav && {!_arm}) then { _g reveal [_v, 2]; continue };
                 _hedef = _v; _silahli = _arm; _dron = _uav;
                 break;

@@ -5,7 +5,7 @@
  *
  * Doktrin (MCWP 3-11.1 "IED or possible IED" drill): durma, bolgeyi tarama, supheli noktayi gozetleme, dagilma; molalarda IED taramasi.
  * Sayisal degerler yoktur (TASARIM):
- *   - TESPIT: lider grubun askerlerinden birinin <= 25 m'sinde (mayin dedektoru / explosiveSpecialist <= 40 m) ve gorus hatti acik supheli nesne
+ *   - TESPIT: lider grubun askerlerinden birinin <= 35 m'sinde (mayin dedektoru / explosiveSpecialist <= 50 m) ve gorus hatti acik supheli nesne
  *     (allMines + sinif adinda "ied" gecen nesneler, mod IED'leri dahil) -> taraf icin revealMine (AI yol planlamasi bunu otomatik atlar).
  *   - TEPKI: 50 m yaricapta askerler IED'den uzaklasir (55 m'ye), yatarak degil ortu / dagilma; grup 60 sn LIMITED hizda, AWARE.
  *   - IMHA: grupta explosiveSpecialist varsa ve temas YOKSA, vanilla mayinda (MineBase) 3 m'ye gidip "Deactivate" dener (45 sn zaman asimi).
@@ -51,7 +51,7 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 private _tespit = objNull;
                 {
                     private _u = _x;
-                    private _menzil = [25, 40] select ((_u getUnitTrait "explosiveSpecialist") || {"MineDetector" in (items _u)});
+                    private _menzil = [35, 50] select ((_u getUnitTrait "explosiveSpecialist") || {"MineDetector" in (items _u)});
                     if ((_u distance2D _m) <= _menzil) then {
                         private _e = eyePos _u;
                         private _t = (getPosASL _m) vectorAdd [0, 0, 0.2];

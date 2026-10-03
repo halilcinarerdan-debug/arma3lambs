@@ -943,3 +943,7 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - DUZELTME: overlay fnc_contact.sqf: taktik calisirken (isExecutingTactic) formasyona / yone dokunma, degilse en fazla 40 sn'de bir ve sadece formasyon farkliysa; rastgele setFormDir kaldirildi. tacticsHold'daki rastgele setFormDir de 40 sn kapisinda.
 - DOGRULANMADI: loopun baska bir kaynagi (ornegin Assault'in kendi tekrarli cagrisi) kalmis mi -> yeni RPT'de [FORM-DEGISIM] sayisi ve araliklarina bak.
 - NOT (v8.47 ilk gozlem, ayni RPT): retreat bu oturumda hic calismadi (GERI-CEKILME 0), tehdit bakisi / hava / IED sadece baslatildi (tetiklenme yok) -> v8.47 ozellikleri HENUZ test edilmedi.
+=== v8.49 HAVA / IED ILK DEGERLER (kullanici: 'ilk degerleri degistir, ied heli dron test edecegim'; RPT 0663d004, v8.48) ===
+- RPT: v8.48 yuklu; [FORM-DEGISIM] 6 satir tum oturumda, hepsi >=47 sn arayla (v8.48 formasyon loopu duzeltmesi tuttu gorunuyor, kisa oturum); retreat basladi, 3 ek sicrama (143/189/206 m), oturum bitmeden kesildi; HAVA-FARK / IED-FARK sadece baslatma satiri (tetiklenme yok).
+- DEGISIKLIK (test icin daha genis tetikleme): heli menzili 900->1200 m, silahli dron 700->900 m, gozlemci dron 600->700 m; knowsAbout esigi 1.5->0.8 (lambs_danger_havaBilgiEsik ile degistirilebilir); IED tespit menzili 25->35 m (EOD / dedektor 40->50 m). Hepsi TASARIM, doktrin sayisi degil.
+- NOT: ECH LEFT goruldu (Alpha 1-4, FLANK karari); kanat yonunun dogrulugu hala kontrol edilmedi.
