@@ -898,3 +898,6 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - XEH_PREP.hpp (preInit): 3 CBA LIST ayari (kategori 'LAMBS Danger' / 'ELITE doktrin', sunucu ayari): lambs_danger_doktrinWest / East / Ind; secenekler OTO, GENEL, USMC, ABD, RUS, CHN, PESHMERGA, DUZENSIZ. OTO = eski fraksiyon eslesmesi.
 - fnc_doktrin: grubun side'ina gore ayar okunur; OTO disi secim fraksiyon eslesmesini ezer; onbellek anahtari (imza) = fraksiyon|secim, ayar oyun ortasinda degisirse profil yeniden kurulur. Log [DOKTRIN-PROFIL].
 - DOGRULANMADI: ayarin oyunda gorunmesi (CBA_fnc_addSetting'in XEH_preInit icinde bu include'dan cagrisi; stringtable'siz duz metin), sunucu degerinin istemci / Zeus makinesine gecmesi, mid-mission degisimde onbellek yenilenmesi.
+=== v8.41 CBA AYARI TANI SATIRI (RPT 8b0d127c: 'cba ayarlari yok') ===
+- RPT'de boot v8.39: v8.40 paketi YUKLENMEMIS (v8.40 gecen satir 0) -> ayarin yoklugu kodun hatasi olarak KANITLANMADI. XEH_PREP.hpp preStart'ta da include edilir; orada CBA_fnc_addSetting yok -> blok atlanir, preInit'te calismali.
+- v8.41: [ELITE-CBA] tani satiri (kaydedildi / CBA_fnc_addSetting yok). Beklenen: preInit'te 'doktrin ayarlari kaydedildi'.
