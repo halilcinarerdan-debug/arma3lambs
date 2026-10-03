@@ -71,6 +71,11 @@ if (count (units _group) < 4) exitWith {
 // ---------------------------------------------------------------------------
 // Taktik kilidi + bounding bayragi
 // ---------------------------------------------------------------------------
+// v8.43: YENIDEN BASLATMA DEBOUNCE — RPT 5ef891c1: ayni grupta ayni saniyede 2 BND-BASLA, onceki dongu 'cycle:1 bizim:false' ile 3 sn'de biter
+//   (token ezilir), roller / hareket emirleri surekli yeniden dagitilir -> asker bound'u tamamlayamaz ('formasyon loopu / etkisiz').
+//   Son bounding baslangicindan < 8 sn ise yeni baslatma yok (calisan dongu surer).
+if ((time - (_group getVariable [QGVAR(bndSonBasla), -999])) < 8) exitWith { false };
+_group setVariable [QGVAR(bndSonBasla), time];
 _group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QGVAR(isBounding), true];
 _group setVariable [QGVAR(boundingStartTime), time];
