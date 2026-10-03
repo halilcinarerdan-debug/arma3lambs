@@ -151,7 +151,7 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
 // ---------------------------------------------------------------------------
 // GUVENLIK VALFI — sadece bu cekilmenin bayraklarini + AI kilitlerini temizler
 // ---------------------------------------------------------------------------
-[_group, _baslangic, time + 175] spawn {
+[_group, _baslangic, time + 340] spawn {
     params ["_g", "_start", "_limit"];
     waitUntil { time > _limit || {isNull _g} };
     if (!isNull _g && {((_g getVariable [QGVAR(retreatStartTime), -1]) isEqualTo _start)}) then {
@@ -569,11 +569,14 @@ if (EGVAR(main,debug_functions)) then {
     // EK SICRAMALAR (v8.6): sabit 4 sicrama ~90 m'de bitiyordu, dusman hala 120-160 m'deydi (RPT 12:39: 'tam olacakken duruyor').
     // Dusman guvenli mesafeye (cekilGuvenM) ulasana, temas kesilene, sure dolana ya da ek sicrama siniri bitene kadar surer.
     // -----------------------------------------------------------------------
-    private _ekGuvenM = [_group, "cekilGuvenM", 220] call FUNC(dk);
-    private _ekMax = [_group, "cekilEkSicrama", 4] call FUNC(dk);
+    private _ekGuvenM = [_group, "cekilGuvenM", 450] call FUNC(dk);
+    private _ekMax = [_group, "cekilEkSicrama", 9] call FUNC(dk);
+    // v8.47: "retreat cok kisa" — sure siniri / gozlem-yok alt siniri doktrin anahtari (TASARIM)
+    private _ekMaxS = [_group, "cekilMaxS", 300] call FUNC(dk);
+    private _ekGozM = [_group, "cekilGozlemM", 280] call FUNC(dk);
     private _ekNo = 0;
     private _ekNeden = "";
-    while {!isNull _group && {_ekNo < _ekMax} && {time < (_baslangic + 150)}} do {
+    while {!isNull _group && {_ekNo < _ekMax} && {time < (_baslangic + _ekMaxS)}} do {
         private _canli = (units _group) select {alive _x && {isNull objectParent _x}};
         if (_canli isEqualTo []) exitWith {};
         private _ld = [leader _group, _canli select 0] select (isNull (leader _group) || {!alive (leader _group)});
@@ -581,17 +584,17 @@ if (EGVAR(main,debug_functions)) then {
         private _tp = [getPosATL _dus, _targetPos] select (isNull _dus);
         private _d = (getPosATL _ld) distance2D _tp;
         if (_d >= _ekGuvenM) exitWith { _ekNeden = "guvenli mesafe"; };
-        if ((_group getVariable [QGVAR(contact), 0]) <= time) then { _ekNeden = "temas kesildi"; };
+        if ((_group getVariable [QGVAR(contact), 0]) <= time && {_d >= (_ekGozM * 0.7)}) then { _ekNeden = "temas kesildi"; };
         // v8.34 DOKTRIN (TC 3-21.76 Break Contact standardi, s. 8-11: "continues to move until the enemy cannot observe or place fire on them"):
         //   bitis kriteri GORUS: dusman biliniyor, >= 100 m (TASARIM: tufek etkili atis alt siniri) ve askerlerin >= %80'i dusmandan siperli (arazi / nesne) ise dur.
         //   Maliyet: ek sicrama basina asker sayisi kadar 2 isin sorgusu (~12-20), ihmal edilebilir.
-        if (_ekNeden isEqualTo "" && {!isNull _dus} && {_d >= 100}) then {
+        if (_ekNeden isEqualTo "" && {!isNull _dus} && {_d >= _ekGozM}) then {
             private _eEye = AGLToASL ((getPosATL _dus) vectorAdd [0, 0, 1.6]);
             private _gizliN = {
                 private _uEye = AGLToASL ((getPosATL _x) vectorAdd [0, 0, 1.0]);
                 terrainIntersectASL [_eEye, _uEye] || {lineIntersects [_eEye, _uEye, _dus, _x]}
             } count _canli;
-            if (_gizliN >= (ceil (0.8 * (count _canli)))) then { _ekNeden = "gozlem yok"; };
+            if (_gizliN >= (ceil (0.9 * (count _canli)))) then { _ekNeden = "gozlem yok"; };
         };
         if (_ekNeden isNotEqualTo "") exitWith {};
         _targetPos = _tp;
@@ -600,7 +603,7 @@ if (EGVAR(main,debug_functions)) then {
         //   sicrama 1 sn'de "vardi 4/4" bitiyor, mesafe 101-103 m'de kaliyordu = retreat mesafe kazanmiyordu)
         private _arka = _ld;
         { if ((_x distance2D _tp) > (_arka distance2D _tp)) then { _arka = _x; }; } forEach _canli;
-        _adimBoy = _adimBoy max 35;
+        _adimBoy = _adimBoy max 50;
         private _o = getPosATL _arka;
         private _wpE = [_o, _tp getDir _o] call _wpSec;
         _wpE = [_wpE, _o] call _suKontrol;
@@ -616,7 +619,7 @@ if (EGVAR(main,debug_functions)) then {
 
     // v8.34 DOKTRIN (TC 3-21.76 s. 8-14, adim 10: "consider changing the unit's direction of movement once contact is broken"; dusmanin izi surmesini / etkili dolayli ates getirmesini zorlastirir):
     //   temas koptu / dusman gozlem yapamiyor ise TEK BIR toplu ek sicrama, geri eksenden +-55 derece (TASARIM) sapma ile (en gizli aday _wpSec ile secilir).
-    if (!isNull _group && {_ekNeden in ["temas kesildi", "gozlem yok"]} && {time < (_baslangic + 140)}) then {
+    if (!isNull _group && {_ekNeden in ["temas kesildi", "gozlem yok"]} && {time < (_baslangic + _ekMaxS - 10)}) then {
         private _canliY = (units _group) select {alive _x && {isNull objectParent _x}};
         if ((count _canliY) >= 3) then {
             private _arkaY = _canliY select 0;
@@ -642,7 +645,7 @@ if (EGVAR(main,debug_functions)) then {
         // v8.30 TOPLANMA (RPT 18:37: retreat biter bitmez LAMBS "TACTICS FLANK" ile hemen geri dondu): konsolidasyonS (45 sn) boyunca grup LAMBS grup taktigi KAPALI kalir,
         //   sonra eski degere doner (gercekte temas kesildikten sonra toparlanma: yeniden duzen, kayip / cephane sayimi)
         private _eskiDGAk = _group getVariable [QGVAR(retreatEskiDGA), false];
-        private _konsS = [_group, "konsolidasyonS", 45] call FUNC(dk);
+        private _konsS = [_group, "konsolidasyonS", 90] call FUNC(dk);
         if (_konsS > 0 && {({alive _x} count (units _group)) >= 2}) then {
             _group setVariable [QGVAR(disableGroupAI), true];
             diag_log format ["[GERI-CEKILME-TOPLAN] %1 | %2 sn toparlanma: LAMBS grup taktigi kapali (hemen geri hucum yok)", groupId _group, _konsS];

@@ -157,6 +157,19 @@ private _onRoad = _roads isNotEqualTo [];
 private _formation = "WEDGE";
 private _reason = "default";
 
+// v8.47: ECH (MCWP 3-11.2: echelon = on kanada agir ates + acik kanadi koruma). Dusman yonu liderin bakisina gore 40-120 derece yanda ise ECH LEFT / RIGHT.
+//   Arma'da ECH LEFT/RIGHT'in kanat yonu dogrulanmadi (TASARIM: dusman tarafina ECH <taraf>) — [FORM-DEGISIM] logu ile oyunda kontrol edilecek.
+private _echYon = "";
+if (_context isEqualTo "COMBAT") then {
+    private _sitE = _grup getVariable [QGVAR(cmdSit), []];
+    private _eP = [0, 0, 0];
+    if (_sitE isNotEqualTo [] && {(_sitE select 7) isEqualType []} && {(_sitE select 7) isNotEqualTo [0,0,0]}) then { _eP = _sitE select 7; } else { if (_validTarget) then { _eP = _targetPos; }; };
+    if (_eP isNotEqualTo [0,0,0]) then {
+        private _rel = (((_leaderPos getDir _eP) - (getDir _unit) + 540) mod 360) - 180;
+        if ((abs _rel) >= 40 && {(abs _rel) <= 120}) then { _echYon = ["ECH LEFT", "ECH RIGHT"] select (_rel > 0); };
+    };
+};
+
 switch (_context) do {
     // BOUNDING
     case "BOUNDING": {
@@ -222,11 +235,11 @@ switch (_context) do {
                         _reason = "yakin temas - maksimum ates / bina kenari";
                     } else {
                         if (_closest < _t2) then {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {"LINE"}};
-                            _reason = "orta mesafe temas - arazi + cephe";
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {if (_echYon isNotEqualTo "") then {_echYon} else {"LINE"}}};
+                            _reason = ["orta mesafe temas - arazi + cephe", "orta mesafe temas - dusman yanda: ECH (acik kanat korumasi)"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         } else {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {"WEDGE"}};
-                            _reason = "uzak temas - esnek intikal";
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {if (_echYon isNotEqualTo "") then {_echYon} else {"WEDGE"}}};
+                            _reason = ["uzak temas - esnek intikal", "uzak temas - dusman yanda: ECH"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         };
                     };
                 };
@@ -276,8 +289,18 @@ switch (_context) do {
                 _formation = "STAG COLUMN";
                 _reason = "orman - konvoy";
             } else {
-                _formation = "WEDGE";
-                _reason = "acik arazi intikal";
+                if (sunOrMoon < 0.1) then {
+                    _formation = "COLUMN";
+                    _reason = "gece / sinirli gorus - kolon (MCWP 3-11.2: kontrollu hizli intikal)";
+                } else {
+                    if (((_grup getVariable [QGVAR(contact), 0]) > 0) && {(time - (_grup getVariable [QGVAR(contact), 0])) < 120}) then {
+                        _formation = "DIAMOND";
+                        _reason = "temas sonrasi - her yone guvenlik (TASARIM)";
+                    } else {
+                        _formation = "WEDGE";
+                        _reason = "acik arazi intikal";
+                    };
+                };
             };
         };
     };
@@ -288,8 +311,8 @@ switch (_context) do {
             _formation = "WEDGE";
             _reason = "meskun savunma - esnek";
         } else {
-            _formation = "VEE";
-            _reason = "acik savunma - agir silah merkezde";
+            _formation = ["VEE", "DIAMOND"] select (!_validTarget);
+            _reason = ["acik savunma - agir silah merkezde", "tehdit yonu bilinmiyor - her yone guvenlik (DIAMOND)"] select (!_validTarget);
         };
     };
 

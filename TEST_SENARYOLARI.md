@@ -92,3 +92,10 @@ Kurulum: ayni tarafin 4 grubu: biri dusmanla sabit temasta (>= 3 dusman), uc gru
 2. `[HQ-FEINT] BIRAK ... neden:` kayip / bastirma / 100 sn / ana saldiri. Kayip ya da bastirmada feint grubu retreat etmeli (`[GERI-CEKILME-BASLA]`).
 3. Zeus modul penceresinde 7 secenek gorunmeli (Feint dahil).
 4. Sorun isaretleri: feint grubunun dogrudan sabitleyenin yanina yigilmasi, feint'in hic birakilmamasi (sure kriteri), kayipli feint'in ayrilmamasi.
+
+## v8.47 testleri
+- Retreat: 8+ kisilik grubu 100 m'den baskiya sokup cekilmeyi izle; beklenen: 300 sn'ye kadar / dusman >=450 m veya gozlem yok >=280 m; sonra 90 sn toparlanma, hemen geri hucum yok. Log: [GERI-CEKILME-EK], [GERI-CEKILME-BITIS].
+- Formasyon: dusman yandan (45-120 derece) acik arazide -> ECH LEFT/RIGHT; gece intikal -> COLUMN; temas sonrasi 2 dk intikal -> DIAMOND. Kanat yonu dogru mu bak.
+- Tehdit bakisi: temas disi grup durunca askerler duvara degil son dusman yonune bakmali. Log: [TEHDIT-BAKIS] baslangic.
+- Hava: dusman silahli heli/dron gonder; grup binaya girmeli veya dagilip gizlenmeli, AA'li asker ates etmeli. Log: [HAVA-FARK].
+- IED: yol kenarina IED (vanilla IEDLandSmall_F) koy, grubu yurut; ~25 m'de durup 55 m'ye acilmali, EOD varsa 'Deactivate'. Log: [IED-FARK].

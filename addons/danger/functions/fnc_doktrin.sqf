@@ -27,11 +27,11 @@
  *   uglUzakM 200, uglUzakAralik 25, uglRezerv 3, uglRezervM 120   40mm kullanim kurallari
  *   --- saha ---
  *   arkaGuvenlik true, arkaGuvenlikMinKisi 6    CQB / kent arka guvenlik askeri
- *   cekilGuvenM 220, cekilEkSicrama 4     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
+ *   cekilGuvenM 450, cekilEkSicrama 9, cekilMaxS 300, cekilGozlemM 280     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
  *   baskiKirmaEsik 0.5, baskiKirmaMaxS 14   retreat: ort. baski bu esikten yuksekse once siper + karsi ates (en fazla N sn), sonra sicrama
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
  *   DUZENSIZ (Taliban-tipi): vur-kac, erken temas kesme, pusu agirlikli (haritada taliban / lop_am / lop_ists / insurgent ...)
- *   sonDirenis true   <= 3 asker son care: yakin binaya yerlesip kale savunmasi;  konsolidasyonS 45   retreat sonrasi LAMBS grup taktigi kapali toparlanma suresi (sn)
+ *   sonDirenis true   <= 3 asker son care: yakin binaya yerlesip kale savunmasi;  konsolidasyonS 90   retreat sonrasi LAMBS grup taktigi kapali toparlanma suresi (sn)
  *   cekilTopluM 180   retreat: dusman bu mesafeden uzaksa kapsama takimi yok, herkes birlikte kosar (yakinda ates-manevra)
  *   yorgunlukEtki 1 (bound uzunlugunu yorgunluga gore kisaltma carpani; 0 = kapali)
  *   teslim true, teslimEsik 0.15   moral endeksi bu esigin altina duserse (+ umutsuz kosullar) teslim; DUZENSIZ: teslim yok
@@ -78,10 +78,10 @@ private _p = createHashMapFromArray [
     ["retreatAdim", [20, 30, 50]], ["cekilKayip", 0.4], ["peelOran", 1.6], ["peelKayip", 0.1], ["kucukEkip", 3], ["yakinM", 60],
     ["uglUzakM", 200], ["uglUzakAralik", 25], ["uglRezerv", 3], ["uglRezervM", 120],
     ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6],
-    ["cekilGuvenM", 220], ["cekilEkSicrama", 4], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
+    ["cekilGuvenM", 450], ["cekilEkSicrama", 9], ["cekilMaxS", 300], ["cekilGozlemM", 280], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
-    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 45], ["toparlan", true]
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---
@@ -98,7 +98,7 @@ private _tanim = [
     ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]],
     // DUZENSIZ / TALIBAN-tipi isyanci (TAHMIN, kaynak dogrulanmadi): vur-kac, pusu agirlikli, kucuk dagitik takimlar, ates ustunlugu yoksa ERKEN temas keser,
     //   yakin mesafeden hucum, daha iyi gizlenme (camouflageCoef alt siniri 0.55), uzun dagilarak cekilme
-    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 20], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]]
+    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 40], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]]
 ];
 // misyon / kullanici tanimlari (ayni ad = ustune yazar)
 { _tanim pushBack _x; } forEach (missionNamespace getVariable ["lambs_danger_doktrinTanimlari", []]);
