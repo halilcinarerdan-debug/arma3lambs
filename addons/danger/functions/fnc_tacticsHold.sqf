@@ -88,7 +88,9 @@ if (count _units > 2) then {
 };
 
 // check new random direction if no enemy found!
-if (isNull _enemy) then {
+// v8.47: rastgele yon de 40 sn kapisinda (her setFormDir askerleri yeni slota kosturur)
+if (isNull _enemy && {(time - (_group getVariable [QGVAR(contactFormT), -999])) >= 40}) then {
+    _group setVariable [QGVAR(contactFormT), time];
     _group setFormDir (random 360);
 };
 
