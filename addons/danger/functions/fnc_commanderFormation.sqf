@@ -39,6 +39,24 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
             ) then { continue };
             if (!isNull objectParent _l) then { continue };
 
+            // v8.45: GERCEK formasyon degisimi izleyicisi (kim cevirdi? RPT 879966ca: ASSAULT'ta LINE <-> STAG COLUMN her ~20 sn = 'formasyon felci')
+            private _formSimdi = formation _g;
+            private _formOnce = _g getVariable [QGVAR(cfIzle), ""];
+            if (_formOnce isNotEqualTo "" && {_formSimdi isNotEqualTo _formOnce}) then {
+                _g setVariable [QGVAR(cfDegisT), time];
+                if (isNil "lambs_danger_formDegN") then { lambs_danger_formDegN = 0; };
+                if (lambs_danger_formDegN < 200) then {
+                    lambs_danger_formDegN = lambs_danger_formDegN + 1;
+                    diag_log format ["[FORM-DEGISIM] %1 | %2 -> %3 | karar:%4 (%5 sn once) | komutan-son:%6 sn once", groupId _g, _formOnce, _formSimdi, _g getVariable [QGVAR(cmdLastDecision), "-"], round (time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])), round (time - (_g getVariable [QGVAR(cfSon), -999]))];
+                };
+            };
+            _g setVariable [QGVAR(cfIzle), _formSimdi];
+
+            // v8.45: LAMBS taktigi (ASSAULT / FLANK / SUPPRESS / DELAY / HOLD) kendi formasyonunu (tacticsAssault: LINE) verir; komutan 60 sn karismaz,
+            //   ve herhangi bir formasyon degisiminden sonra 60 sn yeni degisiklik yapmaz (her setFormation askerleri yeni slota kosturur)
+            if (((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["ASSAULT", "FLANK", "SUPPRESS_ASSAULT", "DELAY", "HOLD"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 60}) then { continue };
+            if ((time - (_g getVariable [QGVAR(cfDegisT), -999])) < 60) then { continue };
+
             private _contact = _g getVariable [QGVAR(contact), 0];
             private _sonKarar = _g getVariable [QGVAR(cfSon), -999];
 
