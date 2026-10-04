@@ -292,7 +292,7 @@ diag_log format [
                 // ates altinda: hekim baskida degil ve dusman uzak olmali
                 if (!_guvenli) then {
                     private _en = _m findNearestEnemy _m;
-                    if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 50}}) then { continue };
+                    if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 35}}) then { continue };   // v8.82: 50 -> 35 m (medevac guclendirme)
                 };
                 // v8.76 YARIS DUZELTMESI (RPT 7066b2ea: ayni hekim ayni saniyede 4 yaraliya birden atandi -> hekim yaralilar arasinda gidip geliyor, tedavi 1/5, hekim kendi yaralandi):
                 //   spawn edilen _tedavi mesgul bayragini gec koyuyordu; dongunun sonraki yaralisi ayni hekimi tekrar aday gorur. Bayrak SENKRON, spawn'dan once konur.
