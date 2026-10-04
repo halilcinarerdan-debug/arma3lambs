@@ -1002,3 +1002,14 @@ v8.51 — HAVA ATES DISIPLINI (ATP 3-01.8) + IED YARICAP CONFIG + WATCHDOG BEKCI
    - Sayisal esikler (600 m, 300 m, 20 sn, 800 m, 0.15) kaynakta YOK, TASARIM tahmini; test sonucuna gore ayarlanir.
   IED: tehlike yaricapi oyunun CfgAmmo indirectHitRange'inden (x3, 20-80 m); veri yoksa sinif adina gore yedek. Log: yaricap X m [config:Y].
   WATCHDOG BEKCISI: hava ve IED betikleri calisma hatasiyla sonlanirsa otomatik yeniden baslar, RPT: [WATCHDOG-YENIDEN] (v8.50 hava hatasi gibi sessiz olum onlenir).
+
+TASARIM YONU (kullanici ile konusma, v8.52 icin; henuz uygulanmadi) — "sayilar sabit olmasin, belirsizlikle calissin":
+  Gerekce: doktrin net sayi vermez, prensip verir; gercek dunyada ayni IED farkli kosulda farkli sonuc verir (barut miktari, yerlesim, yapim), her sey deterministik degildir.
+  Not: doktrindeki sayilar (cevre emniyeti vb.) bu belirsizligin SONUCU olan muhafazakar varsayimlardir (bilinmeyene karsi guvenlik payi). Hassas olmak zorunda degil ama "pay birak" mantigi dogru.
+  Plan:
+   1. Algilanan tehlike != gercek tehlike: AI IED'in gercek yaricapini (config indirectHitRange) bilmez; gorunur sinifa gore TAHMIN eder, hata payi + muhafazakar yone cekme. (v8.51'de config yaricap dogrudan kullaniliyor = AI'ya hile; v8.52'de gurultu eklenecek.)
+   2. Grup basina rastgelelik: tepki mesafeleri, tereddut sureleri, risk toleransi gruptan gruba ~+-%25; komutan becerisine (skill) bagli.
+   3. Sonuc olasiliksal: EOD imhasi basari / basarisizlik (beceri, kit, IED karmasikligi); basarisizlikta patlama; yaklasirken tetiklenme olasiligi yakinlikla artar ama kesin degil.
+   4. Algi gecikmesi: tespit mesafesi tek sabit degil; gorus, gece, zemin, yorgunlukla degisir.
+  Hava tarafi icin ayni ilke: 600 m / 300 m / 20 sn / 800 m / 0.15 esikleri dagilim olarak (grup basina jitter) yeniden tasarlanacak.
+  Oncelik: once v8.51'in temel davranisi test edilsin (RPT), sonra olasiliksal katman uzerine konsun.
