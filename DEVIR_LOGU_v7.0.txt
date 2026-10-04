@@ -1165,3 +1165,7 @@ v8.73 — PANIK / FELC (kullanici: "insan deterministik degil, savasta felc geci
   (lider x0.4, retreat / EOD / IED isinde x0.5, azami 0.30/tik, 3 sn tik), bagisiklik 40 sn, grupta ayni anda en fazla %30. Turler: DONMA 4-12 sn (yere yatar, hareket / hedef yok; lider 20 m icinde %40 kisa) | KOR ATES 5-10 sn (yere yatar, nisan %30, rastgele ates) |
   KACIS 5-9 sn (25-40 m tehditten uzaga). Gerilim >= 0.7: donma .35 / kor .25 / kacis .40; altinda .55 / .35 / .10. Kapatma lambs_danger_panikOff = true; siddet lambs_danger_panikSans (varsayilan 1.0). Log: [PANIK] + [PANIK-OZET].
   UYARI: zorlugu DUSURUR (kullanici gercekcilik istedi). Birim LAMBS disableAI bayragi + taktikKilit ile kilitlenir, bitince geri verilir. TEST EDILMEDI.
+
+v8.74 — KULLANICI UYARISI: karsida OYUNCU var; botlar PvE icin gecerli zorlukta kalmali, veteran oyuncu bile 'bunlar hile' demeli. v8.72 sis + v8.73 panik zorlugu DUSURUR; varsayilanlar hafifletildi:
+  panik: lambs_danger_panikSans varsayilan 1.0 -> 0.35, azami tik olasiligi 0.30 -> 0.12, sureler kisaldi (DONMA 3-7, KOR 4-8, KACIS 4-7 sn). Sis: yeni lambs_danger_hqSisSiddet (0..1, varsayilan 0.4; 0 = eski mukemmel paylasim): gecikme, kayip rapor ve seviye dususu siddetle carpilir.
+  ILKE: gercekcilik katmanlari (panik / sis) ZORLUGU ayarlanabilir yan etki olarak sunar; varsayilan 'oyuncuya hile gibi gelen' dengeyi korur. Oyun testinde kolaylasma gorulurse siddetleri 0'a indir ([PANIK-OZET] / [HQ-ISTIHBARAT-OZET] ile olc).

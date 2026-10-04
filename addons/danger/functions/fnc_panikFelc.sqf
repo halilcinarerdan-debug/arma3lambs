@@ -8,10 +8,10 @@
  *
  * GERILIM (3 sn'de bir, yerel / oyuncusuz / piyade asker, yalniz grup temasta): s = 0.6 x baski + 0.35 (12 sn / 25 m icinde dost oldu) + 0.30 x (1 - grup morali) [moral modulu]
  *   + 0.15 (lider olu / grup liderine > 60 m) + 0.10 (en yakin dost > 60 m)           (hepsi TASARIM tahmini, doktrin sayisi degil)
- * SANS: s >= 0.45 ise tikte p = (s - 0.45) x 0.5 x (1.3 - courage) x lambs_danger_panikSans (varsayilan 1.0) x (lider ? 0.4 : 1), azami 0.30.
+ * SANS: s >= 0.45 ise tikte p = (s - 0.45) x 0.5 x (1.3 - courage) x lambs_danger_panikSans (varsayilan 0.35: oyuncu karsisinda PvE zorlugu korunur) x (lider ? 0.4 : 1), azami 0.12.
  *   Sinirlar: ayni asker 40 sn bagisiklik (bolumden sonra), grupta ayni anda en fazla %30 panikte, retreat sirasinda x0.5, saglikci tedavi / EOD imha / IED isinde x0.5.
- * TURLER (agirliklar gerilime gore): DONMA (4-12 sn: yere yatar, hareket etmez, emir almaz; lider 20 m icindeyse %40 daha kisa) | KOR ATES (5-10 sn: yere yatar, nisan bozuk dusmana dogru rastgele ates) |
- *   KACIS (5-9 sn: tehditten uzaga 25-40 m kosar; gerilim >= 0.7 iken yaygin).
+ * TURLER (agirliklar gerilime gore): DONMA (3-7 sn: yere yatar, hareket etmez, emir almaz; lider 20 m icindeyse %40 daha kisa) | KOR ATES (4-8 sn: yere yatar, nisan bozuk dusmana dogru rastgele ates) |
+ *   KACIS (4-7 sn: tehditten uzaga 25-40 m kosar; gerilim >= 0.7 iken yaygin).
  * Bolum bitince normale doner (doFollow, beceri / AI bayraklari geri). Kapatma: lambs_danger_panikOff = true.   Log: [PANIK] (ilk 150) + [PANIK-OZET] 90 sn
  *
  * Arguments: None
@@ -94,7 +94,7 @@ private _calis = {
     while {true} do {
         sleep 3;
         if (missionNamespace getVariable ["lambs_danger_panikOff", false]) then { continue };
-        private _sansCarpan = missionNamespace getVariable ["lambs_danger_panikSans", 1.0];
+        private _sansCarpan = missionNamespace getVariable ["lambs_danger_panikSans", 0.35];   // v8.74: PvE zorluk korunur (oyuncu karsisinda) - varsayilan 0.35
         {
             private _g = _x;
             private _l = leader _g;
@@ -141,7 +141,7 @@ private _calis = {
                 private _p = 0;
                 if (!_tetik && {_s >= 0.45}) then {
                     private _cesaret = _u skill "courage";
-                    _p = ((_s - 0.45) * 0.5 * ((1.3 - _cesaret) max 0.3) * _sansCarpan * ([1, 0.4] select (_u isEqualTo _l))) min 0.30;
+                    _p = ((_s - 0.45) * 0.5 * ((1.3 - _cesaret) max 0.3) * _sansCarpan * ([1, 0.4] select (_u isEqualTo _l))) min 0.12;
                     if (_retreat || {_u getVariable [QGVAR(forceMove), false]}) then { _p = _p * 0.5; };
                     if ((_u getVariable [QGVAR(iedIsci), false]) || {_u getVariable [QGVAR(iedGuv), false]} || {_u getUnitTrait "explosiveSpecialist"}) then { _p = _p * 0.5; };
                     if ((count _us) > 0 && {(_panikte / (count _us)) >= 0.3}) then { _p = 0; };
@@ -156,7 +156,7 @@ private _calis = {
                 if (_s >= 0.7) then { _a = [0.35, 0.25, 0.40]; };
                 private _r = random 1;
                 private _tur = if (_r < (_a select 0)) then {"DONMA"} else { if (_r < ((_a select 0) + (_a select 1))) then {"KOR"} else {"KACIS"} };
-                private _sure = switch (_tur) do { case "DONMA": {4 + (random 8)}; case "KOR": {5 + (random 5)}; default {5 + (random 4)}; };
+                private _sure = switch (_tur) do { case "DONMA": {3 + (random 4)}; case "KOR": {4 + (random 4)}; default {4 + (random 3)}; };
                 if (_tur isEqualTo "DONMA" && {!_liderOlu} && {(_u distance2D _l) <= 20}) then { _sure = _sure * 0.6; };
 
                 _panikte = _panikte + 1;

@@ -39,6 +39,7 @@ if ((count _tahta) < 2) exitWith {false};
 private _menzil = missionNamespace getVariable ["lambs_danger_hqIstihbaratM", 1500];
 private _maxSeviye = missionNamespace getVariable ["lambs_main_maxRevealValue", 1.5];
 private _sis = !(missionNamespace getVariable ["lambs_danger_hqSisOff", false]);
+private _sd = (missionNamespace getVariable ["lambs_danger_hqSisSiddet", 0.4]) max 0 min 1;   // v8.74: sis siddeti (0 = eski mukemmel, 1 = tam sis); varsayilan 0.4: oyuncu karsisinda PvE zorlugu korunur
 private _telsizMi = {
     params ["_u"];
     private _oge = (assignedItems _u) + (items _u);
@@ -96,7 +97,7 @@ private _yapilan = 0;
         if (_sis && {!([_aL] call _telsizMi)}) then { ["alici telsiz yok"] call _say; continue };
         private _mesafe = _aL distance2D _muhbirL;
         // teslim guvenilirligi: 600 m'e kadar %100, menzil sinirinda %35
-        private _guv = 1 - (0.65 * (((_mesafe - 600) max 0) / ((_menzil - 600) max 1)));
+        private _guv = 1 - (0.65 * _sd * (((_mesafe - 600) max 0) / ((_menzil - 600) max 1)));
         if (_sis && {(random 1) > _guv}) then { ["rapor kayboldu (parazit/menzil)"] call _say; continue };
         private _gk = format ["%1|%2", groupId _a, netId _o];
         if ((time - (lambs_danger_hqIstGecmis getOrDefault [_gk, -999])) < 25) then { continue };
@@ -106,10 +107,11 @@ private _yapilan = 0;
         private _gecikme = 2 + (random 4);
         private _sevYeni = _seviye;
         if (_sis) then {
-            _gecikme = 6 + (random 10) + ((_mesafe / 1500) * 6) + ([0, 8 + (random 10)] select _muhbirMesgul) + ([0, 3] select ((_a getVariable ["lambs_danger_contact", 0]) > time));
+            _gecikme = (2 + (random 4)) + _sd * ((4 + (random 10)) + ((_mesafe / 1500) * 6) + ([0, 8 + (random 10)] select _muhbirMesgul) + ([0, 3] select ((_a getVariable ["lambs_danger_contact", 0]) > time)));
             // belirsizlik: seviye teslim ani yasina (gecikme dahil) + mesafe + bastirmaya gore dusurulur; alt sinir 0.5
             private _yasT = _yas + _gecikme;
-            private _f = ((1 - ((_yasT / 40) * 0.5)) max 0.4) * ((1 - (_mesafe / ((_menzil * 2) max 1))) max 0.5) * (1 - (_muhbirBask * 0.3));
+            private _f0 = ((1 - ((_yasT / 40) * 0.5)) max 0.4) * ((1 - (_mesafe / ((_menzil * 2) max 1))) max 0.5) * (1 - (_muhbirBask * 0.3));
+            private _f = 1 - ((1 - _f0) * _sd);
             _sevYeni = ((_k * _f) min _maxSeviye) max 0.5;
             ["rapor teslim"] call _say;
         };
