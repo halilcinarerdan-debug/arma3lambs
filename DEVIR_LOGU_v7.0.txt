@@ -1013,3 +1013,10 @@ TASARIM YONU (kullanici ile konusma, v8.52 icin; henuz uygulanmadi) — "sayilar
    4. Algi gecikmesi: tespit mesafesi tek sabit degil; gorus, gece, zemin, yorgunlukla degisir.
   Hava tarafi icin ayni ilke: 600 m / 300 m / 20 sn / 800 m / 0.15 esikleri dagilim olarak (grup basina jitter) yeniden tasarlanacak.
   Oncelik: once v8.51'in temel davranisi test edilsin (RPT), sonra olasiliksal katman uzerine konsun.
+
+TASARIM ILKESI (kullanici, 2026-10-04) — "Arma 3 dunyasina uyarla, zorlugu artirma":
+  Gercek hayat modeli (ACE / gelismis balistik / tam gercekci doktrin) ne kadar kurulursa kurulsun, sonuc Arma 3 oyun dunyasinda oyuncuyu daha cok zorluyorsa MANTIK korunur,
+  uygulama oyuna gore YUMUSATILIR / uyarlanir. Su an AI zaten cok guclu (kullanici wallhack'siz 2'ye 1 alamiyor) -> AI'yi DAHA ZOR yapacak degisiklik yapma;
+  cekirdek muharebe davranisina (hedefleme, bounding, formasyon, ates) dokunma.
+  Sonuc: v8.52 olasiliksal katman AI'yi guclendirmemeli; belirsizlik oyuncu lehine hata payi olarak calismali (AI'nin kusursuz bilmemesi, tereddut, kacirma),
+  IED / hava eklentileri mevcut zorluk seviyesini yukari cekmemeli. Her yeni ozellik oyunda 'adil' mi diye test edilmeli.
