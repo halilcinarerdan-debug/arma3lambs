@@ -78,6 +78,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 && {!(_x getUnitTrait "medic")}
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
                 && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
+                && {!(_x getVariable [QGVAR(iedIsci), false])}
                 && {(speed _x) < 1.5}
                 && {(getSuppression _x) < 0.5}
                 && {(insideBuilding _x) < 0.5}
@@ -90,9 +91,11 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
 
             // 1) KALICI ES ATAMASI (STABIL): saglam ciftlere DOKUNULMAZ; sadece esi olmayan (olmus / ayrilmis /
             //    yeni katilan) YETIM askerler yeniden eslesir. Tek yetim -> en yakin dostun yanina (3'lu) baglanir.
+            // v8.57: EOD (explosiveSpecialist / ACE_isEOD) buddy atamasina girmez
+            private _eodMu = { (_this getUnitTrait "explosiveSpecialist") || {_this getVariable ["ACE_isEOD", false]} };
             private _yetim = _tum select {
                 private _bb = _x getVariable [QGVAR(buddy), objNull];
-                isNull _bb || {!alive _bb} || {!(_bb in _tum)} || {_bb isEqualTo _x}
+                !(_x call _eodMu) && {isNull _bb || {!alive _bb} || {!(_bb in _tum)} || {_bb isEqualTo _x}}
             };
             if ((count _yetim) >= 2) then {
                 private _ciftler = [_yetim] call _pairFn;
@@ -113,7 +116,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                     private _yEs = objNull;
                     private _yMes = 99999;
                     {
-                        if (_x isNotEqualTo _y) then {
+                        if (_x isNotEqualTo _y && {!(_x call _eodMu)}) then {
                             private _dd = _y distance2D _x;
                             if (_dd < _yMes) then { _yMes = _dd; _yEs = _x; };
                         };
@@ -121,6 +124,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                     if (!isNull _yEs) then { _y setVariable [QGVAR(buddy), _yEs]; };
                 };
             };
+            { if (_x call _eodMu) then { _x setVariable [QGVAR(buddy), objNull]; }; } forEach _tum;
             if (_yetim isNotEqualTo [] && {_savasta}) then {
                 diag_log format ["[BUDDY] %1 | yetim %2 asker yeniden eslesti (es oldu / ayrildi): %3", groupId _g, count _yetim, _yetim apply {name _x}];
             };

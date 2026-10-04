@@ -1058,3 +1058,12 @@ v8.56 — GARRISON TESHISI ("garrison calismiyor"): hava tepkisinde LAMBS tactic
   4 sn / 12 sn (siper oncesi) / 30 sn (son durum): her asker icin ICERIDE (tavan GEOM isin testi) / ACIKTA + en yakin bina mesafesi, LAMBS hedefine (expectedDestination) mesafe, currentCommand, lambs_main_currentTask, durus.
   Beklenen nedenler: bina pozisyonu < hazir asker (kucuk bina, LAMBS ekstra askerleri ilk pozisyona yigar), hazir asker < grup, ya da baska sistem komutu eziyor (gorev / komut alanlari).
   rpt_ozet --hava-ied: GARRISON cikarimi ([SORUN] pozisyon < hazir asker / garrison basarisiz / 30 sn'de aciktakiler).
+
+v8.57 — RPT 12:47: DEFUSE ve PATLAT (kontrollu patlatma) calisti; heli TOPLU-ATES calisti. Kullanici istekleri: yalniz EOD teknisyen imha edebilsin, zar / daha gercekci model, EOD buddy olmasin.
+  1) YALNIZ EOD: imha eden = explosiveSpecialist trait veya ACE_isEOD degiskenli asker (zaten oyleydi, KARAR logunda "EOD sayisi" + kit kurali yaziyor). Kit: ACE_DefusalKit veya ToolKit;
+     lambs_danger_iedKitSiki = true -> ACE yuklu iken YALNIZ ACE_DefusalKit. (RPT'de EOD 'kit:false' ile imha etti: ACE kiti yok, ToolKit vardi.) OYUNCU icin ACE ayari: ace_explosives_requireSpecialist = true (CBA ayari; teyit et).
+  2) ZAR (lambs_danger_iedZarOff = true -> hep basari): P(basari) = 0.55 + 0.35 x beceri(skill) + ACE kiti 0.05 - cihaz karmasikligi (iedd -0.10, big -0.05, urban -0.03) - baski (getSuppression>0.3: -0.20), 0.35..0.97 arasi.
+     Basarisizlikta ikinci zar: %15 PATLAMA (EOD yakinda), kalan IPTAL: EOD geri cekilir, bu IED konumu iedPatList'e yazilir ve sonraki degerlendirmede KONTROLLU PATLATMA moduna gecilir (EOD yurumez). Loglar: [IED-FARK-ZAR].
+     Gercekcilik notu (genel bilgi, kaynakli degil): gercek EOD'de basarisizlik genelde abort + kontrollu imhadir; kazara patlama nadirdir -> o yuzden %15.
+  3) EOD BUDDY DISI: fnc_buddyPairs EOD'leri ciftlemez (tek elemanli 'cift'), fnc_buddyBond EOD'yi yetim / es atamasindan ve cohesion'dan cikarir, imha sirasinda (iedIsci) cohesion'dan muaf; EOD'nin eski buddy degiskeni temizlenir.
+     Gerekce: cihaza TEK kisi yaklasir (maruziyet en aza), esin patlama bolgesine cekilmesi onlenir (ilk testlerde es / yakindakiler EOD ile oldu). Doktrin: elimizdeki kaynaklarda (MCWP 3-11.1, FM 3-34) EOD teknigi yok; ATP 3-90.37 / ATP 4-32.3 gelince dogrulanacak.

@@ -124,7 +124,9 @@ private _calis = {
                 _eodlar sort true;
                 private _eodU = if (_eodlar isEqualTo []) then {objNull} else {(_eodlar select 0) select 1};
                 // imha icin imha kiti sart: ACE_DefusalKit (ACE) veya ToolKit (vanilla); kitli EOD'lar arasindan en yakini
-                private _kitli = _eodlar select {private _it = items (_x select 1); ("ACE_DefusalKit" in _it) || {"ToolKit" in _it}};
+                // v8.57: yalniz EOD teknisyeni (explosiveSpecialist / ACE_isEOD) imha edebilir; kit: ACE_DefusalKit veya ToolKit (lambs_danger_iedKitSiki = true -> ACE yuklu iken yalniz ACE_DefusalKit)
+                private _kitSiki = (missionNamespace getVariable ["lambs_danger_iedKitSiki", false]) && {isClass (configFile >> "CfgPatches" >> "ace_explosives")};
+                private _kitli = _eodlar select {private _it = items (_x select 1); ("ACE_DefusalKit" in _it) || {!_kitSiki && {"ToolKit" in _it}}};
                 private _imhaU = if (_kitli isEqualTo []) then {objNull} else {(_kitli select 0) select 1};
                 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
                 private _sinif = toLower (typeOf _m);
@@ -151,10 +153,11 @@ private _calis = {
                 private _yakinlik = ((_sinif find "range") >= 0) || {(_sinif find "pressure") >= 0} || {(_sinif find "tripwire") >= 0};
                 // v8.55: yakinlik tetikli (range / pressure / tripwire) IED veya yakininda yakinlik tetikli komsu varsa EOD'nin cihaza YURUMESI olmaz; bunun yerine
                 // KONTROLLU PATLATMA (BIP): kitli EOD guvenli uzakliktan (tehlike yaricapi + 5 m) imha eder, cevre emniyeti disarida, patlama cevreyi etkilemez.
-                private _mod = ["DEFUSE", "PATLAT"] select (_ikincil || _yakinlik);
+                private _zorPat = ((_g getVariable [QGVAR(iedPatList), []]) findIf {_x distance2D _mp < 4}) >= 0;
+                private _mod = ["DEFUSE", "PATLAT"] select (_ikincil || _yakinlik || _zorPat);
                 private _imhaMi = !isNull _imhaU && {!_temas} && {(_imhaU distance2D _m) < 110} && {(_g getVariable [QGVAR(iedIs), []]) params [["_jm", objNull], ["_ju", objNull]]; isNull _jm || {!alive _ju}};
                 if (_imhaMi) then { _eodU = _imhaU; };
-                diag_log format ["[IED-FARK-KARAR] %1 | %2 | EOD sayisi:%3 kitli:%4 | temas:%5 | ikincil(yakinlik tetikli komsu):%6 | bu IED yakinlik tetikli:%7 | devam eden is:%8 | EOD-IED mesafe:%9 | imha karari:%10 | mod:%11", groupId _g, typeOf _m, count _eodlar, count _kitli, _temas, _ikincil, _yakinlik, ((_g getVariable [QGVAR(iedIs), []]) isNotEqualTo []), if (isNull _imhaU) then {"-"} else {str (round (_imhaU distance2D _m))}, _imhaMi, _mod];
+                diag_log format ["[IED-FARK-KARAR] %1 | %2 | EOD sayisi:%3 kitli:%4 | temas:%5 | ikincil(yakinlik tetikli komsu):%6 | bu IED yakinlik tetikli:%7 | devam eden is:%8 | EOD-IED mesafe:%9 | imha karari:%10 | mod:%11 (zar iptali sonrasi PATLAT:%12) | kit kurali:%13", groupId _g, typeOf _m, count _eodlar, count _kitli, _temas, _ikincil, _yakinlik, ((_g getVariable [QGVAR(iedIs), []]) isNotEqualTo []), if (isNull _imhaU) then {"-"} else {str (round (_imhaU distance2D _m))}, _imhaMi, _mod, _zorPat, ["ACE_DefusalKit veya ToolKit", "yalniz ACE_DefusalKit"] select _kitSiki];
                 // yeni IED bulundu: devam eden imhanin hedefine / EOD'ye 20 m'den yakinsa ikincil cihaz -> imha iptal, EOD geri cekilir; uzaksa imha surer
                 private _abort = false;
                 private _is = _g getVariable [QGVAR(iedIs), []];
@@ -336,9 +339,45 @@ private _calis = {
                                     _bitti = true;
                                 };
                             } else {
-                                if (_mine isKindOf "MineBase") then { _u action ["Deactivate", _u, _mine]; sleep 1; };
-                                if (!isNull _mine) then { deleteVehicle _mine; };
-                                _bitti = true;
+                                // v8.57: ZAR — imha basarisi sabit degil. P(basari) = beceri + kit - cihaz karmasikligi - baski. Basarisizlikta cogunlukla IPTAL (EOD geri cekilir, bu IED icin
+                                // kontrollu patlatmaya gecilir), az olasilikla PATLAMA (EOD yakinda: ciddi risk). lambs_danger_iedZarOff = true -> hep basari.
+                                private _basari = true;
+                                if !(missionNamespace getVariable ["lambs_danger_iedZarOff", false]) then {
+                                    private _sk = skill _u;
+                                    private _sin = toLower _mineTip;
+                                    private _kitB = if ("ACE_DefusalKit" in (items _u)) then {0.05} else {0};
+                                    private _tipC = 0;
+                                    if ((_sin find "iedd") >= 0) then { _tipC = _tipC + 0.10; };   // mod IED'leri daha karmasik varsayilir
+                                    if ((_sin find "big") >= 0) then { _tipC = _tipC + 0.05; };
+                                    if ((_sin find "urban") >= 0) then { _tipC = _tipC + 0.03; };
+                                    private _bask = if ((getSuppression _u) > 0.3) then {0.20} else {0};
+                                    private _pB = ((0.55 + (0.35 * _sk) + _kitB - _tipC - _bask) max 0.35) min 0.97;
+                                    private _z1 = random 1;
+                                    private _pD = 0.15;
+                                    private _z2 = random 1;
+                                    if (_z1 < _pB) then {
+                                        diag_log format ["[IED-FARK-ZAR] %1 | beceri:%2 | P(basari):%3 (kit %4, cihaz -%5, baski -%6) | zar:%7 -> BASARI", name _u, _sk toFixed 2, _pB toFixed 2, _kitB, _tipC toFixed 2, _bask, _z1 toFixed 2];
+                                    } else {
+                                        _basari = false;
+                                        if (_z2 < _pD) then {
+                                            _sebep2 = "ZAR: PATLAMA (basarisiz, hata)";
+                                            diag_log format ["[IED-FARK-ZAR] %1 | beceri:%2 | P(basari):%3 | zar:%4 -> BASARISIZ | ikinci zar:%5 < %6 -> PATLAMA (EOD yakinda)", name _u, _sk toFixed 2, _pB toFixed 2, _z1 toFixed 2, _z2 toFixed 2, _pD];
+                                            if (!isNull _mine) then { triggerAmmo _mine; };
+                                        } else {
+                                            _sebep2 = "ZAR: IPTAL (EOD geri cekildi, bu IED icin kontrollu patlatmaya gecilir)";
+                                            diag_log format ["[IED-FARK-ZAR] %1 | beceri:%2 | P(basari):%3 | zar:%4 -> BASARISIZ | ikinci zar:%5 >= %6 -> IPTAL (patlama yok)", name _u, _sk toFixed 2, _pB toFixed 2, _z1 toFixed 2, _z2 toFixed 2, _pD];
+                                            private _pl = _grp getVariable [QGVAR(iedPatList), []];
+                                            _pl pushBack (getPosATL _mine);
+                                            _grp setVariable [QGVAR(iedPatList), _pl];
+                                            _u doMove ((getPosATL _mine) getPos [_yariC + 5, (getPosATL _mine) getDir _u]);
+                                        };
+                                    };
+                                };
+                                if (_basari) then {
+                                    if (_mine isKindOf "MineBase") then { _u action ["Deactivate", _u, _mine]; sleep 1; };
+                                    if (!isNull _mine) then { deleteVehicle _mine; };
+                                    _bitti = true;
+                                };
                             };
                         } else {
                             if (_sebep2 isEqualTo "") then { _sebep2 = "?"; };
@@ -348,7 +387,7 @@ private _calis = {
                         _grp setVariable [QGVAR(iedIs), []];
                         _u setVariable [QGVAR(iedIsci), nil];
                         // tamamlandiysa bilinen listeyi temizle: yakindaki diger IED yeniden degerlendirilip sirayla imha edilir
-                        if (_bitti) then { _grp setVariable [QGVAR(iedBilinen), []]; };
+                        if (_bitti || {(_sebep2 find "IPTAL") >= 0}) then { _grp setVariable [QGVAR(iedBilinen), []]; };
                         diag_log format ["[IED-FARK] %1 | imha %2 | mod:%6 | %3 | ACE:%4 | kit:%5%7", name _u, ["BASARISIZ (calisma kesildi)", "TAMAM"] select _bitti, _mineTip, !isNil "ace_explosives_fnc_defuseExplosive", "ACE_DefusalKit" in (items _u), _mod, if (_bitti) then {""} else {format [" | neden: %1", _sebep2]}];
                     };
                 };

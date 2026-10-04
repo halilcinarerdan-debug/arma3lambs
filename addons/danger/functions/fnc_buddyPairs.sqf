@@ -22,9 +22,13 @@
 
 params [["_units", [], [[]]]];
 
-private _alive = _units select {alive _x};
-if (_alive isEqualTo []) exitWith {[]};
-if ((count _alive) < 2) exitWith {[_alive]};
+// v8.57: EOD (explosiveSpecialist / ACE_isEOD) ASLA buddy olmaz: cihaza tek kisi yaklasir (maruziyet en aza), es patlama bolgesine cekilmesin; EOD tek elemanli "cift" olarak sona eklenir
+private _eodMu = { (_this getUnitTrait "explosiveSpecialist") || {_this getVariable ["ACE_isEOD", false]} };
+private _eodlar = _units select {alive _x && {_x call _eodMu}};
+private _alive = _units select {alive _x && {!(_x call _eodMu)}};
+if (_alive isEqualTo [] && {_eodlar isEqualTo []}) exitWith {[]};
+if (_alive isEqualTo []) exitWith {_eodlar apply {[_x]}};
+if ((count _alive) < 2) exitWith {[_alive] + (_eodlar apply {[_x]})};
 
 // Fonksiyon kayitli degilse (XEH_PREP eksik) herkes TUFEKLI sayilir
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
@@ -71,5 +75,8 @@ for "_p" from 0 to ((floor (_n / 2)) - 1) do {
 if ((_n % 2) isEqualTo 1) then {
     (_ciftler select ((count _ciftler) - 1)) pushBack (_sirali select (floor (_n / 2)));
 };
+
+// EOD'ler tek elemanli cift olarak (buddy yok)
+{ _ciftler pushBack [_x]; } forEach _eodlar;
 
 _ciftler
