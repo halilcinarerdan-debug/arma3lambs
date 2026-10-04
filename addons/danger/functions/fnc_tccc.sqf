@@ -155,6 +155,20 @@ diag_log format [
 
             if (_hedef isNotEqualTo []) then {
                 [_m, _c] call ace_dragging_fnc_startDrag;
+                // v8.81: Zeus / host ekranina "Release" dusmesi (kullanici): ACE startDrag birimin birincil-aksiyon (DefaultAction) yakalayicisini YEREL istemciye kurar; AI icin bu istemci Zeus / host olabilir.
+                //   AI hekim icin bu yakalayici hemen kaldirilir (birakma yine kodla ace_dragging_fnc_dropObject ile yapilir). ACE ic degiskenleri dogrulanamadi: ilk 6 sefer degisken adlari loglanir.
+                if (!isNil "ace_common_fnc_removeActionEventHandler") then {
+                    private _rid = _m getVariable ["ace_dragging_ReleaseActionID", -1];
+                    if (_rid isEqualType 0 && {_rid >= 0}) then {
+                        [_m, "DefaultAction", _rid] call ace_common_fnc_removeActionEventHandler;
+                        _m setVariable ["ace_dragging_ReleaseActionID", -1];
+                    };
+                };
+                if (isNil "lambs_danger_tcccAceLogN") then { lambs_danger_tcccAceLogN = 0; };
+                if (lambs_danger_tcccAceLogN < 6) then {
+                    lambs_danger_tcccAceLogN = lambs_danger_tcccAceLogN + 1;
+                    diag_log format ["[TCCC] %1 | %2 | ACE surukleme degiskenleri: %3 | removeActionEventHandler:%4", groupId _g, name _m, (allVariables _m) select {(toLower _x) find "drag" >= 0 || {(toLower _x) find "carry" >= 0}}, !isNil "ace_common_fnc_removeActionEventHandler"];
+                };
                 _m doMove _hedef;
                 private _b2 = time + 22;
                 // v8.80 SURUKLEME IZLEME (RPT f8015d87: 'yaraliyi 1-3 m kenara cekti' - hedef 10-15 m; suruklemeye girip durdu): 5 sn'de bir konum / hiz / komut logu; 8 sn'de < 1.5 m ilerlediyse TAKILDI

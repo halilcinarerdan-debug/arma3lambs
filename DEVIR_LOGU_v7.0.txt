@@ -1216,3 +1216,7 @@ v8.80 — RPT f8015d87 (v8.79 FINAL; kullanici: 'cok iyi' + 4 gozlem).
   PLAN (kullanici istedi, HENUZ YAPILMADI — arac logu gelmeden kor kodlanmaz, mekanize felc riski): (1) mekanize taktikler: arac ates destegi + piyade inis mesafesi / inis noktasi, arac overwatch, AT tehdidinde cekilme;
     (2) ARACLI MEDEVAC: saglik ekibi araca biner, yaralinin yanina gider, yaraliyi yukler (ace_cargo / ace_dragging), toplama noktasina tasir; (3) mekanize + yaya birlikte bounding.
   RETREAT 'cogunlukla basarisiz': kullanici KARARI: acimasiz = gercekci, bu yuzden retreat basari orani arttirilmayacak (v8.72 komut-ezme duzeltmesi korunur). Tek kalan katilim (v8.67) zaten <= 2 kisi -> diger squad'a (1 kisi dahil).
+
+v8.81 — Kullanici: 'AI medic surukleyince bizim ekrana Release geliyor (sag tik, Zeus'tan izliyorum)'. VARSAYIM (ACE ic kodu dogrulanamadi): ace_dragging_fnc_startDrag birimin DefaultAction yakalayicisini (ace_common_fnc_addActionEventHandler -> inGameUISetEventHandler) YEREL istemciye kurar;
+  AI hekim Zeus / host makinesinde yerelse bu 'Release' ekraninda gorunur. Onlem: startDrag'dan hemen sonra ace_dragging_ReleaseActionID varsa [hekim, "DefaultAction", id] removeActionEventHandler ile kaldirilir (birakma kodla dropObject). Ilk 6 surukleyisde
+  ACE 'drag/carry' degisken adlari [TCCC] satirina yazilir (dogrulama icin). Kalirsa alternatif: ACE startDrag yerine kendi attachTo suruklememiz. TEST EDILMEDI.
