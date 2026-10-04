@@ -13,9 +13,9 @@
  *   - Cooldown: ayni IED icin grup basina 5 dk. ATLANIR: oyuncu lider, arac, retreat / evade / breakContact.
  *   - v8.50: EOD = explosiveSpecialist ozelligi VEYA ACE_isEOD degiskeni (ACE: ace_common_fnc_isEOD ile ayni kosul). EOD / mayin dedektorlu asker
  *     erken tespit eder (90 m, gorus hatti kosulsuz 50 m'ye kadar); diger askerler 60 m (25 m icinde gorus hatti aranmaz).
- *     EOD varsa ve temas yoksa HER tur IED'e (vanilla mayin + mod / ACE IED) gidip diz coker, ~8 sn calisip etkisizlestirir (ACE yuklu ise ACE EOD sureci simule edilir).
+ *     EOD varsa, imha kiti (ACE_DefusalKit veya ToolKit) tasiyorsa ve temas yoksa HER tur IED'e (vanilla mayin + mod / ACE IED) gidip diz coker, ~8 sn calisip etkisizlestirir (ACE yuklu ise ACE EOD sureci simule edilir).
  *     Digerleri 55 m'ye acilir; bounding / taktik kilidi olan askerler dahil (IED tehlikesi kilidi gecer), 60 sn boyunca 4 sn'de bir geri itilir.
- *     EOD yoksa grup yalnizca kacinir (imha denenmez).
+ *     EOD yoksa ya da EOD'da imha kiti yoksa grup yalnizca kacinir (imha denenmez; EOD yine erken tespit eder).
  * Kapatma: lambs_danger_iedOff = true.
  *
  * Arguments:
@@ -77,8 +77,12 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 _eodlar = _eodlar apply {[_x distance2D _m, _x]};
                 _eodlar sort true;
                 private _eodU = if (_eodlar isEqualTo []) then {objNull} else {(_eodlar select 0) select 1};
+                // imha icin imha kiti sart: ACE_DefusalKit (ACE) veya ToolKit (vanilla); kitli EOD'lar arasindan en yakini
+                private _kitli = _eodlar select {private _it = items (_x select 1); ("ACE_DefusalKit" in _it) || {"ToolKit" in _it}};
+                private _imhaU = if (_kitli isEqualTo []) then {objNull} else {(_kitli select 0) select 1};
                 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
-                private _imhaMi = !isNull _eodU && {!_temas} && {(_eodU distance2D _m) < 110};
+                private _imhaMi = !isNull _imhaU && {!_temas} && {(_imhaU distance2D _m) < 110};
+                if (_imhaMi) then { _eodU = _imhaU; };
 
                 // uzaklasma (50 m yaricap -> 55 m); EOD imha edecekse kalir. v8.50: taktik kilidi (bounding vb.) IED tehlikesinde gecilir
                 private _uzaklasan = 0;
@@ -112,7 +116,8 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
 
                 // imha: EOD varsa ve temas yoksa (vanilla mayin + ACE / mod IED); EOD yoksa yalniz kacinilir
                 private _imha = "yok(EOD yok)";
-                if (_temas && {!isNull _eodU}) then { _imha = "yok(temas var)"; };
+                if (!isNull _eodU && {isNull _imhaU}) then { _imha = "yok(imha kiti yok: ACE_DefusalKit / ToolKit)"; };
+                if (_temas && {!isNull _imhaU}) then { _imha = "yok(temas var)"; };
                 if (_imhaMi) then {
                     _imha = "deneniyor";
                     [_eodU, _m, _g] spawn {

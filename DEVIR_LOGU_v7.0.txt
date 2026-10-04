@@ -957,3 +957,6 @@ v8.50 — IED / HAVA testi (RPT 08:29) sonrasi duzeltmeler.
 
 v8.50a — HAVA watchdog'u v8.50 tani satirindaki hata yuzunden ilk calismada olmustu (RPT: "Error getfriend: Type Group, expected Side", fnc_havaFarkindalik.sqf:54).
         spawn dongusu hata ile sonlanir -> heli geldiginde hic tepki yoktu. (_gv getFriend ...) -> ((side _gv) getFriend ...) duzeltildi.
+
+v8.50b — IED imhasi icin kit sarti: ACE_DefusalKit (ACE) veya ToolKit (vanilla). EOD'da kit yoksa imha denenmez, yalniz kacinma + erken tespit
+        (log: imha:yok(imha kiti yok)). Kitli EOD'lar arasindan IED'e en yakin olan gorevlendirilir.
