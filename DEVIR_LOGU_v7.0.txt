@@ -1157,3 +1157,11 @@ v8.72 — RPT bc841e2d (v8.69) sonrasi: kullanici "1) retreat 2) moral 3) bilgi 
     bastirma/retreat (+8-18) + alici temasta (+3), teslim guvenilirligi 600 m'e kadar 1.0 -> menzilde 0.35 (kayip rapor), seviye 0.5..maxReveal (yas+gecikme, mesafe, bastirma; dusuk seviye = alici konum hatasi buyuk).
     Kapatma: lambs_danger_hqSisOff = true. Log: [HQ-ISTIHBARAT] ... SIS satiri + [HQ-ISTIHBARAT-OZET] sayac (telsiz yok / kayboldu / teslim). Dikkat: AI bilgisi azaldigi icin zorluk DUSEBILIR; kullanici gercekcilik istedi. TEST EDILMEDI.
   Acik: moral/korku katmani (2), ROE EAST->EAST 28 ihlal.
+
+v8.73 — PANIK / FELC (kullanici: "insan deterministik degil, savasta felc gecirir; LAMBS panigi ile entegre olsun"). fnc_panikFelc.
+  LAMBS gercegi (upstream lambs_main_fnc_doPanic, okundu): birimin gorevini "Panic" yapar, OnPanic olayi + callout "panic" (hacim 55) uretir — FELC / KACIS / KOR ATES YOK (kodda 'ileride gelistirilebilir' notu). Bu modul: (1) kendi bolumunu baslatirken doPanic'i cagirir
+  (callout + OnPanic tum LAMBS dinleyicilerine gider), (2) LAMBS'in kendi paniki (gorev 'Panic') gorulurse ayni etkiyi uygular. Upstream'in panik TETIKLEME sartini (sans ayari) bilmiyorum — okunmadi.
+  Model (TASARIM tahmini, doktrin sayisi degil; "savas / kac / don" genel ilkesi): gerilim = 0.6 x baski + 0.35 yakinda dost oldu (12 sn / 25 m) + 0.3 x (1 - moral) + 0.15 lider yok/uzak + 0.10 yalniz; s >= 0.45 -> p = (s-0.45) x 0.5 x (1.3 - courage) x panikSans
+  (lider x0.4, retreat / EOD / IED isinde x0.5, azami 0.30/tik, 3 sn tik), bagisiklik 40 sn, grupta ayni anda en fazla %30. Turler: DONMA 4-12 sn (yere yatar, hareket / hedef yok; lider 20 m icinde %40 kisa) | KOR ATES 5-10 sn (yere yatar, nisan %30, rastgele ates) |
+  KACIS 5-9 sn (25-40 m tehditten uzaga). Gerilim >= 0.7: donma .35 / kor .25 / kacis .40; altinda .55 / .35 / .10. Kapatma lambs_danger_panikOff = true; siddet lambs_danger_panikSans (varsayilan 1.0). Log: [PANIK] + [PANIK-OZET].
+  UYARI: zorlugu DUSURUR (kullanici gercekcilik istedi). Birim LAMBS disableAI bayragi + taktikKilit ile kilitlenir, bitince geri verilir. TEST EDILMEDI.
