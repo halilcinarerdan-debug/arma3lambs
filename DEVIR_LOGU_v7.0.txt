@@ -1145,3 +1145,6 @@ v8.69 — RPT 1f05955f karne devami. DUZELTME (v8.68 notu): 'BND+TAK' bayragi NO
 
 v8.70 — Kullanici: "komutan sabitken formasyon oturmuyor, bazilari saga sola oynuyor". Kok neden bilinmiyor (log yok); adaylar: Arma slot oturma (8+ kisi LINE cok genis: v8.69 WEDGE), buddyBond / dispersion doMove (kalici emir, slota donmez), yanGuvenlik/noktaEleman sonrasi doFollow, setFormation/setFormDir slot yenileme.
   Tani: [ANOMALI] BOSTA-HAREKET satirina ilk yuruyen askerin expectedDestination modu + hedefe / liderden mesafe, formasyon degisim / formDir / dagilma son zamani, yan / nokta bayragi eklendi. Sonraki RPT'de mod=FORMATION -> Arma slot oturmasi; mod=DoNotPlan/LEADER... -> script emri. Davranis degistirilmedi.
+
+v8.71 — "komutan durunca formasyon ~30 sn oynuyor" KOK NEDEN (RPT 1f05955f): fnc_buddyBond sakin halde 25 m limitle 'es kopmasi' (25-35 m, ornek Alpha 1-5 / 1-4, 49 [BUDDY] satiri) sayip askerlere kalici doMove veriyor; genis 13 kisilik formasyonda es ciftleri
+  zaten 25-35 m ayri -> lider durunca askerler slota degil birbirine kosuyor. FORM-DEGISIM yoktu (formasyon degismedi). Duzeltme: sakin halde lider hareket ettiyse / durali < 45 sn ise buddyBond atlanir; 8+ kisilikte sakin limit 35 m / izole 50 m. TEST EDILMEDI.

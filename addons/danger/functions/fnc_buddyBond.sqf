@@ -60,10 +60,18 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };
 
+            private _tum0 = (units _g) select {alive _x};
             private _savasta = (_g getVariable [QGVAR(contact), 0]) > time;
             // v8.20b: kama formasyonu 10 m aralik doktrini (FM 3-21.8) -> sakin halde 25 m (v8.19 gevsetmesi geri alindi; spawn hareketinin asil nedeni roleStation siralamasiydi)
             private _ciftLimit = [25, 30] select _savasta;
             private _izoLimit  = [40, 45] select _savasta;
+            // v8.71: sakin halde lider hareket ettiyse / yeni durduysa (< 45 sn) formasyon hala oturuyor: es kopmasi sayilmaz (RPT 1f05955f: 25-35 m 'es kopmasi' -> doMove,
+            //   askerler slot yerine birbirine kosuyor, lider durunca ~30 sn oynama). 8+ kisilik grupta sakin limit 25 -> 35 m (genis formasyon aralik).
+            if (!_savasta) then {
+                if ((speed _leader) > 1.5) then { _g setVariable [QGVAR(bbLiderHareketT), time]; };
+                if ((time - (_g getVariable [QGVAR(bbLiderHareketT), -999])) < 45) then { continue };
+                if ((count _tum0) >= 8) then { _ciftLimit = 35; _izoLimit = 50; };
+            };
 
             // Tum canli piyade + hareket edebilir (uygun) olanlar
             private _tum = (units _g) select {alive _x && {isNull objectParent _x}};
