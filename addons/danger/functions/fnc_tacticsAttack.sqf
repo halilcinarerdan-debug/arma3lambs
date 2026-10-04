@@ -73,7 +73,9 @@ _unit setVariable [QEGVAR(main,currentTask), "Tactics Attack", EGVAR(main,debug_
 // group settings
 _unit setCombatMode "RED";
 (group _unit) setVariable [QGVAR(taktikFormT), time];
-if ((formation _unit) isNotEqualTo "DIAMOND") then { [_unit, "DIAMOND", "attack", 1] call FUNC(formSet); };
+// v8.83: DIAMOND CQB'de cok riskli (kullanici): yapi cevresinde STAG COLUMN (sokak / bina kenari), aciksa WEDGE
+private _cqbForm = ["WEDGE", "STAG COLUMN"] select ((count (nearestTerrainObjects [getPosATL _unit, ["BUILDING", "HOUSE"], 30, false, true])) >= 2);
+if ((formation _unit) isNotEqualTo _cqbForm) then { [_unit, _cqbForm, "attack", 1] call FUNC(formSet); };
 
 // the attack
 private _targetVehicle = vehicle _target;

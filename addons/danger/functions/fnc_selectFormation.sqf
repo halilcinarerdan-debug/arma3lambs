@@ -306,7 +306,7 @@ switch (_context) do {
                     _reason = "gece / sinirli gorus - kolon (MCWP 3-11.2: kontrollu hizli intikal)";
                 } else {
                     if (((_grup getVariable [QGVAR(contact), 0]) > 0) && {(time - (_grup getVariable [QGVAR(contact), 0])) < 120}) then {
-                        _formation = "DIAMOND";
+                        _formation = "WEDGE";   // v8.83: DIAMOND kaldirildi (kullanici: cok riskli)
                         _reason = "temas sonrasi - her yone guvenlik (TASARIM)";
                     } else {
                         _formation = "WEDGE";
@@ -323,8 +323,8 @@ switch (_context) do {
             _formation = "WEDGE";
             _reason = "meskun savunma - esnek";
         } else {
-            _formation = ["VEE", "DIAMOND"] select (!_validTarget);
-            _reason = ["acik savunma - agir silah merkezde", "tehdit yonu bilinmiyor - her yone guvenlik (DIAMOND)"] select (!_validTarget);
+            _formation = ["VEE", "WEDGE"] select (!_validTarget);   // v8.83: DIAMOND yok
+            _reason = ["acik savunma - agir silah merkezde", "tehdit yonu bilinmiyor - toplu WEDGE (DIAMOND kaldirildi)"] select (!_validTarget);
         };
     };
 

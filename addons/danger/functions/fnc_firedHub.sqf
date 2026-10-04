@@ -67,9 +67,16 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             && {_ammo isKindOf ["RocketBase", configFile >> "CfgAmmo"] || {_ammo isKindOf ["MissileBase", configFile >> "CfgAmmo"]}}
         ) then {
             [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_rpgReaction", {0}]);
+            // v8.83: dustugu yerde arac murettebati dahil herkese tepki (rpgReaction yalniz piyade)
+            if (!isNull _proj) then { ["ROKET", _proj, _unit] call (missionNamespace getVariable ["lambs_danger_fnc_tehditIzle", {false}]); };
             if (isMultiplayer) then {
                 [_unit] remoteExecCall ["lambs_danger_fnc_rpgReaction", -clientOwner];
             };
+        };
+
+        // 1b2) v8.83 DUMAN: dusman taraf duman bombasi / 40mm duman = tehdit isareti
+        if (!isNull _proj && {_simTani isEqualTo "shotsmoke" || {(toLower _ammo) find "smoke" >= 0}}) then {
+            ["DUMAN", _proj, _unit] call (missionNamespace getVariable ["lambs_danger_fnc_tehditIzle", {false}]);
         };
 
         // 2) Ses / parlama (roketatar ve 40mm hemen, digerleri 1.2 sn'de bir)
@@ -94,6 +101,9 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
 {
     [_x, {
         params ["_unit", "_thr"];
+        if (!isNull _thr && {(typeOf _thr) isKindOf "SmokeShell" || {((toLower (typeOf _thr)) find "smoke") >= 0}}) then {
+            ["DUMAN", _thr, _unit] call (missionNamespace getVariable ["lambs_danger_fnc_tehditIzle", {false}]);
+        };
         if (!isNull _thr) then {
             lambs_danger_grenadeList = lambs_danger_grenadeList select {!isNull _x};
             if ((count lambs_danger_grenadeList) < 60) then {

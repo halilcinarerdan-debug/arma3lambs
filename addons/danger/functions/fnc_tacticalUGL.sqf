@@ -76,6 +76,33 @@ if (_w isEqualTo "") exitWith {false};
 
 private _gl = [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}]);
 if (_gl isEqualTo "") exitWith {false};
+// v8.83 UGL YUKLEME (RPT c4eedb1d: 'isik_duman' 18-19 / 30 sn = yuklu 40mm DUMAN / FLARE mermisi, 'mermi_yok' 11-15 = namlu bos; envanterde HE varken atilmiyordu):
+//   yuklu mermi olumcul degilse (duman / flare / aydinlatma) ya da namlu bossa ve envanterde olumcul 40mm varsa degistir (10 sn'de en fazla 1 kez).
+private _glMags0 = [_w, _gl] call FUNC(uglMags);
+private _letalMi = {
+    params ["_mg"];
+    private _am = getText (configFile >> "CfgMagazines" >> _mg >> "ammo");
+    private _ad0 = toLower (_mg + "|" + _am);
+    (["flare", "smoke", "illum", "f_40mm", "chemlight", "signal", "cir_"] findIf {(_ad0 find _x) >= 0}) < 0
+        && {((getNumber (configFile >> "CfgAmmo" >> _am >> "hit")) + (getNumber (configFile >> "CfgAmmo" >> _am >> "indirectHit"))) > 0}
+        && {(getNumber (configFile >> "CfgAmmo" >> _am >> "intensity")) <= 0}
+};
+private _yukluSimdi = (primaryWeaponMagazine _unit) select {(toLower _x) in _glMags0};
+private _yukluLetal = (_yukluSimdi isNotEqualTo []) && {[_yukluSimdi select 0] call _letalMi};
+if ((!_yukluLetal || {(_unit ammo _gl) <= 0}) && {(time - (_unit getVariable [QGVAR(glSwapT), -999])) > 10}) then {
+    private _heEnv = (magazines _unit) select {(toLower _x) in _glMags0 && {[_x] call _letalMi}};
+    if (_heEnv isNotEqualTo []) then {
+        _unit setVariable [QGVAR(glSwapT), time];
+        private _eski = if (_yukluSimdi isEqualTo []) then {"(bos)"} else {_yukluSimdi select 0};
+        if (_yukluSimdi isNotEqualTo []) then { _unit removePrimaryWeaponItem (_yukluSimdi select 0); };
+        _unit removeMagazine (_heEnv select 0);
+        _unit addPrimaryWeaponItem (_heEnv select 0);
+        if ((missionNamespace getVariable ["lambs_danger_glSwapN", 0]) < 40) then {
+            missionNamespace setVariable ["lambs_danger_glSwapN", (missionNamespace getVariable ["lambs_danger_glSwapN", 0]) + 1];
+            diag_log format ["[UGL-YUKLE] %1 | %2 | eski yuklu: %3 -> HE: %4 | envanterde olumcul 40mm: %5", groupId (group _unit), name _unit, _eski, _heEnv select 0, count _heEnv];
+        };
+    };
+};
 if ((_unit ammo _gl) <= 0) exitWith {"mermi_yok" call _red};
 
 // ---------------------------------------------------------------------------

@@ -1230,3 +1230,19 @@ v8.82 — RPT f3b1b53f (v8.80; kullanici: 'sorun APC ile alakaliymis, hantal; me
     (moveInCargo: isinlama, animasyon yok), dusmandan uzaga 350 m'ye tasir, indirir, murettebatta hekim varsa hqMedic atar, yoksa TCCC / HQ medevac devralir. Taraf basina tek gorev, arac 180 sn bekler, 240 sn sinir. Log [ARAC-MEDEVAC]. Kapatma lambs_danger_aracMedevacOff.
     SINIRLAR: yalniz KARA araci; helikopter yok; mekanize taktikler (arac ates destegi / inis noktasi) HALA yok; piyadeli APC gruplari secilmez (grup tamamen binmis olmali). Sayilar TASARIM.
   MEDEVAC GUCLENDIRME: HQ medevac menzili 350 -> 600 m (hqMedevacM), TCCC ates altinda 'en yakin dusman' sarti 50 -> 35 m. formSet: bounding-zorla / koru ATLANDI logu kapatildi (spam).
+
+v8.83 — RPT c4eedb1d (v8.82; kullanici 10 madde). KOK NEDEN / YAPILANLAR:
+  (1) FORMASYON OTURMAMA (komutan sabit, AWARE, 13 kisi): 26 BOSTA-HAREKET'te yuruyen askerin beklenen hedef modu 'LEADER PLANNED' / 'FORMATION PLANNED', hedef 1-26 m = Arma'nin KENDI slot motoru (script degil). fnc_haltKur: lider >= 8 sn duruyor,
+      temas yok, grup >= 6 piyade -> slota yakin (<= 20 m) yuruyenlere doStop (halt); uzakta kalan toplanmaya devam; lider kipirdayinca / temas / taktik -> doFollow. [HALT] logu. Slot yeniden hesabi tetikleyicisi KESIN BILINMIYOR (lider donusu?); halt semptomu keser.
+  (2) DUMAN / YANGIN: fnc_tehditOlay + fnc_tehditIzle (firedHub baglantisi: Fired duman mermisi + ACE throwableThrown): dusman duman 250 m icinde lider -> COMBAT + temas isareti 10 sn. YANGIN / yanan arac farkindaligi YOK (guvenilir komut dogrulanamadi).
+  (3) ARAC ICI PERSONEL ROKETE TEPKI VERMEDI: rpgReaction arac icindekileri atliyordu (objectParent filtresi). Yeni: roket / fuze dustugu noktada 70 m icindeki herhangi grup (arac murettebati dahil) COMBAT + temas 15 sn + aticiya reveal 0.5 / 0.8 (yakin <= 25 m);
+      25 m'deki piyade 3 sn yere; silahci / komutan aticiya doWatch. Yalniz piyade roketatari takip edilir (arac silahi / tank mermisi / havan YOK).
+  (4) DIAMOND KALDIRILDI (selectFormation x3, tacticsAttack): CQB / yapi cevresi STAG COLUMN, aciksa WEDGE.
+  (5) ILERI GOZCU + RTO (fnc_gozcuRto): RTO = telsiz sirt cantasi / sinif 'rto|radio' ya da >= 6 kisilik grupta NOMINAL (liderin yanindaki); gozcu = durbunlu / nisanci; temas yokken AWARE'de de 8 sn'de bir tehdit yonu +-35 derece 150 m doWatch + spotDistance / spotTime x1.25.
+      HQ istihbarat: RTO canli -> telsiz gucu 1; RTO olu (atanmisti) -> yalniz lider telsizi, menzil x0.4. [GOZCU] / [RTO] loglari.
+  (6) 'Release' HALA CIKIYOR: v8.81 onlemi ise yaramadi — ACE degiskenleri: ace_dragging_candrag / carryposition / dragposition / dragdirection / cancarry / carrydirection / ignoreweightdrag / ignoreweightcarry (ReleaseActionID YOK). Ayrica AI SURUKLEME TAKILIYOR (anim surukleme, hiz 0, ilerleme 0-1 m, 3/3).
+      Cozum: 3 takilmadan sonra AI surukleme DEVRE DISI (yerinde tedavi; Release yakalayicisi cikmaz); ignoreWeightDrag denenir (dogrulanamadi). Gercek Release kaynagi dogrulanmadi.
+  (7) MEDEVAC ARABASI 'KAFASINA GORE SURDU': RPT'de [ARAC-MEDEVAC] GOREV logu YOK (yalniz baslangic) -> bizim modul calismadi; kullanici aracin kendisi (mission / baska mod) olabilir. Kullanici sildi; dogrulanamadi.
+  (8) APC yerinde duruyor ama hizli ilerliyor: kullanici 'doktrin gerektiriyorsa bosver' -> degistirilmedi (mekanize duzeltici v8.82 kalir).
+  (9) UGL piyadeye zayif: [UGL-OZET]: isik_duman 18-19 / 30 sn (YUKLU mermi duman / flare), mermi_yok 11-15, rezerv 8-26. Duzeltme: yuklu mermi olumcul degilse / namlu bossa envanterdeki olumcul 40mm ile degistir ([UGL-YUKLE]); uglRezerv 3 -> 2. 
+  (10) HEMTT: yeni dosyalar yerel HEMTT ile SPE / PE hatasiz. TEST EDILMEDI.

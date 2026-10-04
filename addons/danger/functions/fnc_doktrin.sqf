@@ -24,7 +24,7 @@
  *   kucukEkip 3        bu sayi ve alti VEYA dusman < yakinM: kosarak kacmak yerine DELAY (siper + sis)
  *   yakinM 60
  *   --- ates / silah ---
- *   uglUzakM 200, uglUzakAralik 25, uglRezerv 3, uglRezervM 120   40mm kullanim kurallari
+ *   uglUzakM 200, uglUzakAralik 25, uglRezerv 2 (v8.83: 3 -> 2), uglRezervM 120   40mm kullanim kurallari
  *   --- saha ---
  *   arkaGuvenlik true, arkaGuvenlikMinKisi 6    CQB / kent arka guvenlik askeri
  *   cekilGuvenM 450, cekilEkSicrama 9, cekilMaxS 300, cekilGozlemM 280     retreat: dusman bu mesafeye ulasana kadar (en fazla N ek sicrama) cekilmeye devam
@@ -76,7 +76,7 @@ private _p = createHashMapFromArray [
     ["ad", "GENEL"],
     ["assaultM", 45], ["bndBitisM", 40], ["bantlar", [[200, 70, 15], [100, 40, 12], [0, 25, 8]]], ["owKurulumS", 5], ["bndMaxCycle", 10],
     ["retreatAdim", [20, 30, 50]], ["cekilKayip", 0.4], ["peelOran", 1.6], ["peelKayip", 0.1], ["kucukEkip", 3], ["yakinM", 60],
-    ["uglUzakM", 200], ["uglUzakAralik", 25], ["uglRezerv", 3], ["uglRezervM", 120],
+    ["uglUzakM", 200], ["uglUzakAralik", 25], ["uglRezerv", 2], ["uglRezervM", 120],
     ["arkaGuvenlik", true], ["arkaGuvenlikMinKisi", 6],
     ["cekilGuvenM", 450], ["cekilEkSicrama", 9], ["cekilMaxS", 300], ["cekilGozlemM", 280], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],

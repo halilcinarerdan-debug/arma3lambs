@@ -126,7 +126,7 @@ diag_log format [
         };
 
         // 2) baygin ise dusmandan uzaga siperli kenara cek
-        if ([_c] call _baygin && {!isNil "ace_dragging_fnc_startDrag"}) then {
+        if ([_c] call _baygin && {!isNil "ace_dragging_fnc_startDrag"} && {(missionNamespace getVariable ["lambs_danger_tcccDragBozuk", 0]) < 3}) then {   // v8.83: AI surukleme 3 kez takilirsa devre disi (RPT c4eedb1d: hepsi 0-1 m)
             private _tp = [];
             private _sit = _g getVariable [QGVAR(cmdSit), []];
             if (_sit isNotEqualTo [] && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then { _tp = _sit select 7; };
@@ -154,6 +154,8 @@ diag_log format [
             } forEach [0, 35, -35];
 
             if (_hedef isNotEqualTo []) then {
+                _c setVariable ["ace_dragging_ignoreWeightDrag", true, true];   // v8.83: agirlik yavaslatmasini yoksay (AI hekim 0 km/s takiliyordu; ACE degiskeni dogrulanamadi)
+                _m setVariable ["ace_dragging_ignoreWeightDrag", true];
                 [_m, _c] call ace_dragging_fnc_startDrag;
                 // v8.81: Zeus / host ekranina "Release" dusmesi (kullanici): ACE startDrag birimin birincil-aksiyon (DefaultAction) yakalayicisini YEREL istemciye kurar; AI icin bu istemci Zeus / host olabilir.
                 //   AI hekim icin bu yakalayici hemen kaldirilir (birakma yine kodla ace_dragging_fnc_dropObject ile yapilir). ACE ic degiskenleri dogrulanamadi: ilk 6 sefer degisken adlari loglanir.
@@ -188,6 +190,10 @@ diag_log format [
                 if (_takildi) then {
                     diag_log format ["[TCCC] %1 | %2 | SURUKLEME TAKILDI (8 sn'de < 1.5 m): yerinde tedavi | AI PATH:%3 MOVE:%4 ANIM:%5", groupId _g, name _m, _m checkAIFeature "PATH", _m checkAIFeature "MOVE", _m checkAIFeature "ANIM"];
                     _m enableAI "PATH"; _m enableAI "MOVE"; _m enableAI "ANIM";
+                    missionNamespace setVariable ["lambs_danger_tcccDragBozuk", (missionNamespace getVariable ["lambs_danger_tcccDragBozuk", 0]) + 1];
+                    if ((missionNamespace getVariable ["lambs_danger_tcccDragBozuk", 0]) isEqualTo 3) then {
+                        diag_log "[TCCC] AI SURUKLEME DEVRE DISI: 3 takilma (hekim anim surukleme, hiz 0). Yaralilar yerinde tedavi edilir; ACE 'Release' yakalayicisi artik cikmaz.";
+                    };
                 };
                 if (!isNull (attachedTo _c)) then { [_m, _c] call ace_dragging_fnc_dropObject; };
                 diag_log format ["[TCCC] %1 | %2 yaraliyi %3 m kenara cekti", groupId _g, name _m, round ((getPosATL _c) distance2D _cp)];

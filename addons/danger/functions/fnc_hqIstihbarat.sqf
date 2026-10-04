@@ -45,6 +45,15 @@ private _telsizMi = {
     private _oge = (assignedItems _u) + (items _u);
     (_oge findIf {private _k = toLower _x; (_k find "radio") >= 0 || {(_k find "prc") >= 0} || {_k find "tf_" == 0}}) > -1
 };
+// v8.83 RTO: grubun telsiz gucu — 1 = RTO canli (uzun menzil), 0.4 = yalniz liderin kisa menzilli telsizi, 0 = telsiz yok
+private _grupTelsiz = {
+    params ["_g"];
+    private _rto = _g getVariable ["lambs_danger_rto", objNull];
+    if (!isNull _rto && {alive _rto} && {(group _rto) isEqualTo _g}) exitWith {1};
+    private _lw = leader _g;
+    if ([_lw] call _telsizMi) exitWith { [1, 0.4] select (_g getVariable ["lambs_danger_rtoAtandi", false]) };   // RTO atanmis ama olu -> yalniz liderin kisa menzilli telsizi
+    0
+};
 if (isNil "lambs_danger_hqIstSay") then { lambs_danger_hqIstSay = createHashMap; lambs_danger_hqIstOzetT = time + 90; };
 private _say = { params ["_k"]; lambs_danger_hqIstSay set [_k, (lambs_danger_hqIstSay getOrDefault [_k, 0]) + 1]; };
 
@@ -55,7 +64,9 @@ private _temaslar = createHashMap;
     private _l = leader _g;
     if ((behaviour _l) isEqualTo "CARELESS") then { continue };
     if (_sis) then {
-        if !([_l] call _telsizMi) then { ["muhbir telsiz yok"] call _say; continue };
+        private _rf = [_g] call _grupTelsiz;
+        if (_rf <= 0) then { ["muhbir telsiz yok"] call _say; continue };
+        _g setVariable ["lambs_danger_hqTelsizF", _rf];
         if ((time - (_g getVariable ["lambs_danger_hqIstMuhbirT", -999])) < 15) then { continue };
     };
     {
@@ -92,12 +103,13 @@ private _yapilan = 0;
         private _a = _x get "g";
         if (_a isEqualTo _muhbir) then { continue };
         private _aL = leader _a;
-        if ((_aL distance2D _muhbirL) > _menzil || {(behaviour _aL) isEqualTo "CARELESS"}) then { continue };
+        private _mzr = _menzil * ((_muhbir getVariable ["lambs_danger_hqTelsizF", 1]) max 0.1);
+        if ((_aL distance2D _muhbirL) > _mzr || {(behaviour _aL) isEqualTo "CARELESS"}) then { continue };
         if ((_a knowsAbout _o) >= 0.8) then { continue };
         if (_sis && {!([_aL] call _telsizMi)}) then { ["alici telsiz yok"] call _say; continue };
         private _mesafe = _aL distance2D _muhbirL;
         // teslim guvenilirligi: 600 m'e kadar %100, menzil sinirinda %35
-        private _guv = 1 - (0.65 * _sd * (((_mesafe - 600) max 0) / ((_menzil - 600) max 1)));
+        private _guv = 1 - (0.65 * _sd * (((_mesafe - 600) max 0) / ((_mzr - 600) max 1)));
         if (_sis && {(random 1) > _guv}) then { ["rapor kayboldu (parazit/menzil)"] call _say; continue };
         private _gk = format ["%1|%2", groupId _a, netId _o];
         if ((time - (lambs_danger_hqIstGecmis getOrDefault [_gk, -999])) < 25) then { continue };
