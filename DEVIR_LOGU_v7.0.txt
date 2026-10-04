@@ -1113,3 +1113,7 @@ v8.64 — BASKI TUFEKCISI (squad taktik zekasi 2/4): squad'da gercek MG yoksa (t
   Secim: >= 4 canli asker, gercek MG yok; lider / UGL tasiyici / AT / saglikci / nisanci disinda; puan = otomatik silah adi +100 (M27 / IAR / M249 / RPK / SAW / LSAT / MK46 / M60), sarjor >= 30 +20, yedek sarjor x3.
   Etki: fnc_getUnitRole atanmis birime 'MG' doner (kendi guc hesabinda 2.0; ikinci parametre gercek = true ile DUSMAN hesabinda (commanderAssess, sniperTeam) yok sayilir) -> roleStation MG istasyonu + alana baski, splitFireTeams ates ekibi, buddyPairs, bounding overwatch.
   Kalici; atanan olunce yeniden secilir; gercek MG belirirse temizlenir. Kapatma: lambs_danger_baskiTufekciOff = true. Log: [ZEKA-BASKI]. Risk: kendi 'MG sayisi' artar -> guc orani biraz yukselir (daha atak karar).
+
+v8.65 — YAN KORUMA + ARKA EMNIYET (squad taktik zekasi 3/4): fnc_yanGuvenlik. Hareket halindeki (lider > 3 km/s), temassiz, taktiksiz, >= 5 askerlik grupta lider hareket yonune gore
+  SAG kanat (yanal > 6 m), SOL kanat (yanal < -6 m), ARKA (boyuna < -8 m) askeri kendi sektorunu (60 m disa nokta) gozler. lookAt kullanilir (doWatch govdeyi cevirir, yan / geri yuruyus yaratir).
+  Lider / saglikci / EOD / taktik kilitli / nokta elemani haric. Durunca / temasta / taktikte / IED isinde serbest. Kapatma: lambs_danger_yanGuvenlikOff = true. Log: [ZEKA-YAN] (atama, SERBEST + neden).
