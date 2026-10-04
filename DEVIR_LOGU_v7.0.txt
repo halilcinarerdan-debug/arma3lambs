@@ -1117,3 +1117,8 @@ v8.64 — BASKI TUFEKCISI (squad taktik zekasi 2/4): squad'da gercek MG yoksa (t
 v8.65 — YAN KORUMA + ARKA EMNIYET (squad taktik zekasi 3/4): fnc_yanGuvenlik. Hareket halindeki (lider > 3 km/s), temassiz, taktiksiz, >= 5 askerlik grupta lider hareket yonune gore
   SAG kanat (yanal > 6 m), SOL kanat (yanal < -6 m), ARKA (boyuna < -8 m) askeri kendi sektorunu (60 m disa nokta) gozler. lookAt kullanilir (doWatch govdeyi cevirir, yan / geri yuruyus yaratir).
   Lider / saglikci / EOD / taktik kilitli / nokta elemani haric. Durunca / temasta / taktikte / IED isinde serbest. Kapatma: lambs_danger_yanGuvenlikOff = true. Log: [ZEKA-YAN] (atama, SERBEST + neden).
+
+v8.66 — NOKTA ELEMANI / TRAVELING OVERWATCH (squad taktik zekasi 4/4): fnc_noktaEleman. >= 6 canli piyade, lider > 4 km/s, temas yok, taktiksiz; TEMAS MUHTEMEL: son temas bitimi < 240 sn ya da 700 m icinde bilinen dusman (nearTargets).
+  2 tufekli (gercek rol RIFLE; lider / saglikci / EOD / baski tufekcisi / UGL / yan guvenlik disinda, hareket yonunde en onde olanlar) ana govdenin 55 m onundeki noktaya (yanal +-7 m) doMove; taktikKilit 8 sn; buddyBond cohesion'dan muaf (noktaEk).
+  Serbest: durma / temas / taktik -> doFollow; 20 sn bekleme. Kapatma: lambs_danger_noktaOff. Log: [ZEKA-NOKTA]. Risk: lider hizina gore on elemanlar geride kalabilir; 95 m'den uzaga gidenler lidere 30 m onune cagrilir.
+  Squad paketi toplam: v8.63 hazirlik, v8.64 baski tufekcisi, v8.65 yan / arka, v8.66 nokta elemani. TEST EDILMEDI (oyun disi); hepsi ZEKA-* loglu ve kapatilabilir. El bombasi (bina) kullanici karariyla baştan yazilacak (ATLANDI).

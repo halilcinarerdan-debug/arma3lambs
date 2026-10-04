@@ -78,7 +78,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 && {!(_x getUnitTrait "medic")}
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
                 && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
-                && {!(_x getVariable [QGVAR(iedIsci), false])} && {!(_x getVariable [QGVAR(iedGuv), false])}
+                && {!(_x getVariable [QGVAR(iedIsci), false])} && {!(_x getVariable [QGVAR(iedGuv), false])} && {!(_x getVariable [QGVAR(noktaEk), false])}
                 && {(speed _x) < 1.5}
                 && {(getSuppression _x) < 0.5}
                 && {(insideBuilding _x) < 0.5}

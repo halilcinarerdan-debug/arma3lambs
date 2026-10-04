@@ -116,3 +116,10 @@ Kurulum: ayni tarafin 4 grubu: biri dusmanla sabit temasta (>= 3 dusman), uc gru
 4. Olum bolgesi: gruptan 1-2 kisiyi bir pozisyondan vur (kayip), ardindan baska bir grubu AYNI taraf, o bolgeden gorulen hat uzerinden dusmana yaklastir: `[ZEKA-OLUM] ... kayip | katil konumu:` ve `[ROTA] ... olum bolgesi gozcusu:1+` (rota o gorus hattindan kacinmali).
 5. HQ otomatik: `lambs_danger_hqOtomatik = true` -> `[HQ-MODUL] kumanda OTOMATIK acildi`, `[HQ-ISTIHBARAT]`, `[HQ-KANAT]` loglari (Zeus modulu gerekmeden).
 Kapatma anahtarlari: lambs_danger_olumBOff, lambs_danger_pusuKarsiOff, lambs_danger_hqOtomatik (acma).
+
+## v8.63-v8.66 SQUAD TAKTIK ZEKASI testleri (RPT: python tools/rpt_ozet.py --zeka <rpt>)
+1. HAZIRLIK (v8.63): >= 4 kisilik grup, dusman 60-200 m, kararin ASSAULT olmasi: `[ZEKA-HAZIRLIK] ... BASTIRMA PENCERESI 5-8 sn | ates eden:N | UGL:M | sonra hucum`; 5-8 sn sonra hucum baslamali. Baskidaki grupta `ATLANDI`.
+2. BASKI TUFEKCISI (v8.64): MG'siz squad: `[ZEKA-BASKI] ... BASKI TUFEKCISI: <ad> | silah ...`; [ROL-SIRA] satirinda MG:1 gorunmeli; o asker MG istasyonuna gecmeli (overwatch), hat kapaliyken `[ROL-GOREV] ... MG alana baski`.
+3. YAN / ARKA (v8.65): >= 5 kisilik grup yuruyus halinde (temassiz): `[ZEKA-YAN] ... SAG:ad | SOL:ad | ARKA:ad`; o askerler yuruyuste kanatlara / arkaya BAKMALI (govde donmeden). Durunca / temasta `SERBEST`.
+4. NOKTA ELEMANI (v8.66): >= 6 kisi, temas yakin zamanda olmus (< 240 sn) ya da 700 m icinde bilinen dusman, yuruyus: `[ZEKA-NOKTA] ... NOKTA ELEMANI: ad1, ad2 | ana govdenin 55 m onunde`; 2 asker ~55 m ONDE ilerlemeli. Temasta / durunca `SERBEST`.
+Kapatma anahtarlari: lambs_danger_hazirlikOff, lambs_danger_baskiTufekciOff, lambs_danger_yanGuvenlikOff, lambs_danger_noktaOff.
