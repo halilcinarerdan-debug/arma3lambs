@@ -36,14 +36,28 @@ lambs_danger_havaFarkStarted = true;
 diag_log "[HAVA-FARK] dron / helikopter farkindaligi watchdog baslatildi (v8.51)";
 
 private _calis = {
+    missionNamespace setVariable ["lambs_danger_havaAdim", "basladi"];
     private _logN = 0;
+    private _tur = 0;
+    private _nabizT = time + 60;
+    private _turMs = 0;
     private _tani = 0;
     private _taniN = 0;
     private _atlaT = 0;
     private _disT = 0;
+    private _atlaN = 0;
+    private _eleN = 0;
     while {true} do {
         sleep 3;
+        private _t0 = diag_tickTime;
+        _tur = _tur + 1;
+        missionNamespace setVariable ["lambs_danger_havaAdim", format ["tur %1: hava araci listesi", _tur]];
         if (missionNamespace getVariable ["lambs_danger_havaFarkOff", false]) then { continue };
+        // NABIZ: dongu yasiyor mu, kac hava araci / yerel grup var, son turun suresi (60 sn'de bir)
+        if (time > _nabizT) then {
+            _nabizT = time + 60;
+            diag_log format ["[HAVA-FARK-NABIZ] tur:%1 | hava araci:%2 | yerel AI grup:%3 | son tur:%4 ms | adim:%5", _tur, count (vehicles select {alive _x && {(_x isKindOf "Helicopter") || {unitIsUAV _x}}}), count (allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x}}), round _turMs, missionNamespace getVariable ["lambs_danger_havaAdim", "?"]];
+        };
         private _hava = vehicles select {alive _x && {(_x isKindOf "Helicopter") || {unitIsUAV _x}} && {(count (crew _x)) > 0}};
         if (_hava isEqualTo []) then { continue };
 
@@ -51,8 +65,8 @@ private _calis = {
         {
             if (isNil {_x getVariable "lambs_danger_havaEH"}) then {
                 _x setVariable ["lambs_danger_havaEH", true];
-                private _eh = { params ["_veh"]; if ((time - (_veh getVariable ["lambs_danger_havaAtesT", -99])) > 2) then { _veh setVariable ["lambs_danger_havaAtesT", time, true]; }; };
-                if (local _x) then { _x addEventHandler ["Fired", _eh]; } else { [_x, ["Fired", _eh]] remoteExecCall ["addEventHandler", _x]; };
+                private _eh = { params ["_veh"]; if ((time - (_veh getVariable ["lambs_danger_havaAtesT", -99])) > 2) then { _veh setVariable ["lambs_danger_havaAtesT", time, true]; if ((time - (missionNamespace getVariable ["lambs_danger_havaAtesLogT", -99])) > 10) then { missionNamespace setVariable ["lambs_danger_havaAtesLogT", time]; diag_log format ["[HAVA-FARK-ATES] %1 ates etti (Fired EH, bu makinede)", typeOf _veh]; }; }; };
+                if (local _x) then { _x addEventHandler ["Fired", _eh]; diag_log format ["[HAVA-FARK-ATES] %1 icin Fired EH eklendi (YEREL arac)", typeOf _x]; } else { [_x, ["Fired", _eh]] remoteExecCall ["addEventHandler", _x]; diag_log format ["[HAVA-FARK-ATES] %1 icin Fired EH uzaktan istendi (arac baska makinede; remoteExec engelli olabilir)", typeOf _x]; };
             };
         } forEach _hava;
 
@@ -82,10 +96,19 @@ private _calis = {
             private _g = _x;
             private _l = leader _g;
             if (isNull _l || {isPlayer _l} || {!local _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
+            missionNamespace setVariable ["lambs_danger_havaAdim", format ["tur %1: grup %2", _tur, groupId _g]];
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(sniperTeam), false]}
-            ) then { continue };
+            ) then {
+                // neden atlandi: heli <= 1500 m ise 15 sn'de bir yaz
+                if ((time - (_g getVariable [QGVAR(havaAtlaT), -99])) > 15 && {(_hava findIf {(_l distance2D _x) <= 1500}) >= 0} && {_atlaN < 80}) then {
+                    _g setVariable [QGVAR(havaAtlaT), time];
+                    _atlaN = _atlaN + 1;
+                    diag_log format ["[HAVA-FARK-ATLA] %1 | grup atlandi, neden: retreat:%2 evade:%3 breakContact:%4 sniper:%5", groupId _g, _g getVariable [QGVAR(isRetreating), false], _g getVariable [QGVAR(isEvading), false], _g getVariable [QGVAR(isBreakingContact), false], _g getVariable [QGVAR(sniperTeam), false]];
+                };
+                continue;
+            };
             private _mesgul = (_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]};
 
             private _taraf = side _g;
@@ -99,27 +122,35 @@ private _calis = {
             private _saldiri = false;
             private _hover = false;
             private _hd = 1e9;
+            private _ele = [];
             {
                 private _v = _x;
                 private _d = _lp distance2D _v;
                 if (_d > 1500) then { continue };
-                if ((_taraf getFriend (side (group (effectiveCommander _v)))) >= 0.6) then { continue };
+                if ((_taraf getFriend (side (group (effectiveCommander _v)))) >= 0.6) then { _ele pushBack format ["%1 %2 m: dost / tarafsiz (getFriend>=0.6)", typeOf _v, round _d]; continue };
                 private _arm = ((_v weaponsTurret [-1]) isNotEqualTo []) || {(_v weaponsTurret [0]) isNotEqualTo []};
                 private _uav = unitIsUAV _v;
                 private _ho = _arm && {!_uav} && {(speed _v) < 15} && {((getPosATL _v) select 2) > 8};
                 private _ates = (time - (_v getVariable ["lambs_danger_havaAtesT", -999])) < 20;
                 private _esik = if (_ho || _ates) then {0.15} else {missionNamespace getVariable ["lambs_danger_havaBilgiEsik", 0.4]};
-                if ((_g knowsAbout _v) < _esik) then { continue };
-                if (_d > 1200 && {!_ho}) then { continue };
-                if (_uav && {!_arm} && {_d > 700}) then { continue };
-                if (_uav && {_arm} && {_d > 900}) then { continue };
+                if ((_g knowsAbout _v) < _esik) then { _ele pushBack format ["%1 %2 m: knowsAbout %3 < esik %4", typeOf _v, round _d, (_g knowsAbout _v) toFixed 2, _esik]; continue };
+                if (_d > 1200 && {!_ho}) then { _ele pushBack format ["%1 %2 m: menzil disi (>1200, hover degil)", typeOf _v, round _d]; continue };
+                if (_uav && {!_arm} && {_d > 700}) then { _ele pushBack format ["%1 %2 m: silahsiz dron >700", typeOf _v, round _d]; continue };
+                if (_uav && {_arm} && {_d > 900}) then { _ele pushBack format ["%1 %2 m: silahli dron >900", typeOf _v, round _d]; continue };
                 if (!_uav && {!_arm}) then { _g reveal [_v, 2]; continue };
                 if (_d < _hd) then {
                     _hd = _d; _hedef = _v; _silahli = _arm; _dron = _uav; _hover = _ho;
                     _saldiri = _ates || {_bask && {_d < 800}};
                 };
             } forEach _hava;
-            if (isNull _hedef) then { continue };
+            if (isNull _hedef) then {
+                if (_ele isNotEqualTo [] && {(time - (_g getVariable [QGVAR(havaEleT), -99])) > 15} && {_eleN < 100}) then {
+                    _g setVariable [QGVAR(havaEleT), time];
+                    _eleN = _eleN + 1;
+                    diag_log format ["[HAVA-FARK-ELE] %1 | hedef secilmedi: %2", groupId _g, _ele joinString " ; "];
+                };
+                continue;
+            };
 
             private _zarf = (_hd <= 600) && {((getPosATL _hedef) select 2) <= 300};
 
@@ -220,6 +251,8 @@ private _calis = {
                 diag_log format ["[HAVA-FARK] %1 | %2 %3 %4 m (silahli:%5 hover:%6 saldiri:%7) | tepki:%8 | AA asker:%9", groupId _g, ["HELI", "DRON"] select _dron, typeOf _hedef, round _hd, _silahli, _hover, _saldiri, _yontem, count _aa];
             };
         } forEach (allGroups select {local _x && {!isNull leader _x}});
+        _turMs = (diag_tickTime - _t0) * 1000;
+        missionNamespace setVariable ["lambs_danger_havaAdim", format ["tur %1 bitti (%2 ms)", _tur, round _turMs]];
     };
 };
 
@@ -229,7 +262,7 @@ private _calis = {
     while {true} do {
         private _h = [] spawn _fn;
         waitUntil { sleep 5; scriptDone _h };
-        diag_log "[WATCHDOG-YENIDEN] hava farkindaligi betigi sonlandi (hata?), yeniden baslatiliyor";
+        diag_log format ["[WATCHDOG-YENIDEN] hava farkindaligi betigi sonlandi (hata?), son adim: %1 | RPT'de hemen ustteki 'Error' satirina bak", missionNamespace getVariable ["lambs_danger_havaAdim", "?"]];
         sleep 5;
     };
 };

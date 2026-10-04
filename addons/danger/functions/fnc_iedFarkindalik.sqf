@@ -33,17 +33,39 @@ lambs_danger_iedFarkStarted = true;
 diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
 
 private _calis = {
+    missionNamespace setVariable ["lambs_danger_iedAdim", "basladi"];
     private _logN = 0;
+    private _gozN = 0;
+    private _atlaN = 0;
+    private _tur = 0;
+    private _nabizT = time + 60;
+    private _turMs = 0;
     while {true} do {
         sleep 4;
+        private _t0 = diag_tickTime;
+        _tur = _tur + 1;
         if (missionNamespace getVariable ["lambs_danger_iedOff", false]) then { continue };
+        // NABIZ: dongu yasiyor mu, haritada kac IED / mayin var, son turun suresi (60 sn'de bir)
+        if (time > _nabizT) then {
+            _nabizT = time + 60;
+            diag_log format ["[IED-FARK-NABIZ] tur:%1 | allMines:%2 | yerel AI grup:%3 | son tur:%4 ms | adim:%5", _tur, count allMines, count (allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x}}), round _turMs, missionNamespace getVariable ["lambs_danger_iedAdim", "?"]];
+        };
         {
             private _g = _x;
             private _l = leader _g;
             if (isNull _l || {isPlayer _l} || {!local _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
+            missionNamespace setVariable ["lambs_danger_iedAdim", format ["tur %1: grup %2", _tur, groupId _g]];
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
-            ) then { continue };
+            ) then {
+                // neden atlandi: yakinda mayin / IED varsa 15 sn'de bir yaz
+                if ((time - (_g getVariable [QGVAR(iedAtlaT), -99])) > 15 && {(allMines findIf {(_x distance2D _l) < 130}) >= 0} && {_atlaN < 80}) then {
+                    _g setVariable [QGVAR(iedAtlaT), time];
+                    _atlaN = _atlaN + 1;
+                    diag_log format ["[IED-FARK-ATLA] %1 | grup atlandi (yakinda IED / mayin var), neden: retreat:%2 evade:%3 breakContact:%4", groupId _g, _g getVariable [QGVAR(isRetreating), false], _g getVariable [QGVAR(isEvading), false], _g getVariable [QGVAR(isBreakingContact), false]];
+                };
+                continue;
+            };
             private _lp = getPosATL _l;
             // v8.50c: tarama merkezi yalniz lider degil, EOD / dedektorlu askerler de (EOD liderden uzaklasinca ikinci IED 4 m'de fark ediliyordu)
             private _merkezler = [_lp] + ((units _g) select {alive _x && {isNull objectParent _x} && {(_x getUnitTrait "explosiveSpecialist") || {_x getVariable ["ACE_isEOD", false]} || {"MineDetector" in (items _x)}}} apply {getPosATL _x});
@@ -74,7 +96,23 @@ private _calis = {
                         if (_d <= ([25, 50] select _eodU) || {!(lineIntersects [_e, _t, _u, _m]) && {!(terrainIntersectASL [_e, _t])}}) exitWith { _tespit = _u; };
                     };
                 } forEach _us;
-                if (isNull _tespit) then { continue };
+                if (isNull _tespit) then {
+                    // tespit YOK: nedenini yaz (15 sn'de bir, grup basina)
+                    if ((time - (_g getVariable [QGVAR(iedGozT), -99])) > 15 && {_gozN < 150}) then {
+                        private _bd = 1e9;
+                        private _bu = objNull;
+                        { private _dd = _x distance2D _m; if (_dd < _bd) then { _bd = _dd; _bu = _x; }; } forEach _us;
+                        if (!isNull _bu && {_bd < 130}) then {
+                            _g setVariable [QGVAR(iedGozT), time];
+                            _gozN = _gozN + 1;
+                            private _ebu = (_bu getUnitTrait "explosiveSpecialist") || {_bu getVariable ["ACE_isEOD", false]};
+                            private _mz = [60, 90] select (_ebu || {"MineDetector" in (items _bu)});
+                            private _neden = if (_bd > _mz) then { format ["menzil disi (%1 m > %2 m)", round _bd, _mz] } else { "gorus hatti kapali (arazi / nesne)" };
+                            diag_log format ["[IED-FARK-GOZLEM] %1 | %2 | en yakin asker %3 (%4 m, EOD:%5) | tespit YOK: %6", groupId _g, typeOf _m, name _bu, round _bd, _ebu, _neden];
+                        };
+                    };
+                    continue;
+                };
 
                 _bilinen pushBack [_mp, time];
                 _g setVariable [QGVAR(iedBilinen), _bilinen];
@@ -113,6 +151,7 @@ private _calis = {
                 private _yakinlik = ((_sinif find "range") >= 0) || {(_sinif find "pressure") >= 0} || {(_sinif find "tripwire") >= 0};
                 private _imhaMi = !isNull _imhaU && {!_temas} && {!_ikincil} && {!_yakinlik} && {(_imhaU distance2D _m) < 110} && {(_g getVariable [QGVAR(iedIs), []]) params [["_jm", objNull], ["_ju", objNull]]; isNull _jm || {!alive _ju}};
                 if (_imhaMi) then { _eodU = _imhaU; };
+                diag_log format ["[IED-FARK-KARAR] %1 | %2 | EOD sayisi:%3 kitli:%4 | temas:%5 | ikincil(yakinlik tetikli komsu):%6 | bu IED yakinlik tetikli:%7 | devam eden is:%8 | EOD-IED mesafe:%9 | imha karari:%10", groupId _g, typeOf _m, count _eodlar, count _kitli, _temas, _ikincil, _yakinlik, ((_g getVariable [QGVAR(iedIs), []]) isNotEqualTo []), if (isNull _imhaU) then {"-"} else {str (round (_imhaU distance2D _m))}, _imhaMi];
                 // yeni IED bulundu: devam eden imhanin hedefine / EOD'ye 20 m'den yakinsa ikincil cihaz -> imha iptal, EOD geri cekilir; uzaksa imha surer
                 private _abort = false;
                 private _is = _g getVariable [QGVAR(iedIs), []];
@@ -149,10 +188,12 @@ private _calis = {
                     private _t0 = time;
                     private _sure = [45, 130] select _imhaVar;
                     private _R2 = _yar + 10;
+                    private _bitis = "sure doldu";
+                    diag_log format ["[IED-FARK-CEVRE] %1 | BASLADI | %2 | cevre yaricap %3 m | sure tavani %4 sn | asker:%5", groupId _grp, ["cevre emniyeti (temas yok)", "TEMAS: yalniz yaricap ici geri itme"] select _tm, round _R2, _sure, count (units _grp)];
                     while {(time - _t0) < _sure && {!isNull _grp} && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}} do {
                         sleep 4;
-                        if (isNull _mine && {!_imhaVar}) exitWith {};
-                        if (_imhaVar && {(time - _t0) > 10} && {(_grp getVariable [QGVAR(iedIs), []]) isEqualTo []}) exitWith {};
+                        if (isNull _mine && {!_imhaVar}) exitWith { _bitis = "IED yok (patladi / silindi)"; };
+                        if (_imhaVar && {(time - _t0) > 10} && {(_grp getVariable [QGVAR(iedIs), []]) isEqualTo []}) exitWith { _bitis = "imha bitti"; };
                         private _lst = (units _grp) select {alive _x && {isNull objectParent _x} && {!(_imhaVar && {_x isEqualTo _eod})} && {!(_x getVariable [QGVAR(iedIsci), false])}};
                         private _n = count _lst;
                         {
@@ -172,6 +213,8 @@ private _calis = {
                             };
                         } forEach _lst;
                     };
+                    if (!isNull _grp && {!((_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos)}) then { _bitis = "yeni IED bulundu (cevre devredildi)"; };
+                    diag_log format ["[IED-FARK-CEVRE] %1 | BITTI | neden: %2 | gecen %3 sn", groupId _grp, _bitis, round (time - _t0)];
                     if (!isNull _grp && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}) then {
                         {
                             _x doWatch objNull;
@@ -206,8 +249,14 @@ private _calis = {
                         private _enYakin = _u distance2D _mine;
                         private _enYakinT = time;
                         private _sonKomut = -99;
+                        private _sonLog = time + 10;
+                        diag_log format ["[IED-FARK-IMHA] %1 | BASLADI | hedef nokta: %2 m uzakta | IED:%3 (%4 m) | kit:%5", name _u, round (_u distance2D _hedefP), _mineTip, round (_u distance2D _mine), "ACE_DefusalKit" in (items _u)];
                         waitUntil {
                             sleep 1;
+                            if (time > _sonLog) then {
+                                _sonLog = time + 10;
+                                diag_log format ["[IED-FARK-IMHA] %1 | yaklasiyor: IED'e %2 m | en yakin %3 m | ilerleme yok:%4 sn | gecen:%5 sn | komut: %6", name _u, round (_u distance2D _mine), round _enYakin, round (time - _enYakinT), round (time - _t0), unitReady _u];
+                            };
                             if (alive _u && {!isNull _mine}) then {
                                 _u setVariable [QGVAR(taktikKilit), time + 6];
                                 _u setVariable [QGVAR(forceMove), true];
@@ -265,6 +314,8 @@ private _calis = {
                 };
             } forEach _adaylar;
         } forEach (allGroups select {local _x && {!isNull leader _x}});
+        _turMs = (diag_tickTime - _t0) * 1000;
+        missionNamespace setVariable ["lambs_danger_iedAdim", format ["tur %1 bitti (%2 ms)", _tur, round _turMs]];
     };
 };
 
@@ -274,7 +325,7 @@ private _calis = {
     while {true} do {
         private _h = [] spawn _fn;
         waitUntil { sleep 5; scriptDone _h };
-        diag_log "[WATCHDOG-YENIDEN] IED farkindaligi betigi sonlandi (hata?), yeniden baslatiliyor";
+        diag_log format ["[WATCHDOG-YENIDEN] IED farkindaligi betigi sonlandi (hata?), son adim: %1 | RPT'de hemen ustteki 'Error' satirina bak", missionNamespace getVariable ["lambs_danger_iedAdim", "?"]];
         sleep 5;
     };
 };

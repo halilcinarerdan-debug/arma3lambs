@@ -1029,3 +1029,12 @@ v8.52 — RPT 11:09 (v8.51 testi): IED'e "hic tepki yok", heliye tepki yok.
   HAVA bulgulari: heli Alpha 1-1'in (bounding) 24-96 m'sinden gecti, saldirmadi -> BOUNDING-DEVAM (gorunur tepki yoktu). Heli 11:31:20'de ates etti (havaAtesT 3 sn once, knows 5.0) ama TOPLU-ATES logu YOK:
    neden RPT'den ayirt edilemedi. Eklenen: [HAVA-FARK-KARAR] teshisi (heli<=800 m iken grup basina 6 sn'de bir: saldiri/ates sn/baski/silahli/zarf/yukseklik/bounding) + [HAVA-FARK] YERE-YAT
    (saldirmayan silahli heli <=250 m, bounding grup: duran askerler 8 sn yere yatar). Sonraki RPT'de KARAR satirlari TOPLU-ATES'in neden tetiklenmedigini gosterecek.
+
+v8.53 — LOG TESHISI (hata sebebi net gorulsun). Oyun ici yeni etiketler:
+  HAVA: [HAVA-FARK-NABIZ] 60 sn'de bir (tur, hava araci sayisi, yerel grup, son tur ms, son adim) | [HAVA-FARK-ATES] Fired EH eklendi (yerel / uzaktan) ve 'ates etti' |
+        [HAVA-FARK-KARAR] heli<=800 m: saldiri/ates sn/baski/silahli/zarf/yukseklik/bounding | [HAVA-FARK-ELE] heli secilmeyince NEDEN (dost / knows<esik / menzil) |
+        [HAVA-FARK-ATLA] grup atlandi (retreat/evade/breakContact/sniper) | [WATCHDOG-YENIDEN] ... son adim: <hangi grup / hangi tur>
+  IED:  [IED-FARK-NABIZ] | [IED-FARK-GOZLEM] tespit YOK nedeni (menzil disi mi, gorus hatti mi; en yakin asker + mesafe) | [IED-FARK-KARAR] imha karari kapilari (EOD / kit / temas / ikincil / yakinlik / devam eden is) |
+        [IED-FARK-IMHA] BASLADI + 10 sn'de bir yaklasma ilerlemesi (mesafe, ilerleme yok sn) | [IED-FARK-CEVRE] cevre emniyeti BASLADI / BITTI + neden | [IED-FARK-ATLA]
+  ARAC: python tools/rpt_ozet.py --hava-ied <rpt>  -> HAVA + IED zaman cizelgesi + OTOMATIK CIKARIM ([SORUN] / [KONTROL] / [OK]); watchdog yeniden baslamasi + ustteki Error satiri,
+        Fired EH remoteExec engeli, saldiri var ama zarf disi, KARAR'da imha neden listesi, EOD yaklasirken takilma.

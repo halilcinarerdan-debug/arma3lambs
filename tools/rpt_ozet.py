@@ -4,6 +4,7 @@
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
+           --hava-ied           HAVA + IED TESHISI: zaman cizelgesi + otomatik 'neden tepki yok' cikarimi (v8.52 loglari)
            --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
            --grup "Alpha 1-1"   o grubun ZAMAN CIZELGESI (olay / bounding / retreat / pusu / karar / anomali, tekrarlar birlestirilir)
            --aralik 12:50:00-12:55:00   cizelgeyi / anomaliyi zaman araligiyla sinirla
@@ -17,7 +18,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.49"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.53"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -358,6 +359,133 @@ def karne(path):
         print("  [%-7s] %-18s %s" % (d, ad, k))
     print("  OK:%d  KONTROL:%d  YOK:%d" % tuple(len([1 for _, d, _ in sat if d == x]) for x in ("OK", "KONTROL", "YOK")))
 
+
+def hava_ied(path):
+    """HAVA / IED teshisi: ilgili etiketleri zaman sirasinda dok, ardindan otomatik NEDEN cikarimi yap."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    rx = re.compile(r'^\s*(\d+:\d\d:\d\d)\s+"?\[(HAVA-FARK[A-Z-]*|IED-FARK[A-Z-]*|WATCHDOG-YENIDEN)\]')
+    ev = []
+    for i, l in enumerate(L):
+        m = rx.match(l)
+        if m:
+            ev.append((i, m.group(1), m.group(2), l.strip()))
+    hata = [(i, l.strip()) for i, l in enumerate(L) if "Error in expression" in l or "Error position" in l or re.search(r"Error [a-z0-9_]+:", l) or "lambs/addons" in l]
+    hata = [(i, l) for i, l in hata if not any(n in l for n in NOISE)]
+    print("=" * 78)
+    print(path, "| HAVA / IED TESHISI")
+    sayac = collections.Counter(e[2] for e in ev)
+    print("etiket sayilari:", dict(sayac))
+    print("-" * 78)
+    for i, t, tag, l in ev:
+        if tag in ("HAVA-FARK-NABIZ", "IED-FARK-NABIZ") and sayac[tag] > 6:
+            continue   # nabizi seyrelt (ilk 6'yi gosterir)
+        print(l[:300])
+    print("-" * 78)
+    print("OTOMATIK CIKARIM")
+    ok = lambda m: print("  [OK]    " + m)
+    uy = lambda m: print("  [SORUN] " + m)
+    kt = lambda m: print("  [KONTROL] " + m)
+    # watchdog
+    wd = [e for e in ev if e[2] == "WATCHDOG-YENIDEN"]
+    if wd:
+        uy("watchdog %d kez yeniden basladi (betik hata ile oldu). Son adim + ustteki Error satirina bak:" % len(wd))
+        for i, t, tag, l in wd[:5]:
+            print("      ", l[:260])
+            for j in range(max(0, i - 6), i):
+                if "Error" in L[j]:
+                    print("        >", L[j].strip()[:200])
+    else:
+        ok("watchdog yeniden baslamadi")
+    if hata:
+        lam = [h for h in hata if "lambs" in h[1] or "fnc_" in h[1]]
+        if lam:
+            uy("RPT'de lambs / fnc_ iceren %d hata satiri (ilk 5):" % len(lam))
+            for i, l in lam[:5]:
+                print("      ", l[:200])
+    # HAVA
+    nab = [e for e in ev if e[2] == "HAVA-FARK-NABIZ"]
+    if not any(e[2] == "HAVA-FARK" and "baslatildi" in e[3] for e in ev):
+        kt("HAVA-FARK baslangic satiri yok (eski surum ya da modul yuklenmedi)")
+    elif not nab:
+        kt("HAVA-FARK-NABIZ yok: oturum 60 sn'den kisa ya da dongu hic calismadi")
+    else:
+        ok("hava dongusu yasiyor (NABIZ %d adet; son: %s)" % (len(nab), nab[-1][3][:160]))
+    ates = [e for e in ev if e[2] == "HAVA-FARK-ATES"]
+    if not ates:
+        kt("HAVA-FARK-ATES yok: hic hava araci gorulmedi ya da Fired EH eklenmedi")
+    else:
+        yerel = [e for e in ates if "YEREL" in e[3]]
+        uzak = [e for e in ates if "uzaktan" in e[3]]
+        etti = [e for e in ates if "ates etti" in e[3]]
+        print("      Fired EH: yerel %d | uzaktan istenen %d | 'ates etti' %d" % (len(yerel), len(uzak), len(etti)))
+        if uzak and not etti:
+            uy("EH uzaktan istendi ama hic 'ates etti' gelmedi -> remoteExec engelli olabilir; saldiri tespiti yalniz baskiya (getSuppression) dayanir")
+    tani = [e for e in ev if e[2] == "HAVA-FARK-TANI"]
+    kar = [e for e in ev if e[2] == "HAVA-FARK-KARAR"]
+    ele = [e for e in ev if e[2] == "HAVA-FARK-ELE"]
+    tepki = [e for e in ev if e[2] == "HAVA-FARK" and "tepki:" in e[3]]
+    if tani and not kar and not tepki:
+        uy("heli goruldu (TANI %d) ama hic KARAR / tepki yok -> hedef secilmedi. ELE nedenleri:" % len(tani))
+        for e in ele[:6]:
+            print("      ", e[3][:260])
+        if not ele:
+            print("       (ELE satiri yok: grup atlandi ya da lider yerel degil; HAVA-FARK-ATLA satirlarina bak)")
+    if kar:
+        sal = [e for e in kar if "saldiri:true" in e[3]]
+        sal_zarfsiz = [e for e in sal if "zarf:false" in e[3]]
+        sal_zarfli = [e for e in sal if "zarf:true" in e[3]]
+        topl = [e for e in tepki if "TOPLU-ATES" in e[3]]
+        print("      KARAR %d | saldiri:true %d | zarf disi %d | zarf ici %d | TOPLU-ATES %d" % (len(kar), len(sal), len(sal_zarfsiz), len(sal_zarfli), len(topl)))
+        if sal_zarfli and not topl:
+            uy("saldiri + zarf ici ama TOPLU-ATES yok -> koşullardan biri (silahli / duran asker / 80 sn pencere) tutmuyor; KARAR satirlarina bak")
+        if sal and not sal_zarfli:
+            kt("saldiri var ama hep zarf disinda (mesafe >600 m ya da yukseklik >300 m): bu ATP 3-01.8'e uygun (etkisiz) ama esikleri gozden gecir")
+        if not sal:
+            kt("heli yakindi (KARAR var) ama saldiri:true hic olmadi: heli ates etmedi ya da Fired EH / baski sinyali gelmedi")
+    # IED
+    inab = [e for e in ev if e[2] == "IED-FARK-NABIZ"]
+    if inab:
+        ok("IED dongusu yasiyor (NABIZ %d; son: %s)" % (len(inab), inab[-1][3][:160]))
+    gz = [e for e in ev if e[2] == "IED-FARK-GOZLEM"]
+    if gz:
+        c = collections.Counter(re.search(r"tespit YOK: (.*)$", e[3]).group(1)[:30] if re.search(r"tespit YOK: (.*)$", e[3]) else "?" for e in gz)
+        kt("IED tespit EDILEMEDI nedenleri: %s" % dict(c))
+    ik = [e for e in ev if e[2] == "IED-FARK-KARAR"]
+    if ik:
+        imha_evet = [e for e in ik if "imha karari:true" in e[3]]
+        print("      IED KARAR %d | imha karari EVET %d | HAYIR %d" % (len(ik), len(imha_evet), len(ik) - len(imha_evet)))
+        for e in ik:
+            if "imha karari:false" in e[3]:
+                nedenler = []
+                if "EOD sayisi:0" in e[3]: nedenler.append("EOD yok")
+                elif "kitli:0" in e[3]: nedenler.append("EOD'da imha kiti yok")
+                if "temas:true" in e[3]: nedenler.append("temas var")
+                if "ikincil(yakinlik tetikli komsu):true" in e[3]: nedenler.append("yakinlik tetikli komsu IED")
+                if "bu IED yakinlik tetikli:true" in e[3]: nedenler.append("bu IED yakinlik tetikli")
+                if "devam eden is:true" in e[3]: nedenler.append("baska imha suruyor")
+                m = re.search(r"EOD-IED mesafe:(\d+)", e[3])
+                if m and int(m.group(1)) >= 110: nedenler.append("EOD >=110 m uzakta")
+                print("       %s imha YOK: %s" % (e[1], ", ".join(nedenler) or "?"))
+    im = [e for e in ev if e[2] == "IED-FARK-IMHA" or (e[2] == "IED-FARK" and "imha " in e[3])]
+    basladi = [e for e in im if "BASLADI" in e[3]]
+    tamam = [e for e in ev if e[2] == "IED-FARK" and "imha TAMAM" in e[3]]
+    yarim = [e for e in ev if e[2] == "IED-FARK" and "YARIM KALDI" in e[3]]
+    if basladi:
+        print("      imha: BASLADI %d | TAMAM %d | YARIM %d" % (len(basladi), len(tamam), len(yarim)))
+        for e in yarim[:5]:
+            print("       ", e[3][:240])
+        takil = [e for e in im if "ilerleme yok:" in e[3] and re.search(r"ilerleme yok:(\d+)", e[3]) and int(re.search(r"ilerleme yok:(\d+)", e[3]).group(1)) >= 20]
+        if takil:
+            uy("EOD yaklasirken %d kez 20 sn+ ilerleyemedi (yol / engel / baska sistem komutu):" % len(takil))
+            for e in takil[:3]:
+                print("       ", e[3][:240])
+        if not tamam and not yarim:
+            kt("imha basladi ama ne TAMAM ne YARIM logu var: betik oldu ya da oturum bitti")
+    cv = [e for e in ev if e[2] == "IED-FARK-CEVRE"]
+    if cv:
+        print("      cevre emniyeti: %d satir (BASLADI/BITTI)" % len(cv))
+    print()
+
 def zaman_cizelgesi(path, grup, aralik):
     """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
     ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
@@ -401,6 +529,7 @@ if __name__ == "__main__":
     grup = aralik = None
     sadece_anomali = False
     karne_modu = False
+    hava_ied_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -412,13 +541,17 @@ if __name__ == "__main__":
             karne_modu = True; i += 1
         elif args[i] == "--anomali":
             sadece_anomali = True; i += 1
+        elif args[i] == "--hava-ied":
+            hava_ied_modu = True; i += 1
         else:
             yollar.append(args[i]); i += 1
     if not yollar:
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if karne_modu:
+        if hava_ied_modu:
+            hava_ied(p)
+        elif karne_modu:
             karne(p)
         elif grup:
             print("=" * 78); print(p, "| grup:", grup, "| aralik:", aralik or "tum")
