@@ -947,3 +947,10 @@ Siralama: ONCE VBS4 temel ozellikleri (rota planlama, pusu/ROE, kapi-oda, hendek
 - RPT: v8.48 yuklu; [FORM-DEGISIM] 6 satir tum oturumda, hepsi >=47 sn arayla (v8.48 formasyon loopu duzeltmesi tuttu gorunuyor, kisa oturum); retreat basladi, 3 ek sicrama (143/189/206 m), oturum bitmeden kesildi; HAVA-FARK / IED-FARK sadece baslatma satiri (tetiklenme yok).
 - DEGISIKLIK (test icin daha genis tetikleme): heli menzili 900->1200 m, silahli dron 700->900 m, gozlemci dron 600->700 m; knowsAbout esigi 1.5->0.8 (lambs_danger_havaBilgiEsik ile degistirilebilir); IED tespit menzili 25->35 m (EOD / dedektor 40->50 m). Hepsi TASARIM, doktrin sayisi degil.
 - NOT: ECH LEFT goruldu (Alpha 1-4, FLANK karari); kanat yonunun dogrulugu hala kontrol edilmedi.
+
+v8.50 — IED / HAVA testi (RPT 08:29) sonrasi duzeltmeler.
+  IED: tespit 35 -> 60 m (EOD / mayin dedektoru 90 m, gorus hatti 25 / 50 m'de aranmaz); EOD = explosiveSpecialist VEYA ACE_isEOD.
+       EOD varsa ve temas yoksa IED'e gidip ~8 sn calisarak etkisizlestirir (vanilla mayin: Deactivate; ACE / mod IED: nesne kaldirilir). EOD yoksa yalniz kacinma.
+       Kok neden: taktik kilidi (bounding) olan askerler IED'den kacmiyordu (13'ten 2) -> IED tehlikesi kilidi gecer, 60 sn boyunca 4 sn'de bir geri itme.
+  HAVA: RPT'de hava araci izi yoktu; olasi sebepler bounding grubun atlanmasi ve knowsAbout 0.8 esigi. Bilgi esigi 0.4; bounding / taktik gruplari silahli tehditte
+       saklanmaz ama AA ateşi + reveal ([HAVA-FARK] ... BOUNDING-DEVAM). Teshis: [HAVA-FARK-TANI] (30 sn'de bir, <=1500 m hava araci) ve [HAVA-FARK-ATLA].
