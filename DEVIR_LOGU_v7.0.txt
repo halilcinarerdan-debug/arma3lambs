@@ -974,3 +974,9 @@ v8.50d — IED imhasi hic gerceklesmiyordu (RPT'de hicbir 'imha TAMAM' / 'IED'e 
   (2) doMove her sn tekrarlaniyordu (yurume komutunu sifirlar) ve bounding / cqbReflex / rearGuard EOD'ye karisabiliyordu.
   Cozum: hedef = IED'in bize bakan tarafinda 5 m onu; komut 8 sn'de bir; taktikKilit + forceMove ile EOD korunur; 6 m'de varis; 20 sn ilerleme yoksa ve <=15 m ise oldugu yerden calisir;
   120 sn zaman asimi. Loglar: "IED'e vardi (m, sn)", "imha YARIM KALDI (sebep)", "imha TAMAM".
+
+v8.50e — RPT 09:09: iki IED 40 m icinde oldugu icin 'ikincil cihaz suphesi' EOD'yi hic gondermedi (v8.50c kurali fazla genisti).
+  Yeni kural: hedefe 12 m (yakinlik tetikli tipte 20 m) veya EOD yaklasma hattina 8 m (14 m) yakin baska aday varsa imha yok; aksi halde imha. 40 m kumelenmesi engellemez.
+  Imha surerken yeni bulunan IED imha hedefine / EOD'ye 20 m'den uzaksa imha SURER (calisan EOD kacmaz); yakinsa iptal + geri cekilme.
+  Bir imha TAMAM olunca bilinen liste temizlenir -> yakindaki diger IED yeniden degerlendirilir, sirayla imha. Tek is kurali (iedIs); olu is kilidi otomatik acilir.
+  HAVA (RPT 09:13): UH-60M (silahli) Alpha 1-1'e (bounding) 226 m'de BOUNDING-DEVAM; AA asker yok -> karsilik motorun dogal AI ates davranisi, bizim kod emir vermedi.
