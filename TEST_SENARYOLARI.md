@@ -99,3 +99,12 @@ Kurulum: ayni tarafin 4 grubu: biri dusmanla sabit temasta (>= 3 dusman), uc gru
 - Tehdit bakisi: temas disi grup durunca askerler duvara degil son dusman yonune bakmali. Log: [TEHDIT-BAKIS] baslangic.
 - Hava: dusman silahli heli/dron gonder; grup binaya girmeli veya dagilip gizlenmeli, AA'li asker ates etmeli. Log: [HAVA-FARK].
 - IED: yol kenarina IED (vanilla IEDLandSmall_F) koy, grubu yurut; ~25 m'de durup 55 m'ye acilmali, EOD varsa 'Deactivate'. Log: [IED-FARK].
+
+## v8.51 HAVA ATES DISIPLINI testi
+1. Saldirmayan silahli heli (UH-60M vb.), grubun 400-1200 m'sinde ucsun, ates ETMESIN. Beklenen: `[HAVA-FARK-TANI]` (ates:... sn once buyuk), grup gizlenir / bina (`tepki:HIDE` veya `GARRISON`), bounding grup `BOUNDING-DEVAM`. Askerler heliye ates ETMEMELI (forgetTarget).
+2. Saldiran heli (door gunner / roket ile gruba ates), mesafe <= 600 m, yukseklik <= 300 m. Beklenen: `tepki:TOPLU-ATES`, `ates eden:N`, 20 sn'den sonra durmali, 60 sn sonra tekrar. Askerler helinin ONUNE ates etmeli (tracer onde).
+3. Saldiran heli > 600 m: ates yok, gizlenme (`tepki:HIDE`).
+4. Hover eden silahli heli: `hover:true`, `[HAVA-FARK-TANI]`'da `hover` alani true.
+5. Hata testi: RPT'de `Error` olmamali; olursa `[WATCHDOG-YENIDEN]` gorulmeli ve davranis devam etmeli.
+## v8.51 IED yaricap testi
+`[IED-FARK] ... (yaricap X m [config:Y], temas:...)`: Y > 0 olmali; yaricap = Y x 3 (20-80 m).

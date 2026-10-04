@@ -32,7 +32,7 @@ lambs_danger_iedFarkStarted = true;
 
 diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
 
-[] spawn {
+private _calis = {
     private _logN = 0;
     while {true} do {
         sleep 4;
@@ -90,8 +90,10 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 private _imhaU = if (_kitli isEqualTo []) then {objNull} else {(_kitli select 0) select 1};
                 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
                 private _sinif = toLower (typeOf _m);
-                // tehlike yaricapi: buyuk IED 55 m, digerleri 30 m
-                private _yaricap = [30, 55] select ((_sinif find "big") >= 0);
+                // tehlike yaricapi: oyunun kendi verisinden (CfgAmmo indirectHitRange; mod IED'leri dahil) x 3 guvenlik / parca payi, 20-80 m arasi;
+                // veri yoksa sinif adina gore yedek (buyuk 55 m, digerleri 30 m)
+                private _irange = getNumber (configFile >> "CfgAmmo" >> (typeOf _m) >> "indirectHitRange");
+                private _yaricap = if (_irange > 0) then { ((_irange * 3) max 20) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) };
                 // ikincil cihaz suphesi: hedefin 40 m cevresinde baska IED adayi var mi (IED'ler kumelenir); yakinlik tetikli (range / pressure) tiplere EOD yurumez
                 // v8.50e: yalniz hedefe / EOD yaklasma hattina YAKIN (12-20 m / 8-14 m) cihaz engeller; 40 m'de kumeleme artik imhayi engellemez (sirayla imha)
                 private _digerleri = _adaylar select {!(_x isEqualTo _m)};
@@ -232,11 +234,22 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 };
                 if (_logN < 100) then {
                     _logN = _logN + 1;
-                    diag_log format ["[IED-FARK] %1 | %2 | lider %3 m | tespit:%4 (%7 m) | uzaklasan:%5 (yaricap %8 m, temas:%9) | imha:%6", groupId _g, typeOf _m, round (_lp distance2D _m), name _tespit, _uzaklasan, _imha, round (_tespit distance2D _m), _yaricap, _temas];
+                    diag_log format ["[IED-FARK] %1 | %2 | lider %3 m | tespit:%4 (%7 m) | uzaklasan:%5 (yaricap %8 m [config:%10], temas:%9) | imha:%6", groupId _g, typeOf _m, round (_lp distance2D _m), name _tespit, _uzaklasan, _imha, round (_tespit distance2D _m), _yaricap, _temas, _irange];
                     if (!isNull _eodU) then { diag_log format ["[IED-FARK] %1 | EOD:%2 (explosiveSpecialist:%3 ACE_isEOD:%4)", groupId _g, name _eodU, _eodU getUnitTrait "explosiveSpecialist", _eodU getVariable ["ACE_isEOD", false]]; };
                 };
             } forEach _adaylar;
         } forEach (allGroups select {local _x && {!isNull leader _x}});
+    };
+};
+
+// bekci: watchdog betigi bir hata ile olurse otomatik yeniden baslat (v8.51)
+[_calis] spawn {
+    params ["_fn"];
+    while {true} do {
+        private _h = [] spawn _fn;
+        waitUntil { sleep 5; scriptDone _h };
+        diag_log "[WATCHDOG-YENIDEN] IED farkindaligi betigi sonlandi (hata?), yeniden baslatiliyor";
+        sleep 5;
     };
 };
 

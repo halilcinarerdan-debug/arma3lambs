@@ -990,3 +990,15 @@ GERCEKLIK NOTU (IED) — kullanicinin verdigi kisitli / dolasimda bir saha ozeti
   Kodla fark (YAPILACAKLAR): (1) bizdeki EOD tek basina IED'e yuruyup imha ediyor -> gercekte once cevre emniyeti + EOD ekibi / robot; EOD tek basina yaklasmaz,
   (2) kontrollu cevre emniyeti (perimetre + erisim kontrolu) yok, yalnizca yaricap disina cekilme, (3) rapor ("IED raporu") ust komutaya gitmiyor (hqIstihbarat'a baglanabilir),
   (4) supheli cihaz yakininda telsiz / konusma kisitlamasi yok, (5) VBIED davranisi yok. Bunlar ATP 3-90.37 gelince sayisal olarak dogrulanip uygulanacak.
+
+v8.51 — HAVA ATES DISIPLINI (ATP 3-01.8) + IED YARICAP CONFIG + WATCHDOG BEKCISI. Kaynak alintilari: kaynaklar_doktrin/HAVA_IED_DOKTRIN_OZET.md.
+  HAVA: fnc_havaFarkindalik yeniden yazildi.
+   - Saldiri tespiti: heli son 20 sn icinde ates etti (Fired EH, havaAtesT) VEYA grupta baski (getSuppression>0.15) + heli<=800 m.
+   - Saldiri + kucuk silah zarfi (<=600 m, yukseklik<=300 m): oz savunma, KOMUTLA toplu ates (volume fire), tek nisan noktasi = hedef konumu + hiz x ucus suresi (mermi initSpeed'den), 3 sn'de bir,
+     20 sn ates + 60 sn bekleme (lambs_danger_havaVolSn). Yalniz duran / yavas askerler atar (hareket eden bounding bozulmaz). Log: tepki:TOPLU-ATES.
+   - Saldirmayan silahli heli: Weapons-Hold mantigi — grup gizlenir / bina (HIDE / GARRISON), bounding grup yuruyus surer ama forgetTarget ile ates disiplini (konumu ele vermeme, 3-4); AA'li asker kimligi belli dusmana ates eder.
+   - Hover eden silahli heli (hiz<15 km/s, yukseklik>8 m): oncelikli tehdit, esik 0.15, menzil 1500 m (4-43).
+   - Zarf disi saldiri (>600 m): ates yok, pasif onlem (4-29: 3 km'de kucuk silah etkisiz).
+   - Sayisal esikler (600 m, 300 m, 20 sn, 800 m, 0.15) kaynakta YOK, TASARIM tahmini; test sonucuna gore ayarlanir.
+  IED: tehlike yaricapi oyunun CfgAmmo indirectHitRange'inden (x3, 20-80 m); veri yoksa sinif adina gore yedek. Log: yaricap X m [config:Y].
+  WATCHDOG BEKCISI: hava ve IED betikleri calisma hatasiyla sonlanirsa otomatik yeniden baslar, RPT: [WATCHDOG-YENIDEN] (v8.50 hava hatasi gibi sessiz olum onlenir).
