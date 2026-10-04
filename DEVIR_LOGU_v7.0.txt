@@ -1020,3 +1020,12 @@ TASARIM ILKESI (kullanici, 2026-10-04) — "Arma 3 dunyasina uyarla, zorlugu art
   cekirdek muharebe davranisina (hedefleme, bounding, formasyon, ates) dokunma.
   Sonuc: v8.52 olasiliksal katman AI'yi guclendirmemeli; belirsizlik oyuncu lehine hata payi olarak calismali (AI'nin kusursuz bilmemesi, tereddut, kacirma),
   IED / hava eklentileri mevcut zorluk seviyesini yukari cekmemeli. Her yeni ozellik oyunda 'adil' mi diye test edilmeli.
+
+v8.52 — RPT 11:09 (v8.51 testi): IED'e "hic tepki yok", heliye tepki yok.
+  IED bulgulari: (1) v8.51'de config yaricap (indirectHitRange x3, min 20 m) cok kucuk kaldi (IEDLandBig config:5 -> 20 m) -> temassiz tespitte 'uzaklasan:0', grup hic durmadi;
+   (2) temasta tepki yalniz yaricap icindekilere (yere yat) -> gozle gorulmez; (3) kumelenmis IED'lerde EOD'li grupta 'ikincil cihaz suphesi' yine imhayi engelledi (komsu 12-20 m).
+   Duzeltme: yaricap = indirectHitRange x6 (30-80 m); ikincil kural yalniz YAKINLIK TETIKLI (range/pressure/tripwire) komsuyu sayar; temas yoksa grup IED etrafinda 360 derece CEVRE EMNIYETI kurar
+   (dis bakar, diz coker, 45 sn veya imha bitene dek, 130 sn tavan; 4 sn'de bir yeniden komut), sonra doFollow ile devam. Temasta eski davranis (yaricap icini yere yatir + uzaklastir).
+  HAVA bulgulari: heli Alpha 1-1'in (bounding) 24-96 m'sinden gecti, saldirmadi -> BOUNDING-DEVAM (gorunur tepki yoktu). Heli 11:31:20'de ates etti (havaAtesT 3 sn once, knows 5.0) ama TOPLU-ATES logu YOK:
+   neden RPT'den ayirt edilemedi. Eklenen: [HAVA-FARK-KARAR] teshisi (heli<=800 m iken grup basina 6 sn'de bir: saldiri/ates sn/baski/silahli/zarf/yukseklik/bounding) + [HAVA-FARK] YERE-YAT
+   (saldirmayan silahli heli <=250 m, bounding grup: duran askerler 8 sn yere yatar). Sonraki RPT'de KARAR satirlari TOPLU-ATES'in neden tetiklenmedigini gosterecek.

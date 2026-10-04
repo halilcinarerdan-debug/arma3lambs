@@ -123,6 +123,13 @@ private _calis = {
 
             private _zarf = (_hd <= 600) && {((getPosATL _hedef) select 2) <= 300};
 
+            // teshis: heli <= 800 m ise grup basina 6 sn'de bir karar girdisi (neden tepki yok sorusu icin)
+            if (_hd <= 800 && {_taniN < 160} && {(time - (_g getVariable [QGVAR(havaKarT), -99])) > 6}) then {
+                _g setVariable [QGVAR(havaKarT), time];
+                _taniN = _taniN + 1;
+                diag_log format ["[HAVA-FARK-KARAR] %1 | %2 %3 m | alt:%4 | saldiri:%5 (ates:%6 sn once, baski:%7) | silahli:%8 | zarf:%9 | hover:%10 | bounding/taktik:%11", groupId _g, typeOf _hedef, round _hd, round ((getPosATL _hedef) select 2), _saldiri, round (time - (_hedef getVariable ["lambs_danger_havaAtesT", -999])), _bask, _silahli, _zarf, _hover, _mesgul];
+            };
+
             // 1) SALDIRI ALTINDA + kucuk silah zarfinda: oz savunma, komutla toplu ates (volume fire), onculu tek nisan noktasi (ATP 3-01.8 4-27..4-29, 4-42)
             if (_saldiri && {_silahli} && {_zarf}) then {
                 private _bas = _g getVariable [QGVAR(havaVolBas), -999];
@@ -159,6 +166,20 @@ private _calis = {
             if (!_saldiri && {_silahli} && {time > _disT}) then {
                 _disT = time + 4;
                 _g forgetTarget _hedef;
+            };
+
+            // 2b) UZERIMIZDEN GECIYOR (saldirmayan silahli heli <= 250 m) ve grup bounding / taktik yurutuyor: duran askerler 8 sn yere yatar (gizlenme; yurumeye devam edenler bozulmaz)
+            if (!_saldiri && {_silahli} && {_hd <= 250} && {_mesgul} && {time > (_g getVariable [QGVAR(havaYatT), 0])}) then {
+                _g setVariable [QGVAR(havaYatT), time + 30];
+                private _y = 0;
+                {
+                    if (alive _x && {isNull objectParent _x} && {(speed _x) < 3}) then {
+                        _x setUnitPos "DOWN";
+                        [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_x], 8] call CBA_fnc_waitAndExecute;
+                        _y = _y + 1;
+                    };
+                } forEach (units _g);
+                diag_log format ["[HAVA-FARK] %1 | %2 %3 m | tepki:YERE-YAT (heli ustumuzden geciyor, saldirmiyor) | yatan:%4", groupId _g, typeOf _hedef, round _hd, _y];
             };
 
             // 3) PASIF ONLEM / hava savunma

@@ -90,15 +90,16 @@ private _calis = {
                 private _imhaU = if (_kitli isEqualTo []) then {objNull} else {(_kitli select 0) select 1};
                 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
                 private _sinif = toLower (typeOf _m);
-                // tehlike yaricapi: oyunun kendi verisinden (CfgAmmo indirectHitRange; mod IED'leri dahil) x 3 guvenlik / parca payi, 20-80 m arasi;
+                // tehlike yaricapi: oyunun kendi verisinden (CfgAmmo indirectHitRange; mod IED'leri dahil) x 6 guvenlik / parca payi (v8.52: x3 / 20 m cok kucuk kaldi), 30-80 m arasi;
                 // veri yoksa sinif adina gore yedek (buyuk 55 m, digerleri 30 m)
                 private _irange = getNumber (configFile >> "CfgAmmo" >> (typeOf _m) >> "indirectHitRange");
-                private _yaricap = if (_irange > 0) then { ((_irange * 3) max 20) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) };
+                private _yaricap = if (_irange > 0) then { ((_irange * 6) max 30) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) };
                 // ikincil cihaz suphesi: hedefin 40 m cevresinde baska IED adayi var mi (IED'ler kumelenir); yakinlik tetikli (range / pressure) tiplere EOD yurumez
                 // v8.50e: yalniz hedefe / EOD yaklasma hattina YAKIN (12-20 m / 8-14 m) cihaz engeller; 40 m'de kumeleme artik imhayi engellemez (sirayla imha)
                 private _digerleri = _adaylar select {!(_x isEqualTo _m)};
                 private _yakinTipi = { private _tt = toLower (typeOf _this); ((_tt find "range") >= 0) || {(_tt find "pressure") >= 0} || {(_tt find "tripwire") >= 0} };
-                private _ikincil = (_digerleri findIf {(_x distance2D _m) < ([12, 20] select (_x call _yakinTipi))}) >= 0;
+                // v8.52: yalniz YAKINLIK TETIKLI (range / pressure / tripwire) komsu engeller; uzaktan tetikli komsular siraya girer
+                private _ikincil = (_digerleri findIf {(_x call _yakinTipi) && {(_x distance2D _m) < 20}}) >= 0;
                 if (!_ikincil && {!isNull _imhaU}) then {
                     private _bas = getPosATL _imhaU;
                     private _son = _mp getPos [5, _mp getDir _bas];
@@ -106,7 +107,7 @@ private _calis = {
                     private _adim = ceil (_hat / 6);
                     for "_i" from 0 to _adim do {
                         private _nk = _bas vectorAdd ((_son vectorDiff _bas) vectorMultiply (_i / (_adim max 1)));
-                        if ((_digerleri findIf {(_x distance2D _nk) < ([8, 14] select (_x call _yakinTipi))}) >= 0) exitWith { _ikincil = true; };
+                        if ((_digerleri findIf {(_x call _yakinTipi) && {(_x distance2D _nk) < 14}}) >= 0) exitWith { _ikincil = true; };
                     };
                 };
                 private _yakinlik = ((_sinif find "range") >= 0) || {(_sinif find "pressure") >= 0} || {(_sinif find "tripwire") >= 0};
@@ -141,18 +142,43 @@ private _calis = {
                     [{ params ["_gg"]; if (!isNull _gg && {!(_gg getVariable [QGVAR(isExecutingTactic), false])}) then { _gg setSpeedMode "NORMAL"; }; }, [_g], 60] call CBA_fnc_waitAndExecute;
                 };
 
-                // bekletme: bounding / formasyon komutlari geri cevirmesin, 60 sn'de 4 sn'de bir 50 m icindekileri geri it
-                [_g, _m, _mp, _eodU, _imhaMi, _yaricap] spawn {
-                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar", "_yar"];
+                // bekletme + CEVRE EMNIYETI (v8.52): temas YOKSA grup IED etrafinda 360 derece cevre kurar (disa bakar, diz coker), imha bitene dek / 45 sn;
+                // bounding / formasyon komutlari geri cevirmesin diye 4 sn'de bir yeniden verilir. TEMASTA: yalniz yaricap icindekiler geri itilir (yere yat + uzaklas)
+                [_g, _m, _mp, _eodU, _imhaMi, _yaricap, _temas] spawn {
+                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar", "_yar", "_tm"];
                     private _t0 = time;
-                    while {(time - _t0) < 60 && {!isNull _grp} && {_grp getVariable [QGVAR(iedPos), _pos] isEqualTo _pos}} do {
+                    private _sure = [45, 130] select _imhaVar;
+                    private _R2 = _yar + 10;
+                    while {(time - _t0) < _sure && {!isNull _grp} && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}} do {
                         sleep 4;
                         if (isNull _mine && {!_imhaVar}) exitWith {};
+                        if (_imhaVar && {(time - _t0) > 10} && {(_grp getVariable [QGVAR(iedIs), []]) isEqualTo []}) exitWith {};
+                        private _lst = (units _grp) select {alive _x && {isNull objectParent _x} && {!(_imhaVar && {_x isEqualTo _eod})} && {!(_x getVariable [QGVAR(iedIsci), false])}};
+                        private _n = count _lst;
                         {
-                            if (alive _x && {(_x distance2D _pos) < (_yar - 2)} && {!(_imhaVar && {_x isEqualTo _eod})} && {isNull objectParent _x}) then {
-                                _x doMove (_pos getPos [_yar + 8 + (random 6), _pos getDir _x]);
+                            private _u = _x;
+                            if (_tm) then {
+                                if ((_u distance2D _pos) < (_yar - 2)) then { _u doMove (_pos getPos [_yar + 8 + (random 6), _pos getDir _u]); };
+                            } else {
+                                private _a = (_pos getDir (leader _grp)) + (_forEachIndex * (360 / (_n max 1)));
+                                private _cp = _pos getPos [_R2 + (5 * (_forEachIndex mod 2)), _a];
+                                if ((_u distance2D _cp) > 5) then {
+                                    _u setVariable [QGVAR(taktikKilit), time + 6];
+                                    _u doMove _cp;
+                                } else {
+                                    _u doWatch (_pos getPos [_R2 + 60, _a]);
+                                    _u setUnitPos "MIDDLE";
+                                };
                             };
+                        } forEach _lst;
+                    };
+                    if (!isNull _grp && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}) then {
+                        {
+                            _x doWatch objNull;
+                            _x setUnitPos "AUTO";
+                            _x setVariable [QGVAR(taktikKilit), nil];
                         } forEach (units _grp);
+                        if (!_tm) then { (units _grp) doFollow (leader _grp); };
                     };
                 };
                 _g setVariable [QGVAR(iedPos), _mp];
