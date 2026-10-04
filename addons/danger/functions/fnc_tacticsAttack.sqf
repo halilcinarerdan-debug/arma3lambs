@@ -72,6 +72,7 @@ _unit setVariable [QEGVAR(main,currentTask), "Tactics Attack", EGVAR(main,debug_
 
 // group settings
 _unit setCombatMode "RED";
+(group _unit) setVariable [QGVAR(taktikFormT), time];
 if ((formation _unit) isNotEqualTo "DIAMOND") then { _unit setFormation "DIAMOND"; };
 
 // the attack

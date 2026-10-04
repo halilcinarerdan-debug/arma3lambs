@@ -117,6 +117,7 @@ _units allowGetIn false;
 
 // ready group
 _group setFormDir (_unit getDir _target);
+_group setVariable [QGVAR(taktikFormT), time];
 if ((formation _group) isNotEqualTo "FILE") then { _group setFormation "FILE"; };
 {
     _x setUnitPos "DOWN";

@@ -123,3 +123,9 @@ Kapatma anahtarlari: lambs_danger_olumBOff, lambs_danger_pusuKarsiOff, lambs_dan
 3. YAN / ARKA (v8.65): >= 5 kisilik grup yuruyus halinde (temassiz): `[ZEKA-YAN] ... SAG:ad | SOL:ad | ARKA:ad`; o askerler yuruyuste kanatlara / arkaya BAKMALI (govde donmeden). Durunca / temasta `SERBEST`.
 4. NOKTA ELEMANI (v8.66): >= 6 kisi, temas yakin zamanda olmus (< 240 sn) ya da 700 m icinde bilinen dusman, yuruyus: `[ZEKA-NOKTA] ... NOKTA ELEMANI: ad1, ad2 | ana govdenin 55 m onunde`; 2 asker ~55 m ONDE ilerlemeli. Temasta / durunca `SERBEST`.
 Kapatma anahtarlari: lambs_danger_hazirlikOff, lambs_danger_baskiTufekciOff, lambs_danger_yanGuvenlikOff, lambs_danger_noktaOff.
+
+## v8.67 — Tek kalan katilimi / formasyon hakemi / HQ takviye
+- Bir squad'i <= 2 kisiye dusur (Zeus ile oldur), 150 m icinde baska dost squad (>= 3) birak -> `[ZEKA-YETIM] KATILDI` beklenir.
+- Ayni test, 600 m uzakta + ikisinde telsiz (ItemRadio) -> `YOLDA` loglari sonra `KATILDI`; telsizsiz iken `uygun dost grup YOK`.
+- Saldiri / bastirma sirasinda `--form` salinim tespiti: WEDGE<->LINE gidip gelme olmamali.
+- Bir squad temasta + kayip >= %25, ikinci squad 300 m+ uzakta bounding'de -> `[HQ-EMIR] ... bounding iptal edildi` ve TAKVIYE.

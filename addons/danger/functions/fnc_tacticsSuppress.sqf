@@ -87,6 +87,7 @@ _unit setVariable [QEGVAR(main,currentTask), "Leader Suppress", EGVAR(main,debug
 // set group task
 _group = group _unit;
 _group enableAttack false;
+_group setVariable [QGVAR(taktikFormT), time];
 if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
 _group setVariable [QEGVAR(main,currentTactic), "Suppressing", EGVAR(main,debug_functions)];
 

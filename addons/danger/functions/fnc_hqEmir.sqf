@@ -34,6 +34,12 @@ if (_ad in ["TAKVIYE", "KANAT", "FEINT"]) then {
     if (_hedef isNotEqualTo [0, 0, 0] && {!isNil "lambs_danger_fnc_tacticsReinforce"}) then {
         private _eskiF = _g getVariable ["lambs_danger_enableGroupReinforce", false];
         private _eskiT = _g getVariable ["lambs_danger_enableGroupReinforceTime", -1];
+        // bounding'deyse iptal et (token degisimi/nil bounding dongusunu sonlandirir) - yoksa isExecutingTactic ile cakisir
+        if (_g getVariable ["lambs_danger_isBounding", false]) then {
+            _g setVariable ["lambs_danger_isBounding", nil];
+            _g setVariable ["lambs_danger_bndToken", nil];
+            diag_log format ["[HQ-EMIR] %1 | bounding iptal edildi (%2 icin)", groupId _g, _ad];
+        };
         [leader _g, _hedef, [], 120] call FUNC(tacticsReinforce);
         _g setVariable ["lambs_danger_enableGroupReinforce", _eskiF, true];
         _g setVariable ["lambs_danger_enableGroupReinforceTime", _eskiT, true];

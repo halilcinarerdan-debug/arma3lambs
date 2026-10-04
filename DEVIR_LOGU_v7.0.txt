@@ -1122,3 +1122,13 @@ v8.66 — NOKTA ELEMANI / TRAVELING OVERWATCH (squad taktik zekasi 4/4): fnc_nok
   2 tufekli (gercek rol RIFLE; lider / saglikci / EOD / baski tufekcisi / UGL / yan guvenlik disinda, hareket yonunde en onde olanlar) ana govdenin 55 m onundeki noktaya (yanal +-7 m) doMove; taktikKilit 8 sn; buddyBond cohesion'dan muaf (noktaEk).
   Serbest: durma / temas / taktik -> doFollow; 20 sn bekleme. Kapatma: lambs_danger_noktaOff. Log: [ZEKA-NOKTA]. Risk: lider hizina gore on elemanlar geride kalabilir; 95 m'den uzaga gidenler lidere 30 m onune cagrilir.
   Squad paketi toplam: v8.63 hazirlik, v8.64 baski tufekcisi, v8.65 yan / arka, v8.66 nokta elemani. TEST EDILMEDI (oyun disi); hepsi ZEKA-* loglu ve kapatilabilir. El bombasi (bina) kullanici karariyla baştan yazilacak (ATLANDI).
+
+v8.67 — RPT 7ef81936 (v8.66) analizi: formasyon salinimi #2 + diger squad bekledi + tek kalanlar.
+  1) Formasyon salinimi #2: bounding'in selectFormation(WEDGE, COMBAT) ile tacticsAssault'in LINE'i gidip geliyordu. Cozum: 6 taktik formasyon koyarken grup degiskeni lambs_danger_taktikFormT = time yazar; fnc_selectFormation 25 sn icinde
+     mevcut formasyonu aynen dondurur (hakem). Taktik bitince komutan normal akisa doner.
+  2) Diger squad (Alpha 1-4) hic yardim etmedi: HQ 'musait' tanimi bounding / uzak temasi 'mesgul' sayiyordu (RPT: bounding bayragi 260-320 sn takili). Yeni: yalniz isBounding mesgulse VE en yakin dusman >= 250 m (cmdSit[1]) VE son temas > 8 sn
+     ise musait. fnc_hqEmir TAKVIYE/KANAT/FEINT bounding'i iptal eder (isBounding + bndToken nil) ve [HQ-EMIR] ... bounding iptal edildi loglar. Takili BND bayragi KOK NEDENI hala arastirilmali (sonraki RPT'de [HQ-TAHTA] + BND-CIKIS bak).
+  3) Tek kalanlar: fnc_yetimKatil (<= 2 canli): <= 150 m dost grup (>= 3 canli, oyuncusuz, katilim sonrasi <= 14) -> joinSilent; telsiz (ItemRadio / ACRE / TFAR) + hedef liderde telsiz + <= 1500 m -> hedefe yuruyup 150 m'de katilir, 120 sn
+     icinde varamazsa vazgecer. Kapatma lambs_danger_yetimOff. Log [ZEKA-YETIM] (YOLDA / KATILDI / YOK). Esikler TASARIM tahmini, doktrin degil.
+  4) ZEKA-HAZIRLIK ATLANDI logu grup basina 60 sn ile sinirlandi. rpt_ozet --zeka ZEKA-YETIM satirini kontrol eder, BEKLENEN_SURUM v8.67.
+  Acik: ZEKA-NOKTA olay uretmedi (>= 6 canli + 4 km/s + temassiz kosulu olusmamis olabilir), Alpha 1-4 takili BND+TAK bayragi. TEST EDILMEDI (oyun disi).

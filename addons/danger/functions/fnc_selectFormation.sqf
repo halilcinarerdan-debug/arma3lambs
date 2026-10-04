@@ -49,6 +49,9 @@ if (!isNull _grpKontrol && {_grpKontrol getVariable [QGVAR(isPeeling), false]}) 
 if (!isNull _grpKontrol && {_grpKontrol getVariable [QGVAR(isRetreating), false]}) exitWith {
     "FILE"
 };
+// TAKTIK FORMASYON HAKEMI: saldiri/baski/kanat/mevzi taktigi son 25 sn icinde formasyon koymussa ona dokunma
+// (bounding WEDGE <-> assault LINE gidip gelmesinin ikinci kaynagi)
+if (!isNull _grpKontrol && {(time - (_grpKontrol getVariable [QGVAR(taktikFormT), -999])) < 25}) exitWith { formation _grpKontrol };
 // ---------------------------------------------------------------------------
 // Hedef pozisyon (obje veya dizi olabilir)
 // ---------------------------------------------------------------------------

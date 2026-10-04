@@ -82,9 +82,18 @@ private _tahtaKur = {
             "lambs_danger_disableGroupAI"
         ];
 
-        private _musait = !_mesgul
-            && {!_temasta}
-            && {(time - _contact) > 20}
+        // bounding'deki ve dusman uzak (>=250 m) grup da destek verebilir (v8.67: ikinci takim bounding'de bekleyip hic yardim etmiyordu)
+        private _sit = _g getVariable ["lambs_danger_cmdSit", []];
+        private _enYakin = if (_sit isEqualType [] && {count _sit > 1} && {(_sit select 1) isEqualType 0}) then {_sit select 1} else {-1};
+        private _sadeceBnd = _mesgul && {_g getVariable ["lambs_danger_isBounding", false]} && {
+            ({_g getVariable [_x, false]} count [
+                "lambs_danger_isRetreating", "lambs_danger_isEvading", "lambs_danger_isBreakingContact", "lambs_danger_isSonDirenis",
+                "lambs_danger_isAmbushing", "lambs_danger_isExecutingTactic", "lambs_danger_sniperTeam", "lambs_danger_disableGroupAI"
+            ]) == 0};
+        private _uzakTemas = _enYakin >= 250 && {(time - _contact) > 8};
+        private _musait = (!_mesgul || {_sadeceBnd && _uzakTemas})
+            && {!_temasta || {_uzakTemas}}
+            && {(time - _contact) > 8}
             && {_n >= 3}
             && {isNull objectParent _l}
             && {(time - (_g getVariable ["lambs_danger_hqGorevT", -999])) > 180}

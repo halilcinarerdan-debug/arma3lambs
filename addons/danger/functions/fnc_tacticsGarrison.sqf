@@ -51,6 +51,7 @@ _target = _target call CBA_fnc_getPos;
 ] call CBA_fnc_waitAndExecute;
 
 // set speed and enableAttack
+_group setVariable [QGVAR(taktikFormT), time];
 if ((formation _group) isNotEqualTo "FILE") then { _group setFormation "FILE"; };
 _group enableAttack false;
 

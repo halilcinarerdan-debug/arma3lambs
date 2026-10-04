@@ -48,7 +48,8 @@ if (!_hazirGecildi && {!(missionNamespace getVariable ["lambs_danger_hazirlikOff
     if (_dM > 45 && {_dM < 250} && {(count _canliH) >= 4} && {!_bskH} && {_sonH > 60}) then {
         _hazirYap = true;
     } else {
-        if (_dM > 45 && {_dM < 250} && {(missionNamespace getVariable ["lambs_danger_hazirLogN", 0]) < 40}) then {
+        if (_dM > 45 && {_dM < 250} && {(missionNamespace getVariable ["lambs_danger_hazirLogN", 0]) < 40} && {(time - (_group getVariable [QGVAR(hazirLogT), -999])) > 60}) then {
+            _group setVariable [QGVAR(hazirLogT), time];
             missionNamespace setVariable ["lambs_danger_hazirLogN", (missionNamespace getVariable ["lambs_danger_hazirLogN", 0]) + 1];
             diag_log format ["[ZEKA-HAZIRLIK] %1 | hedef %2 m | ATLANDI: asker %3 (>=4), baskida:%4, son hazirlik %5 sn once (>60)", groupId _group, round _dM, count _canliH, _bskH, round (_sonH min 9999)];
         };
@@ -109,6 +110,7 @@ if (_hazirYap) exitWith {
 // set speed and enableAttack
 _group enableAttack false;
 _group setSpeedMode "FULL";
+_group setVariable [QGVAR(taktikFormT), time];
 if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
 
 // find units
