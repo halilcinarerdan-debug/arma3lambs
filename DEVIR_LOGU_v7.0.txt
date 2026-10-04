@@ -1169,3 +1169,12 @@ v8.73 — PANIK / FELC (kullanici: "insan deterministik degil, savasta felc geci
 v8.74 — KULLANICI UYARISI: karsida OYUNCU var; botlar PvE icin gecerli zorlukta kalmali, veteran oyuncu bile 'bunlar hile' demeli. v8.72 sis + v8.73 panik zorlugu DUSURUR; varsayilanlar hafifletildi:
   panik: lambs_danger_panikSans varsayilan 1.0 -> 0.35, azami tik olasiligi 0.30 -> 0.12, sureler kisaldi (DONMA 3-7, KOR 4-8, KACIS 4-7 sn). Sis: yeni lambs_danger_hqSisSiddet (0..1, varsayilan 0.4; 0 = eski mukemmel paylasim): gecikme, kayip rapor ve seviye dususu siddetle carpilir.
   ILKE: gercekcilik katmanlari (panik / sis) ZORLUGU ayarlanabilir yan etki olarak sunar; varsayilan 'oyuncuya hile gibi gelen' dengeyi korur. Oyun testinde kolaylasma gorulurse siddetleri 0'a indir ([PANIK-OZET] / [HQ-ISTIHBARAT-OZET] ile olc).
+
+YOL HARITASI (kullanici karari, EN SON yapilacak): KALICI SENARYO / "Bakhmut-lite" — bot kimligi + deneyim kaydi + kaldigi yerden devam.
+  Hedef kitle: Arma 3 veteranlari, milsim toplulugu, kendi sunucusunu kuran bireyler; GUCLU PC / sunucu varsayilir (dusuk-end PC hedef degil).
+  Siralama (oneri): (1) bot basina deneyim kaydi (temas, yara, kayip gorme) -> courage / panik / moral baglantisi; depo = missionProfileNamespace (sunucu profil dosyasi), SQL (extDB3) yalniz cok sunucu / dis panel istenirse.
+  (2) Kaydet / yukle: grup konumu + birim loadout (getUnitLoadout) + hasar + gorev durumu; dedicated server'da 'game save' YOK -> kendi serilestirmemiz; yukleme = birimleri kayitlardan yeniden olusturma. Arac / bina / HQ durumu ayri.
+  (3) Olcek: bot sayisi arttikca birim basina maliyet sabit kalmali -> LOD (oyuncuya / temasa uzaklik katmanlari: yakin = tam tick, orta = 3-5x seyrek, uzak = salt gorev; enableDynamicSimulation), watchdog tick'leri fps'e gore uyarlanir,
+      Headless Client dagitimi (mevcut watchdog'lar zaten yerel gruplarda calisiyor). Olcum: karnedeki 'tick ort max ms' + diag_fps; 100+ AI profil testi gerekli — olcmeden olcek sozu verilmez.
+  (4) Komutan zekasi: uzun sureli gorev (bolge ele gecirme / savunma / ikmal), taburdan takima kademe; mevcut HQ cekirdegi temel.
+  Not: kalici deneyim botlari zamanla guclendirir -> ayar ile kapatilabilir olmali.
