@@ -1108,3 +1108,8 @@ v8.62 — UGL kullanim sikligi (RPT 13:47: M203 / GP-25'li askerler vardi, 5 dk'
 v8.63 — HAZIRLIK PENCERESI (squad taktik zekasi 1/4): fnc_tacticsAssault'a eklendi (5. parametre _hazirGecildi). Hedef 45-250 m, >= 4 canli asker, grup bastirilmamis (getSuppression <= 0.5), son hazirlik > 60 sn:
   5-8 sn lider disindaki herkes hedef konuma doSuppressiveFire; UGL'liler tacticalUGL'yi ZORLA (salvo 2); sonra asil hucum (ayni fonksiyon, _hazirGecildi = true). Log: [ZEKA-HAZIRLIK] (yapildi / ATLANDI + neden).
   Kapatma: lambs_danger_hazirlikOff = true. Sayisal esikler TASARIM. NOT: el bombasi kullanimi (bina temizleme) kullanici karariyla ATLANDI; "baştan yazilacak" olarak devir listesinde.
+
+v8.64 — BASKI TUFEKCISI (squad taktik zekasi 2/4): squad'da gercek MG yoksa (testlerde MG:0) fnc_baskiTufekci bir tufekliyi otomatik tufekci / MG rolune atar.
+  Secim: >= 4 canli asker, gercek MG yok; lider / UGL tasiyici / AT / saglikci / nisanci disinda; puan = otomatik silah adi +100 (M27 / IAR / M249 / RPK / SAW / LSAT / MK46 / M60), sarjor >= 30 +20, yedek sarjor x3.
+  Etki: fnc_getUnitRole atanmis birime 'MG' doner (kendi guc hesabinda 2.0; ikinci parametre gercek = true ile DUSMAN hesabinda (commanderAssess, sniperTeam) yok sayilir) -> roleStation MG istasyonu + alana baski, splitFireTeams ates ekibi, buddyPairs, bounding overwatch.
+  Kalici; atanan olunce yeniden secilir; gercek MG belirirse temizlenir. Kapatma: lambs_danger_baskiTufekciOff = true. Log: [ZEKA-BASKI]. Risk: kendi 'MG sayisi' artar -> guc orani biraz yukselir (daha atak karar).

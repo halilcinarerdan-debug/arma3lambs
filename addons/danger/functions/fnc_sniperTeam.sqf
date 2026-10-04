@@ -61,7 +61,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
         if (_e isKindOf "CAManBase") then {
             if (_e isEqualTo (leader (group _e))) then { _p = 2; };
             if ((secondaryWeapon _e) isNotEqualTo "") then { _p = 3; };
-            if (([_e] call _rolFn) isEqualTo "MG") then { _p = 3; };
+            if (([_e, true] call _rolFn) isEqualTo "MG") then { _p = 3; };
         } else { _p = 0; };
         _p - ((_e distance2D _ref) / 500)
     };

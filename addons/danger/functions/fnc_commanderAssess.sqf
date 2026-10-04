@@ -138,7 +138,7 @@ private _enemyMg = 0;
 private _enemyAT = 0;
 private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else {_enemies};
 {
-    private _r = [_x] call _rolFn;
+    private _r = [_x, true] call _rolFn;
     _enemyPower = _enemyPower + (switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};

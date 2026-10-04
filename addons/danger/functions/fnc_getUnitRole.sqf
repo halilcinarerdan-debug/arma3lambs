@@ -10,6 +10,7 @@
  *
  * Arguments:
  * 0: unit <OBJECT>
+ * 1: gercek rol <BOOL> (true: v8.64 'baski tufekcisi' atamasi YOK SAYILIR; dusman gucu hesabi icin) default false
  *
  * Return Value:
  * "MG" | "AT" | "MARKSMAN" | "MEDIC" | "RIFLE"   (oncelik: MG > AT > MARKSMAN > MEDIC)
@@ -20,7 +21,7 @@
  * Public: No
 */
 
-params [["_unit", objNull, [objNull]]];
+params [["_unit", objNull, [objNull]], ["_gercek", false, [false]]];
 if (isNull _unit) exitWith {"RIFLE"};
 
 private _primary = primaryWeapon _unit;
@@ -76,5 +77,9 @@ if (_silahRol isNotEqualTo "MG") then {
         };
     };
 };
+
+// v8.64: BASKI TUFEKCISI — squad'da gercek MG yoksa fnc_baskiTufekci bir tufekliyi (QGVAR(baskiTuf) = true) otomatik tufekci / MG rolune atar; kendi birimler MG sayilir.
+//   Dusman gucu hesabinda (gercek = true) bu atama yok sayilir (dusmanin tufeklisini MG sanmayalim).
+if (!_gercek && {_rol isEqualTo "RIFLE"} && {_unit getVariable [QGVAR(baskiTuf), false]}) then { _rol = "MG"; };
 
 _rol
