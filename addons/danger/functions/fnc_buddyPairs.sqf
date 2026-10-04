@@ -73,7 +73,7 @@ for "_p" from 0 to ((floor (_n / 2)) - 1) do {
     _ciftler pushBack [_sirali select _p, _sirali select (_n - 1 - _p)];
 };
 if ((_n % 2) isEqualTo 1) then {
-    (_ciftler select ((count _ciftler) - 1)) pushBack (_sirali select (floor (_n / 2)));
+    (_ciftler select -1) pushBack (_sirali select (floor (_n / 2)));
 };
 
 // EOD'ler tek elemanli cift olarak (buddy yok)

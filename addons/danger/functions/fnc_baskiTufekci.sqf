@@ -47,7 +47,7 @@ private _calis = {
 
             // aday secimi
             private _aday = _canli select {
-                !(_x isEqualTo _l) && {([_x, true] call _rolFn) isEqualTo "RIFLE"} && {([_x] call _uglFn) isEqualTo ""}
+                _x isNotEqualTo _l && {([_x, true] call _rolFn) isEqualTo "RIFLE"} && {([_x] call _uglFn) isEqualTo ""}
             };
             if (_aday isEqualTo []) then { continue };
             private _skorlu = _aday apply {

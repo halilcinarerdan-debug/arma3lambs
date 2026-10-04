@@ -67,7 +67,7 @@ private _mesafeMax = switch (true) do {
     case (_botSayisi < 150): { 2 };
     default                  { 1 };
 };
-private _mesafeAdim = if (_botSayisi < 10) then { 4 } else { 6 };
+private _mesafeAdim = [6, 4] select (_botSayisi < 10);
 private _yonAdim = 360 / (_yonMax + 1);
 
 private _unitYer = getTerrainHeightASL _unitPos;

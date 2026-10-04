@@ -184,7 +184,7 @@ private _fnLog = {
                 if (
                     !((lifeState _u) in ["HEALTHY", "INJURED"]) || {(insideBuilding _u) > 0.5}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {(_u getVariable [QGVAR(tcccBusy), 0]) > time}
-                    || {!((_u getVariable [QGVAR(grState), []]) isEqualTo [])}
+                    || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []}
                 ) then { continue };
 
                 // ---------- A) ONCE SIPERE ----------
@@ -246,7 +246,7 @@ private _fnLog = {
                     } forEach selectRandom [[90, -90], [-90, 90]];
                     if (_sec isNotEqualTo []) then {
                         private _s2 = [_u, _eASL, _sec, 6] call _sutNoktasi;
-                        _u doMove (if (_s2 isNotEqualTo []) then {_s2} else {_sec});
+                        _u doMove ([_sec, _s2] select (_s2 isNotEqualTo []));
                         [format ["[SAHA] %1 | %2 | 12+ atis ayni yerden -> yer degistiriyor", groupId _g, name _u]] call _log;
                     };
                 };

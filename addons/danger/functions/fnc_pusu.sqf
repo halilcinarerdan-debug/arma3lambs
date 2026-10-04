@@ -141,7 +141,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                 if ((count (units _g select {alive _x})) >= 5 && {(count _uyeler) >= 2}) then {
                     private _sirali = [_uyeler, [], { private _a = (((_ldPos0 getDir (getPosATL _x)) - _enBrg + 540) mod 360) - 180; _a }, "ASCEND"] call BIS_fnc_sortBy;
                     private _sol = _sirali select 0;
-                    private _sag = _sirali select ((count _sirali) - 1);
+                    private _sag = _sirali select -1;
                     private _ark = objNull;
                     if ((count (units _g select {alive _x})) >= 7) then {
                         private _kal = _uyeler select {_x isNotEqualTo _sol && {_x isNotEqualTo _sag}};
@@ -286,7 +286,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                             _x setVariable [QGVAR(forceMove), nil];
                             _x setUnitPos "AUTO";
                             _x doWatch objNull;
-                            _x setBehaviour (if (_atesEt) then {"COMBAT"} else {_eskiBeh});
+                            _x setBehaviour ([_eskiBeh, "COMBAT"] select (_atesEt));
                         };
                     } forEach (units _g);
                     [_g, "AmbushBitti", _neden] call _gonder;

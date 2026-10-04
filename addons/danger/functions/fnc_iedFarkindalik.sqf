@@ -73,7 +73,7 @@ private _calis = {
             {
                 private _c = _x;
                 {
-                    if !(_x in _adaylar) then { _adaylar pushBack _x };
+                    _adaylar pushBackUnique _x;
                 } forEach ((allMines select {(_x distance2D _c) < 130}) + ((_c nearObjects 130) select {(toLower (typeOf _x)) find "ied" >= 0 && {!(_x in allMines)}}));
             } forEach _merkezler;
             if (_adaylar isEqualTo []) then { continue };
@@ -136,7 +136,7 @@ private _calis = {
                 private _yaricap = if (_irange > 0) then { ((_irange * 6) max 30) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) };
                 // ikincil cihaz suphesi: hedefin 40 m cevresinde baska IED adayi var mi (IED'ler kumelenir); yakinlik tetikli (range / pressure) tiplere EOD yurumez
                 // v8.50e: yalniz hedefe / EOD yaklasma hattina YAKIN (12-20 m / 8-14 m) cihaz engeller; 40 m'de kumeleme artik imhayi engellemez (sirayla imha)
-                private _digerleri = _adaylar select {!(_x isEqualTo _m)};
+                private _digerleri = _adaylar select {_x isNotEqualTo _m};
                 private _yakinTipi = { private _tt = toLower (typeOf _this); ((_tt find "range") >= 0) || {(_tt find "pressure") >= 0} || {(_tt find "tripwire") >= 0} };
                 // v8.52: yalniz YAKINLIK TETIKLI (range / pressure / tripwire) komsu engeller; uzaktan tetikli komsular siraya girer
                 private _ikincil = (_digerleri findIf {(_x call _yakinTipi) && {(_x distance2D _m) < 20}}) >= 0;
@@ -163,7 +163,7 @@ private _calis = {
                 private _is = _g getVariable [QGVAR(iedIs), []];
                 if (_is isNotEqualTo []) then {
                     _is params ["_im", "_ie"];
-                    if (!isNull _im && {alive _ie} && {!(_im isEqualTo _m)} && {((_m distance2D _im) < 20) || {(_m distance2D _ie) < 20}}) then { _abort = true; _g setVariable [QGVAR(iedAbort), time]; };
+                    if (!isNull _im && {alive _ie} && {_im isNotEqualTo _m} && {((_m distance2D _im) < 20) || {(_m distance2D _ie) < 20}}) then { _abort = true; _g setVariable [QGVAR(iedAbort), time]; };
                 };
 
                 // uzaklasma (yaricap + 8 m); EOD imha edecekse kalir. Taktik kilidi (bounding vb.) IED tehlikesinde gecilir.
@@ -202,7 +202,7 @@ private _calis = {
                     // guvenlik elemani secimi (yalniz imha varsa ve temas yoksa)
                     private _guv = [];
                     if (_imhaVar && {!_tm}) then {
-                        private _adaylar2 = (units _grp) select {alive _x && {isNull objectParent _x} && {!(_x isEqualTo _eod)} && {!(_x isEqualTo (leader _grp))} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")} && {(_x distance2D _pos) < 90}};
+                        private _adaylar2 = (units _grp) select {alive _x && {isNull objectParent _x} && {_x isNotEqualTo _eod} && {_x isNotEqualTo (leader _grp)} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")} && {(_x distance2D _pos) < 90}};
                         private _sirali2 = _adaylar2 apply {[_x distance2D _pos, _x]};
                         _sirali2 sort true;
                         _guv = (_sirali2 select [0, 2]) apply {_x select 1};
@@ -244,7 +244,7 @@ private _calis = {
                             };
                         } forEach _sir;
                     };
-                    if (!isNull _grp && {!((_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos)}) then { _bitis = "yeni IED bulundu (gorev devredildi)"; };
+                    if (!isNull _grp && {(_grp getVariable [QGVAR(iedPos), _pos]) isNotEqualTo _pos}) then { _bitis = "yeni IED bulundu (gorev devredildi)"; };
                     diag_log format ["[IED-FARK-CEVRE] %1 | BITTI | neden: %2 | gecen %3 sn | guvenlik elemani serbest birakildi", groupId _grp, _bitis, round (time - _t0)];
                     // kacis iptali: IED yok olduysa tum kacanlar (ve temasta yere yatirilanlar) hemen normale doner, gruba katilir
                     if ((_bitis find "kacis iptal") >= 0 || {_bitis isEqualTo "imha bitti"}) then {
@@ -352,11 +352,11 @@ private _calis = {
                                 private _t2 = time;
                                 waitUntil {
                                     sleep 1;
-                                    private _ic = (units _grp) select {alive _x && {(_x distance2D _mine) < (_yariC - 3)} && {!(_x isEqualTo _u)}};
-                                    if ((count _ic) > 0 && {(time - _t2) < 20}) then {
+                                    private _ic = (units _grp) select {alive _x && {(_x distance2D _mine) < (_yariC - 3)} && {_x isNotEqualTo _u}};
+                                    if (_ic isNotEqualTo [] && {(time - _t2) < 20}) then {
                                         { _x doMove ((getPosATL _mine) getPos [_yariC + 8, (getPosATL _mine) getDir _x]); } forEach _ic;
                                     };
-                                    ((count _ic) == 0) || {(time - _t2) >= 20} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time}
+                                    (_ic isEqualTo []) || {(time - _t2) >= 20} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time}
                                 };
                                 if (!isNull _mine && {(_grp getVariable [QGVAR(contact), 0]) <= time}) then {
                                     triggerAmmo _mine;
@@ -371,12 +371,12 @@ private _calis = {
                                 if !(missionNamespace getVariable ["lambs_danger_iedZarOff", false]) then {
                                     private _sk = skill _u;
                                     private _sin = toLower _mineTip;
-                                    private _kitB = if ("ACE_DefusalKit" in (items _u)) then {0.05} else {0};
+                                    private _kitB = [0, 0.05] select ("ACE_DefusalKit" in items _u);
                                     private _tipC = 0;
                                     if ((_sin find "iedd") >= 0) then { _tipC = _tipC + 0.10; };   // mod IED'leri daha karmasik varsayilir
                                     if ((_sin find "big") >= 0) then { _tipC = _tipC + 0.05; };
                                     if ((_sin find "urban") >= 0) then { _tipC = _tipC + 0.03; };
-                                    private _bask = if ((getSuppression _u) > 0.3) then {0.20} else {0};
+                                    private _bask = [0, 0.2] select (getSuppression _u > 0.3);
                                     private _pB = ((0.55 + (0.35 * _sk) + _kitB - _tipC - _bask) max 0.35) min 0.97;
                                     private _z1 = random 1;
                                     private _pD = 0.15;

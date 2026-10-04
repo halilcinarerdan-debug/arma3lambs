@@ -109,7 +109,7 @@ _group setVariable [QGVAR(evadeStartTime), _baslangic];
                     _x enableAI "AUTOCOMBAT";
                     _x enableAI "COVER";
                     _x setVariable [QGVAR(forceMove), nil];
-                    _x setBehaviour (if ((_g getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {"AWARE"});
+                    _x setBehaviour (["AWARE", "COMBAT"] select ((_g getVariable [QGVAR(contact), 0]) > time));
                     _x allowFleeing 0;
                     _x setAnimSpeedCoef 1.0;
                     _x setUnitPos "AUTO";
@@ -262,7 +262,7 @@ diag_log format [
                 _x enableAI "COVER";
                 _x setVariable [QGVAR(forceMove), nil];
                 _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
-                _x setBehaviour (if ((_group getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {_origBeh});
+                _x setBehaviour ([_origBeh, "COMBAT"] select ((_group getVariable [QGVAR(contact), 0]) > time));
                 _x allowFleeing 0;
                 _x setAnimSpeedCoef 1.0;
                 _x setUnitPos "AUTO";

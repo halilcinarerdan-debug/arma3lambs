@@ -53,7 +53,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.38 [+%15, kulla
             // ---------------------------------------------------------
             private _donuyor = ((toLower (animationState _u)) find "turn") >= 0;
             private _g = group _u;
-            private _tabanAnim = if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]}) then {1.15} else {1.0};
+            private _tabanAnim = [1, 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
             private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.38]} else {_tabanAnim};
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
             // uygulanmiyordu. Artik deger degisince VEYA en geç 1.5 sn'de bir yeniden uygulanir; remoteExec ile TUM makinelerde

@@ -45,7 +45,7 @@ private _menzil = if (_launcher) then {1100} else {
     if (_glMi) then {350} else {
         if (_tur isEqualTo 2) then {200} else {
             if (_kal >= 1.9) then {900} else {
-                if (_kal >= 1.25) then {650} else {450}
+                [450, 650] select (_kal >= 1.25)
             }
         }
     }

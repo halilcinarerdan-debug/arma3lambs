@@ -321,7 +321,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             private _ates = _emir || _yandik;
             if (_ates isNotEqualTo (_ng getVariable [QGVAR(snpAtesEmri), false])) then {
                 _ng setVariable [QGVAR(snpAtesEmri), _ates];
-                diag_log format ["[SNIPER-EMIR] %1 | ates %2 (komutan karari: %3%4)", groupId _ng, ["YASAK", "SERBEST"] select _ates, _karar, if (_yandik) then {", yakildi"} else {""}];
+                diag_log format ["[SNIPER-EMIR] %1 | ates %2 (komutan karari: %3%4)", groupId _ng, ["YASAK", "SERBEST"] select _ates, _karar, ["", ", yakildi"] select (_yandik)];
             };
 
             // Pozisyona vardi mi

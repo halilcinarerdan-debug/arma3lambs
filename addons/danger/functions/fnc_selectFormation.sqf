@@ -244,10 +244,10 @@ switch (_context) do {
                         _reason = "yakin temas - maksimum ates / bina kenari";
                     } else {
                         if (_closest < _t2) then {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {if (_echYon isNotEqualTo "") then {_echYon} else {"LINE"}}};
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {["LINE", _echYon] select (_echYon isNotEqualTo "")}};
                             _reason = ["orta mesafe temas - arazi + cephe", "orta mesafe temas - dusman yanda: ECH (acik kanat korumasi)"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         } else {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {if (_echYon isNotEqualTo "") then {_echYon} else {"WEDGE"}}};
+                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {["WEDGE", _echYon] select (_echYon isNotEqualTo "")}};
                             _reason = ["uzak temas - esnek intikal", "uzak temas - dusman yanda: ECH"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         };
                     };

@@ -87,7 +87,7 @@ private _puanla = {
     private _e2 = [_p1, _p2] call _maruz;
     private _e = (_e1 + _e2) / 2;
     private _ortu = (count (nearestTerrainObjects [_p1, ["TREE", "BUSH", "SMALL TREE", "HIDE", "WALL", "FENCE", "ROCK"], 8, false, true])) min 4;
-    private _bina = (count (nearestTerrainObjects [_p1, ["BUILDING", "HOUSE"], 6, false, true])) > 0;
+    private _bina = (nearestTerrainObjects [_p1, ["BUILDING", "HOUSE"], 6, false, true]) isNotEqualTo [];
     private _ilerleme = ((_o distance2D _hedef) - (_p2 distance2D _hedef)) / (2 * _bacak);
     private _s = (-40 * _e) + (2 * _ortu) + (10 * _ilerleme) - (0.15 * (abs _aci)) - ([0, 12] select _bina);
     [_s, _e, _ortu, _p1]
@@ -157,7 +157,7 @@ if (!_gecerli) then {
             round (((_dir param [1, 0])) * 100), round (((_ilk param [1, 0])) * 100), _ilk param [2, 0],
             round ((diag_tickTime - _t0) * 1000), count _ekGoz
         ];
-        if ((count _pts) > 0) then {
+        if (_pts isNotEqualTo []) then {
             diag_log format ["[ROTA-ZINCIR] %1 | %2 bacak (%3 m'lik) | noktalar:%4", groupId _g, count _pts, round _bacak, _pts apply {mapGridPosition _x}];
         };
     };

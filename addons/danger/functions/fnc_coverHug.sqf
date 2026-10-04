@@ -105,7 +105,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     if (isNil "lambs_danger_hugAcikLogN") then { lambs_danger_hugAcikLogN = 0; };
                     if (lambs_danger_hugAcikLogN < 25) then {
                         lambs_danger_hugAcikLogN = lambs_danger_hugAcikLogN + 1;
-                        diag_log format ["[SIPER-YAPIS-TANI] %1 | %2 | dusman %3 m | yuzey: %4 | en yakin yuzey %5 m (esik 6) | stance:%6", groupId _g, name _u, round _ed, if (_hP isEqualTo []) then {"YOK (3 yukseklikte isin kesisimi yok)"} else {"var ama uzak"}, if (_hP isEqualTo []) then {"-"} else {_d toFixed 1}, stance _u];
+                        diag_log format ["[SIPER-YAPIS-TANI] %1 | %2 | dusman %3 m | yuzey: %4 | en yakin yuzey %5 m (esik 6) | stance:%6", groupId _g, name _u, round _ed, ["var ama uzak", "YOK (3 yukseklikte isin kesisimi yok)"] select (_hP isEqualTo []), if (_hP isEqualTo []) then {"-"} else {_d toFixed 1}, stance _u];
                     };
                     continue
                 };

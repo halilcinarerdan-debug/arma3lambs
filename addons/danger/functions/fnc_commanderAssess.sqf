@@ -170,7 +170,7 @@ private _armorDist = 9999;
 } forEach _armor;
 
 // AT varsa zirh 3, yoksa 6 guc puani (AT'siz piyade zirha karsi cok zayif)
-_enemyPower = _enemyPower + (_armorCount * (if (_ownAT > 0) then {3} else {6}));
+_enemyPower = _enemyPower + (_armorCount * ([6, 3] select (_ownAT > 0)));
 
 private _pwrRatio = _enemyPower / (_ownPower max 0.5);
 
@@ -278,7 +278,7 @@ private _isOpen   = !_isUrban && {!_isForest};
 private _inBuilding = (insideBuilding _unit) > 0.5;
 
 private _factorPosition = if (_isUrban) then {0.2} else {
-    if (_isForest) then {0.5} else {0.8}
+    [0.8, 0.5] select (_isForest)
 };
 
 // ---------------------------------------------------------------------------
@@ -308,7 +308,7 @@ private _enemyInBuilding = false;
 {
     if ((_x distance2D _targetPos) < 30) then {
         private _b = nearestTerrainObjects [getPosATL _x, ["BUILDING", "HOUSE"], 5, false, true];
-        if ((count _b) > 0) exitWith { _enemyInBuilding = true; };
+        if (_b isNotEqualTo []) exitWith { _enemyInBuilding = true; };
     };
 } forEach _enemies;
 
@@ -505,11 +505,7 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
         case "ASSAULT":  { "BOUNDING" };
         default          { _decision };
     };
-    _reason = if (_tekrarMi) then {
-        "hafiza: alternatif"
-    } else {
-        "koord: farkli grup"
-    };
+    _reason = ["koord: farkli grup", "hafiza: alternatif"] select (_tekrarMi);
 };
 
 // KUCUK EKIP / YAKIN TEMAS: cekilme (koşarak kacma) ONERILMEZ — 60 m'den yakin dusmana sirt cevirmek olum; <= 3 kisi acikta kosamaz.

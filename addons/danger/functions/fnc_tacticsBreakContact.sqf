@@ -209,8 +209,8 @@ diag_log format [
                     private _gy = AGLToASL (_c vectorAdd [0, 0, 0.4]);
                     if (terrainIntersectASL [_tehditGoz, _gy] || {lineIntersects [_tehditGoz, _gy, objNull, objNull]}) then { _s = _s + 8; };
                 };
-                if ((count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE"], 6, false, true])) > 0) then { _s = _s - 25; };
-                if ((count (nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE"], 3, false, true])) > 0) then { _s = _s + 8; };
+                if ((nearestTerrainObjects [_c, ["BUILDING", "HOUSE"], 6, false, true]) isNotEqualTo []) then { _s = _s - 25; };
+                if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE"], 3, false, true]) isNotEqualTo []) then { _s = _s + 8; };
                 if (_s > _ebS) then { _ebS = _s; _eb = _c; _ebG = _gizli; };
             } forEach [0, 20, -20, 40, -40, 60, -60, 80, -80];
         } forEach [25, 40, 60];

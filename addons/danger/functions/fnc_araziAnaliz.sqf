@@ -56,7 +56,7 @@ private _hakimS = 2.5;
             private _gizliMi = (terrainIntersectASL [_egoz, _pYat]) || {lineIntersects [_egoz, _pYat, objNull, objNull]};
             if (_gizliMi) then { _gizli = _gizli + 1; } else {
                 // hakim aday: yuksek + tehdidi gorebilir + ufukta degil + bina yok
-                if (_hFark >= _hakimS && {!((count (nearestTerrainObjects [_p, ["BUILDING", "HOUSE"], 6, false, true])) > 0)}) then {
+                if (_hFark >= _hakimS && {(nearestTerrainObjects [_p, ["BUILDING", "HOUSE"], 6, false, true]) isEqualTo []}) then {
                     private _dd = vectorNormalized (_pYat vectorDiff _egoz);
                     private _s3 = _pYat vectorAdd (_dd vectorMultiply 300);
                     if (terrainIntersectASL [_pYat, _s3] || {lineIntersects [_pYat, _s3, objNull, objNull]}) then {
@@ -74,7 +74,7 @@ private _egimMax = if (_egimler isEqualTo []) then {0} else {selectMax _egimler}
 
 // aciklik: agac + cali + bina yogunlugu (yaricap icinde)
 private _nesneler = count (nearestTerrainObjects [_c, ["TREE", "SMALL TREE", "BUSH", "BUILDING", "HOUSE", "ROCK", "WALL"], _r, false, true]);
-private _yogunluk = _nesneler / ((_r * _r * 3.14159) / 10000);   // 1 hektar basina
+private _yogunluk = _nesneler / ((_r * _r * pi) / 10000);   // 1 hektar basina
 private _aciklik = "KARISIK";
 if (_yogunluk >= 90) then { _aciklik = "KAPALI"; };
 if (_yogunluk < 30) then { _aciklik = "ACIK"; };

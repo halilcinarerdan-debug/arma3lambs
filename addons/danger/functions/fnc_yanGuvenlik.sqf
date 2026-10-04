@@ -59,7 +59,7 @@ private _calis = {
             private _lp = getPosATL _l;
 
             private _aday = _canli select {
-                !(_x isEqualTo _l) && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
+                _x isNotEqualTo _l && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
                 && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(forceMove), false])}
                 && {isNil {_x getVariable QGVAR(noktaEk)}}
             };

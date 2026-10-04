@@ -134,7 +134,7 @@ private _halkaFn = {
         private _rr = [_x] call _rolFn;
         if (_rr isEqualTo "MG") then {0} else {
             if (_rr isEqualTo "AT") then {1} else {
-                if (_rr isEqualTo "MARKSMAN") then {2} else {3}
+                [3, 2] select (_rr isEqualTo "MARKSMAN")
             }
         }
     }, "ASCEND"] call BIS_fnc_sortBy;
@@ -455,7 +455,7 @@ if (!isNull _g && {(_g getVariable [QGVAR(sweepToken), ""]) isEqualTo _token}) t
         };
     } forEach (units _g);
     if (!_baskaTaktik) then {
-        _g setBehaviour (if (_iptalOldu) then {"COMBAT"} else {_origBeh});
+        _g setBehaviour ([_origBeh, "COMBAT"] select (_iptalOldu));
     };
 
     diag_log format [

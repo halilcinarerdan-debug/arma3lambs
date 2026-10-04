@@ -79,7 +79,7 @@ private _calis = {
             _nabizT = time + 60;
             diag_log format ["[HAVA-FARK-NABIZ] tur:%1 | hava araci:%2 | yerel AI grup:%3 | son tur:%4 ms | adim:%5", _tur, count (vehicles select {alive _x && {(_x isKindOf "Helicopter") || {unitIsUAV _x}}}), count (allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x}}), round _turMs, missionNamespace getVariable ["lambs_danger_havaAdim", "?"]];
         };
-        private _hava = vehicles select {alive _x && {(_x isKindOf "Helicopter") || {unitIsUAV _x}} && {(count (crew _x)) > 0}};
+        private _hava = vehicles select {alive _x && {(_x isKindOf "Helicopter") || {unitIsUAV _x}} && {(crew _x) isNotEqualTo []}};
         if (_hava isEqualTo []) then { continue };
 
         // heli ates ettiginde saat tutulur (Fired); yerel degilse aracin sahibinde eklenir
@@ -257,13 +257,13 @@ private _calis = {
                 private _garrisonF = missionNamespace getVariable ["lambs_danger_fnc_tacticsGarrison", {false}];
                 private _ok = false;
                 private _yakinB = nearestObjects [_lp, ["House", "Building"], 42];
-                if ((count _yakinB) > 0) then {
+                if (_yakinB isNotEqualTo []) then {
                     // v8.56: GARRISON TESHISI. Cagri oncesi: bina / bina pozisyonu sayisi, hazir (findReadyUnits) asker sayisi
                     private _bpos = [_lp, 42, true, false, true] call EFUNC(main,findBuildings);
                     private _hazir = [_l, 150] call EFUNC(main,findReadyUnits);
-                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI ONCESI | yakin bina:%2 (en yakin %3 m) | kullanilabilir bina pozisyonu:%4 | hazir asker:%5/%6 | grup:%7", groupId _g, count _yakinB, round (_l distance2D (_yakinB select 0)), count _bpos, count _hazir, count (units _g), if (_mesgul) then {"bounding/taktik"} else {"serbest"}];
+                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI ONCESI | yakin bina:%2 (en yakin %3 m) | kullanilabilir bina pozisyonu:%4 | hazir asker:%5/%6 | grup:%7", groupId _g, count _yakinB, round (_l distance2D (_yakinB select 0)), count _bpos, count _hazir, count (units _g), ["serbest", "bounding/taktik"] select (_mesgul)];
                     _ok = [_g, getPosATL _l, [], _sure] call _garrisonF;
-                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI SONUCU: %2%3", groupId _g, _ok, if (_ok isEqualType true && {_ok}) then {" (LAMBS tacticsGarrison kabul etti)"} else {" -> garrison BASARISIZ, HIDE'a dusuluyor (bina yok / pozisyon yok / hazir asker yok)"}];
+                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI SONUCU: %2%3", groupId _g, _ok, [" -> garrison BASARISIZ, HIDE'a dusuluyor (bina yok / pozisyon yok / hazir asker yok)", " (LAMBS tacticsGarrison kabul etti)"] select ((_ok isEqualType true) && {_ok})];
                     if (_ok isEqualType true && {_ok}) then {
                         _yontem = "GARRISON";
                         private _garLog = missionNamespace getVariable ["lambs_danger_havaGarLog", {}];

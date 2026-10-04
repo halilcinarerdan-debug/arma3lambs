@@ -56,7 +56,7 @@ if ((_onbellek select 0) isEqualTo _primary) then {
         _silahRol = if (_kapasite >= 75 || _mgAd) then {
             "MG"
         } else {
-            if (_nisanciAd) then {"MARKSMAN"} else {"RIFLE"}
+            ["RIFLE", "MARKSMAN"] select (_nisanciAd)
         };
     };
     _unit setVariable [QGVAR(roleCache), [_primary, _silahRol]];

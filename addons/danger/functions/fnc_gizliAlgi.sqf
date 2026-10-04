@@ -82,7 +82,7 @@ private _calis = {
             private _irAcik = _isikAcik && {_karanlik} && {[_p] call _irLazer};
             if (!_adimTara && {!_fenerAcik} && {!_irAcik}) then { continue };
 
-            private _tara = if (_fenerAcik) then { 250 } else { if (_irAcik) then { 500 } else { _r } };
+            private _tara = if (_fenerAcik) then { 250 } else { [_r, 500] select (_irAcik) };
             private _bakisYon = getDir _p;
             {
                 private _b = _x;

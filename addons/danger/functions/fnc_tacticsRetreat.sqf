@@ -116,7 +116,7 @@ private _wpSec = {
             _s = _s - (_bina * 25);
             private _cASL = AGLToASL (_c vectorAdd [0, 0, 1.2]);
             if (terrainIntersectASL [_eASL, _cASL] || {lineIntersects [_eASL, _cASL, objNull, objNull]}) then { _s = _s + 35; };
-            if ((count (nearestTerrainObjects [_c, ["TREE", "ROCK", "HIDE", "BUSH", "WALL"], 3, false, true])) > 0) then { _s = _s + 10; };
+            if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "HIDE", "BUSH", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 10; };
             if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
             if ((_c distance2D _targetPos) < (_o distance2D _targetPos)) then { _s = _s - 40; };
             if (_s > _bestS) then { _bestS = _s; _best = _c; };
@@ -176,7 +176,7 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
                     _x enableAI "AUTOCOMBAT";
                     _x enableAI "COVER";
                     _x setVariable [QGVAR(forceMove), nil];
-                    _x setBehaviour (if ((_g getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {"AWARE"});
+                    _x setBehaviour (["AWARE", "COMBAT"] select ((_g getVariable [QGVAR(contact), 0]) > time));
                     _x allowFleeing 0;
                     _x setAnimSpeedCoef 1.0;
                     _x setUnitPos "AUTO";
@@ -711,7 +711,7 @@ if (EGVAR(main,debug_functions)) then {
                 _x setVariable [QGVAR(forceMove), nil];
                 _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
                 // temas suruyorsa COMBAT (siper arar / yatar), degilse cekilme oncesi davranis
-                _x setBehaviour (if ((_group getVariable [QGVAR(contact), 0]) > time) then {"COMBAT"} else {_origBeh});
+                _x setBehaviour ([_origBeh, "COMBAT"] select ((_group getVariable [QGVAR(contact), 0]) > time));
                 _x allowFleeing 0;
                 _x setAnimSpeedCoef 1.0;
                 _x setUnitPos "AUTO";

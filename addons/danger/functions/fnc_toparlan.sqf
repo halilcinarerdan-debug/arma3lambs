@@ -101,7 +101,7 @@ if ((count _us) >= 5 && {_tehditVar}) then {
                 private _cASL = AGLToASL (_c vectorAdd [0, 0, 1.0]);
                 // tehditten gorunmemek (gizli) iyi
                 if (terrainIntersectASL [_eEye, _cASL] || {lineIntersects [_eEye, _cASL, objNull, objNull]}) then { _s = _s + 25; };
-                if ((count (nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE", "BUSH"], 3, false, true])) > 0) then { _s = _s + 10; };
+                if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE", "BUSH"], 3, false, true]) isNotEqualTo []) then { _s = _s + 10; };
                 if (_s > _enIyiS) then { _enIyiS = _s; _enIyi = _c; };
             } forEach [-35, 0, 35];
         } forEach [30, 40, 45];

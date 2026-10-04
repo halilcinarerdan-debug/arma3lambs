@@ -69,7 +69,7 @@ private _calis = {
                 if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaGecT), -999])) < 20}) then { _neden = "serbest birakma bekleme (20 sn)"; };
             };
 
-            private _nk = if (_neden isEqualTo "") then {"KURULDU"} else {_neden};
+            private _nk = [_neden, "KURULDU"] select (_neden isEqualTo "");
             _nedenSay set [_nk, (_nedenSay getOrDefault [_nk, 0]) + 1];
             if (_neden isNotEqualTo "") then {
                 if (_eski isNotEqualTo []) then {
@@ -97,7 +97,7 @@ private _calis = {
             // eleman secimi (yoksa / biri oldu ise tamamla)
             if ((count _eski) < 2) then {
                 private _aday = _canli select {
-                    !(_x isEqualTo _l) && {([_x, true] call _rolFn) isEqualTo "RIFLE"} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
+                    _x isNotEqualTo _l && {([_x, true] call _rolFn) isEqualTo "RIFLE"} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
                     && {!(_x getVariable [QGVAR(baskiTuf), false])} && {([_x] call _uglFn) isEqualTo ""} && {isNil {_x getVariable QGVAR(yanGuv)}}
                     && {!(_x getVariable [QGVAR(iedGuv), false])} && {!(_x getVariable [QGVAR(iedIsci), false])} && {!(_x in _eski)}
                     && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(forceMove), false])}

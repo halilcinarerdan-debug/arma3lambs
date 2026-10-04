@@ -110,13 +110,13 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                         {
                             private _c2 = _upos getPos [_r, _x];
                             if (surfaceIsWater _c2) then { continue };
-                            private _bina = (count (nearestTerrainObjects [_c2, ["BUILDING", "HOUSE"], 5, false, true])) > 0;
+                            private _bina = (nearestTerrainObjects [_c2, ["BUILDING", "HOUSE"], 5, false, true]) isNotEqualTo [];
                             if (_bina) then { continue };
                             private _s = -(_r * 0.3);
                             if (!([_gozE, _c2, 1.0] call _ufukFn)) then { _s = _s + 10; };
                             private _c2ASL = AGLToASL (_c2 vectorAdd [0, 0, 0.4]);
                             if (terrainIntersectASL [_gozE, _c2ASL] || {lineIntersects [_gozE, _c2ASL, objNull, objNull]}) then { _s = _s + 12; };
-                            if ((count (nearestTerrainObjects [_c2, ["TREE", "BUSH", "SMALL TREE", "HIDE", "ROCK", "WALL"], 3, false, true])) > 0) then { _s = _s + 4; };
+                            if ((nearestTerrainObjects [_c2, ["TREE", "BUSH", "SMALL TREE", "HIDE", "ROCK", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 4; };
                             if (_s > _enIyiS) then { _enIyiS = _s; _enIyi = _c2; };
                         } forEach [0, 45, 90, 135, 180, 225, 270, 315];
                     } forEach [8, 16];

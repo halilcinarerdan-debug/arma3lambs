@@ -69,7 +69,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     private _minDist = if (_evade) then {
         ELITE_COVER_MIN_DIST max 40
     } else {
-        if (_survive) then {20} else {ELITE_COVER_MIN_DIST}
+        [ELITE_COVER_MIN_DIST, 20] select (_survive)
     };
 
     // ---------------------------------------------------------------------
@@ -233,7 +233,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         } forEach _digerTehditler;
 
                         // Uzaklik maliyeti
-                        _skor = _skor - ((_unit distance2D _pos) * (if (_evade) then {0.25} else {if (_survive) then {0.9} else {0.5}}));
+                        _skor = _skor - ((_unit distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}));
 
                         // Dusmana yaklasma: ADVANCE bonus, EVADE uzaklasma bonusu, digerleri ceza
                         private _yaklasma = _unitEnemyDist - _enemyDist;
@@ -286,7 +286,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         };
                         _skor = _skor - ((count ((_pos nearEntities ["CAManBase", 5]) - [_unit])) * 10);
 
-                        _adaylar pushBack [_skor, _pos, _stances select ((count _stances) - 1)];
+                        _adaylar pushBack [_skor, _pos, _stances select -1];
                     };
                 };
             };
@@ -317,7 +317,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                 private _dd = vectorNormalized (_bsh vectorDiff _egoz);
                 private _s3 = _bsh vectorAdd (_dd vectorMultiply 300);
                 if (!(terrainIntersectASL [_bsh, _s3]) && {!(lineIntersects [_bsh, _s3, objNull, objNull])}) then { _sk = _sk - 10; };
-                if ((count ((_c nearEntities ["CAManBase", 4]) - [_unit])) > 0) then { _sk = _sk - 10; };
+                if (((_c nearEntities ["CAManBase", 4]) - [_unit]) isNotEqualTo []) then { _sk = _sk - 10; };
                 _adaylar pushBack [_sk, _c, ["DOWN", "MIDDLE"] select _hCom];
             } forEach [0, 45, 90, 135, 180, 225, 270, 315];
         } forEach [6, 14];
@@ -492,7 +492,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
             if (isNil "lambs_main_siperLogN") then { lambs_main_siperLogN = 0; };
             if (lambs_main_siperLogN < 40) then {
                 lambs_main_siperLogN = lambs_main_siperLogN + 1;
-                diag_log format ["[SIPER-ANALIZ] %1 | mod:%2 | aday:%3 | faz2:%4 | ilk secim %5 (%6 m)", name _unit, _mode, count _adaylar, _k, if (((_adaylar select 0) select 1) isEqualTo _ilkPos) then {"ayni"} else {"DEGISTI"}, round (_unit distance2D ((_adaylar select 0) select 1))];
+                diag_log format ["[SIPER-ANALIZ] %1 | mod:%2 | aday:%3 | faz2:%4 | ilk secim %5 (%6 m)", name _unit, _mode, count _adaylar, _k, ["DEGISTI", "ayni"] select (((_adaylar select 0) select 1) isEqualTo _ilkPos), round (_unit distance2D ((_adaylar select 0) select 1))];
             };
         };
         private _adet = if (_maxResults isEqualTo -1) then {

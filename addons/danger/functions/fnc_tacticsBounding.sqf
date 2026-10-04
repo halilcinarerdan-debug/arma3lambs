@@ -318,7 +318,7 @@ if (EGVAR(main,debug_functions)) then {
         if (!alive _b) exitWith {};
         _b setUnitPosWeak (
             if ((getSuppression _b) >= 0.85) then {"DOWN"} else {
-                if ((_b distance2D _p) > 8) then {"AUTO"} else {_s}
+                [_s, "AUTO"] select ((_b distance2D _p) > 8)
             }
         );
         // VARDI: sipernin yerinde KAL (doStop) — aksi halde AI formasyon slotuna (liderin yanina) geri yuruyup "ileri-geri" yapiyor.
@@ -608,10 +608,10 @@ if (EGVAR(main,debug_functions)) then {
         _maneuver = _maneuver select {alive _x};
         _reserve  = _reserve select {alive _x};
 
-        if (count _fse < 2 && {count _reserve > 0}) then {
+        if (count _fse < 2 && {_reserve isNotEqualTo []}) then {
             _fse pushBack (_reserve deleteAt 0);
         };
-        if (count _maneuver < 2 && {count _reserve > 0}) then {
+        if (count _maneuver < 2 && {_reserve isNotEqualTo []}) then {
             _maneuver pushBack (_reserve deleteAt 0);
         };
 
@@ -669,13 +669,13 @@ if (EGVAR(main,debug_functions)) then {
         private _yarim = ceil (((count _alphaE) + (count _bravoE)) / 2);
         while {(count _alphaE) > _yarim && {(count _alphaE) > 1}} do {
             private _gk = _alphaE select {([_x] call _rolFn) isNotEqualTo "MG"};
-            private _kk = if (_gk isEqualTo []) then {_alphaE select ((count _alphaE) - 1)} else {_gk select ((count _gk) - 1)};
+            private _kk = if (_gk isEqualTo []) then {_alphaE select -1} else {_gk select -1};
             _alphaE = _alphaE - [_kk];
             _bravoE pushBack _kk;
         };
         while {(count _bravoE) > _yarim && {(count _bravoE) > 1}} do {
             private _gk = _bravoE select {([_x] call _rolFn) isNotEqualTo "MG"};
-            private _kk = if (_gk isEqualTo []) then {_bravoE select ((count _bravoE) - 1)} else {_gk select ((count _gk) - 1)};
+            private _kk = if (_gk isEqualTo []) then {_bravoE select -1} else {_gk select -1};
             _bravoE = _bravoE - [_kk];
             _alphaE pushBack _kk;
         };
@@ -808,7 +808,7 @@ if (EGVAR(main,debug_functions)) then {
         //    odak yoksa / oldu ise 1.5 sn. Dusman ates ediyorken koşulmaz.
         // -------------------------------------------------------------------
         private _atesBasi = time;
-        [_kapsama, _target, _targetASL, _odak, if (_fseSicrama) then {"Bound/Cover(Maneuver)"} else {"Bound/Suppress"}] call _atesEt;
+        [_kapsama, _target, _targetASL, _odak, ["Bound/Suppress", "Bound/Cover(Maneuver)"] select (_fseSicrama)] call _atesEt;
 
         waitUntil {
             sleep 0.5;
@@ -829,7 +829,7 @@ if (EGVAR(main,debug_functions)) then {
         // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
         private _rotaAci = [_group, _target] call FUNC(rotaPlan);
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, if (_fseSicrama) then {"Leapfrog/Move"} else {"TeamBound/Move"}, (_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), (_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 
