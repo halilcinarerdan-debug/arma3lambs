@@ -51,7 +51,7 @@ diag_log "[HAVA-FARK] dron / helikopter farkindaligi watchdog baslatildi";
                         if (_dv <= 1500 && {_taniN < 120}) then {
                             _taniN = _taniN + 1;
                             diag_log format ["[HAVA-FARK-TANI] %1 | %2 %3 %4 m | taraf:%5 dost:%6 | knows:%7 | silahli:%8 uav:%9 | bayrak: bnd:%10 tac:%11 ret:%12",
-                                groupId _gv, typeOf _x, side (group (effectiveCommander _x)), round _dv, side _gv, _gv getFriend (side (group (effectiveCommander _x))),
+                                groupId _gv, typeOf _x, side (group (effectiveCommander _x)), round _dv, side _gv, (side _gv) getFriend (side (group (effectiveCommander _x))),
                                 (_gv knowsAbout _x) toFixed 2, ((_x weaponsTurret [-1]) isNotEqualTo []) || {(_x weaponsTurret [0]) isNotEqualTo []}, unitIsUAV _x,
                                 _gv getVariable [QGVAR(isBounding), false], _gv getVariable [QGVAR(isExecutingTactic), false], _gv getVariable [QGVAR(isRetreating), false]];
                         };

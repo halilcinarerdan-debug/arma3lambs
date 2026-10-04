@@ -954,3 +954,6 @@ v8.50 — IED / HAVA testi (RPT 08:29) sonrasi duzeltmeler.
        Kok neden: taktik kilidi (bounding) olan askerler IED'den kacmiyordu (13'ten 2) -> IED tehlikesi kilidi gecer, 60 sn boyunca 4 sn'de bir geri itme.
   HAVA: RPT'de hava araci izi yoktu; olasi sebepler bounding grubun atlanmasi ve knowsAbout 0.8 esigi. Bilgi esigi 0.4; bounding / taktik gruplari silahli tehditte
        saklanmaz ama AA ateşi + reveal ([HAVA-FARK] ... BOUNDING-DEVAM). Teshis: [HAVA-FARK-TANI] (30 sn'de bir, <=1500 m hava araci) ve [HAVA-FARK-ATLA].
+
+v8.50a — HAVA watchdog'u v8.50 tani satirindaki hata yuzunden ilk calismada olmustu (RPT: "Error getfriend: Type Group, expected Side", fnc_havaFarkindalik.sqf:54).
+        spawn dongusu hata ile sonlanir -> heli geldiginde hic tepki yoktu. (_gv getFriend ...) -> ((side _gv) getFriend ...) duzeltildi.
