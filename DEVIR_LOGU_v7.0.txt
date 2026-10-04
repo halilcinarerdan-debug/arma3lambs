@@ -960,3 +960,11 @@ v8.50a — HAVA watchdog'u v8.50 tani satirindaki hata yuzunden ilk calismada ol
 
 v8.50b — IED imhasi icin kit sarti: ACE_DefusalKit (ACE) veya ToolKit (vanilla). EOD'da kit yoksa imha denenmez, yalniz kacinma + erken tespit
         (log: imha:yok(imha kiti yok)). Kitli EOD'lar arasindan IED'e en yakin olan gorevlendirilir.
+
+v8.50c — IED testi (RPT 08:55): EOD (kitli) iki kez de ikinci IED'e (ACE_IED*_Range_Ammo, yakinlik tetikli) 4 m'de yetisince oldu; imha hic tamamlanmadi.
+  Kok nedenler: (1) aday taramasi yalniz lider merkezliydi, EOD liderden 70 m+ uzaklasinca ikinci IED gorulmuyordu -> artik lider + EOD / dedektorlu askerler;
+  (2) iki IED = iki paralel imha is parcacigi, EOD'ye celisen doMove -> yeni IED bulununca devam eden imha iptal ('ikincil cihaz'), EOD geri cekilir;
+  (3) yakinlik tetikli (range / pressure / tripwire) IED'e EOD yurumez; hedefin 40 m cevresinde baska aday varsa imha denenmez (IED'ler kumelenir);
+  (4) yaklasma esigi 2.5 -> 4 m; imha YARIM KALDI logu nedeni yazar (IED yok / ikincil cihaz / sure-temas-olu).
+  TEMAS: temasta imha yok. Tehlike yaricapi (buyuk IED 55 m, digerleri 30 m) icindekiler yere yatar (setUnitPos DOWN, 14 sn), surunerek yaricap+8 m'ye cekilir;
+  disindakiler siperde kalip ates eder, IED'e dogru yurumez; COMBAT / hiz degismez (AWARE / LIMITED yalniz temas yoksa).

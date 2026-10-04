@@ -45,7 +45,15 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
             ) then { continue };
             private _lp = getPosATL _l;
-            private _adaylar = (allMines select {(_x distance2D _lp) < 130}) + ((_lp nearObjects 130) select {(toLower (typeOf _x)) find "ied" >= 0 && {!(_x in allMines)}});
+            // v8.50c: tarama merkezi yalniz lider degil, EOD / dedektorlu askerler de (EOD liderden uzaklasinca ikinci IED 4 m'de fark ediliyordu)
+            private _merkezler = [_lp] + ((units _g) select {alive _x && {isNull objectParent _x} && {(_x getUnitTrait "explosiveSpecialist") || {_x getVariable ["ACE_isEOD", false]} || {"MineDetector" in (items _x)}}} apply {getPosATL _x});
+            private _adaylar = [];
+            {
+                private _c = _x;
+                {
+                    if !(_x in _adaylar) then { _adaylar pushBack _x };
+                } forEach ((allMines select {(_x distance2D _c) < 130}) + ((_c nearObjects 130) select {(toLower (typeOf _x)) find "ied" >= 0 && {!(_x in allMines)}}));
+            } forEach _merkezler;
             if (_adaylar isEqualTo []) then { continue };
             private _bilinen = _g getVariable [QGVAR(iedBilinen), []];
             private _us = (units _g) select {alive _x && {isNull objectParent _x}};
@@ -81,33 +89,48 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 private _kitli = _eodlar select {private _it = items (_x select 1); ("ACE_DefusalKit" in _it) || {"ToolKit" in _it}};
                 private _imhaU = if (_kitli isEqualTo []) then {objNull} else {(_kitli select 0) select 1};
                 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
-                private _imhaMi = !isNull _imhaU && {!_temas} && {(_imhaU distance2D _m) < 110};
-                if (_imhaMi) then { _eodU = _imhaU; };
+                private _sinif = toLower (typeOf _m);
+                // tehlike yaricapi: buyuk IED 55 m, digerleri 30 m
+                private _yaricap = [30, 55] select ((_sinif find "big") >= 0);
+                // ikincil cihaz suphesi: hedefin 40 m cevresinde baska IED adayi var mi (IED'ler kumelenir); yakinlik tetikli (range / pressure) tiplere EOD yurumez
+                private _ikincil = (_adaylar select {!(_x isEqualTo _m) && {(_x distance2D _m) < 40}}) isNotEqualTo [];
+                private _yakinlik = ((_sinif find "range") >= 0) || {(_sinif find "pressure") >= 0} || {(_sinif find "tripwire") >= 0};
+                private _imhaMi = !isNull _imhaU && {!_temas} && {!_ikincil} && {!_yakinlik} && {(_imhaU distance2D _m) < 110} && {(time - (_g getVariable [QGVAR(iedImhaT), -999])) > 100};
+                if (_imhaMi) then { _eodU = _imhaU; _g setVariable [QGVAR(iedImhaT), time]; };
+                // yeni IED bulundu: devam eden imha varsa (ikincil cihaz) iptal et, EOD de geri cekilir
+                _g setVariable [QGVAR(iedAbort), time];
 
-                // uzaklasma (50 m yaricap -> 55 m); EOD imha edecekse kalir. v8.50: taktik kilidi (bounding vb.) IED tehlikesinde gecilir
+                // uzaklasma (yaricap + 8 m); EOD imha edecekse kalir. Taktik kilidi (bounding vb.) IED tehlikesinde gecilir.
+                // TEMASTA: yaricap icindekiler yere yatar, surunerek uzaklasir (parca etkisi azalir); disindakiler siperde ates etmeye devam eder, IED'e dogru yurumez
                 private _uzaklasan = 0;
                 {
-                    if ((_x distance2D _m) < 50 && {!(_imhaMi && {_x isEqualTo _eodU})}) then {
+                    if ((_x distance2D _m) < _yaricap && {!(_imhaMi && {_x isEqualTo _eodU})}) then {
                         _x setVariable [QGVAR(taktikKilit), nil];
+                        if (_temas) then {
+                            _x setUnitPos "DOWN";
+                            [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_x], 14] call CBA_fnc_waitAndExecute;
+                        };
                         private _yon = _mp getDir _x;
-                        _x doMove (_mp getPos [55 + (random 8), _yon + (random 40) - 20]);
+                        _x doMove (_mp getPos [_yaricap + 8 + (random 6), _yon + (random 40) - 20]);
                         _uzaklasan = _uzaklasan + 1;
                     };
                 } forEach _us;
-                _g setBehaviour "AWARE";
-                _g setSpeedMode "LIMITED";
-                [{ params ["_gg"]; if (!isNull _gg && {!(_gg getVariable [QGVAR(isExecutingTactic), false])}) then { _gg setSpeedMode "NORMAL"; }; }, [_g], 60] call CBA_fnc_waitAndExecute;
+                if (!_temas) then {
+                    _g setBehaviour "AWARE";
+                    _g setSpeedMode "LIMITED";
+                    [{ params ["_gg"]; if (!isNull _gg && {!(_gg getVariable [QGVAR(isExecutingTactic), false])}) then { _gg setSpeedMode "NORMAL"; }; }, [_g], 60] call CBA_fnc_waitAndExecute;
+                };
 
                 // bekletme: bounding / formasyon komutlari geri cevirmesin, 60 sn'de 4 sn'de bir 50 m icindekileri geri it
-                [_g, _m, _mp, _eodU, _imhaMi] spawn {
-                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar"];
+                [_g, _m, _mp, _eodU, _imhaMi, _yaricap] spawn {
+                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar", "_yar"];
                     private _t0 = time;
                     while {(time - _t0) < 60 && {!isNull _grp} && {_grp getVariable [QGVAR(iedPos), _pos] isEqualTo _pos}} do {
                         sleep 4;
                         if (isNull _mine && {!_imhaVar}) exitWith {};
                         {
-                            if (alive _x && {(_x distance2D _pos) < 48} && {!(_imhaVar && {_x isEqualTo _eod})} && {isNull objectParent _x}) then {
-                                _x doMove (_pos getPos [56 + (random 8), _pos getDir _x]);
+                            if (alive _x && {(_x distance2D _pos) < (_yar - 2)} && {!(_imhaVar && {_x isEqualTo _eod})} && {isNull objectParent _x}) then {
+                                _x doMove (_pos getPos [_yar + 8 + (random 6), _pos getDir _x]);
                             };
                         } forEach (units _grp);
                     };
@@ -117,19 +140,25 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                 // imha: EOD varsa ve temas yoksa (vanilla mayin + ACE / mod IED); EOD yoksa yalniz kacinilir
                 private _imha = "yok(EOD yok)";
                 if (!isNull _eodU && {isNull _imhaU}) then { _imha = "yok(imha kiti yok: ACE_DefusalKit / ToolKit)"; };
-                if (_temas && {!isNull _imhaU}) then { _imha = "yok(temas var)"; };
+                if (_temas && {!isNull _imhaU}) then { _imha = "yok(temas var: yere yat + uzaklas)"; };
+                if (!_temas && {!isNull _imhaU} && {_ikincil}) then { _imha = "yok(ikincil cihaz suphesi: 40 m cevrede baska IED)"; };
+                if (!_temas && {!isNull _imhaU} && {_yakinlik}) then { _imha = "yok(yakinlik tetikli IED: EOD yurumez)"; };
                 if (_imhaMi) then {
                     _imha = "deneniyor";
-                    [_eodU, _m, _g] spawn {
-                        params ["_u", "_mine", "_grp"];
+                    [_eodU, _m, _g, typeOf _m, _yaricap] spawn {
+                        params ["_u", "_mine", "_grp", "_mineTip", "_yariC"];
                         private _t0 = time;
+                        private _ab = _grp getVariable [QGVAR(iedAbort), 0];
                         waitUntil {
                             sleep 1;
                             _u doMove (getPosATL _mine);
-                            isNull _mine || {!alive _u} || {(_u distance2D _mine) < 2.5} || {(time - _t0) > 90} || {(_grp getVariable [QGVAR(contact), 0]) > time}
+                            isNull _mine || {!alive _u} || {(_u distance2D _mine) < 4} || {(time - _t0) > 90} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_grp getVariable [QGVAR(iedAbort), 0]) > _ab}
                         };
-                        if (isNull _mine || {!alive _u} || {(_u distance2D _mine) >= 3.5}) exitWith {
-                            diag_log format ["[IED-FARK] %1 | imha YARIM KALDI (sure/temas/olu) | %2", name _u, typeOf _mine];
+                        if (isNull _mine || {!alive _u} || {(_u distance2D _mine) >= 5.5}) exitWith {
+                            private _sn = if ((_grp getVariable [QGVAR(iedAbort), 0]) > _ab) then {"ikincil cihaz / yeni IED"} else {if (isNull _mine) then {"IED yok (patladi / silindi)"} else {"sure / temas / olu"}};
+                            diag_log format ["[IED-FARK] %1 | imha YARIM KALDI (%3) | %2", name _u, _mineTip, _sn];
+                            // iptal / temas: EOD da IED'den yaricap disina cekilir
+                            if (alive _u && {!isNull _mine}) then { _u doMove ((getPosATL _mine) getPos [_yariC + 8, (getPosATL _mine) getDir _u]); };
                         };
                         // calisma: dur, diz coker, IED'e bak (ACE EOD sureci ~8 sn simule edilir)
                         _u doWatch _mine;
@@ -138,7 +167,7 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                         private _t1 = time;
                         waitUntil {
                             sleep 1;
-                            (time - _t1) > 8 || {!alive _u} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_u distance2D _mine) > 5}
+                            (time - _t1) > 8 || {!alive _u} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_grp getVariable [QGVAR(iedAbort), 0]) > _ab} || {(_u distance2D _mine) > 5}
                         };
                         if (alive _u && {!isNull _mine} && {(_u distance2D _mine) <= 5} && {(_grp getVariable [QGVAR(contact), 0]) <= time}) then {
                             if (_mine isKindOf "MineBase") then { _u action ["Deactivate", _u, _mine]; sleep 1; };
@@ -147,12 +176,12 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                         };
                         _u doWatch objNull;
                         _u setUnitPos "AUTO";
-                        diag_log format ["[IED-FARK] %1 | imha %2 | %3 | ACE:%4 | kit:%5", name _u, ["BASARISIZ", "TAMAM"] select _bitti, typeOf _mine, !isNil "ace_explosives_fnc_defuseExplosive", "ACE_DefusalKit" in (items _u)];
+                        diag_log format ["[IED-FARK] %1 | imha %2 | %3 | ACE:%4 | kit:%5", name _u, ["BASARISIZ", "TAMAM"] select _bitti, _mineTip, !isNil "ace_explosives_fnc_defuseExplosive", "ACE_DefusalKit" in (items _u)];
                     };
                 };
                 if (_logN < 100) then {
                     _logN = _logN + 1;
-                    diag_log format ["[IED-FARK] %1 | %2 | lider %3 m | tespit:%4 (%7 m) | uzaklasan:%5 | imha:%6", groupId _g, typeOf _m, round (_lp distance2D _m), name _tespit, _uzaklasan, _imha, round (_tespit distance2D _m)];
+                    diag_log format ["[IED-FARK] %1 | %2 | lider %3 m | tespit:%4 (%7 m) | uzaklasan:%5 (yaricap %8 m, temas:%9) | imha:%6", groupId _g, typeOf _m, round (_lp distance2D _m), name _tespit, _uzaklasan, _imha, round (_tespit distance2D _m), _yaricap, _temas];
                     if (!isNull _eodU) then { diag_log format ["[IED-FARK] %1 | EOD:%2 (explosiveSpecialist:%3 ACE_isEOD:%4)", groupId _g, name _eodU, _eodU getUnitTrait "explosiveSpecialist", _eodU getVariable ["ACE_isEOD", false]]; };
                 };
             } forEach _adaylar;
