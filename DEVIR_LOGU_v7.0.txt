@@ -1190,3 +1190,7 @@ v8.76 — RPT 7066b2ea (v8.74, ACM + ACE yuklu; [TCCC] baslatildi ace_medical/AC
   -> ayni tikte dongunun sonraki yaralisi ayni hekimi tekrar aday goruyordu: 0:32:52'de Matthew Clark ayni saniyede 4 yaraliya (Ethan James / Donald Evans / Ryan Jones / Douglas Smith) atandi, 4 spawn ayni hekimi farkli yaralilara kosturdu,
   tedavi yalniz 1 yaraliya tamamlandi ('tamam 24 sn', kan kaybi 0.014 -> ACE tedavi zinciri CALISIYOR), hekim ates altinda kendi yaralandi (0:33:35). 0:34:47'de yeni hekim ayni hataya dustu. Duzeltme: tcccBusy / forceMove / tcccBy spawn'dan ONCE senkron konur.
   Not: ates altinda yalniz baygin yarali tedavi edilir (tasarim); temas suruyorsa 'GUVENLI' tam MARCH hic baslamaz. Sonraki RPT'de: ayni hekim tek yaraliya, [TCCC] ... tamam satirlari artmali. TEST EDILMEDI.
+
+v8.77 — HEMTT: error[SPE2] fnc_gizliAlgi.sqf:30 ('private _calis = {' ayristirilamadi). Tek HATA bu; geri kalan ciktilar help / warning (L-S25 count karsilastirma, L-S19 gereksiz !, L-S05 if->select, FNL dosya sonu satiri) — islevsel degil, bilerek ELLENMEDI.
+  Yerel HEMTT yok; nedeni kesin bulunamadi. Supheli yapilar sadelestirildi: eyeDirection / vectorFromTo / vectorDotProduct / acos / max (-1) -> getDir + mod acisi; entities "HeadlessClient_F" -> allPlayers select {isKindOf}; string select [0,4] -> _tag degiskeni.
+  Kullanici HEMTT'i yeniden calistirip SPE2 kalkti mi bildirecek.

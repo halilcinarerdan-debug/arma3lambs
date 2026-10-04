@@ -34,8 +34,8 @@ private _calis = {
     // komut denemesi (sozdizimi / surum): nil donerse kullanilamaz
     private _p0 = objNull;
     private _komutOk = false;
-    waitUntil { sleep 2; !((allPlayers - (entities "HeadlessClient_F")) isEqualTo []) };
-    _p0 = (allPlayers - (entities "HeadlessClient_F")) select 0;
+    waitUntil { sleep 2; ((allPlayers select {!(_x isKindOf "HeadlessClient_F")}) isNotEqualTo []) };
+    _p0 = (allPlayers select {!(_x isKindOf "HeadlessClient_F")}) select 0;
     private _t1 = [_p0] call _fener;
     private _t2 = [_p0] call _irLazer;
     _komutOk = !isNil "_t1" && {!isNil "_t2"};
@@ -51,7 +51,7 @@ private _calis = {
         if (missionNamespace getVariable ["lambs_danger_gizliAlgiOff", false]) then { continue };
         private _adimAcik = !(missionNamespace getVariable ["lambs_danger_adimSesOff", false]);
         private _isikAcik = _komutOk && {!(missionNamespace getVariable ["lambs_danger_isikAlgiOff", false])};
-        private _oyuncular = (allPlayers - (entities "HeadlessClient_F")) select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+        private _oyuncular = allPlayers select {alive _x && {!(_x isKindOf "HeadlessClient_F")} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
         if (_oyuncular isEqualTo []) then { continue };
         private _yagmur = rain;
         private _ruzgar = vectorMagnitude wind;
@@ -83,7 +83,7 @@ private _calis = {
             if (!_adimTara && {!_fenerAcik} && {!_irAcik}) then { continue };
 
             private _tara = if (_fenerAcik) then { 250 } else { if (_irAcik) then { 500 } else { _r } };
-            private _bakis = eyeDirection _p;
+            private _bakisYon = getDir _p;
             {
                 private _b = _x;
                 if (_tepki >= 12) exitWith {};
@@ -98,15 +98,15 @@ private _calis = {
 
                 private _seviye = 0;
                 private _tur = "";
+                private _tag = "";
                 // isik
                 if (_fenerAcik || _irAcik) then {
                     if ((time - (_b getVariable [_isikK, -999])) >= 5) then {
-                        private _yon = (_pEye vectorFromTo (eyePos _b));
-                        private _aci = acos (((_bakis vectorDotProduct _yon) max (-1)) min 1);
+                        private _aci = abs ((((_pPos getDir _bPos) - _bakisYon) + 540) mod 360 - 180);
                         if (_fenerAcik) then {
-                            if (_aci <= 20 && {_d <= 250}) then { _seviye = 1.3; _tur = "FENER (huzme)"; } else { if (_d <= 50) then { _seviye = 0.9; _tur = "FENER (sacilan isik)"; }; };
+                            if (_aci <= 20 && {_d <= 250}) then { _seviye = 1.3; _tur = "FENER (huzme)"; _tag = "ISIK"; } else { if (_d <= 50) then { _seviye = 0.9; _tur = "FENER (sacilan isik)"; _tag = "ISIK"; }; };
                         };
-                        if (_seviye == 0 && {_irAcik} && {(hmd _b) isNotEqualTo ""} && {_aci <= 12} && {_d <= 500}) then { _seviye = 1.2; _tur = "IR LAZER (NVG)"; };
+                        if (_seviye == 0 && {_irAcik} && {(hmd _b) isNotEqualTo ""} && {_aci <= 12} && {_d <= 500}) then { _seviye = 1.2; _tur = "IR LAZER (NVG)"; _tag = "ISIK"; };
                         if (_seviye > 0 && {(checkVisibility [_pEye, eyePos _b]) < 0.2}) then { _seviye = 0; };
                         if (_seviye > 0) then { _b setVariable [_isikK, time]; };
                     };
@@ -121,7 +121,7 @@ private _calis = {
                     private _rEfekt = _r * _bk * _mask;
                     if (_d <= _rEfekt) then {
                         _seviye = 0.5 + (0.5 * (1 - (_d / (_rEfekt max 1))));
-                        _tur = format ["AYAK SESI (r %1 m)", round _rEfekt];
+                        _tur = format ["AYAK SESI (r %1 m)", round _rEfekt]; _tag = "AYAK";
                         _b setVariable [_gk, time];
                     };
                 };
@@ -131,10 +131,10 @@ private _calis = {
                 private _hata = (_d * 0.25) + 4;
                 _b doWatch (_pPos getPos [random _hata, random 360]);
                 _tepki = _tepki + 1;
-                _say set [_tur select [0, 4], (_say getOrDefault [_tur select [0, 4], 0]) + 1];
+                _say set [_tag, (_say getOrDefault [_tag, 0]) + 1];
                 if (_logN < 100) then {
                     _logN = _logN + 1;
-                    diag_log format ["[%1] %2 | bot %3 (%4) | %5 m | seviye %6 | durum: hiz %7 km/s durus %8 | karanlik:%9", ["ADIM-SES", "ISIK-ALGI"] select ((_tur select [0, 4]) isNotEqualTo "AYAK"), _tur, name _b, groupId (group _b), round _d, _seviye toFixed 2, round (speed _p), stance _p, _karanlik];
+                    diag_log format ["[%1] %2 | bot %3 (%4) | %5 m | seviye %6 | durum: hiz %7 km/s durus %8 | karanlik:%9", ["ADIM-SES", "ISIK-ALGI"] select (_tag isEqualTo "ISIK"), _tur, name _b, groupId (group _b), round _d, _seviye toFixed 2, round (speed _p), stance _p, _karanlik];
                 };
             } forEach (allUnits select {(_x distance2D _p) <= _tara && {(side _x) isNotEqualTo _pSide}});
         } forEach _oyuncular;
