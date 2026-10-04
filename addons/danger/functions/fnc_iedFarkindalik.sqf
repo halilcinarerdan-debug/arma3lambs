@@ -169,6 +169,7 @@ private _calis = {
                 // uzaklasma (yaricap + 8 m); EOD imha edecekse kalir. Taktik kilidi (bounding vb.) IED tehlikesinde gecilir.
                 // TEMASTA: yaricap icindekiler yere yatar, surunerek uzaklasir (parca etkisi azalir); disindakiler siperde ates etmeye devam eder, IED'e dogru yurumez
                 private _uzaklasan = 0;
+                private _kacanlar = [];
                 {
                     if ((_x distance2D _m) < _yaricap && {!(_imhaMi && {_x isEqualTo _eodU})} && {_abort || {!(_x getVariable [QGVAR(iedIsci), false])}}) then {
                         _x setVariable [QGVAR(taktikKilit), nil];
@@ -179,6 +180,7 @@ private _calis = {
                         private _yon = _mp getDir _x;
                         _x doMove (_mp getPos [_yaricap + 8 + (random 6), _yon + (random 40) - 20]);
                         _uzaklasan = _uzaklasan + 1;
+                        _kacanlar pushBack _x;
                     };
                 } forEach _us;
                 if (!_temas) then {
@@ -190,8 +192,9 @@ private _calis = {
                 // v8.58: GRUBU FELC ETME. Yalniz EOD (imha) + en fazla 2 GUVENLIK ELEMANI (EOD'ye / IED'e en yakin, lider / saglikci disi) cihazda kalir;
                 // grubun GERISI gorevine / yoluna DEVAM EDER (komutan yolu degistirir: tehlike yaricapindan 4 sn'de bir geri itilir, mayin tipi IED'ler yol planlamasindan kacinilir).
                 // EOD yoksa / imha yoksa hic bekleme: yalniz yaricap icindekiler disari itilir (30 sn).
-                [_g, _m, _mp, _eodU, _imhaMi, _yaricap, _temas] spawn {
-                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar", "_yar", "_tm"];
+                [_g, _m, _mp, _eodU, _imhaMi, _yaricap, _temas, _kacanlar] spawn {
+                    params ["_grp", "_mine", "_pos", "_eod", "_imhaVar", "_yar", "_tm", "_kac"];
+                    private _it = 0;
                     private _t0 = time;
                     private _sure = [30, 130] select _imhaVar;
                     private _R2 = _yar + 10;
@@ -209,9 +212,12 @@ private _calis = {
                     private _guvAd = (_guv apply {name _x}) joinString ", ";
                     diag_log format ["[IED-FARK-CEVRE] %1 | BASLADI | %2 | guvenlik elemani:%3 (%4) | EOD:%5 | grubun gerisi DEVAM EDER (felc yok) | tehlike yaricap %6 m | sure tavani %7 sn", groupId _grp, ["EOD + guvenlik elemani", "TEMAS: yalniz yaricap ici geri itme", "imha yok: yalniz yaricap ici geri itme"] select _kip, count _guv, _guvAd, if (isNull _eod) then {"-"} else {name _eod}, round _yar, _sure];
                     while {(time - _t0) < _sure && {!isNull _grp} && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}} do {
-                        sleep 4;
-                        if (isNull _mine && {!_imhaVar}) exitWith { _bitis = "IED yok (patladi / silindi)"; };
+                        sleep 1;
+                        _it = _it + 1;
+                        // v8.59: IED ARTIK YOK (imha edildi / patladi / silindi) -> kacis emirleri HEMEN iptal; yok olduktan sonra kacmanin anlami yok
+                        if (isNull _mine) exitWith { _bitis = "IED yok (patladi / silindi / imha edildi) - kacis iptal"; };
                         if (_imhaVar && {(time - _t0) > 10} && {(_grp getVariable [QGVAR(iedIs), []]) isEqualTo []}) exitWith { _bitis = "imha bitti"; };
+                        if ((_it mod 4) != 0) then { continue };
                         // tum askerler (EOD hariç) tehlike yaricapinin icindeyse disari itilir; yolu degistirme
                         {
                             if (alive _x && {isNull objectParent _x} && {!(_imhaVar && {_x isEqualTo _eod})} && {(_x distance2D _pos) < (_yar - 2)}) then {
@@ -240,6 +246,18 @@ private _calis = {
                     };
                     if (!isNull _grp && {!((_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos)}) then { _bitis = "yeni IED bulundu (gorev devredildi)"; };
                     diag_log format ["[IED-FARK-CEVRE] %1 | BITTI | neden: %2 | gecen %3 sn | guvenlik elemani serbest birakildi", groupId _grp, _bitis, round (time - _t0)];
+                    // kacis iptali: IED yok olduysa tum kacanlar (ve temasta yere yatirilanlar) hemen normale doner, gruba katilir
+                    if ((_bitis find "kacis iptal") >= 0 || {_bitis isEqualTo "imha bitti"}) then {
+                        private _serbest = (_kac + (units _grp)) select {!isNull _x && {alive _x} && {isNull objectParent _x}};
+                        {
+                            _x setUnitPos "AUTO";
+                            _x doWatch objNull;
+                            _x setVariable [QGVAR(taktikKilit), nil];
+                        } forEach _serbest;
+                        if (!_tm || {(_bitis find "kacis iptal") >= 0}) then {
+                            ((_kac + _guv) select {!isNull _x && {alive _x} && {isNull objectParent _x}}) doFollow (leader _grp);
+                        };
+                    };
                     {
                         _x setVariable [QGVAR(iedGuv), nil];
                         if (!isNull _grp && {(_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos}) then {
@@ -307,6 +325,7 @@ private _calis = {
                             _u setVariable [QGVAR(iedIsci), nil];
                             diag_log format ["[IED-FARK] %1 | imha YARIM KALDI (%3) | %2", name _u, _mineTip, _sebep];
                             if (alive _u && {!isNull _mine}) then { _u doMove ((getPosATL _mine) getPos [_yariC + 8, (getPosATL _mine) getDir _u]); };
+                            if (alive _u && {isNull _mine}) then { _u doFollow (leader _grp); };
                         };
                         diag_log format ["[IED-FARK] %1 | IED'e vardi (%2 m, %3 sn) | %4: calisiyor", name _u, round (_u distance2D _mine), round (time - _t0), _mineTip];
                         // calisma: dur, diz coker, IED'e bak. DEFUSE: ~8 sn (ACE EOD sureci simule edilir). PATLAT: 10 sn hazirlik, cevre bosaltma kontrolu, kontrollu patlatma.
@@ -392,6 +411,7 @@ private _calis = {
                         _u doWatch objNull;
                         _u setUnitPos "AUTO";
                         _grp setVariable [QGVAR(iedIs), []];
+                        if (alive _u && {_bitti || {isNull _mine}}) then { _u doFollow (leader _grp); };
                         _u setVariable [QGVAR(iedIsci), nil];
                         // tamamlandiysa bilinen listeyi temizle: yakindaki diger IED yeniden degerlendirilip sirayla imha edilir
                         if (_bitti || {(_sebep2 find "IPTAL") >= 0}) then { _grp setVariable [QGVAR(iedBilinen), []]; };

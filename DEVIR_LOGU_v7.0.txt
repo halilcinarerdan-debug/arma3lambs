@@ -1075,3 +1075,7 @@ v8.58 — "IED sistemi grubu felc ediyor": v8.52-v8.57 cevre emniyeti TUM grubu 
   tehlike yaricapindaki askerler 4 sn'de bir disari itilir (yolu degistirme); EOD yoksa hic bekleme (30 sn yalniz yaricap disi itme); temkin (AWARE / LIMITED) 60 -> 25 sn.
   iedGuv: guvenlik elemani buddyBond cohesion'dan muaf. Log: [IED-FARK-CEVRE] BASLADI ... guvenlik elemani:N (adlar), grubun gerisi DEVAM EDER.
   SINIR: "squad leader baska yol bulsun" gercek rota yeniden planlama degildir (rotaPlan'a IED bolgesi eklenmedi); grup kendi yolunda ilerler, yaricap disina itilir. Tam alternatif rota icin rotaPlan entegrasyonu ileride.
+
+v8.59 — ZAMANLAMA: IED yok olduktan (imha edildi / patladi / silindi) sonra askerler hala kaciyordu. Neden: kacis emirleri algilama aninda verilir ve keeper dongusu 4 sn aralikli, 'IED yok' yalniz imha-yok durumunda kontrol ediliyordu.
+  Duzeltme: keeper dongusu 1 sn (itme yine 4 sn'de bir), IED yok olunca HEMEN cikar -> kacanlar + guvenlik elemani + temasta yere yatirilanlar stance AUTO / doWatch sifirlanir ve gruba doFollow;
+  EOD de imha sonrasi / IED yok olunca doFollow ile gruba katilir. Log: [IED-FARK-CEVRE] BITTI | neden: IED yok (...) - kacis iptal.
