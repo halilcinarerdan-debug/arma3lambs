@@ -27,9 +27,6 @@ params [
 if (_unit isEqualType grpNull) then {_unit = leader _unit;};
 if (isNull _unit) exitWith {"WEDGE"};
 
-// v8.80: lider KARA ARACINDA (APC / IFV / arac) ise COLUMN — arac gruplarinda LINE / WEDGE slot kovalatir (dur-kalk, "mekanize felc")
-if ((vehicle _unit) isNotEqualTo _unit && {(vehicle _unit) isKindOf "LandVehicle"}) exitWith {"COLUMN"};
-
 // TEK KARAR MERKEZI: grup temastaysa BOUNDING / ASSAULT dahil HER baglam komutanin COMBAT kararina baglanir
 // (eskiden BOUNDING "LINE", COMBAT "WEDGE" derdi ve formasyon surekli gidip gelirdi)
 if (_context in ["BOUNDING", "ASSAULT"] && {((group _unit) getVariable [QGVAR(contact), 0]) > time}) then { _context = "COMBAT"; };
@@ -155,6 +152,19 @@ if (EGVAR(main,debug_functions)) then {
 // 4) Yol yakinligi
 private _roads = _leaderPos nearRoads 20;
 private _onRoad = _roads isNotEqualTo [];
+
+// v8.84 MEKANIZE FORMASYONU (arastirma: FM 3-90 (2023) "Diamond formation", repo kaynaklar_doktrin/FM_3-34 icinde alinti; TC 3-21.76 14-13 / A-4):
+//   DIAMOND = bir eleman onde, birer eleman iki yanda, geri kalan arkada; en etkili YAKLASMA YURUYUSU / ILERLEME / TAKIP sirasinda dusman hakkinda yalnizca GENEL bilgi varken; her yone guvenlik, iki kanada hizli aci;
+//   DEZAVANTAJ: yanal ve derinlemesine MANEVRA ALANI gerekir, DORT alt eleman ister. TC 3-21.76: ic taraftaki atici bastirma atesini kisitlar; koridor (CQB) varyanti 'serpentine' yalniz 4 kisilik ekip icin.
+//   => piyade / CQB'de DIAMOND YOK (v8.83); ARAC grubunda: >= 4 arac + ACIK arazi + yol disi + son temastan > 60 sn + bilinen dusman yok / > 500 m -> DIAMOND (yaklasma yuruyusu);
+//   diger tum arac durumlarinda COLUMN (yol / dar arazi / orman / bina cevresi / temas; slot kovalamayi onler). Lider aracta degilse bu kural calismaz.
+if ((vehicle _unit) isNotEqualTo _unit && {(vehicle _unit) isKindOf "LandVehicle"}) exitWith {
+    private _araclar = [];
+    { private _v = vehicle _x; if (_v isNotEqualTo _x && {_v isKindOf "LandVehicle"}) then { _araclar pushBackUnique _v; }; } forEach (units _grup);
+    private _sitA = _grup getVariable [QGVAR(cmdSit), []];
+    private _enA = if (_sitA isNotEqualTo [] && {(time - (_sitA select 0)) < 60}) then { _sitA select 1 } else { 9999 };
+    if ((count _araclar) >= 4 && {_isOpen} && {!_onRoad} && {(time - (_grup getVariable [QGVAR(contact), -999])) > 60} && {_enA > 500}) then {"DIAMOND"} else {"COLUMN"}
+};
 
 // ===========================================================================
 // FORMASYON SECIMI

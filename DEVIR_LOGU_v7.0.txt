@@ -1246,3 +1246,9 @@ v8.83 — RPT c4eedb1d (v8.82; kullanici 10 madde). KOK NEDEN / YAPILANLAR:
   (8) APC yerinde duruyor ama hizli ilerliyor: kullanici 'doktrin gerektiriyorsa bosver' -> degistirilmedi (mekanize duzeltici v8.82 kalir).
   (9) UGL piyadeye zayif: [UGL-OZET]: isik_duman 18-19 / 30 sn (YUKLU mermi duman / flare), mermi_yok 11-15, rezerv 8-26. Duzeltme: yuklu mermi olumcul degilse / namlu bossa envanterdeki olumcul 40mm ile degistir ([UGL-YUKLE]); uglRezerv 3 -> 2. 
   (10) HEMTT: yeni dosyalar yerel HEMTT ile SPE / PE hatasiz. TEST EDILMEDI.
+
+v8.84 — DIAMOND ARASTIRMASI (kullanici: 'diamond mekanize icin olmasi lazim'). KAYNAK (repodaki doktrin dosyalari): FM 3-90 (01 May 2023) 2-13 / 2-14 (alinti kaynaklar_doktrin/FM_3-34 icinde): diamond = bir eleman onde, birer eleman her yanda, geri kalan arkada;
+  'en etkili: YAKLASMA YURUYUSU, ilerleme (exploitation), takip — dusman hakkinda yalnizca GENEL bilgi varken'; avantaj: her yone guvenlik, iki kanada hizli aci, hiz + kolay kontrol, yedek; DEZAVANTAJ: yanal + derinlemesine MANEVRA ALANI ve DORT alt eleman gerekir.
+  TC 3-21.76 14-13: diamond 'ic taraftaki atici bastirma atesini kisitlar'; A-4: 'serpentine' (koridor) varyanti yalniz 4 kisilik ekip. SONUC: kullanici haklı — diamond BIRIM / ARAC duzeyi hareket formasyonu; piyade CQB'de uygun degil (v8.83 kaldirma dogru), arac gruplarinda uygun.
+  UYGULAMA (selectFormation): lider kara aracinda ise: >= 4 arac + acik arazi + yol disi + son temastan > 60 sn + bilinen dusman yok / > 500 m -> DIAMOND; diger tum arac durumlari COLUMN (slot kovalama / dur-kalk onlemi, v8.80). Arma 3'te tek APC grubu (1 arac) icin diamond anlamsiz -> COLUMN.
+  Mekanize dur-kalk duzeltici (v8.82) hala COLUMN'a zorlar. Not: Arma diamond slotlarinin arac gruplarinda dur-kalk uretip uretmedigi OLCULMEDI. TEST EDILMEDI.
