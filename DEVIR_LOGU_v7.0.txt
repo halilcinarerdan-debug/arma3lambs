@@ -1137,3 +1137,8 @@ v8.68 — RPT 1f05955f (v8.67): "VEE ve LINE loopu" teshisi.
   [FORMASYON] debug satirlari histerezis ONCESI ham secimi yazar (VEE/LINE/ECH/WEDGE saniyeler icinde degisiyor gorunur) — gercek degisim yalniz [FORM-DEGISIM]: 10 dk'da 9 (--form salinim: 0). Asil cakisma: bounding'in "FORMASYON ZORLAMA" dongusu
   (0.5 sn'de bir dangerFormation'a geri yazar) + 45 sn'lik koruma blogu, bounding bayragi taktikle birlikte (BND+TAK) acikken Flank'in FILE'ini / Assault'in LINE'ini eziyordu (Alpha 1-5: LINE->FILE->LINE 5 sn). Her yazma askerleri slota kostururdu
   ("arada kalma"). Cozum: ikisi de taktikFormT < 25 sn ise yazmaz; commanderFormation setFormation yapinca bounding'deyse dangerFormation'i da gunceller (zorlama yeni karari geri almaz). TEST EDILMEDI.
+
+v8.69 — RPT 1f05955f karne devami. DUZELTME (v8.68 notu): 'BND+TAK' bayragi NORMALDIR — tacticsBounding kendisi isExecutingTactic'i de acar (satir ~79); bounding+taktik cakismasi degil. Onceki 'BND+TAK = cakisma' yorumu yanlisti.
+  BAYRAK-TAKILI (fnc_saglik) sureyi yalniz bayrak yoksa sifirliyordu -> 200+ sn suren canli catisma (BND+TAK -> TAK -> RET+TAK) yanlis alarmdi; artik bayrak KUMESI degisince sure sifirlanir, mesaja karar + gorev eklendi.
+  BOSTA-HAREKET (lider durur, 13 askerin 9'u yuruyor): acik arazi BOUNDING formasyonu LINE cok genis -> 8+ canli askerde WEDGE (7 ve alti LINE).
+  ZEKA-NOKTA neden ozeti: her 90 sn'de neden sayaci ([ZEKA-NOKTA] OZET ...). Muhtemel kok neden: kesif / yaklasma BOUNDING (250-500 m) bounding bayragi acik oldugundan nokta elemani 'taktik / bounding' ile engelleniyor; ozet dogrulayacak. TEST EDILMEDI.

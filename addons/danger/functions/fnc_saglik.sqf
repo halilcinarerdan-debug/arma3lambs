@@ -68,9 +68,11 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
 
             // BAYRAK-TAKILI
             if (_bayrakVar) then {
+                // bayrak KUMESI degisirse (BND+TAK -> TAK, BND+TAK -> RET+TAK ...) sure sifirlanir: uzun ama canli catisma takili sayilmaz
+                if ((_g getVariable [QGVAR(saglikBayrakS), ""]) isNotEqualTo _bStr) then { _g setVariable [QGVAR(saglikBayrakS), _bStr]; _g setVariable [QGVAR(saglikBayrakT), time]; };
                 if ((_g getVariable [QGVAR(saglikBayrakT), -1]) < 0) then { _g setVariable [QGVAR(saglikBayrakT), time]; };
                 if ((time - (_g getVariable [QGVAR(saglikBayrakT), time])) > 200) then {
-                    ["BAYRAK-TAKILI", _g, format ["bayrak:%1 | %2 sn acik | %3 kisi", _bStr, round (time - (_g getVariable [QGVAR(saglikBayrakT), time])), count _us]] call _isaretle;
+                    ["BAYRAK-TAKILI", _g, format ["bayrak:%1 | %2 sn acik (ayni bayrak kumesi) | %3 kisi | karar:%4 | gorev:%5", _bStr, round (time - (_g getVariable [QGVAR(saglikBayrakT), time])), count _us, _g getVariable [QGVAR(cmdLastDecision), "-"], (leader _g) getVariable [QEGVAR(main,currentTask), "-"]]] call _isaretle;
                 };
             } else {
                 _g setVariable [QGVAR(saglikBayrakT), -1];

@@ -185,8 +185,14 @@ switch (_context) do {
                 _formation = "VEE";
                 _reason = "orman - esnek V";
             } else {
-                _formation = "LINE";
-                _reason = "acik arazi - genis cephe";
+                // v8.69: 8+ kisilik grupta LINE cok genis (lider durunca 9/13 asker slota yuruyor: BOSTA-HAREKET) -> toplu WEDGE
+                if (({alive _x} count (units (group _unit))) >= 8) then {
+                    _formation = "WEDGE";
+                    _reason = "acik arazi - 8+ kisi: toplu WEDGE (LINE cok genis)";
+                } else {
+                    _formation = "LINE";
+                    _reason = "acik arazi - genis cephe";
+                };
             };
         };
     };

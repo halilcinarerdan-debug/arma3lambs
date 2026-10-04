@@ -24,8 +24,15 @@ diag_log "[ZEKA-NOKTA] nokta elemani (traveling overwatch) watchdog'u baslatildi
 private _calis = {
     missionNamespace setVariable ["lambs_danger_noktaAdim", "basladi"];
     private _logN = 0;
+    private _nedenSay = createHashMap;
+    private _ozetT = time + 90;
     while {true} do {
         sleep 5;
+        if (time > _ozetT) then {
+            _ozetT = time + 90;
+            if (count _nedenSay > 0) then { diag_log format ["[ZEKA-NOKTA] OZET (son 90 sn grup-tur sayaci) %1", (keys _nedenSay) apply {format ["%1:%2", _x, _nedenSay get _x]}]; };
+            _nedenSay = createHashMap;
+        };
         if (missionNamespace getVariable ["lambs_danger_noktaOff", false]) then { continue };
         private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
         private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
@@ -62,6 +69,8 @@ private _calis = {
                 if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaGecT), -999])) < 20}) then { _neden = "serbest birakma bekleme (20 sn)"; };
             };
 
+            private _nk = if (_neden isEqualTo "") then {"KURULDU"} else {_neden};
+            _nedenSay set [_nk, (_nedenSay getOrDefault [_nk, 0]) + 1];
             if (_neden isNotEqualTo "") then {
                 if (_eski isNotEqualTo []) then {
                     {
