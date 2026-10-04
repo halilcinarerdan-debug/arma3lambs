@@ -1067,3 +1067,11 @@ v8.57 — RPT 12:47: DEFUSE ve PATLAT (kontrollu patlatma) calisti; heli TOPLU-A
      Gercekcilik notu (genel bilgi, kaynakli degil): gercek EOD'de basarisizlik genelde abort + kontrollu imhadir; kazara patlama nadirdir -> o yuzden %15.
   3) EOD BUDDY DISI: fnc_buddyPairs EOD'leri ciftlemez (tek elemanli 'cift'), fnc_buddyBond EOD'yi yetim / es atamasindan ve cohesion'dan cikarir, imha sirasinda (iedIsci) cohesion'dan muaf; EOD'nin eski buddy degiskeni temizlenir.
      Gerekce: cihaza TEK kisi yaklasir (maruziyet en aza), esin patlama bolgesine cekilmesi onlenir (ilk testlerde es / yakindakiler EOD ile oldu). Doktrin: elimizdeki kaynaklarda (MCWP 3-11.1, FM 3-34) EOD teknigi yok; ATP 3-90.37 / ATP 4-32.3 gelince dogrulanacak.
+
+v8.58 — "IED sistemi grubu felc ediyor": v8.52-v8.57 cevre emniyeti TUM grubu 45-130 sn bekletiyordu. Yeni model:
+  Doktrin notu (GENEL BILGI, kaynakli degil; repoda IED drill metni yok): IED bulununca birim durur, tehlike alanindan cikar, guvenlik kurar, rapor eder, EOD'yi cagirir; gorev rehberliginde DEVAM edilir —
+  IED'in imha edilmesini beklemek zorunlu degildir, yol gerekiyorsa EOD temizler, degilse tehlike alani KACINILARAK gecilir. (MCWP 3-11.1 sadece 'IED or possible IED' drill basligini verir.)
+  Kod: yalniz EOD (imha / kontrollu patlatma) + en fazla 2 GUVENLIK ELEMANI (IED'e en yakin, lider / saglikci / EOD disi) cihazda kalir; grubun gerisi DEVAM EDER;
+  tehlike yaricapindaki askerler 4 sn'de bir disari itilir (yolu degistirme); EOD yoksa hic bekleme (30 sn yalniz yaricap disi itme); temkin (AWARE / LIMITED) 60 -> 25 sn.
+  iedGuv: guvenlik elemani buddyBond cohesion'dan muaf. Log: [IED-FARK-CEVRE] BASLADI ... guvenlik elemani:N (adlar), grubun gerisi DEVAM EDER.
+  SINIR: "squad leader baska yol bulsun" gercek rota yeniden planlama degildir (rotaPlan'a IED bolgesi eklenmedi); grup kendi yolunda ilerler, yaricap disina itilir. Tam alternatif rota icin rotaPlan entegrasyonu ileride.
