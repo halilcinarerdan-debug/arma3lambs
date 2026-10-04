@@ -1185,3 +1185,8 @@ v8.75 — GIZLI ALGI (kullanici istegi: "yurume / comelme / ayak sesi + el fener
   ISIK (karanlik ya da bina ici + LOS): el feneri huzme (20 derece) <= 250 m seviye 1.3, sacilan isik <= 50 m 0.9; IR lazer yalniz NVG'li botlara (12 derece, <= 500 m, 1.2); bot basina 5 sn.
   isFlashlightOn / isIRLaserOn BI wiki'den DOGRULANAMADI (egress engelli); compile ile denenir, calismazsa [GIZLI] KOMUT YOK yazar ve isik kismi kapanir. Kapatma lambs_danger_gizliAlgiOff / adimSesOff / isikAlgiOff.
   Log [ADIM-SES] / [ISIK-ALGI] / [GIZLI-OZET]. Rakamlar TASARIM tahmini; TEST EDILMEDI. Not: yalniz oyuncuya tepki (botlar birbirini bu yolla algilamaz), arac sesi / isigi yok.
+
+v8.76 — RPT 7066b2ea (v8.74, ACM + ACE yuklu; [TCCC] baslatildi ace_medical/ACM/treatment/drag/bloodloss hepsi true): 'medikler iyilestirmiyor'. KOK NEDEN: fnc_tccc ana dongusu _tedavi'yi SPAWN ediyordu, hekimin mesgul bayragi (tcccBusy) spawn icinde konuyordu
+  -> ayni tikte dongunun sonraki yaralisi ayni hekimi tekrar aday goruyordu: 0:32:52'de Matthew Clark ayni saniyede 4 yaraliya (Ethan James / Donald Evans / Ryan Jones / Douglas Smith) atandi, 4 spawn ayni hekimi farkli yaralilara kosturdu,
+  tedavi yalniz 1 yaraliya tamamlandi ('tamam 24 sn', kan kaybi 0.014 -> ACE tedavi zinciri CALISIYOR), hekim ates altinda kendi yaralandi (0:33:35). 0:34:47'de yeni hekim ayni hataya dustu. Duzeltme: tcccBusy / forceMove / tcccBy spawn'dan ONCE senkron konur.
+  Not: ates altinda yalniz baygin yarali tedavi edilir (tasarim); temas suruyorsa 'GUVENLI' tam MARCH hic baslamaz. Sonraki RPT'de: ayni hekim tek yaraliya, [TCCC] ... tamam satirlari artmali. TEST EDILMEDI.

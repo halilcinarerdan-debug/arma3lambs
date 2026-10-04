@@ -257,6 +257,11 @@ diag_log format [
                     private _en = _m findNearestEnemy _m;
                     if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 50}}) then { continue };
                 };
+                // v8.76 YARIS DUZELTMESI (RPT 7066b2ea: ayni hekim ayni saniyede 4 yaraliya birden atandi -> hekim yaralilar arasinda gidip geliyor, tedavi 1/5, hekim kendi yaralandi):
+                //   spawn edilen _tedavi mesgul bayragini gec koyuyordu; dongunun sonraki yaralisi ayni hekimi tekrar aday gorur. Bayrak SENKRON, spawn'dan once konur.
+                _m setVariable [QGVAR(tcccBusy), time + 150];
+                _m setVariable [QGVAR(forceMove), true];
+                _c setVariable [QGVAR(tcccBy), _m];
                 [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
             } forEach _yaralilar;
         } forEach (allGroups select {local _x && {!isNull leader _x}});
