@@ -4,6 +4,7 @@
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
+           --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
            --zeka               TAKTIK ZEKA katmani (v8.60): olum bolgesi hafizasi, karsi pusu, rota gozcusu, HQ otomatik; otomatik cikarim
            --hava-ied           HAVA + IED TESHISI: zaman cizelgesi + otomatik 'neden tepki yok' cikarimi (v8.52 loglari)
            --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
@@ -19,7 +20,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.60"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.61"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -571,6 +572,29 @@ def zeka(path):
         kt("HQ KAPALI: Zeus 'ELITE Kumanda (HQ)' modulu yok ve lambs_danger_hqOtomatik acik degil (istihbarat paylasimi / kanat / takviye devre disi)")
     print()
 
+
+def form_teshis(path):
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    rx = re.compile(r'^\s*(\d+:\d\d:\d\d)\s+"?\[FORM-DEGISIM\]\s+(.+?)\s+\|\s+(.+?)\s+->\s+(.+?)\s+\|\s+karar:(\S+)')
+    gr = collections.defaultdict(list)
+    for l in L:
+        m = rx.match(l)
+        if m:
+            gr[m.group(2)].append((sn(m.group(1)), m.group(3), m.group(4), m.group(5)))
+    print("=" * 78)
+    print(path, "| FORMASYON DEGISIM TESHISI")
+    if not gr:
+        print("  [OK]    [FORM-DEGISIM] satiri yok (formasyon degismedi ya da log kapali)")
+        return
+    for g, ev in gr.items():
+        hizli = [(ev[i], ev[i + 1]) for i in range(len(ev) - 1) if ev[i + 1][0] - ev[i][0] < 20]
+        cift = collections.Counter((e[1], e[2]) for e in ev)
+        durum = "[SORUN]" if len(hizli) >= 4 else "[OK]   "
+        print("  %s %s: %d degisim | <20 sn aralikli ardisik: %d | karar: %s" % (durum, g, len(ev), len(hizli), collections.Counter(e[3] for e in ev).most_common(2)))
+        if len(hizli) >= 4:
+            print("          en sik gecis:", cift.most_common(2), "-> salinim (formasyon felci); kok neden: taktik yeniden cagrilinca eski zamanlayici formasyon geri yaziyor (v8.61 ile giderildi)")
+    print()
+
 def zaman_cizelgesi(path, grup, aralik):
     """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
     ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
@@ -616,6 +640,7 @@ if __name__ == "__main__":
     karne_modu = False
     hava_ied_modu = False
     zeka_modu = False
+    form_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -631,13 +656,17 @@ if __name__ == "__main__":
             hava_ied_modu = True; i += 1
         elif args[i] == "--zeka":
             zeka_modu = True; i += 1
+        elif args[i] == "--form":
+            form_modu = True; i += 1
         else:
             yollar.append(args[i]); i += 1
     if not yollar:
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if zeka_modu:
+        if form_modu:
+            form_teshis(p)
+        elif zeka_modu:
             zeka(p)
         elif hava_ied_modu:
             hava_ied(p)

@@ -41,7 +41,7 @@ _target = _target call CBA_fnc_getPos;
             _group setVariable [QEGVAR(main,currentTactic), nil];
             _group setCombatMode _combatMode;
             _group enableAttack _enableAttack;
-            _group setFormation _formation;
+            // v8.61: formasyon geri yazma kaldirildi (stale zamanlayici LINE <-> eski formasyon dongusu); formasyonu commanderFormation belirler
             (units _group) doFollow (leader _group)
         };
     },
@@ -50,7 +50,7 @@ _target = _target call CBA_fnc_getPos;
 ] call CBA_fnc_waitAndExecute;
 
 // hold-fire combat mode
-_group setFormation "LINE";
+if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
 _group setCombatMode "WHITE";
 _group enableAttack false;
 

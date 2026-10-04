@@ -1089,3 +1089,12 @@ v8.60 — TAKTIK ZEKA katmani (kullanici istegi: "daha olumcul / taktik zeka, lo
       en buyuk olumculuk kazanci bu modulleri acmak olabilir (SPOTREP agi, kanat manevrasi, feint) — test edilmedi.
   Arac: python tools/rpt_ozet.py --zeka <rpt>. Karne: BEKLENEN_SURUM v8.60.
   ATLANAN (gerekce): bastirma-kapili hucum (dusman bastirma durumu baska makinede yerelse getSuppression okunamaz); traveling overwatch (bounding yeniden yazimi gerekir, risk yuksek).
+
+v8.61 — FORMASYON FELCI KOK NEDENI (RPT 13:27, Alpha 1-5: ASSAULT sirasinda LINE <-> ECH RIGHT, 3 dk boyunca 5-10 sn aralikla, 16 hizli salinim).
+  Kok neden (upstream LAMBS 2.6.2 tacticsAssault / Suppress / Flank / Attack / Garrison): taktik, cagrildigi andaki formasyonu bir zamanlayicida saklar ve sure sonunda geri yazar.
+  ASSAULT her ~10 sn'de yeniden cagrilinca: cagri 1 ECH RIGHT'i yakalar + LINE yazar; cagri 2 LINE'i yakalar; cagri 1'in zamanlayicisi ECH RIGHT'i geri yazar; cagri 3 ECH RIGHT'i yakalar ... = salinim.
+  (commanderFormation / selectFormation sucsuz: komutan formasyonu ASSAULT'ta 60 sn karismiyor; salinim LAMBS taktiginin kendisi.)
+  Duzeltme: bu 5 taktik + tacticsHide fork'a kopyalandi; zamanlayicidaki formasyon GERI YAZMA kaldirildi (tacticsHold ile ayni cozum; sonrasi commanderFormation belirler),
+  baslangicta LINE / FILE / DIAMOND yalniz formasyon farkliysa yazilir (her setFormation askerleri yeni slota kosturur).
+  Arac: python tools/rpt_ozet.py --form <rpt> -> grup basina salinim tespiti ([SORUN] <20 sn aralikli >= 4 ardisik degisim).
+  Not: upstream main = 2.6.2 (build 1); fork ayni tabana overlay oldugu icin dosya kopyalama guvenli.
