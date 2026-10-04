@@ -1178,3 +1178,10 @@ YOL HARITASI (kullanici karari, EN SON yapilacak): KALICI SENARYO / "Bakhmut-lit
       Headless Client dagitimi (mevcut watchdog'lar zaten yerel gruplarda calisiyor). Olcum: karnedeki 'tick ort max ms' + diag_fps; 100+ AI profil testi gerekli — olcmeden olcek sozu verilmez.
   (4) Komutan zekasi: uzun sureli gorev (bolge ele gecirme / savunma / ikmal), taburdan takima kademe; mevcut HQ cekirdegi temel.
   Not: kalici deneyim botlari zamanla guclendirir -> ayar ile kapatilabilir olmali.
+
+v8.75 — GIZLI ALGI (kullanici istegi: "yurume / comelme / ayak sesi + el feneri / lazer / IR"). fnc_gizliAlgi: oyuncu karsisinda botlar (hile yok, fiziksel duyma / gorme):
+  AYAK SESI r = 1.6 x hiz x durus (ayakta 1 / comelmis 0.6 / yatik 0.25) x yuzey (yol-beton-kaya 1.3), azami 45 m; bot katsayisi CARELESS .5 / SAFE .8 / AWARE 1 / COMBAT 1.1 / STEALTH 1.2; yagmur / ruzgar x0.8, botun grubu temasta x0.7;
+    r icinde reveal seviye 0.5-1.0 + yaklasik yone bakis (hata d x 0.25 + 4 m), cift basina 4 sn.
+  ISIK (karanlik ya da bina ici + LOS): el feneri huzme (20 derece) <= 250 m seviye 1.3, sacilan isik <= 50 m 0.9; IR lazer yalniz NVG'li botlara (12 derece, <= 500 m, 1.2); bot basina 5 sn.
+  isFlashlightOn / isIRLaserOn BI wiki'den DOGRULANAMADI (egress engelli); compile ile denenir, calismazsa [GIZLI] KOMUT YOK yazar ve isik kismi kapanir. Kapatma lambs_danger_gizliAlgiOff / adimSesOff / isikAlgiOff.
+  Log [ADIM-SES] / [ISIK-ALGI] / [GIZLI-OZET]. Rakamlar TASARIM tahmini; TEST EDILMEDI. Not: yalniz oyuncuya tepki (botlar birbirini bu yolla algilamaz), arac sesi / isigi yok.
