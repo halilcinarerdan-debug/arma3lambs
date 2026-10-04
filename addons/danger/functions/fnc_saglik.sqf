@@ -149,7 +149,12 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                 if ((count _yuruyen) >= 2) then {
                     if ((_g getVariable [QGVAR(saglikBostaT), -1]) < 0) then { _g setVariable [QGVAR(saglikBostaT), time]; };
                     if ((time - (_g getVariable [QGVAR(saglikBostaT), time])) > 10) then {
-                        ["BOSTA-HAREKET", _g, format ["%1 / %2 asker yuruyor, lider duruyor | formasyon:%3 beh:%4 | gorevler:%5 | buddy son:%6 sn once | rol istasyonu son:%7 sn once", count _yuruyen, count _us, formation _g, behaviour _l, (_yuruyen apply {_x getVariable [QEGVAR(main,currentTask), "-"]}) select [0, 3 min (count _yuruyen)], round (time - (_g getVariable [QGVAR(buddyLast), -999])), round (time - ((_yuruyen select 0) getVariable [QGVAR(stationLast), -999]))]] call _isaretle;
+                        ["BOSTA-HAREKET", _g, (format ["%1 / %2 asker yuruyor, lider duruyor | formasyon:%3 beh:%4 | gorevler:%5 | buddy son:%6 sn once | rol istasyonu son:%7 sn once", count _yuruyen, count _us, formation _g, behaviour _l, (_yuruyen apply {_x getVariable [QEGVAR(main,currentTask), "-"]}) select [0, 3 min (count _yuruyen)], round (time - (_g getVariable [QGVAR(buddyLast), -999])), round (time - ((_yuruyen select 0) getVariable [QGVAR(stationLast), -999]))])
+                            // v8.70 tani: yuruyen asker slota mi (formasyon) yoksa script emrine mi gidiyor?
+                            + (format [" | ilk yuruyen:%1 mod:%2 hedefe:%3 m liderden:%4 m | formasyon degisim:%5 sn once, formDir:%6 sn once, dagilma:%7 sn once, yan:%8, nokta:%9",
+                                name (_yuruyen select 0), (expectedDestination (_yuruyen select 0)) select 1, round ((_yuruyen select 0) distance2D ((expectedDestination (_yuruyen select 0)) select 0)), round ((_yuruyen select 0) distance2D _l),
+                                round (time - (_g getVariable [QGVAR(cfDegisT), -999])), round (time - (_g getVariable [QGVAR(selFdirT), -999])), round (time - ((_yuruyen select 0) getVariable [QGVAR(dispLast), -999])),
+                                !isNil {(_yuruyen select 0) getVariable QGVAR(yanGuv)}, (_yuruyen select 0) getVariable [QGVAR(noktaEk), false]])] call _isaretle;
                     };
                 } else {
                     _g setVariable [QGVAR(saglikBostaT), -1];

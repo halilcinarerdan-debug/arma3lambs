@@ -1142,3 +1142,6 @@ v8.69 — RPT 1f05955f karne devami. DUZELTME (v8.68 notu): 'BND+TAK' bayragi NO
   BAYRAK-TAKILI (fnc_saglik) sureyi yalniz bayrak yoksa sifirliyordu -> 200+ sn suren canli catisma (BND+TAK -> TAK -> RET+TAK) yanlis alarmdi; artik bayrak KUMESI degisince sure sifirlanir, mesaja karar + gorev eklendi.
   BOSTA-HAREKET (lider durur, 13 askerin 9'u yuruyor): acik arazi BOUNDING formasyonu LINE cok genis -> 8+ canli askerde WEDGE (7 ve alti LINE).
   ZEKA-NOKTA neden ozeti: her 90 sn'de neden sayaci ([ZEKA-NOKTA] OZET ...). Muhtemel kok neden: kesif / yaklasma BOUNDING (250-500 m) bounding bayragi acik oldugundan nokta elemani 'taktik / bounding' ile engelleniyor; ozet dogrulayacak. TEST EDILMEDI.
+
+v8.70 — Kullanici: "komutan sabitken formasyon oturmuyor, bazilari saga sola oynuyor". Kok neden bilinmiyor (log yok); adaylar: Arma slot oturma (8+ kisi LINE cok genis: v8.69 WEDGE), buddyBond / dispersion doMove (kalici emir, slota donmez), yanGuvenlik/noktaEleman sonrasi doFollow, setFormation/setFormDir slot yenileme.
+  Tani: [ANOMALI] BOSTA-HAREKET satirina ilk yuruyen askerin expectedDestination modu + hedefe / liderden mesafe, formasyon degisim / formDir / dagilma son zamani, yan / nokta bayragi eklendi. Sonraki RPT'de mod=FORMATION -> Arma slot oturmasi; mod=DoNotPlan/LEADER... -> script emri. Davranis degistirilmedi.
