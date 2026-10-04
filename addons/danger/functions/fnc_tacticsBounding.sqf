@@ -514,7 +514,7 @@ if (EGVAR(main,debug_functions)) then {
             private _df = _g getVariable ["lambs_danger_dangerFormation", ""];
             // Baski altinda (>= 0.4) formasyon ZORLANMAZ: gercek catismada esner, siper icin bozulur
             private _baskida = ((units _g) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
-            if (!_baskida && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df}) then {
+            if (!_baskida && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df} && {(time - (_g getVariable ["lambs_danger_taktikFormT", -999])) > 25}) then {
                 _g setFormation _df;
             };
             sleep 0.5;
@@ -583,7 +583,7 @@ if (EGVAR(main,debug_functions)) then {
         private _grupBaskida = ((units _group) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
         if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}
             && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}
-            && {time > (_group getVariable [QGVAR(formKorumaT), 0])}) then {
+            && {time > (_group getVariable [QGVAR(formKorumaT), 0])} && {(time - (_group getVariable [QGVAR(taktikFormT), -999])) > 25}) then {
             _group setVariable [QGVAR(formKorumaT), time + 45];
             _group setFormation _bndFormation;
         };

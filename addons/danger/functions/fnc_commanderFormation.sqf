@@ -67,6 +67,7 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
                     private _f = [_g, [0, 0, 0], "COMBAT"] call (missionNamespace getVariable ["lambs_danger_fnc_selectFormation", {""}]);
                     if (_f isNotEqualTo "" && {(formation _g) isNotEqualTo _f}) then {
                         _g setFormation _f;
+                        if (_g getVariable [QGVAR(isBounding), false]) then { _g setVariable [QGVAR(dangerFormation), _f]; };
                         diag_log format ["[KOMUTAN-FORM] %1 | TEMAS | formasyon -> %2", groupId _g, _f];
                     };
                 };
@@ -81,6 +82,7 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
                     private _f = [_g, [0, 0, 0], "TRAVEL"] call (missionNamespace getVariable ["lambs_danger_fnc_selectFormation", {""}]);
                     if (_f isNotEqualTo "" && {(formation _g) isNotEqualTo _f}) then {
                         _g setFormation _f;
+                        if (_g getVariable [QGVAR(isBounding), false]) then { _g setVariable [QGVAR(dangerFormation), _f]; };
                         diag_log format ["[KOMUTAN-FORM] %1 | SAKIN | formasyon -> %2", groupId _g, _f];
                     };
                 };

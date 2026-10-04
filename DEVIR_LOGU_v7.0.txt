@@ -1132,3 +1132,8 @@ v8.67 — RPT 7ef81936 (v8.66) analizi: formasyon salinimi #2 + diger squad bekl
      icinde varamazsa vazgecer. Kapatma lambs_danger_yetimOff. Log [ZEKA-YETIM] (YOLDA / KATILDI / YOK). Esikler TASARIM tahmini, doktrin degil.
   4) ZEKA-HAZIRLIK ATLANDI logu grup basina 60 sn ile sinirlandi. rpt_ozet --zeka ZEKA-YETIM satirini kontrol eder, BEKLENEN_SURUM v8.67.
   Acik: ZEKA-NOKTA olay uretmedi (>= 6 canli + 4 km/s + temassiz kosulu olusmamis olabilir), Alpha 1-4 takili BND+TAK bayragi. TEST EDILMEDI (oyun disi).
+
+v8.68 — RPT 1f05955f (v8.67): "VEE ve LINE loopu" teshisi.
+  [FORMASYON] debug satirlari histerezis ONCESI ham secimi yazar (VEE/LINE/ECH/WEDGE saniyeler icinde degisiyor gorunur) — gercek degisim yalniz [FORM-DEGISIM]: 10 dk'da 9 (--form salinim: 0). Asil cakisma: bounding'in "FORMASYON ZORLAMA" dongusu
+  (0.5 sn'de bir dangerFormation'a geri yazar) + 45 sn'lik koruma blogu, bounding bayragi taktikle birlikte (BND+TAK) acikken Flank'in FILE'ini / Assault'in LINE'ini eziyordu (Alpha 1-5: LINE->FILE->LINE 5 sn). Her yazma askerleri slota kostururdu
+  ("arada kalma"). Cozum: ikisi de taktikFormT < 25 sn ise yazmaz; commanderFormation setFormation yapinca bounding'deyse dangerFormation'i da gunceller (zorlama yeni karari geri almaz). TEST EDILMEDI.
