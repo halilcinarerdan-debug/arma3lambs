@@ -1,0 +1,2051 @@
+ATP 4-25.13
+CASUALTY EVACUATION
+February 2013
+DISTRIBUTION RESTRICTION: Approved for public release; distribution is unlimited.
+Headquarters, Department of the Army
+This publication is available at Army Knowledge Online
+(https://armypubs.us.army.mil/doctrine/index.html).
+*ATP 4-25.13
+Distribution Restriction: Approved for public release; distribution is unlimited.
+*This publication supersedes Chapters 8 through 10 and Appendixes C, G, H, I, J, and M of FM 8-10-6
+dated 14 April 2000.
+15 February 2013 ATP 4-25.13 i
+Army Techniques Publication
+No. 4-25.13
+Headquarters
+Department of the Army
+Washington, DC, 15 February 2013
+Casualty Evacuation
+Contents
+Page
+ PREFACE............................................................................................................... v
+ INTRODUCTION ................................................................................................... vi
+Chapter 1 MANUAL EVACUATION METHODS ................................................................ 1-1
+Casualty Handling .............................................................................................. 1-1
+Manual Carries ................................................................................................... 1-3
+Drags ................................................................................................................ 1-10
+Chapter 2 LITTER EVACUATION ...................................................................................... 2-1
+Standard Litters .................................................................................................. 2-1
+Improvised Litters ............................................................................................... 2-8
+Chapter 3 NONMEDICAL CASUALTY EVACUATION PLATFORMS .............................. 3-1
+Section I — Nonmedical Vehicles Used For Casualty Evacuation .............. 3-1
+Nonmedical Vehicles .......................................................................................... 3-1
+Section II — Army Nonmedical Aircraft ......................................................... 3-7
+Army Fixed-Wing Aircraft .................................................................................... 3-7
+Army Rotary-Wing Aircraft .................................................................................. 3-8
+Chapter 4 CASUALTY EVACUATION IN A MASS CASUALTY SITUATION .................. 4-1
+Mass Casualty Situations ................................................................................... 4-1
+Chapter 5 CASUALTY EVACUATION IN SPECIFIC ENVIRONMENTS ........................... 5-1
+Mountainous Terrain ........................................................................................... 5-1
+Jungle Terrain ..................................................................................................... 5-1
+Desert Terrain ..................................................................................................... 5-2
+Extreme Cold ...................................................................................................... 5-2
+Urban Terrain ..................................................................................................... 5-3
+Appendix A EXAMPLE OF A MASS CASUALTY PLAN ...................................................... A-1
+Appendix B LITTER EVACUATION TRAINING .................................................................... B-1
+Appendix C MEDICAL EVACUATION REQUEST ................................................................ C-1
+Contents
+ii ATP 4-25.13 15 February 2013
+ GLOSSARY .......................................................................................... Glossary-1
+ REFERENCES .................................................................................. References-1
+ INDEX ......................................................................................................... Index-1
+Figures
+Figure 1-1. Positioning the casualty on his abdomen ........................................................... 1-3
+Figure 1-2. Fireman’s carry ................................................................................................... 1-4
+Figure 1-3. Fireman’s carry (alternate method for lifting the patient to a standing
+position) .............................................................................................................. 1-5
+Figure 1-4. Supporting carry ................................................................................................. 1-5
+Figure 1-5. Arms carry .......................................................................................................... 1-6
+Figure 1-6. Saddleback carry ................................................................................................ 1-6
+Figure 1-7. Pack-strap carry ................................................................................................. 1-7
+Figure 1-8. Two-man supporting carry .................................................................................. 1-8
+Figure 1-9. Two-man arms carry ........................................................................................... 1-8
+Figure 1-10. Two-man fore-and-aft carry .............................................................................. 1-9
+Figure 1-11. Four-hand seat carry ...................................................................................... 1-10
+Figure 1-12. Two-hand seat carry ....................................................................................... 1-10
+Figure 1-13. Personnel drag ............................................................................................... 1-11
+Figure 1-14. Neck drag ....................................................................................................... 1-12
+Figure 1-15. Cradle-drop drag ............................................................................................ 1-12
+Figure 2-1. Standard collapsible litter ................................................................................... 2-2
+Figure 2-2. Rigid pole folding litter ........................................................................................ 2-2
+Figure 2-3. Adjustable handle rigid pole folding litter ............................................................ 2-3
+Figure 2-4. Chemical litter ..................................................................................................... 2-3
+Figure 2-5. Folding litter ........................................................................................................ 2-4
+Figure 2-6. Talon II® model 90C collapsible handle litter ..................................................... 2-4
+Figure 2-7. Poleless nonrigid litter ........................................................................................ 2-5
+Figure 2-8. SKED® litter ....................................................................................................... 2-5
+Figure 2-9. Spine board ........................................................................................................ 2-6
+Figure 2-10. Positioning of hands ......................................................................................... 2-6
+Figure 2-11. Positioning of litter bearers ............................................................................... 2-7
+Figure 2-12. Positioning of litter straps ................................................................................. 2-8
+Figure 2-13. Patient securing strap ....................................................................................... 2-8
+Figure 2-14. Litter made with blankets and poles ................................................................. 2-9
+Figure 2-15. Litter improvised from jackets and poles .......................................................... 2-9
+Figure 2-16. Litter improvised from sacks and poles .......................................................... 2-10
+Figure 2-17. Rolled blanket litter ......................................................................................... 2-10
+Figure 2-18. Rolled blanket used as litter ........................................................................... 2-11
+Figure 2-19. Travois litter .................................................................................................... 2-12
+Contents
+15 February 2013 ATP 4-25.13 iii
+Figure 2-20. Suspended litter .............................................................................................. 2-12
+Figure 3-1. M998 truck, cargo/troop carrier 1 1/4 ton, HMMWV (four-man
+configuration), with three litters ........................................................................... 3-2
+Figure 3-2. M998 truck, cargo/troop carrier 1 1/4 ton, HMMWV (two-man
+configuration), with five litters .............................................................................. 3-3
+Figure 3-3. Loading the M1093, MTV, 5 ton .......................................................................... 3-4
+Figure 3-4. Loading the M1081, LMTV, 2 1/2 ton.................................................................. 3-5
+Figure 3-5. M977 HEMTT, 8 x 8, cargo ................................................................................. 3-6
+Figure 3-6. M871 22 1/2 ton, cargo semitrailer, loaded with litters ....................................... 3-6
+Figure 3-7. M-Gator military utility vehicle ............................................................................. 3-7
+Figure 3-8. Interior view of CH-47 (Chinook) with litter installation ....................................... 3-8
+Figure B-1. Carrying litter at high port ................................................................................... B-2
+Figure B-2. Litter squad with litter .......................................................................................... B-3
+Figure B-3. Grounding litter (position of ground, litter) .......................................................... B-3
+Figure B-4. Grounding litter (position of litter, POSTS) ......................................................... B-4
+Figure B-5. Opening litter (step one) ..................................................................................... B-4
+Figure B-6. Opening litter (step two) ..................................................................................... B-5
+Figure B-7. Squad at right side, POSTS ............................................................................... B-6
+Figure B-8. Lifting patient to load litter (step one) ................................................................. B-6
+Figure B-9. Lifting patient to load litter (step two) .................................................................. B-7
+Figure B-10. Lifting patient to load litter (step three) ............................................................. B-7
+Figure B-11. Lifting patient to load litter (three bearers) ........................................................ B-8
+Figure B-12. Lowering patient onto litter (three bearers) ...................................................... B-8
+Figure B-13. Two bearers at right side, POSTS .................................................................... B-9
+Figure B-14. Lifting patient with two bearers on the same side ............................................ B-9
+Figure B-15. Lifting patient with two bearers on the same side (step two) .........................B-10
+Figure B-16. Lowering patient onto litter with two bearers on the same side .....................B-10
+Figure B-17. Two bearers, one on each side, POSTS ........................................................B-11
+Figure B-18. Lifting patient with two bearers, one on each side (step one) ........................B-11
+Figure B-19. Lifting patient with two bearers, one on each side (step two) ........................B-12
+Figure B-20. Lowering patient onto litter (two bearers, one on each side) .........................B-12
+Figure B-21. Lifting patient with back injury .........................................................................B-13
+Figure B-22. Lifting the loaded litter ....................................................................................B-14
+Figure B-23. Four-man carry for smooth, level terrain ........................................................B-14
+Figure B-24. Two-man carry for smooth, level terrain .........................................................B-15
+Figure B-25. Litter post carry for rough terrain ....................................................................B-16
+Figure B-26. Rotation of the litter for uphill and upstairs carry and for ambulance
+loading ............................................................................................................B-17
+Figure B-27. Uphill and upstairs carry .................................................................................B-17
+Figure B-28. Downhill or downstairs carry ...........................................................................B-18
+Figure B-29. Surmounting a fence or low wall (step one) ...................................................B-19
+Figure B-30. Surmounting a fence or low wall (step two) ....................................................B-19
+Contents
+iv ATP 4-25.13 15 February 2013
+Figure B-31. Surmounting a high wall ................................................................................. B-20
+Figure B-32. Fording streams and crossing deep trenches (overhead carry, step
+one) ................................................................................................................ B-20
+Figure B-33. Fording streams and crossing deep trenches (overhead carry, step two) ..... B-21
+Figure B-34. Carrying a litter patient up a stairwell with small landings ............................. B-22
+Figure B-35. Carrying a litter patient down a stairwell with small landings ......................... B-23
+Tables
+Table 3-1. Litter and ambulatory configuration of the CH-47 (Chinook) ............................... 3-9
+Table 4-1. Categories of evacuation precedence ................................................................. 4-3
+Table C-1. Medical evacuation request ................................................................................ C-1
+15 February 2013 ATP 4-25.13 v
+Preface
+This Army techniques publication (ATP) provides doctrine for conducting casualty evacuation (CASEVAC).
+Casualty evacuation encompasses both the evacuation of Soldiers from the point of injury or wounding to a
+medical treatment facility (MTF) and the coordination requirements for the use of nonmedical transportation
+assets to accomplish the CASEVAC mission. This publication is intended for use by all commanders and their
+staff involved in CASEVAC operations.
+This publication implements or is in consonance with the following North Atlantic Treaty Organization
+(NATO) International Standardization Agreements (STANAGs):
+ TITLE NATO STANAG
+Stretchers, Bearing Brackets, and Attachment Supports 2040
+Aeromedical Evacuation 3204
+Unless this publication states otherwise, masculine nouns and pronouns do not refer exclusively to men.
+Use of trade or brand names in this publication is for illustrative purposes only and does not imply endorsement
+by the Department of Defense.
+This publication applies to the Active Army, the Army National Guard (ARNG)/Army National Guard of the
+United States (ARNGUS), and the United States Army Reserve (USAR), unless otherwise stated.
+The proponent for this publication is the United States (U.S.) Army Medical Department Center and School
+(USAMEDDC&S). Users of this publication are encouraged to submit comments and recommendations to
+improve this publication on a DA Form 2028 (Recommended Changes to Publications and Blank Forms).
+Comments should include the page, paragraph, and line of the text where the change is recommended.
+Comments and recommendations should be forwarded directly to: Commander, USAMEDDC&S, ATTN:
+MCCS-FC-DL, 2377 Greeley Road, Suite D, Fort Sam Houston, Texas 78234-7731.
+vi ATP 4-25.13 15 February 2013
+Introduction
+For the Army, CASEVAC involves the unregulated movement of casualties using predesignated or opportune
+tactical or logistic aircraft and vehicles. These vehicles/rotary-wing aircraft are not staffed with medical
+personnel for en route care (unless augmentation is planned for in the operation plan). These vehicles/aircraft
+do not have organic medical equipment. If the combat medic is not available to provide care en route, the
+combat lifesaver (CLS) may accompany the casualties to monitor their conditions. Casualty evacuation is
+oftentimes the first step in a process that moves a wounded or injured Soldier from the point of wounding into
+the multifaceted Army Health System. Casualty evacuation can be accomplished by a variety of transportation
+platforms. These methods must be trained and practiced and include manual carries, litter evacuation, and the
+use of nonmedical vehicles. In order to determine the appropriate evacuation method, the Soldier executing the
+movement of the casualty must be able to determine the most effective mode of movement available to them to
+best meet their operational needs and the needs of the casualty. The movement of a casualty begins the
+evacuation chain which clears the operational area of casualties and moves the casualty through successively
+enhanced roles of medical care. Once the casualty is in the medical evacuation system, they receive en route
+medical care and emergency medical intervention, if required; this enhances the Soldier’s prognosis and can
+reduce long-term disability. Upon arrival at an MTF the patient continues through the Army Health System
+until he is treated and released or continues through the Army Health System for more definitive care in the
+continental U.S.
+WARNING
+Casualties transported in this manner may not receive
+proper en route medical care or be transported to the
+appropriate MTF to address the casualty’s medical
+condition. If the casualty’s medical condition deteriorates
+during transport, or the casualty is not transported to the
+appropriate MTF, an adverse impact on his prognosis and
+long-term disability or death may result.
+15 February 2013 ATP 4-25.13 1-1
+Chapter 1
+Manual Evacuation Methods
+Manual evacuation is the process of transporting casualties by manual carries. It is
+accomplished without the aid of a litter or other forms of transport. It is intended to
+end at the point where a more sophisticated means of evacuation becomes available.
+For example, manual evacuation ends when a litter, vehicle, or other form of
+conveyance is available. Refer to Field Manual (FM) 4-25.11 for additional
+information on handling and moving casualties.
+CASUALTY HANDLING
+1-1. Casualties evacuated by manual means must be carefully handled. Rough or improper handling may
+cause further injury to the casualty. The movement effort should be organized and performed
+methodically. Each movement made in lifting or moving a casualty should be performed as deliberately
+and as gently as possible. Taking the tactical situation into consideration, casualties should not be moved
+before the type and extent of their injuries are evaluated and the required first aid (self-aid, buddy aid, or
+enhanced first aid [CLS]) or tactical combat casualty care (combat medic or ambulance crew) is
+administered.
+CAUTION
+The exception to this occurs when the situation dictates immediate
+movement for safety reasons. For example, if a casualty is inside, on
+or near a burning vehicle, or exposed to enemy fire, it may be
+necessary to first move him to a safe location away from the hazard.
+This situation dictates that the urgency of casualty movement
+outweighs the need to administer first aid or tactical combat casualty
+care.
+1-2. Every effort should be made to adequately treat and/or dress injuries to prevent loss of life, limb, or
+eyesight prior to moving the casualty. Except in extreme emergencies, the type and extent of injuries must
+be evaluated before any movement of the casualty is attempted. Measures are taken, as needed, to—
+ Stop life-threatening bleeding.
+ Open the airway and restore breathing and heartbeat.
+ Prevent or control shock.
+ Protect the wound from further contamination.
+1-3. When a fracture is evident or suspected, the injured part must be immobilized. Every precaution
+must be taken to prevent the broken ends of the bone from cutting through muscle, blood vessels, nerves,
+and skin.
+1-4. When a casualty has a serious wound, the dressing over the wound should be reinforced to provide
+additional protection during manual evacuation.
+GENERAL RULES FOR BEARERS
+1-5. In manual evacuation, individuals performing the evacuation are referred to as bearers. Improper
+handling of a casualty can result in injury to the bearers, as well as to the casualty. To minimize disabling
+Chapter 1
+1-2 ATP 4-25.13 15 February 2013
+injuries (muscle strain, sprains, or other injuries) that could hamper the evacuation effort, the following
+rules should be followed:
+ Use the body’s natural system of levers when lifting and moving a casualty.
+ Know your physical capabilities and limitations.
+ Maintain solid footing when lifting and transporting a casualty.
+ Use the leg muscles (not the back muscles) when lifting or lowering a casualty.
+ Use the shoulder and leg muscles (not the back muscles) when carrying or standing with a
+casualty.
+ Keep the back straight; use arms and shoulders when pulling a casualty.
+ Work in unison with other bearers, using deliberate, gradual movements.
+ Slide or roll, rather than lift, heavy objects that must be moved.
+ Rest frequently, or whenever possible, while transporting a casualty.
+ Carry your weapon so that it does not harm the casualty but can be put into operation quickly.
+1-6. Normally, a casualty’s individual weapon is not moved with him through the evacuation chain. Prior
+to moving the casualty from the point of injury, the bearer should make every effort to secure the injured
+Soldier’s weapon and sensitive items (if any). Every attempt should be made for the Soldier’s unit to
+secure the weapon and sensitive items prior to evacuation. In those circumstances where this is not
+possible, weapons and sensitive items will travel to the first MTF where they will be secured and held until
+the Soldier’s parent unit can claim them. Individual equipment, to include protective clothing and mask,
+remains with the casualty and is evacuated with him.
+CASUALTY POSITIONING
+1-7. The first step in any manual carry is to position the casualty to be lifted. If he is conscious, he should
+be told how he is to be positioned and transported. This helps to lessen his fear of movement and to gain
+his cooperation. It may be necessary to roll the casualty onto his abdomen, or his back, depending upon the
+position in which he is lying and the particular carry to be used. This can be accomplished by performing
+the following:
+ Roll a casualty onto his abdomen, kneel at the casualty’s uninjured side and perform the
+following:
+ Place his arms above his head; cross his ankle which is farther from you over the one that is
+closer to you.
+ Place one of your hands on the shoulder which is farthest from you; place your other hand in
+the area of his hip or thigh.
+ Roll him gently toward you onto his abdomen (Figure 1-1).
+ Roll a casualty onto his back, follow the same procedure described in above, except gently roll
+the casualty onto his back, rather than onto his abdomen.
+Manual Evacuation Methods
+15 February 2013 ATP 4-25.13 1-3
+Figure 1-1. Positioning the casualty on his abdomen
+MANUAL CARRIES
+1-8. Manual carries are tiring for the bearers and involve the risk of increasing the severity of the
+casualty’s injuries. In some instances, however, they are essential to save the casualty’s life. When a litter
+is not available or when the terrain or the tactical situation makes other forms of casualty transport
+impractical, a manual carry may be the only means to transport a casualty to where a combat medic can
+treat him. The distance a casualty can be transported by a manual carry depends upon—
+ Strength and endurance of the bearers.
+ Weight of the casualty.
+ Nature of the injuries.
+ Obstacles encountered during transport.
+1-9. Carries can be used to move both a conscious and an unconscious casualty by one or two bearers.
+Carries, when performed correctly (paragraphs 1-10 through 1-21), provide the casualty more protection
+from further injury than drags (paragraphs 1-22 through 1-25) and are used to move a casualty a greater
+distance (from 50 to 300 meters depending on the carry).
+ONE-MAN CARRIES
+Fireman’s Carry
+1-10. The fireman’s carry (Figure 1-2) is one of the easiest ways for one individual to carry another. After
+an unconscious or disabled casualty has been properly positioned, they are raised from the ground, then
+supported and placed in the carrying position. When possible, the bearer should transport the casualty so
+that the bearer’s dominant (firing) hand is free. This can be accomplished by performing the following:
+ After rolling the casualty onto his abdomen, straddle him. Extend your hands under his chest
+and lock them together.
+ Lift the patient to his knees as you move backward.
+ Continue to move backward, thus straightening the casualty’s legs and locking his knees.
+ Walk forward, bringing the casualty to a standing position; tilt him slightly backward to prevent
+his knees from buckling.
+Chapter 1
+1-4 ATP 4-25.13 15 February 2013
+ As you maintain constant support of the casualty with one arm, free your other arm and quickly
+grasp his wrist, and raise his arm high. Instantly pass your head under his raised arm, releasing
+it as you pass under it.
+ Move swiftly to face the casualty and secure your arms around his waist. Immediately place
+your foot between his feet and spread them apart (approximately 6 to 8 inches).
+ Grasp the casualty’s wrist and raise his arm high over your head.
+ Bend down and pull the casualty’s arm over and down on your shoulder, bringing his body
+across your shoulders. At the same time, pass your arm between his legs.
+ Grasp the casualty’s wrist with one hand and place your other hand on your knee for support.
+ Rise with the casualty positioned correctly. Your free hand may be used to grasp your weapon.
+Figure 1-2. Fireman’s carry
+1-11. The alternate method of the fireman’s carry for raising a casualty from the ground is illustrated in
+Figure 1-3; however, it should be used only when the bearer believes it to be safer for the casualty because
+of the location of his wounds. When the alternate method is used, care must be taken to prevent the
+casualty’s head from snapping back and causing a neck injury. The steps for raising a casualty from the
+ground for the fireman’s carry are also used in other one-man carries.
+Manual Evacuation Methods
+15 February 2013 ATP 4-25.13 1-5
+Figure 1-3. Fireman’s carry (alternate method for lifting the patient to a standing position)
+Supporting Carry
+1-12. In the supporting carry (Figure 1-4), the casualty must be able to walk, or at least hop, on one leg,
+using the bearer as a crutch. This carry can be used to transport a casualty as far as he is able to walk or
+hop. To use this technique—
+ Raise the casualty from the ground to a standing position by using the process described above
+for getting him positioned for the fireman’s carry.
+ Grasp the casualty’s wrist and draw his arm around your neck.
+ Place your arm around his wrist. The casualty is now able to walk or hop, using you as a
+support.
+Figure 1-4. Supporting carry
+Arms Carry
+1-13. The arms carry (Figure 1-5) is useful in carrying a casualty for a short distance (up to 50 meters) and
+for placing a casualty on a litter. This carry requires greater upper body strength than other carries and can
+cause the carrier to quickly become fatigued. To use this technique—
+Chapter 1
+1-6 ATP 4-25.13 15 February 2013
+ Raise or lift the casualty from the ground to a standing position, as in the preparation for the
+fireman’s carry.
+ Place one arm under the casualty’s knees and your other arm around his back.
+ Lift the casualty.
+ Carry the casualty high to lessen fatigue.
+Figure 1-5. Arms carry
+Saddleback Carry
+1-14. Only a conscious casualty can be transported by the saddleback carry (Figure 1-6) because he must
+be able to hold onto the bearer’s neck. To use this technique—
+ Raise the casualty to an upright position, as in the preparation for the fireman’s carry.
+ Support the casualty by placing an arm around his waist. Move to the casualty’s side. Have the
+casualty put his arm around your neck and move in front of him with your back to him.
+ Have the casualty encircle his arms around your neck.
+ Stoop, raise him on your back, and clasp your hands together beneath his thighs, if possible.
+ Carry the casualty high to lessen fatigue.
+Figure 1-6. Saddleback carry
+Manual Evacuation Methods
+15 February 2013 ATP 4-25.13 1-7
+Pack-Strap Carry
+1-15. In the pack-strap carry (Figure 1-7) the casualty’s weight rests high on your back. This makes it
+easier for you to carry the casualty a moderate distance (50 to 300 meters). To eliminate the possibility of
+injury to the casualty’s arms, you must hold the casualty’s arms in a palms-down position. To use this
+technique—
+ Lift the casualty from the ground to a standing position, as in the preparation for the fireman’s
+carry.
+ Support the casualty with your arms around him and grasp one of his wrists and pull it closer to
+you.
+ Place his arm over your head and across your shoulders.
+ Move in front of him; while still supporting his weight against your back—
+ Grasp his other wrist and place this arm over your shoulder.
+ Bend forward and raise or hoist the casualty as high on your back as possible so that his
+weight is resting on your back.
+Note. Once the casualty is positioned on the bearer’s back, the bearer remains as erect as
+possible to prevent straining or injuring his back.
+Figure 1-7. Pack-strap carry
+TWO-MAN CARRIES
+1-16. Two-man carries should be used whenever possible. Two-man carries provide more comfort for the
+casualty, are less likely to aggravate injuries, and are less tiring for the bearers. Five different two-man
+carries can be used.
+Two-Man Supporting Carry
+1-17. The two-man supporting carry (Figure 1-8) can be used in transporting both conscious and
+unconscious casualties. If the casualty is taller than the bearers, it may be necessary for the bearers to lift
+the casualty’s legs and let them rest on their forearms. The bearers—
+ Help the casualty to his feet and support him with their arms around his waist.
+ Grasp the casualty’s wrists and draw his arms around their necks.
+Chapter 1
+1-8 ATP 4-25.13 15 February 2013
+Figure 1-8. Two-man supporting carry
+Two-Man Arms Carry
+1-18. The two-man arms carry (Figure 1-9) is useful in carrying a casualty for a moderate distance (50 to
+300 meters) and placing him on a litter. To lessen fatigue, the bearers should carry the casualty high and as
+close to their chests as possible. In extreme emergencies when there is not time to obtain a spine board,
+this carry is the safest one for transporting a casualty with a back injury. If possible, two additional bearers
+should be used to keep the casualty’s head and legs in alignment with his body. The bearers—
+ Kneel at one side of the casualty and place their arms beneath the casualty’s back, waist, hips,
+and knees.
+ Lift the casualty while rising to their knees.
+ Turn the casualty toward their chests, while rising to a standing position.
+ Carry the casualty high to lessen fatigue.
+Figure 1-9. Two-man arms carry
+Manual Evacuation Methods
+15 February 2013 ATP 4-25.13 1-9
+Two-Man Fore-and-Aft Carry
+1-19. The two-man fore-and-aft carry (Figure 1-10) is a useful two-man carry for transporting the casualty
+over a long distance (over 300 meters). The taller of the two bearers should position himself at the
+casualty’s head. By altering this carry so that both bearers face the casualty, it is useful for placing a
+casualty on a litter. To use this technique—
+ One bearer spreads the casualty’s legs and kneels between them with his back to the casualty.
+He positions his hands behind the casualty’s knees. The other bearer kneels at the casualty’s
+head, slides his hands under the arms, across the chest, and locks his hands together.
+ The two bearers rise together, lifting the casualty.
+Figure 1-10. Two-man fore-and-aft carry
+Four-Hand Seat Carry
+1-20. Only a conscious casualty can be transported with the four-hand seat carry (Figure 1-11) since they
+must help support him by placing his arms around the bearers’ shoulders. This carry is especially useful in
+transporting a casualty with a head or foot injury for a moderate distance (50 to 300 meters). It is also
+useful in placing a casualty on a litter. To use this technique—
+ Each bearer grasps one of his wrists and one of the other bearer’s wrists, thus forming a
+packsaddle.
+ The two bearers lower themselves sufficiently for the casualty to sit on the packsaddle; then,
+they have the casualty place his arms around their shoulders for support. The bearers then rise to
+an upright position.
+Chapter 1
+1-10 ATP 4-25.13 15 February 2013
+Figure 1-11. Four-hand seat carry
+Two-Hand Seat Carry
+1-21. The two-hand seat carry (Figure 1-12) is used when carrying a casualty for a short distance (up to 50
+meters) and in placing a casualty on a litter. With the casualty lying on his back, a bearer kneels on each
+side of the casualty at his hips. Each bearer passes his arms under the casualty’s thighs and back and grasps
+the other bearer’s wrists. The bearers rise lifting the casualty.
+Figure 1-12. Two-hand seat carry
+DRAGS
+1-22. Drags are used to move a casualty when the situation dictates that an expedient removal from
+dangerous situations or hostile environments is required. Drags allow the bearer and the casualty to stay
+low and use cover and concealment to move out of hazardous areas when the use of upright manual carries
+Manual Evacuation Methods
+15 February 2013 ATP 4-25.13 1-11
+or litters would put the bearers and casualty in greater danger. Drags are generally used for short distances
+of up to 50 meters.
+CAUTION
+Rough or improper handling may cause further injury to the casualty.
+PERSONNEL DRAG
+1-23. A conscious or unconscious casualty can be readily grasped by their equipment (clothing, equipment
+harness, or body armor drag strap) and dragged to an area of safety where they can be treated and further
+evacuated by other means. This drag can be accomplished by one or two bearers and provides one of the
+fastest means to move a casualty. As with most drags it provides a minimum amount of protection for the
+casualty’s injuries and is only used to move the casualty out of imminent danger. The bearer or bearers
+grasp the casualty by his equipment and pull him backwards to safety. Another variation for moving a
+conscious casualty is to have the casualty assist by grasping the bearer’s hands or forearms over his
+shoulders; the bearer also grasps the casualty by his hands or forearms and pulls the casualty backwards to
+safety (Figure 1-13).
+Figure 1-13. Personnel drag
+NECK DRAG
+1-24. The neck drag (Figure 1-14) is useful in combat because the bearer can transport the casualty as he
+creeps behind concealment or under obstacles. The neck drag cannot be used if the casualty has a broken
+arm. To use this technique perform the following:
+Note. If the casualty is conscious, he may clasp his hands together around the bearer’s neck.
+ Tie the casualty’s hands together at the wrists.
+ Straddle the casualty in a kneeling face-to-face position.
+ Loop the casualty’s tied hands over and around your neck.
+ Crawl forward dragging the casualty with you.
+Note. If the casualty is unconscious, his head must be protected from the ground.
+Chapter 1
+1-12 ATP 4-25.13 15 February 2013
+Figure 1-14. Neck drag
+CRADLE-DROP DRAG
+1-25. The cradle-drop drag (Figure 1-15) is effective in moving a casualty up or down stairs, steps, or to
+maintain a low profile. To use this technique perform the following:
+ Kneel at the casualty’s head (with him lying on his back). Slide your hands, with palms up,
+under the casualty’s shoulders and get a firm hold under his armpits.
+ Rise (partially), supporting the casualty’s head on one of your forearms. (You may bring your
+elbows together and let the casualty’s head rest on both of your forearms.)
+ Rise and drag the casualty backward. (The casualty is in a semisitting position.)
+ Back down the steps, supporting the casualty’s head and body and letting his hips and legs drop
+from step to step.
+Note. If the casualty needs to be moved up steps, you should back up the steps, using the same
+procedure.
+Figure 1-15. Cradle-drop drag
+15 February 2013 ATP 4-25.13 2-1
+Chapter 2
+Litter Evacuation
+When possible, a casualty should be transported on a litter rather than using a manual
+carry. A litter is more comfortable for the casualty and less likely to aggravate his
+injuries. The use of a litter makes evacuation easier and quicker. It also allows the
+casualty to be carried much farther than with manual carries. A standard litter should
+be used when available. If no standard litter is available, an improvised litter can be
+used as a suitable replacement until the casualty can be transferred to a standard litter.
+Standard litters should always be in a serviceable condition. Some of the standard
+and improvised litters used in the field are discussed below.
+This paragraph implements STANAG 2040.
+STANDARD LITTERS
+2-1. The standardization of a litter’s dimensions allows a patient to travel in various medical vehicles on
+the same litter; thereby, minimizing the possibility of further injury and saving valuable time. The Army
+uses several types of standard litters.
+STANDARD COLLAPSIBLE LITTER
+2-2. The standard collapsible litter is the most widely used (Figure 2-1). It only folds along the long axis.
+ The basic components of the litter are—
+ Two straight, rigid, lightweight aluminum poles.
+ A cover (bed) of cotton duck or other durable fabric.
+ Four wooden or plastic material handles attached to the poles.
+ Four stirrups (one bolted near the end of each pole). The stirrups support the litter when it is
+placed on the ground.
+ Two spreader bars (one near each end of the litter). These bars are extended crosswise at
+the stirrups to hold the cover taut when the litter is open.
+ Two litter securing straps (one attached to each pole at the stirrup bolts). These straps are
+used to secure the litter when it is closed.
+ Accessories such as patient securing straps.
+ Dimensions of the standard collapsible litter is as follows:
+ Overall length is 90 inches.
+ Overall width is 22 7/8 inches.
+ Bed length is 72 inches.
+ Bed width is 22 7/8 inches.
+ Weight is 15 pounds.
+Chapter 2
+2-2 ATP 4-25.13 15 February 2013
+Figure 2-1. Standard collapsible litter
+RIGID POLE FOLDING LITTER
+2-3. The legacy standard collapsible litter with a bed made from cotton is being replaced by the ridge pole
+folding litter (Figure 2-2). The new litter is 91 5/8 inches long with nominal adjustable handles (from 90
+inches to 94 3/8 inches) (Figures 2-2 and 2-3). It has a spreader bar and stirrup assemblies with
+interlocking securing buckle. It also has aluminum poles, nylon handles, and a plastic polypropylene cover.
+This litter can be decontaminated and is painted with a chemical agent-resistant material. It is assembled in
+the folded position and weighs 25 pounds.
+Figure 2-2. Rigid pole folding litter
+Litter Evacuation
+15 February 2013 ATP 4-25.13 2-3
+Figure 2-3. Adjustable handle rigid pole folding litter
+CHEMICAL LITTER
+2-4. The standard chemical litter (Figure 2-4) consists of aluminum poles painted with chemical agentresistant coating. It conforms to all NATO standards and weighs about 15 pounds. The cover fabric is a
+honeycomb weave of monofilament polypropylene. The fabric will not absorb agent and is not degraded
+by decontamination fluids. It is flame retardant and rip resistant. It is also treated to withstand weather and
+sunlight.
+Figure 2-4. Chemical litter
+FOLDING LITTER
+2-5. The folding litter (Figure 2-5) is often used in tactical operations where its smaller size allows it to be
+carried inside of military vehicles or carried by Soldiers while patrolling or doing airborne operations. The
+folding aluminum litter when opened is very similar to the standard collapsible litter. The folding litter
+poles are hinged in the middle which allows the litter to be folded lengthwise. To reduce the overall folded
+size, the stirrups also fold flat against the poles. The folding aluminum litter usually comes with two or
+four patient securing straps. There are two basic variants of folding litters, one version folds in half
+Chapter 2
+2-4 ATP 4-25.13 15 February 2013
+(bifold) and the other version has multiple hinges that allows it to be even more compact. The dimensions
+of the folding litter are—
+ The length of a litter is 90 inches when open, but is about 45 1/2 inches when the litter is folded
+lengthwise depending on the model.
+ When open, the litter bed measures 72 inches in length and slightly more than 22 inches across.
+ The litter weight about 15 to 25 pounds depending on the model.
+Figure 2-5. Folding litter
+MULTIHINGED FOLDING LITTER
+2-6. Another type of folding litter, with the same general dimensions as the standard litter when open, is
+the multihinged folding litter. This includes the Talon II® Model 90C collapsible handle litter, National
+Stock Number (NSN) 6530-01-504-9051. It has folding lightweight poles with two hinges that further
+reduces its overall size when folded (Figure 2-6). The litter can be folded to a compact size of
+22 1/2 x 7 x 6 inches when not in use. In its extended configuration the Talon II® Model 90C is 90 inches
+long (78 inches long with the handles collapsed).
+Figure 2-6. Talon II® Model 90C collapsible handle litter
+Litter Evacuation
+15 February 2013 ATP 4-25.13 2-5
+POLELESS NONRIGID LITTER
+2-7. The poleless nonrigid litter (Figure 2-7) can be folded or rolled and carried by the Soldier, CLS, or
+combat medic. It has folds into which improvised poles can be inserted for evacuation over long distances.
+It also has slings for hoisting, lowering, and carrying and allows the use of patient securing straps to secure
+the casualty to the litter.
+Figure 2-7. Poleless nonrigid litter
+SKED® LITTER
+2-8. The SKED® litter (Figure 2-8) is a commercial off-the-shelf evacuation litter system that functions
+in a traditional land-based application. It is a compact, lightweight, and versatile litter system used to
+evacuate a casualty from confined spaces, rough and difficult terrain, water rescues with attached floatation
+devices, and is the primary litter used by the Army in helicopter hoist missions. When the casualty is
+packaged the stretcher becomes rigid. The durable plastic provides protection for the patient/casualty while
+allowing extrication from austere areas.
+Figure 2-8. SKED® litter
+Chapter 2
+2-6 ATP 4-25.13 15 February 2013
+SPINE BOARD
+2-9. Spine boards aid in moving and immobilizing casualties with known or suspected spinal fractures.
+Spine boards are normally prefabricated from plywood or any suitable material (Figure 2- 9).
+Figure 2-9. Spine board
+2-10. The spine board is used when a casualty has a fracture or suspected fracture of the back or neck. To
+apply the spine board, the bearers assemble the required items: a spine board, four 6-foot patient securing
+straps, a cravat, and four pieces of padding. If an item is not available, the bearers should improvise it from
+any available material such as a door or piece of plywood. If the tactical situation permits, consider the use
+of a spine board for evacuation of any patient that has sustained injuries secondary to a blast, or any injury
+in which a significant traumatic brain injury may be suspected. To place and secure a casualty to a spine
+board perform the following:
+ The bearers place the spine board beside the casualty. They align it with his body. They then
+place padding on the board at the points where the casualty’s neck, small of the back, knees, and
+ankles will rest.
+ All commands come from bearer number 1 who kneels at the right side of the casualty’s head
+(see Appendix B for litter team training). He places his hands on each side of the casualty’s
+head and jaws, immobilizing the head and neck and applying slight traction (Figure 2-10).
+Bearers number 2, 3, and 4 kneel on one side of the patient and place their hands on the opposite
+side at the patient’s shoulder and waist, hip and thigh, knee and ankle (Figure 2-11).
+Figure 2-10. Positioning of hands
+Litter Evacuation
+15 February 2013 ATP 4-25.13 2-7
+Figure 2-11. Positioning of litter bearers
+ Bearers number 2, 3, and 4 roll the casualty’s body slightly toward them as bearer number 1
+turns the patient’s head, keeping it in a straight line with the spine.
+ Bearer number 3 reaches across the casualty’s body with one hand, grasps the board at the nearer
+edge and slides it against the casualty. Bearer number 3, with the same hand, reaches across the
+board to the farther edge and holds the board in place. All of the bearers then slowly roll the
+casualty backward onto the board, keeping the head and spine in a straight line.
+ While bearer number 1 continues to apply slight traction to the neck, bearers number 2, 3, and 4
+immobilize the casualty by applying the cravat and four patient securing straps (Figure 2-12) in
+the following order:
+ The center of the cravat is placed over the casualty’s forehead with the middle of the cravat
+covering the hairline. The ends are then extended straight across and inserted through the
+nearest holes on each side of the board.
+ One end of the first patient securing strap is inserted through the board hole near the chest,
+across the chest, and through the hole on the opposite side. It is then brought back across the
+arms and buckled to the other end of the strap. The buckle rests on the top of the board, not
+against the casualty.
+ The three remaining straps are applied: one across the hips, one above the knees (not over
+the kneecaps), and one above the ankles. One end of each strap is inserted through the board
+hole near the body part and buckled to the other end of the strap. The buckle rests on the top of
+the board, not against the casualty.
+Chapter 2
+2-8 ATP 4-25.13 15 February 2013
+Figure 2-12. Positioning of litter straps
+PATIENT SECURING STRAP
+2-11. The patient securing strap (Figure 2-13) NSN 6530-00-784-4205, is used to hold the casualty in
+position on the litter. It is designed to fit the straight and folding aluminum litters, as well as other standard
+litters. It is available in quantities of four per litter. This strap can also be used with an improvised litter
+and as a patient restraint, if required. It is made from a 6-foot length of 2-inch webbing and a buckle with a
+locking device and spring. Additional restraining devices may be used depending on the litter and
+circumstances. Other applications include the use of multipoint restraint harness that provides up to ten
+attachments points. These straps secure the casualty’s shoulder and foot areas to the litter and provide
+better immobilization over rough terrain and while loading and unloading the litter onto high profile
+vehicles. A minimum of two straps should be used when transporting a patient on a litter.
+Figure 2-13. Patient securing strap
+IMPROVISED LITTERS
+2-12. There are times when a casualty may have to be moved and a standard litter is not available. The
+distance may be too great for manual carries or the casualty may have an injury (such as a fractured neck,
+back, hip, or thigh) that would be aggravated by manual transportation. In these situations, litters can be
+improvised from materials at hand. Improvised litters must be as well constructed as possible to avoid the
+risk of dropping or further injuring the casualty. Improvised litters are emergency measures and must be
+replaced by standard litters at the first opportunity.
+2-13. Many different types of litters can be improvised, depending upon the materials available. A
+satisfactory litter can be made by securing poles inside such items as a blanket (Figure 2-14), poncho,
+shelter half, tarpaulin, mattress cover, jackets, shirts (Figure 2-15), or bags and sacks (Figure 2-16).
+Litter Evacuation
+15 February 2013 ATP 4-25.13 2-9
+Poles can be improvised from strong branches, tent poles, skis, lengths of pipe, and other objects. If objects
+for improvising poles are not available, a blanket, poncho, or similar item can be rolled from both sides
+toward the center so the rolls can be gripped for carrying a casualty (Figure 2-17). Most flat-surface
+objects of suitable size can be used as a litter. Such objects include doors, boards, window shutters,
+benches, ladders, cots, and chairs. If possible, these objects should be padded for the casualty’s comfort.
+IMPROVISED LITTER USING BLANKETS AND POLES
+2-14. To improvise a litter using a blanket and poles, the following steps should be used:
+ Open the blanket and lay one pole lengthwise across the center; then fold the blanket over the
+pole.
+ Place the second pole across the center of the folded blanket.
+ Fold the free edges of the blanket over the second pole and across to the first pole.
+Figure 2-14. Litter made with blankets and poles
+IMPROVISED LITTER FROM SHIRTS OR JACKETS AND POLES
+2-15. To improvise a litter using shirts or jackets, button or zip the shirt or jacket and turn it inside out,
+leaving the sleeves inside, then pass the pole through the sleeves.
+Figure 2-15. Litter improvised from jackets and poles
+Chapter 2
+2-10 ATP 4-25.13 15 February 2013
+IMPROVISED LITTER FROM BAGS, SACKS, AND POLES
+2-16. To improvise a litter from bags, sacks, and poles, rip open the corners of the bags or sacks; then pass
+the poles through them. Overlap the bags or sacks to provide support for the middle of the bed to prevent
+the casualty from falling through.
+Figure 2-16. Litter improvised from sacks and poles
+ROLLED BLANKET LITTER
+2-17. If no poles are available, roll a blanket, shelter half, tarpaulin, or similar item from both sides toward
+the center (Figure 2-17). Grip the rolls to carry the casualty (Figure 2-18).
+Figure 2-17. Rolled blanket litter
+Litter Evacuation
+15 February 2013 ATP 4-25.13 2-11
+Figure 2-18. Rolled blanket used as litter
+TRAVOIS
+2-18. This method of evacuation requires trained personnel and a good natured animal. Additional
+information on the use of pack animals can be found in FM 3-05.213. A travois is a primitive vehicle for
+transporting loads. It can be lashed to a horse or similar animal and dragged along the ground. It can also
+be lashed between two animals in single file and carried level. The travois is made from two long poles
+fastened together by two crossbars and a litter bed fastened to the poles and crossbars. The casualty is
+secured on the litter bed. If the travois is pulled by only one animal, the bearers lift the dragging end from
+the ground when going uphill, fording streams, or crossing obstacles. To make a travois—
+ Cut two poles about 16-feet long (one pole should be 8 to 10 inches longer than the other). Ensure that the small ends are at least 2 inches in diameter. Then cut two crossbars which are about
+3-feet long.
+ Lay the poles parallel to each other. They should be placed about 2 1/2 feet apart with the larger
+ends to the front. If only one animal is used, let the smaller ends spread apart about 3 feet and
+have one of the small ends project 8 to 10 inches beyond the other one. This results in a rocking
+motion, rather than a jolting motion to the patient.
+ Notch the poles and the crossbars so that the poles can be connected with one crossbar about 6
+feet from the front end and the other crossbar about 6 feet to the rear of the first one. Fit the
+notches in the crossbars and poles together and lace them securely in place.
+ Make a litter bed 6 feet long between the crossbars. This is done by fastening a blanket, canvas,
+or similar material securely to the poles and crossbars.
+ If only one animal is used, securely fasten the front ends of the poles to the saddle of the animal.
+Leave the other ends of the poles on the ground (Figure 2-19).
+Note. A rope or strap may be stretched diagonally from pole to pole, letting it cross many times
+to form a base for an improvised bed. A litter or cot may also be fastened between the poles for
+the same purpose.
+Chapter 2
+2-12 ATP 4-25.13 15 February 2013
+Figure 2-19. Travois litter
+ If two animals are used, securely fasten the front ends of the poles to the saddle of the lead
+animal and the other end of the poles to the saddle of the animal which follows (Figure 2-20).
+Figure 2-20. Suspended litter
+15 February 2013 ATP 4-25.13 3-1
+Chapter 3
+Nonmedical Casualty Evacuation Platforms
+In combat areas, ambulances may not be available, they may be either too few in
+number or incapable of evacuating patients over certain types of terrain. In these
+instances, many vehicles available to most units can be used to transport casualties
+with little or no change in their configuration. Units should plan and train on how
+their organic vehicles, both air and ground, can be used to move casualties both on
+and off litters. Nonmedical vehicles both air and ground can be used for CASEVAC.
+Organizations need to assess the organic nonmedical vehicles available and
+determine how they can be used to evacuate casualties. Casualties can be ambulatory
+or litter, and the casualties that need to be transported on a litter present the greatest
+challenge as planning and training are required to successfully meet the requirements
+of loading and moving them to casualty collection points (CCPs), ambulance
+exchange points, or to an MTF. When loading casualties onto a vehicles or aircraft,
+the most critical casualties should be loaded last or positioned so that they can be
+unloaded first or be more accessible for en route care.
+This chapter describes recommended loading solutions for some of the more common
+vehicles. While this chapter only covers the most common Army platforms, planners
+should not only consider their organic platforms but all platforms that may be
+available including civilian, other services, and coalition. For platforms not listed,
+organizations can use these examples to develop their own safe-loading
+configurations and add them to their operational plans and unit standard operating
+procedures.
+SECTION I — NONMEDICAL VEHICLES USED FOR CASUALTY EVACUATION
+NONMEDICAL VEHICLES
+M998 TRUCK, CARGO/TROOP CARRIER, 1 1/4 TON, HIGH-MOBILITY MULTIPURPOSE
+WHEELED VEHICLE (FOUR-MAN CONFIGURATION)
+3-1. The M998 high-mobility multipurpose wheeled vehicle (HMMWV), 1 1/4-ton cargo truck in the
+four-man configuration (Figure 3-1) can be easily adapted for transporting three litters. To convert this
+vehicle for carrying litters, follow the procedures listed below:
+ Remove the cargo cover and metal bows. Secure them in place. Lower the tailgate.
+ Place two litters side by side across the back of the truck with the litter handles resting on the
+sides of the truck.
+CAUTION
+When the route of evacuation is along narrow roads or trails, care must
+be taken to prevent the litter handles from catching on trees, bushes or
+buildings.
+Chapter 3
+3-2 ATP 4-25.13 15 February 2013
+ Secure the litters to the vehicle.
+ Place one litter lengthwise, head first, in the bed of the truck. Secure it in place.
+ Leave tailgate open. It is supported by the two tailgate chain hooks.
+Figure 3-1. M998 truck, cargo/troop carrier 1 1/4 ton, HMMWV (four-man configuration), with
+three litters
+M998 TRUCK, CARGO/TROOP CARRIER, 1 1/4 TON, HMMWV (TWO-MAN
+CONFIGURATION)
+3-2. The M998 (HMMWV), 1 1/4-ton cargo truck in the two-man configuration (Figure 3-2), can be
+easily adapted for transporting five litters. To convert this vehicle to carry patients/casualties, the
+procedures listed below should be followed:
+ Fold the fabric cover and metal bows forward and together as an assembly. Secure them in
+place. Lower the tailgate.
+ Place three litters side by side across the sideboards. Secure them in place with cargo tie-downs,
+cravats, or other suitable sturdy material.
+ Place two litters lengthwise, head first, in the bed of the truck. Secure them in place.
+ Leave tailgate open. It is supported by the two tailgate chain hooks.
+Nonmedical Casualty Evacuation Platforms
+15 February 2013 ATP 4-25.13 3-3
+Figure 3-2. M998 truck, cargo/troop carrier 1 1/4 ton, HMMWV (two-man configuration), with
+five litters
+M1093 TRUCK, CARGO, MEDIUM TACTICAL VEHICLE, 5 TON
+3-3. The M1093 medium tactical vehicle (MTV), 5-ton truck (Figure 3-3) is normally used to transport
+general cargo as well as personnel. It has a canvas cover, removable tarpaulin braces, and hinged
+sideboards. The canvas cover and braces need not be removed for patient loading and unloading. This
+vehicle has a maximum capacity of 8 litters and 14 ambulatory patients/casualties.
+3-4. Use the following steps to load patients into this vehicle:
+ Lower the seats and secure the vertical support bracket in place.
+ Place three litters (litter numbers 1 through 3) crosswise on the seats, forward, next to the cab.
+Secure the litters individually to the seats.
+ Place two litters (litter numbers 4 and 5) lengthwise on the floor, forward toward the cab, feet
+first. Secure the litters together and to the vertical seat support.
+ Place litter number 6 crosswise on the seats near the rear of the vehicle. Slide the litter as far
+forward as possible. Do not secure the litter at this time.
+ Place litter number 7 crosswise on the seats near the rear of the vehicle and slide it forward as in
+step above. Secure the litter to the seats.
+ Place litter number 8 crosswise on the seats as far rearward as possible. Secure the litter to the
+seats.
+ Glide litter numbers 6 and 7 rearward next to litter number 8. Secure the litters to the seats.
+ Raise and secure the tailgate.
+ If available the combat medic/CLS rides in the center of the vehicle to monitor the patients or
+casualties.
+Chapter 3
+3-4 ATP 4-25.13 15 February 2013
+Figure 3-3. Loading the M1093, MTV, 5 ton
+M1081 TRUCK, CARGO, LIGHT MEDIUM TACTICAL VEHICLE, 2 1/2 TON
+3-5. The M1081 light medium tactical vehicle (LMTV), 2 1/2-ton truck (Figure 3-4) is normally used to
+transport general cargo and personnel. It has a canvas cover, removable tarpaulin braces, and hinged
+sideboards. The canvas cover and braces need not be removed for patient loading and unloading. This
+vehicle has a maximum capacity of 7 litters and 12 ambulatory patients or casualties.
+3-6. Use the following steps to load patients into this vehicle:
+ Lower the seats and secure the vertical support bracket in place.
+ Place three litters (litter numbers 1 through 3) crosswise on the seats, forward, next to the cab.
+Secure the litters individually to the seats.
+ Place two litters (litter numbers 4 and 5) lengthwise on the floor, forward toward the cab, feet
+first. Secure the litters together and to the vertical seat support.
+ Place litter number 6 crosswise on the seats near the rear of the vehicle. Slide the litter as far
+forward as possible. Do not secure the litter at this time.
+ Place litter number 7 crosswise on the seats as far rearward as possible. Secure the litter to the
+seats.
+ Slide litter number 6 rearward next to litter number 7. Secure the litter to the seats.
+ Raise and secure the tailgate.
+ If available, the combat medic/CLS rides in the center of the vehicle to monitor the
+patients/casualties.
+Nonmedical Casualty Evacuation Platforms
+15 February 2013 ATP 4-25.13 3-5
+Figure 3-4. Loading the M1081, LMTV, 2 1/2 ton
+M977 HEAVY EXPANDED, MOBILITY TACTICAL TRUCK, 8 X 8, CARGO
+3-7. The M977 heavy expanded, mobility tactical truck (HEMTT) (Figure 3-5) is normally used to
+transport heavy cargo. It may or may not have the cargo cover kit consisting of the cover, stakes, and bows
+installed. The heavy expanded mobility tactical truck has collapsible sides and can be used to transport the
+wounded in a mass casualty (MASCAL) situation. It can be adapted to carry a maximum of nine litter
+patients or casualties in one lift. Instructions for the loading of this vehicle are to—
+ Start at the rear of the vehicle; roll the cargo cover (if it is on the vehicle) toward the front of the
+vehicle. Remove the corner lock pins and raise the panel latches to lower the rear section of the
+cargo body. Remove the first two bows and drop one side of the cargo bed. This will be the
+side used for casualty loading.
+WARNING
+Side panels can slide off of the hinge pins when the vehicle is
+parked on a grade. This can cause injury.
+ Place one litter team in the back of the cargo bed to arrange and secure the litters. The second
+litter team will carry and place the litters into the cargo bed.
+ Load the litters from front to back, head to toe, and the less serious to the most serious based on
+casualty triage. The litters will be placed horizontally on the cargo bed (Figure 3-5).
+ Raise and secure the side panel to ensure litter stability and casualty safety. Replace the bows
+and reroll the canvas cover, if necessary, to provide protection from the elements.
+Chapter 3
+3-6 ATP 4-25.13 15 February 2013
+Figure 3-5. M977 HEMTT, 8 x 8, cargo
+M871, 22 1/2 TON, CARGO SEMITRAILER
+3-8. The 22 1/2-ton cargo trailer (Figure 3-6) is attached to a prime mover such as a M800 or M900 series
+tractor for the transport of general cargo. (There are no major differences between the M871 and the
+M871A1 semitrailers.) It has 4 1/3 foot high wooden sides with a canvas trailer cover. This trailer can be
+used to transport wounded in a MASCAL situation. It can be adapted to carry 16 litters in a single lift.
+Instructions for the loading of this trailer are to—
+ Remove the tie-downs that secure the canvas cover and roll it forward toward the front of the
+trailer.
+ Remove the rear panels exposing the trailer bed.
+ Use one litter team in the cargo bed to arrange and secure the litters in the cargo area, while
+another litter team lifts the casualties to the bed of the trailer.
+ Load litters from right to left, front to back, based on casualty triage. The more seriously injured
+are loaded last so that they are unloaded first.
+ Place litters lengthwise, with casualties in a head-to-toe configuration.
+ Replace the rear doors to ensure the security of the litters.
+ Reroll the cargo cover 3/4 of the way down and then secure the cover to protect the casualties.
+Figure 3-6. M871 22 1/2 ton, cargo semitrailer, loaded with litters
+Nonmedical Casualty Evacuation Platforms
+15 February 2013 ATP 4-25.13 3-7
+MINE-RESISTANT AMBUSH PROTECTED
+3-9. Mine-resistant ambush protected (MRAP) vehicles were designed to increase safety of troops
+operating in an environment heavy with mines, improvised explosive devices, and ambushes. Their heavy
+armor and “V-shaped” profiles deflect blasts from below the vehicle, and MRAPs have proven to be
+lifesavers during the recent conflicts in Iraq and Afghanistan, where thousands have been deployed. Many
+of these vehicles have been used in a CASEVAC role and some were even fielded with a CASEVAC kit.
+There are currently several different MRAP variants in service, Soldiers and planners should become
+familiar with their variant and how best to load, secure, and transport casualties.
+ALL-TERRAIN UTILITY VEHICLES
+3-10. The family of small all-terrain vehicles such as the John Deere™ M-Gator (Figure 3-7) military
+utility vehicle, the Polaris® MVRS800 and MV800 as well as other all-terrain vehicle variants currently in
+service, provide a capability as light capacity tactical vehicles. In this role they fill the gap created with the
+phasing out of the 1/4-ton truck M-151 (Jeep) and M-274 mechanical mule that the HMMWV is too large
+to fill. These vehicles provide a wide range of functionality and are used for a variety of utility work and
+the transportation of supplies and equipment. With minimal modification they can easily carry casualties
+and litters. Depending on how the vehicle is equipped, litters can be secured to the forward cargo rack or to
+the rear bed. Units that include these vehicles in their inventory and CASEVAC plan will need to train on
+how best to load and secure casualties and litters.
+Figure 3-7. M-Gator military utility vehicle
+SECTION II — ARMY NONMEDICAL AIRCRAFT
+ARMY FIXED-WING AIRCRAFT
+C-12 HURON
+3-11. The C-12 Huron is used as a utility cargo and reconnaissance aircraft. This aircraft is not normally
+employed as an evacuation aircraft. In emergency situations, this aircraft can be configured to evacuate
+litter and ambulatory patients. Depending on the model, the C-12s normal cruise speed ranges from 275 to
+300 miles per hour with a 5- to 6-hour endurance. It is capable of carrying eight ambulatory patients or two
+litters and four ambulatory.
+C-23 SHERPA
+3-12. The C-23 Sherpa is a light military transport aircraft, designed to operate efficiently, even under the
+most arduous conditions, in a wide range of mission configurations. This aircraft is primarily employed to
+Chapter 3
+3-8 ATP 4-25.13 15 February 2013
+transport up to 30 personnel and or cargo. In emergency situations, this aircraft can be configured to
+evacuate litter and ambulatory patients. The Sherpa can accommodate a maximum of 18 litter patients or a
+combination of litter and ambulatory patients plus their medical personnel. Depending on the model, the
+C-23s cruise speed is 184 miles per hour and the maximum speed is approximately 218 miles per hour.
+LOADING PATIENTS ABOARD ARMY FIXED-WING AIRCRAFT
+3-13. The personnel who transport patients to the landing strip load the patients aboard the aircraft. They
+may be required to assist in configuring the aircraft for litters. Litters are generally loaded from the top
+downward and from the front to the rear. The four-man litter squad plus the crew chief normally load these
+aircraft. The crew chief or another member of the aircraft crew supervises the loading of all patients. One
+or all of the litter bearers, depending on the aircraft normally enters the aircraft to assist the crew chief in
+loading the litters.
+ARMY ROTARY-WING AIRCRAFT
+3-14. Army rotary-wing aircraft provide a flexible asset on the battlefield for the use in CASEVAC. The
+number of patients/casualties that can be transported varies by the type of aircraft and their configuration.
+For information on aircraft dimensions refer to FM 3-04.113 and for landing zone requirements refer to FM
+3-21.38.
+CARGO HELICOPTER-47 (CHINOOK)
+3-15. The Cargo Helicopter (CH)-47 (Chinook) is a multimission, heavy-lift transport helicopter. Its
+primary mission is the transportation of cargo, troops, and equipment on the battlefield during the day or
+night under all flight conditions. Among its multimission profiles is the movement of casualties and
+patients along with medical personnel.
+3-16. Loading patients aboard the CH-47 Chinook with the litter support kit installed allows for a
+maximum capacity of 24 litter patients or 31 ambulatory patients. The 31 ambulatory patients are seated in
+the ten three-man seats and the one-man seat as shown in Figure 3-8. The two one-man seats may be used
+by crew members.
+3-17. When carrying 24 litters, the seats are replaced with six tiers of litters, four litters high. The two oneman seats in the rear section should remain in place for the crew members. The one-man seat at the left
+front may also be left in place provided it is needed. All passengers and cargo loading will be at the
+direction of the crew.
+3-18. The combinations of litter and ambulatory patients that the CH-47 (Chinook) is capable of
+accommodating are provided in Table 3-1.
+Figure 3-8. Interior view of CH-47 (Chinook) with litter installation
+Nonmedical Casualty Evacuation Platforms
+15 February 2013 ATP 4-25.13 3-9
+Table 3-1. Litter and ambulatory configuration of the CH-47 (Chinook)
+Ambulatory patients Litter patients
+31 0
+25 4
+19 8
+16 12
+10 16
+4 20
+1 24
+UTILITY HELICOPTER-60 (BLACKHAWK)
+3-19. Utility Helicopter (UH)-60 Blackhawk is a multimission, medium-lift transport helicopter. Its
+primary mission is the transportation of troops, cargo, and equipment on the battlefield during the day or
+night and under all flight conditions. This utility tactical transport helicopter provides air assault, general
+support, medical evacuation, CASEVAC, mission command, and special operations support.
+3-20. The UH-60 (Blackhawk) is the Army’s primary medical evacuation helicopter. For information on
+the utilization of the UH-60 in the role of medical evacuation refer to FM 4-02.2.
+3-21. In the CASEVAC role, the UH-60 (Blackhawk) is capable of transporting both ambulatory and litter
+casualties. The numbers of both vary with the aircraft’s configuration. To safely secure litters on the floor
+of the UH-60 and other aircraft with appropriate floor cargo attachment points, the strap, tie-down,
+universal litter (NSN: 6530-01-530-3860) and the CASEVAC conversion kit, aircraft (NSN: 6545-01-536-
+9315) are available through the military supply system and commercial vendors. These kits provide a
+means to secure a litter and patient/casualty to the floor of the aircraft and the ability to transfer the casualty
+to an air or ground ambulance for movement to an MTF.
+Note. When the standard litter is placed in the UH-60 perpendicular to the aircraft’s forward and
+aft axis, the cargo doors will not close. In this position a litter with collapsible handles must be
+used.
+LIGHT UTILITY HELICOPTER-72 (LAKOTA)
+3-22. The Light Utility Helicopter (LUH)-72 (Lakota) is a commercial aircraft designed to conduct light
+general support tasks in permissive, noncombat environments. Those tasks include civil search and rescue,
+personnel recovery, evacuation, counterdrug, and limited civil mission command operations in the conduct
+of Homeland Security.
+3-23. As a CASEVAC platform, the LUH-72 (Lakota) can accommodate a limited number of litters and
+ambulatory casualties. These numbers depend on the aircraft’s configuration, it will accommodate a
+maximum of two litters or a maximum of six ambulatory passengers, or a combination one litter and 3
+ambulatory.
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 4-1
+Chapter 4
+Casualty Evacuation in a Mass Casualty Situation
+Mass casualty situations can exceed the ability of organic and direct support medical
+assets to effectively treat the numbers of casualties being sustained. To prevent this
+from occurring, planners should anticipate this possibility and coordinate with area
+support medical units to help absorb the acute rise in battlefield injuries. Careful
+planning and coordination will ensure that the standard of medical care for injured
+Soldiers is not compromised.
+MASS CASUALTY SITUATIONS
+4-1. Mass casualty situations occur when the number of casualties exceeds the available medical
+capability to rapidly treat and evacuate them. The battalion surgeon or medical operations officer work
+with the logistics and operations officer to develop plans and advise the commander on integrating all
+available resources into an effective MASCAL plan. See Appendix A for an example of a MASCAL
+standard operations plan.
+4-2. The deliberate planning required to prepare for a MASCAL situation identifies assets that will be
+utilized to move the casualties in advance of an incident. Units should coordinate these assets in advance
+within the unit’s support structure and supporting MTF.
+4-3. Effective management of MASCAL situations is dependent on the establishment and rehearsal of
+these MASCAL plans. There are a number of other variables which can ensure the success of a unit’s
+MASCAL response plan. These include but are not limited to—
+ Coordination and synchronization of additional medical support and or augmentation such as—
+ Medical and CASEVAC support.
+ Forward resuscitative surgical intervention provided by forward surgical teams.
+ Established Class VIII resupply.
+ Casualty collection points.
+ Evacuation routes.
+ Ambulance exchange points.
+ Medical personnel resources to provide en route medical care on nonmedical vehicles.
+ Capabilities and locations of MTFs.
+ Procedures for medical equipment (litters, patient securing straps, blankets) exchanges.
+ Quickly locating the injured and clearing the battlefield.
+ Providing effective tactical combat casualty care for the injured.
+ Accurate triage and rapid evacuation of the injured to an MTF at the next higher role of care.
+ Coordinating with key personnel and units in the use of nonmedical vehicles for medical
+evacuation or casualty transportation.
+ Nonmedical personnel for litter teams identified and trained.
+ Maintain trained and equipped CLS.
+ Communications frequencies and call signs for mission command.
+4-4. Ground nonmedical assets can be used for CASEVAC when the medical evacuation system is
+overwhelmed. All available ground vehicles should be considered for augmenting medical evacuation
+assets in an emergency. The key to success is identifying the vehicles, drivers, and medical personnel or
+CLS who will accompany the casualties. Each of these vehicles should be equipped with a Warrior aid and
+litter kit (WALK®) NSN 6545-01-532-4962. The WALK® is designed to provide the user with enough
+Chapter 4
+4-2 ATP 4-25.13 15 February 2013
+medical supplies and a stable evacuation platform for two critically injured casualties. Coordinating for the
+release of these assets upon demand rather than waiting for a MASCAL situation to occur is also crucial to
+the success of the operation. Vehicle types will differ depending upon the type of unit supported; however,
+some of the more common vehicles which may be used are the—
+ Family of medium tactical vehicles:
+ Light medium tactical vehicle.
+ Medium tactical vehicle.
+ Truck, cargo, LMTV, 4 x 4, 2 1/2 ton, M1078.
+ Truck cargo, LMTV, 2 1/2 ton, M1078 and M1081.
+ Truck, cargo, MTV, long wheelbase, 5 ton, M1085 series.
+ Truck, cargo, MTV, light vehicle, 5 ton, M1083.
+ Truck, cargo, HEMTT, 8 x 8, cargo, M977.
+ Semitrailer, cargo, 22 1/2 ton, M871.
+ Armored personnel carrier, M2/3 Bradley infantry fighting vehicle, M113, M1133 Stryker,
+MRAP.
+ Tractor, 5 ton, with stake and platform trailer.
+ High-mobility multipurpose wheeled vehicle, M998.
+4-5. All organizations must have procedures in place to respond effectively to MASCAL situations. The
+potential of disasters in war and other operations requires that the medical element be prepared to support
+MASCAL situations. They must be able to receive, triage, treat, and evacuate large numbers of casualties
+within a short period of time. Contingency plans for supporting MASCAL operations must be developed
+by all units in coordination with their battalion surgeon, battalion operations staff officer, and logistics staff
+officer.
+HOST-NATION SUPPORT
+4-6. Depending on the area of operations, host-nation support agreements may provide evacuation assets
+ranging from austere to extensive support. Coordination with the civil affairs personnel can provide
+information on the availability of assets. This information should be included in the operation plans. Some
+of the types of assets which might be available for support are—
+ Buses.
+ Barges and other watercraft.
+ Civilian cargo vehicles.
+MEDICAL STAFFING IN NONMEDICAL VEHICLES
+4-7. The staffing of nonmedical vehicles with medical personnel to provide en route medical care requires
+considerable planning and coordination. Since nonmedical vehicles are normally ones of opportunity,
+medical personnel and equipment and transportation platforms must be carefully tracked if they are to be
+used. The current medical system lends itself well to this form of task organizing by providing four-man
+treatment teams organic to the brigade support medical companies, area support medical companies, and
+within most battalion headquarters. Medical operation planners should plan and coordinate to use these
+assets in this temporary role. Also available within most support organizations are trained CLS. These
+personnel can be used, if available, to provide en route treatment of less seriously injured patients.
+CASUALTY MANAGEMENT
+4-8. The management of CASEVAC using nonmedical evacuation assets is difficult to control. Prior to
+moving a casualty it is important to know where the casualty needs to go, this may be determined by the
+severity of injuries, number of casualties, and availability of the MTF. Because en route medical care is not
+provided, the duration of travel that the casualty can withstand without their condition deteriorating must be
+a consideration. Determining the severity of a casualty’s injuries and patient category can be a difficult
+Casualty Evacuation in a Mass Casualty Situation
+15 February 2013 ATP 4-25.13 4-3
+task for nonmedical personnel, therefore, medical personnel should always be utilized for this task when
+available.
+4-9. Casualties should always be transported to the nearest MTF, CCP, or other sites where medical
+personnel are located. Over evacuation occurs routinely unless controls are implemented to manage the
+casualty by patient category. Responsive evacuation is extremely important; however, if en route patient
+care and management by patient category are ignored, the end result will be an increase in the mortality rate
+and an over evacuation of Soldiers that may be returned to duty.
+4-10. The more severe casualties, the URGENT and URGENT-SURG precedence casualties should be
+evacuated before PRIORITY or ROUTINE precedence casualties. Care must be taken to ensure lower
+precedence casualties are evacuated before their medical condition begins to deteriorate resulting in
+upgrading their precedence to URGENT or URGENT-SURG. URGENT and URGENT-SURG precedence
+patients should be moved by an ambulance providing en route medical care. The URGENT and URGENTSURG casualty that is being transported by a nonmedical assets needs to be transferred to an air or ground
+ambulance at the first opportunity or delivered to a supporting MTF as quickly as possible. Planners
+should consider and incorporate into the operation plan the use of nonmedical air assets and dedicated
+ground ambulances to move the PRIORITY precedence casualties, and nonmedical ground vehicles to
+move the ROUTINE precedence patients when dedicated medical vehicles are not available. Every effort
+should be made to staff and equip nonmedical vehicles used for CASEVAC with medical personnel, even if
+only to move the ROUTINE patient precedence category. See Table 4-1 for categories of evacuation
+precedence.
+Table 4-1. Categories of evacuation precedence
+Priority I─URGENT Is assigned to emergency cases that should be evacuated as soon as possible and
+within a maximum of 1 hour in order to save life, limb, or eyesight, to prevent
+complications of serious illness, or to avoid permanent disability.
+Priority
+IA─URGENT-SURG
+Is assigned to patients who must receive far forward surgical intervention to save life
+and to stabilize them for further evacuation.
+PRIORITY
+II─PRIORITY
+Is assigned to sick and wounded personnel requiring prompt medical care. This
+precedence is used when the individual should be evacuated within 4 hours or his
+medical condition could deteriorate to such a degree that he will become an URGENT
+precedence, or whose requirements for special treatment are not available locally, or
+who will suffer unnecessary pain or disability.
+PRIORITY
+III─ROUTINE
+Is assigned to sick and wounded personnel requiring evacuation but whose condition is
+not expected to deteriorate significantly. The sick and wounded in this category should
+be evacuated within 24 hours.
+PRIORITY
+IV─CONVENIENCE
+Is assigned to patients for whom evacuation by medical platform is a matter of medical
+convenience rather than necessity.
+The NATO STANAG 3204 has deleted the category of Priority IV—CONVENIENCE; however, it will still be included in the U.S.
+Army evacuation priorities as there is a requirement for it on the battlefield.
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 5-1
+Chapter 5
+Casualty Evacuation in Specific Environments
+This chapter addresses CASEVAC in specific environments or under special
+circumstances. Casualty evacuation requires planning and synchronization to be
+effectively carried out. Part of that planning needs to include how environmental
+factors and terrain can affect the movement of casualties. This chapter discusses the
+challenges in moving casualties in mountainous, jungle, desert, extreme cold, and
+urban terrain. More thorough considerations for medical evacuation in these
+environments can be found in FM 4-02.2.
+MOUNTAINOUS TERRAIN
+5-1. General considerations for mountain operations can be found in FM 3-97.6 and TC 3-97.61.
+Mountainous terrain poses great challenges to sustainment operations and complicates movement of
+casualties. Movement is difficult as existing roads and trails are normally few and unrefined. Major
+thoroughfares mainly run along terrain features that present steep sloping grades on either side, making
+them vulnerable to ambushes and attacks. These areas have wide variation in climate and are subject to
+frequent and sudden climate changes and an altitude relief from 1,000 to 3,000 feet or greater.
+5-2. Environmental factors can complicate a casualty’s medical condition at higher altitudes. These may
+include hypoxia-related illnesses, dehydration, cold weather injuries, heat exhaustion, sunburn, and snow
+blindness. These environmental conditions may worsen the casualty’s condition and hasten the
+requirement for a timely evacuation. Refer to Technical Bulletin, Medical 505 for a discussion on altituderelated illnesses.
+5-3. Casualty movement in mountainous terrain can present unique problems. The proportion of litter
+cases to ambulatory cases increases in mountainous terrain. Ambulatory casualties may not be able to
+move unassisted over rugged terrain and may require a litter for movement. The movement of litter
+casualties on rugged and steep terrain may require additional litter bearers. The four-man team may need
+to be augmented up to a six-man litter team. Lines of communication are extended in mountainous terrain,
+and distances to an MTF are also increased. These increased distances and lack of road networks may raise
+the reliance on aviation assets to move casualties. As previously noted, the rugged topography of
+mountains limits the number of natural transportation routes for evacuation and makes those routes
+vulnerable to enemy attack. To assure continued operations, CASEVAC planning in mountainous terrain
+should identify and plan for the use of all possible land routes within the operations area. All alternative
+methods of transporting casualties should be planned for and considered. Air movement avoids many of
+the problems experienced in overland travel, but movement by air has its own limitations. It is severely
+limited by landing zone availability and environmental factors such as weather, altitude, visibility, and
+ambient lighting for night missions.
+JUNGLE TERRAIN
+5-4. General consideration for jungle operations can be found in FM 90-5. A jungle is a dense forest in a
+tropical climate. There are several different classifications of jungles and each presents its own unique
+problems for the movement of casualties. Generally they all have some common limitations which include
+thick vegetation, limited road structure, and degraded mobility. Roads in the jungle are usually affected by
+poor drainage, heavy rainfall, and poor roadbed construction which limit trafficability.
+5-5. Environmental factors can complicate a casualty’s medical condition. The heat, humidity, and
+terrain of the jungle can increase the incidence of dehydration, heat injuries, infection, immersion foot, and
+Chapter 5
+5-2 ATP 4-25.13 15 February 2013
+endemic disease. These increased disease and infection incidences may worsen the casualty’s condition;
+therefore, timely evacuation is essential.
+5-6. Medical treatment and evacuation will often be complicated by the extended distances and
+inaccessibility due to terrain and vegetation. Soldiers may find it impossible to walk through dense
+undergrowth. At best, litter teams can carry casualties only a few hundred meters over this rough terrain
+before needing rest or relief. Navigating in the jungle can be very challenging, Soldiers conducting
+CASEVAC need to have the proper navigation training and navigational aids to assure mission success.
+Due to the difficulties of ground evacuation in jungle operations a greater emphasis on air evacuation is
+necessary. In areas where the jungle is too dense to prepare a landing zone, a helicopter equipped with a
+hoist should be requested.
+DESERT TERRAIN
+5-7. General consideration for desert operations can be found in FM 90-3. Arid regions make up about
+one-third of the earth’s land surface, a higher percentage than any other type of climate. Desert terrain
+varies considerably from place to place, with the primary similarity being the lack of water and its
+consequential effect on vegetation and terrain.
+5-8. Medical considerations can be complicated by environmental factors associated with deserts. This
+includes the increased incidence of heat injuries and dehydration. Dehydration can also increase incidence
+of other medical problems: constipation, piles (hemorrhoids), kidney stones, and urinary infections. These
+conditions can affect the casualty’s condition and the circumstance of evacuation.
+5-9. Casualty movement and medical support in the desert environment is challenged by remote locations,
+which can extend the times and distance for evacuation. Dependent on the type of desert environment,
+trafficability may vary and thereby the means of evacuation will be dependent on the network of (or lack
+of) roads and trails. Consideration should also be made to provide means to cool and hydrate casualties and
+evacuators during movement.
+EXTREME COLD
+5-10. Generally operations in the extreme cold have many of the same limiting factors found in desert
+operations. The tundra and glacial areas are harsh, arid, and barren. Temperatures may reach lows of -
+25°F to -40°F (-20°C to -32°C) which combined with gale force winds, makes exposure unsurvivable.
+Refer to ATTP 3-97.11 for an in depth review of cold weather operations.
+5-11. Medical considerations can be complicated by environmental factors associated with extreme cold.
+This includes hypothermia, frostbite, nonfreezing cold injuries (chilblains, trench foot), snow blindness
+(solar keratitis), dehydration, and immersion syndrome. Any injury in a cold environment enhances the
+risk of circulatory shock due to a reduction in blood flow. Protection of a casualty who is receiving first aid
+is more difficult due to the increased risk of cold injury when cold-weather clothing is removed. Refer to
+Technical Bulletin, Medical 508 and FM 4-25.11 for a full discussion on cold weather injuries.
+5-12. Casualty movement may have to be sustained for longer periods due to terrain delays and the lack of
+direct routes of evacuation. During the movement of casualties to an MTF or to a medical evacuation asset,
+casualties need to be kept as warm as possible, the use of sleeping bags and blankets is recommended.
+Warming shelters should be established along the line of evacuation to provide casualties and litter bearers
+a means to warm themselves. This allows casualties to be monitored for signs of a deteriorating condition
+and provides the litter bearers with some relief from this arduous task. Casualties with hypothermia require
+timely evacuation. Litter bearers should ensure that a hypothermic casualty remains lying on his back, if
+his injuries allow it. Bearers should make every attempt not to jar or move the patient suddenly, and ensure
+that the casualty does not attempt to assist in his evacuation. For prolonged litter evacuations, a full bodyvapor barrier system may be appropriate to help mitigate the effects of hypothermia.
+Casualty Evacuation in Specific Environments
+15 February 2013 ATP 4-25.13 5-3
+URBAN TERRAIN
+5-13. General considerations for urban operations can be found in ATTP 3-06.11. Urban terrain is a
+topographical complex environment characterized by man-made construction and high population density.
+Urban terrain may be cities, towns, or urban sprawl, but does not normally include rural settlement such as
+villages and hamlets. Clearing the urban battlefield of casualties requires the same considerations as does
+fighting in it. Urban areas can be a warren of crisscrossing streets and alleys, dead ends, and open areas of
+observation. It is a multidimensional battlefield that includes not only the normal depth, breath and height
+in terms of airspace and surface, but the supersurface (both internal and external) and subsurface areas too.
+The supersurface includes the internal floors or levels (intrasurface areas) and external roofs or tops of
+buildings, stadiums, towers, or other vertical structures. Subsurface areas are below the surface level
+(basements, sewers, tunnels, and subways).
+5-14. Because urban areas are found throughout the world and in all climates and environments, medical
+considerations for evacuating casualties in an urban environment can have are similar affects on the
+casualty as those mentioned previously. When an urban area is located in a desert, cold, or mountainous
+area, the medical implications that befall those areas can complicate a casualty’s injuries and health.
+Considerations should be made to recognize and reduce these effects. Another consideration is the
+potential for high casualty rates and the need for CASEVAC under difficult circumstances. The urban
+environment has the potential to produce large numbers of casualties. These casualties may become
+separated and isolated from the main force and require additional trained assets to search for and recover
+them. Planning considerations should be made on how to locate, treat, and recover casualties isolated
+within destroyed and collapsed structures both above and below ground level.
+5-15. Casualty movement should be conducted by the most effective and available means that protects both
+the casualty and the evacuators. Streets and alleys can quickly become blocked and inaccessible due to
+rubble and debris. Evacuation routes need to be adequately planned and reconnoitered, to reduce the
+chances of becoming disoriented or lost. The positioning and availability of adequate medical resources,
+evacuation routes, helicopter landing sites, and CCPs should be carefully considered in order to make them
+both accessible to friendly forces and secure from hostile targeting. Once located and treated, the
+movement of casualties becomes a personnel-intensive effort. When there are insufficient medical
+personnel to search for, collect, and treat the wounded, assistance in the form of litter bearers and search
+teams is required from supported units, as the tactical situation permits. As urban areas may have
+significant trouble to vehicular movement due to rubble, road conditions, and other obstacles, much of the
+CASEVAC may require the use of litter teams. When this occurs, a litter shuttle system should be
+established. The shuttle system reduces the distance that the wounded or injured Soldier has to be carried
+by a single litter team. This enhances the litter team’s effectiveness by providing brief respites and
+reducing fatigue. Further, the litter teams are retained in the forward areas. They are familiar with the
+geography of the area and what areas have or have not been searched for casualties.
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 A-1
+Appendix A
+Example of a Mass Casualty Plan
+This appendix provides a sample of a MASCAL plan for a brigade size unit. It
+should not be considered all-inclusive. It may be supplemented with the information
+and procedures required for operating within a specific command or special operation
+and should be adjusted to include both organic and available vehicles.
+Mass Casualty Standard Operations Plan
+1. (U) Purpose.
+This standard operations plan establishes the procedures and responsibilities in the event a MASCAL situation
+occurs within the brigade combat team area of operations.
+2. (U) Scope.
+This standard operations plan is designed to provide procedures for planning for and reacting to a MASCAL
+event. The goal of this standard operations plan is to reduce the loss of life and limb by providing clear and
+concise guidance.
+3. (U) Applicability.
+All assigned and attached personnel.
+4. (U) References.
+FM 4-02.2, Medical Evacuation.
+ATP 4-25.13, Casualty Evacuation.
+5. (U) Definitions.
+Casualty is any person who is lost to his organization by reason of having been declared dead, wounded,
+injured, diseased, interned, captured, retained, missing, missing in action, beleaguered, besieged, or detained.
+Mass casualty is any number of casualties produced in a relatively short period of time, usually as the
+result of a single incident such as a military aircraft accident or armed attack that exceeds local medical support
+capabilities.
+Triage is a process for sorting injured people into groups based on their need for or likely benefit from
+immediate medical treatment. Triage is used on the battlefield, at disaster sites, and in hospital emergency
+rooms when limited medical resources must be allocated.
+Casualty evacuation is the movement of casualties aboard nonmedical vehicles or aircraft. En route
+medical care is not provided.
+Medical evacuation is the timely, efficient movement of any person who is wounded, injured, or ill on
+medically equipped ground or air platforms to and/or between MTFs while providing en route medical care by
+medically trained personnel or crew members.
+Casualty collection point, a specific location where casualties are assembled to be transported to an
+MTF, for example a company aid post.
+Appendix A
+A-2 ATP 4-25.13 15 February 2013
+Ambulance exchange point is a location where a patient is transferred from one ambulance to another en
+route to an MTF.
+6. (U) Concept for a mass casualty situation.
+a. A MASCAL situation exists when the casualty load exceeds the capability of the medical treatment
+assets available to the unit.
+b. The scene commander will be the senior nonmedical person (medical personnel will be providing
+treatment). The scene commander will coordinate the efforts of site security, medical treatment teams, and
+evacuation teams.
+c. Units without organic medical personnel will immediately contact their closest supporting medical
+unit upon suffering mass casualties.
+d. All casualties will be moved to designated CCPs.
+e. Available medically trained personnel will assess and triage casualties at the CCP.
+f. The forward support company of the brigade support battalion will send designated combat lifesavers
+and nonstandard evacuation vehicles to assist in the movement of casualties to designated battalion aid stations
+and MTFs.
+g. The brigade support medical company will send designated medical personnel and ambulances to
+assist.
+h. The scene commander will establish a helicopter landing zone for use by air medical evacuation or
+CASEVAC helicopters.
+7. (U) Mass casualty triage.
+a. Each unit establishes a triage station to sort casualties for treatment.
+b. Medical units will organize and train treatment teams in triage procedures.
+ (1) The most senior medical officer is the triage officer.
+ (2) A medical officer or physician assistant will head each treatment team of three to four medics.
+ (3) The triage officer for the next wave of casualties will be the next most available senior medical
+officer.
+c. Dental officer. Although dental officers will not normally perform triage, they should still be familiar
+with its principles. The dental officer will provide the following:
+ (1) Advanced trauma management.
+ (2) Tactical combat casualty care.
+ (3) Treatment of MINIMAL category casualties.
+d. Triage categories. Casualties are sorted and color coded by marking the casualty’s Department of
+Defense (DD) Form 1380 (U.S. Field Medical Card) and Department of the Army (DA) Form 7656 (Tactical
+Combat Casualty Care Card) as follows:
+Example of a Mass Casualty Plan
+15 February 2013 ATP 4-25.13 A-3
+Triage Categories
+e. Minimally injured patients may be used to assist the treatment teams at the discretion of the treatment or
+triage officers.
+8. Mass casualty medical treatment.
+a. The focus of medical treatment at a MASCAL site is the preservation of life, limb, or eyesight
+(IMMEDIATE and DELAYED categories).
+b. Medical treatment personnel will establish a posttreatment evacuation holding area, clearly marked by
+medical evacuation precedence. The recommended method of marking the areas is to affix signs to stakes in
+the ground.
+c. If available, the chaplain and combat and operational stress control personnel should be at the holding
+area.
+d. The holding area should allow for the Soldier’s leadership to take custody of personal effects that do not
+accompany the patient through the evacuation process (for example, weapons, night vision devices, and
+communication equipment).
+e. This holding area must be easily accessible to the helicopter landing zone and the ground ambulance
+route.
+9. Mass casualty evacuation procedures.
+a. All casualties will be taken to the designated company CCP by designated litter teams. The first sergeant
+or his representative is responsible for identifying nonmedical Soldiers as members of litter teams.
+b. All company combat lifesavers not actively engaged in force protection will go to the company CCP to
+assist medical teams.
+c. The medical noncommissioned officer in absence of a physician or physician assistant will supervise the
+assessment, triage, and evacuation of casualties at the designated site.
+d. The company first sergeant or his designated representative will be responsible for the transportation of
+casualties from the company CCP to the designated MTF or ambulance exchange point via nonstandard
+evacuation vehicles.
+10. Nonstandard evacuation vehicles.
+a. The forward support company commander will create an ordered list of the number of vehicles to be
+used.
+ (1) The forward support company supply trucks (for example M1081) will be downloaded of supplies
+and designated as evacuation vehicles. These vehicles can be rapidly used to clear the company CCP and
+facilitate rapid evacuation of litter patients.
+Priority Treatment categories Color code
+1 IMMEDIATE Red
+2 DELAYED Yellow
+3 MINIMAL Green
+4 EXPECTANT Black
+Appendix A
+A-4 ATP 4-25.13 15 February 2013
+ (2) A driver and assistant driver are designated.
+ (3) The vehicles will be prepared (cleaned) and ready for evacuation of patients.
+ (4) All nonstandard evacuation vehicles will have litters and litter straps present.
+ (5) An M1093 5-ton or M1081 2 1/2-ton cargo vehicle can transport a total of eight and seven litter
+patients, respectively.
+ (6) A cargo HMMWV can transport a total of five litter patients and a four-seat configuration
+HMMWV can transport three litter patients.
+b. Vehicle marking.
+ (1) Whenever the tactical situation allows, nonstandard evacuation vehicles should be marked to
+indicate that they are carrying casualties.
+ (2) Day: VS-17/GX marker panel (NSN 8345-00-174-6865) will be placed on the hood or roof of the
+vehicle, orange side up, to indicate that the vehicle is carrying casualties.
+ (3) Night: Two infrared chemical lights will be secured to the top corners of the highest point of the
+front of the vehicle, one for the driver’s side and one for the passenger’s side.
+15 February 2013 ATP 4-25.13 B-1
+Appendix B
+Litter Evacuation Training
+To safely transport a patient by litter and to ensure litter bearers are not injured by
+using incorrect lifting procedures, training is required for litter bearers. This
+appendix provides the techniques and procedures necessary to accomplish litter
+evacuation.
+PROCEDURES FOR LITTER EVACUATION TRAINING
+BASIC GUIDES FOR TRAINING LITTER BEARERS
+B-1. Litter bearers are normally grouped into squads of four to carry patients. For this reason, litter
+procedures for squads of four are effective in training individuals to be litter bearers. The following
+guidelines promote uniformity and accuracy in training methods:
+ Several squads may be trained at the same time by one individual, or each squad may be
+instructed separately by an instructor or trained squad leader.
+ For the initial training procedures, a litter without a patient on it can be used to simulate a loaded
+litter.
+ For later training, some personnel can be designated as patients. These individuals should be
+frequently rotated with the ones carrying the litters so that all may participate in each phase of
+instruction.
+ For more realistic training in the handling of the different types of injuries, patients may wear
+moulages, bandages, and splints to simulate actual wounds or injuries.
+ The persons designated as patients may be positioned on the ground at suitable intervals near a
+line of litters, first with the head and later with the feet toward the litters. As the instruction
+progresses, their positions may be varied. Lastly, they may be dispersed or concealed to
+simulate positions that the wounded might occupy on a battlefield.
+LITTER COMMANDS
+B-2. Litter procedures are not to be considered precision drills; however, certain preparatory commands
+and commands of execution are used to facilitate instruction. A preparatory command states the movement
+or formation to be carried out and mentally prepares the individual for its execution. A command of
+execution tells when the command is to be carried out. For purposes of identification in the discussion of
+the different types of procedures, preparatory commands will be in lowercase with initial capital letters and
+commands of execution will be in capital letters.
+Note. The use of formal commands is for training and their use is not anticipated during combat
+operations.
+FORMATION FOR INSTRUCTION
+B-3. First, align the trainees into four ranks; then give the commands to form litter squads. This is
+accomplished as follows:
+ The trainees count off from front to rear, one through four, thus forming the litter squads and
+designating each trainee’s position in the litter squad by number. Each number carries with it
+specific responsibilities in the litter squad. The trainee designated number 1 is the squad leader.
+ The squad leaders count off from right to left, designating a number for each litter squad.
+Appendix B
+B-2 ATP 4-25.13 15 February 2013
+ The formation is then opened to provide each squad adequate space for performance.
+ Since exceptional circumstances may make it necessary to use two-bearer litter squads, the
+instruction should include procedures for these reduced squads, using bearers 2 and 3 of the
+four-bearer squad.
+PROCEDURES TO PROCURE, GROUND, OPEN, CLOSE, AND RETURN THE LITTER
+To Procure Litter
+B-4. Upon the command of “Procure, LITTER,” the squad leader (bearer number 1) steps forward, goes to
+the source of supply, picks up the litter, and returns to his original position covered by bearers number 2, 3,
+and 4. The closed litter is carried at high port except near helicopters where it is kept level with the ground
+to avoid contacting the rotor blades. At high port, the litter is carried diagonally across the body with the
+left wrist in front of the left shoulder and the right wrist near the right hip (Figure B-1).
+Figure B-1. Carrying litter at high port
+B-5. After bearer number 1 returns to his original position in the squad, he holds the litter in an upright
+position on his left side with the metal stirrups away from his body (Figure B-2).
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-3
+Figure B-2. Litter squad with litter
+To Ground Litter
+B-6. Upon command of “Ground, LITTER,” bearer number 1 lowers the litter to the ground. With the
+litter squad in formation, bearer number 1 places his left foot beside the litter handles, steps forward with
+his right foot, and lowers the litter to the ground so that it rests on the stirrups (Figure B-3).
+Figure B-3. Grounding litter (position of ground, litter)
+B-7. Upon the command of “Litter, POSTS,” the other three bearers move into their positions at the sides
+of the litter. Bearer number 2 moves to the right front, bearer number 3 moves to the left rear, and bearer
+number 4 moves to the left front (Figure B-4).
+Appendix B
+B-4 ATP 4-25.13 15 February 2013
+Figure B-4. Grounding litter (position of litter, POSTS)
+To Open Litter
+B-8. Upon command of “Open, LITTER,” all bearers face the litter and execute the command. With all
+bearers facing the litter, bearers number 2 and 3 pick up the litter from the ground and support it, while
+bearers number 1 and 4 unfasten the litter straps. (Figure B-5).
+Figure B-5. Opening litter (step one)
+B-9. Bearers number 2 and 3 extend the litter by pulling the handles apart with the canvas up. Then
+bearer number 2 lowers his end of the litter to the ground and bearer number 3 raises his end of the litter
+until it is in a vertical position. Using his foot, bearer number 3 extends the lower spreader bar into a
+locked position, reverses the litter, and extends the other spreader bar. Bearer number 3 then lowers the
+litter to the ground with the canvas in the up position (Figure B-6).
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-5
+Figure B-6. Opening litter (step two)
+To Close Litter
+B-10. Upon command of “Close, LITTER,” bearer number 2 supports the litter while bearer number 3
+releases the spreader bars and turns the bars against the litter poles. Bearers number 2 and 3 then lift the
+litter, move the poles together, and support the litter. Bearers number 1 and 4 fold the canvas smoothly on
+top of the poles and secure the canvas and the poles in place with the litter straps.
+To Return Litter
+B-11. At the completion of the instruction and upon command of “Return, LITTER,” bearer number 1
+returns the litter to the supply point.
+PROCEDURES FOR LOADING A PATIENT ONTO A LITTER
+B-12. After the patient has been located, the general nature of his wounds are determined, emergency
+treatment given, and the litter opened and positioned, the bearers load the patient onto the litter.
+To Load a Litter (Four Bearers)
+B-13. Upon the following commands, the bearers position themselves, lift the patient, position the litter,
+and lower the patient onto the litter:
+ At the command “Right (Left) Side, POSTS,” the bearers take the following positions facing the
+patient: bearer number 2 at the right (left) ankle; bearer number 3 at the right (left) shoulder;
+bearers number 4 and 1 at the right and left hips, respectively (Figure B-7).
+Appendix B
+B-6 ATP 4-25.13 15 February 2013
+Figure B-7. Squad at right side, POSTS
+ At the command “Prepare to Lift, LIFT,” each bearer kneels on his knee that is nearest the
+casualty’s feet. Bearer number 2 passes his forearms under the patient’s legs, carefully
+supporting any fracture, if required. Bearers number 1 and 4 place their arms under the small of
+the patient’s back and thighs without locking hands. Bearer number 3 passes one hand under the
+casualty’s neck to the farther armpit and uses the other hand to support the nearer shoulder
+(Figure B-8). All bearers lift the patient slowly and carefully and place him upon the knees of
+the three bearers who are on the same side (Figure B-9).
+Figure B-8. Lifting patient to load litter (step one)
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-7
+ At the preparatory command “Prepare to Lower,” bearer number 1 resumes his former kneeling
+position opposite the other three bearers and prepares to assist in lowering the patient. As soon
+as the patient is firmly supported on the knees of the three bearers, the bearer on the opposite
+side (bearer number 1) relinquishes his hold and reaches for the litter (Figure B-9). He places
+the litter under the patient and against the ankles of the other bearers. At the command of
+execution, “LOWER,” the patient is lowered gently onto the litter (Figure B-10). Without
+further orders, all bearers rise and resume their positions at Litter, POST.
+Figure B-9. Lifting patient to load litter (step two)
+Figure B-10. Lifting patient to load litter (step three)
+Appendix B
+B-8 ATP 4-25.13 15 February 2013
+To Load Litter (Three Bearers)
+B-14. In the absence of one man from the litter squad, bearers number 2 and 3 with the assistance of bearer
+number 1, lift the patient and lower him onto the litter. To lift the patient with three bearers, bearer number
+2 places his arms under the legs and thighs of the patient. Bearer number 3 places his arms under the small
+of the back and shoulders of the patient. Bearer number 1, on the opposite side of the litter, places his arms
+under the patient’s knees and back. The patient is supported on the knees of bearers number 2 and 3, while
+bearer number 1 places the litter in position (Figure B-11). All three bearers lower the patient onto the
+litter (Figure B-12). The procedures are performed upon the commands cited above for Figure B-8.
+Figure B-11. Lifting patient to load litter (three bearers)
+Figure B-12. Lowering patient onto litter (three bearers)
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-9
+To Load Litter (Two Bearers)
+B-15. The procedures for loading litters with the two bearers on the same side are illustrated in Figures
+B-13 through B-16 as follows:
+ At the command to “Right Side, POSTS,” bearers number 1 and 2 take positions at the patient’s
+right thigh and shoulder, respectively (Figure B-13).
+Figure B-13. Two bearers at right side, POSTS
+ At the preparatory command “Lift,” each bearer kneels on his knee nearer the patient’s feet.
+Bearer number 1 passes his arms beneath the patient’s hips and knees. Bearer number 2 passes
+his arms beneath the small of the patient’s back (Figure B-14).
+Figure B-14. Lifting patient with two bearers on the same side
+ At the command of execution “LIFT,” the bearers lift together, raising the patient upon their
+knees. Readjusting their hold, they rise to their feet and move as close as possible to the side of
+the litter (Figure B-15).
+Appendix B
+B-10 ATP 4-25.13 15 February 2013
+Figure B-15. Lifting patient with two bearers on the same side (step two)
+ At the preparatory command “Prepare to Lower,” the bearers kneel and place the patient on their
+knees. At the command of execution “LOWER,” the bearers gently place the patient onto the
+litter (Figure B-16). They then rise and resume the position of Litter, POSTS, without
+command.
+Figure B-16. Lowering patient onto litter with two bearers on the same side
+To Load Litter with Conscious Patient (Two Bearers)
+B-16. If the patient is conscious and able to hold onto the bearers, the following procedure is used:
+ At the command “On Each Side, POSTS,” bearers number 1 and 2 face the patient and take
+positions at the patient’s right and left hips, respectively (Figure B-17).
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-11
+Figure B-17. Two bearers, one on each side, POSTS
+ At the command of execution “LIFT,” the bearers lift the patient, both rising together, and carry
+him to the center of the litter (Figures B-18 and B-19).
+Figure B-18. Lifting patient with two bearers, one on each side (step one)
+Appendix B
+B-12 ATP 4-25.13 15 February 2013
+Figure B-19. Lifting patient with two bearers, one on each side (step two)
+ At the command “Prepare to Lower, LOWER,” the bearers stoop and lower the patient onto the
+litter in a sitting position. The patient then releases his hold on the bearers’ necks. Both bearers
+assist the patient to lie down. They then resume the position of Litter, POSTS, without
+commands (Figure B-20).
+Figure B-20. Lowering patient onto litter (two bearers, one on each side)
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-13
+To Load Patient with Back Injury
+B-17. To avoid aggravating the condition of a patient with an actual or suspected head, neck, or back
+injury, the casualty should first be placed on a spine board. To place the casualty on a litter the bearers
+proceed as follows (Figure B-21):
+ Each bearer kneels on his knee nearer the patient’s feet. (If the patient is unable to hold his arms
+in front of him, his wrists should be tied loosely before placing him on the litter. This will
+prevent injury to his arms.)
+ Bearer number 1 places a blanket, coat, or jacket in a firm roll or in a position to support the arch
+of the patient’s back. Bearer number 3 places one hand under the patient’s head and the other
+hand under his shoulders. Bearer number 4 places his hands under the small of the back and
+buttocks. Bearer number 2 places his hands under the thighs and calves. Bearer number 1
+assists bearer number 4 in supporting the small of the patient’s back.
+Figure B-21. Lifting patient with back injury
+ At the command “Prepare to Lift, LIFT,” all bearers gently lift the patient off the ground about 8
+inches. Bearers ensure that proper alignment is maintained. Bearer number 1 places the litter
+under the patient and adjusts the roll under the patient’s back.
+ At the command “Prepare to Lower, LOWER,” the three bearers lean forward and with the aid
+of bearer number 1, lower the patient onto the litter.
+PROCEDURES FOR CARRYING A LOADED LITTER
+B-18. After the patient has been loaded onto the litter, the litter is lifted and carried as described below.
+To Lift Loaded Litter
+B-19. Upon the command of “Litter, POSTS,” the bearers resume their position facing in the direction of
+travel and lift the loaded litter upon the command “Prepare to Lift, LIFT” (Figure B-22). At the
+preparatory command “Prepare to Lift,” each bearer kneels on his knee closest to the litter. He grasps the
+litter handle with the hand nearest the litter and places his other hand on his raised knee. At the command
+of execution “LIFT,” all bearers rise together keeping the litter level. When lifting, bearers should use leg
+muscles, not their back muscles.
+Appendix B
+B-14 ATP 4-25.13 15 February 2013
+Figure B-22. Lifting the loaded litter
+To Carry a Loaded Litter
+B-20. The type of carry used in transporting a litter patient depends upon the type of terrain as well as the
+obstacles involved. It may be necessary to use several types of carries.
+Four-Man Carry
+B-21. After the bearers lift the loaded litter, they are in position for the four-man carry (Figure B-23) which
+is used when the terrain is smooth and level. The command to proceed is “Four-Man Carry, MOVE.”
+With modifications, this carry is also used to pass under low obstacles.
+Figure B-23. Four-man carry for smooth, level terrain
+Two-Man Carry
+B-22. The command “Two-Man Carry, MOVE” is given to enable the litter squad in a four-man carry to
+pass through or over narrow passages such as trails, bridges, gangplanks, and catwalks (Figure B-24).
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-15
+After the litter bearers reach the end of such passages, they change back to the four-man carry. With
+modification, this carry can also be used to pass through such obstacles as culverts or tunnels. Both bearers
+carrying the litter face the patient and crawl on their knees through these obstacles. This requires one
+bearer to crawl backwards. To use this technique perform the following:
+Figure B-24. Two-man carry for smooth, level terrain
+ With the litter squad in the position of the four-man carry, the preparatory command “Two-Man
+Carry” is given. Bearers number 2 and 3 change their holds on the litter handles to the other
+hand, step between the handles, and take the full support of the litter as bearers number 1 and 4
+release their holds.
+ Bearer number 1 steps one pace in front of the squad to lead, and bearer number 4 falls one pace
+to the rear to follow.
+ At the command of execution “MOVE,” the four bearers proceed through the passage.
+Litter Post Carry
+B-23. The command “Litter Post Carry, MOVE” is given to enable the litter squad in a four-man carry to
+move over rough terrain (Figure B-25). Perform the following to execute the litter post carry:
+ With the litter squad in position of the four-man carry, the preparatory command “Litter Post
+Carry” is given. Bearers number 2 and 3 step between the handles of the litter and take hold of
+the handles. Bearers number 1 and 4 then release their holds.
+ Bearers number 1 and 4 move to the sides of the litter and grasp the litter poles.
+ At the command of execution “MOVE,” the four bearers proceed carefully over the rough
+terrain.
+Appendix B
+B-16 ATP 4-25.13 15 February 2013
+Figure B-25. Litter post carry for rough terrain
+Uphill Carry
+B-24. Except when the patient has a fracture of a lower extremity, the litter is carried uphill or upstairs with
+the patient’s head forward. Therefore, before proceeding with the uphill carry, the litter must first be
+turned correctly. From the position of four-man carry (Figure B-23), the litter squad first moves into the
+position of litter post carry (Figure B-25); then the command “Prepare to Rotate, ROTATE” (Figure B-26)
+is given and followed by command “UPHILL (UPSTAIRS) CARRY, MOVE” (Figure B-27). Perform the
+following to execute the uphill carry:
+ With the litter squad in the position of litter post carry, the preparatory command “Prepare to
+Rotate” is given. Bearers number 2 and 3 release the litter handles and step one pace away,
+allowing bearers number 1 and 4 to support the litter at its sides.
+ At the command of execution “ROTATE,” bearers number 1 and 4 move 180 degrees
+counterclockwise, thus placing the patient’s head in the direction of travel with bearer number 1
+still on the patient’s right side.
+ As soon as bearers number 2 and 3 observe that the rotation has been completed, they resume
+their positions at the litter handles. The rotation of the litter places bearer number 2 at the
+patient’s head.
+ After the litter is rotated so that the patient’s head is in the direction of travel, the squad halts.
+ At the preparatory command “UPHILL (UPSTAIRS) Carry,” bearer number 4 moves to the foot
+of the litter and takes hold of the litter handle released by bearer number 3. Bearer number 1
+moves in front of the squad.
+ At the command of execution “MOVE,” the squad proceeds uphill (upstairs) with bearer
+number 1 preceding the squad. Bearers number 3 and 4 keep the litter level.
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-17
+Figure B-26. Rotation of the litter for uphill and upstairs carry and for ambulance loading
+Figure B-27. Uphill and upstairs carry
+Downhill Carry
+B-25. Except when the patient has a fracture of a lower extremity, the litter should be carried downhill or
+downstairs with the patient’s feet forward. The command “DOWNHILL (DOWNSTAIRS) CARRY,
+MOVE” (Figure B-28) is given when the litter squad is in the position of four-man carry (Figure B-23) or
+in the position of litter post carry (Figure B-25) provided it has been used to rotate the loaded litter or to
+move it over rough terrain just prior to carrying it downhill (downstairs). Perform the following to execute
+the downhill carry:
+ With the litter squad in the position of the four-man carry, the preparatory command “Downhill
+(Downstairs) Carry,” is given. Bearer number 3 takes the full support of the litter at the patient’s
+head, and bearers number 2 and 4 remain in their positions at the patient’s feet.
+ Bearer number 1 moves to the front, facing the squad. He supports bearers number 2 and 4 and
+ensures that they keep the litter level as they move downhill (downstairs).
+ Before lowering the litter to the ground, the bearers resume the position of four-man carry. At
+the preparatory command “Lower, Litter,” each bearer slowly kneels on the knee closer to the
+litter and gently places the litter on the ground. The squad then stands without command. For
+Appendix B
+B-18 ATP 4-25.13 15 February 2013
+balance and support when lowering the litter, each bearer places his free hand on his other knee
+which remains in an upright position.
+Figure B-28. Downhill or downstairs carry
+PROCEDURES FOR SURMOUNTING OBSTACLES
+B-26. In litter transportation, bearers must be able to surmount various artificial and natural obstacles such
+as fences, high walls, deep trenches, wide streams, and stairwells with small landings. Specific commands
+for surmounting these obstacles are neither necessary nor feasible, as they must be given in conjunction
+with the commands for the appropriate litter carry. Commonsense must also be used in adapting specific
+procedures to individual situations.
+Litter Obstacle Course
+B-27. A litter obstacle course is a useful training tool for surmounting obstacles and for the physical
+conditioning of bearers. An obstacle course can be constructed to simulate most types of natural and
+artificial obstructions that litter bearers are likely to meet. Where construction of such a course is
+impracticable, many obstacles can be simulated from existing facilities.
+B-28. A number of methods, as well as modifications in litter carries, which enable the litter squad to
+surmount various obstacles, are discussed below.
+Surmounting a Fence or Low Wall
+B-29. With the litter squad in the position of “LITTER POST, CARRY,” bearer number 2 releases his
+grasp of the front handles at the patient’s feet and crosses the obstacle, maintaining a low silhouette.
+Bearers number 1, 3, and 4 then advance the litter until bearer number 2 can resume his grip of the front
+handles (Figure B-29).
+B-30. The litter is rested on the obstacle with the stirrups placed on the side of the obstacles in the direction
+of travel. Bearers number 2 and 3 support the litter by the front and rear handles, respectively, while
+bearers number 1 and 4 cross the obstacle maintaining a low silhouette. Having passed the obstacle,
+bearers number 1 and 4 grasp the litter poles near the rear handles held by bearer number 3. Bearer number
+3 then releases his hold of the rear handles and crosses the obstacle, maintaining a low silhouette.
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-19
+Bearer number 3 resumes his grasp on the rear handles and bearers number 1 and 4 adjust the position of
+their holds (Figure B-30).
+Note. The litter should be lifted and not dragged across the top of the obstacle.
+Figure B-29. Surmounting a fence or low wall (step one)
+Figure B-30. Surmounting a fence or low wall (step two)
+Surmounting a High Wall
+B-31. With the litter squad in the position of the four-man carry, the bearers turn and face each other.
+Together they raise the litter approximately chest high, step close to the litter, letting their bent elbows
+touch their chests. The front bearers place the front stirrups beyond the wall, scale the wall and drop to the
+other side. All four bearers move the litter forward until the rear stirrups are against the wall, taking care to
+avoid scraping the patient’s back. The rear bearers then scale the wall and drop to the other side and lift
+their end of the litter off the wall (Figure B-31). The bearers then resume the four-man carry.
+Appendix B
+B-20 ATP 4-25.13 15 February 2013
+Figure B-31. Surmounting a high wall
+Fording Streams and Crossing Deep Trenches
+B-32. With the litter squad in position for the four-man carry, the bearers turn and face each other,
+determining who is the taller of the two at each end of the litter. Together they raise the litter over their
+heads, keeping it level. If they are in a trench, they lift the litter above the top of the trench (Figure B-32).
+B-33. The taller bearer at each end of the litter moves between the handles, facing in the direction of travel
+and grasps the handles as close to the canvas as possible. The shorter bearer at each end moves under the
+litter, facing in the direction of travel and grasps the stirrups, which compensate for the differences in
+height. If all bearers are of equal height, the bearers under the litter grasp the litter poles to the side of the
+stirrups nearer the ends (Figure B-33).
+Figure B-32. Fording streams and crossing deep trenches (overhead carry, step one)
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-21
+Figure B-33. Fording streams and crossing deep trenches (overhead carry, step two)
+Note. Should the front bearer step into a hole as they proceed across the stream and release his
+hold, the other three bearers could keep the litter in position.
+Carrying a Litter Patient Up a Stairwell With Small Landings
+B-34. The steps for this procedure (Figure B-34) are as follows:
+ The litter squad proceeds upstairs to the landing with bearers number 1 and 3 supporting the
+head of the litter and bearers number 2 and 4 supporting the foot of the litter.
+ Upon arrival at the landing, bearer number 3 turns facing the head of the litter and supports it
+while bearer number 1 precedes several steps up the next flight of stairs. Bearers number 2 and
+4 raise the foot of the litter until bearer number 1 can grasp the handle released by bearer number
+2. Bearer number 2 then moves to the side of the litter.
+ With bearer number 2 helping bearer number 1 to support the litter, bearer number 1 grasps the
+handle released by bearer number 4.
+ Bearer number 4 continues to help support the litter on the side as he moves up the stairs.
+ Bearer number 4 assists bearer number 3 in carrying the head of the litter while bearer number 2
+advances and assists bearer number 1 in carrying the foot of the litter to the next landing.
+Appendix B
+B-22 ATP 4-25.13 15 February 2013
+Figure B-34. Carrying a litter patient up a stairwell with small landings
+Carrying a Litter Patient Down a Stairwell with a Small Landing
+B-35. The steps for this procedure (Figure B-35) are as follows:
+ The litter squad proceeds down the steps to the first landing with bearers number 1 and 3
+supporting the head of the litter and bearers number 2 and 4 supporting the foot of the litter.
+ Upon arrival at the first landing, bearer number 4 turns and faces toward the litter and supports
+the foot of the litter while bearer number 3 supports the head of the litter. Bearers number 1 and
+Litter Evacuation Training
+15 February 2013 ATP 4-25.13 B-23
+2 descend a few steps to the lower flight of stairs and receives the head of the litter from bearer
+number 3.
+ Bearer number 3 moves to the foot of the litter to assist bearer number 4 while bearers number 1
+and 2 support the head of the litter. They then move down the stairs to the next landing.
+Figure B-35. Carrying a litter patient down a stairwell with small landings
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 C-1
+Appendix C
+Medical Evacuation Request
+Procedures for requesting medical evacuation support must be institutionalized down
+to the unit level. Procedural guidance and standardization of request procedures are
+provided below. The same format is used to request both air and ground medical
+evacuation. The medical evacuation request should always be transmitted by a
+secure means. Refer to FM 4-02.2 for more information on medical evacuation.
+Table C-1. Medical evacuation request
+Line Title Explanation Reason
+1 Location of
+pick-up site
+The eight or ten digit grid coordinates of the pickup site.
+Required so evacuation vehicle
+knows where to pick up patient.
+Also, so that the unit
+coordinating the evacuation
+mission can plan the route for
+the evacuation vehicle (if the
+evacuation vehicle must pick up
+from more than one location).
+2 Radio
+frequency,
+call sign and
+suffix
+The frequency of the radio at the pick-up site (not a
+relay frequency). The call sign (and suffix if used)
+of person to be contacted at the pick-up site.
+Required so that evacuation
+vehicle can contact requesting
+unit while en route (obtain
+additional information or change
+in situation or directions).
+3 Number of
+patients by
+precedence
+Report only applicable information and encrypt the
+brevity codes.
+A—URGENT
+B—URGENT-SURG
+C—PRIORITY
+D—ROUTINE
+E—CONVENIENCE
+If two or more categories must be reported in the
+same request, insert the word "BREAK" between
+each category.
+Required by unit controlling
+evacuation vehicles to assist in
+prioritizing missions.
+4 Special
+equipment
+required
+Encrypt the application brevity codes.
+A—None
+B—Hoist
+C—Extraction equipment
+D—Ventilator
+Required so that the equipment
+can be placed on board the
+evacuation vehicle prior to the
+start of the mission.
+5 Number of
+patients by
+type
+Report only applicable information and encrypt the
+brevity code. If requesting medical evacuation for
+both types, insert the word "BREAK" between the
+litter entry and ambulatory entry.
+L+# of patients–Litter
+A+# of patients– Ambulatory (sitting)
+Required so that the appropriate number of evacuation
+vehicles may be dispatched to
+the pick-up site. They should
+be configured to carry the
+patients requiring evacuation.
+
+Appendix C
+C-2 ATP 4-25.13 15 February 2013
+Table C-1. Medical evacuation request (Continued)
+Line Title Explanation Reason
+6 Security of
+pick-up site
+(wartime)
+N—No enemy troops in area
+P—Possibly enemy troops in area (approach with
+caution)
+E—Enemy troops in area (approach with caution)
+X—Enemy troops in area (armed escort required)
+Required to assist the evacuation crew in assessing the
+situation and determining if
+assistance is required. More
+definitive guidance can be
+furnished to the evacuation
+vehicle while it is en route
+(specific location of enemy to
+assist an aircraft in planning its
+approach).
+6 Number and
+type of
+wound, injury
+or illness
+(peacetime)
+Specific information regarding patient wounds by
+type (gunshot or shrapnel). Report serious
+bleeding, along with patient's blood type if known.
+Required to assist evacuation
+personnel in determining treatment and special equipment
+needed.
+7 Method of
+marking pickup site
+Encrypt the brevity codes.
+A—Panels
+B—Pyrotechnic signal
+C—Smoke signal
+D—None
+E—Other
+Required to assist the evacuation crew in identifying the
+specific location of the pick up.
+Note that the color of the panel
+or smoke should not be
+transmitted until the evacuation
+vehicle contacts the unit (just
+prior to its arrival). For security,
+the crew should identify the
+color and the unit verifies it.
+8 Patient
+nationality
+and status
+The number of patients in each category need not
+be transmitted. Encrypt only the applicable brevity
+codes.
+A—U.S. military
+B—U.S. civilian
+C—Non-U.S. military
+D—Non-U.S. civilian
+E—Enemy prisoner of war
+Required to assist in planning
+for destination facilities and
+need for guards. Unit
+requesting support should
+ensure that there is an English
+speaking representative at the
+pick-up site.
+9 Chemical,
+biological,
+radiological,
+and nuclear
+contamination
+(wartime)
+Include this line only when applicable. Encrypt the
+applicable brevity codes.
+C—Chemical
+B—Biological
+R—Radiological
+N—Nuclear
+Required to assist in planning
+for the mission. (Determine
+which evacuation vehicle will
+accomplish the mission and
+when it will be accomplished.)
+9 Terrain
+description
+(peacetime)
+Includes details of terrain features in and around
+proposed landing site. If possible, describe
+relationship of site to prominent terrain feature
+(lake, mountain, tower).
+Required to allow evacuation
+personnel to assess route/
+avenue of approach into area.
+Of particular importance if hoist
+operation is required.
+15 February 2013 ATP 4-25.13 Glossary-1
+Glossary
+SECTION I – ACRONYMS AND ABBREVIATIONS
+ATP Army techniques publications
+CASEVAC casualty evacuation
+CCP casualty collection point
+CH cargo helicopter
+FM field manual
+HEMTT heavy expanded, mobility tactical truck
+HMMWV high-mobility multipurpose wheeled vehicle
+LMTV light medium tactical vehicle
+LUH light utility helicopter
+MASCAL mass casualty
+MRAP mine-resistant ambush protected
+MTF medical treatment facility
+MTV medium tactical vehicle
+NATO North Atlantic Treaty Organization
+NSN national stock number
+SKED® company trade name for rescue litter
+STANAG standardization agreement
+UH utility helicopter
+U.S. United States
+USAMEDDC&S United States Army Medical Department Center and School
+WALK® Warrior aid and litter kit
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 References-1
+References
+These are the sources quoted or paraphrased in this publication.
+ARMY PUBLICATIONS
+Army publications are available at: https://armypubs.us.army.mil/.
+ATP 3-90.90, Army Tactical Standard Operating Procedures, 1 November 2011.
+ATTP 3-06.11 (FM 3-06.11), Combined Arms Operations in Urban Terrain, 10 June 2011.
+FM 3-04.113 (FM 1-113), Utility and Cargo Helicopter Operations, 7 December 2007.
+FM 3-05.213 (FM 31-27), Special Forces Use of Pack Animals, 16 June 2004.
+FM 3-21.38, Pathfinder Operations, 25 April 2006.
+FM 3-97.6 (FM 90-6), Mountain Operations, 28 November 2000.
+FM 4-02.2, Medical Evacuation, 8 May 2007.
+FM 90-5, Jungle Operations, 16 August 1982.
+TC 3-97.61, Military Mountaineering, 26 July 2012.
+Technical Bulletin, Medical 505, Altitude Acclimatization and Illness Management,
+30 September 2010.
+Technical Bulletin, Medical 508, Prevention and Management of Cold-Weather Injuries,
+1 April 2005.
+ARMY FORMS
+DA forms are available on the APD web site (www.apd.army.mil).
+DA Form 2028, Recommended Changes to Publications and Blank Forms.
+DA Form 7656, Tactical Combat Casualty Care (TCCC) Card.
+DEPARTMENT OF DEFENSE FORMS
+Department of Defense forms are available at:
+http://www.dtic.mil/whs/directives/infomgt/forms/index.htm.
+DD Form 1380, U.S. Field Medical Card.
+JOINT PUBLICATIONS
+Joint publications are available at: http://www.dtic.mil/doctrine/new_pubs/jointpub.htm.
+JP 4-02, Health Service Support, 26 July 2012.
+MULTISERVICE PUBLICATIONS
+These publications are available at: https://armypubs.us.army.mil/.
+ATTP 3-97.11/MCRP 3-35.1D (FM 31-70 and FM 31-71), Cold Region Operations, 28 January 2011.
+FM 4-25.11 (FM 21-11)/NTRP 4-02.1.1/AFMAN 44-163(I)/MCRP 3-02G, First Aid,
+23 December 2002.
+FM 90-3/FMFM 7-27, Desert Operations, 24 August 1993.
+NATO STANAGs
+These documents are available online at: https://nsa.nato.int (password required).
+STANAG 2040. Stretchers, Bearing Brackets and Attachment Supports, Edition 6, 6 October 2004.
+STANAG 3204. Aeromedical Evacuation, Edition 7, 1 March 2007.
+This page intentionally left blank.
+15 February 2013 ATP 4-25.13 Index-1
+Index
+References are to paragraph numbers unless otherwise stated.
+A
+ambulance, Chapter 3
+ (Introduction), 4-10,
+ Appendix A
+ air, 3-21
+ crew, 1-1
+ exchange point, Chap-
+ ter 3 (Introduction),
+ 4-3, Appendix A
+ ground, 3-21, 4-10
+C
+CH-47, 3-16, 3-18, Table 3-1
+casualty collection point,
+Chapter 3 (Introduction), 4-3,
+4-9, 5-5, Appendix A
+casualty evacuation, Preface,
+ Introduction, Appendix A
+ litter evacuation, Chapter 2
+ manual evacuation
+ methods, Chapter 1
+ mass casualty situation,
+ Chapter 4
+ nonmedical platforms,
+ Chapter 2
+ in specific environments,
+ Chapter 5
+combat lifesaver, Introduction,
+1-1, 2-7, 3-4, 3-6, 4-3—4,
+4-7, Appendix A
+E
+en route medical care,
+Introduction, Chapter 3
+(Introduction), 4-3, 4-7—10,
+Appendix A
+environmental concerns
+ desert terrain, 5-7—9
+ extreme cold, 5-10—12
+ jungle terrain, 5-4—6
+ mountainous terrain, 5-1—3
+ urban terrain, 5-13—15
+evacuation request, Appendix C
+G
+ground evacuation, 5-6
+I
+international standardization
+agreements, Preface,
+Chapter 2 (Introduction)
+L
+landing zone, 3-14, 5-3, 5-6,
+Appendix A
+litter team, 3-7—8, 4-3, 5-3,
+5-6, 5-15, Appendix A
+M
+M-Gator, 3-10, Figure 3-7
+mass casualty, Chapter 4
+plan, 4-1, 4-3, Appendix A
+situation, 3-7—8, Chapter 4
+medical evacuation, 3-19—20,
+ 4-3—4, Chapter 5 (Intro-
+ duction), 5-12, Appendix A
+ request, Appendix C
+ system, 4-4
+medical treatment facility,
+ Preface, Introduction, 1-6,
+ Chapter 3 (Introduction),
+ 3-21, 4-2—3, 4-8—10, 5-3,
+ 5-12, Appendix A
+P
+pack animals, 2-18
+S
+SKED®
+, 2-8
+standard operations plan,
+ Appendix A
+T
+travois, 2-18
+W
+WALK®
+, 4-4
+This page intentionally left blank.
+ATP 4-25.13
+15 February 2013
+By Order of the Secretary of the Army:
+
+ RAYMOND T. ODIERNO
+General, United States Army
+ Chief of Staff
+Official:
+ JOYCE E. MORROW
+Administrative Assistant to the
+ Secretary of the Army
+ 1220112

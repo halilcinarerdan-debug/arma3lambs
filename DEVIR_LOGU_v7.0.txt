@@ -980,3 +980,13 @@ v8.50e — RPT 09:09: iki IED 40 m icinde oldugu icin 'ikincil cihaz suphesi' EO
   Imha surerken yeni bulunan IED imha hedefine / EOD'ye 20 m'den uzaksa imha SURER (calisan EOD kacmaz); yakinsa iptal + geri cekilme.
   Bir imha TAMAM olunca bilinen liste temizlenir -> yakindaki diger IED yeniden degerlendirilir, sirayla imha. Tek is kurali (iedIs); olu is kilidi otomatik acilir.
   HAVA (RPT 09:13): UH-60M (silahli) Alpha 1-1'e (bounding) 226 m'de BOUNDING-DEVAM; AA asker yok -> karsilik motorun dogal AI ates davranisi, bizim kod emir vermedi.
+
+GERCEKLIK NOTU (IED) — kullanicinin verdigi kisitli / dolasimda bir saha ozetinden; METIN YOK, yalniz davranis yonu, kendi kelimelerimizle:
+  Gercekte: IED bulunca piyade DURUR, yaklasmaz, dokunmaz; yakin cevreyi bosaltir, cevre emniyeti (perimetre) kurar, erisimi kontrol eder, EOD'yi cagirir.
+  Piyade IED'i IMHA ETMEZ ("uzmana birak"); imha EOD ekibinin isi, cevre guvenligi saglandiktan sonra. Ikincil cihaz her zaman beklenir (kisitlama icin yerlesen kisiyi hedefleyen).
+  Buyuk cephane / buyuk IED'de tahliye cevresi cok daha genis; supheli cihaz yakininda telsiz / elektronik kullanimi kacinilir (uzaktan tetikleme riski).
+  Kenar tespitinde destek: isaretleme (bant), rapor (konum / tip / durum), kontrol altinda tutulan ilerleme.
+  Arac IED'sinde (VBIED): dur isaretiyle uyar, ROE'ye gore karsilik, bolgeyi bosalt, guvenlik kur.
+  Kodla fark (YAPILACAKLAR): (1) bizdeki EOD tek basina IED'e yuruyup imha ediyor -> gercekte once cevre emniyeti + EOD ekibi / robot; EOD tek basina yaklasmaz,
+  (2) kontrollu cevre emniyeti (perimetre + erisim kontrolu) yok, yalnizca yaricap disina cekilme, (3) rapor ("IED raporu") ust komutaya gitmiyor (hqIstihbarat'a baglanabilir),
+  (4) supheli cihaz yakininda telsiz / konusma kisitlamasi yok, (5) VBIED davranisi yok. Bunlar ATP 3-90.37 gelince sayisal olarak dogrulanip uygulanacak.

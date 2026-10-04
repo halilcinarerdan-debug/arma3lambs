@@ -9,3 +9,4 @@ Eksik: FM 3-21.75 (kullanici henuz metne cevirmedi).
 - FM_3-34_2014_Engineer_Operations.txt              (US Army, 2 Apr 2014 — muhendis operasyonlari; patlayici tehlike / EOD kisa)
 - HAVA_IED_DOKTRIN_OZET.md                          (yukaridaki iki yayindan satir referansli alintilar + oyuna etkisi)
 - DOKTRIN_KATALOG_ARMY_NETWORK.md                   (374 Army yayininin katalogu, oncelik listesi; metin yok, bkz. dosya)
+- ATP_4-25.13_2013_Casualty_Evacuation.txt          (US Army, 15 Feb 2013 — yaralı tahliyesi; Distribution A)
