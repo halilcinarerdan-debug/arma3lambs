@@ -1098,3 +1098,9 @@ v8.61 — FORMASYON FELCI KOK NEDENI (RPT 13:27, Alpha 1-5: ASSAULT sirasinda LI
   baslangicta LINE / FILE / DIAMOND yalniz formasyon farkliysa yazilir (her setFormation askerleri yeni slota kosturur).
   Arac: python tools/rpt_ozet.py --form <rpt> -> grup basina salinim tespiti ([SORUN] <20 sn aralikli >= 4 ardisik degisim).
   Not: upstream main = 2.6.2 (build 1); fork ayni tabana overlay oldugu icin dosya kopyalama guvenli.
+
+v8.62 — UGL kullanim sikligi (RPT 13:47: M203 / GP-25'li askerler vardi, 5 dk'da 1 salvo; 4 kez [ATIS-GUVENLIK] 'onunde cali/dal/engel' ile iptal).
+  Teshis: fnc_tacticalUGL ~11 sessiz cikis noktasi vardi (cooldown / menzil / uygun degil / rezerv / ...); neden bilinmiyordu. Eklendi: her cikis nedeni sayaci + 30 sn'de bir [UGL-OZET] (fark) + [UGL-KARAR] (ilk 60 atis).
+  Gevsetmeler (hepsi kapatilabilir degil; doktrin degil TASARIM tahmini): birim cooldown 9 -> 6 sn; min menzil 40 -> 35 m; kume yaricapi 8 -> 15 m; uygunluk sansi %50 -> %70;
+  grup bastirilmissa (getSuppression > 0.3) UGL oncelikli; hucum ailesi kararinda (ASSAULT / SUPPRESS_ASSAULT / FLANK) roleStation UGL'yi ZORLA (hazirlik atesi, salvo 2; guvenlik / mermi / menzil / dost kontrolleri yine yapilir).
+  DOKUNULMADI: atisGuvenli yakin engel testi (UGL: namlunun ilk 2.5 m'si; gercek risk: 40 mm yakin engelde erken patlar / sekme). Sonraki RPT'de [UGL-OZET] 'guvenlik' sayisi yuksekse gevsetilecek.

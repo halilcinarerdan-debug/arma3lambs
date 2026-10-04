@@ -20,7 +20,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.61"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.62"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -356,6 +356,10 @@ def karne(path):
     dp = sayi(r"PUAN:(\d+)/100")
     ekle("DOKTRIN PUANI", "OK" if dp and sum(dp) / len(dp) >= 70 else ("KONTROL" if dp else "YOK"), ("ort %.0f" % (sum(dp) / len(dp))) if dp else "-")
     ekle("UGL", "OK" if say("ATES-DESTEK") + say("ROL-GOREV") else "YOK", "ates-destek:%d rol-gorev:%d" % (say("ATES-DESTEK"), say("ROL-GOREV")))
+    # v8.62: UGL-OZET (neden atmadi sayaclari) son satir + UGL-KARAR (atis) sayisi
+    uo = [l for l in L if "[UGL-OZET]" in l]
+    if uo:
+        ekle("UGL NEDEN", "KONTROL", re.sub(r'^\s*\d+:\d\d:\d\d\s+"?\[UGL-OZET\]\s*', "", uo[-1])[:160] + " | UGL-KARAR(atis): %d" % say("UGL-KARAR"))
     print("=" * 78); print("TOPLU TEST KARNESI |", path)
     for ad, d, k in sat:
         print("  [%-7s] %-18s %s" % (d, ad, k))

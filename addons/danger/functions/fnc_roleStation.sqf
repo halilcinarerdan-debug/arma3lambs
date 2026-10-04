@@ -345,7 +345,9 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 if (_glM isNotEqualTo "") then {
                     private _e = _u findNearestEnemy _u;
                     if (!isNull _e && {_e isKindOf "CAManBase"}) then {
-                        if ([_u, _e] call _uglFn) then {
+                        // v8.62: hucum ailesi kararinda (ASSAULT / SUPPRESS_ASSAULT / FLANK) UGL HAZIRLIK ATESI zorla (kontroller atlanir; guvenlik / menzil / mermi / dost yine kontrol edilir)
+                        private _zorla = ((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["ASSAULT", "SUPPRESS_ASSAULT", "FLANK"]);
+                        if ([_u, _e, _zorla, [1, 2] select _zorla] call _uglFn) then {
                             diag_log format ["[ROL-GOREV] %1 | %2 | UGL -> %3 (%4m)", groupId _g, name _u, name _e, round (_u distance2D _e)];
                         };
                     };
