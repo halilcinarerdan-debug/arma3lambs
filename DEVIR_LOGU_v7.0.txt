@@ -1079,3 +1079,13 @@ v8.58 — "IED sistemi grubu felc ediyor": v8.52-v8.57 cevre emniyeti TUM grubu 
 v8.59 — ZAMANLAMA: IED yok olduktan (imha edildi / patladi / silindi) sonra askerler hala kaciyordu. Neden: kacis emirleri algilama aninda verilir ve keeper dongusu 4 sn aralikli, 'IED yok' yalniz imha-yok durumunda kontrol ediliyordu.
   Duzeltme: keeper dongusu 1 sn (itme yine 4 sn'de bir), IED yok olunca HEMEN cikar -> kacanlar + guvenlik elemani + temasta yere yatirilanlar stance AUTO / doWatch sifirlanir ve gruba doFollow;
   EOD de imha sonrasi / IED yok olunca doFollow ile gruba katilir. Log: [IED-FARK-CEVRE] BITTI | neden: IED yok (...) - kacis iptal.
+
+v8.60 — TAKTIK ZEKA katmani (kullanici istegi: "daha olumcul / taktik zeka, log destekli"). Ilke: AI hile yapmaz (yalniz kendi olaylarindan ogrenir), kapatma anahtarlari var, her ozellik ZEKA-* loglu.
+  (1) OLUM BOLGESI HAFIZASI (fnc_olumBolgesi): Casualty olayinda katilin konumu (isim eslesmesi / grubun bildigi dusman cmdSit[7]) 240 sn saklanir (en fazla 24; 40 m icinde birlesir, agirlik +1);
+      fnc_rotaPlan ayni taraf gruplar icin bu konumlari EK GOZLEMCI sayar (maruziyet: kayip verilen yerden gorulen hatlar kacinilir; en fazla 2 gozlemci). Log: [ZEKA-OLUM], [ROTA] ... olum bolgesi gozcusu:N.
+  (2) KARSI PUSU (fnc_pusuKarsi, commanderAssess'e takili): imza = onceki >= 25 sn sakin + temas <= 20 sn + (kayip >= 2 veya baski ort >= 0.5). Yakin (<= 50 m) + saglikli (>= 4 asker, kayip < 0.4, guc >= 0.5) -> ASSAULT;
+      uzak (> 50 m) + zayif -> DELAY; digerlerinde dokunmaz. Tepki 20 sn karar taahhudunu (3 sn) atlar. Log: [ZEKA-TEMAS], [ZEKA-PUSU] (tum sinyaller + tepki). Sayisal esikler TASARIM (kaynakta yok).
+  (3) HQ OTOMATIK: lambs_danger_hqOtomatik = true -> kumanda (istihbarat paylasimi, takviye, kanat, feint) Zeus modulu olmadan acilir. NOT: onceki tum test RPT'lerinde kumanda KAPALIYDI (karne: KAPALI — beklenen);
+      en buyuk olumculuk kazanci bu modulleri acmak olabilir (SPOTREP agi, kanat manevrasi, feint) — test edilmedi.
+  Arac: python tools/rpt_ozet.py --zeka <rpt>. Karne: BEKLENEN_SURUM v8.60.
+  ATLANAN (gerekce): bastirma-kapili hucum (dusman bastirma durumu baska makinede yerelse getSuppression okunamaz); traveling overwatch (bounding yeniden yazimi gerekir, risk yuksek).

@@ -106,6 +106,11 @@ private _tahtaKur = {
     private _modSon = createHashMap;
     while {true} do {
         sleep 4;
+        // v8.60: lambs_danger_hqOtomatik = true -> Zeus modulu gerekmeden kumanda (istihbarat paylasimi, takviye, kanat, feint) otomatik acilir
+        if ((missionNamespace getVariable ["lambs_danger_hqOtomatik", false]) && {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then {
+            missionNamespace setVariable ["lambs_danger_hqAktif", true];
+            diag_log "[HQ-MODUL] kumanda OTOMATIK acildi (lambs_danger_hqOtomatik = true)";
+        };
         if (!(missionNamespace getVariable ["lambs_danger_hqV1", true]) || {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then { continue };
         {
             private _taraf = _x;

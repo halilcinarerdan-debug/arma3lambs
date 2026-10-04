@@ -519,6 +519,13 @@ if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < _dkYakin) || {_ownCount <=
     _decision = "DELAY";
 };
 
+// v8.60: KARSI PUSU KURALI (ani temas + zarar): yakin pusuda icinden gec (ASSAULT), uzak + zayifsa siper al (DELAY); aksi halde dokunmaz. Log: [ZEKA-PUSU]
+private _pk = [_group, _decision, [_ownCount, _enemyCount, _closest, _pwrRatio, _factorSupp, _lossRatio]] call (missionNamespace getVariable ["lambs_danger_fnc_pusuKarsi", {[]}]);
+if (_pk isNotEqualTo []) then {
+    _decision = _pk select 0;
+    _reason = _pk select 1;
+};
+
 // CEKILME SONRASI KILIT: cekilme biteli 90 sn dolmadan hucum ailesine GERI DONME (cekil -> hemen dusmana kos -> olum dongusu);
 // guc ustunlugu (PUSH) disinda DELAY (siper al, temas kes) uygulanir
 // (v8.31: PUSH da KILITLI — RPT a1852a2f: cekilme biteli 34 sn sonra 6v4 "PUSH" ile hucum, oysa cekilme sebebi 6v10'du)
@@ -534,7 +541,7 @@ if (_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]
 private _aile = ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"];
 private _karBas = _group getVariable [QGVAR(cmdKarBas), -999];
 if (_decision isNotEqualTo _sonKarar) then {
-    if (!_push && {_decision in _aile} && {_sonKarar in _aile} && {(time - _karBas) < 20}) then {
+    if (!_push && {_decision in _aile} && {_sonKarar in _aile} && {(time - _karBas) < 20} && {(time - (_group getVariable [QGVAR(zekaPusuT), -999])) > 3}) then {
         _decision = _sonKarar;
         _reason = "taahhut: karar korunuyor";
     } else {

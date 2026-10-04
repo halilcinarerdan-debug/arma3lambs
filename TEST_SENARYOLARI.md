@@ -108,3 +108,11 @@ Kurulum: ayni tarafin 4 grubu: biri dusmanla sabit temasta (>= 3 dusman), uc gru
 5. Hata testi: RPT'de `Error` olmamali; olursa `[WATCHDOG-YENIDEN]` gorulmeli ve davranis devam etmeli.
 ## v8.51 IED yaricap testi
 `[IED-FARK] ... (yaricap X m [config:Y], temas:...)`: Y > 0 olmali; yaricap = Y x 3 (20-80 m).
+
+## v8.60 TAKTIK ZEKA testleri (RPT: python tools/rpt_ozet.py --zeka <rpt>)
+1. Baslangic: `[ZEKA-OLUM] ... baslatildi (v8.60)`; 90 sn'de bir `[ZEKA-NABIZ]`.
+2. Karsi pusu (yakin): gruba 25+ sn sakinlikten sonra 30-50 m'den pusu kur (>= 4 kisilik saglikli grup). Beklenen: `[ZEKA-TEMAS] ... onceki sakin sure >= 25`, `[ZEKA-PUSU] ... TEPKI:ASSAULT`, `[CMD] ... ASSAULT (karsi pusu ...)`; grup siper almak yerine pusuya yuklenmeli.
+3. Karsi pusu (uzak + zayif): 100+ m'den pusu, grup 3 kisi ya da cok kayipli: `TEPKI:DELAY` (siper al, temas kes).
+4. Olum bolgesi: gruptan 1-2 kisiyi bir pozisyondan vur (kayip), ardindan baska bir grubu AYNI taraf, o bolgeden gorulen hat uzerinden dusmana yaklastir: `[ZEKA-OLUM] ... kayip | katil konumu:` ve `[ROTA] ... olum bolgesi gozcusu:1+` (rota o gorus hattindan kacinmali).
+5. HQ otomatik: `lambs_danger_hqOtomatik = true` -> `[HQ-MODUL] kumanda OTOMATIK acildi`, `[HQ-ISTIHBARAT]`, `[HQ-KANAT]` loglari (Zeus modulu gerekmeden).
+Kapatma anahtarlari: lambs_danger_olumBOff, lambs_danger_pusuKarsiOff, lambs_danger_hqOtomatik (acma).

@@ -48,6 +48,17 @@ if (_d < 90 || {_d > 600}) exitWith {
 private _bacak = ((_d * 0.35) max 30) min 70;
 private _eASL = AGLToASL (_hedef vectorAdd [0, 0, 1.6]);
 
+// v8.60: OLUM BOLGESI GOZLEMCILERI — ayni taraf bu konumlardan (240 sn icinde kayip verilen yerler) vuruldu; bu noktalardan gorulen hatlar da maruziyet sayilir (en fazla 2, hedefe 30 m'den uzak)
+private _ekGoz = [];
+if (!isNil "lambs_danger_olumBolgeleri") then {
+    private _sd = side _g;
+    private _adaylarOB = (lambs_danger_olumBolgeleri) select {((_x select 0) isEqualTo _sd) && {(time - (_x select 3)) < 240} && {((_x select 1) distance2D _hedef) > 30} && {((_x select 1) distance2D _c) < 700}};
+    _adaylarOB = _adaylarOB apply {[-(_x select 4), ((_x select 1) distance2D _c) + (random 0.01), _x]};
+    _adaylarOB sort true;
+    _ekGoz = (_adaylarOB select [0, 2]) apply { AGLToASL (((_x select 2) select 1) vectorAdd [0, 0, 1.6]) };
+    if (_ekGoz isNotEqualTo []) then { missionNamespace setVariable ["lambs_danger_zekaRotaSay", (missionNamespace getVariable ["lambs_danger_zekaRotaSay", 0]) + 1]; };
+};
+
 // bir bacagin maruziyeti: [a -> b] hatti boyunca 6 m'de bir ornek, dusmanin gordugu oran
 private _maruz = {
     params ["_a", "_b"];
@@ -56,7 +67,11 @@ private _maruz = {
     for "_k" from 1 to _n do {
         private _p = _a vectorAdd ((_b vectorDiff _a) vectorMultiply (_k / _n));
         private _pASL = AGLToASL (_p vectorAdd [0, 0, 1.2]);
-        if (!(terrainIntersectASL [_eASL, _pASL]) && {!(lineIntersects [_eASL, _pASL, objNull, objNull])}) then { _gorulen = _gorulen + 1; };
+        private _gor = !(terrainIntersectASL [_eASL, _pASL]) && {!(lineIntersects [_eASL, _pASL, objNull, objNull])};
+        if (!_gor && {_ekGoz isNotEqualTo []}) then {
+            { if (!(terrainIntersectASL [_x, _pASL]) && {!(lineIntersects [_x, _pASL, objNull, objNull])}) exitWith { _gor = true; }; } forEach _ekGoz;
+        };
+        if (_gor) then { _gorulen = _gorulen + 1; };
     };
     _gorulen / _n
 };
@@ -137,10 +152,10 @@ if (!_gecerli) then {
     if (lambs_danger_rotaLogN < 80) then {
         lambs_danger_rotaLogN = lambs_danger_rotaLogN + 1;
         diag_log format [
-            "[ROTA] %1 | hedef:%2 m | sapma(ilk bacak):%3 | maruziyet direkt:%4%% -> plan:%5%% | ortu:%6 | sure:%7 ms",
+            "[ROTA] %1 | hedef:%2 m | sapma(ilk bacak):%3 | maruziyet direkt:%4%% -> plan:%5%% | ortu:%6 | sure:%7 ms | olum bolgesi gozcusu:%8",
             groupId _g, round _d, _ilkAci,
             round (((_dir param [1, 0])) * 100), round (((_ilk param [1, 0])) * 100), _ilk param [2, 0],
-            round ((diag_tickTime - _t0) * 1000)
+            round ((diag_tickTime - _t0) * 1000), count _ekGoz
         ];
         if ((count _pts) > 0) then {
             diag_log format ["[ROTA-ZINCIR] %1 | %2 bacak (%3 m'lik) | noktalar:%4", groupId _g, count _pts, round _bacak, _pts apply {mapGridPosition _x}];
