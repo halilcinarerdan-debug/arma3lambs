@@ -1038,3 +1038,10 @@ v8.53 — LOG TESHISI (hata sebebi net gorulsun). Oyun ici yeni etiketler:
         [IED-FARK-IMHA] BASLADI + 10 sn'de bir yaklasma ilerlemesi (mesafe, ilerleme yok sn) | [IED-FARK-CEVRE] cevre emniyeti BASLADI / BITTI + neden | [IED-FARK-ATLA]
   ARAC: python tools/rpt_ozet.py --hava-ied <rpt>  -> HAVA + IED zaman cizelgesi + OTOMATIK CIKARIM ([SORUN] / [KONTROL] / [OK]); watchdog yeniden baslamasi + ustteki Error satiri,
         Fired EH remoteExec engeli, saldiri var ama zarf disi, KARAR'da imha neden listesi, EOD yaklasirken takilma.
+
+v8.54 — RPT 12:18 (v8.53 testi): imha TAMAM calisti (EOD 42 sn'de 4 m'ye vardi, 8 sn calisti); hava TOPLU-ATES calisti (3 kez, ates eden 3-8). Iki sorun:
+  (1) IED cevre emniyeti: askerler IED'IN USTUNE / karsi tarafina yuruyordu. Neden: cevre noktalari indekse gore 360 derece dagitiliyordu (asker -> rastgele slot), karsi taraftaki slota giderken IED bolgesinden geciyordu.
+      Duzeltme: slot askerin KENDI yonunde (radyal; IED'e gore bulundugu aci), komsu askerler arasi >= 9 m yay payi; cevreden R2+15 m uzakta olanlar yerinde durup disa bakar.
+  (2) HAVA GARRISON: 8 kisiden yalniz 1'i binaya girdi (bina yeri yetmedi), kalanlar acikta bekledi. Duzeltme: 10 sn sonra aciktakiler (tavan GEOM isin testi) findCover SURVIVE ile siper bulur, yoksa yatar; 75 sn sonra stance AUTO.
+      Log: [HAVA-FARK-GARRISON] iceride:N aciktaki:M.
+  Ek: kucuk silah zarfi egik (3B) mesafe <= 600 m (once yatay<=600 + yukseklik<=300; heli 300 m yukseklikte sinirda kaciyordu). KARAR logunda egik: alani.

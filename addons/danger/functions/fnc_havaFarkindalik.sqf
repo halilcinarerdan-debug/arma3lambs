@@ -152,13 +152,15 @@ private _calis = {
                 continue;
             };
 
-            private _zarf = (_hd <= 600) && {((getPosATL _hedef) select 2) <= 300};
+            // v8.54: kucuk silah zarfi = EGIK mesafe (3B) <= 600 m (heli 300 m yukseklikte 114 m yataydayken eski kural 'alt<=300' sinirda kaciyordu)
+            private _egik = _l distance _hedef;
+            private _zarf = _egik <= 600;
 
             // teshis: heli <= 800 m ise grup basina 6 sn'de bir karar girdisi (neden tepki yok sorusu icin)
             if (_hd <= 800 && {_taniN < 160} && {(time - (_g getVariable [QGVAR(havaKarT), -99])) > 6}) then {
                 _g setVariable [QGVAR(havaKarT), time];
                 _taniN = _taniN + 1;
-                diag_log format ["[HAVA-FARK-KARAR] %1 | %2 %3 m | alt:%4 | saldiri:%5 (ates:%6 sn once, baski:%7) | silahli:%8 | zarf:%9 | hover:%10 | bounding/taktik:%11", groupId _g, typeOf _hedef, round _hd, round ((getPosATL _hedef) select 2), _saldiri, round (time - (_hedef getVariable ["lambs_danger_havaAtesT", -999])), _bask, _silahli, _zarf, _hover, _mesgul];
+                diag_log format ["[HAVA-FARK-KARAR] %1 | %2 %3 m | alt:%4 | saldiri:%5 (ates:%6 sn once, baski:%7) | silahli:%8 | zarf:%9 | hover:%10 | bounding/taktik:%11 | egik:%12 m", groupId _g, typeOf _hedef, round _hd, round ((getPosATL _hedef) select 2), _saldiri, round (time - (_hedef getVariable ["lambs_danger_havaAtesT", -999])), _bask, _silahli, _zarf, _hover, _mesgul, round (_l distance _hedef)];
             };
 
             // 1) SALDIRI ALTINDA + kucuk silah zarfinda: oz savunma, komutla toplu ates (volume fire), onculu tek nisan noktasi (ATP 3-01.8 4-27..4-29, 4-42)
@@ -187,7 +189,7 @@ private _calis = {
                     if (_logN < 120 && {(time - (_g getVariable [QGVAR(havaLogT), -99])) > 6}) then {
                         _g setVariable [QGVAR(havaLogT), time];
                         _logN = _logN + 1;
-                        diag_log format ["[HAVA-FARK] %1 | %2 %3 %4 m | tepki:TOPLU-ATES (oz savunma) | ates eden:%5 | yukseklik:%6 m | bounding:%7", groupId _g, ["HELI", "DRON"] select _dron, typeOf _hedef, round _hd, _n, round ((getPosATL _hedef) select 2), _mesgul];
+                        diag_log format ["[HAVA-FARK] %1 | %2 %3 %4 m | tepki:TOPLU-ATES (oz savunma) | ates eden:%5 | yukseklik:%6 m | egik:%8 m | bounding:%7", groupId _g, ["HELI", "DRON"] select _dron, typeOf _hedef, round _hd, _n, round ((getPosATL _hedef) select 2), _mesgul, round _egik];
                     };
                 };
                 continue;
@@ -235,7 +237,36 @@ private _calis = {
                 private _ok = false;
                 if ((count (nearestObjects [_lp, ["House", "Building"], 42])) > 0) then {
                     _ok = [_g, getPosATL _l, [], _sure] call _garrisonF;
-                    if (_ok isEqualType true && {_ok}) then { _yontem = "GARRISON"; };
+                    if (_ok isEqualType true && {_ok}) then {
+                        _yontem = "GARRISON";
+                        // v8.54: binada yer yetmeyebilir (testte 8 kisiden 1'i girdi, kalanlar acikta bekledi) -> 10 sn sonra acikta kalanlar siper bulur / yatar
+                        [{
+                            params ["_gg", "_hh"];
+                            if (isNull _gg) exitWith {};
+                            private _ic = 0;
+                            private _dis = 0;
+                            {
+                                private _u = _x;
+                                if (alive _u && {isNull objectParent _u}) then {
+                                    private _e = eyePos _u;
+                                    if ((lineIntersectsSurfaces [_e, _e vectorAdd [0, 0, 12], _u, objNull, true, 1, "GEOM", "NONE"]) isNotEqualTo []) then {
+                                        _ic = _ic + 1;
+                                    } else {
+                                        _dis = _dis + 1;
+                                        [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 75] call CBA_fnc_waitAndExecute;
+                                        private _cv = [_u, _hh, 40, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
+                                        if (_cv isNotEqualTo []) then {
+                                            _u doMove ((_cv select 0) select 0);
+                                            _u setUnitPos ((_cv select 0) select 1);
+                                        } else {
+                                            _u setUnitPos "DOWN";
+                                        };
+                                    };
+                                };
+                            } forEach (units _gg);
+                            diag_log format ["[HAVA-FARK-GARRISON] %1 | 10 sn sonra: iceride:%2 aciktaki:%3 -> aciktakiler siper buldu / yatti", groupId _gg, _ic, _dis];
+                        }, [_g, _hedef], 10] call CBA_fnc_waitAndExecute;
+                    };
                 };
                 if (_yontem isEqualTo "HIDE") then { [_g, _hedef, false, _sure] call FUNC(tacticsHide); };
             };

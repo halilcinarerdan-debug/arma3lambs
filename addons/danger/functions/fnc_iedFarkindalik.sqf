@@ -195,23 +195,39 @@ private _calis = {
                         if (isNull _mine && {!_imhaVar}) exitWith { _bitis = "IED yok (patladi / silindi)"; };
                         if (_imhaVar && {(time - _t0) > 10} && {(_grp getVariable [QGVAR(iedIs), []]) isEqualTo []}) exitWith { _bitis = "imha bitti"; };
                         private _lst = (units _grp) select {alive _x && {isNull objectParent _x} && {!(_imhaVar && {_x isEqualTo _eod})} && {!(_x getVariable [QGVAR(iedIsci), false])}};
-                        private _n = count _lst;
-                        {
-                            private _u = _x;
-                            if (_tm) then {
-                                if ((_u distance2D _pos) < (_yar - 2)) then { _u doMove (_pos getPos [_yar + 8 + (random 6), _pos getDir _u]); };
-                            } else {
-                                private _a = (_pos getDir (leader _grp)) + (_forEachIndex * (360 / (_n max 1)));
-                                private _cp = _pos getPos [_R2 + (5 * (_forEachIndex mod 2)), _a];
-                                if ((_u distance2D _cp) > 5) then {
+                        if (_tm) then {
+                            {
+                                if ((_x distance2D _pos) < (_yar - 2)) then { _x doMove (_pos getPos [_yar + 8 + (random 6), _pos getDir _x]); };
+                            } forEach _lst;
+                        } else {
+                            // v8.54: cevre noktasi, askerin KENDI bulundugu yonde (radyal) verilir; eskiden indekse gore 360 derece dagitildigi icin askerler IED'in ustunden / karsi tarafina yuruyordu.
+                            // Komsu askerler arasi en az ~9 m yay payi birakilir; zaten cevreden uzaktakiler (R2+15 m disi) yerinde durup disa bakar.
+                            private _sir = _lst apply {[(_pos getDir _x) + (random 0.01), _x]};
+                            _sir sort true;
+                            private _minA = (9 / (_R2 max 20)) * 57.3;
+                            private _onceki = -999;
+                            {
+                                _x params ["_ac", "_u"];
+                                private _ac2 = if (_ac < (_onceki + _minA)) then { _onceki + _minA } else { _ac };
+                                _onceki = _ac2;
+                                private _du = _u distance2D _pos;
+                                if (_du > (_R2 + 15)) then {
                                     _u setVariable [QGVAR(taktikKilit), time + 6];
-                                    _u doMove _cp;
-                                } else {
-                                    _u doWatch (_pos getPos [_R2 + 60, _a]);
+                                    _u doWatch (_pos getPos [_du + 60, _ac2]);
                                     _u setUnitPos "MIDDLE";
+                                    if ((speed _u) > 1) then { _u doMove (getPosATL _u); };
+                                } else {
+                                    private _cp = _pos getPos [_R2 + (4 * (_forEachIndex mod 2)), _ac2];
+                                    if ((_u distance2D _cp) > 5) then {
+                                        _u setVariable [QGVAR(taktikKilit), time + 6];
+                                        _u doMove _cp;
+                                    } else {
+                                        _u doWatch (_pos getPos [_R2 + 60, _ac2]);
+                                        _u setUnitPos "MIDDLE";
+                                    };
                                 };
-                            };
-                        } forEach _lst;
+                            } forEach _sir;
+                        };
                     };
                     if (!isNull _grp && {!((_grp getVariable [QGVAR(iedPos), _pos]) isEqualTo _pos)}) then { _bitis = "yeni IED bulundu (cevre devredildi)"; };
                     diag_log format ["[IED-FARK-CEVRE] %1 | BITTI | neden: %2 | gecen %3 sn", groupId _grp, _bitis, round (time - _t0)];
