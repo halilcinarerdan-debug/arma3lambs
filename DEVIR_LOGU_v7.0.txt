@@ -1052,3 +1052,9 @@ v8.55 — RPT 12:30: (1) ACE_IED*_Range_Ammo (yakinlik tetikli) hic imha edilmiy
   (2) IEDD 'iedd_ied_Charge_Ammo' imhasi 'BASARISIZ (calisma kesildi)' (varistan 5 sn sonra): neden belirsizdi -> artik calisma asamasinin kesilme nedeni loglanir
   (EOD oldu / IED calisma sirasinda yok oldu / temas basladi / ikincil cihaz). 8.50e'deki _bilinen listesi temizleme (imha TAMAM sonrasi) korundu.
   HAVA (RPT 12:37): saldiri tespiti, TOPLU-ATES (4 kez, ates eden 4-8), egik mesafe zarfi calisti; garrison sonrasi sayim bu testte tetiklenmedi (HAVA-FARK-GARRISON yok: bina yoktu).
+
+v8.56 — GARRISON TESHISI ("garrison calismiyor"): hava tepkisinde LAMBS tacticsGarrison cagrisi detayli loglanir.
+  [HAVA-FARK-GARRISON] CAGRI ONCESI: yakin bina sayisi, en yakin bina m, kullanilabilir bina POZISYONU sayisi (findBuildings), hazir asker (findReadyUnits) / grup | CAGRI SONUCU: true / false (+ neden) |
+  4 sn / 12 sn (siper oncesi) / 30 sn (son durum): her asker icin ICERIDE (tavan GEOM isin testi) / ACIKTA + en yakin bina mesafesi, LAMBS hedefine (expectedDestination) mesafe, currentCommand, lambs_main_currentTask, durus.
+  Beklenen nedenler: bina pozisyonu < hazir asker (kucuk bina, LAMBS ekstra askerleri ilk pozisyona yigar), hazir asker < grup, ya da baska sistem komutu eziyor (gorev / komut alanlari).
+  rpt_ozet --hava-ied: GARRISON cikarimi ([SORUN] pozisyon < hazir asker / garrison basarisiz / 30 sn'de aciktakiler).

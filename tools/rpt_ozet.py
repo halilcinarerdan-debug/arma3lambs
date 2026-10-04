@@ -18,7 +18,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.55"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.56"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -442,6 +442,26 @@ def hava_ied(path):
             kt("saldiri var ama hep zarf disinda (mesafe >600 m ya da yukseklik >300 m): bu ATP 3-01.8'e uygun (etkisiz) ama esikleri gozden gecir")
         if not sal:
             kt("heli yakindi (KARAR var) ama saldiri:true hic olmadi: heli ates etmedi ya da Fired EH / baski sinyali gelmedi")
+    # GARRISON
+    gar = [e for e in ev if e[2] == "HAVA-FARK-GARRISON"]
+    if gar:
+        for e in gar:
+            m = re.search(r"CAGRI ONCESI \| yakin bina:(\d+) \(en yakin (\d+) m\) \| kullanilabilir bina pozisyonu:(\d+) \| hazir asker:(\d+)/(\d+)", e[3])
+            if m:
+                bina, _, poz, hazir, top = (int(x) for x in m.groups())
+                msg = "GARRISON cagrisi: bina %d, pozisyon %d, hazir asker %d/%d" % (bina, poz, hazir, top)
+                if poz < hazir:
+                    uy(msg + " -> pozisyon sayisi hazir askerden az: herkes iceri giremez (bina kucuk)")
+                elif hazir < top:
+                    kt(msg + " -> bazi askerler 'hazir' sayilmadi (LAMBS findReadyUnits): temas / baska gorev")
+                else:
+                    ok(msg)
+            if "CAGRI SONUCU: false" in e[3] or "BASARISIZ" in e[3]:
+                uy("GARRISON basarisiz, HIDE'a dusuldu: " + e[3][:200])
+            m = re.search(r"(\d+ sn[^|]*) \| ICERIDE:(\d+) .*?\| ACIKTA:(\d+)", e[3])
+            if m and "30 sn" in m.group(1):
+                ic, ac = int(m.group(2)), int(m.group(3))
+                (ok if ac == 0 else uy)("GARRISON son durum (30 sn): iceride %d, acikta %d" % (ic, ac))
     # IED
     inab = [e for e in ev if e[2] == "IED-FARK-NABIZ"]
     if inab:

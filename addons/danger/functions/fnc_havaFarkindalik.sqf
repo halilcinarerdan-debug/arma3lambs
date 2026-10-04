@@ -37,6 +37,27 @@ diag_log "[HAVA-FARK] dron / helikopter farkindaligi watchdog baslatildi (v8.51)
 
 private _calis = {
     missionNamespace setVariable ["lambs_danger_havaAdim", "basladi"];
+    // GARRISON TESHIS YARDIMCISI: her askerin bina icinde (tavan testi) olup olmadigini, en yakin binaya mesafeyi, LAMBS hedefine mesafeyi, komutu ve gorevi yazar
+    missionNamespace setVariable ["lambs_danger_havaGarLog", {
+        params ["_gg", "_etiket", "_hh"];
+        if (isNull _gg) exitWith {};
+        private _ic = [];
+        private _dis = [];
+        {
+            private _u = _x;
+            if (alive _u && {isNull objectParent _u}) then {
+                private _e = eyePos _u;
+                private _tavan = (lineIntersectsSurfaces [_e, _e vectorAdd [0, 0, 12], _u, objNull, true, 1, "GEOM", "NONE"]) isNotEqualTo [];
+                private _b = nearestBuilding _u;
+                private _bd = if (isNull _b) then {-1} else {round (_u distance2D _b)};
+                private _dst = expectedDestination _u;
+                private _dm = round (_u distance2D (_dst select 0));
+                private _bilgi = format ["%1(bina %2 m, hedefe %3 m, %4, gorev:%5, durus:%6)", name _u, _bd, _dm, currentCommand _u, _u getVariable ["lambs_main_currentTask", "-"], unitPos _u];
+                if (_tavan) then { _ic pushBack _bilgi } else { _dis pushBack _bilgi };
+            };
+        } forEach (units _gg);
+        diag_log format ["[HAVA-FARK-GARRISON] %1 | %2 | ICERIDE:%3 %4 | ACIKTA:%5 %6", groupId _gg, _etiket, count _ic, _ic joinString " ; ", count _dis, _dis joinString " ; "];
+    }];
     private _logN = 0;
     private _tur = 0;
     private _nabizT = time + 60;
@@ -235,23 +256,30 @@ private _calis = {
             } else {
                 private _garrisonF = missionNamespace getVariable ["lambs_danger_fnc_tacticsGarrison", {false}];
                 private _ok = false;
-                if ((count (nearestObjects [_lp, ["House", "Building"], 42])) > 0) then {
+                private _yakinB = nearestObjects [_lp, ["House", "Building"], 42];
+                if ((count _yakinB) > 0) then {
+                    // v8.56: GARRISON TESHISI. Cagri oncesi: bina / bina pozisyonu sayisi, hazir (findReadyUnits) asker sayisi
+                    private _bpos = [_lp, 42, true, false, true] call EFUNC(main,findBuildings);
+                    private _hazir = [_l, 150] call EFUNC(main,findReadyUnits);
+                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI ONCESI | yakin bina:%2 (en yakin %3 m) | kullanilabilir bina pozisyonu:%4 | hazir asker:%5/%6 | grup:%7", groupId _g, count _yakinB, round (_l distance2D (_yakinB select 0)), count _bpos, count _hazir, count (units _g), if (_mesgul) then {"bounding/taktik"} else {"serbest"}];
                     _ok = [_g, getPosATL _l, [], _sure] call _garrisonF;
+                    diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI SONUCU: %2%3", groupId _g, _ok, if (_ok isEqualType true && {_ok}) then {" (LAMBS tacticsGarrison kabul etti)"} else {" -> garrison BASARISIZ, HIDE'a dusuluyor (bina yok / pozisyon yok / hazir asker yok)"}];
                     if (_ok isEqualType true && {_ok}) then {
                         _yontem = "GARRISON";
-                        // v8.54: binada yer yetmeyebilir (testte 8 kisiden 1'i girdi, kalanlar acikta bekledi) -> 10 sn sonra acikta kalanlar siper bulur / yatar
+                        private _garLog = missionNamespace getVariable ["lambs_danger_havaGarLog", {}];
+                        // 4 sn: hedef pozisyon atandi mi, yuruyorlar mi
+                        [{ params ["_gg", "_hh", "_f"]; [_gg, "4 sn", _hh] call _f; }, [_g, _hedef, _garLog], 4] call CBA_fnc_waitAndExecute;
+                        // v8.54: binada yer yetmeyebilir (testte 8 kisiden 1'i girdi, kalanlar acikta bekledi) -> 12 sn sonra acikta kalanlar siper bulur / yatar
                         [{
-                            params ["_gg", "_hh"];
+                            params ["_gg", "_hh", "_f"];
                             if (isNull _gg) exitWith {};
-                            private _ic = 0;
+                            [_gg, "12 sn (siper oncesi)", _hh] call _f;
                             private _dis = 0;
                             {
                                 private _u = _x;
                                 if (alive _u && {isNull objectParent _u}) then {
                                     private _e = eyePos _u;
-                                    if ((lineIntersectsSurfaces [_e, _e vectorAdd [0, 0, 12], _u, objNull, true, 1, "GEOM", "NONE"]) isNotEqualTo []) then {
-                                        _ic = _ic + 1;
-                                    } else {
+                                    if ((lineIntersectsSurfaces [_e, _e vectorAdd [0, 0, 12], _u, objNull, true, 1, "GEOM", "NONE"]) isEqualTo []) then {
                                         _dis = _dis + 1;
                                         [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 75] call CBA_fnc_waitAndExecute;
                                         private _cv = [_u, _hh, 40, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
@@ -264,8 +292,10 @@ private _calis = {
                                     };
                                 };
                             } forEach (units _gg);
-                            diag_log format ["[HAVA-FARK-GARRISON] %1 | 10 sn sonra: iceride:%2 aciktaki:%3 -> aciktakiler siper buldu / yatti", groupId _gg, _ic, _dis];
-                        }, [_g, _hedef], 10] call CBA_fnc_waitAndExecute;
+                            diag_log format ["[HAVA-FARK-GARRISON] %1 | 12 sn: aciktaki %2 asker icin siper arandi / yatildi", groupId _gg, _dis];
+                        }, [_g, _hedef, _garLog], 12] call CBA_fnc_waitAndExecute;
+                        // 30 sn: son durum
+                        [{ params ["_gg", "_hh", "_f"]; [_gg, "30 sn (son durum)", _hh] call _f; }, [_g, _hedef, _garLog], 30] call CBA_fnc_waitAndExecute;
                     };
                 };
                 if (_yontem isEqualTo "HIDE") then { [_g, _hedef, false, _sure] call FUNC(tacticsHide); };
