@@ -107,7 +107,7 @@ private _calis = {
                             if (_aci <= 20 && {_d <= 250}) then { _seviye = 1.3; _tur = "FENER (huzme)"; _tag = "ISIK"; } else { if (_d <= 50) then { _seviye = 0.9; _tur = "FENER (sacilan isik)"; _tag = "ISIK"; }; };
                         };
                         if (_seviye == 0 && {_irAcik} && {(hmd _b) isNotEqualTo ""} && {_aci <= 12} && {_d <= 500}) then { _seviye = 1.2; _tur = "IR LAZER (NVG)"; _tag = "ISIK"; };
-                        if (_seviye > 0 && {(checkVisibility [_pEye, eyePos _b]) < 0.2}) then { _seviye = 0; };
+                        if (_seviye > 0 && {lineIntersects [_pEye, eyePos _b, _p, _b]}) then { _seviye = 0; };   // engel (duvar / arazi) varsa isik gorulmez
                         if (_seviye > 0) then { _b setVariable [_isikK, time]; };
                     };
                 };

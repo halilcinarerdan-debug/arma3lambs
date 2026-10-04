@@ -1194,3 +1194,7 @@ v8.76 — RPT 7066b2ea (v8.74, ACM + ACE yuklu; [TCCC] baslatildi ace_medical/AC
 v8.77 — HEMTT: error[SPE2] fnc_gizliAlgi.sqf:30 ('private _calis = {' ayristirilamadi). Tek HATA bu; geri kalan ciktilar help / warning (L-S25 count karsilastirma, L-S19 gereksiz !, L-S05 if->select, FNL dosya sonu satiri) — islevsel degil, bilerek ELLENMEDI.
   Yerel HEMTT yok; nedeni kesin bulunamadi. Supheli yapilar sadelestirildi: eyeDirection / vectorFromTo / vectorDotProduct / acos / max (-1) -> getDir + mod acisi; entities "HeadlessClient_F" -> allPlayers select {isKindOf}; string select [0,4] -> _tag degiskeni.
   Kullanici HEMTT'i yeniden calistirip SPE2 kalkti mi bildirecek.
+
+v8.78 — HEMTT SPE2 KOK NEDENI BULUNDU: 'checkVisibility [_pEye, eyePos _b]' (tek argumanli dizi sozdizimi) HEMTT 1.22 ayristiricisini kirdi. Yerel dogrulama: HEMTT linux-x64 (GitHub release) /tmp'ye indirilip stub script_component ile test projesinde 'hemtt check' calistirildi;
+  bolum bolum ikiye bolme (bisect) ile satir bulundu; lineIntersects [_pEye, eyePos _b, _p, _b] ile degistirildi (engel varsa isik / ses gorusu yok). Duzeltme sonrasi tum danger fonksiyonlarinda SPE2 YOK (kalan hatalar yalniz test projesinin surum ayari yapay hatalari: continue / time vb. 'requires version').
+  Yontem not: yeni SQF yazarken SPE2 suphesinde bu yerel HEMTT bisect yontemi kullanilabilir.
