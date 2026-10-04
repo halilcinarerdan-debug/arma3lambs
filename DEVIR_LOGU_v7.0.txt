@@ -1045,3 +1045,10 @@ v8.54 — RPT 12:18 (v8.53 testi): imha TAMAM calisti (EOD 42 sn'de 4 m'ye vardi
   (2) HAVA GARRISON: 8 kisiden yalniz 1'i binaya girdi (bina yeri yetmedi), kalanlar acikta bekledi. Duzeltme: 10 sn sonra aciktakiler (tavan GEOM isin testi) findCover SURVIVE ile siper bulur, yoksa yatar; 75 sn sonra stance AUTO.
       Log: [HAVA-FARK-GARRISON] iceride:N aciktaki:M.
   Ek: kucuk silah zarfi egik (3B) mesafe <= 600 m (once yatay<=600 + yukseklik<=300; heli 300 m yukseklikte sinirda kaciyordu). KARAR logunda egik: alani.
+
+v8.55 — RPT 12:30: (1) ACE_IED*_Range_Ammo (yakinlik tetikli) hic imha edilmiyordu ("EOD yurumez" kurali, v8.50c: onceki testlerde EOD bu tiplere yaklasirken iki kez oldu).
+  Cozum = KONTROLLU PATLATMA (BIP, gercek doktrinle uyumlu): yakinlik tetikli tip (range / pressure / tripwire) veya yakininda yakinlik tetikli komsu varsa EOD cihaza YURUMEZ; kitli EOD tehlike yaricapi + 5 m uzaklikta bekler,
+  10 sn hazirlik, cevre emniyeti kontrolu (yaricap icinde kimse kalmamali, en fazla 20 sn), sonra triggerAmmo (yoksa deleteVehicle). Log: KARAR mod:PATLAT, IMHA mod:PATLAT, "imha TAMAM | mod:PATLAT".
+  (2) IEDD 'iedd_ied_Charge_Ammo' imhasi 'BASARISIZ (calisma kesildi)' (varistan 5 sn sonra): neden belirsizdi -> artik calisma asamasinin kesilme nedeni loglanir
+  (EOD oldu / IED calisma sirasinda yok oldu / temas basladi / ikincil cihaz). 8.50e'deki _bilinen listesi temizleme (imha TAMAM sonrasi) korundu.
+  HAVA (RPT 12:37): saldiri tespiti, TOPLU-ATES (4 kez, ates eden 4-8), egik mesafe zarfi calisti; garrison sonrasi sayim bu testte tetiklenmedi (HAVA-FARK-GARRISON yok: bina yoktu).
