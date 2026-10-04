@@ -29,10 +29,15 @@ private _bolum = {
     params ["_u", "_tur", "_sure", "_tehditPos", "_neden"];
     if (!alive _u) exitWith {};
     private _g = group _u;
+    // v8.82: ust uste binen bolumde (RPT f3b1b53f: Jabr Takhtar DONMA ardindan KOR) ikinci bolum KENDI yazdigimiz disableAI = true'yu "eski deger" sanip kalici birakiyordu (BIRIM-AI-KAPALI).
+    //   Orijinal deger yalniz ilk bolumde kaydedilir; bagisiklik sure sonunda DEGIL basta konur.
+    if (time < (_u getVariable [QGVAR(panikBitis), 0])) exitWith {};
     private _eskiAcc = _u skill "aimingAccuracy";
-    private _eskiDAI = _u getVariable [QGVAR(disableAI), false];
+    private _eskiDAI = _u getVariable [QGVAR(panikEskiDAI), _u getVariable [QGVAR(disableAI), false]];
+    _u setVariable [QGVAR(panikEskiDAI), _eskiDAI];
     private _bitis = time + _sure;
     _u setVariable [QGVAR(panikBitis), _bitis];
+    _u setVariable [QGVAR(panikBagT), _bitis + 40];
     _u setVariable [QGVAR(taktikKilit), _bitis];
     _u setVariable [QGVAR(disableAI), true];     // LAMBS birim duzeyi tepkileri durur (FSM bu birimi yonetmez)
     private _lambsPanik = missionNamespace getVariable ["lambs_main_fnc_doPanic", {}];
@@ -77,6 +82,7 @@ private _bolum = {
         _u setSkill ["aimingAccuracy", _eskiAcc];
         _u setUnitPos "AUTO";
         _u setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI];
+        _u setVariable [QGVAR(panikEskiDAI), nil];
         _u setVariable [QGVAR(taktikKilit), nil];
         _u setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
         _u setVariable [QGVAR(panikBagT), time + 40];

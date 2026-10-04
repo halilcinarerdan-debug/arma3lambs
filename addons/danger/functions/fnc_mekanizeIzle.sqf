@@ -6,7 +6,7 @@
  * IZLEME (2 sn'de bir, yerel / oyuncusuz surucu, kara araci - APC / IFV / tank / arac, lider aracta): son 40 sn hiz ornegi; hiz > 8 km/s'ten < 2 km/s'e dusus >= 3 kez = DUR-KALK.
  * TESHIS LOGU [MEKANIZE-DUR-KALK]: grup davranis / savas modu / hiz modu / formasyon, surucu komutu (currentCommand) / unitReady / beklenen hedef, baski, temas yasi, en yakin bilinen dusman, aktif taktik bayraklari,
  *   aracin onunde 10 m'de arazi nesnesi sayisi, motor / yakit / hasar  (60 sn'de bir; ilk 40) -> kok neden RPT'den okunur.
- * DUZELTICI (kapatma: lambs_danger_mekanizeDuzeltOff = true): dusman bilinmiyor / > 250 m ise
+ * DUZELTICI (kapatma: lambs_danger_mekanizeDuzeltOff = true): dusman bilinmiyor / > 100 m ise
  *   - formasyon COLUMN (arac gruplarinda LINE / WEDGE slot kovalatir -> dur-kalk), formSet hakemi uzerinden
  *   - grup davranisi COMBAT ise (son temas > 15 sn) AWARE
  *   - surucu AUTOCOMBAT kapatilir (60 sn; 'tehlike gordu, durdu' tepkisi azalir); sure bitince geri acilir
@@ -76,15 +76,16 @@ private _calis = {
                     currentCommand _d, unitReady _d, expectedDestination _d, (getSuppression _d) toFixed 2,
                     round (time - (_g getVariable [QGVAR(contact), -999])), round _enM, _bayrak, _onunde, isEngineOn _veh, (fuel _veh) toFixed 2, (damage _veh) toFixed 2];
             };
-            if (_duzelt && {_enM < 0 || {_enM > 250}}) then {
+            if (_duzelt && {_enM < 0 || {_enM > 100}}) then {   // v8.82: 250 -> 100 m (RPT f3b1b53f: Stryker dur-kalk dusman 148 m'de yasandi, duzeltici 250 esiginde calismadi)
                 [_g, "COLUMN", "mekanize", 1] call FUNC(formSet);
+                if ((speedMode _g) isEqualTo "NORMAL") then { _g setSpeedMode "FULL"; };   // mekanize hizli yurur (NORMAL = surucu yarim hizda)
                 if ((behaviour _l) isEqualTo "COMBAT" && {(time - (_g getVariable [QGVAR(contact), -999])) > 15}) then { _g setBehaviour "AWARE"; };
                 if ((_d getVariable [QGVAR(mekAcT), 0]) == 0) then {
                     _d disableAI "AUTOCOMBAT";
                     _d setVariable [QGVAR(mekAcT), time + 60];
                 };
                 _say set ["duzeltildi", (_say getOrDefault ["duzeltildi", 0]) + 1];
-                if (_logN < 40) then { diag_log format ["[MEKANIZE-DUR-KALK] %1 | DUZELTICI: COLUMN + AWARE + surucu AUTOCOMBAT 60 sn kapali (dusman %2 m)", groupId _g, round _enM]; };
+                if (_logN < 40) then { diag_log format ["[MEKANIZE-DUR-KALK] %1 | DUZELTICI: COLUMN + FULL hiz + AWARE + surucu AUTOCOMBAT 60 sn kapali (dusman %2 m)", groupId _g, round _enM]; };
             };
         } forEach (allGroups select {local _x && {!isNull leader _x}});
         if (time > _ozetT) then {

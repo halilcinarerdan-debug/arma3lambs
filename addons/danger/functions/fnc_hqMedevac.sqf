@@ -9,11 +9,11 @@
  *
  * YARALI ADAYI: grup uyesi, canli, baygin (INCAPACITATED / ACE_isUnconscious) ya da agir kanama; TCCC tarafindan alinmamis; hqMedic atanmamis (ya da atanan olu / 120 sn gecti).
  * GRUPTA HEKIM: bilinc yerinde bir uye hekim (trait Medic ya da sargi / turnike tasiyor).
- * YARDIM VEREN: tahta 'musait' grup, hekimi var, yaraliya 40 - hqMedevacM (350) m, hekim meşgul degil.
+ * YARDIM VEREN: tahta 'musait' grup, hekimi var, yaraliya 40 - hqMedevacM (600; v8.82: 350 -> 600) m, hekim meşgul degil.
  * GUVENLI MI: yardim isteyen grup son 8 sn temasta degil ve bilinen dusman yaraliya >= 70 m (cmdSit pozisyonu).  Degilse bekler (hekim tehlikeye atilmaz).
  * Turda en cok 1 atama. Log: [HQ-MEDEVAC] (ilk 120 satir).
  *
- * Kapatma: lambs_danger_hqMedevacV1 = false; doktrin anahtari hqMedevac (varsayilan true), hqMedevacM (varsayilan 350).
+ * Kapatma: lambs_danger_hqMedevacV1 = false; doktrin anahtari hqMedevac (varsayilan true), hqMedevacM (varsayilan 600).
  *
  * Arguments:
  * 0: Taraf <SIDE>
@@ -62,7 +62,7 @@ private _atandi = false;
 
     private _sit = _istek get "sit";
     private _enP = if (_sit isEqualType [] && {(count _sit) >= 8} && {(_sit select 7) isEqualType []}) then {_sit select 7} else {[0, 0, 0]};
-    private _menzil = [_g, "hqMedevacM", 350] call FUNC(dk);
+    private _menzil = [_g, "hqMedevacM", 600] call FUNC(dk);
 
     {
         if (_atandi) exitWith {};

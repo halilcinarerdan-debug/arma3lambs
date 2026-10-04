@@ -35,7 +35,7 @@ private _sonK = _g getVariable [QGVAR(fsK), "-"];
 if (isNil "lambs_danger_fsLogA") then { lambs_danger_fsLogA = 0; lambs_danger_fsLogS = 0; };
 
 if ((time - _sonT) < _bekle && {_oncelik <= _sonO}) exitWith {
-    if (lambs_danger_fsLogS < 80) then {
+    if (lambs_danger_fsLogS < 80 && {!(_kaynak in ["bounding-zorla", "bounding-koru"])}) then {   // 0.5 sn dongusu: atlama logu spam (RPT f3b1b53f: 50+ satir)
         lambs_danger_fsLogS = lambs_danger_fsLogS + 1;
         diag_log format ["[FORM-SET] %1 | ATLANDI %2 -> %3 | kaynak:%4 (oncelik %5) | son yazan:%6 (oncelik %7) %8 sn once", groupId _g, _simdi, _f, _kaynak, _oncelik, _sonK, _sonO, round (time - _sonT)];
     };
