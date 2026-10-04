@@ -409,6 +409,34 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _varis;
 
+            // v8.72 KOMUT EZME TESPITI (RPT bc841e2d: 40 TAKILI satirinin 32'sinde komut ATTACK + beh COMBAT, hedefe medyan 141 m -> baska bir sistem doMove'u ezip askeri
+            //   ayakta durdurup ates ettiriyor; vardi 1/10, 3 dk'da dusman mesafesi 155 -> 96 -> 125 m = retreat mesafe kazanmiyordu). Kosan (varamamis, ezilmemis) askerde komut MOVE degilse
+            //   ya da davranis COMBAT'a donduyse: AI bayraklari yeniden kapatilir, doStop + doMove (birim basina en fazla 2.5 sn'de bir, grup logu ilk 30 olay).
+            {
+                private _b = _x select 0;
+                if (alive _b && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5} && {(time - _t0) > 1.5}) then {
+                    private _kmt = currentCommand _b;
+                    if (_kmt isNotEqualTo "MOVE" || {(behaviour _b) isEqualTo "COMBAT"}) then {
+                        _b setVariable [QGVAR(retEzmeT), time];
+                        if (isNil "lambs_danger_retEzmeN") then { lambs_danger_retEzmeN = 0; };
+                        if (lambs_danger_retEzmeN < 30) then {
+                            lambs_danger_retEzmeN = lambs_danger_retEzmeN + 1;
+                            diag_log format ["[GERI-CEKILME-EZME] %1 | %2 | komut:%3 beh:%4 | hedefe %5 m | TARGET:%6 AUTOTARGET:%7 -> yeniden MOVE", groupId _grup, name _b, _kmt, behaviour _b, round (_b distance2D (_x select 1)), _b checkAIFeature "TARGET", _b checkAIFeature "AUTOTARGET"];
+                        };
+                        _b disableAI "TARGET";
+                        _b disableAI "AUTOTARGET";
+                        _b disableAI "AUTOCOMBAT";
+                        _b enableAI "PATH";
+                        _b enableAI "MOVE";
+                        _b setBehaviour "AWARE";
+                        _b setUnitPos "UP";
+                        _b forceSpeed -1;
+                        doStop _b;
+                        _b doMove (_x select 1);
+                    };
+                };
+            } forEach _varis;
+
             // Takilma tespiti: 3.5 sn'de < 1.5 m ilerleyen, hedefe uzak asker -> emri tazele; 2. takilmada dusmandan uzaga yeni nokta
             {
                 private _b = _x select 0;

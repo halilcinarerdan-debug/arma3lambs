@@ -1148,3 +1148,12 @@ v8.70 — Kullanici: "komutan sabitken formasyon oturmuyor, bazilari saga sola o
 
 v8.71 — "komutan durunca formasyon ~30 sn oynuyor" KOK NEDEN (RPT 1f05955f): fnc_buddyBond sakin halde 25 m limitle 'es kopmasi' (25-35 m, ornek Alpha 1-5 / 1-4, 49 [BUDDY] satiri) sayip askerlere kalici doMove veriyor; genis 13 kisilik formasyonda es ciftleri
   zaten 25-35 m ayri -> lider durunca askerler slota degil birbirine kosuyor. FORM-DEGISIM yoktu (formasyon degismedi). Duzeltme: sakin halde lider hareket ettiyse / durali < 45 sn ise buddyBond atlanir; 8+ kisilikte sakin limit 35 m / izole 50 m. TEST EDILMEDI.
+
+v8.72 — RPT bc841e2d (v8.69) sonrasi: kullanici "1) retreat 2) moral 3) bilgi sisi (gercekci, Arma'da baska modda yok)" onayladi. Bu surum 1 ve 3.
+  RETREAT (varis %17, Alpha 1-4 PEEL 295 sn, dusman mesafesi 155 -> 96 -> 125 m = mesafe kazanmadi, 6 kayip): 40 TAKILI satirinin 32'sinde komut ATTACK + beh COMBAT, hedefe medyan 141 m, binada 0 (acik arazide ayakta duruyorlar;
+    kullanici: arazi acik / engebesiz, evden eve catisma, 3-4 ev blogu). Yani baska bir sistem doMove'u eziyor (kaynak bilinmiyor). Cozum: tacticsRetreat bekleme dongusunde kosan askerde komut MOVE degil / beh COMBAT ise AI bayraklari kapatilir,
+    doStop + doMove (2.5 sn'de bir), [GERI-CEKILME-EZME] logu (ilk 30). Kaynagi bulmak icin log: komut + beh + TARGET/AUTOTARGET durumu.
+  BILGI SISI (fnc_hqIstihbarat): onceki: 2-6 sn, seviye >= 0.9, gercek konum = mukemmel. Simdi (TASARIM tahmini, doktrin sayisi degil): telsiz sarti (muhbir + alici lider), muhbir 15 sn'de bir tur, gecikme 6-16 sn + mesafe + muhbir
+    bastirma/retreat (+8-18) + alici temasta (+3), teslim guvenilirligi 600 m'e kadar 1.0 -> menzilde 0.35 (kayip rapor), seviye 0.5..maxReveal (yas+gecikme, mesafe, bastirma; dusuk seviye = alici konum hatasi buyuk).
+    Kapatma: lambs_danger_hqSisOff = true. Log: [HQ-ISTIHBARAT] ... SIS satiri + [HQ-ISTIHBARAT-OZET] sayac (telsiz yok / kayboldu / teslim). Dikkat: AI bilgisi azaldigi icin zorluk DUSEBILIR; kullanici gercekcilik istedi. TEST EDILMEDI.
+  Acik: moral/korku katmani (2), ROE EAST->EAST 28 ihlal.
