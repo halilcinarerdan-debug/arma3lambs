@@ -1,0 +1,3735 @@
+ATP 3-01.8 
+
+
+Techniques for Combined Arms for Air Defense 
+
+
+JULY 2016 
+
+
+DISTRIBUTION RESTRICTION: 
+Approved for public release; distribution is unlimited 
+
+
+Headquarters, Department of the Army 
+
+
+This publication is available at the Army Publishing 
+Directorate site (http://www.apd.army.mil), 
+and the Central Army Registry site 
+(https://atiam.train.army.mil/catalog/dashboard) 
+
+
+To receive publishing updates, please subscribe at 
+(http://www.apd.army.mil/AdminPubs/new_subscribe.asp) 
+
+
+*ATP 3-01.8 
+Field Manual 
+
+
+ATP 3-01.8 Headquarters 
+Department of the Army 
+
+
+Washington, DC, 29 July 2016 
+
+
+Techniques for Combined Arms for Air 
+
+
+Defense 
+Contents 
+
+Page 
+
+PREPAC Bienes. iste. tert seitinn etnies ahhits eaten dnt idl sin hala iii 
+INFRODUCTION . cccceieititdintnte hie Rent dilide She dhe eee iv 
+
+SUMMARY OF CHANGES ..........:ccccccceceeseeeeeeeeeeeeeeeseeaeeeeeeeeeseeaseaeeeeeeeseseesseaneeeeeeens Vv 
+
+Chapter 1 AERIAL THREATS AND DEFENSIVE PLANNING. ............::ccceseeeceseseeeeeesseeeens 1-1 
+Anticipate Aerial Threats ...............cececcccecceceeeeeeeeeeeeeeeeeeeeecneaeeeeeeeeesecsnaeeeeeeeseteees 1-1 
+
+Analyze Air Threat Capabilities... eee ceneeeeeeneeeeeeneeeeeeaeeeeeenaeeeseeneeeeeeaaes 1-4 
+
+Threat Application...............ccccccceccceeeccecececeeeeeeeeanaeceeeeeeeeeeeacaeceeeeesatensaeeeeeeeeeeeeeees 1-7 
+
+Defensive: Planning. 2i ss cc2 503 sad ceded idee age se axvoed leded sancaangvehadaseanedeansuedecaea dncchanseal de 1-9 
+
+Chapter 2 TECHNIQUES FOR WARNING AND CONTROL ..........cccccceseeeseeeeeeeeeeeeeeeeeenees 2-1 
+OVERVIOW fate ie vecende tied oct eee tanaled vaata dee ene aeh ths faced dept aaatumnnud Mas eadiaces eile 2-1 
+
+Chapter 3 PASSIVE AIR DEFENSE TECHNIQUES ..............:ccccceeeeeeeeseeeeeeeeeeeeeeeseneneeeeeeens 3-1 
+Passive-Air Defense oui... 2.cccisugeniel ie couse deities he Sess ade ried ea seeeene deeiteeeecneseniedennea aces 3-1 
+
+Chapter 4 ACTIVE AIR DEFENSE MEASUREG...............c:eeeecececeeeeeeeeeeeeeeeseeeseeneeseeeeeeeeeees 4-1 
+Active Air Defense ...............:ccccccceceeeeeeecccece cece cess eaeeeceeeeesenaeaeeeeeeeseseesiaeeeeeeeesteeas 4-1 
+
+Appendix:A.. -ASSET PROTECTION soc: cc.ccctccsseshse lect cgevotecencdientvetueeseed ce leeecasvessntecceeetisteesvecdsede A-1 
+Appendix’'B: -~UNIT TRAINING ss .cccccccsicicc cates tscncci ces cade hecsgeieei dated Su sncthev anlee fevesduvevesadee dvssaee cut B-1 
+GLOSSARY ose sccbeedeececsceeecercesecctetezsscetenevecnczegvssureceesductesssteressvecneregestthes Glossary-1 
+
+REFER ENGES ccsscescccectececevccesancetentevesuets ctceutereveeceth nectar tevevseenduteeteaas References-1 
+
+VIN DEX ois geese Sve lens de ce vnedss Seco se rev eke se les et ade oeveeane Snes de tevets ae let ade coved cacao Index-1 
+
+
+DISTRIBUTION RESTRICTION: Approved for public release; distribution is unlimited 
+
+
+VLOrtents 
+
+
+Figures 
+Figure 1-1. Pop-up and launch technique (Rotary Wing) ..........:cccceeeeeeeeeeeeeeettteeeeetneeeereee 1-7 
+Figure 3-1. Attack AVOIdANCE ........ ieee entree teenie ee erent ee ee tne ee eet ne ee ee taeee ee taeeeeeteeeeesneeeenena 3-2 
+Figure 3-2. Detection AVOIdANCE. ........ eee eect eteeee ee ttte ee erent ee ee te ee ee taeeeeeteeeeetieeeeeteeeeeen 3-3 
+Figure 3-3: Eliminate: Glare. eco: cise. feuds cect saecdeevbes cece des eee tab ead aeedee thi eek avnee eb a eeeeeS 3-4 
+Figure 3-4. Selecting natural COVED. .........cccccceeeeeeeeeeete eter eine ee ee ene nese tees ee sieeeeetieeeeetiaeeeeeeaa 3-5 
+Figure 3-5. Vehicle dispersion. .....::....cccccsesececeesecteessecceceesedenenedeceeeeesedeeeeesecseaensecanetesecteaeeseds 3-6 
+Figure 3-6. Estimating 20 degrees technique. ............ceccceeeeeeeeeeeeteeeeeeeneeeeeteneeeeetieeeeesaeeeeneaa 3-7 
+Figure 3-7. Herringbone technique. ............:::cccceeeccceeeeeeceeeeeeaeeneeeeceeeeeeaaceeseeaaceneeeaasenseeeceeneeees 3-8 
+Figure 3-8. Small arms CONVOY COVEFAQGE. .........eeeeeeeeeeeeeee ee eeee eset ette eset taeeeeeteeeeetieeeeeeneeeeeeaa 3-9 
+Figure 3-9. UAS surveillance role ........ececeeeceeeeeeeeeeeeeeeeeeeseneeeeeseneeeeeseeeaeeeseseeeeeseeaeereeeeaeees 3-10 
+Figure 3-10. UAS indirect attack role oo... ee eeceeee cence ee eeeeeeeeeeeeeeeeseeeeeeeseneaeeeseeaeeeeeeeaeees 3-11 
+Figure 3-11. UAS direct attack role... ecccceeeeeeeeeeeeeeeeeeeeeeeeeneeeeeeeeeaeeeseeeaeeeseeneeeeeeeaeees 3-12 
+Figure 3-12. UAS swarm attack role... ee eceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeseeeeeeeseeeeeeeeeeaeeeeneaeees 3-13 
+Figure 3-13. Find, Detect, Identify UAS ...........eccccecccceeeeeeeceece cece cree eeceaeaeeeeeeeeeseccaaeeeeeeneeteees 3-14 
+Figure 4-1. UAS groups 1 — 5 Mission Areas...........cccccceeeeteeeeeeeneeeeeteneeeeetaeeeeetieeeeetneeeeneaa 4-4 
+Figure'4-2. Volume Te ssadtin erate Aden tet ican ntti tae Atti nie ee 4-6 
+Figure 4-3. Football Field Technique: Jet aiming Points. ...........ccceeeeeeeeeeeeeeeeeeeeeeeeeetneeeerees 4-7 
+Figure 4-4. Football Field Technique: Helicopter aiming points..................::::::ecceceeeeeteeeeteees 4-8 
+Figure 4-5.. Firing POSItIONS: secec.secet i cceek ceteted ede davedenedeceeene staat seduatees ae davtceeeedeeeeenedeaatnebdeceeenedat 4-9 
+Figure 4-6. Reference-point technique. .............:::::ccceceeeeeeeeceeceeeeeeeeecencaeeeeeeeeeseceueaeeeeeeeeeneees 4-10 
+Figure A-1. AMD planning Proce .......0....:ccccccesieeeeeetneeeeeteneeeeeteeeeeteeeeesieeeeeteeeeetieeeeneaa A-4 
+Figure A-2. Example CAL and DAL development. .............:::ccccccseeeeeceeceeeeeeeeeeneeeeeeeeettetsnnaeees A-6 
+
+
+Tables 
+
+
+Table 3-1. Recommended Threat UAS Reporting Format .......0....:cccceeeseeeeeeesteeeeeenieeeeeeaes 3-15 
+Fable-4-1: Aiming Points: 2:ececceecegspcczevececee davavtanesves ioecega svagetpessnidaShundaes ¥en aedegansdsenneh aadedavvacens 4-8 
+Table B-1: Example Passive Air Defense Training Checklist .............::ceeeeeeeeseeeeeenteeeeeeaes B-2 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+Preface 
+
+
+Army Techniques Publication (ATP) 3-01.8 provides guidance to combined arms commanders on how to defend 
+against air defense threats. Its focus is to assist in understanding the possible air and missile threats combined 
+arms forces may encounter, providing techniques to counter the air threat while placing the threat in its proper 
+perspective including passive and active air defense measures that that ground commanders can utilize in order 
+to protect their units from air attack. 
+
+
+The principal audience for ATP 3-01.8 is commanders, leaders, and staff who employ combined arms air defense 
+planning within their operations. Trainers and educators will also use this publication to support the employment 
+of combined arms air defense into their curricula. 
+
+
+Commanders, staffs and subordinates ensure their decisions and actions comply with applicable United States, 
+international, and in some cases host-nation laws and regulations. Commanders at all levels must ensure their 
+Soldiers operate in accordance with the law of war and the rules of engagement (ROE) (see FM 27-10). 
+
+
+ATP 3-01.8 uses joint terms where applicable. Selected joint and Army terms and definitions appear in the 
+glossary and the text. For definitions shown in the text, the term is italicized and the number of the proponent 
+publication follows the definition. This publication is not the proponent for any Army terms. 
+
+
+Unless this manual states otherwise, masculine nouns and pronouns do not refer exclusively to men. 
+
+
+ATP 3-01.8 applies to the Active Army, Army National Guard/Army National Guard of the United States, and 
+United States Army Reserve unless otherwise stated. 
+
+
+The proponent of ATP 3-01.8 is the United States Army Fires Center of Excellence. The preparing agency is the 
+Directorate of training and Doctrine, Air Defense Artillery (ADA) Branch. Send written comments and 
+recommendations on a DA form 2028 (Recommended Changes to Publication and Blank Forms) to, United States 
+Army ADA School, Fires Center of Excellence, ATTN: ATSF-DD, 700 McNair Avenue, Suite 128, Fort Sill, 
+OK 73505; by email to usarmy.sill.fcoe.mbx.dotd-doctrine-inbox@mail.mil; or submit an electronic DA Form 
+2028. 
+
+
+90 luihy 9NAK ATD 2.N1 2 iii 
+
+
+iw 
+
+
+Introduction 
+
+
+ATP 3-01.8, focuses on how a combined arms force protects themselves from an adversary’s air attack. 
+Aerial threats include Unmanned Aircraft Systems (UAS); fixed- and rotary-wing aircraft; rockets, artillery, 
+and mortars (RAM); ballistic missiles (BM) and cruise missiles (CM). Commanders at all levels face the 
+challenge of being able counter the air threat and adversarial reconnaissance within their operational 
+environment. Countering air threats is a shared joint and combined arms responsibility. Dedicated ADA 
+forces assigned within a theater are primarily responsible for detection and direct engagements of fixed and 
+rotary wing aircraft, and missile threats to ground forces within an area of operations. 
+
+
+ATP 3-01.8 contains four chapters and a supporting appendix that includes; air threat description and 
+employment planning, warnings and self-defense, passive defense measures, active defense measures, and 
+unit training. This publication also introduces the measures that can be taken to counter unmanned threats. 
+The four chapters and appendix are: 
+
+
+e Chapter | discusses air and missile threats. 
+
+e Chapter 2 provides details on each type of adversarial aerial threat 
+
+e Chapter 3 discusses active and passive air defense techniques 
+
+e Chapter 4 discusses unit security and intelligence operations planning to include reconnaissance 
+and counter reconnaissance activities. 
+
+
+Appendix A discusses integration of aerial threats and combined arms training as a component of unit 
+combined arms training strategy. 
+
+
+Appendix B discusses asset protection considerations. 
+
+
+ATD 2.N1 2 90 Tihs 9NAK 
+
+
+Introquction 
+
+
+Summary of Changes 
+This publication addresses a holistic approach to training, planning, preparing, and 
+implementing combined arms defense techniques against the full range of air threats. 
+Changes include recent measures captured from lessons learned when countering 
+unmanned air threats. It also discusses asset protection considerations in the form of 
+area and point defense protection in Appendix A. 
+
+
+e Chapter 1 discusses air and missile threats. It further describes, in general, 
+defensive active and passive measures units must implement in order to defeat 
+aerial attacks. 
+
+
+Chapter 2 provides details on each type of adversarial aerial threat that may be 
+encountered, how the enemy may employ them and measures units must plan for, 
+and implement in order to defeat them. 
+
+
+Chapter 3 discusses active and passive air defense techniques all units must 
+employ within their organic capabilities. It further discusses available support from 
+external sources including Aviation and ADA units as well as other service 
+capabilities to protect personnel and equipment from enemy aerial reconnaissance 
+and aerial attack. 
+
+
+Chapter 4 discusses unit security and intelligence operations planning to include 
+reconnaissance and counter reconnaissance activities. 
+
+
+Appendix A discusses integration of aerial threats and combined arms training as 
+a component of unit combined arms training strategy. It also describes methods 
+for unit training as it pertains to its preparation to implement active and passive air 
+defense measures. 
+
+
+Appendix B discusses asset protection considerations. 
+
+
+90 liuihs 9NAK ATD 2.N1 2 
+
+
+This page intentionally left blank. 
+
+
+Chapter 1 
+AERIAL THREATS AND DEFENSIVE PLANNING 
+
+
+This chapter defines aerial threats and lays the foundation for basic air and missile 
+defense (AMD) planning in support of combined arms operations. Commanders must 
+understand the circumstances that shape the operational environment and the potential 
+threats in order to preserve combat power. This chapter also outlines potential negative 
+effects on combat power to include collecting and analyzing data in order for the 
+commander to destroy or counter these air threats. 
+
+
+ANTICIPATE AERIAL THREATS 
+
+
+1-1. Our enemies are developing new strategies for conducting operations in the vertical dimension that are 
+enabled by technology and adaptive operations. Combined arms forces must anticipate and plan to defend 
+against multiple aerial attacks while operating in and around contested areas on the battlefield. They must 
+assume the enemy uses both conventional and unconventional tactics employing a range of aerial threats. 
+Aerial threats may be any combination of large or small, manned or UAS, missile type platforms and rockets, 
+artillery and mortars (RAM) used to carry out attacks or support attack functions. The smaller platforms for 
+example, are commonly used to perform supportive functions such as detection, targeting assistance or 
+surveillance prior to the actual attack. 
+
+
+1-2. Anenemy may employ small unmanned, remotely piloted networked or non-networked systems in an 
+effort to observe and report friendly information or troop movements. Actions similar to this can go totally 
+unnoticed by friendly troops unless properly trained in counter techniques. Surviving an air attack may be as 
+simple as practicing avoidance or damage limiting techniques through proper planning and training. 
+
+
+1-3. Combined arms commanders understand the tactical situation and continuously assess their plans 
+weighing the unit’s effectiveness in carrying out its mission. This assessment also examines the unit’s 
+capabilities to respond to and survive an unexpected aerial attack. The commander’s goal is to keep the unit 
+on task and to protect his forces allowing the unit to continue functioning and complete the mission. 
+Combined arms forces can survive a range of aerial attacks by being prepared and anticipating the attacks. 
+They must also recognize enemy patterns and attempts which may preclude an assault. The units’ ability to 
+rapidly detect, identify and report a threat eases transitioning the force from offensive maneuvers to a defense 
+posture. Early detection of any threat is crucial to defend against and highly beneficial when countering 
+attacks. 
+
+
+1-4, Planning includes the commander’s intent, mission objectives, threat estimates, availability and type 
+of active and passive defense systems. Planning must focus on current threat intelligence capitalizing on 
+suspected and reported enemy information that may shape near term objectives within their area of 
+operations. Passive and active defense techniques may be employed at any given time to best preserve unit 
+strength. 
+
+
+1-5. Other planning factors for consideration are the enemy's order of battle, their combat capability, the 
+readiness and willingness to fight will also determine the times and rates of attacks or harassments. Some 
+enemy actions for example, observations and reconnoitering positioning of friendly formations may go 
+unnoticed by friendly troops. 
+
+
+1-6. Combined arms forces must remain vigilant scrutinizing suspected enemy action to prevent multiple 
+attacks. Friendly forces must assume they are always vulnerable to enemy targeting attempts. This is 
+especially true when conducting convoys for troop movements or performing supply actions and as they 
+move through open areas or concentrate at choke points along the convoy route. Traditional forms of aerial 
+threats consist of rockets, artillery, mortars, missiles or attack aircraft in the forward area near lines of contact. 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 41 
+
+
+Unapter 1 
+
+
+These attacks were normally made against massed forces in convoys or within built up areas using strike 
+aircraft or fighter bombers. 
+
+
+1-7. Modern types of hybrid threats (for example, unmanned remote piloted) differ in their capabilities and 
+in the manner in which they are employed. These systems can be configured to perform or support other 
+tactical operations presenting a distinctly different threat profiles. Locating the smaller UAS groups, their 
+launch points or operators is often difficult using air defense radars and other sensors. 
+
+
+AIR AND MISSILE DEFENSE THREATS 
+
+
+1-8. Combined arms forces defend against variety of conventional and hybrid AMD threats. The primary 
+AMD threats (air breathing threats and tactical ballistic missile [TBM] threats) require a joint and combined 
+arms approach in order to defeat them. Threats categorized as air breathing include UAS, CM, rotary-wing 
+(RW) attack helicopters, and air support, ground-attack, and fixed-wing (FW) aircraft. Air support aircraft 
+will conduct reconnaissance, surveillance, interdiction, anti-armor, and troop support missions. Elements in 
+the division and corps rear, mission command facilities, and reserve forces can expect repeated attacks by 
+manned and unmanned high-performance aircraft of all types. 
+
+
+1-9. Enemy TBM and CM strikes against airbases can limit or disrupt timely friendly air support operations 
+over the combat zone. The inability of air assets to operate from airfields close to ground forces combined 
+with increasing numbers of enemy short range anti-air weapon systems will require extended range support 
+operations from remote locations, decreasing the time on station. These threats could force friendly air 
+operations to operate at higher altitudes (beyond 700 feet above ground level) influencing current operations 
+and future plans. 
+
+
+1-10. Short and medium range Surface-to-Air Missiles are plentiful, inexpensive, easy to operate, easy to 
+hide, and effective. Their proliferation created an exploitable low-level threat that has changed the battlefield 
+dynamic. This is not limited to only newer generation weapons but also to older weapons systems and 
+affordable high technology subsystems combined for adaptive warfare. 
+
+
+1-11, The low-level threat includes the use of low, slow, small (LSS) UAS that are difficult to detect. VAS 
+is a system whose components include the necessary equipment, network, and personnel to control an 
+unmanned aircraft. UASs are remotely piloted, pre-programmed or controlled vehicles that can perform an 
+array of tasks such as, surveillance, reconnaissance and targeting support. UASs can also be operated from 
+close proximity enabling precision retargeting support limiting or slowing US advancements. Short-range air 
+defense (SHORAD) capabilities are critical to counter the growing arsenal of mixed aerial weapons platforms 
+that are available to financially limited, rogue or failing states or non-state actors. 
+
+
+1-12, Helicopters are commonly used over short distances as attack and transport platforms because they 
+have exceptional low altitude flight capabilities. These aircraft are easily masked and maneuverable as they 
+near a target even in rugged terrain. Both FW and RW aircraft tend to become exposed at some point when 
+traversing open terrain or nearing their target locations. 
+
+
+1-13. Air support aircraft conduct roles such as; reconnaissance, surveillance, interdiction, anti-armor, and 
+troop support missions. Elements in the division and corps rear, mission command facilities, and reserve 
+forces, can expect repeated attacks by manned and unmanned high-performance aircraft. Surveillance for 
+threat aircraft is a 24- hour mission. 
+1-14, Other factors to consider when planning a defense against any aerial threats are: 
+
+e Identification and distances 
+Precision requirements 
+Geographic conditions (Environmental- human and physical effects) 
+Priority targeting issues 
+Operational locations for theater air assets 
+
+
+Coordination between air and ground platforms (air-ground integration) and their mission 
+command elements. 
+
+
+1-15, Detect, Track, and Identify of all targets remains difficult. Sensor planning considerations include: 
+e Target saturation 
+
+
+ATD 2.N1 2 90 Tihs 9N1AK 
+
+
+ACTidal LMreat ANG VETEMNSIVE FIianning 
+
+
+Distinguishing from nonmilitary threat platforms 
+Potential decoys 
+
+Ground clutter 
+
+Complex terrain and adverse weather conditions 
+Operator training and confidence 
+
+Quick resolution of low, slow, small moving air systems 
+
+
+1-16, Planning a defense is a major consideration during any air or ground operation. Combined arms forces 
+will operating in environments where airspace deconfliction and control is essential. Commanders must 
+anticipate cross-echelon planning for airspace coordination and integration. Airspace deconfliction prevents 
+mutual interference of airspace users. Airspace control methods are implemented to halt or suppress 
+unintended airspace use. Airspace control provides positive control mechanisms that can mitigate fratricide 
+in heavily congested environments. 
+
+
+COLLECT AND ANALYZE THREAT 
+
+
+1-17. When analyzing threat data, include the commander's critical information requirements and priority 
+intelligence requirements. Use the following as a guide in establishing threat information: 
+
+
+90 Tuihy 9NAK 
+
+
+What is known about the enemy’s air operations and tactical objectives? 
+
+Which objectives may be targeted for destruction, jamming or suppression? 
+
+Where do friendly air defense assets fit into the enemy's objectives? Do they need to be destroyed, 
+jammed, or suppressed for the enemy plan to work? (Answers to these two questions may result 
+in modification to air avenues of approach.) 
+
+What is the enemy's air order of battle? How are the assets organized? (Knowledge of threat 
+organization and who has operational control will indicate the importance of the area of operations. 
+For example, if the enemy's bombers are at theater level and are in the area of operations, then that 
+area is probably receiving the theater's main attack.) What is the size of the enemy’s ballistic 
+missile brigade, battalion, and battery? Does it fire as a unit? Does the threat have mobile, fixed, 
+or both types of launchers? 
+
+Who has tactical control of aircraft at the point of attack? 
+
+How will UASs be used; for example, reconnaissance, surveillance, fire support and target 
+acquisition, and or attack. What are the associated profiles? What group UAS do they have? What 
+formations are supported by each of the UAS platforms the threat employs? 
+
+How does the enemy doctrinally attack? Are they expected to carry out low to medium intensity 
+attacks or create a sizable advance? Will the enemy use airborne, air assault, or special operations 
+forces in conjunction with an air or ground attack? Will the enemy use UAS group 1 or 2 for 
+kinetic operations? Will the identification small (micro) UAS be a precursor to some type of 
+enemy attack? What sizes are these forces and to what depth are they used? Will the enemy 
+synchronize the air attack? Does the enemy have the capability to coordinate an air attack (possibly 
+with varied air threat platforms that can overmatch friendly air defense capability)? 
+
+What are air system combat ingress and egress speeds? 
+
+Where is the possible launch point for the missiles and UAS? What are the ranges, endurance, and 
+profiles of these systems? 
+
+What are the doctrinal distances for forward arming and refueling points? If the enemy's maximum 
+range falls short of the area of operations, where is the enemy likely to stop and refuel or be aerially 
+refueled? Does the enemy possess an aerial refueling capability? 
+
+How and where will the enemy attack ground targets for interdiction? 
+
+At what altitudes will the enemy approach the target; deliver munitions, and exit the target area? 
+What is the release authority of certain types of ordnance? This is particularly important when 
+dealing with chemical, biological, radiological and nuclear (CBRN) threats. 
+
+How does the enemy employ reconnaissance assets? 
+
+How has the enemy historically fought? 
+
+What has the enemy learned from out most recent conflict? 
+
+
+ATD 2.N1 2 1.2 
+
+
+Unapter 1 
+
+
+Analyze Air Threat Capabilities 
+
+
+1-18. Combined arms forces must request updated intelligence and air threat information related to their area 
+of operations. They analyze and evaluate enemy air threat capabilities based on this information and 
+collection efforts. This process will guide them while developing defense plans. The analysis should 
+complement theater specific threat estimates, and reflect current intelligence, preparation of the battlefield 
+estimates. This analysis is as simple as providing answers to the following questions. 
+
+
+AIRCRAFT 
+
+
+1-19, What are the enemy’s capabilities regarding aircraft: 
+
+
+Coordination of air-to-ground attacks? 
+
+Coordination of air and artillery operations? 
+
+Forward air controllers? 
+
+Suppression of friendly air defense? 
+
+Performance (speed, altitude, airfield restrictions, troop and weapon load capacity)? 
+Endurance and range (ingress and egress altitudes and speeds)? 
+
+Levels of combat readiness and sortie generation rate? 
+
+Ability to conduct pop-up maneuvers. What is the standoff range? 
+
+Target acquisition capability, night and adverse-weather capability, and identification ranges? 
+Standoff ranges for cruise and tactical air-to-surface missiles? 
+
+Ordnance load (maximum weight, type, load mixture, and level of sophistication)? 
+Combat personnel load? 
+
+Navigational capability (type of radar; can it fly at night or in adverse conditions)? 
+Combat radius (with or without external tanks, ordnance, and location of staging bases)? 
+Loiter time (how long will it have on station over the target area)? 
+
+
+Countermeasures. For example, will standoff jammers, ground-based jammers, reconnaissance or 
+chaff laying UAS, or aircraft degrade friendly air defense systems? 
+
+
+Type, quantity, and quality of pilot training? 
+Do they follow their doctrine? 
+
+
+Do they execute centralized engagements tied to pre-briefed routes, targeting, tactics, and 
+doctrine? 
+
+
+Have they conducted decentralized engagements supporting independent operations and 
+engagement adjustments? 
+
+
+Is the attacker operationally linked to a ground controller? 
+
+
+Ability of pilots to fly at night or perform contour flying? During peacetime, did the pilot conduct 
+wartime mission profiles? 
+
+
+Is the attacker working with a ground controller? 
+
+How long can each type of aircraft loiter within the directed area of operations? 
+Type of threat ordnance evaluated as follows: 
+
+=» Range: Assume engagement at maximum range 
+
+=» Accuracy 
+
+= Release altitude: How high or low must the aircraft fly? 
+
+= Reload and fire time: What is the missile basic load? 
+
+
+=» Warhead type (for example, mass casualty, conventional, and sub munitions). Guidance 
+systems? How does the pilot acquire and engage? 
+
+
+UNMANNED AIRCRAFT (UA) 
+
+
+1-20. What are the capabilities of threat UA regarding: 
+
+
+1A 
+
+
+Size? 
+
+
+ATD 2.N1 2 90 lh, 9NAK 
+
+
+ACTidal LMreat ANG VETEMNSIVE FIianning 
+
+
+Performance (speed, altitude, and launch restrictions)? 
+Endurance and range? 
+
+Contour flying or terrain-limiting factors? 
+
+Target acquisition and standoff range? 
+
+Sensor package and payload (maximum weight, type, and load mixture)? 
+Loiter time (how long can the UAS stay on station)? 
+Visibility effects on acquisition? 
+
+Modes of recovery and turnaround time? 
+
+Real-time, data-link capability? 
+
+Guidance modes (ground-controlled and preprogrammed)? 
+Crew proficiency? 
+
+
+Weapons carried? 
+
+
+TACTICAL BALLISTIC MISSILES (TBM) 
+
+
+1-21. What are the capabilities of threat TBM systems regarding: 
+e Performance (flight time, speed, trajectory and launch restrictions)? 
+Maximum and minimum ranges? 
+Circular error of probability? 
+Crew proficiency? 
+Reload and fire time? What is the number of TBMs available per transporter erector launcher? 
+Mobile missile launch capabilities: Time required to stop, launch, and get underway. 
+Warhead type and size? 
+Guidance modes? 
+
+
+Location of surveyed launch sites? 
+
+
+CRUISE MISSILES (CM) 
+
+
+1-22, CM’s are unmanned, guided, self-propelled, expendable weapon systems that sustain flight by 
+aerodynamic lift over most of their flight path. Most CM’s are ground or sea-launched in order to strike 
+targets on land. Advancements in propulsion, guidance systems electronics and warhead design have resulted 
+in the development of highly sophisticated CM. Significant operational characteristics of state-of-the-art CM 
+include low-level flight profiles (as low as 20-50 meters above ground level). 
+
+
+1-23. CM profiles include ground level, subsonic speeds, high-to-pinpoint accuracy, small radar cross 
+section and infrared signatures, longer stand off ranges, all-aspect attack capability, with few intent-to-launch 
+indicators as well as several warhead options. These warhead options include penetrator warheads for hard 
+targets, anti-runway, anti-armor, anti-personnel and anti-materiel sub munitions, anti-armor smart sub 
+munitions, and weapons of mass destructions. CMs have traditionally been used to strike high value 
+stationary targets, but with the advent of smart sub munitions, real-time video guidance, and sensor-to-shooter 
+links, moving targets can also be attacked. 
+
+
+1-24, CMs are employed from long ranges and launched from various platforms. CM’s are relatively small 
+and are normally much smaller than manned aircraft. In the terminal phase, CMs may employ different attack 
+modes to maximize their target zone penetration capability and potential to inflict lethal effects on their 
+targets. Although a formidable threat, they have exploitable vulnerabilities as well. A CM cannot deviate 
+from their pre-programmed flight if detected, attacked, or encounter adverse weather conditions. The CM 
+threat is projected to increase in both quantity and technology because CMs offer a practical, easy to use, 
+inexpensive method of building a theater missile inventory; are more accurate in targeting specific high value 
+targets than TBMs; and do not endanger pilots or put sophisticated and costly FW aircraft at risk. 
+
+
+1-25. Technology enhancements may provide a capability for increased ranges, improved accuracy, 
+increased use of countermeasures (such as signature reduction), improved synchronization of simultaneous 
+attacks from multiple azimuths, the ability to fly at even lower altitudes, greater maneuverability, and greater 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 4.4 
+
+
+Unapter 1 
+
+
+lethality by employing CBRN capabilities. CM’s are generally perceived as less provocative than ballistic 
+missiles and may result in lower export or technology control standards. 
+1-26, What are the capabilities of threat CM regarding: 
+e Performance (flight time, speed, altitude, and launch restrictions)? 
+Maximum and minimum ranges? 
+Circular error of probability? 
+Targeting capabilities and type? 
+Contour flying capability? 
+Vulnerability to countermeasures? 
+Guidance modes? 
+Warhead type and size? 
+
+
+Launch platform: fixed, mobile; time to set up/ launch/move? 
+
+
+UNMANNED AIRCRAFT SYSTEMS (UAS) 
+
+
+1-27. UASs complement new styles of air operations and are affordable and easy to employ. UAS 
+employment can significantly increase the situational awareness of the battlefield and may be used to 
+influence current and future operations. UAS platforms are highly versatile providing precision strike and 
+surveillance capabilities employing man in the loop guidance or autonomous guidance options. 
+
+
+1-28. The primary UAS threats to Army land operations are categorized as groups | thru 3. This is due to 
+their minimal or no radar cross section allowing them to come in extremely close proximity to friendly forces 
+undetected. These groups are generally tactical assets employed by maneuver units engaging in direct contact 
+operations. They can fly extremely low underneath traditional radar detection zones. They fly very slow and 
+can even hover in place preventing any Doppler based sensor from detecting them. They are generally very 
+small making them hard to hit with direct fire weapons. UAS groups 4 and 5 are predominantly strategic 
+level assets (see UAS categories in Chapter 4). 
+
+
+ROTARY-WING AIRCRAFT 
+
+
+1-29, RW aircraft versatility and survivability make it ideal for troop and equipment transportation, logistics 
+resupply, air assault, and serve as heavily armed weapons platforms for attack roles. RW aircraft currently 
+exist in every potential theater that forces may enter. Many countries around the world possess attack 
+helicopters and have the ability to inflict heavy casualties on the force and destroy critical assets. 
+
+
+1-30. Threat helicopter forces supporting ground operations operate nearly the same as a friendly helicopter 
+force. Helicopters are agile and make good use of cover and concealment offered by folds in the earth and 
+trees. Their armament may include antitank guided missiles, free-flight air-to-air missiles, and radar-directed 
+machines- or Gatling-type guns. Antitank guided missiles can be electronically controlled or laser-guided to 
+engage and destroy armored vehicle at standoff ranges of more than three kilometers. 
+
+
+1-31. Using pop-up and launch techniques (Figure 1-1, page 1-7), attack helicopters can deliver a devastating 
+blow against exposed maneuver units. Their lethality is somewhat softened by practical considerations. They 
+must detect a target to engage it and remain in the open long enough to aim and fire their weapons. For some 
+antitank guided missiles, attack helicopters must maintain track on both the missile and target throughout the 
+missile's flight, which leaves the helicopter exposed for up to 23.2 seconds. The 57-millimeter Folding Fin 
+Aerial Rocket is an area weapon and is effective against exposed troops and lightly armored vehicles at ranges 
+greater than 1,000 meters. 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+ACTidl LMreat ana VETENSIVE Fanning 
+
+
+Pop-up and Launch Technique 
+
+
+Attacking aircraft may be exposed to 
+return fire for up to 23.2 seconds 
+
+
+Figure 1-1. Pop-up and launch technique (Rotary Wing) 
+
+
+FIXED-WING AIRCRAFT 
+
+
+1-32, Although missile threats have taken the place of FW aircraft as the principal air threat to ground forces. 
+The enemy against friendly forces may employ the following types of FW aircraft; bombers, fighter-bombers, 
+fighters, and close air support aircraft. Any of the FW family may carry tactical air-to-surface missiles while 
+only the larger ones will carry CMs. Improvements to FW aircraft will include increased survivability 
+measures and improved fire control accuracy. 
+
+
+1-33, High-performance aircraft, operating in a ground attack role, attack at relatively high speeds. They 
+normally operate under centralized control and are directed against preplanned targets. These aircraft target 
+areas where ordnance delivery optimizes destructive effects. If they have ordnance remaining after 
+completing their primary mission, the aircraft may be released to attack targets of opportunity on their return 
+flight. Whether against preselected targets or against targets of opportunity, the attack will usually include a 
+high-speed, low-level penetration run to a point near the target area to avoid low and medium-altitude air 
+defenses. Ground attack aircraft are effective against preplanned targets. The pilot will carry the correct 
+ordnance for the target location. Effectiveness decreases against targets of opportunity. Pilots must locate 
+their targets, plan their attack, and deliver their ordnance in a short time. As a result, accuracy and 
+effectiveness are degraded. The use of area type weapons such as cluster bombs or folding fin aerial rockets 
+can be expected on the initial attack run, while cannon and machine-gun fire will likely be used in the follow- 
+on attack. 
+
+
+THREAT APPLICATION 
+
+
+1-34, Air threat employment against ground forces may vary from country to country. Threat equipment, 
+capabilities, organizational structures, and military political goals will drive this employment. By 
+understanding air threat capabilities, the commander can make assumptions on how a threat may employ air 
+assets to interdict operations. The following information describes the type of threat that can be countered 
+with each stage of warfighting function operations. 
+
+
+90 Til, 9NAKR ATD 2.N1 2 1_7 
+
+
+Unapter I 
+
+
+ENTRY PHASE 
+
+
+1-35. Entering forces may be required to deploy into hostile environments where enemy forces possess equal 
+or less air power capabilities. We can expect the threat to use his entire aerial assets against lucrative targets 
+in the areas of debarkation. Low-altitude aerial threats will probably be employed in attack operations against 
+ports of debarkation (air or sea), assembly areas, lodgments and supply points. 
+
+
+EXPANSION AND BUILDUP 
+
+
+1-36, Potential threats may focus on conducting reconnaissance and surveillance operations to locate friendly 
+unit movements, assess unit sizes and strengths, and determine their positions during expansion phase. The 
+UAS is the most challenging and prevalent threat platform to combined arms forces and therefore, a logical 
+choice for enemy use. Information obtained by aerial reconnaissance and surveillance will be relayed back 
+to the enemy who can be expected to use any attack means necessary to inflict maximum casualties, slow 
+momentum, and destroy forces. These aerial attack systems could be any combination of RW or FW aircraft, 
+CMs, or UASs. 
+
+
+OPERATIONS 
+
+
+1-37. We can expect continued activity from threat forces throughout the range of combat operations. It is 
+also probable threat forces will attempt to counter our defensive actions and offensive air operations using 
+any combination of threat platforms and tactics available. The threat commander will seize any opportunity 
+to capture information determining friendly unit locations, movements, and objectives. Aerial and artillery 
+strikes can be generated from the intelligence gathered against the following targets: 
+
+
+e@ Maneuver forces. 
+
+Forward arming and refueling points. 
+Forward Operations Bases. 
+Command posts. 
+
+Reserve troop concentrations. 
+Logistical support areas. 
+
+
+Terrain features. 
+e Obstacles constricting unit movements as forces advance to close with the enemy forces. 
+
+
+1-38. UAS can be effective in disabling or interrupting the conduct of military operations, their 
+communications networks, information related activities, or destruction of equipment and facilities. Group 1 
+UAS can assist in coordinating complex attacks or used like an improvised explosive device to degrade, 
+delay, and disrupt friendly movement. Group 5 is highly suitable to conduct drone strikes. Tactical UASs 
+and CMs will probably be used against logistical concentrations, command posts, or paired with sub- 
+munitions for anti-access and area denial. RW aircraft will be used to attack forward elements and the flanks 
+of the advancing maneuver force to slow their tempo, cause confusion and, thereby, inflict maximum 
+casualties. These armed attack helicopters constitute the most widespread and capable air threats to friendly 
+ground forces in the battle. 
+
+
+Defensive Considerations 
+
+
+1-39, Friendly forces may be the most vulnerable to threat actions from enemy aerial platforms when 
+conducting everyday operational tasks supporting the defense. The enemy will attempt to use aerial platforms 
+to monitor friendly forces for targeting. We can expect the enemy to use UAS, RW, and FW aircraft, to 
+determine locations of friendly forces, command centers and sensor locations. Once these sites are located, 
+threat forces will likely disrupt operations or destroy these sites with artillery and rocket fire, air attacks, air 
+insertion or a combined approach. Electronic attack capabilities may also be employed in an attempt to 
+counter an attack, especially against UAS threats adding to an already congested air environment. 
+
+
+1-40, The enemy's preferred weapons against air defense weapon systems and forces may be artillery and 
+rocket attacks. Most artillery and rocket systems are plentiful, inexpensive, highly mobile and survivable, 
+adaptable, and highly effective. UAS will be employed to attack or provide targeting data during this phase 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+ACTidal LMreat ana VETENSIVE Fiannling 
+
+
+of the operation. UAS are extremely effective in this role due to their small size, small radar cross section, 
+and standoff capability. RW and FW attacks are less likely during this phase due to the poor survivability of 
+these systems. In most cases, they are limited to daylight operations. These attacks will be supported with 
+pre-attack and post attack reconnaissance. 
+
+
+1-41, Enemy forces may conduct air insertion operations with either FW or RW assets during the hours of 
+limited visibility. The enemy will likely conduct daytime reconnaissance of landing sites and target areas 
+within 24 hours prior to an attack. These operations will fly at low levels attempting to avoid detection from 
+sensors and infiltrate into friendly unoccupied areas. 
+
+
+Offensive Considerations 
+
+
+1-42, While conducting offensive actions, enemy forces will likely attempt to use maneuver and fire support 
+assets to gain the initiative. Threat air activity will most likely support their own combined arms operations. 
+UAS are best suited for these types of operations, especially if enemy forces have developed effective mission 
+command capabilities. RW assets can be used in attack, air insertion, or reconnaissance. RW in the 
+reconnaissance role will operate in the same manner as UAS to support artillery targeting and maneuver. In 
+the attack, the unit can expect spoiling attacks that usually consist of at least two or more helicopters to 
+disrupt friendly operations. 
+
+
+1-43, FW assets may be limited and countered in their offensive role by the employment of friendly FW 
+aircraft. The enemy’s use of FW aircraft to stall or stop friendly forces advances cannot be entirely ruled out 
+since the ground commander may see limited aircraft used during a spoiling attack. An air attack may be 
+non-coordinated with enemy forces given the number of aircraft involved. 
+
+
+DEFENSIVE PLANNING 
+
+
+1-44, Combined arms forces must create a defensive plan that provides the most flexibility for all elements 
+operating within the area of operations. Planning a defense must also be coordinated with higher and lower 
+echelons operating in areas that may be impacted during operations. Collaboration assists units during 
+planning and development by sharing information and intelligence collection products. Collaboration also 
+directs the commander’s intent and objectives amongst echelons. Defense plans and rehearsals enforce 
+training standards and likely result in suitable counter responses to most situations encountered. Defensive 
+planning identifies the commander’s priorities. For example; threat sets, assigned levels of protection of 
+assets, required actions the unit must take to defend itself in the event of attack and allows for reassessment 
+and possible reengagement coordination. 
+
+
+DETERMINE THREAT COURSES OF ACTION 
+
+
+1-45, The commander will determine threat courses of action for both enemy air and ground situation 
+through military decision-making process, which includes commander’s critical information requirements 
+processes. Commanders must attempt to determine the enemy's likely objectives and what course of action 
+(COA) are available to him. The G-2/S-2 develops threat models that depict the enemy air and missile COAs. 
+They also prepare event templates and matrices that focus intelligence collection on identifying which COA 
+the threat will execute. 
+
+
+THE OPERATIONAL EFFECTS 
+
+
+1-46. Applying methods that identify the effects of the operational environment on friendly and enemy 
+courses of action is important. Specific considerations include: 
+
+
+e Determine most likely air avenues of approach. 
+
+Potential target areas. 
+
+Possible landing and drop zones. 
+
+Locations of air defense weapon systems, sensors and launch areas. 
+
+
+Enemy threat aircraft standoff ranges. 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 1a 
+
+
+Unapter 1 
+
+
+Determine Air Avenues of Approach 
+
+
+1-47, An enemy will use air avenues of approach that permit maneuver while taking advantage of terrain 
+masking from surface-to-air weapon systems. Common air avenues of approach include direct lines from the 
+enemy point of origin that offer optimal concealment, for example, valleys, and riverbeds. Air courses of 
+action are determined through the supported command's intelligence, preparation of the battlefield (IPB) 
+products, including threat assessments and situational templates. Courses of action are portrayed to determine 
+how the threat might utilize their air power. Considerations for the air avenue: 
+
+
+e Terrain masking (cover and concealment)? 
+
+Speed restrictions? 
+
+Radar masking and detection? 
+
+A standoff orbit? 
+
+A standoff orbit distance? 
+
+Does the air avenue of approach affect freedom of maneuver? 
+Restrict or canalize the air system? 
+
+Provide access to other potential avenues? 
+
+Provide the ability to identify, acquire, and fire on a target? 
+Have identifiable reference points to assist in navigation? 
+
+
+Type of Air Threat, Attack Profile, and Ordnance 
+
+
+1-48. The type of air threat, attack profiles and ordnance available must be considered when determining 
+courses of action. Once in a target area, the threat may fly an orbit in an attempt to stay out of engagement 
+ranges of friendly air defenses. Most surface-launched CMs follow the terrain taking advantage of terrain 
+masking. They are capable of flying low (Nap of the earth), but operate at all altitudes. Their extended range 
+provides them the ability take indirect approach routes. Suspected UAS threats need special consideration 
+since most are small and elusive. 
+
+
+1-49, RW aircraft primarily conduct contour flights. They follow ridgelines and military crests, using the 
+terrain to mask their approach to the target area. FW aircraft usually follow major terrain or man-made 
+features. Depending on range, they may fly at very high altitude and straight line to the target. You must also 
+consider the air systems and pilot options. Can the air threat: 
+
+e Perform contour flying? 
+
+e Fly at night? 
+
+e Fly in all weather conditions? 
+
+e Range the targets? 
+
+
+1-50. Ballistic missiles usually travel using predetermined flight trajectories directly from their launch 
+platform to their target or objective. Ordnance or payload may affect range and altitude of the air system and, 
+thus, influence the selection of avenues of approach for airborne and air assault operations. 
+
+
+Air Threat Point of Origin 
+
+
+1-51, When estimating threat points of origin the commander and staff looks at enemy air avenues 
+throughout the entire area of interest to determine any threat points of origin. Analysis begins at known and 
+suspected points of origin, for example, enemy airfields and missile launch sites, and ends at the probable 
+enemy objective. This analysis allows the commander to look at the big picture. The commander and staff 
+should consider counter air and counter-UAS planning. UAS groups | thru 3 have the ability to be launched 
+from close range and short notice to current air defense measures. While their point of origin could help 
+locate the operator, depending on mission of the platform, the launch position may not have staffed personnel 
+following the launch. 
+
+
+Probable Threat Objective 
+
+
+1-52. Each avenue of approach must end at a target, drop zone, landing zone, or within reconnaissance, 
+surveillance, or target acquisition range of a target. Reverse IPB is a technique used to pick threat objectives. 
+
+
+4-1n ATD 2.N1 2 90 Tihs 9N1AK 
+
+
+ACIidal LMreat ANG VETENSIVE Fiannling 
+
+
+Potential to Support Maneuver Forces 
+
+
+1-53, Air assets, which are used to achieve ground objectives, could use air avenues of approach coincident 
+with ground avenues of approach. Although, attacking air assets are not limited to routes that support ground 
+maneuver forces, they may choose to follow them in order to create a tactical advantage. The tactical 
+advantage could include potential targets of opportunity or in a supporting role. 
+
+
+Aircraft Considerations 
+
+
+1-54, Cloud cover restricts aircraft operations providing low operational ceilings and restricting visibility 
+and target engagement. Low ceilings, overcast, and clouds may restrict visually directed combined arms air 
+defense detection and acquisition ranges. Extreme temperatures and humidity may have a severe effect on 
+aircraft and UAS continuous operations by decreasing combat range, altitude, and ordnance loads. Cloud 
+cover, heavy foliage, and built up urban areas provide ideal cover and concealment from tactical UASs. RW 
+UAS can go undetected against a dark cloud or tree line while providing ideal surveillance, target location 
+information and unit intelligence collection. 
+
+
+90 luihy 9NAKR ATD 2.N1 2 4.11 
+
+
+This page intentionally left blank. 
+
+
+Chapter 2 
+TECHNIQUES FOR WARNING AND CONTROL 
+
+
+This chapter describes how to use several methods to implement self-defense measures 
+against air attack. This includes air defense warnings (ADWs), weapons control 
+statuses (WCS), and ROE used to mitigate the effects of potential air threats and attack. 
+
+
+OVERVIEW 
+
+
+2-1. U.S. forces have predominantly achieved air superiority and fought on battlefields with little 
+apprehension towards enemy surveillance or attack from the air. However, in future operations we could face 
+a significant air threat challenge where potential enemies could have significant air capabilities. 
+
+
+2-2, We can expect that friendly units operating within a threats capability will be targeted attacked from 
+the air and the ground. Due to limited air defense resources and defended asset priorities, many Army units 
+and facilities may not receive adequate levels of dedicated air defense protection. These units and facilities 
+must be prepared to protect themselves. All units must reduce their vulnerability to air action by 
+implementing passive and active air defense measures. 
+
+
+AIR DEFENSE WARNING AND ALERTS 
+
+
+2-3. Air defense mission command implement standardized ADWSs to alert all forces of air and missile 
+attacks. Commanders have the ability to issue local ADWs, which provide additional guidance alerting all 
+members within their area of operations. Supported units may monitor the ADA early warning network that 
+contains specific information for air defense units to include more detailed track information. However, the 
+format of directed early warning does not necessarily follow the size, activity, location, unit, time, and 
+equipment report format. Hostile track information and targeting data may be reported using the same 
+systems as directed early warning. Frequencies used to monitor ADA early warning networks are located in 
+the unit’s communications plan. 
+
+
+2-4, ADW conditions demonstrate the degree of air attack probability based not only on current threat 
+assessments but also on future air threats as required. The area air defense commander (AADC) issues ADWs 
+for the joint operations area, based on current threat intelligence and disseminated through mission command 
+channels to subordinate air defense commanders. 
+
+
+2-5, There are three types of ADWs; red, yellow, and white, with red being the most urgent. Any 
+commander, after coordination and approval from the AADC, may issue a higher level of warning for their 
+command but- may not lower the level. The chain of command must ensure that every Soldier knows the 
+current ADW. ADWs will be disseminated through mission command systems throughout a theater. It is the 
+responsibility of supported units at every echelon to inform their respective commanders of the current ADW. 
+Army commanders must then inform their subordinate units of the ADW. For further discussion on ADWs, 
+see FM 3-01. Descriptions of the ADWs are as follows: 
+
+
+e ADW Red. An attack by hostile aircraft or missile is imminent or in progress. 
+e ADW Yellow. An attack by hostile aircraft or missile is probable. 
+e ADW White. An attack by hostile aircraft or missile is improbable. 
+
+
+ALERT STATES AND READINESS CONDITIONS 
+
+
+2-6. ADA commanders use weapons alert designators, alert states and readiness conditions to ready their 
+forces and configure their systems rapidly against an enemy air attack. An example of this is the ready for 
+action drills conducted upon receiving a new surface to air missile tactical order, which heightens a unit’s 
+alert state. In conjunction with elevating the unit’s readiness, the commander also retains the ability to stand 
+
+
+90 luihy 9NAK ATD 2.N1 2 9-1 
+
+
+Unapter Zz 
+
+
+down units for rest or maintenance. Alert states and readiness conditions are implemented locally and 
+coordinated with guidance from the deputy AADC and designated controlling authorities. The Combined 
+arms force should understand ADA brigade commanders establish and control the alert state for their 
+subordinate units operating in support of maneuver areas of operation. Actual timelines and manning 
+requirements are determined by theater or joint operations area plans. Alert state and readiness condition 
+information is normally found in the unit’s tactical standard operating procedures which also takes into 
+account the factors of mission, enemy, terrain and weather, troops and support available, time available, and 
+civil considerations (METT-TC). 
+
+
+RULES OF ENGAGEMENT 
+
+
+2-7. ROE at all echelons are positive and procedural directives that specify the circumstances and 
+limitations under which forces will initiate or continue combat engagements with enemy forces. The joint 
+force commander approves the theater ROE. These established ROE enable the air defense commanders to 
+delegate the authority to execute air defense operations. The ROE also permit the senior air defense 
+commander to retain control of an air battle by prescribing the exact conditions under which engagements 
+may take place. ROE are a direct reflection of the centralized control with decentralized execution principles 
+of air defense. ROE apply to all warfare participants in the theater and disseminated to all echelons of air, 
+land, and sea forces. Commanders have the responsibility to take whatever action is necessary to protect their 
+forces and equipment against air or missile attack. When under attack, the right of self-defense takes 
+precedence over any other established rules and procedures, which normally govern engagement. There are 
+seven ROE categories. The first three ROE are applicable to all air defense contributors. The others are 
+primarily for ADA forces. 
+
+
+e Right of self-defense. 
+
+Hostile / Identification criteria. 
+WCS. 
+
+Level of control. 
+
+Modes of control. 
+Autonomous operations. 
+
+
+Fire control orders. 
+
+
+Right of Self-Defense 
+
+
+2-8. Commanders have the responsibility to use all necessary means available and to take all appropriate 
+actions in self-defense of their unit and other forces in their vicinity in response to a hostile act or 
+demonstrated hostile intent. Self-defense operations allow friendly units to defend themselves against direct 
+attacks or threats of attack with the use of organic weapons and systems. The right of self-defense is inherent 
+in all ROE and weapons control procedures. 
+
+
+Hostile / Identification Criteria 
+
+
+2-9, The AADC and Airspace Control Authority establish procedures within the airspace control plan to 
+positively identify all airborne assets, and permit active air defense. Active air defense measures protect the 
+force reducing delays during tactical operations, and prevents fratricide. Positive identification of aircraft is 
+normally the preferred method of operation. In the absence of positive identification, procedural identification 
+is used, which employs previously established and disseminated airspace coordinating measures. Procedural 
+identification separates airspace users by geography, altitude, heading, time, and/or maneuver. Generally, 
+some combination of positive and procedural identification will be used. 
+
+
+2-10. Proper employment of air defensive weapon systems enables; early detection, identification, 
+classification, and alert of threat aircraft and missiles which maximizes the units’ beyond-visual-range 
+engagements helping avoid fratricide. Identifying and classifying friendly characteristics from enemy assets 
+while employing various weapon systems is a highly complex task. This includes the difference between 
+visual identification and the use of combined arms from the early detection of air defense sensors and 
+supporting systems. Tasks will differ based on the type of threat platform detected whether manned, 
+unmanned, close proximity, or ballistic. Additional considerations include time of detection, range, projected 
+
+
+ATD 2.N1 2 90 Tihs 9N1AK 
+
+
+PCCHMIQues fOr Warning ana VONOl 
+
+
+flight path, and possible battle effects. Ballistic missiles have a distinct flight profile and specific ROE for 
+immediate engagement. While the ROE for aircraft may allow additional time before engagement. 
+
+
+2-11. Hostile criteria are basic rules that assist in the identification process of friendly or hostile air platforms. 
+These rules are promulgated through subordinate commanders from the joint force commander or AADC 
+when so authorized. The commander who establishes hostile criteria parameters may consider the factors of 
+speed, altitude, and heading or other requirements within specified volumes of airspace. The local 
+commander may also consider specific enemy threat characteristics or hostile acts. 
+
+
+2-12. Echelons having engagement authority use hostile criteria to determine the identification of detected 
+air targets. The highest echelon capable of managing engagement operations normally retains identification 
+and engagement authority. Upon target detection, fire units and sensors with real time and near-real-time data 
+transmission capability assist controlling authority by forwarding targeting information. The controlling 
+authority makes final target identification and delegates’ engagement authority. Engagement authority 
+centrally controlled with decentralized execution given to lower echelon units in coordination with higher 
+echelon. 
+
+
+Weapons Control Status 
+
+
+2-13. Weapon control status is a control measure designed to establish procedures for forces using surface 
+air defense weapons (including small arms weapons) to engage threats. Weapon control statuses can apply 
+to weapon systems, volumes of airspace, or types of air platforms. The tactical situation normally determines 
+the degree or extent of control necessary over particular weapon systems. Air defense officers at headquarters 
+planning cells or AMD coordination and liaison teams typically establish or recommend separate weapon 
+control statuses for various air threats, including fixed- and RW aircraft, missiles, or UAS at their supported 
+headquarters. Air defense is optimized when all forces have the ability to rapidly receive and disseminate 
+weapon control statuses for all air platforms. The three weapon control statuses are: 
+
+e Weapons-Free. Engage any target that is not positively identified in accordance with current ROE 
+
+as friendly may be engaged. This is the least restrictive weapon control status. 
+e Weapons-Tight. Engage targets only identified as hostile in accordance with current ROE. 
+
+
+Weapons-Hold. Units may fire only in self-defense or when ordered by proper higher authority. 
+This is the most restrictive weapon control status. 
+
+
+2-14, Any unit can receive ADW or directed alert of possible or immediate threats to their forces or to a 
+specific area of the battlefield. The AMD cell provides the air defense expertise for integration into the 
+corps/division air defense plan (ADP). The air defense airspace management (ADAM) personnel contribute 
+to the brigade and below unit’s airspace plan. Although the airspace control element reviews and deconflicts 
+the corps or division ADP with other division control measures, the control measures for the ADP are 
+normally sent to higher headquarters through AMD channels. 
+
+
+Level of Control 
+
+
+2-15. Level of control describes the ADA echelon at which positive management of the air battle is 
+conducted. This can be an AADC, regional air defense command, sector air defense commander, ADA 
+brigade, battalion, or the individual unit. Different levels of control are normally established for engagements 
+of FW aircraft, RW aircraft, UASs, CM and ballistic missiles. The AADC will specify the level of control in 
+the AADP, which may change over the course of an operation. 
+
+
+Modes of Control 
+
+
+2-16. Combined arms forces must be familiar with the overall area ADP that specifies the modes of control, 
+trigger events and when they should be changed, and who has the authority to change them. The mode of 
+control selected may depend upon the capabilities of the communications system, the weapons systems 
+employed, and both the friendly and enemy air situations. There are two modes of control, centralized and 
+decentralized refer to FM 3-01 for more information. 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 9-2 
+
+
+Unapter Zz 
+
+
+Autonomous Operations 
+
+
+2-17. A unit assumes autonomous operations after it has lost all communications with higher and adjacent 
+echelons. The unit commander assumes full responsibility for control of weapons and engagement of hostile 
+targets. Normally, the ROE and supplemental fire control measures in effect at the time of communications 
+loss remain in effect until communications are regained. Changes to ROE and supplemental fire control 
+measures scheduled to go into effect after communications are lost will be implemented as scheduled. 
+
+
+Fire Control Orders 
+
+
+9A 
+
+
+2-18. Fire control orders are commands used to control engagements on a case-by-case basis, regardless of 
+the prevailing WCS. Higher ADA echelons, when monitoring the decentralized operations of subordinate 
+units, most often use these commands. Fire control orders can be transmitted electronically or verbally; 
+however, not all of the fire control orders shown below can or will be used by every type of ADA unit. 
+
+
+ENGAGE is an order issued by the engagement authority to engage a specified target with the 
+intent to destroy it. 
+
+HOLD FIRE is an emergency fire control order to stop engagement of a specific target. Missiles 
+already in flight must be prevented from intercepting by diversion or destruction, if technically 
+possible. 
+
+CEASE FIRE is a fire control order instructing ADA units to refrain from firing on, but to continue 
+to track, an airborne object. Missiles in flight are allowed to continue to intercept. This fire control 
+order is normally issued to preclude engagement of the same aircraft by two or more weapons 
+systems. 
+
+CEASE ENGAGEMENT is a fire control order used to direct units to stop the firing sequence 
+against a designated target. Missiles already in flight will continue to intercept. 
+
+ENGAGE HOLD is an order applicable to Patriot and Terminal High-Altitude Area Defense 
+(THAAD) only. When operating in the automatic mode, ENGAGE HOLD prevents engagement 
+of the specified target by the system. Missiles in flight are allowed to continue to intercept. 
+STOP FIRE is an emergency order to temporarily halt the engagement sequence due to internally 
+unsafe fire unit conditions. It is seldom transmitted outside the fire unit. This command can be 
+given by anyone in the fire unit who detects an unsafe condition. The engagement may continue 
+after the unsafe condition has been corrected. 
+
+COVER is used to order a fire unit to assume a posture that will allow engagement of a target if 
+directed. This order can be used for targets that are presently being engaged by another fire unit 
+or for targets that have yet to become a significant threat, to receive this command report tracking, 
+and ready to fire at higher echelons. 
+
+
+ATD 2.N1 2 90 Tihs 9N1K 
+
+
+Chapter 3 
+PASSIVE AIR DEFENSE TECHNIQUES 
+
+
+This chapter discusses passive air defense measures units may employ to safeguard its 
+personnel and equipment from air threats. Units may be exposed, bunched up, or in a 
+situation where they are vulnerable to attack or taking unnecessary casualties. If 
+attacked under these conditions, the unit has options to protect itself by minimizing 
+damage while preparing a counter attack and fighting back. The decision to engage 
+hostile air must consider the unit's assigned mission and the tactical situation. In cases 
+where the enemy aerial platforms are outside the range of the unit's weapons, a unit's 
+most lucrative option can be to disperse and seek cover. In other cases, commanders 
+may decide to place the enemy aerial platform under fire with organic weapons with 
+the intent to either destroy or avert their flight path. 
+
+
+PASSIVE AIR DEFENSE 
+
+
+3-1. Passive air defense is all measures, other than active air defense, taken to minimize the effectiveness 
+of hostile air and missile threats against friendly forces and assets (JP 3-01). These measures include 
+camouflage, concealment, deception, dispersion, reconstitution, redundancy, detection and warning systems, 
+and the use of protective construction. There are two types of passive defense measures; attack avoidance 
+and damage-limiting. 
+
+
+3-2. Commanders employ passive AMD measures to improve their units’ survivability by increasing the 
+likelihood of not being detected and targeted (attack avoidance) from the air and by mitigating the potential 
+effects (damage-limiting) of an air attack. Air defense units perform passive air defense techniques, which 
+include the tasks of detecting air and missile launches, predicting impact points, and providing threat 
+identification and alerting forces of possible CBRN events through disseminating early warning. Examples 
+of tasks that help reduce a unit’s vulnerability or minimize damage caused by missile attacks are: 
+
+
+e Positioning and dispersion. 
+
+e Hardening of positions and facilities 
+
+e Cover, concealment and protection of major assets and forces. 
+e Recovery and reconstitution plans. 
+
+
+3-3. It is likely an enemy has the capability to attack from the air. Units without dedicated air defense are 
+not defenseless against air attack. Simple measures can be taken by any unit to avoid and limit damage of an 
+attack. If routinely followed, passive air defense measures will not only reduce the probability detection from 
+an air threat but will, also limit damage if an attack cannot be avoided 
+
+
+3-4. The first line of defense against air attack is to employ passive air defense measures. Upon detection 
+of an approaching hostile aerial platform that is not attacking the unit, the commander has a decision to make. 
+Based on the unit’s assigned mission the commander may not want to fire and disclose their position. 
+Secondly, based on the ROE, the commander needs to decide whether to engage a non-attacking aerial 
+platform. 
+
+
+CAMOUFLAGE AND CONCEALMENT TECHNIQUES 
+
+
+3-5. Attack avoidance is taking the actions necessary to avoid being seen by the enemy to include 
+concealment and, lacking concealment, camouflage. What can be seen can be hit, and if you cannot be seen, 
+the probability of being hit diminishes to near zero. The techniques used for concealment from aerial 
+observation are the same as used for concealment from ground observation (see Figure 3-1). 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 24 
+
+
+Unapter o 
+
+
+Figure 3-1. Attack avoidance 
+
+
+Concealment 
+
+
+3-6. There are three concealment principles employed (site, discipline, and construction) to eliminate the 
+factors of recognition. Site refers to positioning your unit in the most advantageous area in which to hide a 
+man, equipment or an activity. Discipline success in any attack avoidance effort is the strict maintenance of 
+concealment discipline by both the unit and by the individual Soldier. All activities should be avoided that 
+change the appearance of an area or reveal the presence of military equipment. Laxness and carelessness will 
+undoubtedly reveal a position. Tracks, spoil, and debris are the most common signs of military activity, which 
+indicate concealed objects. Ensuring wheeled/track/foot movement follows existing paths, roads, fences, or 
+natural lines in the terrain pattern. Do not end exposed routes at a position, but extend them to another logical 
+termination. If practical, tracks should be brushed out, camouflaged, or covered. Spoil and debris must be 
+covered or placed to blend with the surroundings. Artificial camouflage is added when the terrain and natural 
+vegetation are such that natural concealment is not possible. 
+
+
+3-7. While concealing a position it is best to use natural construction materials to blend-in with the 
+surrounding terrain, which augments this type of concealment. Concealment techniques are hiding; blending, 
+and disguising: 
+
+e Hiding. Hiding is the concealment of an object by some form of natural or man-made screening. 
+For example, sod over mines in a minefield hides the mines; the overhead canopy of trees hides 
+the objects beneath from aerial observation; a camouflage net hides an object beneath it; a defilade 
+position hides objects from ground observation. In some cases, the screen itself may be invisible. 
+In other instances, the screen may be visible, but it hides the activity or object underneath it. 
+
+e Blending. Blending is the arrangement or application of camouflage materials on, over, and around 
+the object so that it appears to be part of the background. For example, applying face paint to the 
+exposed areas of skin; adding burlap, paint, and live vegetation to helmets and clothing to closely 
+resemble or blend into the background. The same technique can be applied for equipment or 
+structures. 
+
+
+e Disguising. Clever disguises can often mislead the enemy concerning identity, strength, and 
+intention, and may draw fire away from real assets. Therefore, the simulation of objects, pieces of 
+equipment, or activities may have a worthwhile military significance. Rubber tanks, placard tents 
+and buildings and other decoys, as seen from the air may appear natural or real to an aerial 
+observer. 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+rassive AIF VETENSE LECnniques 
+
+
+Camouflage Detection Avoidance 
+
+
+3-8. The difference between concealment and camouflage is that concealment is using natural terrain while 
+camouflage is normally constructed from artificial material for concealment. Additional detection avoidance 
+techniques include using mud for glassy surfaces and unfilled sandbags or a sleep matt over windshields 
+(Figure 3-2). Camouflage is one of the basic weapons of war. The importance, the principles, and the 
+techniques of camouflage must be completely understood. All personnel must ensure the effectiveness of all 
+camouflage detection measures while maintaining strict camouflage discipline enforcement. 
+
+
+Figure 3-2. Detection avoidance. 
+
+
+3-9. Dispersion is another type of passive air defense measure, which may limit damage if an enemy air 
+threat detects and attacks the position. This forces the enemy to target and attack one piece of equipment at 
+a time. This will minimize the likelihood of a unit being put out of action with just a single attack. The same 
+measures (dispersion, protective construction, and cover) are taken to limit possible damage from rocket and 
+artillery attacks. 
+
+
+e Dispersion. Dispersed troops, vehicles, and equipment will force the attacker to concentrate on a 
+single target. The wider the dispersion increases the potential for limiting damage. 
+
+e Protective Construction. The use of cover, natural or manmade reduces damage and casualties. 
+Folds in the earth, natural depressions, trees, buildings, and barriers offer damage-limiting cover, 
+which should be sought out and habitually used. Digging in or sandbagging can offer some 
+protection to a unit that is positioned in flat terrain lacking cover. Smoke can be effectively used 
+if the unit is moving and cannot use natural cover. Smoke makes visual target acquisition difficult 
+for the attacker. 
+
+@ Cover. Cover is protection, prohibiting observation of friendly ground forces and their operations 
+by an enemy. Cover can also shield forces from the effects of enemy fires. Cover and dispersion 
+techniques should be used to limit the amount of damage to the unit. 
+
+
+CONVOY SELF-DEFENSE MEASURES 
+
+
+3-10. The majority of all convoys are vulnerable to air attack since they are easily seen and identified from 
+the air. Movements along well used routes can be dangerous during times of heavy conflict and should be 
+avoided unless used during times of limited visibility. Roads may present obstacles such as soft shoulders, 
+deep ditches and embankments, which may restrict a unit’s ability to quickly disperse and seek cover. 
+Convoys represent high-value, hard-to-defend, easy to hit targets to enemy air and ground attack aerial 
+platforms. 
+
+
+90 lily 9NAK ATD 2.N1 2 22 
+
+
+Unadapter o 
+
+
+A high probability of attack must be assumed in planning convoy operations. Not all convoys will be provided 
+dedicated air defense assets and must be prepared to employ organic passive and active air defense measures 
+for protection. 
+
+
+Attack Avoidance 
+
+
+3-11. The enemy may find it difficult to locate a convoy that takes precautions to reduce its visible signature. 
+While it is not possible to become totally undetectable, the convoy commander must take every measure to 
+decrease the likelihood of being spotted. Examples of effective passive measures are: 
+
+
+Change the profile or shape of vehicles. Can it be accomplished by rigging tarps and bows over 
+the cargo compartment? 
+
+
+Train operators, as they disperse, to look for a bush, tree, or some other means of concealment to 
+break their vehicles' shapes as seen from the air 
+
+
+If vehicles are not already painted in a pattern to blend with the terrain and to break the outline, 
+use mud, camouflage nets, or vegetation to achieve this effect. 
+
+
+Try to reduce the dust clouds that usually accompany a convoy. If possible, try to avoid unpaved 
+secondary roads. Reduce speed to reduce dust on unpaved roads. 
+
+
+Try to eliminate glare by using mud, tape, cardboard, tarps, camouflage nets, or ponchos to cover 
+headlights, window glass, and other glossy surfaces. See Figure 3-3. 
+
+
+Use smoke or other obscurants to conceal positions and movements to deceive the enemy as to 
+mission and intent (draw attention to deception operations). 
+
+
+Operate at night or during periods of limited visibility as much as possible. 
+
+
+Position vehicles and facilities inside wood lines and erase vehicle tracks left outside of wood 
+lines. Dedicate air guards and understand the signs of UAS in the area (for example: noises that 
+are not normal for that area of operations). 
+
+
+4 
+
+
+is uy is; 
+
+
+Figure 3-3. Eliminate Glare. 
+
+
+Damage-Limiting Measures 
+
+
+2A 
+
+
+3-12. Cover is the best damage-limiting factor. Since convoys are highly visible, you should plan routes that 
+offer damage-limiting features in case you become exposed. If your signature reduction efforts are not 
+successful, selecting natural cover such as ditches and embankments to the sides of the roads, offer cover and 
+should be used if the unit is attacked. See Figure 3-4 on page 3-5. 
+
+
+ATD 2.N1 2 90 Tihs 9N14K 
+
+
+rassive AIF VETENSE LECnniques 
+
+
+Figure 3-4. Selecting natural cover. 
+
+
+Dispersion 
+
+
+3-13. Dispersion may be your best damage-limiting measure. Proper dispersion of your unit and equipment 
+lessens target density and reduces the lethal effects of the ordnance used against you. Most of the munitions 
+that aerial platforms deliver against vehicles must make a direct hit to be effective. Even area weapons 
+become less effective if the unit is dispersed. The commander must weigh the need for dispersion against the 
+need to stay concentrated to accomplish the mission. 
+
+
+3-14. A technique to achieve dispersion is to travel in an open column with 80 to 100 meters between vehicles 
+during daylight movements and 25 meters during night movements. Air guards can be posted throughout the 
+column constantly watching the skies ready to give early warning of a detected hostile aerial platform. The 
+earlier an aerial threat is detected, the more time your unit will have to react. Air guards search and scan for 
+approaching aerial threat while observing their assigned sectors. Crewmembers must also scan their sectors 
+for ground targets while remaining aware of possible air threats. Crews should use the horizontal search-and- 
+scan technique or vertical search-and-scan technique for detecting air targets. 
+
+
+3-15. Crewmembers should periodically check the air space above their assigned sector using the rapid-scan 
+technique. As each crewmember completes a rapid scan across their sector and field of view where it meets 
+the horizon, they should switch to a detailed search and make a careful, deliberate search of tree lines, valleys, 
+and possible air corridors. When an aerial platform is detected, alert the vehicle commander by calling out 
+the type of platform (plane or unmanned aircraft) and pointing to the aerial platform. Examples of dispersion 
+methods include: 
+
+
+e Increase the number of serials for convoy movements and decrease the number of vehicles in each 
+serial. This procedure provides a smaller target and increases the level of control over each convoy 
+element. This also allows for greater dispersion and reaction time between convoy elements. 
+
+e Do not park vehicles in a straight line; instead, stagger the vehicles to present a poor target. Park 
+the vehicles under cover if available. Arrange with the drivers so that if an attack occurs, they can 
+drive the vehicles to the opposite sides of the road to seek cover. For example, the lead vehicle 
+(odd numbered) is driven to the left; the second vehicle (even numbered) pulls off to the right, and 
+so on (Figure 3-5 on page 3-6). 
+
+
+90 lily 9NAK ATD 2.N1 2 Q.8 
+
+
+Unadapter o 
+
+
+Figure 3-5. Vehicle dispersion. 
+
+
+Detect 
+
+
+3-16. Fixed-wing and rotary-wing aircraft are difficult to identify as they usually engage at extremely long 
+ranges beyond visual recognition. UAS groups 1-3 can also be difficult to readily identify because they can 
+operate low to the ground, move very slowly and have small radar cross sections. To prevent fratricide leaders 
+must keep crews informed of friendly and hostile aircraft and aircraft systems operating in their unit’s sector. 
+Crews must make every effort to correctly identify a target as friend or foe prior to an engagement. 
+
+
+3-17. Based on METT-TC the combined arms commander may elect to establish air guards within sections, 
+platoons, or convoys. If an Avenger team is attached to the unit, they should assume the role as primary air 
+guards. Air guards are responsible for spotting aerial threats within close proximity to the units’ location. Air 
+guards can be the first line of defense especially detecting and coordinating enemy LSS targets and their 
+positions. It is important to engage all aerial targets at the earliest possible time. Air guards search for aerial 
+targets using search and scan techniques as crewmembers within the convoy. Air guards and gunners search 
+not only their assigned sector using the passive air defense techniques, but also ensure: 
+
+
+e Sector limits established for the gunner must cover likely helicopter locations and avenues of 
+approach. 
+
+e@ Gunners must make sure ground reference points are always within their field of view in order to 
+maintain directional control and situational awareness. 
+
+
+Estimation of Upper Search Limits 
+
+
+3-18. When scanning for aircraft, crewmembers may miss high-flying aircraft if they limit their search near 
+the horizon while also missing low-flying aircraft if they concentrate their search too high above the horizon. 
+The correct upper limit of search is 20 degrees. Estimate 20 degrees using the technique illustrated below in 
+figure 3-6 on page 3-7. With the fingers fully spread, the tip of the thumb is the upper search limit. 
+
+
+ATD 2.N1 2 90 lily 9NAKR 
+
+
+Fassive AIF VETENSe LCCnniques 
+
+
+Note. You should expect enemy aircraft typically operating in pairs that may include one or more 
+pairs of aircraft conducting the attack mission. 
+
+
+Protective Construction and Use of Obscurants 
+
+
+3-19. Using natural or manmade cover reduces the probability of detection, damage, and casualties. Cover 
+can prevent the projectile from striking the intended target while reducing the target area exposed to damage, 
+and absorbing part of the blow. Folds in the earth, natural depressions, large trees, buildings, and walls offer 
+damage-limiting cover and should be used whenever possible. Digging in or sandbagging can offer some 
+protection. 
+
+
+3-20. While moving and natural cover is unavailable or sporadic, and fortifications cannot be rapidly built, 
+smoke can be used as a concealment method. Smoke and other obscurants not only make target acquisition 
+much more difficult for the air threat but also may degrade control of laser guided precision munitions. Smoke 
+and other obscurants can be used to deny enemy aircraft the use of avenues of approach, landing and drop 
+zones, air battle positions, and key terrain as navigational aids. 
+
+
+CONVOY MOVEMENT TECHNIQUES 
+
+
+3-21. In terms of vulnerability to air threats, a convoy of vehicles usually presents a lucrative target. Convoys 
+are easily visible from the sky, and shoulders of a road, ditches, or embankments restrict their freedom of 
+maneuver. The linear array of a large convoy can underscore mission command making control difficult. 
+Convoys are high-value, hard-to-defend, easy-to-see and hit targets for enemy air. The unit must assume 
+there is a high probability of air attack when planning a convoy. A unit’s movement plan will consider their 
+routes of travel, the convoy size, timing of staging and initial movement, and available air defense 
+capabilities. 
+
+
+90 lily 9NAK ATD 2.N1 2 2.7 
+
+
+Unadapter o 
+
+
+Routes 
+
+
+3-22. Consider using routes that offer the greatest natural concealment. Trees and the shadows they cast offer 
+concealment. The shadows cast by mountain ridgelines in the early morning and late afternoon also, provide 
+concealment. When crossing open country, travel should occur when the sun is high to avoid casting long, 
+highly visible shadows. When possible, use multiple routes to reduce convoy lengths. Travel in an open 
+column with 100 meters between vehicles. Vehicles stretched out in a long thin line ina convoy are less of a 
+target than vehicles that are located closer together. 
+
+
+Small Convoy Units 
+
+
+3-23. The convoy can also be broken into small platoon size units and dispatched separately with at least 
+1,000 meters between units (use separate march units). This technique minimizes convoy size and increases 
+the level of local control over each convoy element. 
+
+
+Breakout Plan 
+
+
+3-24. Arrange to defend against an attack by moving the vehicles to opposite sides of the road to seek cover: 
+The lead vehicle goes to the right, the second vehicle pulls to the left, and so on. This technique is called the 
+Herringbone (see Figure 3-7). If possible, have vehicles drive 45 degrees off the road and move to a covered 
+and concealed position. Establish rally points for the convoy to reassemble after the attack. In cases where 
+not all vehicles in the convoy have radios, the unit must develop a means to signal drivers that enemy aircraft 
+are coming. The use of protective vehicle-launched or hand grenade smoke can cause the threat air to lose 
+weapons lock or disrupt target acquisition long enough for convoy vehicles to find suitable concealed or 
+dispersed positions. 
+
+
+Figure 3-7. Herringbone technique. 
+
+
+3-25. Inthe event hostile aircraft pass over your convoy and does not attack, the convoy still needs to disperse 
+and prepare to return fire in case the aircraft returns. If attacked prior to reaching an established rally point, 
+crewmembers should engage attacking aircraft with available weapons including small arms. Accomplished 
+by determining the correct aiming point and firing upon command. The unit will engage the target until the 
+aircraft is hit or flies out of effective range. Small arms alone can provide a limited amount coverage (Figure 
+3-8 on page 3-9). 
+
+
+ATD 2.N1 2 90 lily 9NAKR 
+
+
+Fassive AIF VETeENnse LeCCnniques 
+
+
+al 
+“@ » M16 and M60 Machine Gun range 
+ya 350 meters 
+
+
+re ) » -00 Cal. Machine Gun range 
+750 meters 
+
+
+Caliber M16 and M60 individual or crew served weapons 
+
+
+Figure 3-8. Small arms convoy coverage. 
+
+
+Integration of Air Defense Capabilities 
+
+
+3-26. Vehicles with air defense weapons that are effective against short-range air threats should be integrated 
+into the convoy every fourth or fifth vehicle if possible. Many simple, commonsense measures can be taken 
+by a unit to avoid attack and limit damage if attacked. Combined arms forces should make planning, 
+coordination and integration of AMD standard practice during planning development. For example, the 
+commander should coordinate the unit’s plans for short-range air defense systems from general support or 
+direct support ADA units whenever possible. Coordinating a units movement routes with ADA coverage can 
+also preserve units’ survivability. 
+
+
+COUNTERING UAS GROUPS I AND 2 
+
+
+3-27. UAS group | and 2 presents the greatest challenges for Army forces. These unique platforms have the 
+ability to operate within the commander’s operational time and space, down to the smallest echelon. The 
+enemy will use UAS to fulfill multiple attack roles. UAS used as a single point or area attack weapon, a 
+sensing platform, or function in support of either role. UAS used in clusters combining multiple mass effects. 
+The smaller platform also provides the user with the ability to meet reconnaissance, surveillance, and 
+information collection requirements without being noticed. These systems are more mobile and less 
+noticeable than dismounted scouts with the added benefit of greater standoff enhanced by electronic optics. 
+
+
+Planning for Potential Threat use of UAS 
+
+
+3-28. Combined arms commanders must consider an enemy’s probable use of UAS. The smaller UAS can 
+complement any attack plan providing real time battle information and insight for expected countermeasures. 
+Some of the most exploitable roles in which UAS group! and 2 are the most beneficial are: 
+
+e Surveillance. UAS has the ability to parallel dismounted and mounted elements, and in most cases 
+undetected and operating at close proximity (see figure 3-9 on page 3-10). This allows for detailed 
+surveillance from multiple vantage points, within the commanders time and space as mentioned 
+previously. This may be the most probable COA as it allows for continued use of the system 
+without destruction. 
+
+
+90 lily 9NAK ATD 2.N1 2 2.0 
+
+
+Unadapter o 
+
+
+Pre-pionned 
+flight path 
+
+
+Surveillance: UAS gains situational awareness of friendly forces and activities or 
+provides command and control and directs ground attacks through a video feed. 
+
+
+UAS unmanned aircraft system 
+
+
+Figure 3-9. UAS surveillance role 
+
+
+e Indirect Attack. In the role of the indirect attack, the UAS can guide indirect fires, observe/spot 
+fires, adjust fires and or serve as the indirect attack weapon or munitions. As an indirect attack 
+platform, the UAS has the ability to carry the improvised explosive device or become the 
+improvised explosive device. See figure 3-10 on page 3-11. 
+
+
+2.41Nn ATD 2.N12 90 Ihnih: ONAKR 
+
+
+Fassive AIr VeTeNnse LeCcnniques 
+
+
+Pro-planned 
+flight path 
+
+
+Indirect Attack 
+
+
+Indirect Attack: UAS release hazards (explosives, toxic matenals, CBRN, etc.) to cause damage, injury, 
+chaos. or death 
+
+
+chemical, biological, radiological and nuclear 
+unmanned aircraft system 
+
+
+Figure 3-10. UAS indirect attack role 
+
+
+e Direct Attack. Flying at close proximity to designated targets, UAS can be directed towards point 
+targets or placed around area targets. The probability increases with the size of the target and 
+whether the target is stationary or in motion. These drones can have the ability to seek out their 
+intended targets (see figure 3-11 on page 3-12). 
+
+
+90 thls DNAR ATD 2.N12 2.11 
+
+
+Unadapter o 
+
+
+Direct Attack 
+
+
+Direct Attack UAS stnkes target and causes Gamage or inpuury rough force of impact or payload cared 
+
+
+UAS unmanned aircraft system 
+
+
+Figure 3-11. UAS direct attack role 
+
+
+e Swarm Attack. Perhaps the most dangerous COA, even though it may not be the most probable is 
+the Swarm, see figure 3-12 on page 3-13). Clusters of UAS can be used for all three purposes 
+(Surveillance, Indirect Attack and Direct Attack). They can be preprogrammed or remotely piloted 
+as an expendable asset at relatively low cost. The Swarm itself can be used to disrupt our own 
+reconnaissance efforts or overwhelm an entry control point. 
+
+
+2.19 ATD 2.N12 90 Ihih: 9NAKR 
+
+
+Fassive AIF VETeENnse LeCCnniques 
+
+
+Swarm Attack Threat uses a swarm of UAS to cause significant damage and overwheln fnendly systems 
+and reactons 
+
+
+Figure 3-12. UAS swarm attack role 
+
+
+Find the Unmanned Aircraft System, Detect and Identify 
+
+
+3-29. Use Air Guards. Designate a person or team depending on unit’s size to observe above the horizon. 
+Pay close attention at key times such as immediately after indirect fire attacks, during or after key leader 
+engagements or during and after raids. Commanders must articulate to their Soldiers to report and properly 
+coordinate with operations and intelligence elements or asymmetric warfare division personnel to define if 
+enemy UAS are establishing a pattern. All mission command elements should know who to call to determine 
+if airspace is clear of friendly air. 
+
+
+3-30. Awareness of a LSS threat, prior to the mission can drastically aid the Soldier’s ability to detect and 
+identify UAS. Knowledge of pattern of life within an environment can assist Soldiers to spot threat UAS in 
+their vicinity. During foot patrols with limited noise, both seeing and hearing will be the primary organic 
+capabilities to detect a UAS group | or 2 (Figure 3-13 on page 3-14). During convoys or scenarios with 
+greater noise levels, sight will be the primary capability to detect UAS group | or 2. 
+
+
+90 thls 9NAKR ATD 2.N1 2 212 
+
+
+Unadapter o 
+
+
+ae 
+: 
+
+
+Signal Theft or Spoofing 
+Surveillance 
+
+
+indirect Attack 
+
+
+Dicect Attack 
+
+
+Find: Visual detection may be the primary means of detect and identify 
+
+
+Figure 3-13. Find, Detect, Identify UAS 
+
+
+What to do 
+
+
+3-31. Proper planning by leaders will ensure that units employ adequate force protection measures to counter 
+the UAS threat. Units must develop tactics, techniques and procedures to counter this threat in their respective 
+areas of operation. Units must request and coordinate current air threat information from their intelligence 
+sections, and observe all enemy techniques used and define an operational tactic, technique or procedure 
+(Direct Fire, Reporting Criteria, etc.). Notify higher and adjacent units (Clear airspace and pass early 
+warning). Move to overhead cover. Get distance and bearing to the threat. Recommended format to use in 
+reporting threat UAS shown in table 3-1 on page 3-15. 
+
+
+3-32. Understanding the capabilities and limitations of UAS group | or 2 can increase a Soldiers ability to 
+react and defeat a threat. Reacting to a threat UAS should include reporting timely and relevant information 
+to mission command and security control personnel if the UAS does not pose an immediate threat. Defeat 
+does not equate kinetic means; however, it is an option. Other defeat solutions could be limiting a 
+surveillance threat from gaining information or following the air path of the UAS to the operator. 
+
+
+2AA ATD 2.N1 2 90 Ihnih: 9NAKR 
+
+
+rassive AIF VETENSEe 1eCCnniques 
+
+
+Table 3-1. Recommended Threat UAS Reporting Format 
+
+
+Line Information Example Example 
+
+1 Unit call sign and frequency Red 1, FHXXX 
+
+2 Unit location 6 to 8 digit grid coordinate 
+
+3 Location of threat unmanned aircraft system | Grid or distance and direction from reporting unit 
+location 
+
+4 Time threat unmanned aircraft system asset | Date/time group (DTG): 
+
+spotted/detected 
+
+5 Estimated time on site Was threat unmanned aircraft system asset 
+approach observed or was it spotted overhead? 
+How long might it have been there? 
+
+6 Flight characteristics Is threat unmanned aircraft system loitering in one 
+spot (possibly already spotted reporting unit), is it 
+flying straight (en route to loitering location), what 
+is the direction of flight, or is it flying randomly 
+(searching)? 
+
+7 Estimated size, elevation, and physical Wingspan, height, color, tail configuration, other 
+
+description distinguish markings. 
+
+
+90 liuihs 9NAK ATD 2.N1 2 2.16 
+
+
+This page intentionally left blank. 
+
+
+Chapter 4 
+ACTIVE AIR DEFENSE MEASURES 
+
+
+This chapter discusses active air defense techniques. Active air defense is direct action 
+taken to destroy enemy aerial platforms or reduce their effectiveness. Commanders 
+must prepare their units to actively engage air threats if attacked. The decision to 
+engage air threats should include consideration of the unit’s mission and tactical 
+situation. If the enemy aerial platforms are outside the engagement range of the unit’s 
+weapons, a unit’s most attractive option could be to seek cover. 
+
+
+ACTIVE AIR DEFENSE 
+
+
+4-1. Active air defense is a direct defensive action taken to destroy, nullify, or reduce the effectiveness of 
+hostile air and missile threats against friendly forces and assets. It includes the use of aircraft, air defense 
+weapons, electronic warfare, and other available weapons (JP 3-01). Active missile defense requires early 
+detection of missiles in flight to permit cueing, acquisition, tracking, classification, identification, and 
+destruction as soon as possible after launch. 
+
+
+4-2. At theater level, the AADC exercises control of active air defense operations through integration of 
+army and joint AMD systems and forces into counter air operational plans. Counter air operations include; 
+offensive and defensive counter air tasks performed during the execution of AMD operations. Active air 
+defense techniques are measures taken in support of a commander’s intent using ROE, defended asset 
+priorities, and airspace control measures to protect the force. 
+
+
+4-3, Combined arms approach to active air defense is defending against a threat as a coordinated unit with 
+all available forms of defense. Combined arms active air defense employs coordinated tasks and available 
+capabilities in response to a threat using prescribed engagement techniques. Active air defense by a combined 
+arms unit may not be successful if the response cannot be coordinated. Combining resources during combined 
+arms operations based on coordinated planning and efforts across all echelons. 
+
+
+ENEMY AIR THREAT 
+
+
+4-4, Ifpassive air defense measures fail to conceal and enemy air threats are within range, units can conduct 
+active air defense (right of self-defense) by engaging the threat with all available weapons. All units if 
+authorized can engage enemy air threats to protect their forces by: 
+
+e Neutralizing or destroying the threat. 
+
+e Forcing the threat away from friendly positions. 
+
+e Forcing the threat to fly higher, so that friendly aerial platforms or air defense weapon systems 
+
+can destroy them. 
+e Deprive or spoil the hostile pilots’ aim as they engage friendly forces. 
+
+
+Note: Right of Self-Defense-The inherent right to fire at attacking aerial platforms is derived from 
+self-defense doctrine refer to FM 3-01. A unit may defend itself from direct attack but may not 
+engage aerial platforms, which do not pose a threat except on the command of the appropriate 
+authority or in following the current ROE. 
+
+
+ACTIVE MISSILE DEFENSE 
+
+
+4-5, Air defense forces possess a wide range of capabilities that are employed to perform both active AMD 
+from the strategic to the tactical level supporting the force. Active missile defense is similar to active air 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 AA 
+
+
+Unapter 4 
+
+
+defense with exception of tasks focused primarily on ballistic and CM threats which identify launch points, 
+classify the type of threat and project potential impact points. Characterization of a missile threat is significant 
+for combined arms units as these threats typically traverse multiple operational areas requiring protection 
+from a nearby air defense weapon system. Active missile defense is the continuous actions to detect, identify, 
+classify and engage hostile missiles. 
+
+
+4-6. Air defense forces have a variety of different systems at their disposal that contribute to or perform 
+active missile defense. These systems are generally referred to as either sensors or shooters based on their 
+intended purpose but equally contribute to active missile defense. 
+
+
+4-7. Sensors play an important role in active missile defense. Whether acting as a stand-alone sensor 
+reporting to a single mission command node or functioning as part of a sensor network, sensors enable 
+situational awareness of the commander’s operational environment. It gives commanders the early warning 
+capabilities needed to mitigate risk to personnel and equipment minimizing effects from missile attack. 
+
+
+Contributing Sensors 
+
+
+4-8. Examples of sensors that contribute to active missile defense are: 
+
+
+e The theater event system that provides comprehensive tactical warning architecture supporting 
+geographic commands and theater warning elements. 
+
+
+e The Defense Support Program is a satellite system using space-based infrared detection 
+capabilities to detect and report near or real time missile launches 
+
+
+e The Joint Tactical Ground Station is a transportable information processing system that receives 
+and processes in-theater, raw, wideband infrared data down linked from Defense Support Program 
+sensors. The system disseminates early warning, alerting, and cueing information on ballistic 
+missiles and other tactical events of interest throughout the area of operations using existing 
+communications networks. 
+
+
+e@ The AN/TPY-2 forward based mode radar provides long-range surveillance, tracking, external 
+sensor cueing, and launch and impact point estimates for ballistic missile defense. 
+
+
+e The Sentinel radar provides 360-degree surveillance coverage at a range of approximately 40 
+kilometers. It has the capability to acquire, track, and classify CMs, UAS, fixed and rotary wing 
+aircraft. The sentinel provides track data to Air Defense Airspace Management cells and is 
+normally deployed with Indirect Fire Protection Capability /Avenger and organic to Avenger 
+battalions and Target Acquisition Platoons at division. 
+
+
+4-9, Although these sensors cannot actively engage threats, they do provide weapon system cueing and 
+early warning functions needed by combined arms commanders to make an informed decision. These systems 
+are normally tied into an established early warning network where tactical commanders can integrate their 
+units through the deployment of air defense airspace management cells or AMD elements at the brigade 
+combat team or division. Based on the information given on a potential threat, a commander can make a 
+decision on active defense or employ passive defense measures. The commander may also have time 
+available to take force protection measures against a threat such as an inbound ballistic missile if there are 
+no available air defense systems that can defend against it. Above all, coordinating sensor plans with air 
+defense elements prior to and during operations can increase a unit’s survivability especially when located 
+separately from the main effort. Implementing sensor plans using varying routines will also reduce an 
+adversaries targeting and counter-target effectiveness. When combined arms forces operate their sensors they 
+must consider the following: 
+
+
+e Positioning sensors and forces within the effective range of an air defense weapon system. 
+Coordinating with supporting Signal for spectrum management. 
+
+Operating radars other sensors using intervals and frequency diversity techniques. 
+
+Plan for low, slow, small UAS used for counter-sensor and targeting operations. 
+
+Prepare for electronic warfare directed at overwhelming sensor networks (including counter-fire). 
+
+
+Enemy employment of heavy or mobile jamming tactics. 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+ACLIVE AIT VETEMSe WieadSures 
+
+
+Contributing Shooters 
+
+
+4-10, Examples of shooters that contribute to active missile defense: 
+
+e The THAAD missile system is a defensive weapon system within the theater used to protect 
+against hostile incoming TBM threats. The system provides the upper tier of a two-tiered layered 
+defensive shield to protect high value strategic or tactical sites such as airfields or populations 
+centers. Combined arms forces may operate in areas where coverage by THAAD exists by default 
+through a theater early warning system. 
+
+e The Patriot air defense system provides air defense coverage against TBM’s and ABT’s within 
+the area of operations. Patriot can defend against the larger UAS platforms (groups 3, 4, and 5), 
+lower tier TBMs, CMs, fixed-wing aircraft, and rotary wing aircraft. Combined arms forces may 
+transition through areas where Patriot coverage is coordinated or dedicated to them through theater 
+early warning operations. 
+
+e Avenger missile systems are highly mobile and versatile. Avenger can be queued to search a 
+specific area or tied into the division’s early warning sensor networks. Avenger can support and 
+coordinate lower tier AMD engagements within their designated zones. 
+
+
+ACTIVE AIR BREATHING THREAT DEFENSE 
+
+
+4-11, As a component of active air defense and closely related to missile defense is air breathing threat 
+defense. Combined arms commanders must plan to counter this threat as it may pose an even greater risk to 
+friendly forces due to the variety of delivery systems. The enemy may choose a combination of attack and 
+delivery methods to inflict maximum damage. The air breathing threat set includes all forms of fixed- and 
+RW aircraft and unmanned aircraft (see FM 3-01, Chapter 9 that addresses AMD Threat). This threat set also 
+includes CMs, rockets, artillery, mortars, and other guided and unguided systems. 
+
+
+4-12, Along with employing small arms, defense techniques there are specific air defense weapon systems 
+that can counter these threats. Examples of air defense systems that are designed to counter air breathing 
+threats are: 
+
+Patriot (see paragraph 4-10 above). 
+
+e Avenger weapon system provides air defense of UAS, fixed and rotary wing aircraft with 8 stinger 
+missiles and an M3P .5O caliber machine gun. This system is highly mobile and can be used to 
+provide SHORAD security for maneuver forces. 
+
+e Indirect Fire Protection Capability. This system complements a commander’s layered air defense 
+capabilities supporting a point defense against immediate area aerial threats such as; UASs, RAM, 
+air-to-surface pop-up missile launches, aerial launch platforms. 
+
+e Combined arms commanders have the options to employ a point defense warning capability 
+Rockets, Artillery, and Mortar- Warn (RAM-Warn) System. The RAM-Warn provides early 
+detection and impact point prediction of inbound rocket, artillery, and mortar during attack. 
+Stinger (Dismounted Avenger) 
+
+e Sentinel (see paragraph 4-8) 
+
+
+UNMANNED AIR THREAT 
+
+
+4-13, Unmanned air threats employ characteristics similar to CMs. Air threats are one of the two primary 
+elements of enemy AMD threats (air threats and ballistic missiles). Unmanned air threats are UAS or other 
+remotely piloted systems that present an elusive target, which is difficult to detect, identify, and engage. 
+UASs are often used for intelligence collection in a surveillance or reconnaissance role, but can also be fitted 
+as a small munitions delivery or re-supply system. Weaponized UAS perform targeting roles which provide 
+precision strikes or operate in open areas taking advantage of targets of opportunity or forces operating in the 
+open. UAS can also be configured to conduct sensor jamming or act as communications relay device. 
+
+
+4-14, UAS have become an increasing greater threat to combined arms forces in recent years. They have 
+become more readily available and unmanned technology has become less expensive to buyers from nations 
+who wish to use them to gain an advantage over conventional military forces or employed as a threat. This 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 A.2 
+
+
+Unapter 4 
+
+
+increased availability can make it difficult for friendly forces to distinguish between friendly and enemy UAS 
+platforms. 
+
+
+UAS Groups 
+
+
+AA 
+
+
+4-15, UAS platforms are identified by groups ranging from | thru 5 based on their capabilities with each 
+group presenting a unique set of capabilities or problems for commanders. UAS threats are the greatest near- 
+term concern for SHORAD and combined arms forces. 
+
+
+4-16. UAS are grouped based on the physical and performance characteristics of weight, operating altitude, 
+and airspeed. UAS groups 4 and 5 are larger systems with endurance normally deployed to conduct 
+operational or strategic mission sets. These groups normally operate at altitudes up to 18,000 feet and require 
+runways or roads for launch. UAS groups 2 and 3 are smaller with missions that center on tactical operations. 
+Group 3 UASs normally operate at a comparable elevation as groups 4 and 5 but do not have the payload 
+capacity. UAS group 2 operate at a much lower altitude (less than 3,500 feet above ground level), have a 
+limited payload, and 2 require some logistical support. UAS group | consists of small or micro systems that 
+are easily deployable within line of sight of its operator and primarily used for surveillance and 
+reconnaissance at very low altitude (less than 1,200 feet), see figure 4-1 below. 
+
+
+letect Small UAS to Strike Capable | 
+
+
+Surveillance and targeting assist 
+
+
+Data and Communications Relay 
+
+
+UAS Categories 
+
+
+UAS —_ unmanned aircraft system 
+
+
+Figure 4-1. UAS groups 1 — 5 Mission Areas 
+
+
+4-17. UAS groups | thru 3 are more prevalent throughout the world due to their cheap costs, tactical ability, 
+and operational impacts. For mission planning purposes, the technology of these platforms and the ability of 
+the operator remain the major limitations of groups | thru 3. From the Soldiers on the ground to strategic 
+assets in storage, small UAS pose a significant threat to all levels of the force. 
+
+
+ATD 2.N1 2 90 Ihnih: ONAKR 
+
+
+ACLIVE AIT VETEMSe WIeEadSUres 
+
+
+4-18. The tasks of correctly identifying aircraft is often challenging in itself; however, performing these tasks 
+on unmanned platforms having limited or no identification, friend or foe capabilities, increases a unit’s 
+difficulties in achieving positive identification. 
+
+
+4-19, Combined arms commanders will be challenged with the tasks of detecting, identifying, and defeating 
+the unmanned threat platforms that enter into their airspace. During planning, a commander must consider 
+the capabilities of the unmanned threat within their area of operations, the capabilities of friendly air defense 
+systems and how they can contribute to countering the 4-20, threat. 
+
+
+4-20. Cloud cover, heavy foliage, and built up areas provide ideal cover and concealment for groups | thru 
+3 and these platforms can operate at ranges varying from 25 to 800 kilometers with flight times up to 72 
+hours. UAS roles include; reconnaissance, surveillance, target acquisition, suppression of enemy air defense, 
+ground attack, decoy, communications relay, and chemical detection. The enemy’s surveillance mission may 
+incorporate UAS to locate friendly maneuver forces and key assets with the ability to pass real-time 
+information to long-range systems. The commander must assess his unit’s methods (tactics, techniques, and 
+procedures) that will be used to confirm and report unknown and hostile UAS activity, and how to counter a 
+possible UAS threat. 
+
+
+4-21, Planning considerations at the tactical level include: 
+
+
+e Incorporating early warning network capabilities including ADAM and Brigade Aviation Element 
+cells. 
+
+
+Identify capabilities and profiles of hostile UAS platforms. 
+Address locations of likely targets 
+Train ground troops to identify a UAS either visually or acoustically. 
+
+
+Required coordination and synchronization actions with supporting command posts and air 
+defense units for integration into sensor plans and targeting priorities. 
+
+
+e Establish UAS reporting procedures. 
+= Identification of unknown UAS. 
+=» Notification forwarded to supporting air defense or integration officer. 
+e@ Minimize the unit’s exposure to threatening UAS while coordinating UAS position. 
+e Monitor threat UAS actions and coordinate engagement support of threat UAS if needed. 
+
+
+4-22. Combined arms forces that encounter hostile UAS may have limited time to engage due to the speed 
+and altitude of the UAS. Air space control officers may encounter similar difficulties based on; the 
+capabilities of sensors used within their early warning network, the low radar cross sections of many UAS, 
+or targeting impacts due to congestion of the airspace. Considering these factors, engagement control should 
+be released to the lowest levels of engagement authority to ensure early engagement opportunities. 
+
+
+4-23, Air defense operations and air ground integration personnel have established coordination techniques 
+and reporting procedures available to aid commanders’ in countering unmanned air threats. See ATP 3-91.1 
+and FM 3-01 for further reference on C-UAS threat and reporting. 
+
+
+Reporting of Enemy UAS 
+
+
+4-24, Proper force protection planning measures and training of personnel will assist commanders with 
+detecting, identifying and defeating UAS threat. Units must have established enemy UAS reporting 
+procedures. Units must also develop counter-UAS tactics, techniques and procedures within their area of 
+responsibility. These methods should include; observation techniques, airspace coordination, self-defense 
+techniques, accurate time on station reporting, UAS position and heading estimations, as well as proper 
+coordination with ADAM, air ground integration elements, and maneuver targeting cell for airspace 
+clearances. Reporting procedures must integrate with other units including signal personnel for spectrum 
+management and alerting activities. 
+
+
+4-25, Once an enemy UAS is identified and its location is confirmed an engagement will be coordinated. 
+The commander will need to know if there are any patterns that can be established to assist in determining 
+their employment (time or event driven). The focus of engaging any enemy UAS platform is also finding and 
+neutralizing its launch point and controller. Finding the point of origin may require gathering and leveraging 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 ABR 
+
+
+Unadapter & 
+
+
+all sources of information and intelligence from a variety of sources. For example, using sensors (audible, 
+radars, imagery, and human intelligence) or maintaining visual means. 
+
+
+SMALL ARMS DEFENSE TECHNIQUES 
+
+
+4-26. Small arms techniques used in air defense incorporate the use of volume fire and proper aiming points 
+according to the targets direction. If Soldiers are trained to apply an appropriate sequence of engagement 
+techniques for aircraft based on the rules for selecting aiming points, the response will be automatic upon 
+command. You will have effective air defense using the small arms available to your unit. Small arms are 
+limited to the range and destructive capability of the weapon and should be used only on low flying aircraft. 
+
+
+Small Arms Engagement 
+
+
+4-27, The decision to fire small arms against threat aircraft is the unit commander's and is based on his 
+judgment of the situation. Considerations should at a minimum include the severity of the threat versus the 
+potential impact of the units effectiveness and the area of engagement (urban versus rural). Techniques for 
+delivering small arms fire remains standard across all services. For example, a general rule to follow when 
+engaging attacking aircraft with small arms is to use a technique known as volume fire. 
+
+
+Volume Fire 
+
+
+4-28. Volume fire is an effective method to employ when using small arms fire against aerial threats. The 
+key to success in engaging enemy aircraft with small arms is to put out a high volume of fire towards the 
+immediate threat. The more bullets a unit can put in the sky, the greater the chance the enemy will fly into 
+them (Figure 4-2). Even if these fires do not hit the enemy, throwing up a wall of lead in the sky can intimidate 
+enemy pilots, ultimately breaking off their attack or distracting them from taking proper aim. One of the most 
+important points about volume fire is that once the lead distance is estimated, you must aim at the estimated 
+aiming point and fire at that single point until the aircraft has flown past that point. Maintain the aiming point, 
+not the lead distance. Once you start firing, do not adjust your weapon. 
+
+
+Figure 4-2. Volume fire. 
+
+
+4-29, When the decision is made to engage an aircraft with small arms, every weapon (M4, M240, M249, 
+and M2) should be used with the goal of placing as many bullets as possible in the enemy's flight path. That 
+does not mean that everyone fires in some random direction. Instead, each individual selects an aiming point 
+
+
+ATD 2.N1 2 90 lily 9NAKR 
+
+
+ACLIVE AIP VETEMNsSe WiedadSures 
+
+
+in front of the target and fires at that point. This aiming point is determined using the football field technique. 
+When deciding to fire upon an enemy aircraft, practical considerations need to be taken into account before 
+engaging. An example is engaging a helicopter attacking you from a standoff range of 3 kilometers. It is 
+important to consider the capabilities of the weapons you have available to you. Using small arms at this 
+range is ineffective while the best possibility may be the use of the main gun on a tank or tracked vehicle. 
+
+
+4-30. Small arms have a low probability of kill against attacking aerial platforms due to their travel speeds 
+and maneuverability. The use of coordinated group firing, using all organic weapons will make the pilot 
+aware that they are under fire disrupting their concentration and potentially causing them to miss their target 
+or abandon their attack. 
+
+
+Football Field Technique 
+
+
+4-31, The football field technique is a simple method of estimating lead distance. The theory is that most 
+people have played or watched football and have a concept of how long a football field is. When told to lead 
+the target by one football field, everyone aims at approximately the same point in space. One person's error 
+in making the football field estimate will be offset by another person's error. The variation in aiming points 
+will ensure that massed fire is delivered into a volume of space in front of the target rather than on a small 
+point. Also, the differing perspectives from which the Soldiers view the target will act to further distribute 
+the fire over a volume of space. Figure 4-3 and figure 4-4 below shows an example of this technique used 
+with aiming points for both fixed- and RW aircraft. 
+
+
+Coming directly at you 
+
+
+Aiming point 
+(above the nose) 
+
+
+Crossing 
+course ==" 
+
+
+Figure 4-3. Football Field Technique: Jet aiming points. 
+
+
+90 lily 9NAK ATD 2.N1 2 A.7 
+
+
+Unapter & 
+
+
+Threat coming directly at you 
+
+
+Aiming Point 
+(slightly above helicopter body) 
+
+
+Aiming Point 
+
+
+; one-half 
+Crossing football 
+
+
+course > 
+
+
+s eo 
+a a pee ee vee 
+
+
+a ere 
+
+
+2 
+
+
+Firing at slow aircraft with M16, M60, and 50 Caliber Machine Gun 
+
+
+Figure 4-4. Football Field Technique: Helicopter aiming points. 
+
+
+Aiming Points 
+
+
+4-32, Aiming points used to engage hostile jets and helicopters are different but may be used on a variety of 
+different threats. An example of this technique would apply if missiles were detected and the decision was 
+made to engage, they should be engaged using the FW aiming point technique. UASs should be engaged 
+using the helicopter aiming point technique. The rules for selecting aiming points are simple, easily learned, 
+
+
+and retained. The various aiming points are summarized in Table 4-1. 
+
+
+Table 4-1. Aiming Points. 
+
+
+AERIAL PLATFORM TYPE COURSE AIMING POINT 
+JET/CM Crossing Two football fields in front of the nose 
+of the platform 
+JET/CM Overhead Two football fields in front of the nose 
+of the platform 
+JET/CM Directly At You Slightly above the aerial platform nose 
+Helicopter Hovering Slightly above the helicopter body 
+Helicopter Directly At You One half football field in front of the 
+nose 
+UAS / LSS Crossing (UAS Group 1) half a football field in 
+front 
+(UAS Groups 2 and 3) one and a half 
+football fields in front 
+UAS / LSS Directly At You Slightly above UAS body 
+UAS / LSS Hovering Slightly above UAS body 
+CM _ cruise missile JET JWICS earth terminal 
+LSS low, slow, small (UAS) UAS unmanned aircraft system 
+AQ ATD 2.N1 2 90 lil, ONAK 
+
+
+ACLIVE AIT VETEMSe WieadSures 
+
+
+FIRING POSITION TECHNIQUES FOR SMALL ARMS 
+
+
+4-33, Except for the prone position, the firing positions used in rifle marksmanship are the same firing 
+positions used to counter aerial threats with small arms (see Figure 4-5). Firing at aircraft when lying down 
+means the individuals are lying on their backs (supine), aiming their rifles into the air. If you are in an 
+individual fighting position, stay there and return fire from the supported standing position. If you are not in 
+an individual firing position, you should look for a tree, a large rock, or supportive object to help stabilize 
+the weapon and provide protection. Use the following firing positions accordingly: 
+e You can use all the basic firing positions for air defense except the prone position. Instead, use the 
+reverse position; lie on your back (supine) and point your weapon upward. 
+e Always take cover when available. If you are in an individual fighting position, stay there. Assume 
+a supported standing position and return fire. The bipod on the M249/240 machineguns rifle assists 
+you in firing your weapon more effectively at hostile aerial platforms. 
+e Ifcover and concealment are good, use the high-kneeling position. If cover and concealment are 
+less substantial, use the low kneeling position. 
+
+
+4-34, When using the M240 machine gun, the gunner will also fire from a protected position if possible. He 
+needs to get the weapon up in the air. He can hold it up or use some support such as a tree limb. In an 
+emergency, another Soldier can act as a hasty firing support. 
+
+
+Figure 4-5. Firing positions. 
+
+
+ENGAGING WITH M1 SERIES TANK or STRYKER MACHINE GUNS 
+
+
+4-35, The machine gun is effective against slow-moving, FW aircraft and helicopters. To sustain the volume 
+of fire and kill a target, a continuous burst of 20-to-25 rounds fired using a tracer on target method, allowing 
+the gunner to adjust rounds on target. If equipped with MK 19 grenade launchers, the greater dispersion factor 
+gives the use of high explosive rounds a higher probability of kill against the threat. 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 A.a 
+
+
+Unadapter & 
+
+
+4-36, Tank commander's machine guns are useful weapons against unarmored threats. They can be fired 
+quickly unleashing a high volume fire. Ensure that the area is clear of friendly personnel. Use the following 
+guidelines when using crew served weapons: 
+
+e@ When targets are hovering or inbound, aim high with the machine gun and fire a continuous burst, 
+adjusting onto target by observing the travel and impact of tracers remembering, tracers may 
+appear to be striking the target when they are actually going under it. 
+
+e Ifengaging a moving target, track along its flight path using a lead of 50 meters or half a football 
+field. Fire a continuous burst, forcing the target to fly through the cone of fire. 
+
+
+4-37. Stryker squads are trained to use machine guns against FW aircraft, unarmored helicopters, and 
+airborne troops (it is ineffective against heavily armored helicopters such as the Hind). When used, the 
+machine gun must fire a continuous burst (50-to-100 rounds) at the aiming point, while squad and 
+crewmembers use time on target to bring the rounds on target. Just as in ground engagements, the maximum 
+effective range of the specific machine gun will apply. 
+
+
+4-38. Ideally, when the Stryker must engage high-speed aircraft, mounted and Infantry rifle elements, direct 
+small-arms weapons and controlled machine gun fire on a designated point. The platoon leader, platoon 
+sergeant, or squad leader can initiate this type of fire by issuing a predetermined command or by firing tracers 
+to indicate the target. He applies a 200-meter lead (the length of two football fields) on approaching aircraft. 
+When coordinated effectively, the aircraft will fly through the platoon's cone of fire. Vehicle commanders 
+must not try to track high-speed aircraft because they fly too fast. 
+
+
+4-39, When enemy aircraft fly directly at Stryker vehicles, vehicle commanders are responsible for engaging 
+them with controlled machine gun bursts of 50-to-100 rounds. They are trained to select an aiming point 
+slightly above the nose to position the aircraft in the cone of fire. 
+
+
+4-40. To engage aircraft, the squad leader or vehicle commander chooses one or more reference points 
+(Figure 4-6). For example, the platoon leader alerts the platoon. Then as an aircraft nears a reference point, 
+the platoon leader will order, ENEMY AIR, REFERENCE POINT TWO, and then FIRE. The Stryker(s) 
+and rifle Infantry Soldiers fire all weapons at a 45-degree angle above the reference point. 
+
+
+Figure 4-6. Reference-point technique. 
+
+
+ENGAGING FAST-MOVING AIRCRAFT 
+
+
+4-41, Because of the speed of jets, the best technique to use against them is to fire all tank automatic weapons 
+in continuous bursts. If the jets are inbound, aim slightly above the nose or fuselage and fire. If the jet is 
+crossing, use a lead of 200 meters (two football fields) and fire letting the jet fly through the cone of fire from 
+the machine guns. Do not try to track or traverse your fire with the jet since it flies too fast. 
+
+
+PRACTICE SEQUENCE OF ENGAGEMENT 
+
+
+4-42, A coordinated, high volume of fire will get results; precision is not important. Fire is delivered on 
+command and not at the option of the individual Soldier. The sequence of engagement might be as follows: 
+
+
+A.AN ATD 2.N1 2 90 lily ONAKR 
+
+
+ACLIVE AIT VETEMSe WieadSures 
+
+
+An aircraft commences an attack on the unit. 
+The soldier or the air sentries spot the attacker. In either event, the unit is alerted to the attack and 
+decide to engage the target. 
+
+e Alert the unit. For example, “Air attack, inbound 5 o’clock, prepare to fire.” 
+
+e Each member of the unit prepares his weapon to fire by placing the weapon in full automatic mode. 
+Each soldier locates the target, finds their aiming reference point as determined by the rules and 
+waits for the command to fire. 
+
+The leaders estimate the right moment and give the command, “Fire.” 
+
+
+e Each individual fires at the aiming point until all ammunition is expended, or until ordered “Cease 
+fire.” Everyone immediately reloads and prepares to engage follow-on attackers. 
+
+
+Engaging Helicopters with the Tank Main Gun or TOW 
+
+
+4-43, The main gun should be used against armored threat helicopters. Speed is essential in engaging an 
+attack helicopter. If an attack helicopter is hovering, it is probably preparing to fire a missile. Time is 
+essential; fire any round that is preloaded. The M830A1 multipurpose antitank round is, by design, the most 
+accurate round for engaging helicopters and should be the next round fired after any preloaded round. Several 
+other types of main gun ammunition are effective against helicopters, including high-explosive antitank and 
+armor-piercing discarding sabot rounds. When engaging moving helicopters with an M1 series tank, 
+smoothly track the target while aiming at the center of mass. Lase to the target, wait for the automatic lead 
+to be induced (about 2 seconds), and fire. Be prepared to fire a second round using the same technique used 
+for the first round. The tube-launched, optically tracked, wire-guided missile is a command-guided surface- 
+attack weapon that can also be used to destroy helicopters. It can destroy fortified bunkers, gun 
+emplacements, and other protected positions as well. The tube-launched, optically tracked, wire-guided 
+missile system destroys armored vehicles at ranges from 65 to 4,250 meters, depending on the type of missile 
+used. 
+
+
+90 luihy 9NAKR ATD 2.N1 2 A141 
+
+
+This page intentionally left blank. 
+
+
+Appendix A 
+ASSET PROTECTION 
+
+
+This appendix describes the concept of AMD operations in the context of employing 
+ADA capabilities in the defense of area and point protection. 
+
+
+CONCEPT OF AMD OPERATIONS 
+
+
+A-1. AMD is inherently a joint effort due to its role in defensive counter air operations. The joint force 
+commander is responsible for providing the guidance, priorities, tasking, and concept of operations to 
+subordinate commanders operating within a joint operations area. The joint force commander and his staff 
+develop the operations plan (OPLAN) that describes the mission, situation (including intelligence, 
+preparation of the battlefield), concept of operations, and tasks that must be accomplished to effectively 
+execute coordinated counter air operations. This leads to the issuance of an operations order (OPORD) which 
+identifies the priorities and critical assets that must be protected and levels of protection required. These 
+assets are identified in the defended asset list (DAL), which is prioritized by operational phase. 
+
+
+A-2. The OPORD also defines the protective relationship between AMD forces and the combined arms 
+units. The OPORD describes; command and support relationships, provides coordinating instructions and 
+ROE for the AMD threat sets which includes air breathing threats (manned and unmanned aircraft platforms) 
+and ballistic missiles. 
+
+
+A-3. The command and support relationship between air defense units and tactical level commanders may 
+differ depending on METT-TC. For example, units in direct support to the corps and division normally 
+remain under the operational control of the corps or division, whereas ADA units in a theater role support 
+corps and division with area coverage. Due to the limited resources of air defense, tactical control is retained 
+at the air operations center and the level of protection will vary depending on the supported commander’s 
+priorities and location. In this case, combined arms commanders must coordinate with the corps or division 
+air-ground operations element for protection during operations that takes them outside the established area 
+of protection. 
+
+
+A-4. During movement and at a halt, the combined arms forces may have attached SHORAD weapons 
+systems and sensor capabilities that provide lower-tier air defense for point a defense which includes early 
+warning to alerting functions. It is recommended that combined arms commanders plan their operations 
+taking into consideration that unit movements often affect local air defense coverage within their area of 
+operations. Combined arms forces should conduct preliminary planning and coordination with air-ground 
+integration activities. Coordination should also be made with adjacent air defense airspace management cells, 
+battlefield coordination detachments or AMD liaisons informing them of plans to continue air defense 
+coverage and early warning while maneuvering. 
+
+
+A-5. Air defense planning integrates AMD capabilities and airspace requirements to include air and missile 
+warning, cueing information requirements, combat identification procedures, and engagement authority as 
+required. Based on this planning, air defense units will be task organized by either the U.S. Army AMD 
+Command (AAMDC) or corps based on the capability needed. Coordinated planning ensures the combined 
+arms effort is integrated and synchronized with the overall AMD effort. 
+
+
+MISSION PLANNING 
+
+
+A-6. Mission planning involves steps and process for determining the critical asset list (CAL) and the DAL. 
+This includes risk management used to protect the commander’s critical assets. Risk management considers 
+all hazards that have the potential to injure or kill personnel, damage or destroy equipment, or otherwise 
+impact mission effectiveness. Risk management provides an adaptive process for combined arms units to 
+conduct continuous assessments and assists in identifying control measures where specific standards may not 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 AA 
+
+
+Appendix A 
+
+
+exist. For commanders and staff, risk management begins during planning and continues throughout the 
+operations process. 
+
+
+A-7. DAL development is an interactive process that involves subordinate commands. After reviewing the 
+initial DAL, subordinate commanders and their staffs may nominate additional assets for inclusion in the 
+DAL. The joint force commander and his staff may incorporate one or more nominees and issue an updated 
+(re-prioritized) DAL, which then becomes the basis for AMD planning and defense design. 
+
+
+A-8. Other critical planning guidance provided by joint force planners includes the airspace control order 
+(ACO) and the air tasking order (ATO). The ACO implements the airspace control plan, and provides the 
+details of the approved request for airspace control measures. The ATO also provides specific instructions 
+for tasking forces/capabilities/sorties to specific missions and targets. The ACO is part of the ATO, although 
+it may be transmitted separately. Both are provided to all subordinate echelons of command. All components 
+of the ACO and the ATO should be included in the planning process to give commanders and staff a complete 
+understanding of the air battle. 
+
+
+A-9. The service and functional component commander (for example, Army Forces Commander or Joint 
+Forces Land Component Commander or the Joint Forces Air Component Commander) reviews the joint force 
+commander 's OPORD, including the mission, situation, concept of operation, tasks to be accomplished, 
+DAL, and other pertinent mission related information. The joint force commander will normally task the 
+Joint Force Air Component Commander (JFACC) and AADC to develop the DAL with input from all 
+components. Part of the planning process along with the DAL will contain the levels of engagement 
+effectiveness needed to protect defended assets. The role of the JFACC and AADC is to provide centralized 
+direction, coordination, and integration for counter air operation capabilities. 
+
+
+A-10. The joint force commander defines the JFACC's authority and responsibilities, which may include, but 
+are not limited to, planning, coordinating, allocating, and tasking for joint civil affairs operations based on 
+the joint force commander’s concept of operations and air apportionment decisions. 
+
+
+A-11. JFACC or AADC staff planners develop and distribute a rough first-order ADP to the components. 
+The role of the AADC is synchronizing land-based air and missile operations. With input from other 
+components, the staff then produces an operation's plan or OPORD conveying the joint force commander’s 
+strategic and operational objectives but focusing on the service and functional component area of operations. 
+The threat composition must be evaluated in the planning process to determine the objective. The OPORD is 
+then sent to subordinate commands, which include the AAMDC and corps. 
+
+
+AAMDC PLANNING 
+
+
+A-12. The AAMDC has overall responsibility for planning Army AMD operations in support of the ARFOR 
+commander or Joint Forces Land Component Commander. Planners review the assigned mission, critical 
+assets to be protected, the enemy situation, and the composition and disposition of AMD resources available 
+to protect critical assets against the known threat. This is based on the IPB process. They then perform a top- 
+level defense lay down to estimate if available AMD resources can adequately protect critical assets. If 
+required, levels of protection cannot be achieved; additional resources are requested from the service or 
+functional component commander (or the commander is advised of the risk to forces or assets) to support 
+asset defenses. See FM 3-01 for AMD planning responsibilities of each echelon. 
+
+
+A-13. Based on this planning, the AAMDC task organizes the subordinate ADA brigade(s) and assigns 
+missions to the brigade(s). If the AAMDC is not present in theater, the responsibility for this planning falls 
+to an ADA brigade. To ensure the overall Army AMD effort within the theater is coordinated and 
+synchronized, the AAMDC must coordinate planning with the corps and division ADA elements. 
+
+
+CORPS PLANNING 
+
+
+A-14. Corps planners perform essentially the same planning functions and produce the same planning 
+products as the AAMDC planners, except the focus is on protecting maneuver forces and critical assets within 
+the corps area of operations. Because the corps lacks robust automated AMD planning capabilities, it may 
+rely upon a supporting ADA brigade to perform most of the AMD planning. This planning may include 
+development of the AMD support annex to the corps OPLAN. In developing the AMD annex, the ADA 
+
+
+ATD 2.N1 2 90 Tih, 9N1AK 
+
+
+ASSEL Protection 
+
+
+brigade, in coordination with the corps (and division level elements if applicable) will use its organic planning 
+staff and capabilities to best meet mission objectives. The ADA brigade may leverage subordinate units to 
+assist in this development. This will likely include Patriot battalion staff personnel and air defense airspace 
+management personnel as well. 
+
+
+A-15. Based on this planning, the corps task organizes its subordinate air defense elements and coordinates 
+with the supporting ADA brigade and liaisons for support. AMD asset availability and mission assignments 
+are based on priorities and overall scheme of maneuver. The ADA brigade also coordinates with the AAMDC 
+to ensure the corps effort is integrated and synchronized with the theater Army's AMD effort. 
+
+
+ADA BRIGADE PLANNING 
+
+
+A-16. The brigade commander and his staff review the OPORD received from higher headquarters, including 
+the mission, situation, concept of operation, tasks, Air Defense priorities and other information. He and his 
+staff then produce an OPLAN that describes how tactical operations in the brigade area of operations will be 
+carried out. This plan includes the restated mission, tasks to be performed, resources to be allocated, assets 
+to be protected, number of FUs needed to protect assets, and coordination and control measures to be 
+followed. 
+
+
+A-17. The number of fire units needed to defend an asset can be determined by using the DAL and the levels 
+of engagement effectiveness prescribed by the joint force commander. Critical assets are posted to a 
+database/overlay, and provided to subordinate battalions along with the OPORD. Changes by phase to the 
+DAL or reprioritization of critical assets on the DAL will normally affect support priorities and require 
+continual assessment by the staff. 
+
+
+A-18. The approved risk mitigation measures, risk decisions, the CAL and the DAL are incorporated into 
+appropriate plans and orders. The protection cell is responsible for developing the concept of protection in 
+the base order, the fires appendix to the operations annex and applicable tabs. 
+
+
+A-19. This is normally accomplished during mission preparation through training, rehearsals, task 
+organization, and resource allocation. 
+
+
+PLANS AND ORDERS 
+
+
+A-20. The joint forces commander is responsible for providing the guidance, priorities, tasking, and concept 
+of operations to subordinate commanders. The joint force commander and his staff develop an OPLAN that 
+describes the mission, situation (including IPB), concept of operations, and tasks that must be accomplished 
+to effectively execute defensive counter air operations. After the OPLAN has been issued, an operational 
+order is then developed. The OPORD is a directive issued by a commander to subordinate commanders for 
+the purpose of effecting the coordinated execution of an operation. The OPORD identifies critical assets that 
+must be protected and levels of protection required. These assets are identified in the DAL, a prioritized 
+listing of assets by operational phase. The OPORD also describes command and support relationships and 
+provides coordinating instructions and ROE for both TBMs and hostile aircraft. 
+
+
+A-21. Depending on the situation and the threat, protection tasks may be conducted for either a short or a 
+long duration, covering the course of several missions or an entire operation or campaign. The staff must 
+coordinate the commander’s protection priorities and risk control measures and clearly communicate them 
+to— 
+
+e Superior, subordinate, and adjacent units. 
+
+e Civilian agencies and personnel that are part of the force or may be impacted by the task or control. 
+
+
+A-22. Upon publication of the OPORD, the protection cell and the protection working group are responsible 
+for monitoring the situation to ensure that the protection tasks approved by the commander are executed 
+according to the plan. 
+
+
+A-23.The command staff incorporates risk management into their running estimates and provides 
+recommendation for control measures to mitigate risk within their particular area of expertise. The unit’s 
+protection coordinator has primary responsibility for ensuring risk management is integrated during all 
+operations process activities: 
+
+
+90 lily 9NAK ATD 2.N1 2 A.2 
+
+
+Appendix A 
+
+
+Commanders and staff use the factors of METT-TC to support hazard identification. 
+Insufficient time for mission preparation often forces commanders to accept greater risk in 
+planning, preparation, and execution of orders and plans associated with mission planning. 
+
+e During hazard assessment, the members of the protection cell identify and prioritize the 
+
+
+commander’s critical assets through the use of the vulnerability assessment and criticality 
+assessment. 
+
+
+AIR AND MISSILE DEFENSE PLANNING 
+
+
+A-24. AMD planning involves joint, multinational, and Army units including the joint forces command, 
+service or functional component commands, AAMDC, the corps, the ADA brigades, the Patriot battalions, 
+and batteries. At each level of command, planning begins with the receipt of a mission from higher 
+headquarters and culminates in the issuance of an OPLAN, which provides planning direction to subordinate 
+commands. The designation plan is usually used instead of order in preparing for operations well in advance. 
+An operation plan may be put into effect at a prescribed time, or on signal, it then becomes the operation 
+order. 
+
+
+A-25. AMD planning is performed concurrently at all echelons, a process known as parallel planning. Figure 
+A-1 shows the planning process performed at each echelon as well as the planning products exchanged 
+between echelons. This planning is summarized in the paragraphs below. 
+
+
+Joint Force 
+Command 
+
+
+Service 
+Develop Functional 
+- Mission/OPORD Component 
+-ATO/ACO Command 
+~ Initial DAL 
+Generate revised 
+DAL, send to lower 
+echelon units 
+Receive/Review 
+Defense Designs 
+
+
+Review 
+
+~ Mission/OPORD 
+
+-ATO/ACO 
+
+~ DAL 
+
+Develop OPLAN and 
+
+OPORD for ADA, send Cee. 
+
+to lower echelon units ~ Mission/OPORD se oe 
+DAL, send to lower -ATO/ACO Sien 
+echelon units ~ DAL 
+
+Receive/Review + Develop OPLAN and OPORD 
+
+
+ADA Brigade 
+(Theater) 
+
+
+Defense Designs, for AO, send to lowerechelon | 
+pass to higher echelon units 
+units + Post Assets to Development 
+Plan Overlay, pass to ADA 
+brigade 
+Roll up Army AMD designs, 
+pass to higher echelon units 
+
+
+~ Mission/OPORD 
+
+- ATO/ACO 
+
+- DAL 
+
+Develop OPLAN and OPORD 
+
+for AO, send to 
+
+Battalion/Battery Py 
+
+Post Assets to Development - Mission/OPORD 
+
+Plan Overlay, pass to ADA - ATO/ACO 
+
+battalion and elements - DAL 
+
+Receive/Review Battalion + Develop OPLAN 
+
+Detailed Defense Design, pass and OPORD for AO 
+
+to higher echelon units = Generate Detailed 
+Defense Designs, 
+pass to higher 
+echelon units 
+
+
+airspace control order air defense artillery 
+
+Army Air And Missile Defense Command area of operations 
+
+air tasking order - Counter- Rockets, Artillery, and Mortar 
+defended asset list operations plan 
+
+operations order Terminal High Altitude Area Defense 
+
+
+Figure A-1. AMD planning process 
+
+
+CAL/DAL AND MISSION PLANS 
+
+
+A-26. Planning tasks for CAL/DAL development include, joint targeting and coordination, and defense 
+design which continue throughout all phases of an operation. CAL/DAL development is based on the 
+commander’s priorities by phase of an operation, availability of AMD resources, and levels of desired 
+protection for each asset. 
+
+
+ATD 2.N1 2 90 lily 9NAKR 
+
+
+ASSEL Frovecuion 
+
+
+CRITICALITY ASSESSMENT 
+
+
+A-27. A criticality assessment identifies key assets that are required to accomplish commander’s mission. It 
+addresses the impact of temporary or permanent loss of key assets or a unit’s ability to perform its mission. 
+It examines costs of recovery and reconstitution including time, dollars, capability, and infrastructure support. 
+The staff must gauge how quickly a lost capability can be replaced before giving an accurate status to the 
+commander. The general sequence for a criticality assessment follows: 
+
+
+e List the key assets and capabilities. 
+
+
+e Determine whether critical functions or combat power can be substantially duplicated with other 
+elements of the command or an external resource. 
+
+
+e Determine the time required to substantially duplicate key assets and capabilities in the event of 
+temporary or permanent loss. 
+
+
+e Prioritize responses threats to personnel, physical assets, and information. 
+
+
+A-28. DAL development is an interactive process that involves subordinate commands. After reviewing the 
+initial DAL, subordinate commanders and their staffs may nominate additional assets for inclusion in the 
+DAL. 
+
+
+A-29. The joint force commander and his staff may incorporate one or more nominees and issue an updated 
+(re-prioritized) DAL, which then becomes the basis for AMD planning and defense design. 
+
+
+A-30. Other critical planning guidance provided by joint force planners includes the ACO and the ATO. The 
+ACO implements the airspace control plan, and provides the details of the approved request for airspace 
+control measures. The ATO also provides specific instructions for tasking forces/capabilities/sorties to 
+specific missions and targets. The ACO is part of the ATO, although it may be transmitted separately. Both 
+are provided to all subordinate echelons of command. All components of the ACO and the ATO should be 
+included in the planning process to give commanders and staff a complete understanding of the air battle. 
+
+
+A-31. The protection cell staff continuously updates the hazard assessment during the operations process. 
+As the staff identifies and modifies a friendly COA, reconnaissance confirms or denies information 
+requirements. As the threat changes, the risk to the force changes. New risks may require different mitigating 
+measures. The protection cell analyzes changes that may require modifications to protection priorities. 
+
+
+A-32. A vulnerability assessment is a command, or unit-level evaluation (assessment) to determine the 
+vulnerability of an air terrorist attack against an installation, unit, exercise, residence, facility, or other site. 
+It identifies areas of improvement to withstand, mitigate, or deter air attack acts of violence or terrorism. The 
+staff addresses the questions of who or what is vulnerable, and how it is vulnerable. The vulnerability 
+assessment determines the susceptibility of the commander’s assets to an air attack by the previously assessed 
+threats. The product of the vulnerability assessment is the identification of physical characteristics or 
+procedures that render critical assets, areas, or special events vulnerable to the range of known or potential 
+threats. The assessment provides a basis for developing controls to eliminate or mitigate vulnerabilities. 
+Vulnerability is the component of risk over which the commander has the most control and greatest influence. 
+The general sequence of a vulnerability assessment is below: 
+
+
+e List assets, capabilities, and the threats against them. 
+e Determine common criteria for assessing vulnerabilities. 
+e Evaluate the assets and capabilities for their vulnerability 
+A-33. After determining what assets to protect and comparing them to the risk, the protection cell develops 
+
+
+risk mitigation measures and makes recommendations to the commander. The CAL is the primary tool used 
+by the protection cell to mitigate risk. 
+
+
+Critical Asset List (CAL) 
+
+
+A-34. The CAL is a prioritized list of assets, normally identified by phase of the operation and approved by 
+commander that should be defended. Once the staff has completed the hazard, criticality and vulnerability 
+assessments, the prioritized list of critical assets is presented to the commander for approval. Commanders 
+typically operate in a resource-constrained environment and have a finite amount of combat power to use for 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 ABR 
+
+
+Appendix A 
+
+
+protecting assets. Therefore, the staff must determine which assets are critical for mission success and 
+recommend priorities with available resources. The list will vary depending on the factors of METT-TC. 
+
+
+Defended Asset List (DAL) 
+
+
+A-35. The vulnerability and criticality assessments, when compared to the assessed hazards, provide the 
+commander with information to make decisions of which assets are the most critical and must have combat 
+power dedicated to their protection and which ones to he can accept risk. For instance, one of five critical 
+assets considered in a given criticality assessment cannot be replaced during an operation, while the other 
+four can. This lack of replacement may then cause that critical asset to become the first priority for protection. 
+
+
+A-36. Not all assets listed on the CAL will receive protection from continuously applied combat power. 
+Critical assets with some protection from applied combat power become part of the DAL. The DAL is a 
+listing of those assets from the CAL prioritized by the commander to be defended with the resources 
+available. The combat power applied may be a weapons system, electronic sensor, obstacle, or some 
+combination of them all. Both the CAL and DAL are dynamic lists. 
+
+
+A-37. Figure A-2 illustrates how the protection cell determines the CAL during planning. This list is dynamic; 
+it changes depending on the mission, phase of the operation, and situation. The protection cell helps 
+commanders to integrate the risk management process with the decision-making process. 
+
+
+Receipt of Mission 
+
+
+! Threat, Criticality & (Vulnerabilit Critical Asset 
+Mission Analysis Assessmen 
+
+
+Y Determine Initial CCIR 
+
+
+COA Development : 5 
+
+
+COAAnalysis |< PROTECTION CELL 
+
+
+PROTECTION 
+Y cats WORKING GROUP 
+COA Comparison | < Refines EEFI, Critical Asset List, and 
+
+
+lena for protection Defended Asset List. Protection cell 
+tasks continually updates the above based 
+
+
+COA Approval upon changes in mission and situation. 
+
+
+Orders Production > Recommends how one or more CSB(ME)s are 
+tailored to meet mission requirements. 
+
+
+AMD air and missile defense engineer 
+
+CBRN chemical, biological, radiological, and nuclear intelligence preparation of the battlefield 
+CCIR commander's critical information requirements operation plan 
+
+COA course of action operation order 
+
+CSB(ME) combat support brigade (maneuver enhancement) provost marshal 
+
+EEFI essential elements of friendly information 
+
+
+Figure A-2. Example CAL and DAL development. 
+
+
+A-38. All of the information gathered during planning is can be compiled into a matrix. These matrices 
+become useful tools for determining which critical assets present a good target for the enemy and should be 
+on the DAL. Ultimately, the commander approves both prioritized lists for dissemination. 
+
+
+AR ATD 2.N1 2 90 lily 9N1AKR 
+
+
+Appendix B 
+UNIT TRAINING 
+
+
+This appendix discusses methods for unit training as it pertains to the combined arms 
+approach to active and passive air defense measures. Because self-defense against 
+aerial attack is closely related to the defensive measures you take against ground attack, 
+training methods can be focused on varying the perspective attack from the air as 
+opposed to attack from the ground. This is especially true for training techniques 
+related to the application of passive air defense measures (camouflage, concealment, 
+and the use of cover). 
+
+
+SELF DEFENSE ACTIONS 
+
+
+B-1. Soldiers must learn to protect themselves while on the battlefield and the right to self-defense is never 
+denied. Combined arms training should emphasis the importance of recognizing signs and identifying 
+enemy patterns when anticipating air attacks before they happen. Units can survive air attacks by mastering 
+active and passive air defense techniques. Combined arms for air defense measures must be taken when 
+early warning and early recognition fails. Learning techniques for delivering volume fire in the path of 
+attacking aircraft can dramatically effect a unit’s survivability changing the outcome. Combined arms forces 
+must be trained to overcome their natural tendencies used to detect, track and identify aerial targets, fire 
+directly at crossing targets, and not to utilize so-called Kentucky windage and Tennessee Elevation 
+techniques. The doctrinal leads have been calculated to give the highest probability of massing the target 
+with fire. In order for Combined Arms for Air Defense to be effective the Soldier must adhere to the unit’s 
+ROE and training program. Other training tasks related to Combined Arms for Air Defense is available on 
+the web at Combined Arms Training Strategies (CATS). 
+
+
+PASSIVE AIR DEFENSE 
+
+
+B-2. Training in passive air defense measures is continuous and is integrated with other field training 
+undertaken by the unit. The trainer should vary the training exercise occasionally by injecting an air attack 
+situation. On command, the unit should immediately disperse and seek cover from the attack. If available, 
+use radio control and/or coordinate actual aircraft to fly simulated attack missions so that the troops can get 
+an idea of the time element of an attack. See Table B-1 for an example checklist of items the trainer should 
+review before and during the attack. 
+
+
+90 Tuihy 9NAK ATD 2.N1 2 Ru1 
+
+
+Appendix D 
+
+
+Table B-1: Example Passive Air Defense Training Checklist 
+
+
+BEFORE THE ATTACK 
+
+Action 
+
+1 Is an air watch being maintained? YES NO 
+
+2 Are vehicles and equipment camouflaged? YES NO 
+
+3 Do the troops know the air attack warning signals? YES NO 
+
+4 Is dispersion the maximum permitted by the terrain and the tactical YES NO 
+situation? 
+
+5 Is available cover used for maximum advantage? YES NO 
+
+DURING THE ATTACK 
+
+Action 
+
+| Was the warning disseminated in time for the unit to take damage- YES NO 
+limiting measures? 
+
+2 Did all elements of the unit receive the warning? YES NO 
+
+3 Was the available cover used effectively? YES NO 
+
+4 Was dispersion used effectively? YES NO 
+
+5 Did the commander maintain close control during the attack? YES NO 
+
+6 Could the unit have engaged the aircraft had the order been given? YES NO 
+
+Note: If the trainer must mark a “No” in any item under “Before the Attack,” stop the training exercise and take corrective action. If 
+
+he marks a “No” in any item under “During the Attack,” he must then assess the unit accordingly. 
+
+
+ACTIVE AIR DEFENSE 
+
+
+B-3. When training in active air defense measures, the trainer assumes that, the individual Soldier knows 
+how to fire his personal weapon. Therefore, training should concentrate on coordination of fire and on 
+correct lead estimation. Fire coordination consists simply of ensuring that the unit acts as a group and in 
+response to command and/or air attack alarms. This means that each individual knows what he is going to 
+do in response to the command “air attack” and that he does it without further instructions. It also means 
+that he holds fire until he receives the “fire” command. 
+
+
+B-4. All Soldiers need to train on combined arms tasks, whether collective or individual in order to be 
+prepared for air attacks in future conflicts. Units must integrate training for air defense and protection into 
+their tactical training and standard operating procedures. Units must practice the passive and active air 
+defense skills they will employ when deploying, while moving cross-country in tactical formations, or 
+moving in convoy, and while stationary. Units must practice and be evaluated on such skills as posting air 
+guards; maintaining cover, concealment, and dispersion (or seeking cover and concealment if attacked in 
+the open); and proper employment of their weapon systems against air threats. Units must follow the 
+guidance contained in their unit’s Standard Operating Procedures. References to assist unit trainers include: 
+
+e ADRP 1-03 AUTL, ART 3.4.2.4 Employ Combined Arms for Air Defense 
+
+e ADRP 1-03 AUTL, ART3.4.3 Deny Enemy Use of Airspace 
+
+
+e Plan convoy security, FM 3-21.10 The Infantry Rifle Company 
+
+
+R29 ATD 2.N1 2 90 Tihs 9N1AK 
+
+
+Glossary 
+
+
+SECTION | - ACRONYMS AND ABBREVIATIONS 
+
+
+AADC 
+AAMDC 
+ACO 
+ADA 
+ADAM 
+ADP 
+ADW 
+AMD 
+ATO 
+BM 
+CAL 
+CBRN 
+CM 
+COA 
+DAL 
+FW 
+
+IPB 
+JFACC 
+LSS 
+METT-TC 
+
+
+OPORD 
+OPLAN 
+
+
+area air defense commander 
+
+army air and missile defense command 
+airspace control order 
+
+air defense artillery 
+
+air defense airspace management 
+
+air defense plan 
+
+air defense warning 
+
+air and missile defense 
+
+Air Tasking Order 
+
+ballistic missiles 
+
+critical asset list 
+
+chemical, biological, radiological and nuclear 
+crusie missile 
+
+course of action 
+
+defended asset list 
+
+fixed-wing 
+
+intelligence preparation of the battlefield 
+joint force air component commander 
+low-slow-small 
+
+
+mission, enemy, terrain and weather, troops and support available, time 
+available, and civil considerations 
+
+
+operations order 
+
+operation plan 
+
+rockets, artillery and mortars 
+
+tule of engagement 
+
+rotary-wing 
+
+short-range air defense 
+
+tactical ballistic missile 
+
+Terminal High-Altitude Area Defense 
+unmanned aircraft systems 
+
+
+SECTION Il - TERMS 
+
+
+active air defense 
+
+
+Direct defensive action taken to destroy, nullify, or reduce the effectiveness of hostile air and missile 
+threats against friendly forces and assets. It includes the use of aircraft, air defense weapons, electronic 
+warfare, and other available weapons (JP 3-01). 
+
+
+airspace control authority (ACA) 
+The commander designated to assume overall responsibility for the operation of the airspace control 
+system in the airspace control area. (JP 3-52) 
+
+
+90 bails 9N1AK 
+
+
+ATD 2.N1 2 Glacearw1 
+
+
+ulossary 
+
+
+airspace control order (ACO) 
+An order implementing the airspace control plan that provides the details of the approved requests for 
+airspace coordinating measures. It is published either as part of the air tasking order or as a separate 
+document (JP 3-52) 
+
+
+air defense (AD) 
+Defensive measures designed to destroy attacking enemy aircraft or missiles in the atmosphere, or to 
+nullify or reduce the effectiveness of such attack. Also called AD. (JP 3-01) 
+
+
+Army forces 
+The Army component and senior Army headquarters of all Army forces assigned or attached to a 
+combatant command, subordinate joint force command, joint functional command, or multinational 
+command. Also called ARFOR. (ADRP 1-02). 
+
+
+critical asset list 
+A prioritized list of assets or areas, normally identified by phase of the operation and approved by the 
+joint force commander that should be defended against air and missile threats. Also called CAL. (JP 3- 
+01) 
+
+defended asset list 
+
+
+A listing of those assets from the critical asset list prioritized by the joint force commander to be 
+defended with the resources available. Also called DAL. (JP 3-01) 
+
+
+engagement 
+1. In air defense, an attack with guns or air-to-air missiles by an interceptor aircraft, or the launch of an 
+air defense missile by air defense artillery and the missile’s subsequent travel to intercept. (JP 3-01) 2. 
+A tactical conflict, usually between opposing lower echelons maneuver forces. (JP 3-0) See also battle; 
+campaign. 
+
+mission command 
+The exercise of authority and direction by the commander using mission orders to enable disciplined 
+initiative within the commander’s intent to empower agile and adaptive leaders in the conduct of 
+unified land operations. (ADP 6-0) 
+
+perational environment 
+A composite of the conditions, circumstances, and influences that affect the employment of 
+capabilities and bear on the decisions of the commander. Also called OE. (JP 3-0) 
+
+passive air defense 
+All measures, other than active air defense, taken to minimize the effectiveness of hostile air and 
+missile threats against friendly forces and assets. (JP 3-01) 
+
+risk management 
+The process of identifying, assessing, and controlling risks arising from operational factors and making 
+decisions that balance risk cost with mission benefits. Also called RM. (JP 3-0) 
+
+rules of engagement 
+Directives issued by competent military authority that delineate the circumstances and limitations 
+
+
+under which United States forces will initiate and/or continue combat engagement with other forces 
+encountered. Also called ROE. (JP 1-04) 
+
+
+Glacearw9 ATD 2.N1 2 90 lil, ON1K 
+
+
+References 
+All URLs were accessed on | December 2015. 
+
+
+REQUIRED PUBLICATIONS 
+These sources must be available to intended users of this publication. 
+ADRP 1-02. Terms and Military Symbols. 7 December 2015. 
+JP 1-02. Department of Defense Dictionary of Military and Associated Terms. 8 November 2010. 
+
+
+RELATED PUBLICATIONS 
+
+
+These sources contain relevant supplemental information. 
+
+
+JOINT PUBLICATION 
+Most joint and Department of Defense doctrinal publications are available online: 
+http://www.dtic.mil/doctrine/new_pubs/jointpub.htm. 
+JP 3-0. Joint Operations, 11 August 2011 
+JP 3-01. Countering Air and Missile Threats, 23 March 2012 
+JP 3-52. Joint Airspace Control, 13 November 2014 
+
+
+ARMY PUBLICATIONS 
+Most Army doctrinal publications are available online: www.apd.army.mil. 
+ADP 6-0. Mission Command, 17 May 2012 
+ADRP 1-03. The Army Universal Task List, 02 October 2015. 
+ADRP 3-0. Unified Land Operations, 16 May 2012. 
+ADRP 5-0. The Operations Process, 17 May 2012. 
+ATP 3-91.1. The Joint Air Ground Integration Center, 18 June 2014 
+FM 3-01. United States Army Air and Missile Defense Operations, 2 November 2015. 
+FM 3-01.7. Air Defense Artillery Brigade Operations, 11 February 2010. 
+FM 3-21.10. The Infantry Rifle Company, 27 July 2006 
+FM 27-10. Law of Land Warfare, 18 July 1956 
+
+
+PRESCRIBED FORMS 
+
+
+None 
+
+
+REFERENCED FORMS 
+
+
+Unless otherwise indicated, DA Forms are available on the Army Publishing Directorate (APD) web 
+site: www.apd.army.mil. 
+
+
+DA Form 2028, Recommended Changes to Publication and Blank Forms. 
+
+
+29 July 2016 ATP 3-01.8 References-1 
+
+
+This page intentionally left blank. 
+
+
+A 
+
+AADC, 2-3, 2-4, 2-4, 2-8, 2-10, 
+2-14, 4-2, A-9, A-11 
+
+AAMDC, A-5, A-11, A-12, A- 
+13, A-14, A-15, A-24 
+
+ACO, A-8, A-30, G-1 
+
+Active air defense, 2-1, 2-8, 3- 
+1, 3-10, 4-1, 4-2, 4-3, 4-4, 4- 
+5, 4-11, B-3, B-4 
+
+
+ADA, 2-2, 2-5, 2-14, 2-17, 3- 
+26, A-13, A-14, A-15 
+
+ADP, 2-13, 2-14, 2-15, A-11 
+
+ADW, 2-2, 2-3, 2-4, 2-13 
+
+airspace control order, A-8, 1-8 
+
+
+AMD, 1-8, 2-13, 4-2, A-2, A-5, 
+A-12, A-14, A-15 
+
+
+ATO, A-8, A-30 
+Autonomous Operations, 2-6, 
+2-16 
+Cc 
+CM, 1-22, 1-23, 1-24 
+COA, 1-45, 3-28, A-31 
+D 
+
+
+defended asset list, A-1, A-6, 
+A-7, A-9, A-16, A-18, A-20, 
+
+
+29 July 2016 
+
+
+Index 
+
+
+Entries are by paragraph number. 
+
+
+A-26, A-28, A-29, A-35, A- 
+36, A-38 
+F 
+Fire Control Orders, 2-6, 2-17 
+FW, 1-8, 1-12, 1-24, 1-32, 1- 
+36, 1-39, 1-40, 1-41, 1-43, 1- 
+49, 2-14, 4-32, 4-35, 4-37 
+M 
+METT-TC, 2-5, 3-17, A-3, A- 
+23, A-34 
+
+
+Mission Planning, 4-17, A-6, A- 
+23 
+
+
+Modes of Control, 2-6, 2-15 
+
+
+Oo 
+OPLAN, A-1, A-14, A-16, A-20, 
+A-24 
+OPORD, A-1, A-2, A-9, A-11, 
+A-16, A-17, A-20, A-22 
+P 
+
+
+Passive Air Defense, 3-1, 3- 
+3-3, 3-4, 3-9, 3-17, 4-4, B- 
+B-2 
+
+
+2, 
+1 
+
+
+R 
+
+
+Right of Self-Defense, 2-6, 2-7, 
+4-4 
+
+
+ATP 3-01.8 
+
+
+ROE, 2-6, 2-7, 2-9, 2-12, 2-16, 
+3-4, 4-2, 4-4, A-2, A-20, B-1 
+
+RW, 1-8, 1-12, 1-19, 1-36, 1- 
+38, 1-39, 1-40, 1-41, 1-42, 1- 
+49, 1-54, 2-12, 2-14, 4-11, 4- 
+31 
+
+
+T 
+
+
+TBM, 1-8, 1-9, 1-21, 1-24, 4- 
+10, A-20 
+THAAD, 2-17, 4-10 
+
+
+U 
+UAS, 1-1, 1-7, 1-8, 1-11, 1-17, 
+1-19, 1-20, 1-27, 1-28, 1-36, 
+1-38, 1-39, 1-40, 1-42, 1-48, 
+1-51, 1-54, 2-12, 2-13, 3-11, 
+3-16, 3-27, 3-28, 3-29, 3-30, 
+3-31, 3-32, 4-8, 4-9, 4-10, 4- 
+12, 4-13, 4-14, 4-15, 4-16, 4- 
+17, 4-19, 4-20, 4-21, 4-22, 4- 
+23, 4-24, 4-25, 4-32 
+Ww 
+
+
+Weapons Control Status, 2-12, 
+2-17 
+
+
+Index-1 
+
+
+This page intentionally left blank. 
+
+
+ATP 3-01.8 
+29 July 2016 
+
+
+By Order of the Secretary of the Army: 
+
+
+MARK A. MILLEY 
+General, United States Army 
+Chief of Staff 
+
+
+Official: 
+
+
+ine Ol 
+
+
+GERALD B. O’KEEFE 
+Administrative Assistant to the 
+Secretary of the Army 
+
+
+1619405 
+
+
+DISTRIBUTION: 
+Active Army, Army National Guard, and United States Army Reserve: Distributed in electronic media 
+only (EMO). 
+
+
