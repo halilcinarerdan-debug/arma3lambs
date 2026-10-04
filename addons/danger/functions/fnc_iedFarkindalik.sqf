@@ -149,34 +149,58 @@ diag_log "[IED-FARK] IED farkindaligi watchdog baslatildi";
                         params ["_u", "_mine", "_grp", "_mineTip", "_yariC"];
                         private _t0 = time;
                         private _ab = _grp getVariable [QGVAR(iedAbort), 0];
+                        private _sebep = "";
+                        // v8.50d: bilinen mayina AI yol planlamasi yaklasmaz (revealMine) -> mayin noktasina doMove asla varmiyordu. Hedef: IED'in kendi tarafimizdaki 5 m onu;
+                        // komut 8 sn'de bir (her sn tekrarlanan doMove yurumeyi sifirliyordu); diger sistemler (bounding / cqb / rearGuard) EOD'ye karismasin diye kilit
+                        private _noktaF = { params ["_uu", "_mm"]; private _mp0 = getPosATL _mm; _mp0 getPos [5, _mp0 getDir _uu] };
+                        private _hedefP = [_u, _mine] call _noktaF;
+                        private _enYakin = _u distance2D _mine;
+                        private _enYakinT = time;
+                        private _sonKomut = -99;
                         waitUntil {
                             sleep 1;
-                            _u doMove (getPosATL _mine);
-                            isNull _mine || {!alive _u} || {(_u distance2D _mine) < 4} || {(time - _t0) > 90} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_grp getVariable [QGVAR(iedAbort), 0]) > _ab}
+                            if (alive _u && {!isNull _mine}) then {
+                                _u setVariable [QGVAR(taktikKilit), time + 6];
+                                _u setVariable [QGVAR(forceMove), true];
+                                if ((time - _sonKomut) > 8) then { _u doMove _hedefP; _sonKomut = time; };
+                                private _dm = _u distance2D _mine;
+                                if (_dm < (_enYakin - 2)) then { _enYakin = _dm; _enYakinT = time; };
+                            };
+                            if !(alive _u) then { _sebep = "EOD oldu"; };
+                            if (isNull _mine) then { _sebep = "IED yok (patladi / silindi)"; };
+                            if ((_grp getVariable [QGVAR(iedAbort), 0]) > _ab) then { _sebep = "ikincil cihaz / yeni IED"; };
+                            if ((_grp getVariable [QGVAR(contact), 0]) > time) then { _sebep = "temas basladi"; };
+                            if ((time - _t0) > 120) then { _sebep = "sure doldu (yaklasamadi, kalan " + str (round (_u distance2D _mine)) + " m)"; };
+                            // 20 sn ilerleme yok ve <= 15 m: engel / yol planlayici -> oldugu yerden calis
+                            (_sebep != "") || {(_u distance2D _mine) <= 6} || {((time - _enYakinT) > 20) && {(_u distance2D _mine) <= 15}}
                         };
-                        if (isNull _mine || {!alive _u} || {(_u distance2D _mine) >= 5.5}) exitWith {
-                            private _sn = if ((_grp getVariable [QGVAR(iedAbort), 0]) > _ab) then {"ikincil cihaz / yeni IED"} else {if (isNull _mine) then {"IED yok (patladi / silindi)"} else {"sure / temas / olu"}};
-                            diag_log format ["[IED-FARK] %1 | imha YARIM KALDI (%3) | %2", name _u, _mineTip, _sn];
-                            // iptal / temas: EOD da IED'den yaricap disina cekilir
+                        _u setVariable [QGVAR(forceMove), nil];
+                        _u setVariable [QGVAR(taktikKilit), nil];
+                        if (_sebep != "") exitWith {
+                            diag_log format ["[IED-FARK] %1 | imha YARIM KALDI (%3) | %2", name _u, _mineTip, _sebep];
                             if (alive _u && {!isNull _mine}) then { _u doMove ((getPosATL _mine) getPos [_yariC + 8, (getPosATL _mine) getDir _u]); };
                         };
+                        diag_log format ["[IED-FARK] %1 | IED'e vardi (%2 m, %3 sn) | %4: calisiyor", name _u, round (_u distance2D _mine), round (time - _t0), _mineTip];
                         // calisma: dur, diz coker, IED'e bak (ACE EOD sureci ~8 sn simule edilir)
                         _u doWatch _mine;
                         _u setUnitPos "MIDDLE";
+                        _u doMove (getPosATL _u);
                         private _bitti = false;
                         private _t1 = time;
                         waitUntil {
                             sleep 1;
-                            (time - _t1) > 8 || {!alive _u} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_grp getVariable [QGVAR(iedAbort), 0]) > _ab} || {(_u distance2D _mine) > 5}
+                            _u setVariable [QGVAR(taktikKilit), time + 4];
+                            (time - _t1) > 8 || {!alive _u} || {isNull _mine} || {(_grp getVariable [QGVAR(contact), 0]) > time} || {(_grp getVariable [QGVAR(iedAbort), 0]) > _ab}
                         };
-                        if (alive _u && {!isNull _mine} && {(_u distance2D _mine) <= 5} && {(_grp getVariable [QGVAR(contact), 0]) <= time}) then {
+                        _u setVariable [QGVAR(taktikKilit), nil];
+                        if (alive _u && {!isNull _mine} && {(_grp getVariable [QGVAR(contact), 0]) <= time} && {(_grp getVariable [QGVAR(iedAbort), 0]) <= _ab}) then {
                             if (_mine isKindOf "MineBase") then { _u action ["Deactivate", _u, _mine]; sleep 1; };
                             if (!isNull _mine) then { deleteVehicle _mine; };
                             _bitti = true;
                         };
                         _u doWatch objNull;
                         _u setUnitPos "AUTO";
-                        diag_log format ["[IED-FARK] %1 | imha %2 | %3 | ACE:%4 | kit:%5", name _u, ["BASARISIZ", "TAMAM"] select _bitti, _mineTip, !isNil "ace_explosives_fnc_defuseExplosive", "ACE_DefusalKit" in (items _u)];
+                        diag_log format ["[IED-FARK] %1 | imha %2 | %3 | ACE:%4 | kit:%5", name _u, ["BASARISIZ (calisma kesildi)", "TAMAM"] select _bitti, _mineTip, !isNil "ace_explosives_fnc_defuseExplosive", "ACE_DefusalKit" in (items _u)];
                     };
                 };
                 if (_logN < 100) then {

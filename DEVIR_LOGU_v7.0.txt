@@ -968,3 +968,9 @@ v8.50c — IED testi (RPT 08:55): EOD (kitli) iki kez de ikinci IED'e (ACE_IED*_
   (4) yaklasma esigi 2.5 -> 4 m; imha YARIM KALDI logu nedeni yazar (IED yok / ikincil cihaz / sure-temas-olu).
   TEMAS: temasta imha yok. Tehlike yaricapi (buyuk IED 55 m, digerleri 30 m) icindekiler yere yatar (setUnitPos DOWN, 14 sn), surunerek yaricap+8 m'ye cekilir;
   disindakiler siperde kalip ates eder, IED'e dogru yurumez; COMBAT / hiz degismez (AWARE / LIMITED yalniz temas yoksa).
+
+v8.50d — IED imhasi hic gerceklesmiyordu (RPT'de hicbir 'imha TAMAM' / 'IED'e vardi' yok). Kok nedenler:
+  (1) tespit edilen mayina revealMine yapildigi icin AI yol planlayicisi o noktaya yaklasmaz; doMove (getPosATL mine) ile "<2.5-4 m" kosulu hic saglanmiyordu;
+  (2) doMove her sn tekrarlaniyordu (yurume komutunu sifirlar) ve bounding / cqbReflex / rearGuard EOD'ye karisabiliyordu.
+  Cozum: hedef = IED'in bize bakan tarafinda 5 m onu; komut 8 sn'de bir; taktikKilit + forceMove ile EOD korunur; 6 m'de varis; 20 sn ilerleme yoksa ve <=15 m ise oldugu yerden calisir;
+  120 sn zaman asimi. Loglar: "IED'e vardi (m, sn)", "imha YARIM KALDI (sebep)", "imha TAMAM".
