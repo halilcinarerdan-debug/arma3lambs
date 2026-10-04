@@ -18,7 +18,7 @@
  *
  * Public: No
 */
-params ["_group", "_target", ["_units", []], ["_delay", 85]];
+params ["_group", "_target", ["_units", []], ["_delay", 85], ["_hazirGecildi", false]];
 
 // group is missing
 if (isNull _group) exitWith {false};
@@ -32,6 +32,54 @@ private _unit = leader _group;
 _target = _target call CBA_fnc_getPos;
 if ((_target select 2) > 6) then {
     _target set [2, 0.5];
+};
+
+// ---------------------------------------------------------------------------
+// v8.63 HAZIRLIK PENCERESI (hucum oncesi ates destegi): hedefe 45-250 m, >= 4 canli asker, grup bastirilmamis, son hazirliktan > 60 sn ise
+//   5-8 sn boyunca lider disindaki herkes hedef konuma BASTIRMA atesi acar (UGL'liler 40 mm'yi ZORLA atar), SONRA asil hucum baslar (ayni fonksiyon, _hazirGecildi = true).
+//   Doktrin ilkesi (genel; sayisal esik kaynaklarda yok): manevra unsuru hareket etmeden once ates unsuru dusmani bastirir. Kapatma: lambs_danger_hazirlikOff = true.  Log: [ZEKA-HAZIRLIK]
+// ---------------------------------------------------------------------------
+private _hazirYap = false;
+if (!_hazirGecildi && {!(missionNamespace getVariable ["lambs_danger_hazirlikOff", false])}) then {
+    private _dM = _unit distance2D _target;
+    private _canliH = (units _group) select {alive _x && {isNull objectParent _x}};
+    private _bskH = (_canliH findIf {(getSuppression _x) > 0.5}) >= 0;
+    private _sonH = time - (_group getVariable [QGVAR(hazirT), -999]);
+    if (_dM > 45 && {_dM < 250} && {(count _canliH) >= 4} && {!_bskH} && {_sonH > 60}) then {
+        _hazirYap = true;
+    } else {
+        if (_dM > 45 && {_dM < 250} && {(missionNamespace getVariable ["lambs_danger_hazirLogN", 0]) < 40}) then {
+            missionNamespace setVariable ["lambs_danger_hazirLogN", (missionNamespace getVariable ["lambs_danger_hazirLogN", 0]) + 1];
+            diag_log format ["[ZEKA-HAZIRLIK] %1 | hedef %2 m | ATLANDI: asker %3 (>=4), baskida:%4, son hazirlik %5 sn once (>60)", groupId _group, round _dM, count _canliH, _bskH, round (_sonH min 9999)];
+        };
+    };
+};
+if (_hazirYap) exitWith {
+    _group setVariable [QGVAR(hazirT), time];
+    private _sn = 5 + (random 3);
+    private _eObj = _unit findNearestEnemy _target;
+    private _nAtes = 0;
+    private _nUgl = 0;
+    {
+        private _u = _x;
+        if (_u isNotEqualTo _unit && {alive _u} && {isNull objectParent _u} && {(primaryWeapon _u) isNotEqualTo ""}) then {
+            _u doWatch _target;
+            _u doSuppressiveFire _target;
+            _nAtes = _nAtes + 1;
+            if (!isNull _eObj && {_eObj isKindOf "CAManBase"} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}])) isNotEqualTo ""}) then {
+                if ([_u, _eObj, true, 2] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}])) then { _nUgl = _nUgl + 1; };
+            };
+        };
+    } forEach (units _group);
+    diag_log format ["[ZEKA-HAZIRLIK] %1 | hedef %2 m | BASTIRMA PENCERESI %3 sn | ates eden:%4 | UGL:%5 | sonra hucum", groupId _group, round (_unit distance2D _target), _sn toFixed 1, _nAtes, _nUgl];
+    [{
+        params ["_g", "_t", "_us", "_d"];
+        if (!isNull _g && {alive leader _g}) then {
+            { if (alive _x) then { _x doWatch objNull; }; } forEach (units _g);
+            [_g, _t, _us, _d, true] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsAssault", {false}]);
+        };
+    }, [_group, _target, _units, _delay], _sn] call CBA_fnc_waitAndExecute;
+    true
 };
 
 // reset tactics

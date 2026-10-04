@@ -1104,3 +1104,7 @@ v8.62 — UGL kullanim sikligi (RPT 13:47: M203 / GP-25'li askerler vardi, 5 dk'
   Gevsetmeler (hepsi kapatilabilir degil; doktrin degil TASARIM tahmini): birim cooldown 9 -> 6 sn; min menzil 40 -> 35 m; kume yaricapi 8 -> 15 m; uygunluk sansi %50 -> %70;
   grup bastirilmissa (getSuppression > 0.3) UGL oncelikli; hucum ailesi kararinda (ASSAULT / SUPPRESS_ASSAULT / FLANK) roleStation UGL'yi ZORLA (hazirlik atesi, salvo 2; guvenlik / mermi / menzil / dost kontrolleri yine yapilir).
   DOKUNULMADI: atisGuvenli yakin engel testi (UGL: namlunun ilk 2.5 m'si; gercek risk: 40 mm yakin engelde erken patlar / sekme). Sonraki RPT'de [UGL-OZET] 'guvenlik' sayisi yuksekse gevsetilecek.
+
+v8.63 — HAZIRLIK PENCERESI (squad taktik zekasi 1/4): fnc_tacticsAssault'a eklendi (5. parametre _hazirGecildi). Hedef 45-250 m, >= 4 canli asker, grup bastirilmamis (getSuppression <= 0.5), son hazirlik > 60 sn:
+  5-8 sn lider disindaki herkes hedef konuma doSuppressiveFire; UGL'liler tacticalUGL'yi ZORLA (salvo 2); sonra asil hucum (ayni fonksiyon, _hazirGecildi = true). Log: [ZEKA-HAZIRLIK] (yapildi / ATLANDI + neden).
+  Kapatma: lambs_danger_hazirlikOff = true. Sayisal esikler TASARIM. NOT: el bombasi kullanimi (bina temizleme) kullanici karariyla ATLANDI; "baştan yazilacak" olarak devir listesinde.
