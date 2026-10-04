@@ -88,7 +88,7 @@ _unit setVariable [QEGVAR(main,currentTask), "Leader Suppress", EGVAR(main,debug
 _group = group _unit;
 _group enableAttack false;
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
+if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "suppress", 1] call FUNC(formSet); };
 _group setVariable [QEGVAR(main,currentTactic), "Suppressing", EGVAR(main,debug_functions)];
 
 // gesture

@@ -156,7 +156,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             _ng setVariable [QGVAR(sniperSide), selectRandom [1, -1]];
             _ng setBehaviour "STEALTH";
             _ng setCombatMode "GREEN";
-            _ng setFormation "FILE";
+            [_ng, "FILE", "sniper", 2] call FUNC(formSet);
             diag_log format [
                 "[SNIPER] %1 | nisanci:%2 (%3) | gozlemci:%4 | ana tim:%5 kisi",
                 groupId _g, name _s, primaryWeapon _s, if (isNull _sp) then {"yok"} else {name _sp}, count (units _g)

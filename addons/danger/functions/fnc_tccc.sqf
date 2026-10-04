@@ -117,7 +117,13 @@ diag_log format [
             !alive _m || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
         };
-        if (!alive _m || {!alive _c} || {(_m distance2D _c) >= 5}) exitWith { [_m, _c] call _birak; };
+        if (!alive _m || {!alive _c} || {(_m distance2D _c) >= 5}) exitWith {
+            // v8.80 IPTAL NEDENI (RPT f8015d87: 5 hekim atandi, 1 yaraliyi bitirdi; digerleri sessizce birakildi)
+            diag_log format ["[TCCC] %1 | %2 -> %3 | IPTAL (yaklasma): %4 | mesafe %5 m | hekim baski %6 | %7 sn", groupId _g, name _m, name _c,
+                ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!alive _m)),
+                round (_m distance2D _c), (getSuppression _m) toFixed 2, round (time - _t0)];
+            [_m, _c] call _birak;
+        };
 
         // 2) baygin ise dusmandan uzaga siperli kenara cek
         if ([_c] call _baygin && {!isNil "ace_dragging_fnc_startDrag"}) then {
@@ -151,7 +157,24 @@ diag_log format [
                 [_m, _c] call ace_dragging_fnc_startDrag;
                 _m doMove _hedef;
                 private _b2 = time + 22;
-                waitUntil { sleep 0.7; !alive _m || {!alive _c} || {(_m distance2D _hedef) < 3} || {time > _b2} };
+                // v8.80 SURUKLEME IZLEME (RPT f8015d87: 'yaraliyi 1-3 m kenara cekti' - hedef 10-15 m; suruklemeye girip durdu): 5 sn'de bir konum / hiz / komut logu; 8 sn'de < 1.5 m ilerlediyse TAKILDI
+                private _dp0 = getPosATL _m;
+                private _dT = time;
+                private _dLog = time + 5;
+                private _takildi = false;
+                waitUntil {
+                    sleep 0.7;
+                    if (time > _dLog) then {
+                        _dLog = time + 5;
+                        diag_log format ["[TCCC] %1 | %2 suruklerken | hedefe %3 m | hiz %4 km/s | komut %5 | anim %6 | baski %7 | ilerleme %8 m", groupId _g, name _m, round (_m distance2D _hedef), round (speed _m), currentCommand _m, animationState _m, (getSuppression _m) toFixed 2, round (_m distance2D _dp0)];
+                    };
+                    if ((time - _dT) > 8 && {(_m distance2D _dp0) < 1.5}) then { _takildi = true; };
+                    !alive _m || {!alive _c} || {(_m distance2D _hedef) < 3} || {time > _b2} || {_takildi}
+                };
+                if (_takildi) then {
+                    diag_log format ["[TCCC] %1 | %2 | SURUKLEME TAKILDI (8 sn'de < 1.5 m): yerinde tedavi | AI PATH:%3 MOVE:%4 ANIM:%5", groupId _g, name _m, _m checkAIFeature "PATH", _m checkAIFeature "MOVE", _m checkAIFeature "ANIM"];
+                    _m enableAI "PATH"; _m enableAI "MOVE"; _m enableAI "ANIM";
+                };
                 if (!isNull (attachedTo _c)) then { [_m, _c] call ace_dragging_fnc_dropObject; };
                 diag_log format ["[TCCC] %1 | %2 yaraliyi %3 m kenara cekti", groupId _g, name _m, round ((getPosATL _c) distance2D _cp)];
             };

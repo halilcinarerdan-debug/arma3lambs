@@ -111,7 +111,7 @@ if (_hazirYap) exitWith {
 _group enableAttack false;
 _group setSpeedMode "FULL";
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
+if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "assault", 1] call FUNC(formSet); };
 
 // find units
 if (_units isEqualTo []) then {

@@ -51,7 +51,7 @@ _target = _target call CBA_fnc_getPos;
 
 // hold-fire combat mode
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "LINE") then { _group setFormation "LINE"; };
+if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "hide", 1] call FUNC(formSet); };
 _group setCombatMode "WHITE";
 _group enableAttack false;
 

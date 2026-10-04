@@ -111,7 +111,7 @@ _group setVariable [QGVAR(bndToken), _bndToken];
             _t2 = _t2 call CBA_fnc_getPos;
             if (_t2 isEqualTo [0,0,0]) then { _t2 = getPosATL _u2 vectorAdd [50, 0, 0]; };
             private _yeniForm = [_u2, _t2, "BOUNDING"] call FUNC(selectFormation);
-            _group setFormation _yeniForm;
+            [_group, _yeniForm, "bounding-baslat", 0] call FUNC(formSet);
 
             {
                 _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
@@ -192,7 +192,7 @@ _group setVariable [QGVAR(bndOrigAtk), attackEnabled _group];
 _group setVariable [QGVAR(bndOrigSpeed), speedMode _group];
 
 private _formation = [_unit, _target, "BOUNDING"] call FUNC(selectFormation);
-_group setFormation _formation;
+[_group, _formation, "bounding-ilk", 0] call FUNC(formSet);
 _group setVariable [QGVAR(dangerFormation), _formation];
 
 _group enableAttack false;
@@ -293,7 +293,7 @@ if (EGVAR(main,debug_functions)) then {
         _g setSpeedMode (_g getVariable [QGVAR(bndOrigSpeed), "NORMAL"]);
         _g setCombatMode (_g getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
         private _of = _g getVariable [QGVAR(bndOrigForm), ""];
-        if (_of isNotEqualTo "") then { _g setFormation _of; };
+        if (_of isNotEqualTo "") then { [_g, _of, "bounding-son", 0] call FUNC(formSet); };
         _g setVariable [QGVAR(dangerFormation), nil];
         (units _g) allowGetIn true;
         {
@@ -515,7 +515,7 @@ if (EGVAR(main,debug_functions)) then {
             // Baski altinda (>= 0.4) formasyon ZORLANMAZ: gercek catismada esner, siper icin bozulur
             private _baskida = ((units _g) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
             if (!_baskida && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df} && {(time - (_g getVariable ["lambs_danger_taktikFormT", -999])) > 25}) then {
-                _g setFormation _df;
+                [_g, _df, "bounding-zorla", 0, 6] call FUNC(formSet);
             };
             sleep 0.5;
         };
@@ -585,7 +585,7 @@ if (EGVAR(main,debug_functions)) then {
             && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}
             && {time > (_group getVariable [QGVAR(formKorumaT), 0])} && {(time - (_group getVariable [QGVAR(taktikFormT), -999])) > 25}) then {
             _group setVariable [QGVAR(formKorumaT), time + 45];
-            _group setFormation _bndFormation;
+            [_group, _bndFormation, "bounding-koru", 0] call FUNC(formSet);
         };
 
         // FORMASYON GUNCELLEME (arazi degisti mi)
@@ -599,7 +599,7 @@ if (EGVAR(main,debug_functions)) then {
             if (_yeniFormasyon isNotEqualTo _bndFormation && {time > (_group getVariable [QGVAR(formKorumaT), 0])}) then {
                 _group setVariable [QGVAR(formKorumaT), time + 20];
                 _group setVariable [QGVAR(dangerFormation), _yeniFormasyon];
-                _group setFormation _yeniFormasyon;
+                [_group, _yeniFormasyon, "bounding-yeni", 0] call FUNC(formSet);
             };
         };
 

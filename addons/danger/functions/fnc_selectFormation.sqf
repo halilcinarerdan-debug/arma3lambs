@@ -27,6 +27,9 @@ params [
 if (_unit isEqualType grpNull) then {_unit = leader _unit;};
 if (isNull _unit) exitWith {"WEDGE"};
 
+// v8.80: lider KARA ARACINDA (APC / IFV / arac) ise COLUMN — arac gruplarinda LINE / WEDGE slot kovalatir (dur-kalk, "mekanize felc")
+if ((vehicle _unit) isNotEqualTo _unit && {(vehicle _unit) isKindOf "LandVehicle"}) exitWith {"COLUMN"};
+
 // TEK KARAR MERKEZI: grup temastaysa BOUNDING / ASSAULT dahil HER baglam komutanin COMBAT kararina baglanir
 // (eskiden BOUNDING "LINE", COMBAT "WEDGE" derdi ve formasyon surekli gidip gelirdi)
 if (_context in ["BOUNDING", "ASSAULT"] && {((group _unit) getVariable [QGVAR(contact), 0]) > time}) then { _context = "COMBAT"; };

@@ -50,7 +50,7 @@ _group enableAttack false;
 if (!(_group getVariable [QGVAR(isExecutingTactic), false]) && {(time - (_group getVariable [QGVAR(contactFormT), -999])) >= 40}) then {
     _group setVariable [QGVAR(contactFormT), time];
     private _cf = _group getVariable [QGVAR(dangerFormation), formation _unit];
-    if ((formation _group) isNotEqualTo _cf) then { _group setFormation _cf; };
+    if ((formation _group) isNotEqualTo _cf) then { [_group, _cf, "contact", 0] call FUNC(formSet); };
     _group setFormDir (_unit getDir _enemy);
 };
 

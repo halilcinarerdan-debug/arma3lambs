@@ -215,7 +215,7 @@ if (EGVAR(main,debug_functions)) then {
         _x enableAI "COVER";
     } forEach (units _group);
 
-    _group setFormation "FILE";
+    [_group, "FILE", "retreat", 2] call FUNC(formSet);
     _group setFormDir (_unit getDir _targetPos);
     _group setSpeedMode "FULL";
     _group enableAttack false;

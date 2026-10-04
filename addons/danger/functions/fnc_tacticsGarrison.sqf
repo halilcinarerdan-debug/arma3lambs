@@ -52,7 +52,7 @@ _target = _target call CBA_fnc_getPos;
 
 // set speed and enableAttack
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "FILE") then { _group setFormation "FILE"; };
+if ((formation _group) isNotEqualTo "FILE") then { [_group, "FILE", "garrison", 1] call FUNC(formSet); };
 _group enableAttack false;
 
 // find units

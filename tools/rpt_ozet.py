@@ -20,7 +20,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.79"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.80"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -567,7 +567,7 @@ def zeka(path):
     if tb:
         ani = [e for e in tb if re.search(r"sakin sure:(\d+)", e[3]) and int(re.search(r"sakin sure:(\d+)", e[3]).group(1)) >= 25]
         print("      ZEKA-TEMAS: %d yeni temas | ani (>=25 sn sakin) %d" % (len(tb), len(ani)))
-    for tag, ad, baslangic in [("ZEKA-HAZIRLIK", "hucum hazirlik penceresi", None), ("ZEKA-BASKI", "baski tufekcisi atamasi", "baslatildi"), ("ZEKA-YAN", "yan koruma / arka emniyet", "baslatildi"), ("ZEKA-NOKTA", "nokta elemani (traveling overwatch)", "baslatildi"), ("ZEKA-YETIM", "tek kalan katilimi", "baslatildi"), ("PANIK", "panik / felc", "baslatildi"), ("GIZLI", "gizli algi (ayak sesi + isik)", "baslatildi")]:
+    for tag, ad, baslangic in [("ZEKA-HAZIRLIK", "hucum hazirlik penceresi", None), ("ZEKA-BASKI", "baski tufekcisi atamasi", "baslatildi"), ("ZEKA-YAN", "yan koruma / arka emniyet", "baslatildi"), ("ZEKA-NOKTA", "nokta elemani (traveling overwatch)", "baslatildi"), ("ZEKA-YETIM", "tek kalan katilimi", "baslatildi"), ("PANIK", "panik / felc", "baslatildi"), ("GIZLI", "gizli algi (ayak sesi + isik)", "baslatildi"), ("MEKANIZE", "mekanize dur-kalk izleyici", "baslatildi")]:
         satir = [e for e in ev if e[2] == tag]
         if baslangic:
             if not any(baslangic in e[3] for e in satir):
@@ -608,6 +608,14 @@ def form_teshis(path):
         print("  %s %s: %d degisim | <20 sn aralikli ardisik: %d | karar: %s" % (durum, g, len(ev), len(hizli), collections.Counter(e[3] for e in ev).most_common(2)))
         if len(hizli) >= 4:
             print("          en sik gecis:", cift.most_common(2), "-> salinim (formasyon felci); kok neden: taktik yeniden cagrilinca eski zamanlayici formasyon geri yaziyor (v8.61 ile giderildi)")
+    # v8.80 formSet hakemi: hangi kaynak kac kez yazdi / kac kez atlandi
+    uyg, atl = collections.Counter(), collections.Counter()
+    for l in open(path, encoding="utf-8", errors="replace").read().splitlines():
+        m = re.search(r"\[FORM-SET\] .*?\| (ATLANDI )?.*?kaynak:([a-z0-9-]+)", l)
+        if m:
+            (atl if m.group(1) else uyg)[m.group(2)] += 1
+    if uyg or atl:
+        print("  [FORM-SET] uygulanan kaynaklar:", dict(uyg.most_common()), "| hakemin ATLADIGI kaynaklar:", dict(atl.most_common()))
     print()
 
 def zaman_cizelgesi(path, grup, aralik):
