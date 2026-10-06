@@ -1447,3 +1447,9 @@ v8.115 - KOMUTAN PLANI: 6 EK + TOPCU + MANUEL NOKTALAR + AAR (kullanici: 'hepsin
   Zeus 'ELITE Plan Noktasi (manuel)' modulu (YENI): RP / ORP / SBF / KANAT1 / KANAT2 / CCP noktalarini Zeus secer; komutan HESAPLAMAK yerine bunu KULLANIR (itiraz etmez, tarihsel hata canlandirma); secim sorunluysa [PLAN-UYARI] (RP objektife < 250 m / gorunur / yolda / acik arazi; ORP < 80 veya > 450 m;
     SBF gorus yok / < 100 / > 450 m; kanat < 60 m; SBF ile kanat ayni ates hatti < 25 derece). Nokta kullanilinca silinir; 'SIL' temizler.
   [PLAN-OZET] (plan bitince; 'ne oldu?'): sonuc (objektif alindi / alinamadi (cekilme) / iptal / grup kalmadi), toplam sure, faz sureleri, grup basina etkin / bayilmis / olu, manuel noktalar, uyarilar; Zeus'lara sohbet mesaji. TEST EDILMEDI.
+
+v8.116 - KOMUTAN PLANI COK OYUNCULU (MP / DEDICATED) DUZELTMESI
+  Sorun (kod incelemesi; RPT yok): Zeus modulleri CURATOR'UN makinesinde calisir (isGlobal 0, local _logic); gruplar ise SUNUCUDA yereldir. fnc_komutanPlan yalniz 'local' gruplari secer -> dedicated sunucuda / Zeus istemcideyken plan 'uygun grup yok' diyerek KURULAMAZDI
+  (tek oyunculu / host = Zeus iken calisirdi). Arkadaslarla PvE (cok oyunculu) icin kritik.
+  Duzeltme: moduleObjektif / modulePlanNokta CBA SUNUCU OLAYI gonderir (lambs_danger_planIstegi / planNoktaIstegi; HashMap -> cift listesi); yeni fnc_komutanPlanKapi (baslangic izleyicisi) sunucuda dinler ve plani sunucuda kurar; manuel noktalar da sunucu hashmap'inde tutulur (marker global). [PLAN-KAPI] logu.
+  SINIR: gruplar headless client'ta ise (HC sahipligi) plan o gruplari goremez (yalniz sunucuda yerel gruplar). TEST EDILMEDI (dedicated).

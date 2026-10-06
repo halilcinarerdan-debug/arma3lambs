@@ -45,7 +45,8 @@ if (_activated && local _logic) then {
                 ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp],
                 ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN]
             ];
-            [_taraf, _obj, _ayar] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {}]);
+            // Zeus modulu curator'un makinesinde calisir; plan gruplarin yerel oldugu SUNUCUDA kurulur (CBA sunucu olayi; HashMap -> cift listesi)
+            ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;
         }, {}, {}, [_obj]
     ] call EFUNC(main,showDialog);
 };
