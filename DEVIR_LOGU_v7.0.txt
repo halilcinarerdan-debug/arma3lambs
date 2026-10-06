@@ -1361,3 +1361,9 @@ v8.101 - HEKIM BETIGI OLUYORDU (RPT 30f9155e) + SINSI-GERI HATASI
 v8.102 - HEKIM TRIYAJ ONCELIGI
   fnc_tccc: yaralilar siralanir: kalp durmasi (+1000) > kanama hizi (x4000, <= 0.2) > dusuk kan hacmi (x25) > bekleme suresi (<= 240 sn, /4). Ilk gorulme zamani tcccGorulduT. Boylece ilk bayilan yarali (RPT 30f9155e: William Miller 4 dk) bekleme puaniyla one cikar.
   Hekim adayi: gercek hekim (rol MEDIC / Medic trait) bounding'den gelen forceMove bayragi yuzunden elenmez (Jake Edwards 'fm' ile atlanip tufekci Robertson hekim atanmisti). Diger asker tipleri icin forceMove kurali ayni.
+
+v8.103 - HEKIM YURUTME TITREMESI (RPT abaa3317)
+  Bulgu: TCCC calisti: [TCCC-TX] UYGULANDI (FirstAidKit -> FieldDressing, 'medicother' animasyonu, kanKaybi 0.006 -> 0.000, tamam 43 sn); ACE-TEDAVI olayi baska (Penthrox, oyuncu / ACE). Kullanici: yaraliya giderken 'minik minik tplene tplene' (titreme).
+  KOK NEDEN: her yaklasma SCRIPT-YURUTME'ye dusuyor (kademe 1-2 sonrasi: 16 m -> 2 m 4 sn, 26 m -> 2 m 7 sn), dongu her 0.15 sn'de playMoveNow + setDir + sabit hiz vektoru -> anim her seferinde basa sariyor.
+  fnc_tccc: anim yalniz kosu animasyonu degilse baslatilir; dir yalniz > 20 derece sapmada; hiz vektoru 0.05 sn'de bir yumusak (0.6 x onceki + 1.2, hedef ~3 m/sn).
+  SURUKLEME: AI surukleme hala devre disi (ACE startDrag AI'da calismiyor). Kendi script surukleme (attachTo + anim) yazilmadi; kullanici karari bekleniyor (kim surukler: hekim mi, en yakin tufekci mi).

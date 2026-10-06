@@ -211,10 +211,14 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     _bitis = _bitis + 14;
                     _m setUnitPos "UP";
                     while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {(getSuppression _m) < 0.9}} do {
-                        _m setDir (_m getDir _c);
-                        _m playMoveNow "AmovPercMrunSrasWrflDf";
-                        _m setVelocityModelSpace [0, 3.2, ((velocityModelSpace _m) select 2)];
-                        sleep 0.15;
+                        // v8.103: pürüzsüz yürütme (kullanici: 'minik minik tplene tplene'): her 0.15 sn'de anim yeniden baslatma + dir snap titreme yapiyordu
+                        //   -> animasyon yalniz kosu degilse baslatilir, yon yalniz > 20 derece sapmada duzeltilir, hiz vektoru 0.05 sn'de bir (hedef hiz yumusak)
+                        private _hDir = _m getDir _c;
+                        if ((abs ((((getDir _m) - _hDir) + 540) mod 360 - 180)) > 20) then { _m setDir _hDir; };
+                        if (((toLower (animationState _m)) find "run") < 0) then { _m playMoveNow "AmovPercMrunSrasWrflDf"; };
+                        private _vm = velocityModelSpace _m;
+                        _m setVelocityModelSpace [0, ((_vm select 1) * 0.6) + 1.2, _vm select 2];
+                        sleep 0.05;
                     };
                     diag_log format ["[TCCC-DURGUN] %1 | %2 -> %3 | SCRIPT-YURUTME | %4 m -> %5 m | %6 sn", groupId _g, name _m, name _c, round _y0, round (_m distance2D _c), round (14 - (_yT - time))];
                     _durT = time; _durPos = getPosATL _m;
