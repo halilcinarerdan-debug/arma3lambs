@@ -1493,3 +1493,10 @@ v8.123 - PLAN: UZAK (BASKA MAKINEDEKI) GRUPLAR SUNUCUYA DEVREDILIR
  - fnc_komutanPlan: yerel filtresi kaldirildi; secilen uzak AI gruplari setGroupOwner 2 ile sunucuya devredilir (en fazla 6 sn bekler), [PLAN-DEVIR] logu. Oyuncu iceren gruplar yine secilmez.
  - Etki: devredilen grubun ELITE izleyicileri artik sunucuda calisir (zaten sunucuda calisan gruplarla ayni).
  - Test edilmedi.
+
+v8.124 - AI GRUPLARI SUNUCUYA DEVIR BEKCISI
+ - Kullanici: Zeus ile konan AI curator PC'sini kasiyor, sunucu 160 FPS bos. Arma'da AI hesabi grubun sahibi makinede yapilir; sahip dusuk FPS ise AI karar / yuruyus kalitesi de duser.
+ - fnc_grupSunucuDevir (yalniz sunucuda, 10 sn, tur basina <= 4 grup): istemcide yerel kalan AI gruplarini setGroupOwner 2 ile sunucuya devreder.
+   Devredilmez: oyuncu iceren grup, Zeus uzaktan kontrol (bis_fnc_moduleRemoteControl_owner), headless client sahibi, olu / bos / sivil, son devirden < 60 sn.
+   Kapatma: lambs_danger_sunucuDevirOff = true. Log: [SUNUCU-DEVIR], [SUNUCU-DEVIR-OZET].
+ - Test edilmedi. Zeus'ta grup duzenleme / waypoint verme sunucuda yerel gruplarla da calisir (Zeus zaten tum gruplari duzenleyebilir).
