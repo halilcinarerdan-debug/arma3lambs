@@ -126,7 +126,7 @@ diag_log format [
         };
 
         // 2) baygin ise dusmandan uzaga siperli kenara cek
-        if ([_c] call _baygin && {!isNil "ace_dragging_fnc_startDrag"} && {(missionNamespace getVariable ["lambs_danger_tcccDragBozuk", 0]) < 3}) then {   // v8.83: AI surukleme 3 kez takilirsa devre disi (RPT c4eedb1d: hepsi 0-1 m)
+        if ([_c] call _baygin && {!isNil "ace_dragging_fnc_startDrag"} && {missionNamespace getVariable ["lambs_danger_tcccSurukleAc", false]} && {(missionNamespace getVariable ["lambs_danger_tcccDragBozuk", 0]) < 3}) then {   // v8.85: varsayilan KAPALI (RPT 820408cd: AI surukleme 8/8 takildi + ACE Release yakalayicisi)   // v8.83: AI surukleme 3 kez takilirsa devre disi (RPT c4eedb1d: hepsi 0-1 m)
             private _tp = [];
             private _sit = _g getVariable [QGVAR(cmdSit), []];
             if (_sit isNotEqualTo [] && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then { _tp = _sit select 7; };

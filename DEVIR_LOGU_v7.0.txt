@@ -1252,3 +1252,9 @@ v8.84 — DIAMOND ARASTIRMASI (kullanici: 'diamond mekanize icin olmasi lazim').
   TC 3-21.76 14-13: diamond 'ic taraftaki atici bastirma atesini kisitlar'; A-4: 'serpentine' (koridor) varyanti yalniz 4 kisilik ekip. SONUC: kullanici haklı — diamond BIRIM / ARAC duzeyi hareket formasyonu; piyade CQB'de uygun degil (v8.83 kaldirma dogru), arac gruplarinda uygun.
   UYGULAMA (selectFormation): lider kara aracinda ise: >= 4 arac + acik arazi + yol disi + son temastan > 60 sn + bilinen dusman yok / > 500 m -> DIAMOND; diger tum arac durumlari COLUMN (slot kovalama / dur-kalk onlemi, v8.80). Arma 3'te tek APC grubu (1 arac) icin diamond anlamsiz -> COLUMN.
   Mekanize dur-kalk duzeltici (v8.82) hala COLUMN'a zorlar. Not: Arma diamond slotlarinin arac gruplarinda dur-kalk uretip uretmedigi OLCULMEDI. TEST EDILMEDI.
+
+v8.85 — RPT 820408cd (v8.84): 'Release hala cikiyor, surukleme calismiyor, oldugu yerde tutuyor'.
+  SURUKLEME: 8/8 AI surukleme denemesi takildi (anim surukleme yurumesi, hiz 0, ilerleme 0-1 m); 3 takilmada devre disi kaliyordu ama ilk 3 denemede Release cikiyordu. Artik varsayilan KAPALI (lambs_danger_tcccSurukleAc = true ile acilir): yaralilar yerinde tedavi edilir, Release yakalayicisi hic kurulmaz.
+  YENI BULGU — hekim yaklasma IPTALLERI: 8 IPTAL 'sure doldu (yetisemedi)' (mesafe 13-58 m, baski 0). Neden: hekimin gorevi bounding emriyle eziliyor (DURUM: Jake Edwards MEDIC gorev 'Bound/Cover(Maneuver)' / forceMove). Duzeltme: tacticsBounding birim listesi / taktik kilidi / uyeler / doFollow'dan
+    tcccBusy > time olan hekimi MUAF tutar. TEST EDILMEDI.
+  v8.83 modulleri bu RPT'de calisti: [RTO] / [GOZCU] / [HALT] / [TEHDIT-OLAY] satirlari goruldu; HALT 'lider 1020 sn duruyor' (sayac hareket ilk 8 sn kural, lider baslangicta duruyor).

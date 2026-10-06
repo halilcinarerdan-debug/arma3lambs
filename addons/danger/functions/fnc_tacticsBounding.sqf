@@ -134,6 +134,8 @@ if (_units isEqualTo []) then {
 if (count _units < 4) then {
     _units = (units _group) select {alive _x && {isNull objectParent _x}};
 };
+// v8.85: TCCC gorevindeki hekim (tcccBusy) bounding emirlerinden MUAF — RPT 820408cd: hekimin gorevi 'Bound/Cover(Maneuver)' ile eziliyor, yaraliya 25 sn'de varamiyor (IPTAL: sure doldu)
+_units = _units select {time > (_x getVariable [QGVAR(tcccBusy), 0])};
 if (count _units < 4) exitWith {
     _group setVariable [QGVAR(bndToken), nil];   // 79. satirdaki temizlik zamanlayicisi bu calismaya dokunmasin
     _group setVariable ["lambs_danger_isBounding", nil];
@@ -536,7 +538,7 @@ if (EGVAR(main,debug_functions)) then {
         _cycleCount = _cycleCount + 1;
         // HAREKET ARBITRAJI: bounding'e katilan HER askere (koşucu + overwatch) taktik kilidi — buddyBond / dispersion / roleStation / rearGuard /
         // coverHug / fieldCraft / cqbReflex bu askerlere hareket emri vermez (RPT: bounding / retreat sirasinda "[BUDDY] ... yanina donuyor")
-        { if (alive _x) then { _x setVariable [QGVAR(taktikKilit), time + 30]; }; } forEach (units _group);
+        { if (alive _x && {time > (_x getVariable [QGVAR(tcccBusy), 0])}) then { _x setVariable [QGVAR(taktikKilit), time + 30]; }; } forEach (units _group);
 
         // Siste periyodik sis (cooldown 45 sn icinde)
         if ((_cycleCount % 3) isEqualTo 2) then {
@@ -624,7 +626,7 @@ if (EGVAR(main,debug_functions)) then {
             alive _ldrT && {isNull objectParent _ldrT} && {!isPlayer _ldrT}
             && {time > (_group getVariable [QGVAR(bndLiderT), 0])}
         ) then {
-            private _uyeler = (units _group) select {alive _x && {_x isNotEqualTo _ldrT} && {isNull objectParent _x}};
+            private _uyeler = (units _group) select {alive _x && {_x isNotEqualTo _ldrT} && {isNull objectParent _x} && {time > (_x getVariable [QGVAR(tcccBusy), 0])}};
             if (count _uyeler >= 2) then {
                 private _mrk = [0, 0, 0];
                 { _mrk = _mrk vectorAdd (getPosATL _x); } forEach _uyeler;
@@ -1089,7 +1091,7 @@ if (EGVAR(main,debug_functions)) then {
             [_group, _target] call FUNC(tacticsAssault);
         } else {
             // Cycle limiti doldu / hedef uzak: kilidi birak, gruba normal davranisi geri ver
-            { if (alive _x) then { _x doFollow (leader _x); }; } forEach (units _group);
+            { if (alive _x && {time > (_x getVariable [QGVAR(tcccBusy), 0])}) then { _x doFollow (leader _x); }; } forEach (units _group);
         };
     };
 };
