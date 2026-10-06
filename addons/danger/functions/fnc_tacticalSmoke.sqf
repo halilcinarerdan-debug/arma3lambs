@@ -140,6 +140,21 @@ private _mod = _mode;
         _sisPos = _aticiPos getPos [(((_aticiPos distance2D _sisPos) max 12) min 38), _aticiPos getDir _sisPos];
         _sisPos set [2, 0];
 
+        // v8.112: AYNI NOKTA kontrolu (RPT 6cdc8fa0: bir bolgede 3 farkli sis). Aci kontrolu atici konumuna gore oldugu icin FARKLI grup / askerlerin ayni noktaya attigi sisleri yakalamiyordu:
+        //   inis noktasinin 22 m'sinde son 75 sn'de planlanan / atilan sis ya da yasayan standart sis nesnesi varsa atis yapilmaz.
+        private _noktaKayit = lambs_danger_sisListe findIf {((_x select 0) distance2D _sisPos) <= 22};
+        private _noktaNesne = (nearestObjects [_sisPos, ["SmokeShell"], 22]) findIf {
+            private _tn = toLower (typeOf _x);
+            ((_tn find "red") < 0) && {(_tn find "green") < 0} && {(_tn find "blue") < 0} && {(_tn find "yellow") < 0} && {(_tn find "purple") < 0} && {(_tn find "orange") < 0}
+        };
+        if (_noktaKayit >= 0 || {_noktaNesne >= 0}) then {
+            lambs_danger_sisEkoSay = (missionNamespace getVariable ["lambs_danger_sisEkoSay", 0]) + 1;
+            if ((missionNamespace getVariable ["lambs_danger_sisEkoN", 0]) < 40) then {
+                lambs_danger_sisEkoN = (missionNamespace getVariable ["lambs_danger_sisEkoN", 0]) + 1;
+                diag_log format ["[SIS-EKONOMI] %1 | mod:%2 | atis %3 ATILMADI: inis noktasinin 22 m'sinde zaten sis var (%4) | toplam atlanan %5", name _atici, _mod, _i + 1, ["planlanmis / atilmis kayit", "yasayan sis nesnesi"] select (_noktaKayit < 0), lambs_danger_sisEkoSay];
+            };
+            continue
+        };
         if (!surfaceIsWater _sisPos) then {
             lambs_danger_sisListe pushBack [_sisPos, time];
             [_atici, _sisPos] call EFUNC(main,doSmoke);

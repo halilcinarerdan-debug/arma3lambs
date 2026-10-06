@@ -1416,3 +1416,8 @@ v8.111 - ARAC - PIYADE SENKRONU + IS'TE DIAMOND YOK (kullanici istegi)
   fnc_aracSenkron (YENI watchdog, 2 sn): arac grubu (lider kara aracinda, surucu AI, icinde >= 2 piyade yolcu yok) en yakin dost PIYADE grubunu (300 m, >= 3 yaya asker; oyuncu grubu dahil) eskort alir; aracin piyade merkezine gore 'onde' mesafesi:
     > 60 m BEKLE (forceSpeed 0), 20-60 m YAVASLA (piyade hizi + 1 m/sn), -40..20 m SENKRON (piyade hizi x 1.1, en az 1.4, en cok 8 m/sn), < -40 m SERBEST (yetis, forceSpeed -1). Dusman < 100 m / baski > 0.5 / cekilme / kacis / aracli medevac / tasiyici ise SERBEST.
     mekanizeIzle forceSpeed -1 duzeltmesi senkron suresince atlanir (senkT). [ARAC-SENKRON] durum degisimleri, [ARAC-SENKRON-OZET]. Kapatma aracSenkronOff; doktrin anahtari aracSenkron. TEST EDILMEDI.
+
+v8.112 - SIS AYNI NOKTA (RPT 6cdc8fa0, v8.110: 'ayni yerde 3 farkli sis')
+  Bulgu: v8.110 sis ekonomisi (aci tabanli, ATICI konumuna gore) calisti ([SIS-EKONOMI] 8 atis atlandi) ama FARKLI grup / askerlerin ayni bolgeye attigi sisleri yakalamadi: 14:41:49-14:41:51 dort farkli grup COVER_MOVE sisini ayni bolgeye atti (farkli atici konumu = farkli aci).
+  fnc_tacticalSmoke: inis noktasi hesaplandiktan sonra 22 m yaricapta son 75 sn'de planlanan / atilan sis (global sisListe) veya yasayan standart sis nesnesi varsa atis iptal ([SIS-EKONOMI] 'inis noktasinin 22 m'sinde'). Aci kontrolu aynen durur.
+  NOT: [ACE] 'targetHR max (desiredHR ...)' hatasi ACE'nin kendi CPR kodundan (_timeSinceROSC), bu pakete ait degil.
