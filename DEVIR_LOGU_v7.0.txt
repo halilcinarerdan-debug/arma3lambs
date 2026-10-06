@@ -1383,3 +1383,8 @@ v8.105 - CEPHANE PASLAMA KOK NEDENI + LOG DESTEGI (kullanici: 'M4 adamda 2 sarjo
   [CEPHANE-NEDEN]: alici var ama verici yok ise (20 sn'de bir) alici, sarjor, sakin, grupta >= 5 sarjorlu asker sayisi; [CEPHANE-OZET] alici_* ve vericiYok_* sayaclari.
   LIDER-DEVRI log: [LIDER-DEVRI-HALEF] (halef degisimi + ilk 3 aday: ad rutbe commanding rol puan), BAYILDI, BAYILMA DEVRI (aday tablosu), DEVIR BASARISIZ (3 sn dogrulama), HALEF YOK, LIDER DEGISTI (motor secimi: eski lider olu / yasiyor, yeni lider, en iyi aday, 'EN IYI ADAY / EN IYI DEGIL'), DUZELTME YOK (fark < 30), MOTOR SECIMI DUZELTILDI; 120 sn ozet sayaclari.
   HQ-DESTEK: [HQ-DESTEK-OZET] 90 sn'de bir NEDEN sayaci: musait destek grubu yok / taarruz grubu yok (karar-temas-mesafe) / telsiz mesafesinde uygun destek yok / yan tepe noktasi bulunamadi / limit / hqEmir reddetti. MERMI: onceki surumdeki gecis + ozet loglari aynen.
+
+v8.106 - CEPHANE (sakin test: bir askerde 2 sarjor, digerleri AWARE, vermediler)
+  Olasi neden (RPT yok, kod okumasi): sarjor sayimi yalniz ILK sarjor sinifini sayiyordu; RHS askerlerin sarjorleri karisik siniflarda (M855A1 / izli / baska) -> verici '>= 5 ayni sinif' saglanmayabiliyor; ayrica verici, alicinin sinifina sahip olmayabiliyor (aktarim bos).
+  Duzeltme: sarjor sayisi = tum uyumlu (40 mm haric) sarjorler; verici adayi = >= 5 uyumlu sarjor ve alicinin silahina uyan en az bir sinif; aktarim sinifi = alicinin sinifi vericide varsa o, yoksa vericinin uyumlu ilk sinifi.
+  [CEPHANE-TANI] (30 sn'de bir, ilk 30): dusuk cephaneli asker + grupta kac asker / tabloya kac girdi (forceMove / taktikKilit / bayilmis elenir) + sakin / aktifAtes + >= 5 sarjorlu verici sayisi. Yeni RPT'de nedeni bu satir ve [CEPHANE-NEDEN] gosterecek.

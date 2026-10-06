@@ -152,15 +152,28 @@ private _calis = {
                 private _env = magazinesAmmo _u;
                 private _ana = _env select {private _k = toLower (_x select 0); _k in _uyum && {!(_k in _glM)}};
                 private _sinifA = if (_ana isEqualTo []) then { "" } else { toLower ((_ana select 0) select 0) };
-                private _sayi = {(toLower (_x select 0)) isEqualTo _sinifA} count _ana;
+                // v8.106: sarjor sayisi = TUM uyumlu (40 mm haric) sarjorler (eskiden yalniz ilk sinif: karisik izli / M855A1 yuklemelerinde verici >= 5 saglanmiyordu)
+                private _sayi = count _ana;
+                private _anaSn = [];
+                { _anaSn pushBackUnique (toLower (_x select 0)); } forEach _ana;
                 private _kap = if (_sinifA isEqualTo "") then { 30 } else { (getNumber (configFile >> "CfgMagazines" >> _sinifA >> "count")) max 1 };
                 private _gl40 = if (_glM isEqualTo []) then { 99 } else { {(toLower (_x select 0)) in _glM} count _env };
-                [_u, _sinifA, _sayi, _kap, _gl40, {(toLower _x) in _frag} count (magazines _u), {(toLower _x) in _dumanA} count (magazines _u), _w, _uyum]
+                [_u, _sinifA, _sayi, _kap, _gl40, {(toLower _x) in _frag} count (magazines _u), {(toLower _x) in _dumanA} count (magazines _u), _w, _uyum, _anaSn]
+            };
+
+            // [CEPHANE-TANI]: dusuk cephaneli asker var ise (30 sn'de bir, ilk 30) durum ozeti: kac asker filtrelendi, sakin mi, verici adaylari
+            private _dusukTbl = _tablo select {(_x select 2) < 3 && {(_x select 7) isNotEqualTo ""}};
+            if (_dusukTbl isNotEqualTo [] && {(time - (_g getVariable [QGVAR(cephaneTaniT), -999])) > 30} && {(missionNamespace getVariable ["lambs_danger_cephaneTaniN", 0]) < 30}) then {
+                _g setVariable [QGVAR(cephaneTaniT), time];
+                missionNamespace setVariable ["lambs_danger_cephaneTaniN", (missionNamespace getVariable ["lambs_danger_cephaneTaniN", 0]) + 1];
+                diag_log format ["[CEPHANE-TANI] %1 | dusuk cephaneli: %2 | gruptaki asker %3, tabloya girenler %4 (forceMove / taktikKilit / bayilmis elenir) | sakin:%5 aktifAtes:%6 | >= 5 sarjorlu verici adayi: %7",
+                    groupId _g, _dusukTbl apply {format ["%1 (%2 sarjor, sinif %3)", name (_x select 0), _x select 2, _x select 1]},
+                    count (units _g), count _us, _sakin, _aktif, {(_x select 2) >= 5} count _tablo];
             };
 
             private _aliciSec = [];
             {
-                _x params ["_u", "_sa", "_sayi", "_kap", "_gl40", "_fr", "_dm", "_w", "_uy"];
+                _x params ["_u", "_sa", "_sayi", "_kap", "_gl40", "_fr", "_dm", "_w", "_uy", "_anaSn"];
                 if ((time - (_u getVariable [QGVAR(cephaneAliciT), -999])) < 15) then { continue };
                 if (_w isNotEqualTo "" && {_sayi < 3} && {(_sayi * _kap) < (2.5 * _kap)}) then { _aliciSec pushBack [_u, "SARJOR", _sa, 1 - (_sayi / 3)]; continue };
                 if (_gl40 < 3) then { _aliciSec pushBack [_u, "40MM", "", 0.8]; continue };
@@ -179,14 +192,12 @@ private _calis = {
                 private _aTbl = _tablo select (_tablo findIf {(_x select 0) isEqualTo _a});
                 private _buddy = _a getVariable [QGVAR(buddy), objNull];
                 // verici adaylari
-                private _aSinif = _aTbl select 1;
                 private _aUyum = _aTbl select 8;
                 private _vAd = _tablo select {
-                    private _vSinif = _x select 1;
                     private _vu = _x select 0;
                     _vu isNotEqualTo _a && {(time - (_vu getVariable [QGVAR(cephaneT), -999])) > 10}
                     && {switch (_tur) do {
-                        case "SARJOR": { (_x select 2) >= 5 && {(((_x select 8) findIf {_x isEqualTo _aSinif}) >= 0) || {(_aUyum findIf {_x isEqualTo _vSinif}) >= 0}} };
+                        case "SARJOR": { (_x select 2) >= 5 && {((_x select 9) findIf {_x in _aUyum}) >= 0} };
                         case "40MM": { false };
                         case "PARCALI": { (_x select 5) >= 3 };
                         case "DUMAN": { (_x select 6) >= 3 };
@@ -194,9 +205,6 @@ private _calis = {
                     }}
                     && {_sakin || {(_vu distance2D _a) <= 6 && {_vu isEqualTo _buddy || {_a isEqualTo (_vu getVariable [QGVAR(buddy), objNull])}}}}
                     && {(_vu distance2D _a) <= 40}
-                };
-                if (_tur isEqualTo "SARJOR" && {(_aTbl select 1) isNotEqualTo ""}) then {
-                    _vAd = _vAd select { private _vt = _x; ((_vt select 8) findIf {_x isEqualTo (_aTbl select 1)}) >= 0 };
                 };
                 if (_vAd isEqualTo []) then {
                     _say set ["vericiYok_" + _tur, (_say getOrDefault ["vericiYok_" + _tur, 0]) + 1];
@@ -216,7 +224,11 @@ private _calis = {
                 private _v = ((_vAd select 0) select 1) select 0;
                 private _vTbl = (_vAd select 0) select 1;
                 private _sinif = switch (_tur) do {
-                    case "SARJOR": { if ((_aTbl select 1) isEqualTo "") then { _vTbl select 1 } else { _aTbl select 1 } };
+                    case "SARJOR": {
+                        // vericinin elindeki, alicinin silahina uyan sinif: alicinin kendi sinifi varsa o, yoksa vericinin en cok sarjoru olan uyumlu sinifi
+                        private _vOrtak = (_vTbl select 9) select {_x in _aUyum};
+                        if ((_aTbl select 1) in _vOrtak) then { _aTbl select 1 } else { _vOrtak param [0, ""] }
+                    };
                     case "PARCALI": { ((magazines _v) select {(toLower _x) in _frag}) param [0, ""] };
                     case "DUMAN": { ((magazines _v) select {(toLower _x) in _dumanA}) param [0, ""] };
                     default { "" };
