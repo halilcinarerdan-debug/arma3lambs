@@ -42,6 +42,30 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 0b) v8.93 BAYGIN HEDEFE PATLAYICI YOK (kullanici: 'yerdeki baygin adami rpg ve el bombasiyla infaz ediyor; etrafta tehdit yoksa gerek yok'):
+        //   atilan el bombasi / roket / fuze / 40mm, birimin hedefi BAYGIN (ACE) bir dusman ise VE hedefin 35 m cevresinde bayilmamis bir dusman yoksa mermi hemen silinir + hedef unutulur.
+        //   (Tufek ateşi serbest: dogrulama atisi; yalniz patlayici israfi / infaz engellenir.) Kapatma: lambs_danger_bayginPatlayiciOff = true.
+        if (!isNull _proj && {!(missionNamespace getVariable ["lambs_danger_bayginPatlayiciOff", false])} && {_simTani in ["shotgrenade", "shotrocket", "shotmissile", "shotshell"]}) then {
+            private _tgt = getAttackTarget _unit;
+            if (isNull _tgt) then { _tgt = assignedTarget _unit; };
+            if (!isNull _tgt && {_tgt isKindOf "CAManBase"} && {alive _tgt} && {((lifeState _tgt) isEqualTo "INCAPACITATED") || {_tgt getVariable ["ACE_isUnconscious", false]}}) then {
+                private _tSide = side (group _tgt);
+                private _bilincliYakin = (_tgt nearEntities ["CAManBase", 35]) findIf {
+                    alive _x && {_x isNotEqualTo _tgt} && {(side (group _x)) isEqualTo _tSide}
+                    && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])}
+                };
+                if (_bilincliYakin < 0) then {
+                    deleteVehicle _proj;
+                    _unit forgetTarget _tgt;
+                    if (isNil "lambs_danger_bayginEngelN") then { lambs_danger_bayginEngelN = 0; };
+                    if (lambs_danger_bayginEngelN < 60) then {
+                        lambs_danger_bayginEngelN = lambs_danger_bayginEngelN + 1;
+                        diag_log format ["[BAYGIN-ROE] %1 | %2 | %3 (%4) baygin hedefe PATLAYICI iptal | hedef %5 | 35 m'de bilincli dusman yok", groupId (group _unit), name _unit, _weapon, _ammo, name _tgt];
+                    };
+                };
+            };
+        };
+
         // 1) El bombasi listesi
         // RHS el bombalari (rhs_ammo_rgd5 / m67...) GrenadeCore'un ALTINDA DEGIL (RPT: GrenadeCore:false, sim:shotgrenade) -> simulation ile de yakala
         if (!isNull _proj && {(_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]) || {_simTani isEqualTo "shotgrenade"}}) then {

@@ -112,8 +112,11 @@ diag_log format [
         private _bitis = time + ((25 max (((_m distance2D _c) / 3) + 8)) min 100);
         _m setUnitPos "UP";
         _m doMove (getPosATL _c);
+        private _tazeT = time + 1.5;
         waitUntil {
             sleep 0.7;
+            // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
+            if (time > _tazeT && {alive _m} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
             !alive _m || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
         };

@@ -79,13 +79,13 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
             if ((count _u) < 3) then { continue };
 
             // TEHDIT BILINCI: launcher'li dusman piyade / tank / APC
-            private _tehditler = _leader targets [true, 350];
+            private _tehditler = _leader targets [true, 450];   // v8.93: 350 -> 450 m (kullanici: karsida RPG goruldu ise mesafe / yigilma yok)
             private _buyukTehdit = (_tehditler findIf {
                 ((secondaryWeapon _x) isNotEqualTo "")
                 || {(vehicle _x) isKindOf "Tank"}
                 || {(vehicle _x) isKindOf "Wheeled_APC_F"}
             }) > -1;
-            private _yaricap = [9, 14] select _buyukTehdit;   // v7.5: 5/8 -> 9/14 (tek RPG / el bombasi hepsini almasin)
+            private _yaricap = [9, 16] select _buyukTehdit;   // v7.5: 5/8 -> 9/14 (tek RPG / el bombasi hepsini almasin)
 
             // Komsu sayilari
             private _komsuSay = _u apply {

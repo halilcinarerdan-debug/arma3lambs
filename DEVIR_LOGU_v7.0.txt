@@ -1303,3 +1303,10 @@ v8.92 — SQUAD EKSIKLERI (kullanici onayi: tehlike alani + cephane dagitimi + e
   fnc_tehlikeAlani: YOL gecisi — grup >= 5 piyade, temas yok, lider yolda degil, beklenen hedef dogrultusunda 20-70 m'de roadAt + ACIK cevre (80 m'de yapi < 6, 40 m'de agac < 6) -> dur + gozetle (8 sn, iki gozetleyici yolun iki ucu) -> takim A (lider + yarisi) gecer -> takim B gecer -> serbest + waypoint yeniden.
     70 sn sinir, temas / retreat aninda hemen serbest. [TEHLIKE-ALANI]. Kapatma lambs_danger_tehlikeAlaniOff. SINIR: yalniz YOL; tepe sirti / acik tarla yok. TEST EDILMEDI (felc riski: ilk testte [TEHLIKE-ALANI] SERBEST sureleri izlenmeli).
   ODA / BINA TEMIZLEME + EL BOMBASI KULLANIMI: en son (kullanici sirasi).
+
+v8.93 - BAYGIN-ROE + MEDEVAC TALEP DUZELTMESI (RPT a331c7eb)
+  fnc_firedHub: hedef bayilmis (INCAPACITATED / ACE_isUnconscious) ve 35 m'de bilincli dusman yoksa roket / bomba / UGL / pompali (shotrocket, shotmissile, shotgrenade, shotshell) mermisi silinir, hedef unutulur [BAYGIN-ROE]. Tufek ateşi serbest. Kapatma lambs_danger_bayginPatlayiciOff.
+  fnc_hqMedevac: KOK NEDEN — bandaj tasiyan HER asker hekim sayiliyordu; grupta bandaj olunca talep hic acilmiyordu ve musait filtresi n>=3 grubu disliyordu. Yeni kural: bos (gercek hekim trait'li) yardimci varsa ve bekleyen < 2 x bos hekim ise talep acilmaz; yoksa talep acilir. Yardimci havuzu temasta olmayan / mesgul olmayan gruplari da alir.
+  fnc_tccc: yaklasma beklemesinde her 1.5 sn doMove tazelenir (baska LAMBS emri yaricap disi birakmasin).
+  fnc_dispersion: lider targets yaricapi 450 m, buyuk tehdit (RPG) dagilma yaricapi 9-16 m.
+  TEST EDILMEDI: [BAYGIN-ROE] ve [HQ-MEDEVAC] satirlari izlenmeli.

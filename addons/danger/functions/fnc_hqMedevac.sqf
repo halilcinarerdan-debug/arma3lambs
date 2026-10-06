@@ -46,7 +46,12 @@ private _atandi = false;
     private _g = _istek get "g";
     if (!([_g, "hqMedevac", true] call FUNC(dk))) then { continue };
     if ((_istek get "temasta") || {(_istek get "temasSure") < 8}) then { continue };
-    if ((units _g) findIf {[_x] call _hekimMi} > -1) then { continue };
+    // v8.93 TALEP KOSULU (RPT a331c7eb: 'corpsman diger squad'lara yardim etmedi'): eski kural 'grupta hekim YOKSA' idi — ama sargisi olan HERKES hekim sayildigi icin hicbir grup yardim istemiyordu.
+    //   Yeni: asil hekim (Medic trait) yok / hepsi mesgul (tcccBusy) / bekleyen baygin sayisi asil hekimlerin 2 kati ve ustu ise yardim istenir.
+    private _asilHek = (units _g) select {[_x] call _bilincli && {_x getUnitTrait "Medic"}};
+    private _bosHek = _asilHek select {time > (_x getVariable [QGVAR(tcccBusy), 0])};
+    private _bekleyen = ({alive _x && {((lifeState _x) isEqualTo "INCAPACITATED") || {_x getVariable ["ACE_isUnconscious", false]}} && {isNull (_x getVariable [QGVAR(tcccBy), objNull])}} count (units _g));
+    if (_asilHek isNotEqualTo [] && {_bosHek isNotEqualTo []} && {_bekleyen < (2 * (count _bosHek))}) then { continue };
 
     private _yaralilar = (units _g) select {
         alive _x
@@ -75,7 +80,8 @@ private _atandi = false;
         {
             private _y = _x;
             if ((_y get "g") isEqualTo _g) then { continue };
-            if (!(_y get "musait")) then { continue };
+            // v8.93: kucuk hekim gruplari (corpsman 1-2 kisi, n < 3) de yardim edebilir: temasta degil + mesgul degil yeterli
+            if (!((_y get "musait") || {!(_y get "temasta") && {!(_y get "mesgul")}})) then { continue };
             private _d = (_y get "poz") distance2D (getPosATL _c);
             if (_d < 40 || {_d > _menzil}) then { continue };
             {
