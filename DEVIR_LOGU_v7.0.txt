@@ -1334,3 +1334,8 @@ v8.97 - TCCC-TX TANI LOGU (kullanici: 'hic animasyona girip turnike yapmalarini 
   RPT bfc418e3: 'tamam' satirlarinda kanKaybi tedaviden sonra da 0.01-0.02 (kanama durmamis) -> tedavi adimlari uygulanmiyor ya da esya yok olabilir; sebep RPT'de gorunmuyordu.
   fnc_tccc: her tedavi adimi icin [TCCC-TX] (ilk 120): YOK-ESYA (hekimin tibbi esyalari listelenir) / UYGULANDI (olay mi dogrudan mi, kanKaybi once -> sonra, hekim animasyon durumu). Yerel hastada ACE yerel fonksiyonu (bandageLocal / tourniquetLocal) dogrudan cagrilir (CBA olay turu yedek).
   Bir sonraki RPT'de [TCCC-TX] satirlari kok nedeni gosterecek.
+
+v8.98 - HEKIM ESYASI (FAK) + BAYILAN HEKIM KAYMASI (RPT fd9aa156)
+  [TCCC-TX] KOK NEDEN: hekimin tibbi esyalari yalniz ["FirstAidKit"] (ACE bandaj / turnike / morfin YOK) -> tum tedavi adimlari YOK-ESYA, hekim varir ama hicbir sey yapmaz (animasyon / turnike gorulmemesi bunun sonucu).
+  fnc_tccc: FirstAidKit, FieldDressing yerine gecer (tcccMalzeme fielddressing = ace_fielddressing + firstaidkit); yarasi olmayan bolgeye esya harcanmaz (ace_medical_openWounds). Turnike / morfin / epinefrin icin ACE esyasi yoksa yapilmaz (tasarim: esya yoksa tedavi yok).
+  BAYILAN HEKIM KAYMASI: SCRIPT-YURUTME dongusu yalniz alive kontrol ediyordu; hekim yolda bayilinca (INCAPACITATED / ACE_isUnconscious) hiz vektoru bayilan hekimi yaralinin ustune kaydiriyordu. Yeni lambs_danger_tcccMedikOk (canli + bayilmamis) tum hekim donguleri / bekleme / tedavi dongusunde kullanilir.

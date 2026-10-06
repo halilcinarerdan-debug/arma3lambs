@@ -57,12 +57,16 @@ diag_log format [
     };
     lambs_danger_tcccMalzeme = createHashMapFromArray [
         ["packingbandage", ["ace_packingbandage"]], ["elasticbandage", ["ace_elasticbandage"]],
-        ["fielddressing", ["ace_fielddressing"]], ["pressurebandage", ["ace_fielddressing", "ace_elasticbandage"]],
+        ["fielddressing", ["ace_fielddressing", "firstaidkit"]], ["pressurebandage", ["ace_fielddressing", "ace_elasticbandage"]],
         ["quikclot", ["ace_quikclot"]], ["applytourniquet", ["ace_tourniquet"]],
         ["morphine", ["ace_morphine"]], ["epinephrine", ["ace_epinephrine"]],
         ["bloodiv", ["ace_bloodiv"]], ["bloodiv_500", ["ace_bloodiv_500"]], ["bloodiv_250", ["ace_bloodiv_250"]],
         ["salineiv", ["ace_salineiv"]], ["salineiv_500", ["ace_salineiv_500"]]
     ];
+    lambs_danger_tcccMedikOk = {
+        params ["_m"];
+        alive _m && {!((lifeState _m) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_m getVariable ["ACE_isUnconscious", false])}
+    };
     lambs_danger_tcccVarMi = {
         params ["_m", "_cls"];
         private _l = lambs_danger_tcccMalzeme getOrDefault [toLower _cls, []];
@@ -93,6 +97,11 @@ diag_log format [
         if (_sinif in ["morphine", "epinephrine"]) then { _tip = 3; };
         if (_tip isEqualTo 0 && {_sinif find "iv" >= 0}) then { _tip = 4; };
         if (_sinif isEqualTo "cpr") then { _tip = 5; };
+        // yarasi olmayan bolgeye esya harcama (FirstAidKit dahil)
+        if (_tip isEqualTo 1) then {
+            private _aw = _c getVariable ["ace_medical_openWounds", createHashMap];
+            if (_aw isEqualType createHashMap && {(_aw getOrDefault [toLower _part, []]) isEqualTo []}) exitWith { false };
+        };
         private _sure = [3, 3.5, 4.5, 2.5, 4, 8] select _tip;
         if (_tip isEqualTo 0 || {isNil "CBA_fnc_targetEvent"} || {_tip < 5 && {_esya isEqualTo ""}}) exitWith {
             // eski yol (yedek)
@@ -104,8 +113,8 @@ diag_log format [
         };
         if (!isNil "ace_medical_ai_fnc_playTreatmentAnim") then { [_m, _cls, false] call ace_medical_ai_fnc_playTreatmentAnim; } else { _m playActionNow "MedicOther"; };
         private _t = time + _sure;
-        waitUntil { sleep 0.3; time > _t || {!alive _m} || {!alive _c} || {(_m distance2D _c) > 6} };
-        if (!alive _m || {!alive _c} || {(_m distance2D _c) > 6}) exitWith {false};
+        waitUntil { sleep 0.3; time > _t || {!([_m] call lambs_danger_tcccMedikOk)} || {!alive _c} || {(_m distance2D _c) > 6} };
+        if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) > 6}) exitWith {false};
         if (_esya isNotEqualTo "") then { _m removeItem _esya; };
         private _dogrudan = local _c;
         switch (_tip) do {
@@ -164,8 +173,8 @@ diag_log format [
         waitUntil {
             sleep 0.7;
             // v8.94: DURGUN tespiti (RPT a331c7eb: hekim 13 m'de 25 sn hic yurumedi) -> 3 sn'de 1 m'den az ilerlediyse kademeli mudahale
-            if (alive _m && {(_m distance2D _durPos) > 1}) then { _durPos = getPosATL _m; _durT = time; _durKademe = 0; };
-            if (alive _m && {alive _c} && {time - _durT > 3} && {(_m distance2D _c) > 3} && {_durKademe < 3}) then {
+            if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _durPos) > 1}) then { _durPos = getPosATL _m; _durT = time; _durKademe = 0; };
+            if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {time - _durT > 3} && {(_m distance2D _c) > 3} && {_durKademe < 3}) then {
                 _durKademe = _durKademe + 1; _durT = time;
                 {_m enableAI _x} forEach ["MOVE", "PATH", "ANIM"];
                 _m setVariable [QGVAR(forceMove), true];
@@ -179,7 +188,7 @@ diag_log format [
                     private _yT = time + 14; private _y0 = _m distance2D _c;
                     _bitis = _bitis + 14;
                     _m setUnitPos "UP";
-                    while {alive _m && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {(getSuppression _m) < 0.9}} do {
+                    while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {(getSuppression _m) < 0.9}} do {
                         _m setDir (_m getDir _c);
                         _m playMoveNow "AmovPercMrunSrasWrflDf";
                         _m setVelocityModelSpace [0, 3.2, ((velocityModelSpace _m) select 2)];
@@ -190,14 +199,14 @@ diag_log format [
                 };
             };
             // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
-            if (time > _tazeT && {alive _m} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
-            !alive _m || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}
+            if (time > _tazeT && {([_m] call lambs_danger_tcccMedikOk)} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
+            !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
         };
-        if (!alive _m || {!alive _c} || {(_m distance2D _c) >= 5}) exitWith {
+        if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 5}) exitWith {
             // v8.80 IPTAL NEDENI (RPT f8015d87: 5 hekim atandi, 1 yaraliyi bitirdi; digerleri sessizce birakildi)
             diag_log format ["[TCCC] %1 | %2 -> %3 | IPTAL (yaklasma): %4 | mesafe %5 m | hekim baski %6 | %7 sn", groupId _g, name _m, name _c,
-                ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!alive _m)),
+                ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!([_m] call lambs_danger_tcccMedikOk))),
                 round (_m distance2D _c), (getSuppression _m) toFixed 2, round (time - _t0)];
             [_m, _c] call _birak;
         };
@@ -262,7 +271,7 @@ diag_log format [
                         diag_log format ["[TCCC] %1 | %2 suruklerken | hedefe %3 m | hiz %4 km/s | komut %5 | anim %6 | baski %7 | ilerleme %8 m", groupId _g, name _m, round (_m distance2D _hedef), round (speed _m), currentCommand _m, animationState _m, (getSuppression _m) toFixed 2, round (_m distance2D _dp0)];
                     };
                     if ((time - _dT) > 8 && {(_m distance2D _dp0) < 1.5}) then { _takildi = true; };
-                    !alive _m || {!alive _c} || {(_m distance2D _hedef) < 3} || {time > _b2} || {_takildi}
+                    !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _hedef) < 3} || {time > _b2} || {_takildi}
                 };
                 if (_takildi) then {
                     diag_log format ["[TCCC] %1 | %2 | SURUKLEME TAKILDI (8 sn'de < 1.5 m): yerinde tedavi | AI PATH:%3 MOVE:%4 ANIM:%5", groupId _g, name _m, _m checkAIFeature "PATH", _m checkAIFeature "MOVE", _m checkAIFeature "ANIM"];
@@ -276,13 +285,13 @@ diag_log format [
                 diag_log format ["[TCCC] %1 | %2 yaraliyi %3 m kenara cekti", groupId _g, name _m, round ((getPosATL _c) distance2D _cp)];
             };
         };
-        if (!alive _m || {!alive _c}) exitWith { [_m, _c] call _birak; };
+        if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c}) exitWith { [_m, _c] call _birak; };
 
         // 3) M — kanama: sarma / paketleme / elastik; durmazsa turnike
         private _guvenli = [_g] call _guvenliFn;
         private _parcalar = ["Body", "LeftLeg", "RightLeg", "LeftArm", "RightArm"];
         private _tur = 0;
-        while {alive _m && {alive _c} && {([_c] call _kanKaybi) > 0.001} && {_tur < 3} && {time < (_t0 + 140)}} do {
+        while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {([_c] call _kanKaybi) > 0.001} && {_tur < 3} && {time < (_t0 + 140)}} do {
             if (_tur >= 1) then {
                 { [_m, _c, _x, "ApplyTourniquet"] call _tx; } forEach ["LeftLeg", "RightLeg", "LeftArm", "RightArm"];
             } else {
@@ -303,13 +312,13 @@ diag_log format [
             // A/R: kalp durmasi -> CPR + epinefrin (ACM'ye ozgu hava yolu / pnomotoraks yapilacak)
             if (_c getVariable ["ace_medical_inCardiacArrest", false]) then {
                 for "_i" from 1 to 5 do {
-                    if (alive _m && {alive _c} && {_c getVariable ["ace_medical_inCardiacArrest", false]}) then { [_m, _c, "Body", "CPR"] call _tx; };
+                    if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {_c getVariable ["ace_medical_inCardiacArrest", false]}) then { [_m, _c, "Body", "CPR"] call _tx; };
                 };
                 if (_c getVariable ["ace_medical_inCardiacArrest", false]) then { [_m, _c, "Body", "Epinephrine"] call _tx; };
             };
             // C: kan hacmi / agri
             private _iv = 0;
-            while {alive _m && {alive _c} && {(_c getVariable ["ace_medical_bloodVolume", 6]) < 5.2} && {_iv < 2}} do {
+            while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_c getVariable ["ace_medical_bloodVolume", 6]) < 5.2} && {_iv < 2}} do {
                 private _ok = false;
                 { if (!_ok) then { _ok = [_m, _c, "LeftArm", _x] call _tx; }; } forEach ["BloodIV_500", "BloodIV", "SalineIV_500", "SalineIV"];
                 _iv = _iv + 1;
