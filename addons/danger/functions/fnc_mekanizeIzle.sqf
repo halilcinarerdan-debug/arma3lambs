@@ -53,7 +53,7 @@ private _calis = {
                 _d forceSpeed -1;
                 _d setVariable [QGVAR(mekFsT), time];
                 _say set ["forceSpeed-kaldirildi", (_say getOrDefault ["forceSpeed-kaldirildi", 0]) + 1];
-                if (_logN < 40) then { _logN = _logN + 1; diag_log format ["[MEKANIZE-YAVAS] %1 | arac %2 | surucu forceSpeed sifirlandi (-1; 15 km/s alti + hareket emri) | komut %4 | beh %5 | hiz modu %6 | mevcut hiz %7 km/s", groupId _g, typeOf _veh, "-", currentCommand _d, behaviour _l, speedMode _g, round (speed _veh)]; };
+                if (_logN < 40) then { _logN = _logN + 1; diag_log format ["[MEKANIZE-YAVAS] %1 | arac %2 | surucu forceSpeed sifirlandi (-1; 15 km/s alti + hareket emri) | komut %3 | beh %4 | hiz modu %5 | mevcut hiz %6 km/s", groupId _g, typeOf _veh, currentCommand _d, behaviour _l, speedMode _g, round (speed _veh)]; };
             };
             _say set ["hizToplam", (_say getOrDefault ["hizToplam", 0]) + (abs (speed _veh))];
             private _hist = _veh getVariable [QGVAR(mekHist), []];
