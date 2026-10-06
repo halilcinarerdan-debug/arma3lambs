@@ -73,6 +73,17 @@ private _yeni = [];
     _u setSkill [_ad, _v];
     _yeni pushBack format ["%1=%2", _ad, _v toFixed 2];
 } forEach _tablo;
+// v8.90 OPTIK ETKISI (kalibrasyon arastirmasi: kaynaklar_doktrin/arastirma_gerceklik/): Arma AI optikten isabet KAZANMAZ (tarama: AI optik avantaji yok) -> USMC ACOG / reflex ile optiksiz AK ayni isabetle atiyordu.
+//   Gercek veri (ARL AD1064518 + USMC ilk-atis calismasi; arama ozeti, GUVEN orta): 200 m acik nisangah ~%71 / optik >%90; 300 m ~%55 / ~%87; USMC 137-432 m ilk atis M16A2 acik %45 / ACOG %88 -> oran ~0.5-0.8.
+//   Optigi (primaryWeaponItems[2]) OLMAYAN birimin aimingAccuracy'si x0.75 (kapatma: lambs_danger_optikSkillOff = true). ACE yukluyken dusuk skill isabeti beklenenden az dusurur (ACE3 #6948) -> etki kucuk olabilir, [SKILL-VARSAYILAN] ile ölc.
+if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_tablo findIf {(_x select 0) isEqualTo "aimingAccuracy"}) >= 0}) then {
+    private _optik = ((primaryWeaponItems _u) param [2, ""]) isNotEqualTo "";
+    if (!_optik && {(primaryWeapon _u) isNotEqualTo ""}) then {
+        private _aa = (_u skill "aimingAccuracy") * 0.75;
+        _u setSkill ["aimingAccuracy", _aa];
+        _yeni pushBack format ["optiksiz x0.75 -> %1", _aa toFixed 2];
+    };
+};
 _u setVariable [QGVAR(skillAyarli), true];
 ["uygulandi"] call _say;
 

@@ -5,6 +5,7 @@ RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
+           --kayip              KAYIP TABLOSU (v8.90): taraf basina OLU + BAYILAN (ACE etkisiz) + oran; gercek hayat hedefiyle karsilastirma icin
            --zeka               TAKTIK ZEKA katmani (v8.60): olum bolgesi hafizasi, karsi pusu, rota gozcusu, HQ otomatik; otomatik cikarim
            --hava-ied           HAVA + IED TESHISI: zaman cizelgesi + otomatik 'neden tepki yok' cikarimi (v8.52 loglari)
            --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
@@ -20,7 +21,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.89"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.90"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -618,6 +619,45 @@ def form_teshis(path):
         print("  [FORM-SET] uygulanan kaynaklar:", dict(uyg.most_common()), "| hakemin ATLADIGI kaynaklar:", dict(atl.most_common()))
     print()
 
+def kayip_tablosu(path):
+    """Taraf basina olu + bayilan (ACE: gorev 'Incapacitated') sayisi. Taraf: [ZEKA-OLUM] (WEST / EAST / GUER) ve [DOKTRIN-PROFIL] fraksiyon adindan cikarilir."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    taraf = {}
+    for l in L:
+        m = re.search(r"\[ZEKA-OLUM\] (Alpha [0-9-]+) \((WEST|EAST|GUER|INDEPENDENT)\)", l)
+        if m:
+            taraf[m.group(1)] = m.group(2)
+    for l in L:
+        m = re.search(r"\[DOKTRIN-PROFIL\] (Alpha [0-9-]+) \| faction:([A-Za-z0-9_]+)", l)
+        if m and m.group(1) not in taraf:
+            f = m.group(2).lower()
+            taraf[m.group(1)] = "EAST" if any(k in f for k in ("opf", "ists", "rus", "chn", "taliban", "irgc")) else ("GUER" if any(k in f for k in ("ind", "guer", "fia", "aaf", "nato_")) else "WEST")
+    bayilan = {}
+    for l in L:
+        m = re.search(r"\[DURUM\] (Alpha [0-9-]+) \| ([A-Za-z' -]+?) \|.*gorev:Incapacitated", l)
+        if m:
+            bayilan.setdefault(m.group(1), set()).add(m.group(2).strip())
+    olu = {}
+    for l in L:
+        m = re.search(r"\[OLAY\] (Alpha [0-9-]+) \| Casualty \| \[\"?\"?([^\"]+)", l)
+        if m:
+            olu.setdefault(m.group(1), set()).add(m.group(2))
+    print("=" * 78)
+    print(path, "| KAYIP TABLOSU (olu = Casualty olayi, bayilan = [DURUM] gorev:Incapacitated; ikisi ust uste olabilir)")
+    ozet = {}
+    for g in sorted(set(bayilan) | set(olu) | set(taraf)):
+        t = taraf.get(g, "?")
+        o, b = len(olu.get(g, ())), len(bayilan.get(g, ()))
+        print("  %-10s %-6s olu:%-3d bayilan:%-3d" % (g, t, o, b))
+        ozet.setdefault(t, [0, 0])
+        ozet[t][0] += o
+        ozet[t][1] += b
+    for t, (o, b) in ozet.items():
+        print("  TOPLAM %-6s olu:%d bayilan:%d etkisiz(toplam):%d" % (t, o, b, o + b))
+    print("  NOT: 'etkisiz' ust uste sayilmis olabilir (bayilip olenler iki satirda). Hedef tablo: kaynaklar_doktrin/arastirma_gerceklik/README_GERCEKLIK_KALIBRASYON.md")
+    print()
+
+
 def zaman_cizelgesi(path, grup, aralik):
     """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
     ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
@@ -664,6 +704,7 @@ if __name__ == "__main__":
     hava_ied_modu = False
     zeka_modu = False
     form_modu = False
+    kayip_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -681,13 +722,17 @@ if __name__ == "__main__":
             zeka_modu = True; i += 1
         elif args[i] == "--form":
             form_modu = True; i += 1
+        elif args[i] == "--kayip":
+            kayip_modu = True; i += 1
         else:
             yollar.append(args[i]); i += 1
     if not yollar:
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if form_modu:
+        if kayip_modu:
+            kayip_tablosu(p)
+        elif form_modu:
             form_teshis(p)
         elif zeka_modu:
             zeka(p)
