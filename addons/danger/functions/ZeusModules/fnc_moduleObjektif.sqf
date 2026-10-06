@@ -33,7 +33,7 @@ if (_activated && local _logic) then {
             ["Ates destegi (topcu / havan)", "LIST", "Tarafin topcu / havan araclari (artilleryScanner) kullanilir. Hazirlik: kesiften sonra saldiriya kadar objektife. Cagri: saldiri basinda ve objektif temizlenmezse. Dost mesafesi < RED (TC 3-21.76 Tablo 3-3: 60 mm ~145, 82 mm ~195, 120 mm ~430, 105 / 155 mm ~455 m) ise o arac ATMAZ; <= 600 m: DANGER CLOSE loglanir. Topcu yoksa atlanir.", ["Yok", "Hazirlik atesi", "Cagri atesi", "Hazirlik + cagri"], 0],
             ["Topcu atis sayisi (mermi)", "SLIDER", "Atis seansi basina mermi.", [1, 12], [1, 2], 4, 0],
             ["Rally point mesafesi (m)", "SLIDER", "Toplanma noktasi objektiften bu kadar geride, ortulu.", [250, 900], [10, 50], 450, 0],
-            ["ORP mesafesi (m)", "SLIDER", "Objektif toplanma noktasi. KAYNAK: TC 3-21.76 s. 7-15: ORP tipik olarak objektiften 200-400 m (veya en az bir buyuk arazi ogesi geride); sinirli gorusta 100-200 m (s. 7-20). Ses ve gorus disinda olmali.", [100, 400], [10, 25], 300, 0],
+            ["ORP mesafesi (m)", "SLIDER", "Objektif toplanma noktasi. KAYNAK: TC 3-21.76 s. 7-15: ORP tipik olarak objektiften 200-400 m (veya en az bir buyuk arazi ogesi geride); sinirli gorusta 100-200 m (s. 7-20). Ses ve gorus disinda olmali.", [100, 400], [10, 25], 300, 0]
         ],
         {
             params ["_data", "_args"];
