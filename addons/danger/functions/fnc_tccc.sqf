@@ -38,6 +38,26 @@ diag_log format [
     !isNil "ace_medical_treatment_fnc_treatment", !isNil "ace_dragging_fnc_startDrag", !isNil "ace_medical_status_fnc_getBloodLoss"
 ];
 
+// v8.100: ACE'nin KENDI AI tedavisi (medical_ai) de dahil her yerel tedavi olayini logla (kullanici: 'medic calisti, RPT'de goremiyorsan sorun loglamada')
+if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"}) then {
+    lambs_danger_tcccAceDinleyici = true;
+    lambs_danger_tcccAceN = 0;
+    {
+        private _ev = _x;
+        [_ev, {
+            if (lambs_danger_tcccAceN >= 200) exitWith {};
+            private _e = _thisArgs;
+            private _hasta = [_this select 0, _this select 1] select (_e isEqualTo "ace_medical_treatment_cprLocal");
+            if !(_hasta isEqualType objNull) exitWith {};
+            private _yakin = (_hasta nearEntities ["CAManBase", 8]) select {_x isNotEqualTo _hasta && {alive _x} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {(side (group _x)) isEqualTo (side (group _hasta))}};
+            _yakin = [_yakin, [], {_x distance2D _hasta}, "ASCEND"] call BIS_fnc_sortBy;
+            private _hk = [objNull, _yakin select 0] select (_yakin isNotEqualTo []);
+            lambs_danger_tcccAceN = lambs_danger_tcccAceN + 1;
+            diag_log format ["[ACE-TEDAVI] %1 | hasta %2 (%3) | parametre %4 | en yakin bilincli dost: %5 (%6 m)", _e, name _hasta, groupId (group _hasta), (_this select [1, 2]), ["-", name _hk] select (!isNull _hk), ["-", round (_hk distance2D _hasta)] select (!isNull _hk)];
+        }, _ev] call CBA_fnc_addEventHandlerArgs;
+    } forEach ["ace_medical_treatment_bandageLocal", "ace_medical_treatment_tourniquetLocal", "ace_medical_treatment_medicationLocal", "ace_medical_treatment_ivBagLocal", "ace_medical_treatment_cprLocal"];
+};
+
 [] spawn {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 

@@ -1345,3 +1345,7 @@ v8.99 - EL BOMBASI + BAYGIN (RPT 9ccb4953)
   fnc_firedHub: shotGrenade icin hedef bossa mermi hizindan balistik inis noktasi (basit, surtunmesiz) hesaplanir, 12 m'deki en yakin dusman hedef sayilir; ayni kural (baygin + 35 m'de bilincli dusman yok) -> bomba silinir [BAYGIN-ROE].
   fnc_cephanePaylas: parcali bomba listesinde satchel / demo / tnt / bundle gibi patlayici yukler vardi (7 sinif) -> elenir; duman sinifi 0 cikiyordu (RHS duman adlari 'smoke' icermiyor) -> shotSmoke simulasyonu, isik / chemlight / strobe haric. Boot logu 14 sinif yazar.
   GOZLEM (cozulmedi): [GERI-CEKILME-TAKILI] 40 satir: EAST Alpha 1-2 geri cekilirken askerler PRONE + komut MOVE + hiz 0 + beh AWARE, AI PATH / MOVE / ANIM acik, bekleyen hedef 'LEADER PLANNED' -> TCCC hekim durgunluguyla ayni belirti (genel 'MOVE komutu verilen PRONE asker yurumuyor'); ortak neden henuz bilinmiyor.
+
+v8.100 - ACE-TEDAVI LOGU
+  Kullanici: medic calisti (Zeus'ta bazi gruplari silip yalniz yaralilari birakinca tedavi etti) ama RPT'de gorunmedi. Olasilik: tedaviyi ACE'nin kendi AI hekimi (medical_ai healingLogic) yapti, [TCCC] kodu yalniz kendi atamalarini loglar.
+  fnc_tccc: ace_medical_treatment_{bandage,tourniquet,medication,ivBag,cpr}Local CBA olaylari dinlenir -> [ACE-TEDAVI] hasta / grup / parametre / en yakin bilincli dost (ilk 200). Boylece kaynak (ACE AI mi, TCCC mi) ayirt edilir. TEST EDILMEDI.
