@@ -34,6 +34,34 @@ if ((count _alive) < 2) exitWith {[_alive] + (_eodlar apply {[_x]})};
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
 // ---------------------------------------------------------------------------
+// v8.108 ONCELIKLI ESLER: MG + MG asistani, AT + AT asistani (asistan 'bittikce mermi saglar' — cephanePaylas: asistan MG'nin esi olarak oncelikli verici)
+//   asistan turu: fnc_asistanTur (sinif / gorunen ad); genel 'ASIST' ikisine de eslesir. Kalan askerler asagidaki yilan eslestirmesine girer (ozyineleme).
+// ---------------------------------------------------------------------------
+private _asistFn = missionNamespace getVariable ["lambs_danger_fnc_asistanTur", {""}];
+private _on = [];
+private _kullanilan = [];
+{
+    private _agir = _x;
+    private _rol = [_agir] call _rolFn;
+    if !(_rol in ["MG", "AT"]) then { continue };
+    private _hedefTur = [_rol + "_ASIST", "ASIST"];
+    private _adaylar = _alive select {
+        !(_x in _kullanilan) && {_x isNotEqualTo _agir} && {([_x] call _asistFn) in _hedefTur}
+    };
+    if (_adaylar isEqualTo []) then { continue };
+    _adaylar = [_adaylar, [], {_x distance2D _agir}, "ASCEND"] call BIS_fnc_sortBy;
+    private _as = _adaylar select 0;
+    _on pushBack [_agir, _as];
+    _kullanilan pushBack _agir;
+    _kullanilan pushBack _as;
+} forEach (_alive select {([_x] call _rolFn) in ["MG", "AT"]});
+if (_on isNotEqualTo []) exitWith {
+    private _kalan = _alive select {!(_x in _kullanilan)};
+    private _geri = if (count _kalan >= 1) then { [_kalan] call FUNC(buddyPairs) } else { [] };
+    _on + _geri + (_eodlar apply {[_x]})
+};
+
+// ---------------------------------------------------------------------------
 // ONCELIK SKORU
 // ---------------------------------------------------------------------------
 private _skorlu = _alive apply {

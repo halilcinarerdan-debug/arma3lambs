@@ -106,6 +106,14 @@ private _calis = {
     missionNamespace setVariable ["lambs_danger_cephaneAdim", "basladi"];
     private _aktarFn = missionNamespace getVariable "lambs_danger_cephaneAktarFn";
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
+    private _asistFn = missionNamespace getVariable ["lambs_danger_fnc_asistanTur", {""}];
+    private _uygunMag = {
+        params ["_envL", "_uyumL", "_glL"];
+        _envL select {
+            private _k = toLower (_x select 0);
+            _k in _uyumL && {!(_k in _glL)} && {(getNumber (configFile >> "CfgMagazines" >> (_x select 0) >> "count")) > 3}
+        }
+    };
     private _mags = missionNamespace getVariable ["lambs_danger_fnc_uglMags", {[]}];
     // v8.96: RHS / mod bombalari Throw muzzle listesinde tek sinif gorunuyordu (RPT bfc418e3: parcali 1) -> sinif mermi simulasyonundan (shotGrenade / shotSmoke)
     private _frag = []; private _dumanA = [];
@@ -122,6 +130,25 @@ private _calis = {
             if (_sim isEqualTo "shotsmoke" && {!_isik}) then { _dumanA pushBackUnique _mn; };
         } forEach (getArray (configFile >> "CfgWeapons" >> "Throw" >> _mz >> "magazines"));
     } forEach (("isClass _x && {isArray (_x >> 'magazines')}" configClasses (configFile >> "CfgWeapons" >> "Throw")) apply {configName _x});
+    // v8.107: RHS M67 vb. config taramasinda bulunamadi (parcali 2: yalniz khattabka) -> sinif ENVANTERDEKI mermiden: ammo simulation shotGrenade (parcali) / shotSmoke (duman), 40 mm (UGL) birimin kendi UGL listesinden elenir
+    private _turCache = createHashMap;
+    private _turFn = {
+        params ["_m", ["_glList", []]];
+        private _k = toLower _m;
+        if (_k in _glList) exitWith {""};
+        private _r = _turCache get _k;
+        if (!isNil "_r") exitWith {_r};
+        private _ammo = getText (configFile >> "CfgMagazines" >> _m >> "ammo");
+        private _sim = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));
+        private _ad = _k + "|" + toLower _ammo;
+        private _yikim = ["charge", "satchel", "demo", "bundle", "mine", "claymore", "c4", "explosive", "tnt", "sb3kg", "40mm", "g_40", "shell"] findIf {(_ad find _x) >= 0} >= 0;
+        private _isik = ["chem", "strobe", "flare", "light", "tracer", "ir_"] findIf {(_ad find _x) >= 0} >= 0;
+        private _t = "";
+        if (_sim isEqualTo "shotgrenade" && {!_yikim} && {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit")) >= 5}) then { _t = "F"; };
+        if (_sim isEqualTo "shotsmoke" && {!_isik}) then { _t = "S"; };
+        _turCache set [_k, _t];
+        _t
+    };
     diag_log format ["[CEPHANE] bomba siniflari (mermi simulasyonundan): parcali %1 %2 | duman %3 %4", count _frag, _frag select [0, 14], count _dumanA, _dumanA select [0, 14]];
     private _say = createHashMap;
     private _ozetT = time + 90;
@@ -169,7 +196,7 @@ private _calis = {
                 { _anaSn pushBackUnique (toLower (_x select 0)); } forEach _ana;
                 private _kap = if (_sinifA isEqualTo "") then { 30 } else { (getNumber (configFile >> "CfgMagazines" >> _sinifA >> "count")) max 1 };
                 private _gl40 = if (_glM isEqualTo []) then { 99 } else { {(toLower (_x select 0)) in _glM} count _env };
-                [_u, _sinifA, _sayi, _kap, _gl40, {(toLower _x) in _frag} count (magazines _u), {(toLower _x) in _dumanA} count (magazines _u), _w, _uyum, _anaSn]
+                [_u, _sinifA, _sayi, _kap, _gl40, {([_x, _glM] call _turFn) isEqualTo "F"} count (magazines _u), {([_x, _glM] call _turFn) isEqualTo "S"} count (magazines _u), _w, _uyum, _anaSn, _glM, _env]
             };
 
             // [CEPHANE-TANI]: dusuk cephaneli asker var ise (30 sn'de bir, ilk 30) durum ozeti: kac asker filtrelendi, sakin mi, verici adaylari
@@ -208,13 +235,18 @@ private _calis = {
                     private _vu = _x select 0;
                     _vu isNotEqualTo _a && {(time - (_vu getVariable [QGVAR(cephaneT), -999])) > 10}
                     && {switch (_tur) do {
-                        case "SARJOR": { (_x select 2) >= 5 && {((_x select 9) findIf {_x in _aUyum}) >= 0} };
+                        case "SARJOR": {
+                            // v8.108: donor = envanterindeki (40 mm haric) ALICININ silahina uyan sarjorler; MG / AT asistani kendi agir silahcisina 2 sarjorda bile verir (kendinde >= 1 kalir), digerleri >= 5
+                            private _asistEsi = ([_vu] call _asistFn) isNotEqualTo "" && {_vu isEqualTo _buddy || {_a isEqualTo (_vu getVariable [QGVAR(buddy), objNull])}};
+                            private _vm = [_x select 11, _aUyum, _x select 10] call _uygunMag;
+                            (count _vm) >= ([5, 2] select _asistEsi)
+                        };
                         case "40MM": { false };
                         case "PARCALI": { (_x select 5) >= 3 };
                         case "DUMAN": { (_x select 6) >= 3 };
                         default { false };
                     }}
-                    && {_sakin || {(_vu distance2D _a) <= 6 && {_vu isEqualTo _buddy || {_a isEqualTo (_vu getVariable [QGVAR(buddy), objNull])}}}}
+                    && {_sakin || {(_vu distance2D _a) <= ([6, 15] select (([_vu] call _asistFn) isNotEqualTo "")) && {_vu isEqualTo _buddy || {_a isEqualTo (_vu getVariable [QGVAR(buddy), objNull])}}}}   // temasta yalniz esler; asistan-agir silahci cifti 15 m
                     && {(_vu distance2D _a) <= 40}
                 };
                 if (_vAd isEqualTo []) then {
@@ -236,17 +268,23 @@ private _calis = {
                 private _vTbl = (_vAd select 0) select 1;
                 private _sinif = switch (_tur) do {
                     case "SARJOR": {
-                        // vericinin elindeki, alicinin silahina uyan sinif: alicinin kendi sinifi varsa o, yoksa vericinin en cok sarjoru olan uyumlu sinifi
-                        private _vOrtak = (_vTbl select 9) select {_x in _aUyum};
-                        if ((_aTbl select 1) in _vOrtak) then { _aTbl select 1 } else { _vOrtak param [0, ""] }
+                        // vericinin envanterindeki, alicinin silahina uyan sinif: alicinin kendi sinifi varsa o, yoksa vericinin ilk uyumlu sinifi
+                        private _vmC = ([_vTbl select 11, _aUyum, _vTbl select 10] call _uygunMag) apply {toLower (_x select 0)};
+                        if ((_aTbl select 1) in _vmC) then { _aTbl select 1 } else { _vmC param [0, ""] }
                     };
-                    case "PARCALI": { ((magazines _v) select {(toLower _x) in _frag}) param [0, ""] };
-                    case "DUMAN": { ((magazines _v) select {(toLower _x) in _dumanA}) param [0, ""] };
+                    case "PARCALI": { ((magazines _v) select {([_x, _vTbl select 10] call _turFn) isEqualTo "F"}) param [0, ""] };
+                    case "DUMAN": { ((magazines _v) select {([_x, _vTbl select 10] call _turFn) isEqualTo "S"}) param [0, ""] };
                     default { "" };
                 };
                 if (_sinif isEqualTo "") then { continue };
                 // sarjor: alici 4 sarjora tamamlanir (en fazla 3), verici kendinde >= 4 birakir
-                private _adet = if (_tur isEqualTo "SARJOR") then { (((4 - (_aTbl select 2)) max 1) min 3) min (((_vTbl select 2) - 4) max 1) } else { 1 };
+                private _adet = 1;
+                if (_tur isEqualTo "SARJOR") then {
+                    private _vN = count ([_vTbl select 11, _aUyum, _vTbl select 10] call _uygunMag);
+                    private _asistV = ([_v] call _asistFn) isNotEqualTo "" && {_v isEqualTo _buddy || {_a isEqualTo (_v getVariable [QGVAR(buddy), objNull])}};
+                    private _kalir = [4, 1] select _asistV;   // verici kendinde en az bu kadar birakir
+                    _adet = (((4 - (_aTbl select 2)) max 1) min 3) min ((_vN - _kalir) max 1);
+                };
                 private _sebep = format ["alici %1 (kalan %2 sarjor / %3 parcali / %4 duman) | verici stok %5 | %6", _tur, _aTbl select 2, _aTbl select 5, _aTbl select 6, _vTbl select 2, ["buddy / en cok stok", "esi"] select (_v isEqualTo _buddy)];
                 _basladi = true;
                 _g setVariable [QGVAR(cephaneGrupT), time + 10];

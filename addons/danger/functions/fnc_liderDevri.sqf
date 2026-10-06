@@ -79,6 +79,11 @@ private _calis = {
             private _halef = objNull; private _halefSkor = -1e9;
             { if ((_x select 1) isNotEqualTo _l) exitWith { _halef = _x select 1; _halefSkor = _x select 0; }; } forEach _puanli;
             private _eskiHalef = _g getVariable [QGVAR(halef), objNull];
+            // yapiskanlik (RPT 38f4018a: esit puanli onbasilar arasinda halef 2 sn'de bir degisiyordu): eski halef hala aday ve en iyiden <= 1 puan geride ise degismez
+            if (!isNull _eskiHalef && {_eskiHalef isNotEqualTo _l} && {_eskiHalef isNotEqualTo _halef}) then {
+                private _ei = _puanli findIf {(_x select 1) isEqualTo _eskiHalef};
+                if (_ei >= 0 && {((_puanli select _ei) select 0) >= (_halefSkor - 1)}) then { _halef = _eskiHalef; _halefSkor = (_puanli select _ei) select 0; };
+            };
             _g setVariable [QGVAR(halef), _halef];
             _g setVariable [QGVAR(halefSkor), _halefSkor];
             if (_eskiHalef isNotEqualTo _halef) then {
