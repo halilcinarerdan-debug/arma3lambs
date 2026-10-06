@@ -1437,3 +1437,13 @@ v8.114 - OBJEKTIF MODULU COKMESI (RPT ffdca817: 'sistem coktu, HUD acinca Zeus b
   (Error ==: Type Array...) ~2500 kez / 15 sn; dialog hic tamamlanmadi, modul nesnesi silinmedigi icin tekrar tetiklendi -> hata dongusu, Zeus arayuzu kilitlendi. Bizim [PLAN] kodu hic calismadi (RPT'de [PLAN] satiri yok).
   Duzeltme: Taraf = LIST (BLUFOR / OPFOR / INDEP, indeks -> taraf); modul nesnesi dialog acilmadan SILINIR (dialog hata verse bile tekrar tetiklenmez); geri cagirimlar yalniz konumu tasir.
   DERS: ucuncu taraf UI fonksiyonu (showDialog) icin repoda kullanilmayan tipleri (SIDE) KULLANMA; kaynagini okumak yetmedi, ilk testte denenmemis dialog tipi.
+
+v8.115 - KOMUTAN PLANI: 6 EK + TOPCU + MANUEL NOKTALAR + AAR (kullanici: 'hepsini yaz'; 'manuel destek'; 'rally pointi biz secelim, o an canlandirilsin, ne olurdu sorusu')
+  Zeus 'ELITE Objektif' modulu yeni alanlar: gorev tipi 'ONAY VER' (bekleyen plani baslat), TEMPO / KOMUTAN NIYETI (dengeli / sessiz-gizli / hizli-agresif), BASLAMA (H-saati: hemen / 30 / 60 / 120 / 300 sn / Zeus onayi), SURE SINIRI (sinirsiz / 10-45 dk),
+    TEHDIT YONU (savunma; 8 yon), KISITLAR (siviller var -> korleme destek atesi yok; binalara agir silah / bomba yasak), ATES DESTEGI (topcu / havan: hazirlik / cagri / ikisi, mermi sayisi).
+  Uygulama (fnc_komutanPlanDongu): tempo -> waypoint davranis / hiz (STEALTH + LIMITED + ates disiplini GREEN; hizli: FULL, kesif 10 sn; sessiz: kesif 70 sn); H-saati kapisi (KUR) + Zeus onayi; sure siniri -> ele gecirde CEKILME (tacticsRetreat) / savunmada BITTI;
+    savunma sektorleri tehdit yonunde yogun (+-110 derece), DESTEK / MG grubu tam karsida; topcu (hazirlik KESIF'te, cagri SALDIRI basi + 150 sn sonra duşman hala varsa): tarafin artilleryScanner araclari, dost < 150 m ise ATIS YOK ([PLAN-TOPCU]);
+    CCP: rally yaninda isaret + aracli medevac CCP'ye tasir; ROE: lambs_danger_agirYasak -> firedHub binadaki hedefe patlayici iptal [PLAN-ROE].
+  Zeus 'ELITE Plan Noktasi (manuel)' modulu (YENI): RP / ORP / SBF / KANAT1 / KANAT2 / CCP noktalarini Zeus secer; komutan HESAPLAMAK yerine bunu KULLANIR (itiraz etmez, tarihsel hata canlandirma); secim sorunluysa [PLAN-UYARI] (RP objektife < 250 m / gorunur / yolda / acik arazi; ORP < 80 veya > 450 m;
+    SBF gorus yok / < 100 / > 450 m; kanat < 60 m; SBF ile kanat ayni ates hatti < 25 derece). Nokta kullanilinca silinir; 'SIL' temizler.
+  [PLAN-OZET] (plan bitince; 'ne oldu?'): sonuc (objektif alindi / alinamadi (cekilme) / iptal / grup kalmadi), toplam sure, faz sureleri, grup basina etkin / bayilmis / olu, manuel noktalar, uyarilar; Zeus'lara sohbet mesaji. TEST EDILMEDI.

@@ -77,6 +77,9 @@ private _gorev = {
 
     // (3) toplanma noktasina surus
     private _tp = _yPos getPos [350, _yon];
+    // v8.115: aktif komutan planinin yarali toplama noktasi (CCP) 1000 m icindeyse arac oraya tasir
+    private _ccpAday = (missionNamespace getVariable ["lambs_danger_planCCPlar", []]) select {(_x select 1) isEqualTo (side _vg) && {((_x select 2) distance2D _yPos) < 1000}};
+    if (_ccpAday isNotEqualTo []) then { _tp = (_ccpAday select 0) select 2; };
     if (_iptal isEqualTo "") then {
         if (surfaceIsWater _tp) then { _tp = _yPos getPos [200, _yon]; };
         diag_log format ["[ARAC-MEDEVAC] %1 | YUKLENDI %2 | toplanma noktasina %3 m", groupId _vg, _yuklenen apply {name _x}, round (_v distance2D _tp)];

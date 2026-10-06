@@ -80,6 +80,23 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 0c) v8.115 PLAN ROE: 'binalara agir silah / bomba yasak' (Zeus Objektif kisiti): grup bayragi lambs_danger_agirYasak; hedef (ya da bomba iniş noktasi) bir binanin 15 m'sindeyse patlayici iptal
+        if (!isNull _proj && {(group _unit) getVariable ["lambs_danger_agirYasak", false]} && {_simTani in ["shotgrenade", "shotrocket", "shotmissile", "shotshell"]}) then {
+            private _hedefP = [];
+            private _tg = getAttackTarget _unit;
+            if (isNull _tg) then { _tg = assignedTarget _unit; };
+            if (!isNull _tg) then { _hedefP = getPosATL _tg; };
+            if (_hedefP isEqualTo [] && {_simTani isEqualTo "shotgrenade"}) then { _hedefP = (getPosATL _unit) getPos [((_unit distance2D _proj) max 20) min 35, getDir _unit]; };
+            if (_hedefP isNotEqualTo [] && {((nearestObjects [_hedefP, ["House"], 15]) findIf {count (_x buildingPos -1) > 0}) >= 0}) then {
+                deleteVehicle _proj;
+                if (isNil "lambs_danger_planRoeN") then { lambs_danger_planRoeN = 0; };
+                if (lambs_danger_planRoeN < 40) then {
+                    lambs_danger_planRoeN = lambs_danger_planRoeN + 1;
+                    diag_log format ["[PLAN-ROE] %1 | %2 | %3 (%4) binadaki hedefe patlayici IPTAL (plan kisiti: binalara agir silah / bomba yasak)", groupId (group _unit), name _unit, _weapon, _ammo];
+                };
+            };
+        };
+
         // 1) El bombasi listesi
         // RHS el bombalari (rhs_ammo_rgd5 / m67...) GrenadeCore'un ALTINDA DEGIL (RPT: GrenadeCore:false, sim:shotgrenade) -> simulation ile de yakala
         if (!isNull _proj && {(_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]) || {_simTani isEqualTo "shotgrenade"}}) then {

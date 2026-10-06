@@ -44,6 +44,20 @@ if (_tip isEqualTo 2) exitWith {
     _n > 0
 };
 
+// ONAY VER: Zeus onayi bekleyen plani baslat
+if (_tip isEqualTo 3) exitWith {
+    private _n = 0;
+    {
+        private _p = _y;
+        if ((_p get "taraf") isEqualTo _taraf && {_p getOrDefault ["bekleOnay", false]}) then {
+            _p set ["bekleOnay", false];
+            _n = _n + 1;
+        };
+    } forEach lambs_danger_planlar;
+    diag_log format ["[PLAN] ONAY: %1 tarafinin %2 plani onaylandi", _taraf, _n];
+    _n > 0
+};
+
 // ---------------------------------------------------------------------------
 // KATILAN GRUPLAR: taraf, yerel, AI lider, >= 3 asker, baska plana bagli degil, objektife <= 4000 m; en yuksek rutbe + buyuk grup + yakin
 // ---------------------------------------------------------------------------
@@ -162,6 +176,69 @@ private _kanatGerek = _mg || _bina || (_sayi >= 8);
 private _kanatNokta = [_obj getPos [110, _B + 75], _obj getPos [110, _B - 75]];
 
 // ---------------------------------------------------------------------------
+// MANUEL NOKTALAR (Zeus 'ELITE Plan Noktasi'): komutan hesapladigi noktalar yerine Zeus'un sectigini KULLANIR (emri uygular, itiraz etmez); sistem yalniz [PLAN-UYARI] loglar (tarihsel canlandirma: 'ne olurdu?')
+// ---------------------------------------------------------------------------
+private _manuel = missionNamespace getVariable ["lambs_danger_planManuel", createHashMap];
+private _uyarilar = [];
+private _manuelAd = [];
+private _uyar = {
+    params ["_ad", "_metin"];
+    _uyarilar pushBack format ["%1: %2", _ad, _metin];
+    diag_log format ["[PLAN-UYARI] %1 | %2", _ad, _metin];
+};
+private _gorunur = { params ["_p"]; !(terrainIntersectASL [AGLToASL (_p vectorAdd [0, 0, 1.2]), AGLToASL (_obj vectorAdd [0, 0, 1.5])]) };
+private _ccp = _rp getPos [25, _B + 90];
+{
+    private _tip2 = _x;
+    private _p = _manuel getOrDefault [format ["%1|%2", _taraf, _tip2], []];
+    if (_p isNotEqualTo []) then {
+        _manuelAd pushBack _tip2;
+        private _d = _p distance2D _obj;
+        switch (_tip2) do {
+            case "RP": {
+                _rp = _p;
+                if (_d < 250) then { ["RP", format ["objektife cok yakin (%1 m < 250 m): ates / gorus altinda toplanma", round _d]] call _uyar; };
+                if ([_p] call _gorunur) then { ["RP", "objektiften GORUNUR (arazi gorusu var)"] call _uyar; };
+                if (isOnRoad _p) then { ["RP", "yol uzerinde (pusu / IED riski)"] call _uyar; };
+                private _pr = [_p, 30, _obj] call _araziFn;
+                if ((_pr getOrDefault ["olu", 1]) < 0.3) then { ["RP", format ["acik arazide (olu arazi orani %1)", (_pr getOrDefault ["olu", 0]) toFixed 2]] call _uyar; };
+            };
+            case "ORP": {
+                _orp = _p;
+                if (_d < 80) then { ["ORP", format ["objektife cok yakin (%1 m < 80 m)", round _d]] call _uyar; };
+                if (_d > 450) then { ["ORP", format ["objektiften cok uzak (%1 m > 450 m): saldiri hatti kopuk", round _d]] call _uyar; };
+                if ([_p] call _gorunur) then { ["ORP", "objektiften GORUNUR"] call _uyar; };
+            };
+            case "SBF": {
+                _sbf = _p;
+                if !([_p] call _gorunur) then { ["SBF", "destek noktasinin objektife arazi GORUSU YOK (ates veremez)"] call _uyar; };
+                if (_d < 100) then { ["SBF", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; };
+                if (_d > 450) then { ["SBF", format ["etkili menzil disinda (%1 m > 450 m)", round _d]] call _uyar; };
+            };
+            case "KANAT1": { _kanatNokta set [0, _p]; if (_d < 60) then { ["KANAT1", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; }; };
+            case "KANAT2": { _kanatNokta set [1, _p]; if (_d < 60) then { ["KANAT2", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; }; };
+            case "CCP": {
+                _ccp = _p;
+                if ([_p] call _gorunur) then { ["CCP", "yarali toplama noktasi objektiften GORUNUR"] call _uyar; };
+            };
+        };
+        _manuel deleteAt (format ["%1|%2", _taraf, _tip2]);
+        deleteMarker (format ["ELITE_MANUEL_%1_%2", _taraf, _tip2]);
+        diag_log format ["[PLAN-MANUEL] %1 | %2 = MANUEL nokta kullanildi (%3, objektife %4 m)", _taraf, _tip2, mapGridPosition _p, round _d];
+    };
+} forEach ["RP", "ORP", "SBF", "KANAT1", "KANAT2", "CCP"];
+if !("CCP" in _manuelAd) then { _ccp = _rp getPos [25, _B + 90]; };
+// destek noktasi ile kanat noktasi ayni hat uzerinde ise dost atesi riski
+if ("SBF" in _manuelAd || {"KANAT1" in _manuelAd} || {"KANAT2" in _manuelAd}) then {
+    {
+        private _kn = _x;
+        if (abs ((((_obj getDir _sbf) - (_obj getDir _kn)) + 540) mod 360 - 180) < 25) then {
+            ["SBF/KANAT", "destek noktasi ile kanat noktasi AYNI ates hattinda (dost atesi riski, < 25 derece)"] call _uyar;
+        };
+    } forEach _kanatNokta;
+};
+
+// ---------------------------------------------------------------------------
 // PLAN KAYDI
 // ---------------------------------------------------------------------------
 if (isNil "lambs_danger_planSay") then { lambs_danger_planSay = 0; };
@@ -180,22 +257,37 @@ private _isaretler = [];
     ["OBJ", _obj, "mil_objective", format ["%1 OBJ", _id]],
     ["RP", _rp, "mil_start", format ["%1 RP", _id]],
     ["ORP", _orp, "mil_triangle", format ["%1 ORP", _id]],
-    ["SBF", _sbf, "mil_dot", format ["%1 SBF (destek)", _id]]
+    ["SBF", _sbf, "mil_dot", format ["%1 SBF (destek)", _id]],
+    ["CCP", _ccp, "mil_pickup", format ["%1 CCP (yarali toplama)", _id]]
 ];
+// yarali toplama noktasi (CCP): rally point'in yaninda; araçli medevac buraya tasir
+if (isNil "lambs_danger_planCCPlar") then { lambs_danger_planCCPlar = []; };
+lambs_danger_planCCPlar pushBack [_id, _taraf, _ccp];
 
 private _plan = createHashMapFromArray [
     ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
-    ["ayar", _ayar], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap]
+    ["ayar", _ayar], ["tempo", _ayar getOrDefault ["tempo", 0]], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
+    ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
+    ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
+    ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
-{ _x setVariable ["lambs_danger_planAktif", true, true]; _x setVariable ["lambs_danger_planId", _id]; } forEach _gruplar;
+{
+    _x setVariable ["lambs_danger_planAktif", true, true];
+    _x setVariable ["lambs_danger_planId", _id];
+    _x setVariable ["lambs_danger_agirYasak", _ayar getOrDefault ["agirYasak", false]];
+} forEach _gruplar;
 lambs_danger_planlar set [_id, _plan];
 
-diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | %7 grup: %8 | RP %9 (%10 m) | ORP %11 (%12 m) | SBF %13 | yaklasma ekseni %14 | duşman: piyade:%15 zirh:%16 AT:%17 MG:%18 nisanci:%19 bina:%20 sayi:%21 | kanat gerekli:%22",
+diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | %7 grup: %8 | RP %9 (%10 m) | ORP %11 (%12 m) | SBF %13 | yaklasma ekseni %14 | duşman: piyade:%15 zirh:%16 AT:%17 MG:%18 nisanci:%19 bina:%20 sayi:%21 | kanat gerekli:%22 | tempo:%23 | H-saati:%24 | sure sinir:%25 sn | tehdit yonu:%26 | siviller:%27 agir silah yasak:%28 | topcu:%29",
     _id, _taraf, ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1), mapGridPosition _obj, groupId _komutanG, rank (leader _komutanG), _gn,
     _gruplar apply {format ["%1=%2 (%3)", groupId _x, _roller get (groupId _x), {alive _x} count (units _x)]},
     mapGridPosition _rp, round (_rp distance2D _obj), mapGridPosition _orp, round (_orp distance2D _obj), mapGridPosition _sbf, round _B,
-    _ayar getOrDefault ["piyade", true], _zirh, _atVar, _mg, _ayar getOrDefault ["nisanci", false], _bina, _sayi, _kanatGerek];
+    _ayar getOrDefault ["piyade", true], _zirh, _atVar, _mg, _ayar getOrDefault ["nisanci", false], _bina, _sayi, _kanatGerek,
+    ["dengeli", "sessiz / gizli", "hizli / agresif"] select ((_ayar getOrDefault ["tempo", 0]) min 2),
+    ["hemen", "30 sn", "60 sn", "120 sn", "300 sn", "ZEUS ONAYI BEKLENIYOR"] select ((_ayar getOrDefault ["basla", 0]) min 5),
+    _plan get "sureSn", [_plan get "tehditB", "bilinmiyor"] select ((_plan get "tehditB") < 0), _plan get "sivil", _plan get "agirYasak",
+    ["yok", "hazirlik", "cagri", "hazirlik + cagri"] select ((_ayar getOrDefault ["topcu", 0]) min 3)];
 if (_zirh && {!_atVar} && {({([_x] call _destekPuan) >= 3} count _gruplar) isEqualTo 0}) then {
     diag_log format ["[PLAN] %1 UYARI: duşmanda zirh / arac var ama katilan gruplarda AT gucu zayif", _id];
 };
