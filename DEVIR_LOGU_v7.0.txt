@@ -1470,3 +1470,9 @@ v8.119 - SICRAMA MENZIL SINIRI (kaynakli esik)
  - fnc_tacticsBounding: kosucunun siper adayi, gozetleyen (FSE) elemanin etkili menzilinin 2/3'u (~307 m, 5.56 icin) icinde kalmali.
    Kosucu zaten menzil disindaysa filtre atlanir (kilitlenme olmasin). Kaynak: MCWP 3-11.1 (bkz. SAYISAL_ESIKLER_KAYNAK_TABLOSU.md).
  - Test edilmedi. Kalan 4 oneri (farside 250 m, hucum pozisyonu ~50 m, dagilma 3-5/1-3 m, 4 kisilik sedye) kodlanmadi.
+
+v8.120 - OBJEKTIF PANELI 3 KUCUK PANELE BOLUNDU
+ - Kullanici: panel 20 alanla tum ekrani kapliyor, OK / Close tiklanamiyor. fnc_moduleObjektif artik 3 panel zinciri:
+   1/3 gorev (7 alan), 2/3 dusman bilgisi (7), 3/3 kisit / destek / mesafe (6). Her biri onceki OK'inda sonraki karede acilir (CBA_fnc_execNextFrame).
+   Iptal = plan kurulmaz. Planin kendisi (ayar HashMap, sunucu olayi) degismedi.
+ - Test edilmedi (oyunda panellerin sigdigi dogrulanmadi).
