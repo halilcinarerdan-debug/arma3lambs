@@ -77,8 +77,14 @@ diag_log format [
         if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {false};
         private _sinif = toLower _cls;
         private _l = lambs_danger_tcccMalzeme getOrDefault [_sinif, []];
-        private _esya = if (_l isEqualTo []) then {""} else { private _i = (items _m) findIf {(toLower _x) in _l}; if (_i < 0) then {""} else {(items _m) select _i} };
-        private _tip = if (_sinif in ["fielddressing", "packingbandage", "elasticbandage", "quikclot"]) then {1} else { if (_sinif isEqualTo "applytourniquet") then {2} else { if (_sinif in ["morphine", "epinephrine"]) then {3} else { if (_sinif find "iv" >= 0) then {4} else { if (_sinif isEqualTo "cpr") then {5} else {0} } } } };
+        private _esya = "";
+        if (_l isNotEqualTo []) then { private _i = (items _m) findIf {(toLower _x) in _l}; if (_i >= 0) then { _esya = (items _m) select _i; }; };
+        private _tip = 0;
+        if (_sinif in ["fielddressing", "packingbandage", "elasticbandage", "quikclot"]) then { _tip = 1; };
+        if (_sinif isEqualTo "applytourniquet") then { _tip = 2; };
+        if (_sinif in ["morphine", "epinephrine"]) then { _tip = 3; };
+        if (_tip isEqualTo 0 && {_sinif find "iv" >= 0}) then { _tip = 4; };
+        if (_sinif isEqualTo "cpr") then { _tip = 5; };
         private _sure = [3, 3.5, 4.5, 2.5, 4, 8] select _tip;
         if (_tip isEqualTo 0 || {isNil "CBA_fnc_targetEvent"} || {_tip < 5 && {_esya isEqualTo ""}}) exitWith {
             // eski yol (yedek)
