@@ -1357,3 +1357,7 @@ v8.101 - HEKIM BETIGI OLUYORDU (RPT 30f9155e) + SINSI-GERI HATASI
   fnc_sinsiGeri: cmdSit bos iken _sit select 1 (eager) hatasi 104 kez -> sinsiGeri yarim kaliyordu; duzeltildi.
   NOT: RPT'de 'addWeaponWithAttachmentsCargoGlobal' / setHitPointDamage hatalari baska (mission / Zeus) betiklerinden, bu pakete ait degil.
   DERS: ACE gibi dis fonksiyon cagrilari surum imzasi dogrulanmadan eklenmemeli; scriptli hata ucuncu taraf fonksiyonda tum betigi oldurur.
+
+v8.102 - HEKIM TRIYAJ ONCELIGI
+  fnc_tccc: yaralilar siralanir: kalp durmasi (+1000) > kanama hizi (x4000, <= 0.2) > dusuk kan hacmi (x25) > bekleme suresi (<= 240 sn, /4). Ilk gorulme zamani tcccGorulduT. Boylece ilk bayilan yarali (RPT 30f9155e: William Miller 4 dk) bekleme puaniyla one cikar.
+  Hekim adayi: gercek hekim (rol MEDIC / Medic trait) bounding'den gelen forceMove bayragi yuzunden elenmez (Jake Edwards 'fm' ile atlanip tufekci Robertson hekim atanmisti). Diger asker tipleri icin forceMove kurali ayni.

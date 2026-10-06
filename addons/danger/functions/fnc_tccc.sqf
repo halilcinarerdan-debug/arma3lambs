@@ -385,6 +385,18 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 && {(time - (_x getVariable [QGVAR(tcccDone), -999])) > 60}
             };
             if (_yaralilar isEqualTo []) then { continue };
+            // v8.102 TRIYAJ ONCELIGI (kullanici: 'medikler icin oncelik belirtilsin'): kalp durmasi > kanama hizi > dusuk kan hacmi > en uzun suredir bekleyen (ilk bayilan atlanmasin)
+            {
+                if ((_x getVariable [QGVAR(tcccGorulduT), -1]) < 0) then { _x setVariable [QGVAR(tcccGorulduT), time]; };
+            } forEach _yaralilar;
+            _yaralilar = [_yaralilar, [], {
+                private _p = 0;
+                if (_x getVariable ["ace_medical_inCardiacArrest", false]) then { _p = _p + 1000; };
+                _p = _p + 4000 * (([_x] call _kanKaybi) min 0.2);
+                _p = _p + 25 * ((6 - (_x getVariable ["ace_medical_bloodVolume", 6])) max 0);
+                _p = _p + ((time - (_x getVariable [QGVAR(tcccGorulduT), time])) min 240) / 4;
+                _p
+            }, "DESCEND"] call BIS_fnc_sortBy;
 
             {
                 private _c = _x;
@@ -395,7 +407,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
                     && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call _baygin)}
                     && {time > (_x getVariable [QGVAR(tcccBusy), 0])}
-                    && {!(_x getVariable [QGVAR(forceMove), false])}
+                    && {!(_x getVariable [QGVAR(forceMove), false]) || {([_x] call _rolFn) isEqualTo "MEDIC" || {_x getUnitTrait "Medic"}}}   // v8.102: gercek hekim bounding'in forceMove'u yuzunden elenmez (RPT 30f9155e: hekim 'fm' diye atlandi, tufekci hekim secildi)
                     && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
                 };
                 // hekim onceligi: MEDIC rolu > Medic trait > sargi tasiyan
