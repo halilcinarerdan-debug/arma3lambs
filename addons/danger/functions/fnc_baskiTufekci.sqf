@@ -68,7 +68,7 @@ private _calis = {
                 _logN = _logN + 1;
                 diag_log format ["[ZEKA-BASKI] %1 | MG yok -> BASKI TUFEKCISI: %2 | silah %3 | sarjor kapasite %4, yedek %5 | otomatik silah:%6 | skor %7 | aday %8", groupId _g, name _u, _w, _kap, _yedek, _otomatik, _sk toFixed 1, count _aday];
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         missionNamespace setVariable ["lambs_danger_baskiAdim", "tur bitti"];
     };
 };

@@ -424,7 +424,7 @@ private _calis = {
                     if (!isNull _eodU) then { diag_log format ["[IED-FARK] %1 | EOD:%2 (explosiveSpecialist:%3 ACE_isEOD:%4)", groupId _g, name _eodU, _eodU getUnitTrait "explosiveSpecialist", _eodU getVariable ["ACE_isEOD", false]]; };
                 };
             } forEach _adaylar;
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         _turMs = (diag_tickTime - _t0) * 1000;
         missionNamespace setVariable ["lambs_danger_iedAdim", format ["tur %1 bitti (%2 ms)", _tur, round _turMs]];
     };

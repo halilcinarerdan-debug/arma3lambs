@@ -87,7 +87,7 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
                     };
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
     };
 };
 

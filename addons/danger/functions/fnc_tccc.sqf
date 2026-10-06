@@ -307,7 +307,7 @@ diag_log format [
                 _c setVariable [QGVAR(tcccBy), _m];
                 [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
             } forEach _yaralilar;
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
     };
 };
 

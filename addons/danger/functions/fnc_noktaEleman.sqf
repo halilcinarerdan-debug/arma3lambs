@@ -136,7 +136,7 @@ private _calis = {
                         groupId _g, _imza joinString ", ", _muhtemel, _ileri, round ((_eski select 0) distance2D _l), round ((_eski param [1, _l]) distance2D _l), round _dir, round (speed _l), _hareket];
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         missionNamespace setVariable ["lambs_danger_noktaAdim", "tur bitti"];
     };
 };

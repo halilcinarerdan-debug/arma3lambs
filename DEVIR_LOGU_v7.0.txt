@@ -1258,3 +1258,8 @@ v8.85 — RPT 820408cd (v8.84): 'Release hala cikiyor, surukleme calismiyor, old
   YENI BULGU — hekim yaklasma IPTALLERI: 8 IPTAL 'sure doldu (yetisemedi)' (mesafe 13-58 m, baski 0). Neden: hekimin gorevi bounding emriyle eziliyor (DURUM: Jake Edwards MEDIC gorev 'Bound/Cover(Maneuver)' / forceMove). Duzeltme: tacticsBounding birim listesi / taktik kilidi / uyeler / doFollow'dan
     tcccBusy > time olan hekimi MUAF tutar. TEST EDILMEDI.
   v8.83 modulleri bu RPT'de calisti: [RTO] / [GOZCU] / [HALT] / [TEHDIT-OLAY] satirlari goruldu; HALT 'lider 1020 sn duruyor' (sayac hareket ilk 8 sn kural, lider baslangicta duruyor).
+
+v8.86 — TARAF SECIMI (kullanici: 'LAMBS komutan icin hangi sidede aktif olacagini secebilelim; oyuncular BLUFOR ise BLUFOR'u dislayabilsin'). CBA Addon Options > LAMBS Danger > ELITE taraf secimi: BLUFOR / OPFOR / INDEPENDENT (varsayilan acik) / SIVIL (kapali); sunucu ayari.
+  Mission / Zeus script: lambs_danger_aktifWest|East|Ind|Civ = true|false. fnc_tarafSecim (3 sn): kapali taraftaki TUM AI gruplari (oyunculu gruptaki botlar dahil): grup disableGroupAI = true, birim disableAI = true (upstream LAMBS FSM / tactics bu bayraklari okur),
+  grup tarafKapali = true. Fork izleyicilerinin 13 dosyasi (ortak 'yerel grup' filtresi) bu grubu atlar; HQ tahtasina girmez. Yalniz KENDI koydugu bayraklari geri alir.
+  SINIR: fork'un ortak filtreyi kullanmayan izleyicileri (kendi allGroups dongusu) kapali tarafi tam atlamayabilir; upstream bayraklari ile kullanim etkisi 'LAMBS FSM kapali'. Her izleyicide tek tek dogrulama YAPILMADI. TEST EDILMEDI.

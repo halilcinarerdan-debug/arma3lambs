@@ -63,6 +63,7 @@ private _tahtaKur = {
         private _l = leader _g;
         if (isNull _l || {!alive _l} || {isPlayer _l} || {!local _g}) then { continue };
         if ((side _g) isNotEqualTo _taraf) then { continue };
+        if (_g getVariable ["lambs_danger_tarafKapali", false]) then { continue };   // v8.86: dislanan taraf
         if ((units _g) findIf {isPlayer _x} > -1) then { continue };
         private _n = {alive _x} count (units _g);
         if (_n < 1) then { continue };

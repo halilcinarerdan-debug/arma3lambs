@@ -174,7 +174,7 @@ private _calis = {
                 };
                 [_u, _tur, _sure, _tp, _neden joinString ","] spawn _bolumFn;
             } forEach _us;
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[PANIK-OZET] son 90 sn: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };

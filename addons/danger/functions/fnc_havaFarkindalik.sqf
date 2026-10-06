@@ -311,7 +311,7 @@ private _calis = {
                 _logN = _logN + 1;
                 diag_log format ["[HAVA-FARK] %1 | %2 %3 %4 m (silahli:%5 hover:%6 saldiri:%7) | tepki:%8 | AA asker:%9", groupId _g, ["HELI", "DRON"] select _dron, typeOf _hedef, round _hd, _silahli, _hover, _saldiri, _yontem, count _aa];
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         _turMs = (diag_tickTime - _t0) * 1000;
         missionNamespace setVariable ["lambs_danger_havaAdim", format ["tur %1 bitti (%2 ms)", _tur, round _turMs]];
     };

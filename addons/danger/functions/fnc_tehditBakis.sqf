@@ -76,7 +76,7 @@ diag_log "[TEHDIT-BAKIS] tehdit yonu gozlem watchdog baslatildi";
                 _u setVariable [QGVAR(tbSon), time];
                 _u doWatch (_eye getPos [150, _secildi]);
             } forEach _us;
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
     };
 };
 

@@ -74,7 +74,7 @@ private _calis = {
                     diag_log format ["[HALT] %1 | %2 asker slota yakin yurumeyi kesti (lider %3 sn duruyor) | formasyon %4 | beh %5", groupId _g, _dur, round (time - (_g getVariable [QGVAR(haltHareketT), -999])), formation _g, behaviour _l];
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[HALT-OZET] son 90 sn: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };
