@@ -47,6 +47,15 @@ private _calis = {
                 _d setVariable [QGVAR(mekAcT), nil];
             };
 
+            // v8.87 YAVASLIK KOK NEDENI ADAYI (RPT a73b486e: 'APC hala cok yavas'; v8.80 logunda surucu komutu ATTACK): LAMBS doAssaultSpeed (ATTACK komutu) suruculere forceSpeed 2-3 m/s birakir = ~10 km/s.
+            //   forceSpeed OKUNAMIYOR (unary yok / HEMTT SPE2): arac < 15 km/s ise ve kasitli yavaslatma (retreat / cekilme / taktik kilit) yoksa surucuye forceSpeed -1 verilir (20 sn'de en fazla bir).
+            if (_duzelt && {(speed _veh) < 15} && {(time - (_d getVariable [QGVAR(mekFsT), -999])) > 20} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])} && {(_d getVariable [QGVAR(taktikKilit), 0]) <= time}) then {
+                _d forceSpeed -1;
+                _d setVariable [QGVAR(mekFsT), time];
+                _say set ["forceSpeed-kaldirildi", (_say getOrDefault ["forceSpeed-kaldirildi", 0]) + 1];
+                if (_logN < 40) then { _logN = _logN + 1; diag_log format ["[MEKANIZE-YAVAS] %1 | arac %2 | surucu forceSpeed sifirlandi (-1; 15 km/s alti + hareket emri) | komut %4 | beh %5 | hiz modu %6 | mevcut hiz %7 km/s", groupId _g, typeOf _veh, "-", currentCommand _d, behaviour _l, speedMode _g, round (speed _veh)]; };
+            };
+            _say set ["hizToplam", (_say getOrDefault ["hizToplam", 0]) + (abs (speed _veh))];
             private _hist = _veh getVariable [QGVAR(mekHist), []];
             _hist pushBack [time, speed _veh];
             _hist = _hist select {(time - (_x select 0)) <= 40};
@@ -90,7 +99,10 @@ private _calis = {
         } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
-            if (count _say > 0) then { diag_log format ["[MEKANIZE-OZET] son 90 sn: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };
+            if (count _say > 0) then {
+                private _iz = _say getOrDefault ["izlenen", 0];
+                diag_log format ["[MEKANIZE-OZET] son 90 sn: %1 | ortalama arac hizi %2 km/s", (keys _say) apply {format ["%1:%2", _x, _say get _x]}, [0, round ((_say getOrDefault ["hizToplam", 0]) / _iz)] select (_iz > 0)];
+            };
             _say = createHashMap;
         };
         missionNamespace setVariable ["lambs_danger_mekanizeAdim", "tur bitti"];

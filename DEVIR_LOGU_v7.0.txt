@@ -1263,3 +1263,9 @@ v8.86 — TARAF SECIMI (kullanici: 'LAMBS komutan icin hangi sidede aktif olacag
   Mission / Zeus script: lambs_danger_aktifWest|East|Ind|Civ = true|false. fnc_tarafSecim (3 sn): kapali taraftaki TUM AI gruplari (oyunculu gruptaki botlar dahil): grup disableGroupAI = true, birim disableAI = true (upstream LAMBS FSM / tactics bu bayraklari okur),
   grup tarafKapali = true. Fork izleyicilerinin 13 dosyasi (ortak 'yerel grup' filtresi) bu grubu atlar; HQ tahtasina girmez. Yalniz KENDI koydugu bayraklari geri alir.
   SINIR: fork'un ortak filtreyi kullanmayan izleyicileri (kendi allGroups dongusu) kapali tarafi tam atlamayabilir; upstream bayraklari ile kullanim etkisi 'LAMBS FSM kapali'. Her izleyicide tek tek dogrulama YAPILMADI. TEST EDILMEDI.
+
+v8.87 — RPT a73b486e (v8.86). 'APC hala cok yavas; medevac timi catismadan sonra mi geliyor, gelmediler'.
+  APC: [MEKANIZE-DUR-KALK] HIC olmadi (21-72 ornek, stutter yok) -> sorun dur-kalk degil YAVASLIK. Aday kok neden: LAMBS doAssaultSpeed (ATTACK komutu) surucuye forceSpeed 2-3 m/s (~10 km/s) birakir (v8.80 logunda surucu komutu ATTACK).
+    forceSpeed OKUNAMIYOR (unary forceSpeed yok; HEMTT SPE2 verdi) -> arac < 15 km/s + kasitli yavaslatma yok (retreat / temas kes / taktik kilit) ise surucuye forceSpeed -1 (20 sn'de en fazla bir). [MEKANIZE-YAVAS] logu + [MEKANIZE-OZET] ortalama arac hizi. DOGRULANMADI.
+  MEDEVAC (HQ + aracli): [HQ-MEDEVAC] / [ARAC-MEDEVAC] satiri YOK. TASARIM geregi yalniz GUVENLIYKEN calisir: HQ medevac: yardim isteyen grup son 8 sn temasta degil + bilinen dusman yaraliya >= 70 m + yardim veren grup 'musait' (temasta degil, hekimi var);
+    aracli: temas > 10 sn once + dusman >= 120 m + yarali >= 40 sn + uygun arac. Bu testte catisma surekli -> sartlar hic olusmadi; ayrica HQ-TAHTA WEST'te yalniz 1 grup (yardim veren yok). TCCC (grup ici hekim) calisti: tamam 19-21 sn; iptaller: hekim baskida (>0.6) / sure doldu.
