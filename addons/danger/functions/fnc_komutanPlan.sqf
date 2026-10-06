@@ -216,7 +216,7 @@ private _ccp = _rp getPos [25, _B + 90];
                 _sbf = _p;
                 if !([_p] call _gorunur) then { ["SBF", "destek noktasinin objektife arazi GORUSU YOK (ates veremez)"] call _uyar; };
                 if (_d < 100) then { ["SBF", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; };
-                if (_d > 450) then { ["SBF", format ["etkili menzil disinda (%1 m > 450 m)", round _d]] call _uyar; };
+                if (_d > 460) then { ["SBF", format ["tufek etkili menzili disinda (%1 m > 460 m, MCWP 3-11.2: M16 etkili menzil 460 m; MG 600-1100 m ayri)", round _d]] call _uyar; };
             };
             case "KANAT1": { _kanatNokta set [0, _p]; if (_d < 60) then { ["KANAT1", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; }; };
             case "KANAT2": { _kanatNokta set [1, _p]; if (_d < 60) then { ["KANAT2", format ["objektife cok yakin (%1 m)", round _d]] call _uyar; }; };

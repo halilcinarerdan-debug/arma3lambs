@@ -268,7 +268,8 @@ while {true} do {
                 _plan set ["hazirlikAtildi", true];
                 [_plan, _obj, "HAZIRLIK"] call _topcuAt;
             };
-            private _kesifS = (([40, 70, 10] select _tempo)) max ([0, 35] select (_topcuTip in [1, 3]));
+            // KESIF = ORP'de guvenlik halti: TC 3-21.76 s. 6-22: short halt tipik 1-2 dk, long halt > 2 dk -> dengeli 60 sn, sessiz 90 sn, hizli 30 sn (kitap araligi icinde; secim tasarim)
+            private _kesifS = (([60, 90, 30] select _tempo)) max ([0, 35] select (_topcuTip in [1, 3]));
             if (_fazSure > _kesifS) then {
                 private _maneuv = _gruplar select {(_roller getOrDefault [groupId _x, "MANEVRA"]) isEqualTo "MANEVRA"};
                 private _i = 0;
