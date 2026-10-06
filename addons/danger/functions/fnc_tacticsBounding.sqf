@@ -459,7 +459,12 @@ if (EGVAR(main,debug_functions)) then {
             private _cp = _x select 0;
             private _atilim = _kPos distance2D _cp;
             // en az 6m ILERI kazanc yoksa siper sayma (yerinde saymasin); cok uzak atilim da sayilmaz
-            if ((_mesafe - (_cp distance2D _hedef)) >= _kazMin && {_atilim <= _atMax}) then {
+            // v8.119 KAYNAKLI: sicrama, gozetleyen silahin etkili menzilinin 2/3'unu asmaz (MCWP 3-11.1; 5.56 icin ~460 m -> ~307 m).
+            // Kosucu su an zaten menzildeyse uygulanir (menzil disindaysa kilitlenmesin diye filtre atlanir).
+            private _fseYakin = (_fse select {alive _x && {_x isNotEqualTo _kosan}}) apply {_x distance2D _kosan};
+            private _ozMin = if (_fseYakin isEqualTo []) then {-1} else {selectMin _fseYakin};
+            private _menzilOk = (_ozMin < 0) || {_ozMin > 307} || {(selectMin ((_fse select {alive _x && {_x isNotEqualTo _kosan}}) apply {_x distance2D _cp})) <= 307};
+            if (_menzilOk && {(_mesafe - (_cp distance2D _hedef)) >= _kazMin} && {_atilim <= _atMax}) then {
                 private _n = (floor (_atilim / 5)) max 1;
                 private _a = 0;
                 for "_k" from 1 to _n do {

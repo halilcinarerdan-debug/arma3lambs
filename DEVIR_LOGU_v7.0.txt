@@ -1465,3 +1465,8 @@ v8.118 - TUM DOKTRIN KAYNAKLARI TARANDI (kullanici: 'hepsine bak')
   Sonuc: kaynaklar_doktrin/SAYISAL_ESIKLER_KAYNAK_TABLOSU.md (kaynakli sayilar + dosya:satir; kitapta SAYI OLMAYANLAR ayri liste; kodda kitaba cekilebilecek 5 oneri). Tarama bir alt ajanla yapildi; ben 8 kritik kaydi kaynaktan elle dogruladim (hareket araliklari, halt, farside 250 m, bound 2/3, kama 10 m, tasima 50-300 m, ORP).
   Koda alinanlar: KESIF suresi = guvenlik halti (short halt 1-2 dk): dengeli 60, sessiz 90, hizli 30 sn (eskiden 40 / 70 / 10); SBF manuel uyari esigi 460 m (M16 etkili menzil, MCWP 3-11.2).
   Kitapta sayi OLMAYAN (tasarim kalir): rally bekleme suresi, SBF mesafe / aci, kanat mesafe / aci, pusu kill zone boyutu, duman olculeri, ammo yuzde esikleri, TCCC evreleri. Daha once 'kitapta sayi yok' dedigim ORP / danger close / RED'in AKSINE sayilarin oldugu konular tabloda.
+
+v8.119 - SICRAMA MENZIL SINIRI (kaynakli esik)
+ - fnc_tacticsBounding: kosucunun siper adayi, gozetleyen (FSE) elemanin etkili menzilinin 2/3'u (~307 m, 5.56 icin) icinde kalmali.
+   Kosucu zaten menzil disindaysa filtre atlanir (kilitlenme olmasin). Kaynak: MCWP 3-11.1 (bkz. SAYISAL_ESIKLER_KAYNAK_TABLOSU.md).
+ - Test edilmedi. Kalan 4 oneri (farside 250 m, hucum pozisyonu ~50 m, dagilma 3-5/1-3 m, 4 kisilik sedye) kodlanmadi.
