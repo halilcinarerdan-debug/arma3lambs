@@ -69,19 +69,46 @@ diag_log format [
         _l isEqualTo [] || {((items _m) findIf {(toLower _x) in _l}) > -1}
     };
 
-    // Tek tedavi adimi: true = envanter degisti (uygulandi)
+    // Tek tedavi adimi: true = uygulandi
+    // v8.95: AI hekim icin ACE'nin kendi AI yolu (medical_ai healingLogic): ilerleme cubugu / animasyon / log olmayan ace_medical_treatment_fnc_treatment yerine
+    //   anim + bekleme + item sil + CBA hedef olayi + aktivite logu (RPT 5d7b3371: kullanici 'animasyon yok, aktivite logunda bir sey yok' dedi)
     private _tx = {
         params ["_m", "_c", "_part", "_cls"];
         if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {false};
-        private _once = count (items _m);
-        _m playActionNow "MedicOther";
-        if (isNil "ace_medical_treatment_fnc_treatment") then {
-            _m action ["HealSoldier", _c];
-        } else {
-            [_m, _c, _part, _cls] call ace_medical_treatment_fnc_treatment;
+        private _sinif = toLower _cls;
+        private _l = lambs_danger_tcccMalzeme getOrDefault [_sinif, []];
+        private _esya = if (_l isEqualTo []) then {""} else { private _i = (items _m) findIf {(toLower _x) in _l}; if (_i < 0) then {""} else {(items _m) select _i} };
+        private _tip = if (_sinif in ["fielddressing", "packingbandage", "elasticbandage", "quikclot"]) then {1} else { if (_sinif isEqualTo "applytourniquet") then {2} else { if (_sinif in ["morphine", "epinephrine"]) then {3} else { if (_sinif find "iv" >= 0) then {4} else { if (_sinif isEqualTo "cpr") then {5} else {0} } } } };
+        private _sure = [3, 3.5, 4.5, 2.5, 4, 8] select _tip;
+        if (_tip isEqualTo 0 || {isNil "CBA_fnc_targetEvent"} || {_tip < 5 && {_esya isEqualTo ""}}) exitWith {
+            // eski yol (yedek)
+            private _once = count (items _m);
+            _m playActionNow "MedicOther";
+            if (isNil "ace_medical_treatment_fnc_treatment") then { _m action ["HealSoldier", _c]; } else { [_m, _c, _part, _cls] call ace_medical_treatment_fnc_treatment; };
+            sleep 2.5;
+            (count (items _m)) < _once || {_cls isEqualTo "CPR"}
         };
-        sleep 2.5;
-        (count (items _m)) < _once || {_cls isEqualTo "CPR"}
+        if (!isNil "ace_medical_ai_fnc_playTreatmentAnim") then { [_m, _cls, false] call ace_medical_ai_fnc_playTreatmentAnim; } else { _m playActionNow "MedicOther"; };
+        private _t = time + _sure;
+        waitUntil { sleep 0.3; time > _t || {!alive _m} || {!alive _c} || {(_m distance2D _c) > 6} };
+        if (!alive _m || {!alive _c} || {(_m distance2D _c) > 6}) exitWith {false};
+        if (_esya isNotEqualTo "") then { _m removeItem _esya; };
+        switch (_tip) do {
+            case 1: { ["ace_medical_treatment_bandageLocal", [_c, _part, _cls], _c] call CBA_fnc_targetEvent; };
+            case 2: { ["ace_medical_treatment_tourniquetLocal", [_c, _part], _c] call CBA_fnc_targetEvent; };
+            case 3: { ["ace_medical_treatment_medicationLocal", [_c, _part, _cls], _c] call CBA_fnc_targetEvent; };
+            case 4: { ["ace_medical_treatment_ivBagLocal", [_c, _part, _cls, _m], _c] call CBA_fnc_targetEvent; };
+            case 5: { ["ace_medical_treatment_cprLocal", [_m, _c], _c] call CBA_fnc_targetEvent; };
+        };
+        if (!isNil "ace_medical_treatment_fnc_addToLog") then {
+            private _msg = ["", "STR_ACE_Medical_Treatment_Activity_bandagedPatient", "STR_ACE_Medical_Treatment_Activity_appliedTourniquet", "STR_ACE_Medical_Treatment_Activity_usedItem", "STR_ACE_Medical_Treatment_Activity_gaveIV", "STR_ACE_Medical_Treatment_Activity_CPR"] select _tip;
+            if (_msg isNotEqualTo "" && {_tip < 5}) then {
+                private _arg = [name _m];
+                if (_tip isEqualTo 3) then { _arg pushBack _cls; };
+                [_c, "activity", _msg, _arg] call ace_medical_treatment_fnc_addToLog;
+            };
+        };
+        true
     };
 
     private _birak = {
@@ -127,6 +154,20 @@ diag_log format [
                 if (_durKademe >= 2) then { doStop _m; _m setUnitPos "UP"; };
                 _m doMove (getPosATL _c);
                 diag_log format ["[TCCC-DURGUN] %1 | %2 -> %3 | kademe %4 | mesafe %5 m | komut:%6 | durus:%7 | MOVE:%8 PATH:%9 ANIM:%10 | baski %11 | panik:%12", groupId _g, name _m, name _c, _durKademe, round (_m distance2D _c), currentCommand _m, stance _m, _m checkAIFeature "MOVE", _m checkAIFeature "PATH", _m checkAIFeature "ANIM", (getSuppression _m) toFixed 2, _m getVariable [QGVAR(panikEskiDAI), "-"]];
+                // v8.95: AI komutu ise yaramiyorsa (RPT 5d7b3371: kademe 1-3 sonrasi da durgun, MOVE/PATH/ANIM acik) hekim kosu animasyonu + hiz vektoruyle yaraliya yurutulur
+                if (_durKademe >= 2) then {
+                    private _yT = time + 14; private _y0 = _m distance2D _c;
+                    _bitis = _bitis + 14;
+                    _m setUnitPos "UP";
+                    while {alive _m && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {(getSuppression _m) < 0.9}} do {
+                        _m setDir (_m getDir _c);
+                        _m playMoveNow "AmovPercMrunSrasWrflDf";
+                        _m setVelocityModelSpace [0, 3.2, ((velocityModelSpace _m) select 2)];
+                        sleep 0.15;
+                    };
+                    diag_log format ["[TCCC-DURGUN] %1 | %2 -> %3 | SCRIPT-YURUTME | %4 m -> %5 m | %6 sn", groupId _g, name _m, name _c, round _y0, round (_m distance2D _c), round (14 - (_yT - time))];
+                    _durT = time; _durPos = getPosATL _m;
+                };
             };
             // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
             if (time > _tazeT && {alive _m} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
