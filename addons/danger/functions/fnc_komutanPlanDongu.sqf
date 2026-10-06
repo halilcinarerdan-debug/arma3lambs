@@ -1,0 +1,295 @@
+#include "script_component.hpp"
+/*
+ * Author: Cinar (ELITE fork)
+ * KOMUTAN PLANI DONGUSU (v8.113) — fnc_komutanPlan'in kurdugu planlari (lambs_danger_planlar) 3 sn'de bir yurutur. Durum plan HashMap'inde tutulur: dongu hata ile olurse bekci yeniden baslatir, plan kaldigi yerden surer.
+ * Fazlar (ele gecir): TOPLAN -> ORP -> KESIF -> SALDIRI -> TOPLANMA -> BITTI.   Savun: TOPLAN -> MEVZI -> BEKLE -> BITTI.   IPTAL: waypoint / bayrak temizligi.
+ * Waypoint: yalniz "ELITE PLAN:" adli kendi waypoint'lerimiz silinir / yazilir (Zeus'un elle koydugu waypoint'e dokunulmaz). Temastaki grup zorlanmaz.
+ * Log: [PLAN] FAZ / ROL / TEMAS / BITTI.
+ *
+ * Arguments: None
+ * Return Value: None
+ * Public: No
+*/
+
+missionNamespace setVariable ["lambs_danger_planAdim", "basladi"];
+
+private _temasta = {
+    params ["_g"];
+    private _sit = _g getVariable [QGVAR(cmdSit), []];
+    ((_g getVariable [QGVAR(contact), 0]) > time) && {_sit isEqualType []} && {(count _sit) >= 2} && {(time - (_sit select 0)) < 30} && {(_sit select 1) <= 450}
+};
+
+// kendi waypoint'lerimizi sil, yenilerini yaz: [[poz, tip, ad, davranis, hiz, yaricap], ...]
+private _wpYaz = {
+    params ["_g", "_liste"];
+    private _w = waypoints _g;
+    for "_i" from ((count _w) - 1) to 0 step -1 do {
+        if (((waypointName (_w select _i)) find "ELITE PLAN:") isEqualTo 0) then { deleteWaypoint (_w select _i); };
+    };
+    private _ilk = [];
+    {
+        _x params ["_poz", "_tip", "_ad", ["_beh", "AWARE"], ["_hiz", "NORMAL"], ["_yar", 40]];
+        private _wp = _g addWaypoint [_poz, 0];
+        _wp setWaypointType _tip;
+        _wp setWaypointName format ["ELITE PLAN: %1", _ad];
+        _wp setWaypointDescription format ["ELITE PLAN: %1", _ad];
+        _wp setWaypointBehaviour _beh;
+        _wp setWaypointSpeed _hiz;
+        _wp setWaypointCombatMode "YELLOW";
+        _wp setWaypointCompletionRadius _yar;
+        if (_ilk isEqualTo []) then { _ilk = _wp; };
+    } forEach _liste;
+    if (_ilk isNotEqualTo []) then { _g setCurrentWaypoint _ilk; };
+};
+
+private _wpTemizle = {
+    params ["_g"];
+    private _w = waypoints _g;
+    for "_i" from ((count _w) - 1) to 0 step -1 do {
+        if (((waypointName (_w select _i)) find "ELITE PLAN:") isEqualTo 0) then { deleteWaypoint (_w select _i); };
+    };
+};
+
+private _fazGec = {
+    params ["_plan", "_yeni", ["_neden", ""]];
+    private _eski = _plan get "faz";
+    _plan set ["faz", _yeni];
+    _plan set ["fazT", time];
+    _plan set ["fazHazir", false];
+    diag_log format ["[PLAN] %1 FAZ %2 -> %3 | %4 sn | %5", _plan get "id", _eski, _yeni, round (time - (_plan get "t0")), _neden];
+};
+
+// grup ofseti: ayni noktaya yigilma yok (grup indeksine gore yana 30 m)
+private _ofset = {
+    params ["_poz", "_i", "_B"];
+    _poz getPos [30 * (ceil (_i / 2)) * ([1, -1] select (_i mod 2 isEqualTo 1)), _B + 90]
+};
+
+while {true} do {
+    sleep 3;
+    if (missionNamespace getVariable ["lambs_danger_komutanPlanOff", false]) then { continue };
+    private _bitenler = [];
+    {
+        private _id = _x;
+        private _plan = _y;
+        missionNamespace setVariable ["lambs_danger_planAdim", format ["%1 faz %2", _id, _plan get "faz"]];
+        private _faz = _plan get "faz";
+        private _tip = _plan get "tip";
+        private _obj = _plan get "obj";
+        private _rp = _plan get "rp";
+        private _orp = _plan get "orp";
+        private _sbf = _plan get "sbf";
+        private _B = _plan get "B";
+        private _roller = _plan get "roller";
+        private _gruplar = (_plan get "gruplar") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
+        _plan set ["gruplar", _gruplar];
+        private _fazSure = time - (_plan get "fazT");
+
+        // plan bitti / iptal / grup yok
+        if (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []} || {_faz isEqualTo "BITTI"}) then {
+            { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; } forEach (_plan get "gruplar");
+            { deleteMarker _x; } forEach (_plan get "isaretler");
+            diag_log format ["[PLAN] %1 BITTI (%2) | %3 sn", _id, ["tamam", ["iptal", "grup kalmadi"] select (_gruplar isEqualTo [])] select (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []}), round (time - (_plan get "t0"))];
+            _bitenler pushBack _id;
+            continue
+        };
+
+        // ---------------------------------------------------------------- KUR / TOPLAN
+        if (_faz isEqualTo "KUR") then {
+            { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar;
+            [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
+            continue
+        };
+        if (_faz isEqualTo "TOPLAN") then {
+            private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
+            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300}) then {
+                if (_tip isEqualTo 1) then {
+                    // SAVUN: objektif cevresinde sektorlu halka (komutan grubu merkezde degil, halkanin guvenli yaninda)
+                    private _n = count _gruplar;
+                    {
+                        private _g = _x;
+                        private _a = _B + (360 / _n) * _forEachIndex;
+                        private _poz = _obj getPos [55, _a];
+                        (_plan get "notlar") set [groupId _g, [_poz, _a]];
+                        [_g, [[_poz, "MOVE", format ["MEVZI sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
+                    } forEach _gruplar;
+                    [_plan, "MEVZI", format ["%1 sektor", _n]] call _fazGec;
+                } else {
+                    private _i = 0;
+                    {
+                        private _g = _x;
+                        private _r = _roller getOrDefault [groupId _g, "MANEVRA"];
+                        private _hedef = if (_r isEqualTo "DESTEK") then { _sbf } else { [_orp, _i, _B] call _ofset };
+                        if (_r isNotEqualTo "DESTEK") then { _i = _i + 1; };
+                        (_plan get "notlar") set [groupId _g, _hedef];
+                        [_g, [[_hedef, "MOVE", format ["%1 -> %2", _r, ["ORP", "SBF"] select (_r isEqualTo "DESTEK")], "AWARE", "NORMAL", 40]]] call _wpYaz;
+                        diag_log format ["[PLAN] %1 ROL %2 = %3 | hedef %4", _id, groupId _g, _r, mapGridPosition _hedef];
+                    } forEach _gruplar;
+                    [_plan, "ORP", "ORP / destek noktasina intikal"] call _fazGec;
+                };
+            };
+            continue
+        };
+
+        // ---------------------------------------------------------------- ELE GECIR: ORP -> KESIF
+        if (_faz isEqualTo "ORP") then {
+            private _notlar = _plan get "notlar";
+            private _vardi = {
+                private _h = _notlar getOrDefault [groupId _x, _orp];
+                ((leader _x) distance2D _h) < 70 || {[_x] call _temasta}
+            } count _gruplar;
+            // temastaki grubu zorlamama; temas kesilince hedefe yeniden yonlendir
+            {
+                private _g = _x;
+                private _h = _notlar getOrDefault [groupId _g, _orp];
+                if (!([_g] call _temasta) && {((leader _g) distance2D _h) > 90} && {(time - (_g getVariable ["lambs_danger_planYenileT", -999])) > 25}) then {
+                    _g setVariable ["lambs_danger_planYenileT", time];
+                    [_g, [[_h, "MOVE", format ["%1 -> %2", _roller getOrDefault [groupId _g, "?"], "hedef"], "AWARE", "NORMAL", 40]]] call _wpYaz;
+                };
+            } forEach _gruplar;
+            if (_vardi >= (count _gruplar) || {_fazSure > 280}) then {
+                { _x setBehaviour "AWARE"; _x setSpeedMode "LIMITED"; } forEach _gruplar;
+                [_plan, "KESIF", "ORP'de guvenlik / kesif (40 sn)"] call _fazGec;
+            };
+            continue
+        };
+        if (_faz isEqualTo "KESIF") then {
+            if (_fazSure > 40) then {
+                private _maneuv = _gruplar select {(_roller getOrDefault [groupId _x, "MANEVRA"]) isEqualTo "MANEVRA"};
+                private _i = 0;
+                {
+                    private _g = _x;
+                    private _kanat = (_plan get "kanatGerek") && {(count _maneuv) >= 2};
+                    if (_kanat) then {
+                        private _k = (_plan get "kanatNokta") select (_i mod 2);
+                        [_g, [[_k, "MOVE", "KANAT noktasi", "AWARE", "NORMAL", 40]]] call _wpYaz;
+                        [_g, "KANAT", [_k, "plan"]] call FUNC(hqEmir);
+                        (_plan get "notlar") set [format ["%1_kanat", groupId _g], [_k, time]];
+                        diag_log format ["[PLAN] %1 KANAT %2 -> %3", _id, groupId _g, mapGridPosition _k];
+                    } else {
+                        [_g, [[_obj, "SAD", "SALDIRI (objektif)", "COMBAT", "NORMAL", 60]]] call _wpYaz;   // Zeus'ta objektif waypoint'i gorunur
+                        [_g, "SALDIRI", [_obj]] call FUNC(hqEmir);
+                    };
+                    _i = _i + 1;
+                } forEach _maneuv;
+                { if ((_roller getOrDefault [groupId _x, ""]) isEqualTo "DESTEK") then { _x setCombatMode "RED"; _x setBehaviour "COMBAT"; }; } forEach _gruplar;
+                [_plan, "SALDIRI", format ["manevra %1 grup, destek ates baslar", count _maneuv]] call _fazGec;
+            };
+            continue
+        };
+
+        // ---------------------------------------------------------------- SALDIRI
+        if (_faz isEqualTo "SALDIRI") then {
+            private _notlar = _plan get "notlar";
+            private _maneuv = _gruplar select {(_roller getOrDefault [groupId _x, "MANEVRA"]) isEqualTo "MANEVRA"};
+            // kanat noktasina varinca (60 m) / 120 sn sonra SALDIRI emri
+            {
+                private _g = _x;
+                private _kn = _notlar getOrDefault [format ["%1_kanat", groupId _g], []];
+                if (_kn isNotEqualTo []) then {
+                    if (((leader _g) distance2D (_kn select 0)) < 60 || {(time - (_kn select 1)) > 120}) then {
+                        [_g, [[_obj, "SAD", "SALDIRI (objektif)", "COMBAT", "NORMAL", 60]]] call _wpYaz;
+                        [_g, "SALDIRI", [_obj]] call FUNC(hqEmir);
+                        _notlar deleteAt (format ["%1_kanat", groupId _g]);
+                        diag_log format ["[PLAN] %1 SALDIRI %2 (kanattan)", _id, groupId _g];
+                    };
+                };
+            } forEach _maneuv;
+            // destek ateşi: objektife baski; manevra lideri objektife < 45 m ise 40 m ileri kaydir (dost atesi)
+            if (time > (_plan getOrDefault ["destekT", 0])) then {
+                _plan set ["destekT", time + 8];
+                private _yakinM = 9999;
+                private _ml = objNull;
+                { private _dm = (leader _x) distance2D _obj; if (_dm < _yakinM) then { _yakinM = _dm; _ml = leader _x; }; } forEach _maneuv;
+                private _hedefAtes = _obj;
+                if (_yakinM < 45 && {!isNull _ml}) then { _hedefAtes = _obj getPos [40, _ml getDir _obj]; };
+                {
+                    private _g = _x;
+                    if ((_roller getOrDefault [groupId _g, ""]) in ["DESTEK"] && {!([_g] call _temasta) || true}) then {
+                        {
+                            private _u = _x;
+                            if (alive _u && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(time < (_u getVariable [QGVAR(tcccBusy), 0]))}) then {
+                                private _rol = [_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}]);
+                                if (!(_u getVariable [QGVAR(mermiTasarruf), false]) || {_rol isEqualTo "MG"}) then {
+                                    _u doSuppressiveFire (_hedefAtes getPos [random 7, random 360]);
+                                };
+                            };
+                        } forEach (units _g);
+                    };
+                } forEach _gruplar;
+            };
+            // objektif temiz: yakin (< 80 m) duşman 30 sn bilinmiyor ve bir manevra lideri objektife < 50 m
+            private _dusmanVar = false;
+            {
+                private _g = _x;
+                { if (alive _x && {((side _g) getFriend (side _x)) < 0.6} && {(_x distance2D _obj) < 80} && {(_g knowsAbout _x) >= 0.8}) then { _dusmanVar = true; }; } forEach (_obj nearEntities ["CAManBase", 80]);
+            } forEach _gruplar;
+            if (_dusmanVar) then { _plan set ["dusmanT", time]; };
+            private _yakinM2 = 9999;
+            { _yakinM2 = _yakinM2 min ((leader _x) distance2D _obj); } forEach _maneuv;
+            if ((_yakinM2 < 50 && {(time - (_plan getOrDefault ["dusmanT", _plan get "fazT"])) > 30}) || {_fazSure > 480}) then {
+                [_plan, "TOPLANMA", [format ["objektif temiz (manevra %1 m)", round _yakinM2], "SURE DOLDU (480 sn)"] select (_fazSure > 480)] call _fazGec;
+            };
+            continue
+        };
+
+        // ---------------------------------------------------------------- TOPLANMA (cevre savunmasi + reorganizasyon)
+        if (_faz isEqualTo "TOPLANMA") then {
+            private _notlar = _plan get "notlar";
+            if !(_plan getOrDefault ["fazHazir", false]) then {
+                _plan set ["fazHazir", true];
+                private _n = count _gruplar;
+                {
+                    private _g = _x;
+                    private _a = _B + (360 / _n) * _forEachIndex;
+                    private _poz = _obj getPos [45, _a];
+                    _notlar set [format ["%1_tpl", groupId _g], [_poz, false]];
+                    [_g, [[_poz, "MOVE", format ["TOPLANMA sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
+                    _g setCombatMode "YELLOW";
+                } forEach _gruplar;
+            };
+            // sektora varinca (45 m) / 90 sn sonra toparlanma: sayim, rapor, guvenlik (TC 3-21.76 consolidate and reorganize)
+            {
+                private _g = _x;
+                private _t = _notlar getOrDefault [format ["%1_tpl", groupId _g], []];
+                if (_t isNotEqualTo [] && {!(_t select 1)} && {(((leader _g) distance2D (_t select 0)) < 45) || {_fazSure > 90}}) then {
+                    _t set [1, true];
+                    [_g, _obj getPos [200, _B]] call FUNC(toparlan);
+                };
+            } forEach _gruplar;
+            if (_fazSure > 180) then { [_plan, "BITTI", "toparlanma suresi doldu"] call _fazGec; };
+            continue
+        };
+
+        // ---------------------------------------------------------------- SAVUN: MEVZI -> BEKLE
+        if (_faz isEqualTo "MEVZI") then {
+            private _notlar = _plan get "notlar";
+            private _vardi = {
+                private _n = _notlar getOrDefault [groupId _x, [_obj, 0]];
+                ((leader _x) distance2D (_n select 0)) < 50 || {[_x] call _temasta}
+            } count _gruplar;
+            if (_vardi >= (count _gruplar) || {_fazSure > 240}) then {
+                {
+                    private _g = _x;
+                    private _n = _notlar getOrDefault [groupId _g, [_obj, _B]];
+                    private _bina = (nearestObjects [_n select 0, ["House"], 70]) select {count (_x buildingPos -1) > 0};
+                    if (_bina isNotEqualTo []) then {
+                        [_g, _obj] call FUNC(tacticsGarrison);
+                    } else {
+                        _g setBehaviour "AWARE";
+                        _g setCombatMode "YELLOW";
+                        { if (alive _x && {isNull objectParent _x} && {!(time < (_x getVariable [QGVAR(tcccBusy), 0]))}) then { doStop _x; _x doWatch ((_n select 0) getPos [150, _n select 1]); }; } forEach (units _g);
+                    };
+                } forEach _gruplar;
+                [_plan, "BEKLE", "sektorlar tutuldu, garrison / mevzi"] call _fazGec;
+            };
+            continue
+        };
+        if (_faz isEqualTo "BEKLE") then {
+            if (_fazSure > (missionNamespace getVariable ["lambs_danger_planSavunmaS", 1200])) then { [_plan, "BITTI", "savunma suresi doldu"] call _fazGec; };
+            continue
+        };
+    } forEach lambs_danger_planlar;
+    { lambs_danger_planlar deleteAt _x; } forEach _bitenler;
+    missionNamespace setVariable ["lambs_danger_planAdim", "tur bitti"];
+};

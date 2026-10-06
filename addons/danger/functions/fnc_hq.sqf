@@ -80,7 +80,7 @@ private _tahtaKur = {
         } forEach [
             "lambs_danger_isRetreating", "lambs_danger_isEvading", "lambs_danger_isBreakingContact", "lambs_danger_isSonDirenis",
             "lambs_danger_isAmbushing", "lambs_danger_isExecutingTactic", "lambs_danger_isBounding", "lambs_danger_sniperTeam",
-            "lambs_danger_disableGroupAI"
+            "lambs_danger_disableGroupAI", "lambs_danger_planAktif"
         ];
 
         // bounding'deki ve dusman uzak (>=250 m) grup da destek verebilir (v8.67: ikinci takim bounding'de bekleyip hic yardim etmiyordu)
@@ -89,7 +89,7 @@ private _tahtaKur = {
         private _sadeceBnd = _mesgul && {_g getVariable ["lambs_danger_isBounding", false]} && {
             ({_g getVariable [_x, false]} count [
                 "lambs_danger_isRetreating", "lambs_danger_isEvading", "lambs_danger_isBreakingContact", "lambs_danger_isSonDirenis",
-                "lambs_danger_isAmbushing", "lambs_danger_isExecutingTactic", "lambs_danger_sniperTeam", "lambs_danger_disableGroupAI"
+                "lambs_danger_isAmbushing", "lambs_danger_isExecutingTactic", "lambs_danger_sniperTeam", "lambs_danger_disableGroupAI", "lambs_danger_planAktif"
             ]) == 0};
         private _uzakTemas = _enYakin >= 250 && {(time - _contact) > 8};
         private _musait = (!_mesgul || {_sadeceBnd && _uzakTemas})

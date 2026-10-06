@@ -88,4 +88,23 @@ class CfgVehicles {
             };
         };
     };
+
+    // ELITE fork (v8.113): objektif (komutan plani) - Zeus'tan objektif + duşman bilgisi verilir, komutan harekat plani + waypoint uretir
+    class GVAR(Objektif) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(Objektif);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Objektif (komutan plani)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\attack_ca.paa";
+        function = QFUNC(moduleObjektif);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
 };
