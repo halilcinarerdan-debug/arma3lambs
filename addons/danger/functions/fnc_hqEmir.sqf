@@ -48,6 +48,28 @@ if (_ad in ["TAKVIYE", "KANAT", "FEINT"]) then {
     };
 };
 
+// DESTEK: yan tepede destek ateşi (fnc_hqDestek); noktaya hareket, varista kumanda modulu doSuppressiveFire surdurur
+if (_ad isEqualTo "DESTEK") then {
+    _veri params [["_poz", [0, 0, 0], [[]]], ["_enP", [0, 0, 0], [[]]], ["_istekAd", "", [""]]];
+    if (_poz isNotEqualTo [0, 0, 0]) then {
+        if (_g getVariable ["lambs_danger_isBounding", false]) then {
+            _g setVariable ["lambs_danger_isBounding", nil];
+            _g setVariable ["lambs_danger_bndToken", nil];
+            diag_log format ["[HQ-EMIR] %1 | bounding iptal edildi (DESTEK icin)", groupId _g];
+        };
+        _g setVariable ["lambs_danger_isExecutingTactic", true];
+        _g setBehaviour "AWARE";
+        {
+            if (alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])} && {!(time < (_x getVariable ["lambs_danger_tcccBusy", 0]))}) then {
+                _x setVariable ["lambs_danger_forceMove", true];
+                _x setVariable ["lambs_danger_destekAsker", true];
+                _x doMove (_poz getPos [random 7, random 360]);
+            };
+        } forEach (units _g);
+        _ok = true;
+    };
+};
+
 // FEINT_BIRAK: feint grubunu serbest birak (LAMBS normal taktik; enableAttack acik)
 if (_ad isEqualTo "FEINT_BIRAK") then {
     _g enableAttack true;

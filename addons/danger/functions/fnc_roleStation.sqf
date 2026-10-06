@@ -354,7 +354,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 };
 
                 // MG: hat kapaliysa alana baski (atis ussu ates kesmesin)
-                if (_key isEqualTo "MG" && {(time - (_u getVariable [QGVAR(mgSupLast), -999])) > 8}) then {
+                if (_key isEqualTo "MG" && {(time - (_u getVariable [QGVAR(mgSupLast), -999])) > 8} && {!(_u getVariable [QGVAR(mermiKritik), false])}) then {   // v8.104: kritik cephanede baski yok
                     private _e = _u findNearestEnemy _u;
                     if (!isNull _e) then {
                         private _d = _u distance2D _e;

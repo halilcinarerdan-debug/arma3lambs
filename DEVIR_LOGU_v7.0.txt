@@ -1367,3 +1367,12 @@ v8.103 - HEKIM YURUTME TITREMESI (RPT abaa3317)
   KOK NEDEN: her yaklasma SCRIPT-YURUTME'ye dusuyor (kademe 1-2 sonrasi: 16 m -> 2 m 4 sn, 26 m -> 2 m 7 sn), dongu her 0.15 sn'de playMoveNow + setDir + sabit hiz vektoru -> anim her seferinde basa sariyor.
   fnc_tccc: anim yalniz kosu animasyonu degilse baslatilir; dir yalniz > 20 derece sapmada; hiz vektoru 0.05 sn'de bir yumusak (0.6 x onceki + 1.2, hedef ~3 m/sn).
   SURUKLEME: AI surukleme hala devre disi (ACE startDrag AI'da calismiyor). Kendi script surukleme (attachTo + anim) yazilmadi; kullanici karari bekleniyor (kim surukler: hekim mi, en yakin tufekci mi).
+
+v8.104 - DESTEK ATESI + LIDER DEVRI + MERMI DISIPLINI (kullanici istegi)
+  fnc_hqDestek (YENI kumanda modulu, hq.sqf moduller listesine ["destek", 6]): TAARRUZ grubu A (temasta, karar ASSAULT / SUPPRESS_ASSAULT / BOUNDING, dusman 70-450 m, cmdSit taze) icin telsiz mesafesindeki (hqDestekM 1200 m, A'dan >= 60 m) musait B grubu,
+    dusman -> A eksenine +-35..105 derece acili, dusmandan 160-380 m, yukseklik + arazi gorusu skoruyla secilen YAN TEPE noktasina gider (hqEmir 'DESTEK'), varista doStop + RED + herkes doSuppressiveFire dusman noktasina (8 sn'de bir, +-6 m dagilim, 2'de 1 tufekci dinlenir; MG / nisanci surekli).
+    A dusman noktasina < 45 m girince ates 40 m ilerisine KAYDIRILIR. Bitis: taarruz bitti / dusman 25 sn bilinmiyor / 150 sn / destek grubu ates altinda / cekilme. Taraf basina en cok 2 es zamanli destek. [HQ-DESTEK]. Kapatma hqDestekV1 = false. TASARIM (kaynaksiz esikler). TEST EDILMEDI.
+  fnc_liderDevri (YENI watchdog): on hesapli halef (rutbe x 100 + commanding x 40 + courage x 15 + general x 15 - rol cezasi hekim 45 / EOD 40 / MG 35 / AT 25 / nisanci 15), lider BAYILIRSA (motor bayilmis lideri TUTAR) 3 sn sonra selectLeader halef;
+    lider olurse ve motorun sectigi aday halefden >= 30 puan zayifsa 15 sn icinde bir kez duzeltir. Uyanan eski lider geri alinmaz. [LIDER-DEVRI]. Kapatma liderDevriOff. TEST EDILMEDI.
+  fnc_mermiDisiplin (YENI watchdog): her asker sarjor esdegerini (40 mm haric) bilir: TASARRUF (< 2.0; MG < 1.5; histerezis 3.0 / 2.5) -> destek atesi / baski gorevlerinden cikar; KRITIK (< 0.8; MG < 0.6) -> tabanca varsa secilir, MG alana baskisi kesilir (roleStation);
+    grupta >= %50 tasarruf -> mermiKriz + 'MermiAz' olayi. [MERMI]. Kapatma mermiDisiplinOff. TEST EDILMEDI.

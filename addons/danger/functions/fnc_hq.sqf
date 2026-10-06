@@ -32,7 +32,7 @@ lambs_danger_hqStarted = true;
 
 // MODUL LISTESI: [ad, aralik sn] — yeni modul eklemek = fnc_hq<Ad>.sqf + buraya satir
 if (isNil "lambs_danger_hqModuller") then {
-    lambs_danger_hqModuller = [["istihbarat", 5], ["takviye", 8], ["kanat", 7], ["feint", 9], ["medevac", 6]];
+    lambs_danger_hqModuller = [["istihbarat", 5], ["takviye", 8], ["kanat", 7], ["feint", 9], ["medevac", 6], ["destek", 6]];
 };
 
 diag_log format ["[HQ] kumanda cekirdegi baslatildi | moduller: %1", lambs_danger_hqModuller apply {_x select 0}];
