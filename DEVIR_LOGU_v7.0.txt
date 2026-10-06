@@ -1401,3 +1401,7 @@ v8.108 - MG / AT ASISTANI ES + MERMI SAGLAMA (kullanici istegi) + RPT 38f4018a b
   fnc_buddyPairs: ONCE MG + en yakin MG asistani, AT + en yakin AT asistani eslesir (varsa); kalanlar eski yilan eslestirmesine (ozyineleme). buddyBond bu esleri kullanir.
   fnc_cephanePaylas: asistan, kendi agir silahcisina (es) envanterinde 2 uyumlu sarjorde bile verir (kendinde >= 1 kalir; digerleri >= 5, kendinde >= 4 kalir); donor sarjoru artik ALICININ silahina uyan envanter sarjorleri (asistanin sirt cantasindaki MG kayislari sayilir); temasta asistan-agir silahci cifti 15 m'den (digerleri 6 m); aktarilan adet alici 4'e tamamlanir (<= 3).
   NOT: asistan siniflari mod'a gore degisir; asistan tespit edilemezse eski eslestirme calisir. TEST EDILMEDI.
+
+v8.109 - RPT f89f5f17 (v8.108): TCCC UYGULANDI calisiyor, lider devri duzeltmesi dogru calisti (motor, bayilmis Kakar'i lider secti -> bilincli tek aday Siddiqi'ye duzeltildi; log 'MOTOR SECIMI DUZELTILDI'); HQ-DESTEK testte tetiklenmedi (taarruz grubu / musait grup yok: neden ozeti calisiyor); cephane aktarimi gerektirmedi.
+  Sorun: PARCALI / DUMAN alicisi 90 sn'de 360-460 (kimsede parcali / duman yok; test squadlarinda bomba yok) -> alici yalniz grupta >= 3 bombali verici varsa. [BUDDY-ES] (yeni): MG / AT + asistan cifti ilk olusunda loglanir (asistan tespiti dogrulamasi).
+  NOT: lider devrinde skill 'commanding' 0.00 gorulen askerler var (varsayilan beceri uygulanmamis olabilir); puan rutbeye + beceriye bagli oldugu icin AT / MG gibi yuksek skilli asker, skill 0'li tufekciden once secilebilir.

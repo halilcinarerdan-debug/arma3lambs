@@ -56,6 +56,17 @@ private _kullanilan = [];
     _kullanilan pushBack _as;
 } forEach (_alive select {([_x] call _rolFn) in ["MG", "AT"]});
 if (_on isNotEqualTo []) exitWith {
+    // log: ayni cift yalniz bir kez (ilk 60)
+    if (isNil "lambs_danger_asistEsLog") then { lambs_danger_asistEsLog = []; };
+    {
+        private _k = format ["%1|%2", name (_x select 0), name (_x select 1)];
+        if !(_k in lambs_danger_asistEsLog) then {
+            lambs_danger_asistEsLog pushBack _k;
+            if ((count lambs_danger_asistEsLog) <= 60) then {
+                diag_log format ["[BUDDY-ES] asistan cifti: %1 (%2) + %3 (%4)", name (_x select 0), [_x select 0] call _rolFn, name (_x select 1), [_x select 1] call _asistFn];
+            };
+        };
+    } forEach _on;
     private _kalan = _alive select {!(_x in _kullanilan)};
     private _geri = if (count _kalan >= 1) then { [_kalan] call FUNC(buddyPairs) } else { [] };
     _on + _geri + (_eodlar apply {[_x]})

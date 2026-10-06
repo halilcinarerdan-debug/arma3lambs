@@ -210,13 +210,16 @@ private _calis = {
             };
 
             private _aliciSec = [];
+            // v8.109: parcali / duman alicisi yalniz grupta o bombadan >= 3 tasiyan (verici) varsa (RPT f89f5f17: kimsede yoktu, 90 sn'de 360-460 bosuna alici)
+            private _parcaliVerici = (_tablo findIf {(_x select 5) >= 3}) >= 0;
+            private _dumanVerici = (_tablo findIf {(_x select 6) >= 3}) >= 0;
             {
                 _x params ["_u", "_sa", "_sayi", "_kap", "_gl40", "_fr", "_dm", "_w", "_uy", "_anaSn"];
                 if ((time - (_u getVariable [QGVAR(cephaneAliciT), -999])) < 15 || {_u getVariable [QGVAR(cephaneAliciBusy), false]}) then { continue };
                 if (_w isNotEqualTo "" && {_sayi < 3} && {(_sayi * _kap) < (2.5 * _kap)}) then { _aliciSec pushBack [_u, "SARJOR", _sa, 1 - (_sayi / 3)]; continue };
                 if (_gl40 < 3) then { _aliciSec pushBack [_u, "40MM", "", 0.8]; continue };
-                if (_fr isEqualTo 0 && {!(_u getUnitTrait "medic")}) then { _aliciSec pushBack [_u, "PARCALI", "", 0.4]; continue };
-                if (_dm isEqualTo 0 && {_u isEqualTo _l}) then { _aliciSec pushBack [_u, "DUMAN", "", 0.3]; continue };
+                if (_parcaliVerici && {_fr isEqualTo 0} && {!(_u getUnitTrait "medic")}) then { _aliciSec pushBack [_u, "PARCALI", "", 0.4]; continue };
+                if (_dumanVerici && {_dm isEqualTo 0} && {_u isEqualTo _l}) then { _aliciSec pushBack [_u, "DUMAN", "", 0.3]; continue };
             } forEach _tablo;
             if (_aliciSec isEqualTo []) then { continue };
             { _say set ["alici_" + (_x select 1), (_say getOrDefault ["alici_" + (_x select 1), 0]) + 1]; } forEach _aliciSec;
