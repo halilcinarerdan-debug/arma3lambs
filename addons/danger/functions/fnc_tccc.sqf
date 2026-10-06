@@ -113,8 +113,21 @@ diag_log format [
         _m setUnitPos "UP";
         _m doMove (getPosATL _c);
         private _tazeT = time + 1.5;
+        private _durPos = getPosATL _m; private _durT = time; private _durKademe = 0;
         waitUntil {
             sleep 0.7;
+            // v8.94: DURGUN tespiti (RPT a331c7eb: hekim 13 m'de 25 sn hic yurumedi) -> 3 sn'de 1 m'den az ilerlediyse kademeli mudahale
+            if (alive _m && {(_m distance2D _durPos) > 1}) then { _durPos = getPosATL _m; _durT = time; _durKademe = 0; };
+            if (alive _m && {alive _c} && {time - _durT > 3} && {(_m distance2D _c) > 3} && {_durKademe < 3}) then {
+                _durKademe = _durKademe + 1; _durT = time;
+                {_m enableAI _x} forEach ["MOVE", "PATH", "ANIM"];
+                _m setVariable [QGVAR(forceMove), true];
+                _m setVariable [QGVAR(taktikKilit), 0];
+                _m forceSpeed -1; _m setSpeedMode "FULL";
+                if (_durKademe >= 2) then { doStop _m; _m setUnitPos "UP"; };
+                _m doMove (getPosATL _c);
+                diag_log format ["[TCCC-DURGUN] %1 | %2 -> %3 | kademe %4 | mesafe %5 m | komut:%6 | durus:%7 | MOVE:%8 PATH:%9 ANIM:%10 | baski %11 | panik:%12", groupId _g, name _m, name _c, _durKademe, round (_m distance2D _c), currentCommand _m, stance _m, _m checkAIFeature "MOVE", _m checkAIFeature "PATH", _m checkAIFeature "ANIM", (getSuppression _m) toFixed 2, _m getVariable [QGVAR(panikEskiDAI), "-"]];
+            };
             // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
             if (time > _tazeT && {alive _m} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
             !alive _m || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}

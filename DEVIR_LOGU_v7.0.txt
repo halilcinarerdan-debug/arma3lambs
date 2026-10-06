@@ -1310,3 +1310,8 @@ v8.93 - BAYGIN-ROE + MEDEVAC TALEP DUZELTMESI (RPT a331c7eb)
   fnc_tccc: yaklasma beklemesinde her 1.5 sn doMove tazelenir (baska LAMBS emri yaricap disi birakmasin).
   fnc_dispersion: lider targets yaricapi 450 m, buyuk tehdit (RPG) dagilma yaricapi 9-16 m.
   TEST EDILMEDI: [BAYGIN-ROE] ve [HQ-MEDEVAC] satirlari izlenmeli.
+
+v8.94 - TCCC HEKIM DURGUN (RPT a331c7eb 2. analiz)
+  Bulgu: roket tek vurusta Alpha 1-4'un 14 kisisinden 12'sini dusurdu, grubun GERCEK hekimi (Ryan King) de bayildi; yerine bandajli tufekci (Mike Hughes) atandi. 31 TCCC atamasinda yalniz 1 tedavi tamamlandi; 10+ IPTAL 'sure doldu (yetisemedi)' ve mesafe 13-28 m (25 sn'de 13 m yurunemedi) = hekim DURGUN kaldi (LAMBS hide / bounding / jest / panik kaynakli, tam neden RPT'de gorunmuyor).
+  fnc_tccc: yaklasmada 3 sn boyunca <1 m ilerleme = durgun; kademe 1: MOVE/PATH/ANIM ac, forceMove, taktikKilit sifirla, forceSpeed -1, FULL, doMove; kademe 2-3: doStop + UP + doMove. [TCCC-DURGUN] logu komut / durus / AI ozellikleri / baski / panik degiskeni yazar -> bir sonraki RPT'de gercek kok neden okunacak.
+  NOT: dagilma (v8.93) roketin 12 kisiyi birden dusurmesini azaltmali (grupta <2.5 m yigilma 7/14, ort. aralik 4 m idi). TEST EDILMEDI.
