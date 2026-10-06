@@ -187,6 +187,7 @@ while {true} do {
         // plan bitti / iptal / grup yok
         if (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []} || {_faz isEqualTo "BITTI"}) then {
             { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; } forEach (_plan get "gruplar");
+            { if (!isNull _x) then { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setCombatMode "YELLOW"; _x setBehaviour "AWARE"; _x setSpeedMode "NORMAL"; { _x setUnitPos "AUTO"; _x doWatch objNull; } forEach (units _x); }; } forEach (_plan getOrDefault ["reconG", []]);
             { deleteMarker _x; } forEach (_plan get "isaretler");
             { _x setVariable ["lambs_danger_agirYasak", nil]; } forEach (_plan get "gruplar");
             lambs_danger_planCCPlar = (missionNamespace getVariable ["lambs_danger_planCCPlar", []]) select {(_x select 0) isNotEqualTo _id};
@@ -240,7 +241,30 @@ while {true} do {
         };
         if (_faz isEqualTo "TOPLAN") then {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
-            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]}) then {
+            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]}) then {
+                // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
+                if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
+                    _plan set ["reconYapildi", true];
+                    private _rgl = (_plan get "reconG") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
+                    private _opN = _plan get "op";
+                    {
+                        private _g = _x;
+                        private _poz = _opN getPos [10 * _forEachIndex, _B + ([90, -90] select (_forEachIndex % 2 isEqualTo 1))];
+                        [_g, [[_poz, "MOVE", "RECON -> OP", "STEALTH", "LIMITED", 25]]] call _wpYaz;
+                        private _wr = (waypoints _g) select ((count (waypoints _g)) - 1);
+                        _wr setWaypointBehaviour "STEALTH";
+                        _wr setWaypointCombatMode "GREEN";
+                        _wr setWaypointSpeed "LIMITED";
+                        _g setBehaviour "STEALTH";
+                        _g setCombatMode "GREEN";
+                        _g setSpeedMode "LIMITED";
+                        { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "MIDDLE"; }; } forEach (units _g);
+                        (_plan get "notlar") set [format ["%1_op", groupId _g], [_poz, -1]];
+                    } forEach _rgl;
+                    diag_log format ["[PLAN-RECON] %1 | recon OP'ye gidiyor (STEALTH + GREEN: ates gelene kadar ates yok) | %2 grup | OP %3", _id, count _rgl, mapGridPosition _opN];
+                    [_plan, "RECON", format ["%1 grup gozlem noktasina", count _rgl]] call _fazGec;
+                    continue
+                };
                 // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
                 if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])}) then {
                     _plan set ["tasimaYapildi", true];
@@ -278,6 +302,60 @@ while {true} do {
                     } forEach _gruplar;
                     [_plan, "ORP", "ORP / destek noktasina intikal"] call _fazGec;
                 };
+            };
+            continue
+        };
+
+        // ---------------------------------------------------------------- RECON (gozlem noktasinda bilgi toplama; temas arama, ates yok)
+        if (_faz isEqualTo "RECON") then {
+            private _notlar = _plan get "notlar";
+            private _rg = (_plan get "reconG") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
+            private _vardi = 0;
+            private _bozuldu = false;
+            {
+                private _g = _x;
+                private _t = _notlar getOrDefault [format ["%1_op", groupId _g], []];
+                if ([_g] call _temasta) then { _bozuldu = true; };
+                if (_t isNotEqualTo []) then {
+                    if (((leader _g) distance2D (_t select 0)) < 40 || {_fazSure > 240}) then {
+                        if ((_t select 1) < 0) then {
+                            _t set [1, time];
+                            { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "DOWN"; }; } forEach (units _g);
+                            (leader _g) doWatch _obj;
+                            diag_log format ["[PLAN-RECON] %1 | %2 OP'ye vardi (%3 m), gozlem basladi", _id, groupId _g, round ((leader _g) distance2D _obj)];
+                        };
+                        _vardi = _vardi + 1;
+                    };
+                };
+            } forEach _rg;
+            if (_vardi >= (count _rg) && {!("reconVarT" in _plan)}) then { _plan set ["reconVarT", time]; };
+            private _gozlemS = if (!("reconVarT" in _plan)) then {0} else {time - (_plan get "reconVarT")};
+            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= 90} || {_fazSure > 420}) then {
+                // RAPOR: grubun bildikleri (knowsAbout >= 0.8) objektif cevresi 450 m
+                private _rolFn2 = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+                private _hos = (_obj nearEntities [["CAManBase", "LandVehicle", "Air"], 450]) select {
+                    private _e = _x;
+                    alive _e && {(side _e) isNotEqualTo civilian} && {_taraf getFriend (side _e) < 0.6} && {(_rg findIf {(_x knowsAbout _e) >= 0.8}) >= 0}
+                };
+                private _adam = _hos select {_x isKindOf "CAManBase"};
+                private _mgN = {([_x] call _rolFn2) isEqualTo "MG"} count _adam;
+                private _atN = {([_x] call _rolFn2) isEqualTo "AT"} count _adam;
+                private _nisN = {([_x] call _rolFn2) isEqualTo "MARKSMAN"} count _adam;
+                private _zirhN = {!(_x isKindOf "CAManBase") && {(getNumber (configOf _x >> "armor")) >= 100}} count _hos;
+                private _ay = _plan get "ayar";
+                if (_mgN > 0) then { _ay set ["mg", true]; };
+                if (_atN > 0) then { _ay set ["at", true]; };
+                if (_nisN > 0) then { _ay set ["nisanci", true]; };
+                if (_zirhN > 0) then { _ay set ["zirh", true]; };
+                if ((count _adam) > (_ay getOrDefault ["sayi", 0])) then { _ay set ["sayi", count _adam]; };
+                { private _g = _x; { _g reveal [_x, 2.5]; } forEach _hos; } forEach _gruplar;
+                private _rap = format ["gorulen piyade %1 (MG %2, AT %3, nisanci %4), arac / zirh %5, toplam %6 | gozlem %7 sn | %8", count _adam, _mgN, _atN, _nisN, _zirhN, count _hos, round _gozlemS,
+                    ["gizlilik korundu", "TEMAS: gizlilik bozuldu"] select _bozuldu];
+                _plan set ["reconRapor", _rap];
+                diag_log format ["[PLAN-RECON] %1 | RAPOR: %2 | plan gruplari bilgilendirildi (reveal 2.5)", _id, _rap];
+                systemChat format ["[ELITE] Recon raporu (%1): %2", _id, _rap];
+                _plan set ["reconTamam", true];
+                [_plan, "TOPLAN", "recon raporu alindi"] call _fazGec;
             };
             continue
         };

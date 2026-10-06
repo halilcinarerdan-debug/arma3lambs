@@ -68,7 +68,7 @@ private _aday = allGroups select {
     && {({isPlayer _x} count (units _x)) isEqualTo 0}
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
-    && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC"])}
+    && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
     && {isNull objectParent _l} && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}
 };
@@ -102,10 +102,17 @@ private _gruplar = _aday select [0, (_grupN max 1) max (count _atanmis)];
 if (_atanmis isNotEqualTo []) then {
     diag_log format ["[PLAN-ATAMA] Zeus atamali gruplar plana alindi: %1", _atanmis apply {format ["%1=%2", groupId _x, _x getVariable ["lambs_danger_gorev", ""]]}];
 };
+// v8.131 RECON: Zeus 'Gorev Ata -> RECON' gruplari (>= 2 asker) planin KESIF unsuru olur: once gozlem noktasina (OP) sizip bilgi toplar (cogu gizlilik: STEALTH + GREEN), plana rapor verir
+private _reconG = allGroups select {
+    private _l = leader _x;
+    (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _l} && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
+    && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _l}
+    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+};
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {
-    private _uzak = _gruplar select {!local _x};
+    private _uzak = (_gruplar + _reconG) select {!local _x};
     {
         diag_log format ["[PLAN-DEVIR] %1 | sahip makine %2 -> sunucu (2)", groupId _x, groupOwner _x];
         _x setGroupOwner 2;
@@ -117,6 +124,7 @@ if (isServer) then {
         if (_kalan isNotEqualTo []) then {
             diag_log format ["[PLAN-DEVIR] DEVIR OLMADI (plandan cikarildi): %1", _kalan apply {groupId _x}];
             _gruplar = _gruplar - _kalan;
+            _reconG = _reconG - _kalan;
         } else {
             diag_log format ["[PLAN-DEVIR] %1 grup sunucuya devredildi (%2 sn)", count _uzak, (time - _t0) toFixed 1];
         };
@@ -239,6 +247,25 @@ private _gozObj = AGLToASL (_obj vectorAdd [0, 0, 1.5]);
 } forEach [35, 55, 80, 105, -35, -55, -80, -105];
 if (_sbf isEqualTo []) then { _sbf = _obj getPos [220, _B + 70]; };
 
+// v8.131 RECON gozlem noktasi (OP): objektife 450-600 m (tufek etkili menzili 460 m civari: gozlem, temas degil), objektifi gorebilen, yuksek, bitki / kaya orten
+private _op = [];
+if (_reconG isNotEqualTo []) then {
+    private _opS = -1e9;
+    {
+        private _a = _x;
+        {
+            private _p = _obj getPos [_x, _B + _a];
+            if (!surfaceIsWater _p && {!isOnRoad _p} && {(nearestObjects [_p, ["House"], 12]) isEqualTo []}) then {
+                if (!(terrainIntersectASL [AGLToASL (_p vectorAdd [0, 0, 0.8]), _gozObj])) then {
+                    private _s = 1.5 * ((getTerrainHeightASL _p) - _hObj) + 2 * (count (nearestTerrainObjects [_p, ["TREE", "BUSH", "ROCK", "ROCKS"], 14])) - 0.2 * abs _a - 0.02 * (_x - 450);
+                    if (_s > _opS) then { _opS = _s; _op = _p; };
+                };
+            };
+        } forEach [450, 520, 600];
+    } forEach [-45, -25, 0, 25, 45];
+    if (_op isEqualTo []) then { _op = _obj getPos [500, _B]; };
+};
+
 // kanat noktalari (>= 2 manevra grubu ve MG / bina / sayi >= 8): objektiften 110 m, eksenin +-75 derecesi
 private _kanatGerek = _mg || _bina || (_sayi >= 8);
 private _kanatNokta = [_obj getPos [110, _B + 75], _obj getPos [110, _B - 75]];
@@ -335,13 +362,17 @@ private _isaretler = [];
 if (isNil "lambs_danger_planCCPlar") then { lambs_danger_planCCPlar = []; };
 lambs_danger_planCCPlar pushBack [_id, _taraf, _ccp];
 
+if (_reconG isNotEqualTo []) then {
+    diag_log format ["[PLAN-RECON] %1 | recon %2 grup: %3 | gozlem noktasi OP %4 (objektiften %5 m)", _id, count _reconG, _reconG apply {groupId _x}, mapGridPosition _op, round (_op distance2D _obj)];
+    { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _reconG;
+};
 private _plan = createHashMapFromArray [
     ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select ((_ayar getOrDefault ["baskin", 0]) > 0 && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
-    ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
+    ["reconG", _reconG], ["op", _op], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {
     _x setVariable ["lambs_danger_planAktif", true, true];
@@ -361,6 +392,21 @@ diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | 
     ["yok", "hazirlik", "cagri", "hazirlik + cagri"] select ((_ayar getOrDefault ["topcu", 0]) min 3)];
 if (_zirh && {!_atVar} && {({([_x] call _destekPuan) >= 3} count _gruplar) isEqualTo 0}) then {
     diag_log format ["[PLAN] %1 UYARI: duşmanda zirh / arac var ama katilan gruplarda AT gucu zayif", _id];
+};
+// v8.131: topcu envanteri (kullanici: "artilleryden tik yok") — plan kurulurken tarafin topcu araclarini ve atisa uygunlugunu logla
+if ((_ayar getOrDefault ["topcu", 0]) > 0) then {
+    private _tAr = vehicles select {(side (group _x)) isEqualTo _taraf || {(side _x) isEqualTo _taraf}} select {(getNumber (configOf _x >> "artilleryScanner")) > 0};
+    if (_tAr isEqualTo []) then {
+        diag_log format ["[PLAN-TOPCU] %1 | ENVANTER: %2 tarafinda artilleryScanner'li arac YOK (topcu / havan araci eksik ya da taraf farkli; Zeus'ta tarafi kontrol edin)", _id, _taraf];
+    } else {
+        {
+            private _v = _x;
+            private _m = (getArtilleryAmmo [_v]) param [0, ""];
+            diag_log format ["[PLAN-TOPCU] %1 | ENVANTER: %2 | gunner:%3 (oyuncu:%4) | yerel:%5 | canFire:%6 | mermi:%7 | hedef menzilde:%8 | Zeus:%9",
+                _id, typeOf _v, [name (gunner _v), "YOK"] select (isNull (gunner _v)), isPlayer (gunner _v), local _v, canFire _v, _m,
+                ["?", _obj inRangeOfArtillery [[_v], _m]] select (_m isNotEqualTo ""), _v getVariable ["lambs_danger_gorev", ""]];
+        } forEach _tAr;
+    };
 };
 if (_zirh && {_tip isEqualTo 0}) then { diag_log format ["[PLAN] %1 NOT: zirh var -> saldirida AT'li grup destek tarafina oncelik verildi (destek puani AT x3)", _id]; };
 

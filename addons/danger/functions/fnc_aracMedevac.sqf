@@ -204,7 +204,7 @@ private _calis = {
                 };
                 continue;
             };
-            _aday = [_aday, [], {_x select 0}] call BIS_fnc_sortBy;
+            _aday = [_aday, [], {(_x select 0) - ([0, 800] select ((_x select 2) getVariable ["lambs_danger_medevacRezerv", false]))}] call BIS_fnc_sortBy;   // v8.131: medevac rezerv araci oncelikli
             (_aday select 0) params ["_dm0", "_vg0", "_v0", "_d0"];
             // ayni yakindaki yaralilar (<= 25 m)
             private _grup = _yaralilar select {(_x distance2D _y) <= 25};

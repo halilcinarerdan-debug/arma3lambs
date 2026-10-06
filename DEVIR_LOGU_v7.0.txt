@@ -1562,3 +1562,17 @@ v8.130 - RPT 5ebe2e37 (sunucu) + 894b3f68 (istemci) analizi: APC nakli, SUNUCU-D
    Plan / taksi / tasima altgruplari ve KARAKOL_ARAC araclari almaz. Log [KARAKOL-GARNIZON] + 60 sn ozet. Kapatma: lambs_danger_garnizonOff.
  - Test edilmedi: buildingPos yuksekligi (AGL varsayildi), merdivenle ust kata cikis, PATH kapali nobetcinin davranisi, devriye alarm gecisi, arac mevzisi. HEMTT: yalniz stil / surum gurultusu.
  YAPILMADI: karakolda MG / AT'li gruplarin ozel yerlesimi, nobet degisimi (rotasyon), hareket halinde formasyon sorununun kok nedeni (yukaridaki yol gecisi hipotez).
+
+v8.131 - RPT 14ae37d0 (istemci / listen) + kullanici geri bildirimi: APC nakli, medevac rezervi, takim bazli bolme, yigilma, recon, topcu envanteri
+ KULLANICI: "apc ler simdi gidiyor, hepsi gidiyor; medevac varsa 1 tanesi rezerve ayrilsin; recon entegrasyonu (stealth oncelikli, bilgi toplamak, catismaya girmemek, forced holdfire / ates gelene kadar ates yok);
+ apcler ayni yere yigildi; artilleryden tik yok; apcye bindiler; grubu bolebilirsin (takim bazli)".
+ GOZLEM (RPT 14ae37d0 istemci): [TASIMA] / [TAKSI] / [PLAN-TOPCU] bu dosyada yok (sunucu RPT'si yok); ARAC-SENKRON bosta duran Stryker'lari 3 kisilik piyadeye gore yavaslatmis (nakil disi, normal).
+ YAPILDI:
+ - aracTasima: (1) MEDEVAC REZERVI: Zeus MEDEVAC atamasi yoksa ve >= 2 arac varsa objektiften en uzak arac nakilde kullanilmaz (lambs_danger_medevacRezerv; aracMedevac onu 800 m avantajla secer; lambs_danger_tasimaMedevacRezerv=false ile kapanir).
+   (2) TAKIM BAZLI BOLME: grup tamami sigmazsa splitFireTeams (FSE / Maneuver / Reserve) takimlari buyukten kucuge ayri araclara yerlesir (ayni takim ayni arac); sigmayan takim yurur; [TASIMA] logu bolunen gruplari yazar.
+   (3) YIGILMA ONLEME: alma ve inis noktalari araclar arasinda yanal 24 m aralikla dagitilir (hepsi ayni RP / inis noktasina gidiyordu).
+ - RECON (Zeus Gorev Ata -> RECON, >= 2 asker): plana KESIF unsuru; TOPLAN'dan sonra RECON fazi: gozlem noktasina (OP: objektife 450-600 m, objektifi gorebilen, yuksek, bitki / kaya orten) STEALTH + LIMITED + combatMode GREEN (ates gelene kadar ates yok), cömelerek, OP'de yatarak gozlem (90 sn;
+   temas olursa / 420 sn dolarsa biter). RAPOR: recon grubunun bildikleri (knowsAbout >= 0.8, objektif cevresi 450 m): piyade / MG / AT / nisanci / zirh sayisi -> plan ayari (mg / at / nisanci / zirh / sayi) guncellenir ve plan gruplarina reveal 2.5 ile iletilir (hile yok: yalniz gozlenenler).
+   Recon plan bitince serbest birakilir. Log [PLAN-RECON] + Zeus systemChat. Plana / taksiye alinmaz (RECON).
+ - Topcu: plan kurulurken [PLAN-TOPCU] ENVANTER: tarafin artilleryScanner'li araclari (gunner, oyuncu, yerel, canFire, mermi, hedef menzilde mi, Zeus atamasi) — sunucu RPT'si gelince "tik yok" nedeni gorunecek (v8.130 ATIS YOK sayaclari da duruyor).
+ TEST EDILMEDI: tum yukaridakiler. YAPILMADI: recon'un arac kullanimi, recon'un birden cok OP'de ardisik gozlemi, topcu duzeltmesi (neden bilinmiyor).

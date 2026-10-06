@@ -56,32 +56,67 @@ private _araclar = if (_atanan isNotEqualTo []) then {_atanan} else {
 if (_araclar isEqualTo []) exitWith {0};
 _araclar = [_araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
 
-// ---- grup -> arac eslesmesi (grup tamami sigmali) ----
+// ---- v8.131 MEDEVAC REZERVI: Zeus MEDEVAC atamasi yoksa ve >= 2 arac varsa objektiften en uzak (geride) arac medevac icin ayrilir (nakilde kullanilmaz) ----
+private _mdVarMi = (_tumAraclar select {("MEDEVAC" in [_x getVariable ["lambs_danger_gorev", ""], (group (driver _x)) getVariable ["lambs_danger_gorev", ""]])}) isNotEqualTo [];
+if (count _araclar > 1 && {!_mdVarMi} && {missionNamespace getVariable ["lambs_danger_tasimaMedevacRezerv", true]}) then {
+    private _uz = [_araclar, [], {_x distance2D _obj}, "DESCEND"] call BIS_fnc_sortBy;
+    private _rez = _uz select 0;
+    _rez setVariable ["lambs_danger_medevacRezerv", true, true];
+    _araclar = _araclar - [_rez];
+    diag_log format ["[TASIMA] %1 | MEDEVAC REZERVI: %2 (%3 m geride) nakilde kullanilmayacak", _taraf, getText (configOf _rez >> "displayName"), round (_rez distance2D _obj)];
+};
+
+// ---- birim -> arac eslesmesi: once grup TAMAMI, sigmazsa TAKIM BAZLI (FSE / Maneuver / Reserve; ayni takim ayni araca) ----
 private _kalan = _araclar apply {[_x, _x emptyPositions "cargo"]};
-private _eslesme = [];   // [arac, [gruplar]]
+private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
-{
-    private _g = _x;
-    private _n = {alive _x && {isNull objectParent _x}} count (units _g);
+private _bolunen = [];
+private _yerlestir = {
+    params ["_birimler", "_ad"];
+    private _n = count _birimler;
     private _i = _kalan findIf {(_x select 1) >= _n};
-    if (_i < 0) then { _yaya pushBack _g; continue };
+    if (_i < 0) exitWith { false };
     (_kalan select _i) set [1, ((_kalan select _i) select 1) - _n];
     private _v = (_kalan select _i) select 0;
     private _e = _eslesme findIf {(_x select 0) isEqualTo _v};
-    if (_e < 0) then { _eslesme pushBack [_v, [_g]]; } else { ((_eslesme select _e) select 1) pushBack _g; };
+    if (_e < 0) then { _eslesme pushBack [_v, [_birimler]]; } else { ((_eslesme select _e) select 1) pushBack _birimler; };
+    true
+};
+{
+    private _g = _x;
+    private _on = (units _g) select {alive _x && {isNull objectParent _x}};
+    if (_on isEqualTo []) then { continue };
+    if ([_on, groupId _g] call _yerlestir) then { continue };
+    // sigmadi: takim bazli bol
+    private _takimlar = ([_g] call FUNC(splitFireTeams)) select {_x isNotEqualTo []};
+    _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
+    private _yerlesen = 0;
+    {
+        if ([_x, groupId _g] call _yerlestir) then { _yerlesen = _yerlesen + 1; } else { _yaya pushBack [_g, count _x]; };
+    } forEach _takimlar;
+    if (_yerlesen > 0) then { _bolunen pushBack format ["%1 (%2/%3 takim)", groupId _g, _yerlesen, count _takimlar]; };
 } forEach _gruplar;
 if (_eslesme isEqualTo []) exitWith {
-    diag_log format ["[TASIMA] %1 | arac var (%2) ama hicbir grup sigmadi -> yuruyerek", _taraf, count _araclar];
+    diag_log format ["[TASIMA] %1 | arac var (%2) ama hicbir takim sigmadi -> yuruyerek", _taraf, count _araclar];
     0
 };
 
 private _dropM = (500 max (_orpM + 150));
 private _drop = _obj getPos [_dropM, _B];
 if (surfaceIsWater _drop) then { _drop = _obj getPos [(_dropM + 100), _B]; };
-private _nG = 0;
-{ _nG = _nG + count (_x select 1); } forEach _eslesme;
-diag_log format ["[TASIMA] %1 | %2 arac / %3 grup eslesti (yaya: %4) | inis noktasi %5 (hedeften %6 m) | atanmis arac: %7",
-    _taraf, count _eslesme, _nG, count _yaya, mapGridPosition _drop, round _dropM, count _atanan];
+private _nB = 0;
+{ { _nB = _nB + count _x; } forEach (_x select 1); } forEach _eslesme;
+diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen: %4 | yaya kalan birim: %5 | inis noktasi %6 (hedeften %7 m) | atanmis arac: %8",
+    _taraf, count _eslesme, _nB, _bolunen, count _yaya, mapGridPosition _drop, round _dropM, count _atanan];
+
+// ---- v8.131 YIGILMA ONLEME: araclar ayni noktaya gitmesin; alma / inis noktasi yanal 24 m aralikla dagitilir ----
+private _noktaYay = {
+    params ["_nokta", "_i", "_n"];
+    private _of = (_i - (_n - 1) / 2) * 24;
+    private _p = _nokta getPos [abs _of, _B + ([90, -90] select (_of < 0))];
+    if (surfaceIsWater _p) then { _p = _nokta; };
+    _p
+};
 
 private _tasinan = 0;
 private _isler = [];
@@ -89,7 +124,9 @@ private _isler = [];
     _x params ["_v", "_gl"];
     private _d = driver _v;
     private _vg = group _d;
-    _isler pushBack ([_v, _d, _vg, _gl, _rp, _drop, _ctl] spawn {
+    private _rpi = [_rp, _forEachIndex, count _eslesme] call _noktaYay;
+    private _dropi = [_drop, _forEachIndex, count _eslesme] call _noktaYay;
+    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl] spawn {
         params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl"];
         _v setVariable [QGVAR(tasimaMesgul), true];
         _v setVariable [QGVAR(aracMedevacT), time];
@@ -119,7 +156,7 @@ private _isler = [];
         if (_iptal isEqualTo "") then {
             doStop _d;
             private _hepsi = [];
-            { _hepsi append ((units _x) select {alive _x && {isNull objectParent _x}}); } forEach _gl;
+            { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
             { _x assignAsCargo _v; } forEach _hepsi;
             _hepsi orderGetIn true;
             private _bt = time + 60;
@@ -143,7 +180,7 @@ private _isler = [];
             waitUntil {
                 sleep 1;
                 !alive _v || {!alive _d} || {(_v distance2D _drop) < 40} || {time > _st}
-                || {(_gl findIf {(time - (_x getVariable [QGVAR(contact), -999])) < 5}) >= 0}
+                || {(_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}
                 || {(getSuppression _d) > 0.5} || {_ctl select 0}
             };
             if (!alive _v || {!alive _d}) then { _iptal = "tasima sirasinda arac / surucu oldu"; };
@@ -184,7 +221,7 @@ private _isler = [];
         _v setVariable [QGVAR(tasimaMesgul), nil];
         count _binen
     });
-    _tasinan = _tasinan + count _gl;
+    { _tasinan = _tasinan + count _x; } forEach _gl;
 } forEach _eslesme;
 
 waitUntil { sleep 2; (_isler findIf {!scriptDone _x}) isEqualTo -1 };
