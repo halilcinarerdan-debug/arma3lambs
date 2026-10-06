@@ -108,11 +108,14 @@ private _calis = {
             private _mn = toLower _x;
             private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
             private _sim = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));
-            if (_sim isEqualTo "shotgrenade" && {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit")) >= 5}) then { _frag pushBackUnique _mn; };
-            if (_sim isEqualTo "shotsmoke" && {(_mn find "smoke") >= 0 || {(toLower _ammo) find "smoke" >= 0} || {(toLower _mz) find "smoke" >= 0}}) then { _dumanA pushBackUnique _mn; };
+            private _ad = _mn + "|" + (toLower _ammo);
+            private _yikim = ["charge", "satchel", "demo", "bundle", "mine", "claymore", "c4", "explosive", "tnt", "sb3kg"] findIf {(_ad find _x) >= 0} >= 0;   // v8.99: patlayici yuk / demolisyon bomba degil (RPT 9ccb4953: satchel / demo / tnt listede)
+            private _isik = ["chem", "strobe", "flare", "light", "tracer", "ir_"] findIf {(_ad find _x) >= 0} >= 0;
+            if (_sim isEqualTo "shotgrenade" && {!_yikim} && {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit")) >= 5}) then { _frag pushBackUnique _mn; };
+            if (_sim isEqualTo "shotsmoke" && {!_isik}) then { _dumanA pushBackUnique _mn; };
         } forEach (getArray (configFile >> "CfgWeapons" >> "Throw" >> _mz >> "magazines"));
     } forEach ((getArray (configFile >> "CfgWeapons" >> "Throw" >> "muzzles")) select {_x isNotEqualTo "this"});
-    diag_log format ["[CEPHANE] bomba siniflari (mermi simulasyonundan): parcali %1 %2 | duman %3 %4", count _frag, _frag select [0, 6], count _dumanA, _dumanA select [0, 6]];
+    diag_log format ["[CEPHANE] bomba siniflari (mermi simulasyonundan): parcali %1 %2 | duman %3 %4", count _frag, _frag select [0, 14], count _dumanA, _dumanA select [0, 14]];
     private _say = createHashMap;
     private _ozetT = time + 90;
     private _logN = 0;

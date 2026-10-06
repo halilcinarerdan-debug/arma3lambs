@@ -48,6 +48,20 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
         if (!isNull _proj && {!(missionNamespace getVariable ["lambs_danger_bayginPatlayiciOff", false])} && {_simTani in ["shotgrenade", "shotrocket", "shotmissile", "shotshell"]}) then {
             private _tgt = getAttackTarget _unit;
             if (isNull _tgt) then { _tgt = assignedTarget _unit; };
+            // v8.99: atilan el bombasinin hedefi yok (getAttackTarget bos) -> balistik inis noktasi 12 m'sindeki en yakin dusman hedef sayilir
+            if (isNull _tgt && {_simTani isEqualTo "shotgrenade"}) then {
+                private _pv = velocity _proj;
+                private _pp = getPosASL _proj;
+                private _hh = (_pp select 2) - (getTerrainHeightASL [_pp select 0, _pp select 1]);
+                private _tt = (((_pv select 2) + sqrt (((_pv select 2) ^ 2) + 19.62 * (_hh max 0))) / 9.81) max 0;
+                private _land = [(_pp select 0) + (_pv select 0) * _tt, (_pp select 1) + (_pv select 1) * _tt, 0];
+                private _uSide = side (group _unit);
+                private _ad = ((_land nearEntities ["CAManBase", 12]) select {alive _x && {_uSide getFriend (side (group _x)) < 0.6}});
+                if (_ad isNotEqualTo []) then {
+                    _ad = [_ad, [], {_x distance2D _land}, "ASCEND"] call BIS_fnc_sortBy;
+                    _tgt = _ad select 0;
+                };
+            };
             if (!isNull _tgt && {_tgt isKindOf "CAManBase"} && {alive _tgt} && {((lifeState _tgt) isEqualTo "INCAPACITATED") || {_tgt getVariable ["ACE_isUnconscious", false]}}) then {
                 private _tSide = side (group _tgt);
                 private _bilincliYakin = (_tgt nearEntities ["CAManBase", 35]) findIf {
