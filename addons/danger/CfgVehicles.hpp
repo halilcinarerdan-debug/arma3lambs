@@ -126,4 +126,22 @@ class CfgVehicles {
             };
         };
     };
+
+    class GVAR(GorevAta) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(GorevAta);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Gorev Ata (plan / medevac / topcu)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleGorevAta);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
 };

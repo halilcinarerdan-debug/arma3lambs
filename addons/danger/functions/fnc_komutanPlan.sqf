@@ -68,6 +68,7 @@ private _aday = allGroups select {
     && {({isPlayer _x} count (units _x)) isEqualTo 0}
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+    && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK"])}
     && {isNull objectParent _l} && {(_l distance2D _obj) <= 4000}
 };
 if (_aday isEqualTo []) exitWith {
@@ -93,8 +94,13 @@ if (_aday isEqualTo []) exitWith {
     diag_log format ["[PLAN] KURULAMADI: %1 icin uygun grup yok | taraftaki grup:%2 | elenme nedenleri: %3 | objektife en yakin lider: %4 m | sunucu: isServer=%5", _taraf, count _tum, _red toArray false, round _enYakin, isServer];
     false
 };
-_aday = [_aday, [], { (rankId (leader _x)) * 1000 + ({alive _x} count (units _x)) * 10 - ((leader _x) distance2D _obj) / 100 }, "DESCEND"] call BIS_fnc_sortBy;
-private _gruplar = _aday select [0, _grupN max 1];
+// v8.127: Zeus 'ELITE Gorev Ata' ile MANEVRA / DESTEK / YEDEK atananlar once gelir ve grup sayisi sinirina bakilmaksizin plana girer
+private _atanmis = _aday select {(_x getVariable ["lambs_danger_gorev", ""]) in ["MANEVRA", "DESTEK", "YEDEK"]};
+_aday = [_aday, [], { ([0, 100000] select ((_x getVariable ["lambs_danger_gorev", ""]) in ["MANEVRA", "DESTEK", "YEDEK"])) + (rankId (leader _x)) * 1000 + ({alive _x} count (units _x)) * 10 - ((leader _x) distance2D _obj) / 100 }, "DESCEND"] call BIS_fnc_sortBy;
+private _gruplar = _aday select [0, (_grupN max 1) max (count _atanmis)];
+if (_atanmis isNotEqualTo []) then {
+    diag_log format ["[PLAN-ATAMA] Zeus atamali gruplar plana alindi: %1", _atanmis apply {format ["%1=%2", groupId _x, _x getVariable ["lambs_danger_gorev", ""]]}];
+};
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {
@@ -194,6 +200,17 @@ if (_gn isEqualTo 1) then {
         if (count _manev >= 3) then { _roller set [groupId (_manev select -1), "YEDEK"]; };
     };
 };
+
+// v8.127: Zeus atamasi rolu ezer (MANEVRA / DESTEK / YEDEK)
+{
+    private _ga = _x getVariable ["lambs_danger_gorev", ""];
+    if (_ga in ["MANEVRA", "DESTEK", "YEDEK"]) then {
+        if ((_roller getOrDefault [groupId _x, ""]) isNotEqualTo _ga) then {
+            diag_log format ["[PLAN-ATAMA] %1 rolu %2 -> %3 (Zeus atamasi)", groupId _x, _roller getOrDefault [groupId _x, "?"], _ga];
+        };
+        _roller set [groupId _x, _ga];
+    };
+} forEach _gruplar;
 
 // destek noktasi (SBF): dusman gozetlenen, objektife arazi gorusu olan, dost eksenin yanlarinda yuksek nokta
 private _sbf = [];

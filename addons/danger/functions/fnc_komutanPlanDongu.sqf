@@ -62,6 +62,10 @@ private _topcuAt = {
     private _araclar = vehicles select {
         alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {!isPlayer (gunner _x)} && {local _x} && {canFire _x}
     };
+    // v8.127: Zeus 'ELITE Gorev Ata': TOPCU_YOK olanlar atmaz; en az bir arac TOPCU atandiysa yalniz atananlar atar
+    _araclar = _araclar select {!("TOPCU_YOK" in [_x getVariable ["lambs_danger_gorev", ""], (group (gunner _x)) getVariable ["lambs_danger_gorev", ""]])};
+    private _isTop = _araclar select {"TOPCU" in [_x getVariable ["lambs_danger_gorev", ""], (group (gunner _x)) getVariable ["lambs_danger_gorev", ""]]};
+    if (_isTop isNotEqualTo []) then { _araclar = _isTop; };
     private _atan = 0;
     {
         private _v = _x;

@@ -166,8 +166,13 @@ private _calis = {
 
             // arac ara
             private _aday = [];
+            // v8.127: Zeus 'ELITE Gorev Ata' MEDEVAC: bu tarafta atanmis arac / grup varsa yalniz atananlar kullanilir
+            private _mdAtanmis = (allGroups select {(side _x) isEqualTo _taraf}) select {
+                ((_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC") || {((vehicle (leader _x)) getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC"}
+            };
             {
                 private _vg = _x;
+                if (_mdAtanmis isNotEqualTo [] && {!(_vg in _mdAtanmis)}) then { continue };
                 private _l = leader _vg;
                 if (isNull _l || {!local _vg} || {isPlayer _l} || {(side _vg) isNotEqualTo _taraf}) then { continue };
                 private _v = vehicle _l;

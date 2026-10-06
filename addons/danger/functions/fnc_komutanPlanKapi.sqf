@@ -61,5 +61,18 @@ lambs_danger_planKapiStarted = true;
     diag_log format ["[PLAN-MANUEL] %1 | %2 | %3", _taraf, _ad, ["SILINDI", format ["konuldu: %1 (sonraki Objektif planinda kullanilir)", mapGridPosition _poz]] select (_poz isNotEqualTo [])];
 }] call CBA_fnc_addEventHandler;
 
+// v8.127: Zeus 'ELITE Gorev Ata' -> sunucu degiskeni yazar (grup + varsa arac)
+["lambs_danger_gorevAta", {
+    params ["_hedef", "_kod"];
+    if (!isServer || {isNull _hedef}) exitWith {};
+    private _g = if (_hedef isEqualType grpNull) then {_hedef} else {group (effectiveCommander _hedef)};
+    private _nesneler = [];
+    if (!(_hedef isEqualType grpNull) && {!(_hedef isKindOf "CAManBase")}) then { _nesneler pushBack _hedef; };
+    if (_hedef isKindOf "CAManBase" && {!isNull objectParent _hedef}) then { _nesneler pushBack (vehicle _hedef); };
+    if (!isNull _g) then { _nesneler pushBack _g; };
+    { _x setVariable ["lambs_danger_gorev", _kod, true]; } forEach _nesneler;
+    diag_log format ["[GOREV-ATAMA] %1 -> %2 (nesne: %3)", [groupId _g, "-"] select (isNull _g), ["TEMIZLENDI", _kod] select (_kod isNotEqualTo ""), count _nesneler];
+}] call CBA_fnc_addEventHandler;
+
 diag_log "[PLAN-KAPI] komutan plani sunucu kapisi baslatildi (v8.116)";
 true

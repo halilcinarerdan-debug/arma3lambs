@@ -1515,3 +1515,12 @@ v8.126 - TELEMETRI (guclendirilmis loglama)
    [HIZ-ANOMALI]       2 sn: yaya asker > 26 km/s: grup, asker, anim, stance, bayrak, beh / combat / hiz modu (asker basina 15 sn'de bir, <= 80 satir)
    [DONUS-OZET]        60 sn: donus animasyonu oynayan asker sayisi + turnCoef
  - HEMTT: yalniz test ortami sürüm-gereksinimi gurultusu; oyunda calismasi test edilmedi.
+
+v8.127 - ZEUS "ELITE GOREV ATA" MODULU (squad / arac gorev secimi)
+ - Kullanici: medevac gorevli takim ayarlanabilsin; hangi squad ne yapacak, hangi topcu / heli / zirhli / birim medevac yapacak secilebilsin; "sadece 4 squad katilsin yetmez".
+ - Modul bir askerin / aracin ustune birakilir (degilse 25 m icindeki en yakin). Atama grupta (+ aractaysa araca) lambs_danger_gorev degiskeni; sunucu olayi lambs_danger_gorevAta (fnc_komutanPlanKapi), log [GOREV-ATAMA].
+   Kodlar: Otomatik (sil) / MANEVRA / DESTEK / YEDEK / HARIC / MEDEVAC / TOPCU / TOPCU_YOK; LISTELE atamalari systemChat'e yazar.
+ - Okuyucular: fnc_komutanPlan (MANEVRA / DESTEK / YEDEK atananlar once ve grup sayisi sinirina bakilmaksizin plana girer, rolu ezer, [PLAN-ATAMA]; HARIC / MEDEVAC / TOPCU gruplar plana alinmaz),
+   fnc_komutanPlanDongu (topcu: TOPCU_YOK atmaz; en az bir arac TOPCU ise yalniz atananlar), fnc_aracMedevac (en az bir MEDEVAC atamasi varsa yalniz atananlar), fnc_hqMedevac (MEDEVAC grubunun hekimi once secilir).
+ - YAPILMADI (dürüst not): HELIKOPTER medevac yok (arac medevac yalniz kara araci); ZIRHLI destek plani yok (mekanize taktikler ertelenmisti); atama sadece Zeus oturumunda kalir (kayit yok).
+ - Test edilmedi. HEMTT: yalniz stil uyarilari, hata yok.

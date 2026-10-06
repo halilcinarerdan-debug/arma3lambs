@@ -94,7 +94,7 @@ private _atandi = false;
         if (_hekimler isEqualTo []) then { continue };
 
         // rol onceligi: asil hekim (trait) > sargi tasiyan; sonra yakinlik
-        private _sirali = [_hekimler, [], { ([0, 100] select (_x getUnitTrait "Medic")) - (_x distance2D _c) }, "DESCEND"] call BIS_fnc_sortBy;
+        private _sirali = [_hekimler, [], { ([0, 300] select (((group _x) getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC")) + ([0, 100] select (_x getUnitTrait "Medic")) - (_x distance2D _c) }, "DESCEND"] call BIS_fnc_sortBy;
         private _m = _sirali select 0;
 
         _c setVariable [QGVAR(hqMedic), _m];
