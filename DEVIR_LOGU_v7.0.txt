@@ -1405,3 +1405,8 @@ v8.108 - MG / AT ASISTANI ES + MERMI SAGLAMA (kullanici istegi) + RPT 38f4018a b
 v8.109 - RPT f89f5f17 (v8.108): TCCC UYGULANDI calisiyor, lider devri duzeltmesi dogru calisti (motor, bayilmis Kakar'i lider secti -> bilincli tek aday Siddiqi'ye duzeltildi; log 'MOTOR SECIMI DUZELTILDI'); HQ-DESTEK testte tetiklenmedi (taarruz grubu / musait grup yok: neden ozeti calisiyor); cephane aktarimi gerektirmedi.
   Sorun: PARCALI / DUMAN alicisi 90 sn'de 360-460 (kimsede parcali / duman yok; test squadlarinda bomba yok) -> alici yalniz grupta >= 3 bombali verici varsa. [BUDDY-ES] (yeni): MG / AT + asistan cifti ilk olusunda loglanir (asistan tespiti dogrulamasi).
   NOT: lider devrinde skill 'commanding' 0.00 gorulen askerler var (varsayilan beceri uygulanmamis olabilir); puan rutbeye + beceriye bagli oldugu icin AT / MG gibi yuksek skilli asker, skill 0'li tufekciden once secilebilir.
+
+v8.110 - SIS EKONOMISI (kullanici: 'ayni acida 1 sis varsa 3 tane atilmasina gerek yok')
+  fnc_tacticalSmoke: her atis oncesi bu YONDE (<= 10 derece) iki kaynaga bakilir: (1) global lambs_danger_sisListe (planlanan / atilan sisler, 75 sn; thrower'dan 8-60 m), (2) yasayan standart sis nesneleri (nearestObjects SmokeShell, 60 m; sinyal renkleri haric).
+  Varsa atis iptal ([SIS-EKONOMI] atilmadi: yon, kaynak, toplam). Temas kesmedeki +-14 derecelik genis perde AYRI aci sayilir (10 derece esik); ayni yone ikinci / ucuncu atis ve her tetikte tekrarlanan sis (RPG tepkisi, fireSupport, bounding, hucum) elenir.
+  Baska modullerin kendi attigi sisler yalniz yasayan nesne taramasiyla gorunur (listeye yazilmaz). TEST EDILMEDI.

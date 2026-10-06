@@ -14,6 +14,7 @@
  *   - ruzgar telafisi (sis ruzgar yonune kayar -> 3 sn "ruzgar ustu" nisan)
  *   - sadece beyaz/standart sis (kirmizi/yesil/mavi sinyal sisleri atilmaz)
  *   - GVAR(disableAutonomousSmokeGrenades) ayari saygi gorur
+ *   - v8.110 SIS EKONOMISI: ayni acida (<= 10 derece) 75 sn icinde atilmis / yasayan sis varsa tekrar atilmaz [SIS-EKONOMI]
  *
  * Arguments:
  * 0: group <GROUP> or leader <OBJECT>
@@ -103,6 +104,31 @@ private _mod = _mode;
         // 2. sis biraz daha yakin = derin perde
         if (_i > 0) then { _atisMesafe = (_atisMesafe - (6 * _i)) max 15; };
 
+        // v8.110 SIS EKONOMISI (kullanici: 'ayni acida 1 sis varsa 3 tane atilmasina gerek yok'): bu acida (<= 10 derece) 12 sn onceden planlanmis / atilmis (75 sn) sis veya yasayan sis nesnesi
+        //   (8-60 m, standart sis) varsa bu atis yapilmaz. Temas kesmedeki +-14 derecelik genis perde ayri aci sayilir.
+        if (isNil "lambs_danger_sisListe") then { lambs_danger_sisListe = []; };
+        lambs_danger_sisListe = lambs_danger_sisListe select {(time - (_x select 1)) < 75};
+        private _acikFn = { params ["_a1", "_a2"]; abs ((((_a1 - _a2) + 540) mod 360) - 180) };
+        private _kayit = lambs_danger_sisListe findIf {
+            ([_aticiPos getDir (_x select 0), _yon] call _acikFn) <= 10 && {(_aticiPos distance2D (_x select 0)) >= 8} && {(_aticiPos distance2D (_x select 0)) <= 60}
+        };
+        private _canliNesne = objNull;
+        if (_kayit < 0) then {
+            {
+                private _tn = toLower (typeOf _x);
+                if (isNull _canliNesne && {(_tn find "red") < 0} && {(_tn find "green") < 0} && {(_tn find "blue") < 0} && {(_tn find "yellow") < 0} && {(_tn find "purple") < 0} && {(_tn find "orange") < 0}
+                    && {([_aticiPos getDir _x, _yon] call _acikFn) <= 10} && {(_aticiPos distance2D _x) >= 8}) then { _canliNesne = _x; };
+            } forEach (nearestObjects [_aticiPos, ["SmokeShell"], 60]);
+        };
+        if (_kayit >= 0 || {!isNull _canliNesne}) then {
+            if (isNil "lambs_danger_sisEkoN") then { lambs_danger_sisEkoN = 0; };
+            lambs_danger_sisEkoSay = (missionNamespace getVariable ["lambs_danger_sisEkoSay", 0]) + 1;
+            if (lambs_danger_sisEkoN < 40) then {
+                lambs_danger_sisEkoN = lambs_danger_sisEkoN + 1;
+                diag_log format ["[SIS-EKONOMI] %1 | mod:%2 | atis %3 ATILMADI: %4 derecede zaten sis var (%5) | toplam atlanan %6", name _atici, _mod, _i + 1, round _yon, ["planlanmis / atilmis kayit", "yasayan sis nesnesi"] select (_kayit < 0), lambs_danger_sisEkoSay];
+            };
+            continue
+        };
         private _sisPos = _aticiPos getPos [_atisMesafe, _yon];
 
         // ruzgar telafisi: sis ruzgar yonune kayar -> ruzgar ustune nisan al
@@ -115,6 +141,7 @@ private _mod = _mode;
         _sisPos set [2, 0];
 
         if (!surfaceIsWater _sisPos) then {
+            lambs_danger_sisListe pushBack [_sisPos, time];
             [_atici, _sisPos] call EFUNC(main,doSmoke);
 
             if (EGVAR(main,debug_functions)) then {
