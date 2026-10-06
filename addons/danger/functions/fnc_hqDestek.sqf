@@ -27,6 +27,19 @@ params [["_taraf", sideUnknown, [sideUnknown]], ["_tahta", [], [[]]]];
 if (isNil "lambs_danger_hqDestekler") then { lambs_danger_hqDestekler = createHashMap; };
 if (isNil "lambs_danger_hqDestekN") then { lambs_danger_hqDestekN = 0; };
 
+if (isNil "lambs_danger_hqDestekNeden") then { lambs_danger_hqDestekNeden = createHashMap; };
+private _neden = {
+    lambs_danger_hqDestekNeden set [_this, (lambs_danger_hqDestekNeden getOrDefault [_this, 0]) + 1];
+};
+if (isNil "lambs_danger_hqDestekOzetT") then { lambs_danger_hqDestekOzetT = time + 90; };
+if (time > lambs_danger_hqDestekOzetT) then {
+    lambs_danger_hqDestekOzetT = time + 90;
+    if (count lambs_danger_hqDestekNeden > 0) then {
+        diag_log format ["[HQ-DESTEK-OZET] son 90 sn (neden sayaci): %1 | aktif destek: %2", (keys lambs_danger_hqDestekNeden) apply {format ["%1:%2", _x, lambs_danger_hqDestekNeden get _x]}, count lambs_danger_hqDestekler];
+        lambs_danger_hqDestekNeden = createHashMap;
+    };
+};
+
 private _log = {
     if (lambs_danger_hqDestekN < 150) then {
         lambs_danger_hqDestekN = lambs_danger_hqDestekN + 1;
@@ -117,10 +130,10 @@ private _kaldir = [];
 // 2) yeni destek istegi
 // ---------------------------------------------------------------------------
 private _calisanTaraf = {(side (_x select 0)) isEqualTo _taraf} count (values lambs_danger_hqDestekler);
-if (_calisanTaraf >= 2) exitWith {false};
+if (_calisanTaraf >= 2) exitWith { "es zamanli limit (2)" call _neden; false };
 
 private _musaitlar = _tahta select {(_x get "musait") && {(_x get "n") >= 3}};
-if (_musaitlar isEqualTo []) exitWith {false};
+if (_musaitlar isEqualTo []) exitWith { "musait destek grubu yok" call _neden; false };
 
 private _istekler = _tahta select {
     private _g = _x get "g";
@@ -137,7 +150,7 @@ private _istekler = _tahta select {
         && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0, 0, 0]}}
     && {!((keys lambs_danger_hqDestekler) findIf {(lambs_danger_hqDestekler get _x) select 1 isEqualTo _g} >= 0)}
 };
-if (_istekler isEqualTo []) exitWith {false};
+if (_istekler isEqualTo []) exitWith { "taarruz grubu yok (karar / temas / mesafe sarti)" call _neden; false };
 
 private _aY = (_istekler apply {[_x, time - ((_x get "g") getVariable [QGVAR(hqTemasBas), time])]});
 _aY = [_aY, [], {_x select 1}, "DESCEND"] call BIS_fnc_sortBy;
@@ -156,7 +169,7 @@ private _adaylar = _musaitlar select {
     && {({alive _x && {!(_x getVariable [QGVAR(mermiTasarruf), false])}} count (units _bG)) >= 2}
     && {(time - (_bG getVariable [QGVAR(destekT), -999])) > 60}
 };
-if (_adaylar isEqualTo []) exitWith {false};
+if (_adaylar isEqualTo []) exitWith { "telsiz mesafesinde uygun destek yok" call _neden; false };
 private _sirali = [_adaylar, [], { -((_x get "poz") distance2D _aPoz) + (10 * (_x get "n")) }, "DESCEND"] call BIS_fnc_sortBy;
 private _b = _sirali select 0;
 private _bG = _b get "g";
@@ -185,7 +198,7 @@ private _enSkor = -1e9;
         };
     } forEach [160, 240, 320, 380];
 } forEach [35, 55, 80, 105, -35, -55, -80, -105];
-if (_en isEqualTo []) exitWith {false};
+if (_en isEqualTo []) exitWith { "yan tepe noktasi (gorus) bulunamadi" call _neden; false };
 
 // emir: B grubuna destek
 if ([_bG, "DESTEK", [_en, _enP, groupId _aG]] call FUNC(hqEmir)) then {
@@ -195,4 +208,4 @@ if ([_bG, "DESTEK", [_en, _enP, groupId _aG]] call FUNC(hqEmir)) then {
         _taraf, groupId _aG, _istek get "n", round (_sit select 1), _aG getVariable [QGVAR(cmdSonKarar), "?"], groupId _bG, _b get "n", round (_bPoz distance2D _aPoz),
         mapGridPosition _en, round ((getTerrainHeightASL _en) - _hE), mapGridPosition _enP]) call _log;
     true
-} else { false }
+} else { "hqEmir reddetti" call _neden; false }

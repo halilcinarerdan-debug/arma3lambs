@@ -114,7 +114,7 @@ private _calis = {
             if (_sim isEqualTo "shotgrenade" && {!_yikim} && {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit")) >= 5}) then { _frag pushBackUnique _mn; };
             if (_sim isEqualTo "shotsmoke" && {!_isik}) then { _dumanA pushBackUnique _mn; };
         } forEach (getArray (configFile >> "CfgWeapons" >> "Throw" >> _mz >> "magazines"));
-    } forEach ((getArray (configFile >> "CfgWeapons" >> "Throw" >> "muzzles")) select {_x isNotEqualTo "this"});
+    } forEach (("isClass _x && {isArray (_x >> 'magazines')}" configClasses (configFile >> "CfgWeapons" >> "Throw")) apply {configName _x});
     diag_log format ["[CEPHANE] bomba siniflari (mermi simulasyonundan): parcali %1 %2 | duman %3 %4", count _frag, _frag select [0, 14], count _dumanA, _dumanA select [0, 14]];
     private _say = createHashMap;
     private _ozetT = time + 90;
@@ -133,9 +133,14 @@ private _calis = {
                 && {!(_x getVariable ["ACE_isUnconscious", false])} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
             };
             if ((count _us) < 2) then { continue };
-            private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
-            private _sakin = (time - (_g getVariable [QGVAR(cephaneSonTemasT), -999])) > 15;
-            if (_temas) then { _g setVariable [QGVAR(cephaneSonTemasT), time]; _sakin = false; };
+            // v8.105: 'temas' = GERCEK ates degisimi (son 10 sn atis ya da baski > 0.2 ya da bilinen dusman < 60 m). LAMBS contact bayragi temastan sonra uzun sure (yuzlerce sn) acik kalir;
+            //   eski kosul (contact > time) yuzunden grup neredeyse hep 'temasta' sayilip yalniz <= 6 m esler paslasabiliyordu (kullanici: 2 sarjorlu M4'e arkadaslari vermedi).
+            private _sit = _g getVariable [QGVAR(cmdSit), []];
+            private _yakinDusman = _sit isEqualType [] && {(count _sit) >= 2} && {(time - (_sit select 0)) < 20} && {(_sit select 1) < 60};
+            private _aktif = _yakinDusman || {((units _g) findIf {alive _x && {((time - (_x getVariable [QGVAR(sonAtisT), -999])) < 10) || {(getSuppression _x) > 0.2}}}) >= 0};
+            if (_aktif) then { _g setVariable [QGVAR(cephaneSonTemasT), time]; };
+            private _temas = _aktif;
+            private _sakin = (time - (_g getVariable [QGVAR(cephaneSonTemasT), -999])) > 8;
 
             // stok tablosu: [birim, ana sarjor sinifi, ana sarjor sayisi, kapasite, 40mm sayisi, parcali, duman]
             private _tablo = _us apply {
@@ -163,6 +168,8 @@ private _calis = {
                 if (_dm isEqualTo 0 && {_u isEqualTo _l}) then { _aliciSec pushBack [_u, "DUMAN", "", 0.3]; continue };
             } forEach _tablo;
             if (_aliciSec isEqualTo []) then { continue };
+            { _say set ["alici_" + (_x select 1), (_say getOrDefault ["alici_" + (_x select 1), 0]) + 1]; } forEach _aliciSec;
+            if (_temas) then { _say set ["alici_temasta", (_say getOrDefault ["alici_temasta", 0]) + 1]; };
             _aliciSec = [_aliciSec, [], {_x select 3}, "DESCEND"] call BIS_fnc_sortBy;
 
             private _basladi = false;
@@ -191,7 +198,15 @@ private _calis = {
                 if (_tur isEqualTo "SARJOR" && {(_aTbl select 1) isNotEqualTo ""}) then {
                     _vAd = _vAd select { private _vt = _x; ((_vt select 8) findIf {_x isEqualTo (_aTbl select 1)}) >= 0 };
                 };
-                if (_vAd isEqualTo []) then { continue };
+                if (_vAd isEqualTo []) then {
+                    _say set ["vericiYok_" + _tur, (_say getOrDefault ["vericiYok_" + _tur, 0]) + 1];
+                    if (_logN < 40 && {(time - (missionNamespace getVariable ["lambs_danger_cephaneNedenT", -999])) > 20}) then {
+                        missionNamespace setVariable ["lambs_danger_cephaneNedenT", time];
+                        _logN = _logN + 1;
+                        diag_log format ["[CEPHANE-NEDEN] %1 | alici %2 (%3: %4 sarjor) | verici yok | sakin:%5 | grupta >= 5 sarjorlu: %6", groupId _g, name _a, _tur, _aTbl select 2, _sakin, {(_x select 2) >= 5} count _tablo];
+                    };
+                    continue
+                };
                 // sira: esi -> en cok stok -> yakin
                 _vAd = _vAd apply {
                     private _vu = _x select 0;

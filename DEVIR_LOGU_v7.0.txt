@@ -1376,3 +1376,10 @@ v8.104 - DESTEK ATESI + LIDER DEVRI + MERMI DISIPLINI (kullanici istegi)
     lider olurse ve motorun sectigi aday halefden >= 30 puan zayifsa 15 sn icinde bir kez duzeltir. Uyanan eski lider geri alinmaz. [LIDER-DEVRI]. Kapatma liderDevriOff. TEST EDILMEDI.
   fnc_mermiDisiplin (YENI watchdog): her asker sarjor esdegerini (40 mm haric) bilir: TASARRUF (< 2.0; MG < 1.5; histerezis 3.0 / 2.5) -> destek atesi / baski gorevlerinden cikar; KRITIK (< 0.8; MG < 0.6) -> tabanca varsa secilir, MG alana baskisi kesilir (roleStation);
     grupta >= %50 tasarruf -> mermiKriz + 'MermiAz' olayi. [MERMI]. Kapatma mermiDisiplinOff. TEST EDILMEDI.
+
+v8.105 - CEPHANE PASLAMA KOK NEDENI + LOG DESTEGI (kullanici: 'M4 adamda 2 sarjor kaldi arkadaslari vermedi'; 'hepsine log destegi, ozellikle komutan devri')
+  CEPHANE KOK NEDEN: temas kosulu `contact > time`. LAMBS contact bayragi temastan sonra yuzlerce sn acik kalir (olay [OLAY] InContact -598) -> grup neredeyse hep 'temasta' sayildi ve cephanePaylas yalniz <= 6 m ESLER arasinda calisti
+    (esler normalde 25-30 m'de; verici hic bulunamadi). Yeni kosul: son 10 sn'de atis / baski > 0.2 / bilinen dusman < 60 m -> aktif ates; sakin = son aktif atesten 8 sn. Ayrica bomba siniflari: Throw'un TUM alt siniflari (RHS 'Rhsusf_Throw_Grenade' muzzles[] icinde degildi: parcali 2 -> hepsi).
+  [CEPHANE-NEDEN]: alici var ama verici yok ise (20 sn'de bir) alici, sarjor, sakin, grupta >= 5 sarjorlu asker sayisi; [CEPHANE-OZET] alici_* ve vericiYok_* sayaclari.
+  LIDER-DEVRI log: [LIDER-DEVRI-HALEF] (halef degisimi + ilk 3 aday: ad rutbe commanding rol puan), BAYILDI, BAYILMA DEVRI (aday tablosu), DEVIR BASARISIZ (3 sn dogrulama), HALEF YOK, LIDER DEGISTI (motor secimi: eski lider olu / yasiyor, yeni lider, en iyi aday, 'EN IYI ADAY / EN IYI DEGIL'), DUZELTME YOK (fark < 30), MOTOR SECIMI DUZELTILDI; 120 sn ozet sayaclari.
+  HQ-DESTEK: [HQ-DESTEK-OZET] 90 sn'de bir NEDEN sayaci: musait destek grubu yok / taarruz grubu yok (karar-temas-mesafe) / telsiz mesafesinde uygun destek yok / yan tepe noktasi bulunamadi / limit / hqEmir reddetti. MERMI: onceki surumdeki gecis + ozet loglari aynen.

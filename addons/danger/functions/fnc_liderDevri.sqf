@@ -11,7 +11,7 @@
  *   DEVIR 1 (bayilma): lider 3 sn bayilmis / bilinci yok -> selectLeader halef
  *   DEVIR 2 (olum): lider degisti ve yeni lider halef degilse (puan farki >= 30) 15 sn icinde bir kez halef secilir
  *   Devirden sonra eski lider uyanirsa lider OLMAZ (kararlilik); halef ayri hesaplanir.
- * Kapatma: lambs_danger_liderDevriOff = true.   Log: [LIDER-DEVRI] (ilk 80)
+ * Kapatma: lambs_danger_liderDevriOff = true.   Log (ilk 150 satir + 120 sn ozet): [LIDER-DEVRI-HALEF] halef degisimi + ilk 3 aday; [LIDER-DEVRI] BAYILDI / BAYILMA DEVRI / DEVIR BASARISIZ / HALEF YOK / LIDER DEGISTI (motor secimi) / DUZELTME YOK / MOTOR SECIMI DUZELTILDI
  *
  * Arguments: None
  * Return Value: Baslatildi mi <BOOL>
@@ -30,6 +30,16 @@ private _calis = {
     private _say = createHashMap;
     private _ozetT = time + 120;
 
+    // log: ilk 150 satir (sinirsiz spam yok); ozet sayaclari her zaman artar
+    private _logla = {
+        params ["_etiket", "_metin"];
+        _say set [_etiket, (_say getOrDefault [_etiket, 0]) + 1];
+        if (_logN < 150) then { _logN = _logN + 1; diag_log _metin; };
+    };
+    private _tabloMetin = {
+        params ["_liste", "_rolFn2"];
+        (_liste select [0, 3]) apply { format ["%1 (%2 r%3 cmd%4 %5 =%6)", name (_x select 1), rank (_x select 1), rankId (_x select 1), ((_x select 1) skill "commanding") toFixed 2, [_x select 1] call _rolFn2, round (_x select 0)] }
+    };
     private _bilincli = {
         params ["_u"];
         alive _u && {!((lifeState _u) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_u getVariable ["ACE_isUnconscious", false])}
@@ -68,22 +78,31 @@ private _calis = {
             private _enSkor = (_puanli select 0) select 0;
             private _halef = objNull; private _halefSkor = -1e9;
             { if ((_x select 1) isNotEqualTo _l) exitWith { _halef = _x select 1; _halefSkor = _x select 0; }; } forEach _puanli;
+            private _eskiHalef = _g getVariable [QGVAR(halef), objNull];
             _g setVariable [QGVAR(halef), _halef];
             _g setVariable [QGVAR(halefSkor), _halefSkor];
+            if (_eskiHalef isNotEqualTo _halef) then {
+                ["halefDegisti", format ["[LIDER-DEVRI-HALEF] %1 | lider %2 (%3) | halef %4 (%5) | ilk 3 aday: %6", groupId _g, name _l, rank _l, ["YOK", name _halef] select (!isNull _halef), ["-", rank _halef] select (!isNull _halef), [_puanli, _rolFn] call _tabloMetin]] call _logla;
+            };
 
             private _liderBilincli = [_l] call _bilincli;
             // DEVIR 1: lider bayilmis
             if (!_liderBilincli && {alive _l}) then {
-                if ((_g getVariable [QGVAR(liderBadT), -1]) < 0) then { _g setVariable [QGVAR(liderBadT), time]; };
+                if ((_g getVariable [QGVAR(liderBadT), -1]) < 0) then {
+                    _g setVariable [QGVAR(liderBadT), time];
+                    ["liderBayildi", format ["[LIDER-DEVRI] %1 | LIDER BAYILDI: %2 (%3) | halef %4 | devir 3 sn sonra", groupId _g, name _l, rank _l, ["YOK", name _en] select (!isNull _en && {_en isNotEqualTo _l})]] call _logla;
+                };
+                if ((time - (_g getVariable [QGVAR(liderBadT), time])) >= 3 && {(isNull _en) || {_en isEqualTo _l}} && {(time - (_g getVariable [QGVAR(halefYokLogT), -999])) > 30}) then {
+                    _g setVariable [QGVAR(halefYokLogT), time];
+                    ["halefYok", format ["[LIDER-DEVRI] %1 | LIDER BAYIK ama HALEF YOK (bilincli aday sayisi %2)", groupId _g, count _adaylar]] call _logla;
+                };
                 if ((time - (_g getVariable [QGVAR(liderBadT), time])) >= 3 && {!isNull _en} && {_en isNotEqualTo _l}) then {
                     _g selectLeader _en;
                     _g setVariable [QGVAR(liderBadT), -1];
                     _g setVariable [QGVAR(liderDevirT), time];
-                    _say set ["bayilma", (_say getOrDefault ["bayilma", 0]) + 1];
-                    if (_logN < 80) then {
-                        _logN = _logN + 1;
-                        diag_log format ["[LIDER-DEVRI] %1 | BAYILMA: %2 (%3) -> %4 (%5 | rutbe %6 | commanding %7 | rol %8 | puan %9)", groupId _g, name _l, rank _l, name _en, rank _en, rankId _en, (_en skill "commanding") toFixed 2, [_en] call _rolFn, round _enSkor];
-                    };
+                    ["devirBayilma", format ["[LIDER-DEVRI] %1 | BAYILMA DEVRI: %2 (%3) -> %4 (%5 | rutbe %6 | commanding %7 | courage %8 | rol %9 | puan %10) | aday tablosu: %11", groupId _g, name _l, rank _l, name _en, rank _en, rankId _en, (_en skill "commanding") toFixed 2, (_en skill "courage") toFixed 2, [_en] call _rolFn, round _enSkor, [_puanli, _rolFn] call _tabloMetin]] call _logla;
+                    // dogrulama: 3 sn sonra lider gercekten degisti mi
+                    [_g, _en] spawn { params ["_gg", "_hh"]; sleep 3; if (!isNull _gg && {(leader _gg) isNotEqualTo _hh}) then { diag_log format ["[LIDER-DEVRI] %1 | DEVIR BASARISIZ: beklenen %2, mevcut lider %3", groupId _gg, name _hh, name (leader _gg)]; }; };
                 };
                 continue;
             };
@@ -93,19 +112,23 @@ private _calis = {
             private _sonL = _g getVariable [QGVAR(liderSon), objNull];
             if (_sonL isNotEqualTo _l) then {
                 _g setVariable [QGVAR(liderSon), _l];
-                if (!isNull _sonL) then { _g setVariable [QGVAR(liderDegisT), time]; };
+                if (!isNull _sonL) then {
+                    _g setVariable [QGVAR(liderDegisT), time];
+                    private _lSkor0 = [_l] call _puanFn;
+                    ["liderDegisti", format ["[LIDER-DEVRI] %1 | LIDER DEGISTI: %2 (%3, %4) -> %5 (%6 | rutbe %7 | commanding %8 | rol %9 | puan %10) | en iyi aday %11 (puan %12) | motor secimi %13", groupId _g, name _sonL, ["OLU", "yasiyor"] select (alive _sonL), ["-", lifeState _sonL] select (alive _sonL), name _l, rank _l, rankId _l, (_l skill "commanding") toFixed 2, [_l] call _rolFn, round _lSkor0, name _en, round _enSkor, ["EN IYI ADAY", "EN IYI DEGIL"] select (_en isNotEqualTo _l)]] call _logla;
+                };
             };
             if ((time - (_g getVariable [QGVAR(liderDegisT), -999])) < 15 && {(time - (_g getVariable [QGVAR(liderDevirT), -999])) > 15}) then {
                 private _lSkor = [_l] call _puanFn;
+                if (_en isNotEqualTo _l && {(_enSkor - _lSkor) < 30} && {(time - (_g getVariable [QGVAR(devirYokLogT), -999])) > 20}) then {
+                    _g setVariable [QGVAR(devirYokLogT), time];
+                    ["devirYok", format ["[LIDER-DEVRI] %1 | DUZELTME YOK: motorun lideri %2 (puan %3), en iyi %4 (puan %5), fark %6 < 30", groupId _g, name _l, round _lSkor, name _en, round _enSkor, round (_enSkor - _lSkor)]] call _logla;
+                };
                 if (_en isNotEqualTo _l && {(_enSkor - _lSkor) >= 30}) then {
                     _g selectLeader _en;
                     _g setVariable [QGVAR(liderDevirT), time];
                     _g setVariable [QGVAR(liderDegisT), -999];
-                    _say set ["olum", (_say getOrDefault ["olum", 0]) + 1];
-                    if (_logN < 80) then {
-                        _logN = _logN + 1;
-                        diag_log format ["[LIDER-DEVRI] %1 | MOTOR SECIMI DUZELTILDI: %2 (%3 | puan %4) -> %5 (%6 | rutbe %7 | puan %8)", groupId _g, name _l, rank _l, round _lSkor, name _en, rank _en, rankId _en, round _enSkor];
-                    };
+                    ["devirDuzeltme", format ["[LIDER-DEVRI] %1 | MOTOR SECIMI DUZELTILDI: %2 (%3 | puan %4) -> %5 (%6 | rutbe %7 | puan %8) | aday tablosu: %9", groupId _g, name _l, rank _l, round _lSkor, name _en, rank _en, rankId _en, round _enSkor, [_puanli, _rolFn] call _tabloMetin]] call _logla;
                 };
             };
         } forEach allGroups;
