@@ -100,11 +100,19 @@ private _calis = {
     private _aktarFn = missionNamespace getVariable "lambs_danger_cephaneAktarFn";
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
     private _mags = missionNamespace getVariable ["lambs_danger_fnc_uglMags", {[]}];
-    private _frag = getArray (configFile >> "CfgWeapons" >> "Throw" >> "HandGrenadeMuzzle" >> "magazines");
-    private _dumanA = getArray (configFile >> "CfgWeapons" >> "Throw" >> "SmokeShellMuzzle" >> "magazines");
-    _frag = _frag apply {toLower _x};
-    _dumanA = _dumanA apply {toLower _x};
-    diag_log format ["[CEPHANE] bomba siniflari: parcali %1 | duman %2 (config Throw muzzle)", count _frag, count _dumanA];
+    // v8.96: RHS / mod bombalari Throw muzzle listesinde tek sinif gorunuyordu (RPT bfc418e3: parcali 1) -> sinif mermi simulasyonundan (shotGrenade / shotSmoke)
+    private _frag = []; private _dumanA = [];
+    {
+        private _mz = _x;
+        {
+            private _mn = toLower _x;
+            private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
+            private _sim = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));
+            if (_sim isEqualTo "shotgrenade" && {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit")) >= 5}) then { _frag pushBackUnique _mn; };
+            if (_sim isEqualTo "shotsmoke" && {(_mn find "smoke") >= 0 || {(toLower _ammo) find "smoke" >= 0} || {(toLower _mz) find "smoke" >= 0}}) then { _dumanA pushBackUnique _mn; };
+        } forEach (getArray (configFile >> "CfgWeapons" >> "Throw" >> _mz >> "magazines"));
+    } forEach ((getArray (configFile >> "CfgWeapons" >> "Throw" >> "muzzles")) select {_x isNotEqualTo "this"});
+    diag_log format ["[CEPHANE] bomba siniflari (mermi simulasyonundan): parcali %1 %2 | duman %3 %4", count _frag, _frag select [0, 6], count _dumanA, _dumanA select [0, 6]];
     private _say = createHashMap;
     private _ozetT = time + 90;
     private _logN = 0;
@@ -161,11 +169,14 @@ private _calis = {
                 private _aTbl = _tablo select (_tablo findIf {(_x select 0) isEqualTo _a});
                 private _buddy = _a getVariable [QGVAR(buddy), objNull];
                 // verici adaylari
+                private _aSinif = _aTbl select 1;
+                private _aUyum = _aTbl select 8;
                 private _vAd = _tablo select {
+                    private _vSinif = _x select 1;
                     private _vu = _x select 0;
                     _vu isNotEqualTo _a && {(time - (_vu getVariable [QGVAR(cephaneT), -999])) > 10}
                     && {switch (_tur) do {
-                        case "SARJOR": { (_x select 2) >= 5 && {((_x select 8) findIf {_x isEqualTo (_aTbl select 1)}) >= 0 || {((_aTbl select 8) findIf {_x isEqualTo (_x select 1)}) >= 0}} };
+                        case "SARJOR": { (_x select 2) >= 5 && {(((_x select 8) findIf {_x isEqualTo _aSinif}) >= 0) || {(_aUyum findIf {_x isEqualTo _vSinif}) >= 0}} };
                         case "40MM": { false };
                         case "PARCALI": { (_x select 5) >= 3 };
                         case "DUMAN": { (_x select 6) >= 3 };

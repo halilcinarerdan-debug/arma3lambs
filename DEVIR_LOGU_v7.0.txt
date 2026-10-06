@@ -1323,3 +1323,9 @@ v8.95 - HEKIM ACE-AI YOLU + DURGUN YURUTME + SINSI GERI CEKILME (RPT 5d7b3371)
   NOT: kanamasiz bayilanlarda sadece epinefrin / IV / morfin kosullari varsa tedavi olur; 'kaldirma' yok (kullanici istegi).
   fnc_sinsiGeri (YENI): grup kendisi henuz ates altinda degil, dusman 90-450 m ve ACIK USTUN (oran >= 1.4; DUZENSIZ 1.25) ise ates kesilir (GREEN + STEALTH), onde olanlar (lider dahil, medyandan >= 8 m dusmana yakin) dusmandan gizli geri noktaya cekilir,
   digerleri yerinde gozler; varistan 25 sn sonra / bastirma > 0.25 / kayip / dusman < 70 m / oran < 1.1 / 75 sn iptal -> ates serbest. 90 sn cooldown. [SINSI-GERI]. Kapatma lambs_danger_sinsiGeriOff. TASARIM tahmini, kaynakli degil. TEST EDILMEDI (felc / fazla pasiflik riski: [SINSI-GERI] BITTI nedenleri izlenmeli).
+
+v8.96 - CEPHANE WATCHDOG COKMESI + BOMBA SINIFLARI (RPT bfc418e3)
+  TCCC (v8.95): 33 atamadan 10 tamam (onceki RPT'de 13/102) - ACE AI yolu + SCRIPT-YURUTME calisti; kalan basarisizlar 75-274 m uzak hekim (yetisemedi) ve ates baskisi iptali.
+  KOK NEDEN cephane / bomba paslama HIC calismadi: watchdog 2 kez cokup yeniden basladi ([WATCHDOG-YENIDEN] cephane, son adim Alpha 1-2). Verici filtresinde 'findIf {_x isEqualTo (_x select 1)}' ic _x bir STRING iken select 1 -> calisma zamani hatasi; ayrica
+  bomba siniflari Throw HandGrenadeMuzzle config listesinden 1 sinif geliyordu (RHS bombalari yok) -> parcali stok hep 0, verici hic yok. Duzeltme: aliciSinif / aliciUyum onceden degiskene alinir; parcali = mermi ammo simulation 'shotGrenade' + hit >= 5 (tum Throw muzzle'lari), duman = 'shotSmoke' + ad 'smoke'.
+  [CEPHANE] boot satiri artik sinif sayisi + ilk 6 sinifi yazar. TEST EDILMEDI (ilk aktarim satirlari izlenmeli).
