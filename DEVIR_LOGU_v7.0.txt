@@ -1505,3 +1505,13 @@ v8.125 - DONUS ANIMASYON HIZI 1.38 -> 1.15
  - Kullanici: AI sunucuya devredilince (sunucu 165 FPS) sagda / solda donus animasyonu asiri hizli; "sadece o" (yurume / kosu degil).
  - fnc_moveAssist: lambs_danger_turnCoef varsayilani 1.38 -> 1.15 (yalniz "turn" animasyonu calisirken; yurume 1.0 / geri cekilmede 1.15 ayni).
    Elle ayar: lambs_danger_turnCoef degiskeni (ornegin 1.0 = vanilla hiz). Test edilmedi; neden (FPS'e bagli algi) kesin dogrulanmadi.
+
+v8.126 - TELEMETRI (guclendirilmis loglama)
+ - Kullanici: taktikleri / goremedigim seyleri gorebilecegim sekilde loglama guclensin. Eski fnc_durumLog hic baslatilmiyordu (starter listesinde yok) -> RPT'de [DURUM] yoktu.
+ - fnc_telemetri (her makinede kendi yerel AI gruplari icin; dedicated'da SUNUCU RPT'si), oyuna mudahale etmez, kapatma lambs_danger_telemetriOff:
+   [TELEMETRI-SUNUCU] 20 sn: sunucu fps (ort / min), yerel AI grup / asker, taraf dagilimi, plan sayisi, donus animasyonundaki asker
+   [TELEMETRI-GRUP]    20 sn: grup, taraf, canli/toplam, grid, son komutan karari (+kac sn once), bayraklar (BND RTR EVD AT BRK TKT PLAN:faz TCCC:n),
+                       davranis / combatMode / hiz modu / formasyon, hiz lider/ort/max m/s, temas yasi, ort. baski, en yakin dusman (<= 14 satir / tur)
+   [HIZ-ANOMALI]       2 sn: yaya asker > 26 km/s: grup, asker, anim, stance, bayrak, beh / combat / hiz modu (asker basina 15 sn'de bir, <= 80 satir)
+   [DONUS-OZET]        60 sn: donus animasyonu oynayan asker sayisi + turnCoef
+ - HEMTT: yalniz test ortami sürüm-gereksinimi gurultusu; oyunda calismasi test edilmedi.
