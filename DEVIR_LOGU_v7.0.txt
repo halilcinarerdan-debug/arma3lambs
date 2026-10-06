@@ -1431,3 +1431,9 @@ v8.113 - KOMUTAN PLANI FAZ 1 (kullanici: dinamik patrol / arazi tanima / harekat
     -> TOPLANMA (cevre sektorleri + fnc_toparlan) -> BITTI. Savun: TOPLAN -> MEVZI (objektif cevresinde 55 m sektorler; binada tacticsGarrison, degilse doStop + sektor bakisi) -> BEKLE (1200 sn) -> BITTI. IPTAL: modulden.
   Waypoint: gercek addWaypoint ('ELITE PLAN: ...' adli, MOVE / SAD); yalniz kendi waypoint'lerimiz silinir (Zeus'un elle koydugu dokunulmaz). Temastaki grup zorlanmaz (plan bekler). Plan grubu HQ modullerinde 'mesgul' (lambs_danger_planAktif).
   Kapatma lambs_danger_komutanPlanOff. Loglar [PLAN]. FAZ 2: garrison seçimi / savunma ayrintisi / yeniden plan; FAZ 3: dinamik devriye, pusu / blokaj. TEST EDILMEDI.
+
+v8.114 - OBJEKTIF MODULU COKMESI (RPT ffdca817: 'sistem coktu, HUD acinca Zeus bile kapanmadi')
+  KOK NEDEN: moduleObjektif dialogunda 'Taraf' SIDE kontrolu [[taraf, ipucu], ...] ciftleriyle verildi; showDialog (upstream fnc_showDialog.sqf satir 334) varsayilani '_default in _sides' ile eslestirir, ciftlerde eslesmez -> varsayilan DIZI olur -> '_default == _side' hatasi
+  (Error ==: Type Array...) ~2500 kez / 15 sn; dialog hic tamamlanmadi, modul nesnesi silinmedigi icin tekrar tetiklendi -> hata dongusu, Zeus arayuzu kilitlendi. Bizim [PLAN] kodu hic calismadi (RPT'de [PLAN] satiri yok).
+  Duzeltme: Taraf = LIST (BLUFOR / OPFOR / INDEP, indeks -> taraf); modul nesnesi dialog acilmadan SILINIR (dialog hata verse bile tekrar tetiklenmez); geri cagirimlar yalniz konumu tasir.
+  DERS: ucuncu taraf UI fonksiyonu (showDialog) icin repoda kullanilmayan tipleri (SIDE) KULLANMA; kaynagini okumak yetmedi, ilk testte denenmemis dialog tipi.

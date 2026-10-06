@@ -9,10 +9,12 @@ params ["_logic", "", "_activated"];
 
 if (_activated && local _logic) then {
     private _obj = getPosATL _logic;
+    // modul nesnesi hemen silinir (pencere hata verse / kapansa bile modul tekrar tetiklenmez; RPT ffdca817: hata dongusu Zeus'u kilitledi)
+    deleteVehicle _logic;
     [
         "ELITE Objektif (komutan plani)",
         [
-            ["Taraf", "SIDE", "Plani uygulayacak taraf.", [[west, "BLUFOR"], [east, "OPFOR"], [independent, "INDEP"]], west],
+            ["Taraf", "LIST", "Plani uygulayacak taraf. (SIDE kontrolu yerine LIST: showDialog SIDE hatasi, RPT ffdca817)", ["BLUFOR", "OPFOR", "INDEP"], 0],
             ["Gorev tipi", "LIST", "ELE GECIR: toplan -> ORP -> kesif -> destek + manevra saldirisi -> toparlanma. SAVUN: toplan -> objektif cevresinde sektorlu mevzi + garrison. IPTAL: bu taraftaki aktif plani durdurur.", ["Ele gecir (saldiri)", "Savun (mevzilen)", "IPTAL (aktif plani durdur)"], 0],
             ["Katilacak grup sayisi", "SLIDER", "En yetkili (rutbe) ve en yakin gruplardan secilir; en yuksek rutbeli lider KOMUTAN olur.", [1, 8], [1, 1], 4, 0],
             ["Duşman: piyade var", "BOOLEAN", "Objektifte duşman piyadesi var.", true, ""],
@@ -27,20 +29,14 @@ if (_activated && local _logic) then {
         ],
         {
             params ["_data", "_args"];
-            _args params ["_logic", "_obj"];
-            _data params ["_taraf", "_tip", "_grupN", "_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say", "_rally", "_orp"];
+            _args params ["_obj"];
+            _data params ["_tarafI", "_tip", "_grupN", "_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say", "_rally", "_orp"];
+            private _taraf = [west, east, independent] select (_tarafI max 0 min 2);
             private _ayar = createHashMapFromArray [
                 ["tip", _tip], ["grupN", round _grupN], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
                 ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp]
             ];
             [_taraf, _obj, _ayar] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {}]);
-            deleteVehicle _logic;
-        }, {
-            params ["_logic"];
-            deleteVehicle _logic;
-        }, {
-            params ["_logic"];
-            deleteVehicle _logic;
-        }, [_logic, _obj]
+        }, {}, {}, [_obj]
     ] call EFUNC(main,showDialog);
 };
