@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.103)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.130)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -63,7 +63,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Hekim durgun tespiti**: kademeli müdahale + pürüzsüz script yürütme (AI komutu işlemezse).
 - **Ölü betik kilidi temizliği**, bayılan hekimin hareketi durdurulur.
 - **Gerçek hekim bounding'den muaf**, **sağlıkçı tasması** (hekim öne geçmez).
-- **HQ medevac**: gruplar arası hekim atama, talep / hekim havuzu kuralı. **Araçlı medevac** (T): APC / araç yaralıları toplama noktasına taşır.
+- **HQ medevac**: gruplar arası hekim atama, talep / hekim havuzu kuralı. **Araçlı medevac** (T): kara aracı yaralıları taşır; **doktrin standoff'u** (zırhlı ≥ 300 m, yumuşak araç ≥ 600 m düşmandan; yaralıyı düşmandan ≥ 600 m uzağa / CCP'ye taşır; tasarım değerleri, kitapta sayı yok). Zeus "Görev Ata" ile MEDEVAC ekibi / aracı seçilir.
 - **AI sürükleme kapalı** (ACE startDrag AI'da çalışmıyor; kullanıcı kararıyla iptal).
 - Baygın asker **kayıp sayılır** (komutan, moral, HQ, son direniş); COD tarzı kaldırma yok.
 
@@ -80,18 +80,35 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 
 ## 9. Mekanize
 - **Mekanize dur-kalk izleyici** (`mekanizeIzle`): sürücü forceSpeed sıfırlama, COLUMN / FULL; **doAssaultSpeed overlay** (araç içindekine uygulanmaz).
-- Aracın roket / duman tepkisi, ≥4 araçta DIAMOND.
+- Aracın roket / duman tepkisi, ≥4 araçta DIAMOND (DÜZENSİZ doktrinde yok).
+- **Araç–piyade senkronu** (T) (`aracSenkron`): araç piyadeyi aşmaz; nakil / medevac görevindeki araç muaf.
+- **Kara aracı nakli + taksi** (T) (`aracTasima`, `taksi`): APC / IFV / kamyon grubu alma noktasından alır, hedefin ≥ 500 m öncesinde (M16 menzili + pay) indirir, geri döner. Plan TASIMA fazı + genel "taksi" (aktif waypoint > 1200 m, araç ≤ 600 m). Zeus "Görev Ata → TASIMA".
 
 ## 10. Lojistik
 - **Cephane + el bombası paslama (T)** (`cephanePaylas`): eşler arası önce; vericinin yere bırakıp alıcının alması; sınıflar mermi simülasyonundan bulunur (RHS).
 
+## 10b. Komutan planı ve Zeus modülleri (v8.113+)
+- **ELITE Objektif** (Zeus, 3 küçük panel): görev tipi (ele geçir / savun / iptal / onay ver), tempo (dengeli / sessiz-gizli / hızlı), H-saati + Zeus onayı, süre sınırı, tehdit yönü, düşman bilgisi (piyade / zırh / AT / MG / nişancı / bina), kısıtlar (siviller, ağır silah yasağı), topçu / havan (RED + danger close), rally / ORP mesafesi, **Baskın (vur-çek)**.
+- **Planlayıcı** (`komutanPlan`, `komutanPlanDongu`): arazi tanıma → RP → ORP → keşif (kısa durak) → destek (SBF) + manevra + kanat → saldırı → toparlanma / çekilme; savunmada sektörlü mevzi + garrison. Gerçek waypoint'ler ("ELITE PLAN: …", Zeus'ta görünür), harita işaretleri, `[PLAN-OZET]` AAR.
+- **Gizlilik önceliği (sızma)**: gizli tempo / baskında temas yoksa ateş yok (GREEN), objektife < 450 m çömelerek; temasta / saldırıda serbest.
+- **ELITE Plan Noktası** (manuel RP / ORP / SBF / kanat / CCP, tarihsel canlandırma; komutan hatalı olsa da uygular, `[PLAN-UYARI]`).
+- **ELITE Görev Ata**: grup / araca MANEVRA / DESTEK / YEDEK / HARİÇ / MEDEVAC / TOPÇU / TOPÇU_YOK / TASIMA ata; atananlar plana grup sayısı sınırına bakılmadan girer.
+- **ELITE Karakol / HQ** (haritadan): karakol / mevzi / HQ / gözetleme noktası; savunma planı hemen / alarm (düşman 800 m içinde gerçekten bilinince).
+- **ELITE Karakol Garnizon** (T): nöbetçiler (üst kat + yüksek arazi pozisyonları, görüş skoru), devriye alt grupları (alarmda çevre savunması), araçlar çevre mevzisinde; tekrar tekrar düzenlenebilir, yeni birimler havuza girer.
+- **Sunucu devri** (`grupSunucuDevir`): istemcide kalan AI grupları sunucuya devredilir (Zeus PC yükü); plan da uzak grupları devralır.
+- **MP**: Zeus modülleri CBA sunucu olayı gönderir (plan sunucuda kurulur), sonuç `[PLAN-YANIT]` ve Zeus sohbetinde.
+
 ## 11. Geliştirici araçları
 - **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --grup` RPT özetleri, sürüm kontrolü.
-- **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ...
+- **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
+- **Telemetri** (`telemetri`): her 20 sn sunucu FPS + grup durumu (karar, bayraklar, hız, temas, baskı, en yakın düşman), `[HIZ-ANOMALI]`, `[DONUS-OZET]`.
 - **Watchdog bekçisi**: her izleyici hata ile ölürse yeniden başlar (`[WATCHDOG-YENIDEN]`).
 - **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
 
 ## Planlanan / bekleyen
+- Helikopter medevac / hava nakli (şu an yalnız kara aracı).
+- Zırhlı destek planı (mekanize taktikler).
+- Karakolda MG / AT yerleşimi, nöbet rotasyonu.
 - Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
 - Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
 - Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.

@@ -126,7 +126,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - **Hekim durgun tespiti**: 3 sn'de 1 m'den az ilerleme → kademe 1 (MOVE / PATH / ANIM aç, forceMove, hız serbest, `doMove`), kademe 2 (`doStop` + `doMove` + script yürütme: koşu animasyonu + yumuşak hız vektörü, ≤ 14 sn, 2.5 m'ye kadar).
 - **Ölü betik kilidi temizliği**: hekim betiği ölürse / hekim bayılırsa `forceMove` ve yaralı kilidi süre sonunda açılır; bayılan hekim hareket ettirilmez.
 - **Kumanda medevac** (`hqMedevac`): menzil 600 m, boş hekim varsa talep açılmaz, yoksa açılır (bekleyen < 2 × boş hekim).
-- **Araçlı medevac (T)** (`aracMedevac`): yalnız mürettebatlı kara aracı, ≥ 40 sn ilgilenilmeyen yaralıya gider, ≤ 3 yükler, 350 m taşır.
+- **Araçlı medevac (T)** (`aracMedevac`): yalnız mürettebatlı kara aracı, ≥ 40 sn ilgilenilmeyen yaralıya gider, ≤ 3 yükler. v8.129 doktrin standoff'u: yaralı–düşman mesafesi zırhlı araç için ≥ 300 m, yumuşak araç için ≥ 600 m değilse araç gitmez; yaralıyı düşmandan ≥ 600 m (ya da yaralının mesafesi + 250 m) uzağa / plan CCP'sine taşır (kaynakta araç standoff sayısı yok → tasarım; AK-74 500 m, RPG-7 ~200 m kaynaklı). Zeus "Görev Ata → MEDEVAC" atanmışsa yalnız atananlar kullanılır; atanmış grubun hekimi önce seçilir.
 - **AI sürükleme kapalı** (ACE startDrag AI'da çalışmıyor; iptal edildi).
 - Baygınlar kayıp sayılır; COD tarzı kaldırma yok.
 
@@ -137,7 +137,10 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - `mekanizeIzle`: dur-kalk tespiti; düşman > 100 m veya yok → COLUMN / FULL / AUTOCOMBAT kapalı; sürücü forceSpeed sıfırlama (-1).
 - `doAssaultSpeed` overlay: forceSpeed araç içindekine uygulanmaz.
 - Araç mürettebatı roket / duman tehdidine tepki verir (`tehditOlay`).
-- DIAMOND yalnız ≥ 4 kara aracı, açık, yol dışı, temas > 60 sn, düşman > 500 m.
+- DIAMOND yalnız ≥ 4 kara aracı, açık, yol dışı, temas > 60 sn, düşman > 500 m; DÜZENSİZ doktrinde yok.
+- **Araç–piyade senkronu** (`aracSenkron`, T): BEKLE > 60 m, YAVAŞLA 20–60 m, SENKRON; temas / baskı / medevac / nakilde serbest.
+- **Kara aracı nakli** (`aracTasima`, T): adaylar AI sürücülü, arac grubu tamamen içinde, kargo ≥ 3, yakıt > %10, planda / medevac / karakol görevinde değil. Adımlar: alma noktasına gel (≤ 150 sn) → bin (60 sn; 40 m içindeki gecikenler `moveInCargo`) → iniş noktasına sür (≤ 240 sn; temas / baskı olursa erken in) → in (`doGetOut` → 10 sn sonra `moveOut`) → geri dön, bekle. İniş noktası = hedeften max(500 m, ORP + 150 m) (M16 etkili menzili 460 m + pay; kitapta iniş mesafesi sayısı yok → tasarım). Plan TASIMA fazı 420 sn'de iptal edilir. Kapatma: `lambs_danger_tasimaOff`; otomatik araç seçimi: `lambs_danger_tasimaOtomatik = false` ile kapanır.
+- **Taksi** (`taksi`, sunucu, T): yaya AI grubunun aktif waypoint'i > 1200 m ve 600 m içinde boş araç varsa aynı nakil (iniş hedefin 500 m öncesi); ≤ 2 eşzamanlı, grup başına 180 sn bekleme; plan waypoint'leri alınmaz. Kapatma: `lambs_danger_taksiOff`.
 
 ---
 
@@ -147,6 +150,23 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - `hqIstihbarat`: SPOTREP ağı, telsiz şartı (lider / RTO), gecikme, belirsizlik, "bilgi sisi" (varsayılan 0.4), kayıp raporu.
 - `hqTakviye`, `hqKanat` (iki grup koordineli), `hqFeint` (yanıltıcı sınırlı saldırı), `hqEmir` (emir kanalı; TAKVİYE / KANAT / FEINT bounding'i iptal eder).
 - `hqMedevac`: yukarıda. Müsait grup hesabı: bounding grupları (düşman ≥ 250 m) de kullanılır.
+
+---
+
+## G2. KOMUTAN PLANI VE ZEUS MODÜLLERİ (v8.113 – v8.130)
+
+- **ELITE Objektif** (3 panel: görev / düşman / kısıt-destek-mesafe): tip (ele geçir, savun, iptal, onay ver), tempo, H-saati (Zeus onayı), süre, tehdit yönü, düşman bilgisi, ROE kısıtları, topçu, rally (250–900 m, 450), ORP (100–400 m, 300), Baskın (5 / 10 dk).
+- **Fazlar** (`komutanPlanDongu`, 3 sn): KUR → TOPLAN → (TASIMA) → ORP → KEŞİF (60 / 90 / 30 sn short halt) → SALDIRI → TOPLANMA / ÇEKİLME; savunma: MEVZİ → BEKLE (1200 sn). Baskın: hedef temiz / süre dolunca ÇEKİLME.
+- **Topçu / havan**: RED tablosu (60 mm 145, 81/82 mm 195, 120 mm 430, 105 mm 455 m), danger close ≤ 600 m loglanır; "ATIS YOK" nedenleri sayaçla loglanır. Zeus TOPÇU / TOPÇU_YOK atamasına uyar.
+- **Gizlilik önceliği** (gizli tempo veya baskın): toplan / ORP / keşifte temas yoksa GREEN, objektife < 450 m MIDDLE; temas → YELLOW + AUTO; saldırı → AUTO + YELLOW.
+- **Görev Ata** (`lambs_danger_gorev`): MANEVRA / DESTEK / YEDEK (plana sınırsız katılır, rol ezilir), HARİÇ, MEDEVAC, TOPÇU, TOPÇU_YOK, TASIMA, KARAKOL_ARAC (sistem atar); LİSTELE.
+- **Karakol / HQ**: harita işareti `ELITE_KARAKOL_*`, kayıt `lambs_danger_karakollar`; savunma: yok / hemen (yarıçap × 1.5 içindeki gruplar için savun planı) / alarm (düşman 800 m içinde savunanlarca bilinirse, knowsAbout ≥ 0.5).
+- **Karakol Garnizon** (`karakolGarnizon`, sunucu, 15 sn, T): havuz = karakol yarıçapı × 1.5 içindeki AI piyade. Nöbetçi (0–8): üst kat (buildingPos ≥ 2.5 m, skor = yükseklik × 3 + 8 ışın dış cephe görüşü × 4) + arazi halkası (%50 / %80 yarıçap, 30°); en yüksek skor + önceki noktalardan uzaklık, min 18 m. PATH kapatılır, dışa `doWatch`, 120 sn'de varamazsa ışınlanır. Devriye (0–3 grup × 2–6 asker): %60 yarıçap halka, CYCLE, alarmda çevre savunması, 120 sn temassız devam. Araç mevzileri: %75 yarıçap, PATH kapalı, mürettebat içinde. Alt grup değişkeni `lambs_danger_garnizonAlt` (plan / taksi / nakil almaz). Modül tekrar çalıştırılınca yeniden hesaplanır; yeni birimler eksiği tamamlar; kaldırınca birimler orijinal gruplarına döner. Kapatma: `lambs_danger_garnizonOff`.
+- **Sunucu devri** (`grupSunucuDevir`, sunucu, 10 sn, tur başına ≤ 4): oyuncu / uzaktan kontrol / HC sahibi / 60 sn içinde devredilmiş olmayan istemci AI grupları `setGroupOwner 2`. Kapatma: `lambs_danger_sunucuDevirOff`.
+- **Sunucu kapısı** (`komutanPlanKapi`): CBA sunucu olayları `lambs_danger_planIstegi`, `planNoktaIstegi`, `gorevAta`, `karakolIstegi`, `garnizonIstegi`; yanıtlar `planYanit`, `garnizonYanit` (Zeus sohbetinde + RPT).
+- **Telemetri** (`telemetri`): `[TELEMETRI-SUNUCU]` (FPS ort / min, yerel AI, taraf, plan, dönme animasyonu), `[TELEMETRI-GRUP]` (≤ 14 satır / 20 sn), `[HIZ-ANOMALI]` (> 26 km/s yaya), `[DONUS-OZET]`.
+- **Dönme animasyon hızı**: `lambs_danger_turnCoef` 1.15 (yalnız "turn" animasyonunda; v8.125).
+- Kaynaklı / tasarım eşik ayrımı: `kaynaklar_doktrin/SAYISAL_ESIKLER_KAYNAK_TABLOSU.md`.
 
 ---
 
@@ -161,4 +181,4 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 ---
 
 ## Bekleyen
-Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona); kalıcı senaryo (Bakhmut-lite); mekanize taktikleri; moral → davranış katmanı.
+Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona); kalıcı senaryo (Bakhmut-lite); helikopter medevac / hava nakli; zırhlı destek (mekanize taktikler); karakolda MG / AT yerleşimi + nöbet rotasyonu; moral → davranış katmanı; hareket halinde formasyon / yol geçişi çakışmasının kök nedeni.
