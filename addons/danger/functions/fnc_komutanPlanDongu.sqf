@@ -49,6 +49,60 @@ private _wpYaz = {
     if (_ilk isNotEqualTo []) then { _g setCurrentWaypoint _ilk; };
 };
 
+// v8.134 ISTIHBARAT: komutan IDDIAYA gore planlar (Zeus'un verdigi sayi / konum yanlis olabilir: "100 adam var" dendi, gercekte sivil var); gercek sahne komutandan gizli.
+// Gozlem raporu: verilen gruplarin BILDIKLERI (knowsAbout >= 0.8, objektif cevresi 450 m): dusman (piyade / MG / AT / nisanci / zirh) VE sivil sayisi; iddia ile fark loglanir.
+private _gozlemRapor = {
+    params ["_plan", "_gozGruplar", "_bozuldu", "_gozlemS", "_etiket"];
+    private _obj = _plan get "obj";
+    private _taraf = _plan get "taraf";
+    private _rolFn2 = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+    private _bilinen = (_obj nearEntities [["CAManBase", "LandVehicle", "Air"], 450]) select {
+        private _e = _x;
+        alive _e && {(_gozGruplar findIf {(_x knowsAbout _e) >= 0.8}) >= 0}
+    };
+    private _hos = _bilinen select {(side _x) isNotEqualTo civilian && {_taraf getFriend (side _x) < 0.6}};
+    private _siv = _bilinen select {(side _x) isEqualTo civilian && {_x isKindOf "CAManBase"}};
+    private _adam = _hos select {_x isKindOf "CAManBase"};
+    private _mgN = {([_x] call _rolFn2) isEqualTo "MG"} count _adam;
+    private _atN = {([_x] call _rolFn2) isEqualTo "AT"} count _adam;
+    private _nisN = {([_x] call _rolFn2) isEqualTo "MARKSMAN"} count _adam;
+    private _zirhN = {!(_x isKindOf "CAManBase") && {(getNumber (configOf _x >> "armor")) >= 100}} count _hos;
+    private _ay = _plan get "ayar";
+    private _iddia = _plan getOrDefault ["iddiaSayi", 0];
+    if (_mgN > 0) then { _ay set ["mg", true]; };
+    if (_atN > 0) then { _ay set ["at", true]; };
+    if (_nisN > 0) then { _ay set ["nisanci", true]; };
+    if (_zirhN > 0) then { _ay set ["zirh", true]; };
+    _plan set ["gozDusman", count _hos];
+    _plan set ["gozSivil", count _siv];
+    _plan set ["gozAdam", count _adam];
+    _plan set ["raporHazir", true];
+    // komutan inancini gunceller (tam gozlem): gozlenen sayi iddiadan farkliysa gozlenene gecer
+    if (_gozlemS >= 40) then { _ay set ["sayi", count _adam]; };
+    private _fark = if (_iddia <= 0) then {"iddia sayisi verilmemis"} else {
+        format ["IDDIA %1 / GOZLENEN %2 (%3)", _iddia, count _adam, ["uyumlu", "UYUSMAZLIK: iddia gozlenenin cok ustunde / altinda"] select (((count _adam) < (_iddia * 0.4)) || {(count _adam) > (_iddia * 1.6)})]
+    };
+    private _rap = format ["gorulen dusman %1 (piyade %2: MG %3, AT %4, nisanci %5; arac / zirh %6), SIVIL %7 | %8 | gozlem %9 sn | %10 | %11", count _hos, count _adam, _mgN, _atN, _nisN, _zirhN, count _siv, _fark, round _gozlemS, ["gizlilik korundu", "TEMAS: gizlilik bozuldu"] select _bozuldu, _etiket];
+    _plan set ["reconRapor", _rap];
+    { private _g = _x; { _g reveal [_x, 2.5]; } forEach (_hos + _siv); } forEach (_plan get "gruplar");
+    diag_log format ["[PLAN-ISTIHBARAT] %1 | RAPOR: %2", _plan get "id", _rap];
+    systemChat format ["[ELITE] Istihbarat (%1): %2", _plan get "id", _rap];
+    _rap
+};
+// Atis izni (PID): dogrulama 0 tam / 1 son dogrulama: rapor gelmeden atis YOK; sivil gozlenirse atis iptal; dusman gozlenmediyse atis iptal. dogrulama 2 (yok): iddiaya guvenilir, atilir (tarihsel hata canlandirmasi; [PLAN-UYARI])
+// Doner: [izin, neden, bekle]
+private _atisIzni = {
+    params ["_plan"];
+    private _dg = _plan getOrDefault ["dogrulama", 0];
+    if (_dg isEqualTo 2) exitWith { [true, format ["DOGRULAMA YOK: iddiaya guvenildi (guven %1)", ["yetersiz", "orta", "kesin"] select ((_plan getOrDefault ["guven", 1]) min 2)], false] };
+    if !(_plan getOrDefault ["raporHazir", false]) exitWith { [false, "dogrulama bekleniyor (rapor yok)", true] };
+    private _gs = _plan getOrDefault ["gozSivil", 0];
+    private _gd = _plan getOrDefault ["gozDusman", 0];
+    if (_gs > 0) exitWith { [false, format ["SIVIL GOZLENDI (%1): atis IPTAL (PID)", _gs], false] };
+    if (_gd < 1) exitWith { [false, "hedefte dusman gozlenmedi: atis IPTAL", false] };
+    [true, format ["dogrulandi: %1 dusman, 0 sivil", _gd], false]
+};
+
 // topcu / havan atesi: tarafin artilleryScanner araclari; dost mesafesi < 150 m ise atis yapilmaz (tasarim esigi, kaynakli degil)
 private _topcuAt = {
     params ["_plan", "_poz", "_ad"];
@@ -57,6 +111,14 @@ private _topcuAt = {
     // KAYNAK: TC 3-21.76 (Ranger El Kitabi, 2017) s. 3-4 / 3-5: DANGER CLOSE = hedef dost birlige <= 600 m (havan / sahra topcusu: komut cagrisinda ilan edilir, yasak DEGIL);
     //   'risk estimate distance' (RED, %0.1 Pi) tablosu (azami sarj, ayakta): 60 mm ~145 m, 81 / 82 mm ~195 m, 105 mm ~455 m, 120 mm ~430 m. Savasta RED, egitimde MSD kullanilir (kitap).
     //   Burada: dost mesafesi < RED ise o arac ATMAZ; RED'in altinda ama <= 600 m ise 'DANGER CLOSE' loglanir. Cap cikarimi mermi / arac sinif adindan (sezgisel).
+    private _izin = [_plan] call _atisIzni;
+    _plan set ["atisRet", ["RED", "BEKLE"] select (_izin param [2, false])];
+    if !(_izin select 0) exitWith {
+        diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YAPILMADI: %3", _plan get "id", _ad, _izin select 1];
+        false
+    };
+    diag_log format ["[PLAN-TOPCU] %1 | %2 atis izni: %3", _plan get "id", _ad, _izin select 1];
+    if ((_plan getOrDefault ["dogrulama", 0]) isEqualTo 2) then { diag_log format ["[PLAN-UYARI] %1 | topcu dogrulamasiz (iddiaya guvenerek) atiyor - yanlis istihbarat sivil / dost kaybina yol acabilir", _plan get "id"]; };
     private _dostEn = 99999;
     { if (alive _x && {(side (group _x)) isEqualTo _taraf}) then { _dostEn = _dostEn min (_x distance2D _poz); }; } forEach allUnits;
     private _araclar = vehicles select {
@@ -82,6 +144,10 @@ private _topcuAt = {
             if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
                 private _hd = _poz getPos [random 30, random 360];
                 _v doArtilleryFire [_hd, _mg, _mermi];
+                // ZARAR TAKIBI: atis noktasinin 250 m cevresindeki sivil / dost / dusman anlik listesi (plan sonunda kimlerin oldugu [PLAN-ZARAR] ile yazilir)
+                private _yakin = _hd nearEntities ["CAManBase", 250];
+                (_plan getOrDefault ["atislar", []]) pushBack [time, _hd, _yakin select {(side _x) isEqualTo civilian}, _yakin select {(side (group _x)) isEqualTo (_plan get "taraf")}, _yakin select {(side _x) isNotEqualTo civilian && {((_plan get "taraf") getFriend (side _x)) < 0.6}}];
+                _plan set ["atislar", _plan getOrDefault ["atislar", []]];
                 _atan = _atan + 1;
                 diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 -> %4 | %5 mermi (%6) | ETA %7 sn | en yakin dost %8 m (RED %9 m)%10", _plan get "id", _ad, typeOf _v, mapGridPosition _hd, _mermi, _mg, round (_v getArtilleryETA [_hd, _mg]), round _dostEn, _red, ["", " | DANGER CLOSE (<= 600 m)"] select (_dostEn <= 600)];
             };
@@ -212,6 +278,19 @@ while {true} do {
             private _aar = format ["[PLAN-OZET] %1 | SONUC: %2 | toplam %3 sn | fazlar: %4 | gruplar: %5 | MANUEL noktalar: %6 | uyarilar: %7",
                 _id, _sonuc, round (time - (_plan getOrDefault ["kurT", _plan get "t0"])), (_plan getOrDefault ["fazGecmis", []]) apply {format ["%1 %2 sn", _x select 0, _x select 1]},
                 _kayipMetin, _plan getOrDefault ["manuelNoktalar", []], _plan getOrDefault ["uyarilar", []]];
+            // v8.134: istihbarat ozeti + atis zarari (sivil / dost / dusman)
+            private _ist = format ["[PLAN-ISTIHBARAT] %1 | OZET: guven %2 | dogrulama %3 | iddia sayi %4 | rapor: %5", _id, ["YETERSIZ (iddia)", "ORTA", "KESIN (iddia)"] select ((_plan getOrDefault ["guven", 1]) min 2), ["tam kesif", "son dogrulama", "YOK (iddiaya guvenildi)"] select ((_plan getOrDefault ["dogrulama", 0]) min 2), _plan getOrDefault ["iddiaSayi", 0], _plan getOrDefault ["reconRapor", "rapor alinmadi"]];
+            diag_log _ist;
+            private _zrr = [];
+            {
+                _x params ["_t", "_hd", "_sv", "_df", "_dm"];
+                _zrr pushBack format ["atis %1 (t+%2 sn): sivil %3/%4 oldu, dost %5/%6 oldu, dusman %7/%8 oldu", mapGridPosition _hd, round (_t - (_plan getOrDefault ["kurT", _plan get "t0"])), {!alive _x} count _sv, count _sv, {!alive _x} count _df, count _df, {!alive _x} count _dm, count _dm];
+            } forEach (_plan getOrDefault ["atislar", []]);
+            if (_zrr isNotEqualTo []) then {
+                diag_log format ["[PLAN-ZARAR] %1 | atis sonrasi olenler (nedeni kesin atanamaz, atis noktasinin 250 m cevresindeki anlik listeye gore): %2", _id, _zrr];
+                private _scu = (allCurators apply {getAssignedCuratorUnit _x}) select {!isNull _x};
+                if (_scu isNotEqualTo []) then { [format ["ELITE PLAN %1 ZARAR: %2", _id, _zrr joinString " | "]] remoteExec ["systemChat", _scu]; };
+            };
             diag_log _aar;
             private _cu = (allCurators apply {getAssignedCuratorUnit _x}) select {!isNull _x};
             if (_cu isNotEqualTo []) then { [format ["ELITE PLAN %1: %2 (%3 sn)", _id, _sonuc, round (time - (_plan getOrDefault ["kurT", _plan get "t0"]))]] remoteExec ["systemChat", _cu]; };
@@ -249,7 +328,7 @@ while {true} do {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
             if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
                 // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
-                if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
+                if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2} && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
                     _plan set ["reconYapildi", true];
                     private _rgl = (_plan get "reconG") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
                     private _opN = _plan get "op";
@@ -340,30 +419,10 @@ while {true} do {
             } forEach _rg;
             if (_vardi >= (count _rg) && {!("reconVarT" in _plan)}) then { _plan set ["reconVarT", time]; };
             private _gozlemS = if (!("reconVarT" in _plan)) then {0} else {time - (_plan get "reconVarT")};
-            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= 90} || {_fazSure > 420}) then {
-                // RAPOR: grubun bildikleri (knowsAbout >= 0.8) objektif cevresi 450 m
-                private _rolFn2 = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
-                private _hos = (_obj nearEntities [["CAManBase", "LandVehicle", "Air"], 450]) select {
-                    private _e = _x;
-                    alive _e && {(side _e) isNotEqualTo civilian} && {_taraf getFriend (side _e) < 0.6} && {(_rg findIf {(_x knowsAbout _e) >= 0.8}) >= 0}
-                };
-                private _adam = _hos select {_x isKindOf "CAManBase"};
-                private _mgN = {([_x] call _rolFn2) isEqualTo "MG"} count _adam;
-                private _atN = {([_x] call _rolFn2) isEqualTo "AT"} count _adam;
-                private _nisN = {([_x] call _rolFn2) isEqualTo "MARKSMAN"} count _adam;
-                private _zirhN = {!(_x isKindOf "CAManBase") && {(getNumber (configOf _x >> "armor")) >= 100}} count _hos;
-                private _ay = _plan get "ayar";
-                if (_mgN > 0) then { _ay set ["mg", true]; };
-                if (_atN > 0) then { _ay set ["at", true]; };
-                if (_nisN > 0) then { _ay set ["nisanci", true]; };
-                if (_zirhN > 0) then { _ay set ["zirh", true]; };
-                if ((count _adam) > (_ay getOrDefault ["sayi", 0])) then { _ay set ["sayi", count _adam]; };
-                { private _g = _x; { _g reveal [_x, 2.5]; } forEach _hos; } forEach _gruplar;
-                private _rap = format ["gorulen piyade %1 (MG %2, AT %3, nisanci %4), arac / zirh %5, toplam %6 | gozlem %7 sn | %8", count _adam, _mgN, _atN, _nisN, _zirhN, count _hos, round _gozlemS,
-                    ["gizlilik korundu", "TEMAS: gizlilik bozuldu"] select _bozuldu];
-                _plan set ["reconRapor", _rap];
-                diag_log format ["[PLAN-RECON] %1 | RAPOR: %2 | plan gruplari bilgilendirildi (reveal 2.5)", _id, _rap];
-                systemChat format ["[ELITE] Recon raporu (%1): %2", _id, _rap];
+            private _gozlemHedef = [90, 45, 20] select ((_plan getOrDefault ["dogrulama", 0]) min 2);
+            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= _gozlemHedef} || {_fazSure > 420}) then {
+                // RAPOR (recon grubunun gozlemi): dusman + sivil sayisi, iddia farki, komutan inanci guncellenir
+                private _rap = [_plan, [_rg, _gruplar] select (_rg isEqualTo []), _bozuldu, _gozlemS, "recon"] call _gozlemRapor;
                 _plan set ["reconTamam", true];
                 [_plan, "TOPLAN", "recon raporu alindi"] call _fazGec;
             };
@@ -413,12 +472,21 @@ while {true} do {
         if (_faz isEqualTo "KESIF") then {
             private _topcuTip = _plan getOrDefault ["topcu", 0];
             if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]}) then {
-                _plan set ["hazirlikAtildi", true];
-                [_plan, _obj, "HAZIRLIK"] call _topcuAt;
+                private _fired = [_plan, _obj, "HAZIRLIK"] call _topcuAt;
+                if (_fired || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
             };
             // KESIF = ORP'de guvenlik halti: TC 3-21.76 s. 6-22: short halt tipik 1-2 dk, long halt > 2 dk -> dengeli 60 sn, sessiz 90 sn, hizli 30 sn (kitap araligi icinde; secim tasarim)
             private _kesifS = (([60, 90, 30] select _tempo)) max ([0, 35] select (_topcuTip in [1, 3]));
-            if (_fazSure > _kesifS) then {
+            // v8.134: kesif kisa / uzun: dogrulama 0 tam (guven yetersizse x2), 1 son dogrulama (30 sn), 2 yok (20 sn)
+            private _dgz = _plan getOrDefault ["dogrulama", 0];
+            private _kesifS2 = switch (_dgz) do { case 1: {(_kesifS min 30)}; case 2: {20}; default {_kesifS * ([1, 2] select ((_plan getOrDefault ["guven", 1]) isEqualTo 0))} };
+            if (_fazSure > _kesifS2) then {
+                // plan gruplari bu noktaya kadar gozlediklerini rapor eder (recon raporu yoksa); sonra bekleyen hazirlik atisi yeniden degerlendirilir
+                if (_dgz isNotEqualTo 2 && {!(_plan getOrDefault ["raporHazir", false])}) then { [_plan, _gruplar, false, _fazSure, "ORP gozlemi (recon yok)"] call _gozlemRapor; };
+                if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]}) then {
+                    _plan set ["hazirlikAtildi", true];
+                    [_plan, _obj, "HAZIRLIK (dogrulamadan sonra)"] call _topcuAt;
+                };
                 private _maneuv = _gruplar select {(_roller getOrDefault [groupId _x, "MANEVRA"]) isEqualTo "MANEVRA"};
                 private _i = 0;
                 {
