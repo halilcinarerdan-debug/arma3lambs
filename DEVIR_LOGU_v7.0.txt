@@ -1329,3 +1329,8 @@ v8.96 - CEPHANE WATCHDOG COKMESI + BOMBA SINIFLARI (RPT bfc418e3)
   KOK NEDEN cephane / bomba paslama HIC calismadi: watchdog 2 kez cokup yeniden basladi ([WATCHDOG-YENIDEN] cephane, son adim Alpha 1-2). Verici filtresinde 'findIf {_x isEqualTo (_x select 1)}' ic _x bir STRING iken select 1 -> calisma zamani hatasi; ayrica
   bomba siniflari Throw HandGrenadeMuzzle config listesinden 1 sinif geliyordu (RHS bombalari yok) -> parcali stok hep 0, verici hic yok. Duzeltme: aliciSinif / aliciUyum onceden degiskene alinir; parcali = mermi ammo simulation 'shotGrenade' + hit >= 5 (tum Throw muzzle'lari), duman = 'shotSmoke' + ad 'smoke'.
   [CEPHANE] boot satiri artik sinif sayisi + ilk 6 sinifi yazar. TEST EDILMEDI (ilk aktarim satirlari izlenmeli).
+
+v8.97 - TCCC-TX TANI LOGU (kullanici: 'hic animasyona girip turnike yapmalarini gormedim')
+  RPT bfc418e3: 'tamam' satirlarinda kanKaybi tedaviden sonra da 0.01-0.02 (kanama durmamis) -> tedavi adimlari uygulanmiyor ya da esya yok olabilir; sebep RPT'de gorunmuyordu.
+  fnc_tccc: her tedavi adimi icin [TCCC-TX] (ilk 120): YOK-ESYA (hekimin tibbi esyalari listelenir) / UYGULANDI (olay mi dogrudan mi, kanKaybi once -> sonra, hekim animasyon durumu). Yerel hastada ACE yerel fonksiyonu (bandageLocal / tourniquetLocal) dogrudan cagrilir (CBA olay turu yedek).
+  Bir sonraki RPT'de [TCCC-TX] satirlari kok nedeni gosterecek.

@@ -74,8 +74,16 @@ diag_log format [
     //   anim + bekleme + item sil + CBA hedef olayi + aktivite logu (RPT 5d7b3371: kullanici 'animasyon yok, aktivite logunda bir sey yok' dedi)
     private _tx = {
         params ["_m", "_c", "_part", "_cls"];
-        if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {false};
+        if (isNil "lambs_danger_tcccTxN") then { lambs_danger_tcccTxN = 0; };
+        if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {
+            if (lambs_danger_tcccTxN < 120) then {
+                lambs_danger_tcccTxN = lambs_danger_tcccTxN + 1;
+                diag_log format ["[TCCC-TX] %1 -> %2 | %3 %4 | YOK-ESYA | tibbi esyalar: %5", name _m, name _c, _cls, _part, (items _m) select {(toLower _x) find "ace_" == 0 || {(toLower _x) find "firstaid" >= 0}}];
+            };
+            false
+        };
         private _sinif = toLower _cls;
+        private _kanOnce = if (isNil "ace_medical_status_fnc_getBloodLoss") then {0} else {[_c] call ace_medical_status_fnc_getBloodLoss};
         private _l = lambs_danger_tcccMalzeme getOrDefault [_sinif, []];
         private _esya = "";
         if (_l isNotEqualTo []) then { private _i = (items _m) findIf {(toLower _x) in _l}; if (_i >= 0) then { _esya = (items _m) select _i; }; };
@@ -99,9 +107,10 @@ diag_log format [
         waitUntil { sleep 0.3; time > _t || {!alive _m} || {!alive _c} || {(_m distance2D _c) > 6} };
         if (!alive _m || {!alive _c} || {(_m distance2D _c) > 6}) exitWith {false};
         if (_esya isNotEqualTo "") then { _m removeItem _esya; };
+        private _dogrudan = local _c;
         switch (_tip) do {
-            case 1: { ["ace_medical_treatment_bandageLocal", [_c, _part, _cls], _c] call CBA_fnc_targetEvent; };
-            case 2: { ["ace_medical_treatment_tourniquetLocal", [_c, _part], _c] call CBA_fnc_targetEvent; };
+            case 1: { if (_dogrudan && {!isNil "ace_medical_treatment_fnc_bandageLocal"}) then { [_c, _part, _cls] call ace_medical_treatment_fnc_bandageLocal; } else { ["ace_medical_treatment_bandageLocal", [_c, _part, _cls], _c] call CBA_fnc_targetEvent; }; };
+            case 2: { if (_dogrudan && {!isNil "ace_medical_treatment_fnc_tourniquetLocal"}) then { [_c, _part] call ace_medical_treatment_fnc_tourniquetLocal; } else { ["ace_medical_treatment_tourniquetLocal", [_c, _part], _c] call CBA_fnc_targetEvent; }; };
             case 3: { ["ace_medical_treatment_medicationLocal", [_c, _part, _cls], _c] call CBA_fnc_targetEvent; };
             case 4: { ["ace_medical_treatment_ivBagLocal", [_c, _part, _cls, _m], _c] call CBA_fnc_targetEvent; };
             case 5: { ["ace_medical_treatment_cprLocal", [_m, _c], _c] call CBA_fnc_targetEvent; };
@@ -113,6 +122,11 @@ diag_log format [
                 if (_tip isEqualTo 3) then { _arg pushBack _cls; };
                 [_c, "activity", _msg, _arg] call ace_medical_treatment_fnc_addToLog;
             };
+        };
+        if (lambs_danger_tcccTxN < 120) then {
+            lambs_danger_tcccTxN = lambs_danger_tcccTxN + 1;
+            private _kanSonra = if (isNil "ace_medical_status_fnc_getBloodLoss") then {0} else {[_c] call ace_medical_status_fnc_getBloodLoss};
+            diag_log format ["[TCCC-TX] %1 -> %2 | %3 %4 | UYGULANDI (%5) esya:%6 | kanKaybi %7 -> %8 | anim:%9", name _m, name _c, _cls, _part, ["olay", "dogrudan"] select _dogrudan, _esya, _kanOnce toFixed 3, _kanSonra toFixed 3, animationState _m];
         };
         true
     };
