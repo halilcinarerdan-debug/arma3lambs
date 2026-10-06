@@ -40,7 +40,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             private _g = _x;
             if (isNull _g || {!local _g} || {(side _g) isEqualTo civilian}) then { continue };
             if ((units _g) findIf {isPlayer _x} > -1) then { continue };
-            private _us = (units _g) select {alive _x && {isNull objectParent _x}};
+            private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.91: bayilanlar etkin guc degil (kayip orani / moral)
             if (_us isEqualTo []) then { continue };
             if (_g getVariable [QGVAR(teslimOldu), false]) then { continue };
             _gSay = _gSay + 1;

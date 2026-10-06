@@ -65,7 +65,7 @@ private _tahtaKur = {
         if ((side _g) isNotEqualTo _taraf) then { continue };
         if (_g getVariable ["lambs_danger_tarafKapali", false]) then { continue };   // v8.86: dislanan taraf
         if ((units _g) findIf {isPlayer _x} > -1) then { continue };
-        private _n = {alive _x} count (units _g);
+        private _n = (({alive _x && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])}} count (units _g)));   // v8.91: bayilanlar etkin guc degil
         if (_n < 1) then { continue };
 
         private _init = _g getVariable ["lambs_danger_cmdInitialCount", _n];

@@ -77,8 +77,11 @@ _group setVariable [QGVAR(cmdLastEval), time];
 // ---------------------------------------------------------------------------
 // Temel veriler
 // ---------------------------------------------------------------------------
+// v8.91 ETKIN GUC: bayilan / etkisiz (ACE) asker KAYIP sayilir (RPT e020cec6: IS ~23 kisinin ~%91'i etkisizdi ama komutan yalniz olenleri sayiyor -> kayip orani ~%26, cekilme esigi (%30) dolmuyordu).
+//   _aliveUnits = canli (taban / silinen mantigi icin degismez); _etkin = canli VE bayilmamis (guc / kayip / baski hesabi).
 private _aliveUnits = (units _group) select {alive _x};
-private _ownCount = count _aliveUnits;
+private _etkin = _aliveUnits select {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"]) && {!(_x getVariable ["ACE_isUnconscious", false])}};
+private _ownCount = count _etkin;
 if (_ownCount <= 0) exitWith {"WITHDRAW"};
 
 private _mySide = side _unit;
@@ -128,7 +131,7 @@ private _ownAT = 0;
     });
     if (_r isEqualTo "MG") then {_ownMg = _ownMg + 1;};
     if ([_x] call _atFn) then {_ownAT = _ownAT + 1;};
-} forEach _aliveUnits;
+} forEach _etkin;
 
 // ---------------------------------------------------------------------------
 // DUSMAN GUCU — ilk 12 dusmanin rolu, fazlasi orantilanir
@@ -239,7 +242,7 @@ private _toplamMermi = 0;
             _toplamMermi = _toplamMermi + _ammoCount;
         };
     } forEach (magazinesAmmo _asker);
-} forEach _aliveUnits;
+} forEach _etkin;
 
 private _mermiPerKisi = _toplamMermi / (_ownCount max 1);
 
@@ -286,7 +289,7 @@ private _factorPosition = if (_isUrban) then {0.2} else {
 // Grubun ortalama getSuppression degeri (0..1)
 // ---------------------------------------------------------------------------
 private _suppAvg = 0;
-{ _suppAvg = _suppAvg + (getSuppression _x); } forEach _aliveUnits;
+{ _suppAvg = _suppAvg + (getSuppression _x); } forEach _etkin;
 _suppAvg = _suppAvg / _ownCount;
 private _factorSupp = linearConversion [0, 0.8, _suppAvg, 0, 1, true];
 

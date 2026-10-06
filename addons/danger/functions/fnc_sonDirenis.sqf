@@ -27,7 +27,7 @@ if (isNull _group || {!(missionNamespace getVariable ["lambs_danger_sonDirenisV1
 if (!([_group, "sonDirenis", true] call FUNC(dk))) exitWith {false};
 if (_group getVariable [QGVAR(isSonDirenis), false] || {(time - (_group getVariable [QGVAR(sonDirenisT), -999])) < 120}) exitWith {false};
 
-private _us = (units _group) select {alive _x && {isNull objectParent _x}};
+private _us = (units _group) select {alive _x && {isNull objectParent _x} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])}};   // v8.91
 private _n = count _us;
 if (_n < 1 || {_n > 3}) exitWith {false};
 private _lider = if (alive (leader _group)) then {leader _group} else {_us select 0};
