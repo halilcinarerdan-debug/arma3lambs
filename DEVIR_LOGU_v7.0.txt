@@ -1295,3 +1295,11 @@ v8.91 — ETKIN GUC (kullanici: 'hepsini gercekci olsun'): KOK NEDEN IS'in %91 e
   Duzeltme: commanderAssess _etkin (canli + bayilmamis) -> _ownCount / guc / baski; moral + HQ tahtasi + sonDirenis etkin guc. cmdKnown / 'silinen' mantigi canli listesiyle KALIR (bayilan, gruptan silinmis sayilip taban dusurmesin). Tum gruplari etkiler (USMC dahil): daha erken cekilme / DELAY.
   Gercek hedef: kaynaksiz tahmin IS %20-30 kayipta kopar; tarihsel tabur ortalamasi ~%40 (sabit kural yok). TEST EDILMEDI.
   SQUAD ODAKLI EKSIKLER (oneri sirasi): (1) el bombasi + bina / oda temizleme yeniden yazimi (kullanici ertelemisti; karne: oda CLEAR 0); (2) tehlike alani gecisi (yol / acik arazi / sirt; iki taraf otoyolu kullandi) overwatch'li gecis; (3) dolayli ates / CAS cagrisi (havan, SALUTE); (4) cephane dagitimi + konsolidasyon (ammo cross-level, yarali toplama); (5) mekanize inis / arac ates destegi.
+
+v8.92 — SQUAD EKSIKLERI (kullanici onayi: tehlike alani + cephane dagitimi + el bombasi paslama; ODA TEMIZLEME EN SON). 
+  fnc_cephanePaylas: alici = tufek / MG ana sarjor stogu < 2.5 x kapasite (40mm haric), 40mm < 3 (UGL'li; verici bulunmadigi icin su an pasif), parcali bomba 0, lider dumani 0; verici = ayni grup >= 5 sarjor (>= 4 kalir) / >= 3 bomba, esi -> en cok stok -> yakin;
+    FIZIKSEL: verici (sakinse <= 40 m'den alici yanina yurur, temasta yalniz <= 6 m esler) 'PutDown' animasyonuyla mermiyi / bombayi YERE BIRAKIR (GroundWeaponHolder), ALICI gidip YERDEN ALIR; alamazsa 120 sn yerde kalir. 'PutDown' aksiyon adi dogrulanamadi
+    (gecersizse animasyon yok, aktarim yine yapilir). [CEPHANE] / [CEPHANE-OZET]. Kapatma lambs_danger_cephanePaylasOff.
+  fnc_tehlikeAlani: YOL gecisi — grup >= 5 piyade, temas yok, lider yolda degil, beklenen hedef dogrultusunda 20-70 m'de roadAt + ACIK cevre (80 m'de yapi < 6, 40 m'de agac < 6) -> dur + gozetle (8 sn, iki gozetleyici yolun iki ucu) -> takim A (lider + yarisi) gecer -> takim B gecer -> serbest + waypoint yeniden.
+    70 sn sinir, temas / retreat aninda hemen serbest. [TEHLIKE-ALANI]. Kapatma lambs_danger_tehlikeAlaniOff. SINIR: yalniz YOL; tepe sirti / acik tarla yok. TEST EDILMEDI (felc riski: ilk testte [TEHLIKE-ALANI] SERBEST sureleri izlenmeli).
+  ODA / BINA TEMIZLEME + EL BOMBASI KULLANIMI: en son (kullanici sirasi).
