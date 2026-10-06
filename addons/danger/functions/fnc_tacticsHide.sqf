@@ -52,7 +52,11 @@ _target = _target call CBA_fnc_getPos;
 // hold-fire combat mode
 _group setVariable [QGVAR(taktikFormT), time];
 if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "hide", 1] call FUNC(formSet); };
-_group setCombatMode "WHITE";
+// v8.89 ATES KESME DUZELTMESI (RPT e020cec6: IS gruplari 75 karardan 39'unda DELAY = siper + 'WHITE' (ates kesme); 140-250 m'de bilinen dusman ates ederken karsilik vermiyorlardi, 15 bayilan / 4):
+//   WHITE yalniz saklanma / pusu icin anlamli. Bilinen dusman 400 m icinde ve gruptan biri baski altindaysa siper al + KARSILIK VER (YELLOW).
+private _hEn = _unit findNearestEnemy _unit;
+private _hBask = ((units _group) findIf {alive _x && {(getSuppression _x) > 0.1}}) > -1;
+_group setCombatMode (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > 1.2}) || {_hBask}));
 _group enableAttack false;
 
 _unit setVariable [QEGVAR(main,currentTarget), _target, EGVAR(main,debug_functions)];

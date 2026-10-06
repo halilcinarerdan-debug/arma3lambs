@@ -42,6 +42,9 @@ private _sis = !(missionNamespace getVariable ["lambs_danger_hqSisOff", false]);
 private _sd = (missionNamespace getVariable ["lambs_danger_hqSisSiddet", 0.4]) max 0 min 1;   // v8.74: sis siddeti (0 = eski mukemmel, 1 = tam sis); varsayilan 0.4: oyuncu karsisinda PvE zorlugu korunur
 private _telsizMi = {
     params ["_u"];
+    // v8.89: grup LIDERI (komutan) telsiz tasir kabul edilir — RPT e020cec6: IS (LOP_ISTS) askerlerinde ItemRadio yok -> 'muhbir / alici telsiz yok' 38 kez, EAST'te HIC istihbarat paylasimi olmadi,
+    //   USMC'de oldu (asimetri: esya listesi yapayligi, doktrin degil). Lider = implicit kisa menzilli telsiz; esya aramasi diger birimler icin kalir.
+    if (_u isEqualTo (leader (group _u))) exitWith {true};
     private _oge = (assignedItems _u) + (items _u);
     (_oge findIf {private _k = toLower _x; (_k find "radio") >= 0 || {(_k find "prc") >= 0} || {_k find "tf_" == 0}}) > -1
 };

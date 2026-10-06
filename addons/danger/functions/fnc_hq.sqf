@@ -149,8 +149,8 @@ private _tahtaKur = {
             } forEach lambs_danger_hqModuller;
 
             // tahta ozeti (90 sn'de bir, ilk 40 satir)
-            if ((time - _sonTahtaLog) > 90 && {(missionNamespace getVariable ["lambs_danger_hqTahtaN", 0]) < 40}) then {
-                _sonTahtaLog = time;
+            if ((time - (missionNamespace getVariable [format ["lambs_danger_hqTahtaLogT_%1", _taraf], -999])) > 90 && {(missionNamespace getVariable ["lambs_danger_hqTahtaN", 0]) < 80}) then {   // v8.89: taraf basina zamanlayici (EAST logu WEST tarafindan yutuluyordu)
+                missionNamespace setVariable [format ["lambs_danger_hqTahtaLogT_%1", _taraf], time];
                 missionNamespace setVariable ["lambs_danger_hqTahtaN", (missionNamespace getVariable ["lambs_danger_hqTahtaN", 0]) + 1];
                 private _toplamN = 0;
                 { _toplamN = _toplamN + (_x get "n"); } forEach _tahta;

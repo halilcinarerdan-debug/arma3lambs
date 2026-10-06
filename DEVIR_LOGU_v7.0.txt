@@ -1275,3 +1275,11 @@ v8.88 — RPT 9c82aefa (v8.87): APC ortalama hiz 0 -> 7 km/s (ATTACK + COMBAT ik
   -> lider (arac komutani / surucu lideriyse) 2 m/s = 7 km/s. v8.87 forceSpeed -1 sifirlamasi her LAMBS cagrisinda geri eziliyordu (etkisiz).
   COZUM: fork overlay addons/main/functions/UnitAction/fnc_doAssaultSpeed.sqf — objectParent bos degilse (arac icinde) forceSpeed -1 + return 4; piyade davranisi AYNEN (STEALTH 1, baski / lider / moral / < 5 m dusurmeleri).
   mekanize izleyici sifirlama yalniz komut MOVE / ATTACK iken. Not: kullanici 'iki taraf da otoyolu kullaniyordu' — yol kullanimi (tehlike alani) ayri konu, degistirilmedi. TEST EDILMEDI.
+
+v8.89 — RPT e020cec6 (USMC / NATO vs IS 'DUZENSIZ'): kullanici: teçhizat Rus ordusu kadar, tek fark optik yok, RPG ustunlugu bile vardi; IS 15 bayilan / USMC ~4 (not: onceki '0'a 6' analizi yanlis — yalniz oluler sayilmisti; bayilmalar [DURUM] gorev:Incapacitated).
+  ASIMETRI KOKLERI (teçhizat disi):
+  (1) TELSIZ: v8.72 sis kurali 'telsiz esyasi' ariyordu; IS askerlerinde ItemRadio yok -> HQ-ISTIHBARAT-OZET 'muhbir / alici telsiz yok' 38+, EAST'te HIC istihbarat paylasimi olmadi, USMC'de oldu. Esya listesi yapayligi (doktrin degil). Lider = kisa menzilli telsiz kabul (liderler icin esya sarti kalkti).
+  (2) DELAY = tacticsHide = setCombatMode 'WHITE' (ates kesme): IS kararlarinin 39 / 75'i DELAY (guc orani 1.7-2.5 grup basina, acikta baski) -> 140-250 m'de bilinen dusman ates ederken karsilik vermiyorlardi. Duzeltme: bilinen dusman < 400 m ve (knowsAbout > 1.2 ya da baski > 0.1) ise YELLOW.
+  (3) HQ KOORDINASYONU asimetrik: WEST'te HQ-EMIR KANAT + FEINT + ATES_KAYDIR + SALDIRI; EAST'te HQ-EMIR YOK (IS gruplari surekli temasta / mesgul -> musait degil). Ek: [HQ-TAHTA] logu tek sayacla WEST'e ait oldugu icin EAST hic loglanmiyordu (taraf basina sayac eklendi).
+  (4) Grup basina guc orani: her IS grubu (5-8 kisi) 17-25 gorulen dusmani KENDI basina sayiyor (oran 1.7-2.5), komsu IS gruplarini katmiyor -> DELAY / PEEL erken. (DUZENSIZ: peelKayip 0.08, cekilKayip 0.30.) Ilerisi icin aday: komsu dost gruplarin gucunu orana ekle. DEGISTIRILMEDI.
+  IS RPG'leri 199-253 m'den atti, 39-54 m ıskaladi (fırlatma dogal hata). TEST EDILMEDI.
