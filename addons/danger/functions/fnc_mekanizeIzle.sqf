@@ -49,7 +49,7 @@ private _calis = {
 
             // v8.87 YAVASLIK KOK NEDENI ADAYI (RPT a73b486e: 'APC hala cok yavas'; v8.80 logunda surucu komutu ATTACK): LAMBS doAssaultSpeed (ATTACK komutu) suruculere forceSpeed 2-3 m/s birakir = ~10 km/s.
             //   forceSpeed OKUNAMIYOR (unary yok / HEMTT SPE2): arac < 15 km/s ise ve kasitli yavaslatma (retreat / cekilme / taktik kilit) yoksa surucuye forceSpeed -1 verilir (20 sn'de en fazla bir).
-            if (_duzelt && {(speed _veh) < 15} && {(time - (_d getVariable [QGVAR(mekFsT), -999])) > 20} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])} && {(_d getVariable [QGVAR(taktikKilit), 0]) <= time}) then {
+            if (_duzelt && {(currentCommand _d) in ["MOVE", "ATTACK"]} && {(speed _veh) < 15} && {(time - (_d getVariable [QGVAR(mekFsT), -999])) > 20} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])} && {(_d getVariable [QGVAR(taktikKilit), 0]) <= time}) then {
                 _d forceSpeed -1;
                 _d setVariable [QGVAR(mekFsT), time];
                 _say set ["forceSpeed-kaldirildi", (_say getOrDefault ["forceSpeed-kaldirildi", 0]) + 1];
