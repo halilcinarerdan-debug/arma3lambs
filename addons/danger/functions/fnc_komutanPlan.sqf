@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * KOMUTAN PLANI (v8.113) — kullanici: "dinamik patrol / arazi tanima / harekat plani / garrison / rally point; waypoint otomatik, Zeus'ta gorunsun; Zeus objektif + 'duşmanda sunlar var / yok' versin; komutan kitaba gore hareket etsin".
  * Kitap (kaynaklar_doktrin/TC_3-21.76 Ranger Handbook, MCWP 3-11.1 / 3-11.2): Troop Leading Procedures (gorevi al, tahmini plan, harekete basla, kesif, plani tamamla, emir ver, denetle), rally point / objective rally point (ORP),
- *   destek (support by fire) + manevra (assault) + yedek (reserve), kanat saldirisi, toparlanma (consolidate and reorganize). SAYISAL ESIKLER (mesafeler, sureler) TASARIM tahminidir, kaynakli degil.
+ *   destek (support by fire) + manevra (assault) + yedek (reserve), kanat saldirisi, toparlanma (consolidate and reorganize). SAYISAL ESIKLER: KAYNAKLI = ORP 200-400 m (sinirli gorusta 100-200 m), TC 3-21.76 s. 7-15 / 7-20; rally point nitelikleri (ortulu, yol / akin yolu disi, kisa sure savunulabilir) s. 7-14; DANGER CLOSE <= 600 m + RED mesafeleri (Tablo 3-3) topcu icin. Digerleri (RP mesafesi 450 m, kanat 110 m, SBF 160-300 m, keşif 40 sn, 150 sn bekleme) TASARIM tahminidir, kitapta sayi YOK.
  * ISLEYIS (ELE GECIR): TOPLAN (RP'ye) -> ORP (manevra: ORP, destek: destek noktasi) -> KESIF (40 sn guvenlik) -> SALDIRI (destek ates + manevra [>= 2 grupta kanat noktalari] + hqEmir SALDIRI) -> TOPLANMA (cevre savunmasi + fnc_toparlan) -> BITTI.
  *   SAVUN: TOPLAN -> MEVZI (objektif cevresinde sektorlu halka noktalari; binalar varsa tacticsGarrison) -> BEKLE (sure sinirli).
  * KOMUTAN: katilan gruplar arasinda en yuksek rutbeli lider (esitlikte buyuk grup); >= 3 grupta komutan destek noktasinda (gorus). Roller: DESTEK (MG / AT / nisanci puani en yuksek), MANEVRA, YEDEK.
@@ -110,7 +110,7 @@ private _konumSec = {
     _en
 };
 private _rallyM = _ayar getOrDefault ["rallyM", 450];
-private _orpM = _ayar getOrDefault ["orpM", 180];
+private _orpM = _ayar getOrDefault ["orpM", 300];
 private _rp = [_rallyM, [0, 12, -12, 24, -24, 36, -36]] call _konumSec;
 private _orp = [_orpM, [0, 10, -10, 20, -20]] call _konumSec;
 
@@ -205,8 +205,11 @@ private _ccp = _rp getPos [25, _B + 90];
             };
             case "ORP": {
                 _orp = _p;
-                if (_d < 80) then { ["ORP", format ["objektife cok yakin (%1 m < 80 m)", round _d]] call _uyar; };
-                if (_d > 450) then { ["ORP", format ["objektiften cok uzak (%1 m > 450 m): saldiri hatti kopuk", round _d]] call _uyar; };
+                // KAYNAK TC 3-21.76 s. 7-15 / 7-20: ORP tipik 200-400 m (sinirli gorusta 100-200 m); ses ve gorus disinda
+                private _sinirliGorus = (sunOrMoon < 0.15) || {fog > 0.4};
+                private _alt = [200, 100] select _sinirliGorus;
+                if (_d < _alt) then { ["ORP", format ["kitap ORP mesafesinin altinda (%1 m < %2 m, %3)", round _d, _alt, ["iyi gorus", "sinirli gorus"] select _sinirliGorus]] call _uyar; };
+                if (_d > 400) then { ["ORP", format ["kitap ORP mesafesinin ustunde (%1 m > 400 m): objektife gec yetisilir / baglanti kopar", round _d]] call _uyar; };
                 if ([_p] call _gorunur) then { ["ORP", "objektiften GORUNUR"] call _uyar; };
             };
             case "SBF": {

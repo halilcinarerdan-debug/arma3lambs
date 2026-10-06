@@ -54,11 +54,11 @@ private _topcuAt = {
     params ["_plan", "_poz", "_ad"];
     private _taraf = _plan get "taraf";
     private _mermi = _plan getOrDefault ["topcuN", 4];
-    private _dost = allUnits select {alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _poz) < 150}};
-    if (_dost isNotEqualTo []) exitWith {
-        diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YAPILMADI: dost %3 m'de (tehlikeli yakinlik < 150 m)", _plan get "id", _ad, round ((_dost select 0) distance2D _poz)];
-        false
-    };
+    // KAYNAK: TC 3-21.76 (Ranger El Kitabi, 2017) s. 3-4 / 3-5: DANGER CLOSE = hedef dost birlige <= 600 m (havan / sahra topcusu: komut cagrisinda ilan edilir, yasak DEGIL);
+    //   'risk estimate distance' (RED, %0.1 Pi) tablosu (azami sarj, ayakta): 60 mm ~145 m, 81 / 82 mm ~195 m, 105 mm ~455 m, 120 mm ~430 m. Savasta RED, egitimde MSD kullanilir (kitap).
+    //   Burada: dost mesafesi < RED ise o arac ATMAZ; RED'in altinda ama <= 600 m ise 'DANGER CLOSE' loglanir. Cap cikarimi mermi / arac sinif adindan (sezgisel).
+    private _dostEn = 99999;
+    { if (alive _x && {(side (group _x)) isEqualTo _taraf}) then { _dostEn = _dostEn min (_x distance2D _poz); }; } forEach allUnits;
     private _araclar = vehicles select {
         alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {!isPlayer (gunner _x)} && {local _x} && {canFire _x}
     };
@@ -66,14 +66,24 @@ private _topcuAt = {
     {
         private _v = _x;
         private _mg = (getArtilleryAmmo [_v]) param [0, ""];
-        if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
-            private _hd = _poz getPos [random 30, random 360];
-            _v doArtilleryFire [_hd, _mg, _mermi];
-            _atan = _atan + 1;
-            diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 -> %4 | %5 mermi (%6) | ETA %7 sn", _plan get "id", _ad, typeOf _v, mapGridPosition _hd, _mermi, _mg, round (_v getArtilleryETA [_hd, _mg])];
+        private _cap = toLower (_mg + "|" + typeOf _v);
+        private _red = 300;
+        if ((_cap find "60mm") >= 0) then { _red = 145; };
+        if ((_cap find "81mm") >= 0 || {(_cap find "82mm") >= 0}) then { _red = 195; };
+        if ((_cap find "120mm") >= 0) then { _red = 430; };
+        if ((_cap find "105mm") >= 0 || {(_cap find "155mm") >= 0} || {(_cap find "152mm") >= 0}) then { _red = 455; };
+        if (_dostEn < _red) then {
+            diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 ATMADI: en yakin dost %4 m < RED %5 m (TC 3-21.76 Tablo 3-3, %6)", _plan get "id", _ad, typeOf _v, round _dostEn, _red, _mg];
+        } else {
+            if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
+                private _hd = _poz getPos [random 30, random 360];
+                _v doArtilleryFire [_hd, _mg, _mermi];
+                _atan = _atan + 1;
+                diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 -> %4 | %5 mermi (%6) | ETA %7 sn | en yakin dost %8 m (RED %9 m)%10", _plan get "id", _ad, typeOf _v, mapGridPosition _hd, _mermi, _mg, round (_v getArtilleryETA [_hd, _mg]), round _dostEn, _red, ["", " | DANGER CLOSE (<= 600 m)"] select (_dostEn <= 600)];
+            };
         };
     } forEach _araclar;
-    if (_atan isEqualTo 0) then { diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YOK: menzilde / yerel topcu araci bulunamadi (%3 aday)", _plan get "id", _ad, count _araclar]; };
+    if (_atan isEqualTo 0) then { diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YOK (%3 aday arac; menzil / yerel / RED kosulu)", _plan get "id", _ad, count _araclar]; };
     _atan > 0
 };
 
