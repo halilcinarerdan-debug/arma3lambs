@@ -1544,3 +1544,21 @@ v8.129 - KARA ARACI NAKLI / TAKSI + MEDEVAC DOKTRIN STANDOFF
  - fnc_taksi (yeni, sunucu): yaya AI grubu aktif waypoint'i > 1200 m ise ve 600 m icinde bos arac varsa ayni nakil; inis hedefin 500 m oncesi; ayni anda <= 2 gorev; grup basina 180 sn bekleme. Plan waypoint'leri ("ELITE PLAN:") alinmaz. Log [TAKSI]. lambs_danger_taksiOff = true.
  - aracMedevac: yarali - duşman mesafesi zirhli arac icin >= 300 m, yumusak arac icin >= 600 m degilse arac gitmez (log'da 'standoff yuzunden elenen'); yaralilar duşmandan en az 600 m (ya da yaralinin mesafesi + 250 m) uzaga tasinir. tasimaMesgul araclar medevaca alinmaz.
  - Test edilmedi: biniş / inis (orderGetIn, doGetOut, moveInCargo) AI davranisi, taksi tetikleri, ELITE izleyicilerinin aracin icindeki piyadeyi rahatsiz etmesi. HEMTT: temiz (yalniz stil uyarilari).
+
+v8.130 - RPT 5ebe2e37 (sunucu) + 894b3f68 (istemci) analizi: APC nakli, SUNUCU-DEVIR hatasi, topcu tani, karakol garnizonu, gizlilik
+ BULGULAR (RPT):
+ - [SUNUCU-DEVIR] hata: HashMap anahtari olarak GROUP kullanildi ("Type Group, expected Number,Bool,Array,String..."; fnc_grupSunucuDevir satir 41) -> netId anahtari.
+ - [TASIMA] P2 TOPLAN -> TASIMA'ya girdi (3 arac / 3 grup eslesti, atanmis arac 3) ama devami yok: ARAC-SENKRON Stryker'i nakil yolunda 1.4 m/s'e kisti
+   (aracSenkron muafiyeti aracMedevacT'yi ARACTA okuyor, ben GRUPTA yazmistim) + 120 sn RP bekleme / 300 sn surus cok uzun, plan fazi 700 sn TASIMA'da kalabiliyordu.
+ - [PLAN-TOPCU]: P2 TASIMA'da takildigi icin KESIF'e (hazirlik atesi) hic gelmedi -> topcu atmadi; tani yoktu.
+ - Yol gecisi (TEHLIKE-ALANI, 8+25+25 sn, taktikKilit 75 sn) plan yurusunde calisti: lider durup 3-4 asker 60 m ileri kosuyor -> kullanici "hareket halindeki takim formasyon alamiyor" diye gorebilir (KILIT-UZUN 73 sn, BOSTA-HAREKET). Tasarim geregi; degistirilmedi.
+ DUZELTMELER:
+ - grupSunucuDevir: netId anahtari. aracSenkron: grup + arac aracMedevacT ve tasimaMesgul muaf. aracTasima: RP bekleme 150 sn, surus 240 sn, kontrol dizisi (plan zaman asimi 420 sn'de nakil iptal, binenler oldugu yerde iner), adim loglari.
+ - [PLAN-TOPCU] ATIS YOK: neden sayaclari (topcu yok / oyuncu / yerel degil / canFire / Zeus TOPCU_YOK / mermi yok / menzil disi).
+ - GIZLILIK ONCELIGI (sizma): tempo = sessiz / gizli ya da Baskin secili ise (baskin tempoyu otomatik gizli yapar): toplan / ORP / kesif'te temas yoksa combatMode GREEN (ates yok), objektife < 450 m'de comelerek (MIDDLE); temas olunca YELLOW + AUTO; SALDIRI baslayinca AUTO + YELLOW. Eski kodda stealth waypoint'inin combat modu YELLOW'du (yorumda GREEN yaziyordu) -> duzeltildi.
+ YENI: ELITE KARAKOL GARNIZON (Zeus modulu + fnc_karakolGarnizon sunucu bekcisi)
+ - Karakol icinde: NOBETCILER (onemli pozisyonlar: bina ust kati >= 2.5 m + yuksek arazi, gorus + yukseklik skoru, dagilma), DEVRIYE ALT GRUPLARI (halka rotasi, alarmda cevre savunmasi), ARAC MEVZILERI (APC / kamyon cevre ates mevzisi, muretteat icinde).
+   Komutan (ELITE) pozisyon / kisi secer; LAMBS garrison rastgelesi degil. Modul tekrar calistirilinca ayar yeniden hesaplanir, birimler orijinal gruplarina doner; yeni birimler havuza girip eksigi tamamlar; Kaldir bosaltir.
+   Plan / taksi / tasima altgruplari ve KARAKOL_ARAC araclari almaz. Log [KARAKOL-GARNIZON] + 60 sn ozet. Kapatma: lambs_danger_garnizonOff.
+ - Test edilmedi: buildingPos yuksekligi (AGL varsayildi), merdivenle ust kata cikis, PATH kapali nobetcinin davranisi, devriye alarm gecisi, arac mevzisi. HEMTT: yalniz stil / surum gurultusu.
+ YAPILMADI: karakolda MG / AT'li gruplarin ozel yerlesimi, nobet degisimi (rotasyon), hareket halinde formasyon sorununun kok nedeni (yukaridaki yol gecisi hipotez).

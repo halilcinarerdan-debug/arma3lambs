@@ -162,4 +162,22 @@ class CfgVehicles {
             };
         };
     };
+
+    class GVAR(KarakolGarnizon) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(KarakolGarnizon);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Karakol Garnizon (nobet / devriye / arac)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleKarakolGarnizon);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
 };

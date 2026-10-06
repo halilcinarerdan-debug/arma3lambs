@@ -23,12 +23,13 @@
  * 4: Yaklasma ekseni (objektiften dost gruplara yon) <NUMBER>
  * 5: ORP mesafesi (m) <NUMBER> (taksi: 0)
  * 6: Arac arama menzili (m, varsayilan 2500; taksi: 600) <NUMBER>
+ * 7: Kontrol dizisi [iptal <BOOL>] (true olunca is derhal biter, binenler oldugu yerde iner) <ARRAY>
  *
  * Return Value: Tasinan grup sayisi <NUMBER>
  * Public: No
 */
 
-params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500]];
+params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], ["_ctl", [false]]];
 if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0};
 
 
@@ -45,7 +46,7 @@ private _uygun = _tumAraclar select {
     !isNull _d && {!isPlayer _d} && {local _d} && {(side _vg) isEqualTo _taraf}
     && {((units _vg) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
     && {!(_vg getVariable [QGVAR(planAktif), false])} && {(time - (_vg getVariable [QGVAR(aracMedevacT), -999])) > 240}
-    && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK"])})}
+    && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"])})}
     && {(({isPlayer _x} count (crew _v)) isEqualTo 0)} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}
 };
 private _atanan = _uygun select {((_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA") || {((group (driver _x)) getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"}};
@@ -88,9 +89,10 @@ private _isler = [];
     _x params ["_v", "_gl"];
     private _d = driver _v;
     private _vg = group _d;
-    _isler pushBack ([_v, _d, _vg, _gl, _rp, _drop] spawn {
-        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop"];
+    _isler pushBack ([_v, _d, _vg, _gl, _rp, _drop, _ctl] spawn {
+        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl"];
         _v setVariable [QGVAR(tasimaMesgul), true];
+        _v setVariable [QGVAR(aracMedevacT), time];
         private _eskiBeh = behaviour _d;
         private _eskiHiz = speedMode _vg;
         private _eskiAC = _d checkAIFeature "AUTOCOMBAT";
@@ -104,11 +106,13 @@ private _isler = [];
         private _iptal = "";
 
         // (1) RP'ye gel
+        diag_log format ["[TASIMA] %1 | %2 | alma noktasina %3 m (RP) | surucu %4", groupId _vg, _ad, round (_v distance2D _rp), name _d];
         _d doMove _rp;
-        private _t = time + 120;
-        waitUntil { sleep 1; !alive _v || {!alive _d} || {(_v distance2D _rp) < 45} || {time > _t} };
+        private _t = time + 150;
+        waitUntil { sleep 1; !alive _v || {!alive _d} || {(_v distance2D _rp) < 45} || {time > _t} || {_ctl select 0} };
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
-        if (_iptal isEqualTo "" && {(_v distance2D _rp) >= 45}) then { _iptal = "RP'ye varilamadi (120 sn)"; };
+        if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
+        if (_iptal isEqualTo "" && {(_v distance2D _rp) >= 45}) then { _iptal = format ["RP'ye varilamadi (150 sn, kalan %1 m)", round (_v distance2D _rp)]; };
 
         // (2) bin
         private _binen = [];
@@ -121,7 +125,7 @@ private _isler = [];
             private _bt = time + 60;
             waitUntil {
                 sleep 1;
-                !alive _v || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
+                !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {(time > (_bt - 15)) && {((_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}) isEqualTo []) isEqualTo false}}
             };
             // gecikenler: 40 m icindeyse arac icine al
@@ -135,17 +139,17 @@ private _isler = [];
         if (_iptal isEqualTo "") then {
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
             _d doMove _drop;
-            private _st = time + 300;
+            private _st = time + 240;
             waitUntil {
                 sleep 1;
                 !alive _v || {!alive _d} || {(_v distance2D _drop) < 40} || {time > _st}
                 || {(_gl findIf {(time - (_x getVariable [QGVAR(contact), -999])) < 5}) >= 0}
-                || {(getSuppression _d) > 0.5}
+                || {(getSuppression _d) > 0.5} || {_ctl select 0}
             };
             if (!alive _v || {!alive _d}) then { _iptal = "tasima sirasinda arac / surucu oldu"; };
             if (_iptal isEqualTo "") then {
                 if ((_v distance2D _drop) >= 40) then {
-                    _erkenInis = [format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)], "sure doldu (300 sn)"] select (time > _st);
+                    _erkenInis = [format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)], "sure doldu (240 sn)"] select (time > _st);
                 };
             };
         };

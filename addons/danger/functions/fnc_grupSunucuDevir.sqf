@@ -38,10 +38,10 @@ private _calis = {
             if ((_us findIf {isPlayer _x}) >= 0) then { continue };
             if ((_us findIf {!isNull (_x getVariable ["bis_fnc_moduleRemoteControl_owner", objNull])}) >= 0) then { continue };
             if ((groupOwner _g) in _hcSahip) then { continue };
-            if ((time - (_devirT getOrDefault [_g, -999])) < 60) then { continue };
+            if ((time - (_devirT getOrDefault [netId _g, -999])) < 60) then { continue };
             missionNamespace setVariable ["lambs_danger_sunucuDevirAdim", format ["grup %1", groupId _g]];
             private _eski = groupOwner _g;
-            _devirT set [_g, time];
+            _devirT set [netId _g, time];
             _g setGroupOwner 2;
             _tur = _tur + 1;
             _toplam = _toplam + 1;

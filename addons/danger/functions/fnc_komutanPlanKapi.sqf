@@ -83,7 +83,7 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
     private _ad = _adlar select (_adI max 0 min 4);
     // ayni noktada (60 m) mevcut kayit: once sil
     private _eski = lambs_danger_karakollar select {((_x select 1) distance2D _poz) < 60 && {(_x select 0) isEqualTo _taraf}};
-    { deleteMarker (_x select 5); lambs_danger_karakollar deleteAt (lambs_danger_karakollar find _x); } forEach _eski;
+    { deleteMarker (_x select 5); if (!isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar set [_x select 5, createHashMap]; }; lambs_danger_karakollar deleteAt (lambs_danger_karakollar find _x); } forEach _eski;
     if (_sav isEqualTo 3) exitWith {
         diag_log format ["[KARAKOL] %1 | %2 KALDIRILDI (%3 kayit)", _taraf, mapGridPosition _poz, count _eski];
     };
@@ -100,6 +100,37 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
         _kayit set [6, true];
         [_taraf, _poz, createHashMapFromArray [["tip", 1], ["grupN", 8], ["grupMesafe", _yar * 1.5], ["bina", true], ["piyade", true], ["rallyM", 250], ["orpM", 150], ["basla", 0]]] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
     };
+}] call CBA_fnc_addEventHandler;
+
+// v8.130: Zeus 'ELITE Karakol Garnizon' — ayar kaydi (nobet / devriye / ust kat / arac); uygulama fnc_karakolGarnizon bekcisinde
+if (isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar = createHashMap; };
+["lambs_danger_garnizonIstegi", {
+    params ["_poz", "_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac"];
+    if (!isServer) exitWith {};
+    private _ad = lambs_danger_karakollar select {((_x select 1) distance2D _poz) <= ((_x select 2) + 150)};
+    if (_ad isEqualTo []) exitWith {
+        diag_log format ["[KARAKOL-GARNIZON] istek reddedildi: %1 yakininda karakol yok (once ELITE Karakol / HQ modulunu koyun)", mapGridPosition _poz];
+        ["lambs_danger_garnizonYanit", ["Garnizon: yakinda karakol yok - once 'ELITE Karakol / HQ' modulu koyun (yaricap + 150 m icine)"]] call CBA_fnc_globalEvent;
+    };
+    _ad = [_ad, [], {(_x select 1) distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
+    private _k = _ad select 0;
+    private _mn = _k select 5;
+    if (_islem isEqualTo 1) then {
+        lambs_danger_karakolAyar set [_mn, createHashMap];
+        diag_log format ["[KARAKOL-GARNIZON] %1 | %2 garnizon KALDIRILDI", _k select 0, _k select 3];
+        ["lambs_danger_garnizonYanit", [format ["Garnizon kaldirildi: %1", _k select 3]]] call CBA_fnc_globalEvent;
+    } else {
+        private _eski = lambs_danger_karakolAyar getOrDefault [_mn, createHashMap];
+        lambs_danger_karakolAyar set [_mn, createHashMapFromArray [["nobet", _nobet], ["devriye", _dev], ["devBoy", _devBoy], ["ustKat", _ust], ["arac", _arac], ["surum", (_eski getOrDefault ["surum", 0]) + 1]]];
+        diag_log format ["[KARAKOL-GARNIZON] %1 | %2 ayar: nobet %3 | devriye %4 x %5 | ust kat %6 | arac %7 (surum %8)", _k select 0, _k select 3, _nobet, _dev, _devBoy, _ust, _arac, (_eski getOrDefault ["surum", 0]) + 1];
+        ["lambs_danger_garnizonYanit", [format ["Garnizon ayari alindi: %1 | nobet %2, devriye %3 x %4, ust kat %5, arac %6 (15 sn icinde uygulanir)", _k select 3, _nobet, _dev, _devBoy, _ust, _arac]]] call CBA_fnc_globalEvent;
+    };
+}] call CBA_fnc_addEventHandler;
+["lambs_danger_garnizonYanit", {
+    params ["_m"];
+    if (!hasInterface) exitWith {};
+    diag_log format ["[KARAKOL-YANIT] %1", _m];
+    if (!isNull (getAssignedCuratorLogic player)) then { systemChat format ["[ELITE] %1", _m]; };
 }] call CBA_fnc_addEventHandler;
 
 // ALARM bekcisi: duşman karakolun 800 m icinde savunanlarca bilinirse savunma plani kurulur

@@ -58,7 +58,7 @@ private _calis = {
             private _yolcuPiyade = ({alive _x && {(group _x) isNotEqualTo _g}} count (crew _veh)) + ({alive _x && {_x isKindOf "CAManBase"} && {(assignedVehicleRole _x) select 0 isEqualTo "cargo"}} count (units _g));
             if (_yolcuPiyade >= 2) then { ["tasiyici (yolcu >= 2)"] call _serbest; continue };
             if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isSonDirenis), false]}) then { ["cekilme / kacis"] call _serbest; continue };
-            if ((time - (_veh getVariable [QGVAR(aracMedevacT), -999])) < 120) then { ["aracli medevac"] call _serbest; continue };
+            if ((time - (_veh getVariable [QGVAR(aracMedevacT), -999])) < 120 || {(time - (_g getVariable [QGVAR(aracMedevacT), -999])) < 120} || {_veh getVariable [QGVAR(tasimaMesgul), false]}) then { ["aracli medevac / nakil"] call _serbest; continue };   // v8.130: grup degiskeni + nakil (RPT 5ebe2e37: Stryker nakil yolunda 1.4 m/s'e kisildi)
 
             // tehdit: dusman yakin / baski
             private _en = _d findNearestEnemy _d;

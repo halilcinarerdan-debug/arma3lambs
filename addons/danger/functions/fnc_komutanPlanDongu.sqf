@@ -42,7 +42,7 @@ private _wpYaz = {
         };
         _wp setWaypointBehaviour _beh;
         _wp setWaypointSpeed _hiz;
-        _wp setWaypointCombatMode (["YELLOW", "YELLOW", "YELLOW"] select _tm);
+        _wp setWaypointCombatMode (["YELLOW", ["GREEN", "YELLOW"] select _savasWp, "YELLOW"] select _tm);   // v8.130: gizli tempoda saldiriya kadar GREEN (ates yok, yalniz savunma)
         _wp setWaypointCompletionRadius _yar;
         if (_ilk isEqualTo []) then { _ilk = _wp; };
     } forEach _liste;
@@ -87,7 +87,21 @@ private _topcuAt = {
             };
         };
     } forEach _araclar;
-    if (_atan isEqualTo 0) then { diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YOK (%3 aday arac; menzil / yerel / RED kosulu)", _plan get "id", _ad, count _araclar]; };
+    if (_atan isEqualTo 0) then {
+        // v8.130 TANI: neden atis yok? (kullanici: "topcu atesi calismiyor")
+        private _tumTop = vehicles select {alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0}};
+        private _ned = [
+            ["toplam topcu araci", count _tumTop],
+            ["topcu yok / gunner yok", {isNull (gunner _x)} count _tumTop],
+            ["gunner oyuncu", {!isNull (gunner _x) && {isPlayer (gunner _x)}} count _tumTop],
+            ["sunucuda yerel degil", {!local _x} count _tumTop],
+            ["ates edemez (canFire false)", {!canFire _x} count _tumTop],
+            ["Zeus TOPCU_YOK", {"TOPCU_YOK" in [_x getVariable ["lambs_danger_gorev", ""], (group (gunner _x)) getVariable ["lambs_danger_gorev", ""]]} count _tumTop],
+            ["mermi yok (getArtilleryAmmo bos)", {((getArtilleryAmmo [_x]) param [0, ""]) isEqualTo ""} count _tumTop],
+            ["hedef menzil disi", {private _m = ((getArtilleryAmmo [_x]) param [0, ""]); _m isNotEqualTo "" && {!(_poz inRangeOfArtillery [[_x], _m])}} count _tumTop]
+        ];
+        diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YOK (%3 aday arac) | nedenler: %4 | hedef %5", _plan get "id", _ad, count _araclar, _ned, mapGridPosition _poz];
+    };
     _atan > 0
 };
 
@@ -138,6 +152,22 @@ while {true} do {
 
         missionNamespace setVariable ["lambs_danger_planTempoGecici", _plan getOrDefault ["tempo", 0]];
         private _tempo = _plan getOrDefault ["tempo", 0];
+        // v8.130 SIZMA / GIZLILIK ONCELIGI (tempo = sessiz / gizli, ya da baskin): toplan / ORP / kesif sirasinda temas yoksa ates yok (GREEN); objektife < 450 m'de comelerek (MIDDLE) ilerle;
+        // temas olursa serbest (YELLOW, AUTO). SALDIRI baslayinca herkes AUTO + YELLOW. Doktrin: yaklasma gizli, ates ancak saldiri / temasta (sayi kitapta yok: 450 m = M16 etkili menzil tasarim kullanimi).
+        if (_tempo isEqualTo 1 && {_faz in ["TOPLAN", "ORP", "KESIF", "TASIMA"]}) then {
+            {
+                private _g = _x;
+                private _tm = [_g] call _temasta;
+                private _yak = (leader _g) distance2D _obj;
+                private _hedefPos = if (_tm || {_yak > 450} || {_faz in ["TOPLAN", "TASIMA"]}) then {"AUTO"} else {"MIDDLE"};
+                if ((_g getVariable ["lambs_danger_gizliPos", ""]) isNotEqualTo _hedefPos) then {
+                    _g setVariable ["lambs_danger_gizliPos", _hedefPos];
+                    { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos _hedefPos; }; } forEach (units _g);
+                    diag_log format ["[PLAN] %1 GIZLILIK %2 | durus %3 | objektife %4 m | temas:%5", _id, groupId _g, _hedefPos, round _yak, _tm];
+                };
+                _g setCombatMode (["GREEN", "YELLOW"] select _tm);
+            } forEach _gruplar;
+        };
         private _sureSn = _plan getOrDefault ["sureSn", 0];
         // SURE SINIRI: ele gecirde hedef alinmadiysa CEKILME; savunmada plan biter
         if (_sureSn > 0 && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "BITTI", "IPTAL"])}) then {
@@ -214,7 +244,8 @@ while {true} do {
                 // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
                 if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])}) then {
                     _plan set ["tasimaYapildi", true];
-                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300]] spawn FUNC(aracTasima)];
+                    _plan set ["tasimaCtl", [false]];
+                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
                     [_plan, "TASIMA", "arac nakli (varsa)"] call _fazGec;
                     continue
                 };
@@ -254,7 +285,15 @@ while {true} do {
         // ---------------------------------------------------------------- TASIMA (arac nakli bitince TOPLAN'a doner; gruplar inis noktasindadir)
         if (_faz isEqualTo "TASIMA") then {
             private _th = _plan getOrDefault ["tasimaH", scriptNull];
-            if (scriptDone _th || {_fazSure > 700}) then {
+            if (_fazSure > 420 && {!scriptDone _th}) then {
+                (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
+                diag_log format ["[PLAN] %1 TASIMA zaman asimi (420 sn): nakil iptal, gruplar oldugu yerden devam", _plan get "id"];
+                _plan set ["tasimaTamam", true];
+                _plan set ["tasimaH", scriptNull];
+                [_plan, "TOPLAN", "arac nakli zaman asimi"] call _fazGec;
+                continue
+            };
+            if (scriptDone _th) then {
                 _plan set ["tasimaTamam", true];
                 [_plan, "TOPLAN", "arac nakli bitti"] call _fazGec;
             };
@@ -311,6 +350,7 @@ while {true} do {
                 } forEach _maneuv;
                 { if ((_roller getOrDefault [groupId _x, ""]) isEqualTo "DESTEK") then { _x setCombatMode (["RED", "YELLOW"] select (_plan getOrDefault ["sivil", false])); _x setBehaviour "COMBAT"; } else { _x setCombatMode "YELLOW"; }; } forEach _gruplar;
                 if ((_plan getOrDefault ["topcu", 0]) in [2, 3]) then { [_plan, _obj, "CAGRI (saldiri basi)"] call _topcuAt; _plan set ["cagriT", time]; };
+                { _x setVariable ["lambs_danger_gizliPos", ""]; { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; }; } forEach (units _x); _x setCombatMode "YELLOW"; } forEach _gruplar;
                 [_plan, "SALDIRI", format ["manevra %1 grup, destek ates baslar", count _maneuv]] call _fazGec;
             };
             continue

@@ -181,6 +181,7 @@ private _calis = {
                 if (_v isEqualTo _l || {!(_v isKindOf "LandVehicle")} || {!alive _v} || {!canMove _v} || {(fuel _v) < 0.1}) then { continue };
                 if ((_v emptyPositions "cargo") < 1) then { continue };
                 if (_v getVariable [QGVAR(tasimaMesgul), false]) then { continue };
+                if ("KARAKOL_ARAC" in [_v getVariable ["lambs_danger_gorev", ""], _vg getVariable ["lambs_danger_gorev", ""]]) then { continue };
                 // v8.129 DOKTRIN: tahliye araci cepheye girmez. Standoff (duşmana en az): zirhli 300 m, yumusak arac 600 m
                 //   (kaynak: AK-74 etkili menzil 500 m, RPG-7 ~200 m, RH 6524-6541; kitapta arac standoff'u sayisi YOK -> TASARIM). Yaralidan duşmana mesafe bu kadar degilse bu arac gitmez.
                 private _zirhli = (getNumber (configOf _v >> "armor")) >= 100;
