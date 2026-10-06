@@ -1500,3 +1500,8 @@ v8.124 - AI GRUPLARI SUNUCUYA DEVIR BEKCISI
    Devredilmez: oyuncu iceren grup, Zeus uzaktan kontrol (bis_fnc_moduleRemoteControl_owner), headless client sahibi, olu / bos / sivil, son devirden < 60 sn.
    Kapatma: lambs_danger_sunucuDevirOff = true. Log: [SUNUCU-DEVIR], [SUNUCU-DEVIR-OZET].
  - Test edilmedi. Zeus'ta grup duzenleme / waypoint verme sunucuda yerel gruplarla da calisir (Zeus zaten tum gruplari duzenleyebilir).
+
+v8.125 - DONUS ANIMASYON HIZI 1.38 -> 1.15
+ - Kullanici: AI sunucuya devredilince (sunucu 165 FPS) sagda / solda donus animasyonu asiri hizli; "sadece o" (yurume / kosu degil).
+ - fnc_moveAssist: lambs_danger_turnCoef varsayilani 1.38 -> 1.15 (yalniz "turn" animasyonu calisirken; yurume 1.0 / geri cekilmede 1.15 ayni).
+   Elle ayar: lambs_danger_turnCoef degiskeni (ornegin 1.0 = vanilla hiz). Test edilmedi; neden (FPS'e bagli algi) kesin dogrulanmadi.
