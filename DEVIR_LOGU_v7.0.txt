@@ -1410,3 +1410,9 @@ v8.110 - SIS EKONOMISI (kullanici: 'ayni acida 1 sis varsa 3 tane atilmasina ger
   fnc_tacticalSmoke: her atis oncesi bu YONDE (<= 10 derece) iki kaynaga bakilir: (1) global lambs_danger_sisListe (planlanan / atilan sisler, 75 sn; thrower'dan 8-60 m), (2) yasayan standart sis nesneleri (nearestObjects SmokeShell, 60 m; sinyal renkleri haric).
   Varsa atis iptal ([SIS-EKONOMI] atilmadi: yon, kaynak, toplam). Temas kesmedeki +-14 derecelik genis perde AYRI aci sayilir (10 derece esik); ayni yone ikinci / ucuncu atis ve her tetikte tekrarlanan sis (RPG tepkisi, fireSupport, bounding, hucum) elenir.
   Baska modullerin kendi attigi sisler yalniz yasayan nesne taramasiyla gorunur (listeye yazilmaz). TEST EDILMEDI.
+
+v8.111 - ARAC - PIYADE SENKRONU + IS'TE DIAMOND YOK (kullanici istegi)
+  fnc_selectFormation: DUZENSIZ doktrin (Islamic State, Taliban vb.) arac grubunda DIAMOND secilmez (>= 4 arac kosulu saglansa bile COLUMN).
+  fnc_aracSenkron (YENI watchdog, 2 sn): arac grubu (lider kara aracinda, surucu AI, icinde >= 2 piyade yolcu yok) en yakin dost PIYADE grubunu (300 m, >= 3 yaya asker; oyuncu grubu dahil) eskort alir; aracin piyade merkezine gore 'onde' mesafesi:
+    > 60 m BEKLE (forceSpeed 0), 20-60 m YAVASLA (piyade hizi + 1 m/sn), -40..20 m SENKRON (piyade hizi x 1.1, en az 1.4, en cok 8 m/sn), < -40 m SERBEST (yetis, forceSpeed -1). Dusman < 100 m / baski > 0.5 / cekilme / kacis / aracli medevac / tasiyici ise SERBEST.
+    mekanizeIzle forceSpeed -1 duzeltmesi senkron suresince atlanir (senkT). [ARAC-SENKRON] durum degisimleri, [ARAC-SENKRON-OZET]. Kapatma aracSenkronOff; doktrin anahtari aracSenkron. TEST EDILMEDI.

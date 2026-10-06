@@ -163,7 +163,8 @@ if ((vehicle _unit) isNotEqualTo _unit && {(vehicle _unit) isKindOf "LandVehicle
     { private _v = vehicle _x; if (_v isNotEqualTo _x && {_v isKindOf "LandVehicle"}) then { _araclar pushBackUnique _v; }; } forEach (units _grup);
     private _sitA = _grup getVariable [QGVAR(cmdSit), []];
     private _enA = if (_sitA isNotEqualTo [] && {(time - (_sitA select 0)) < 60}) then { _sitA select 1 } else { 9999 };
-    if ((count _araclar) >= 4 && {_isOpen} && {!_onRoad} && {(time - (_grup getVariable [QGVAR(contact), -999])) > 60} && {_enA > 500}) then {"DIAMOND"} else {"COLUMN"}
+    // v8.111: DUZENSIZ doktrinde (Islamic State / Taliban tipi) DIAMOND yok: duzensiz birlikler geometrik arac duzeni kurmaz (kullanici)
+    if ((count _araclar) >= 4 && {_isOpen} && {!_onRoad} && {(time - (_grup getVariable [QGVAR(contact), -999])) > 60} && {_enA > 500} && {([_grup, "ad", "GENEL"] call FUNC(dk)) isNotEqualTo "DUZENSIZ"}) then {"DIAMOND"} else {"COLUMN"}
 };
 
 // ===========================================================================
