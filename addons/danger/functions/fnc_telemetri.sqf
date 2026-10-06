@@ -35,7 +35,7 @@ private _bayrak = {
         private _p = (missionNamespace getVariable ["lambs_danger_planlar", createHashMap]) getOrDefault [_g getVariable [QGVAR(planId), ""], createHashMap];
         _b pushBack format ["PLAN:%1", _p getOrDefault ["faz", "?"]];
     };
-    private _tc = {alive _x && {_x getVariable [QGVAR(tcccBusy), false]}} count (units _g);
+    private _tc = {alive _x && {time < (_x getVariable [QGVAR(tcccBusy), 0])}} count (units _g);   // tcccBusy = BITIS ZAMANI (sayi), bool degil (RPT 23251a0a: Type Number expected Bool)
     if (_tc > 0) then { _b pushBack format ["TCCC:%1", _tc]; };
     _b joinString ","
 };

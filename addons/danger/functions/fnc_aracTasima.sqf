@@ -23,13 +23,13 @@
  * 4: Yaklasma ekseni (objektiften dost gruplara yon) <NUMBER>
  * 5: ORP mesafesi (m) <NUMBER> (taksi: 0)
  * 6: Arac arama menzili (m, varsayilan 2500; taksi: 600) <NUMBER>
- * 7: Kontrol dizisi [iptal <BOOL>] (true olunca is derhal biter, binenler oldugu yerde iner) <ARRAY>
+ * 7: Kontrol dizisi [iptal <BOOL>, hazir <BOOL>] (iptal: is derhal biter, binenler oldugu yerde iner; hazir: gruplar toplandi, araclar RP'de beklemeyi birakip bindirir; varsayilan [false, true]) <ARRAY>
  *
  * Return Value: Tasinan grup sayisi <NUMBER>
  * Public: No
 */
 
-params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], ["_ctl", [false]]];
+params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], ["_ctl", [false, true]]];
 if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0};
 
 
@@ -145,7 +145,7 @@ private _isler = [];
         // (1) RP'ye gel
         diag_log format ["[TASIMA] %1 | %2 | alma noktasina %3 m (RP) | surucu %4", groupId _vg, _ad, round (_v distance2D _rp), name _d];
         _d doMove _rp;
-        private _t = time + 150;
+        private _t = time + (150 max (((_v distance2D _rp) / 6) min 420));   // RPT 23251a0a: araclar RP'den 1825 m uzaktaydi; 150 sn yetmiyordu
         waitUntil { sleep 1; !alive _v || {!alive _d} || {(_v distance2D _rp) < 45} || {time > _t} || {_ctl select 0} };
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
         if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
@@ -155,18 +155,24 @@ private _isler = [];
         private _binen = [];
         if (_iptal isEqualTo "") then {
             doStop _d;
+            // v8.132: piyade toplanana kadar (plan TOPLAN hazir) RP'de bekle (en fazla 600 sn)
+            if !(_ctl select 1) then {
+                diag_log format ["[TASIMA] %1 | %2 | RP'de, piyadenin toplanmasi bekleniyor", groupId _vg, _ad];
+                private _wt = time + 600;
+                waitUntil { sleep 2; !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _wt} };
+            };
             private _hepsi = [];
             { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
             { _x assignAsCargo _v; } forEach _hepsi;
             _hepsi orderGetIn true;
-            private _bt = time + 60;
+            private _bt = time + 90;
             waitUntil {
                 sleep 1;
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {(time > (_bt - 15)) && {((_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}) isEqualTo []) isEqualTo false}}
             };
             // gecikenler: 40 m icindeyse arac icine al
-            { if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 40} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _hepsi;
+            { if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _hepsi;
             _binen = _hepsi select {alive _x && {(vehicle _x) isEqualTo _v}};
             if (_binen isEqualTo []) then { _iptal = "kimse binmedi"; };
         };

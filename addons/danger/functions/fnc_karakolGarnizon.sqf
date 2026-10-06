@@ -180,7 +180,7 @@ private _calis = {
                 private _u = _atama getOrDefault [str _i, objNull];
                 if (alive _u && {_u in (units _nobetG)}) then {
                     // varmadi mi? (120 sn) -> isinla; varsa PATH kapat
-                    if ((_u distance _p) < 3.5) then {
+                    if (((getPosATL _u) distance _p) < 4.5) then {
                         if !(_u getVariable ["lambs_danger_nobet", false]) then {
                             _u setVariable ["lambs_danger_nobet", true, true];
                             doStop _u;
@@ -194,6 +194,12 @@ private _calis = {
                         if ((time - (_u getVariable ["lambs_danger_nobetT", time])) > 120 && {!(_u getVariable ["lambs_danger_nobet", false])}) then {
                             _u setPosATL _p;
                             _u setVariable ["lambs_danger_nobetT", time];
+                            // isinlanan nobetci hemen pozisyonda sayilir (RPT 23251a0a: ayni nobetciler 120 sn'de bir tekrar isinlaniyordu, PATH acik kalip yuruyordu)
+                            _u setVariable ["lambs_danger_nobet", true, true];
+                            doStop _u;
+                            _u disableAI "PATH";
+                            _u setUnitPos (["MIDDLE", "UP"] select ((_x select 2) isEqualTo "USTKAT"));
+                            _u doWatch (_p getPos [150, _x select 1]);
                             diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET %2 pozisyona 120 sn'de varamadi -> isinlandi", _ad, name _u];
                         };
                     };

@@ -188,6 +188,7 @@ while {true} do {
         if (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []} || {_faz isEqualTo "BITTI"}) then {
             { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; } forEach (_plan get "gruplar");
             { if (!isNull _x) then { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setCombatMode "YELLOW"; _x setBehaviour "AWARE"; _x setSpeedMode "NORMAL"; { _x setUnitPos "AUTO"; _x doWatch objNull; } forEach (units _x); }; } forEach (_plan getOrDefault ["reconG", []]);
+            (_plan getOrDefault ["tasimaCtl", [false, true]]) set [0, true];   // bekleyen / yoldaki nakil isi iptal (v8.132)
             { deleteMarker _x; } forEach (_plan get "isaretler");
             { _x setVariable ["lambs_danger_agirYasak", nil]; } forEach (_plan get "gruplar");
             lambs_danger_planCCPlar = (missionNamespace getVariable ["lambs_danger_planCCPlar", []]) select {(_x select 0) isNotEqualTo _id};
@@ -236,6 +237,11 @@ while {true} do {
             { _ilkSay set [groupId _x, {alive _x} count (units _x)]; } forEach _gruplar;
             _plan set ["ilkSayi", _ilkSay];
             { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar;
+            // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
+            if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
+                _plan set ["tasimaCtl", [false, false]];
+                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+            };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
             continue
         };
@@ -268,8 +274,12 @@ while {true} do {
                 // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
                 if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])}) then {
                     _plan set ["tasimaYapildi", true];
-                    _plan set ["tasimaCtl", [false]];
-                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                    if (!("tasimaH" in _plan) || {isNull (_plan get "tasimaH")}) then {
+                        _plan set ["tasimaCtl", [false, true]];
+                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                    } else {
+                        (_plan get "tasimaCtl") set [1, true];
+                    };
                     [_plan, "TASIMA", "arac nakli (varsa)"] call _fazGec;
                     continue
                 };

@@ -1576,3 +1576,16 @@ v8.131 - RPT 14ae37d0 (istemci / listen) + kullanici geri bildirimi: APC nakli, 
    Recon plan bitince serbest birakilir. Log [PLAN-RECON] + Zeus systemChat. Plana / taksiye alinmaz (RECON).
  - Topcu: plan kurulurken [PLAN-TOPCU] ENVANTER: tarafin artilleryScanner'li araclari (gunner, oyuncu, yerel, canFire, mermi, hedef menzilde mi, Zeus atamasi) — sunucu RPT'si gelince "tik yok" nedeni gorunecek (v8.130 ATIS YOK sayaclari da duruyor).
  TEST EDILMEDI: tum yukaridakiler. YAPILMADI: recon'un arac kullanimi, recon'un birden cok OP'de ardisik gozlemi, topcu duzeltmesi (neden bilinmiyor).
+
+v8.132 - SUNUCU RPT 23251a0a (v8.130) analizi: nakil, telemetri hatasi, nobetci isinlanmasi
+ BULGULAR:
+ - [TASIMA] P2: 3 arac eslesti, araclar RP'den 1825 m uzaktaydi (RP bekleme 150 sn yetmedi), RP'ye gelince piyade 400 m uzakta yuruyordu (TOPLAN 301 sn zaman asimiyla bitmisti) -> 60 sn'de kimse binmedi: "IPTAL: kimse binmedi" x3; plan ORP'ye gecti.
+ - [TELEMETRI-GRUP] hata dongusu: "Type Number, expected Bool" (tcccBusy BITIS ZAMANI = sayi, ben bool saniyordum) -> telemetri betigi her 20 sn olup yeniden basladi; taksi'de ayni hata.
+ - [KARAKOL-GARNIZON] nobetciler 120 sn'de bir "varamadi -> isinlandi" tekrarlandi: varis kontrolu (distance 3.5 m, formatlar farkli) tutmuyor; isinlanan nobetci PATH acik kaldigi icin yurumeye devam ediyordu.
+ - [PLAN-TOPCU]: P2 ORP'ye gecmeden log bitti; topcu hala dogrulanmadi (v8.131 ENVANTER logu bu surumde yoktu).
+ DUZELTMELER:
+ - telemetri + taksi: tcccBusy = time < sayi.
+ - aracTasima: nakil isi plan KUR -> TOPLAN'da erken baslar (araclar RP'ye gelir, piyade toplanirken); ctl[hazir] plan TOPLAN hazir olunca true -> bindirme; RP'ye varis suresi 150 sn..420 sn (uzakliga gore); bindirme 90 sn, gecikenler 100 m icinden moveInCargo; plan BITTI'de is iptal.
+ - karakolGarnizon: varis = (getPosATL birim) distance poz < 4.5; isinlanan nobetci hemen PATH kapali / doWatch ile pozisyonda sayilir.
+ YAPILMADI: ARAC-SENKRON'un nakil beklerken BEKLE:135 tur saymasi (nakil muafiyeti v8.130'da; bu RPT'de nakil oncesi bekleme); topcu nedeni; recon test (bu RPT v8.130, recon yok).
+ TEST EDILMEDI.

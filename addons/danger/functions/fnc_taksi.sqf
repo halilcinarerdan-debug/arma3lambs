@@ -39,7 +39,7 @@ private _calis = {
             if ((time - (_g getVariable [QGVAR(contact), -999])) < 60) then { continue };
             if (({_g getVariable ["lambs_danger_" + _x, false]} count ["planAktif", "isRetreating", "isEvading", "isBounding", "isExecutingTactic", "isBreakingContact", "isSonDirenis", "isAmbushing", "sniperTeam", "disableGroupAI"]) > 0) then { continue };
             if ((_g getVariable ["lambs_danger_gorev", ""]) in ["MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"] || {(_g getVariable ["lambs_danger_garnizonAlt", ""]) isNotEqualTo ""}) then { continue };
-            if ((_us findIf {_x getVariable [QGVAR(tcccBusy), false]}) >= 0) then { continue };
+            if ((_us findIf {time < (_x getVariable [QGVAR(tcccBusy), 0])}) >= 0) then { continue };
             private _wi = currentWaypoint _g;
             if (_wi <= 0 || {_wi >= count (waypoints _g)}) then { continue };
             private _w = (waypoints _g) select _wi;
