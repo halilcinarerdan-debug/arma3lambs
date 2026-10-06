@@ -1349,3 +1349,11 @@ v8.99 - EL BOMBASI + BAYGIN (RPT 9ccb4953)
 v8.100 - ACE-TEDAVI LOGU
   Kullanici: medic calisti (Zeus'ta bazi gruplari silip yalniz yaralilari birakinca tedavi etti) ama RPT'de gorunmedi. Olasilik: tedaviyi ACE'nin kendi AI hekimi (medical_ai healingLogic) yapti, [TCCC] kodu yalniz kendi atamalarini loglar.
   fnc_tccc: ace_medical_treatment_{bandage,tourniquet,medication,ivBag,cpr}Local CBA olaylari dinlenir -> [ACE-TEDAVI] hasta / grup / parametre / en yakin bilincli dost (ilk 200). Boylece kaynak (ACE AI mi, TCCC mi) ayirt edilir. TEST EDILMEDI.
+
+v8.101 - HEKIM BETIGI OLUYORDU (RPT 30f9155e) + SINSI-GERI HATASI
+  KOK NEDEN (hekim 'hicbir sey yapmadi, yaralinin yaninda durdu'): v8.95'te eklenen ace_medical_ai_fnc_playTreatmentAnim cagrisi kullanicinin ACE surumunde (3.21.2) 'Error >>: Type Bool, expected String' hatasi verdi (RPT 11:14:31, 4 kez) ->
+  hekimin zamanlanmis betigi OLDU: forceMove + tcccBusy (150 sn) kilitli kaldi, hekim yaralinin yaninda ~150 sn durdu, yarali.tcccBy bos kalmadi -> baska hekim atanamadi (William Miller 4 dk tedavisiz). Sonra grup bounding'i hekimi sutter hareketle goturdu.
+  fnc_tccc: ACE animasyon cagrisi kaldirildi (MedicOther). Olu betik temizligi: tcccFM isareti + tcccBusy suresi dolunca forceMove temizlenir; yaralinin tcccBy'i hekim yok / bayilmis / sure dolmus ise yarali yeniden atanabilir. Yarasiz bolge 'exitWith' dogru kapsama alindi (onceki surum if icinde kalip esyayi harciyordu).
+  fnc_sinsiGeri: cmdSit bos iken _sit select 1 (eager) hatasi 104 kez -> sinsiGeri yarim kaliyordu; duzeltildi.
+  NOT: RPT'de 'addWeaponWithAttachmentsCargoGlobal' / setHitPointDamage hatalari baska (mission / Zeus) betiklerinden, bu pakete ait degil.
+  DERS: ACE gibi dis fonksiyon cagrilari surum imzasi dogrulanmadan eklenmemeli; scriptli hata ucuncu taraf fonksiyonda tum betigi oldurur.

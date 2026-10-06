@@ -39,9 +39,12 @@ private _calis = {
 
             private _sit = _g getVariable [QGVAR(cmdSit), []];
             private _sitTaze = _sit isNotEqualTo [] && {(time - (_sit select 0)) < 8};
-            private _mesafe = [9999, _sit select 1] select _sitTaze;
-            private _oran = [0, _sit select 5] select _sitTaze;
-            private _dPos = [[], _sit select 7] select (_sitTaze && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]});
+            private _mesafe = 9999; private _oran = 0; private _dPos = [];
+            if (_sitTaze) then {   // v8.101: cmdSit bos iken _sit select 1 hatasi (RPT 30f9155e: 104 hata) -> koruma icinde oku
+                _mesafe = _sit select 1;
+                _oran = _sit select 5;
+                if ((_sit select 7) isEqualType [] && {(_sit select 7) isNotEqualTo [0,0,0]}) then { _dPos = _sit select 7; };
+            };
             private _bas = 0; { _bas = _bas + (getSuppression _x); } forEach _us;
             if ((count _us) > 0) then { _bas = _bas / (count _us); };
 

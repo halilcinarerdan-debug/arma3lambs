@@ -118,10 +118,9 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         if (_tip isEqualTo 0 && {_sinif find "iv" >= 0}) then { _tip = 4; };
         if (_sinif isEqualTo "cpr") then { _tip = 5; };
         // yarasi olmayan bolgeye esya harcama (FirstAidKit dahil)
-        if (_tip isEqualTo 1) then {
-            private _aw = _c getVariable ["ace_medical_openWounds", createHashMap];
-            if (_aw isEqualType createHashMap && {(_aw getOrDefault [toLower _part, []]) isEqualTo []}) exitWith { false };
-        };
+        private _aw = _c getVariable ["ace_medical_openWounds", createHashMap];
+        private _yarasiz = _tip isEqualTo 1 && {_aw isEqualType createHashMap} && {(_aw getOrDefault [toLower _part, []]) isEqualTo []};
+        if (_yarasiz) exitWith { false };
         private _sure = [3, 3.5, 4.5, 2.5, 4, 8] select _tip;
         if (_tip isEqualTo 0 || {isNil "CBA_fnc_targetEvent"} || {_tip < 5 && {_esya isEqualTo ""}}) exitWith {
             // eski yol (yedek)
@@ -131,7 +130,8 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             sleep 2.5;
             (count (items _m)) < _once || {_cls isEqualTo "CPR"}
         };
-        if (!isNil "ace_medical_ai_fnc_playTreatmentAnim") then { [_m, _cls, false] call ace_medical_ai_fnc_playTreatmentAnim; } else { _m playActionNow "MedicOther"; };
+        // v8.101: ace_medical_ai_fnc_playTreatmentAnim cagrisi RPT 30f9155e'de 'Type Bool, expected String' hatasiyla hekim betigini oldurdu (hekim 150 sn yaralinin yaninda dondu); ACE surumu imzasi farkli -> kendi animasyon
+        _m playActionNow "MedicOther";
         private _t = time + _sure;
         waitUntil { sleep 0.3; time > _t || {!([_m] call lambs_danger_tcccMedikOk)} || {!alive _c} || {(_m distance2D _c) > 6} };
         if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) > 6}) exitWith {false};
@@ -167,6 +167,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         };
         if (alive _m) then {
             _m setVariable [QGVAR(forceMove), nil];
+            _m setVariable [QGVAR(tcccFM), nil];
             _m setVariable [QGVAR(tcccBusy), 0];
             _m setUnitPos "AUTO";
             _m doFollow (leader _m);
@@ -179,6 +180,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         private _t0 = time;
         _m setVariable [QGVAR(tcccBusy), time + 150];
         _m setVariable [QGVAR(forceMove), true];
+        _m setVariable [QGVAR(tcccFM), true];
         _c setVariable [QGVAR(tcccBy), _m];
         private _guvenliFn = { (((_this select 0) getVariable [QGVAR(contact), 0]) < time) };
         diag_log format ["[TCCC] %1 | hekim %2 -> yarali %3 | baygin:%4 | %5", groupId _g, name _m, name _c, [_c] call _baygin, ["ATES ALTINDA", "GUVENLI"] select ([_g] call _guvenliFn)];
@@ -367,8 +369,20 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             private _sonKes = time - (_g getVariable [QGVAR(contact), 0]);
             private _guvenli = !_contact && {_sonKes > 6};
 
+            {
+                if (_x getVariable [QGVAR(tcccFM), false] && {time > (_x getVariable [QGVAR(tcccBusy), 0])}) then {
+                    _x setVariable [QGVAR(forceMove), nil];
+                    _x setVariable [QGVAR(tcccFM), nil];
+                };
+            } forEach (units _g);
             private _yaralilar = (units _g) select {
-                [_x] call _yarali && {isNull (_x getVariable [QGVAR(tcccBy), objNull])} && {(time - (_x getVariable [QGVAR(tcccDone), -999])) > 60}
+                [_x] call _yarali
+                && {
+                    private _by = _x getVariable [QGVAR(tcccBy), objNull];
+                    // v8.101: olen hekim betigi tcccBy'i temizleyemez -> hekim yok / bayilmis / suresi dolmus ise yarali yeniden atanabilir
+                    isNull _by || {!([_by] call lambs_danger_tcccMedikOk)} || {time > (_by getVariable [QGVAR(tcccBusy), 0])}
+                }
+                && {(time - (_x getVariable [QGVAR(tcccDone), -999])) > 60}
             };
             if (_yaralilar isEqualTo []) then { continue };
 
