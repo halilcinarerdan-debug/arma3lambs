@@ -1482,3 +1482,7 @@ v8.121 - PLAN YANITI (tani)
  - Modul istemcide [PLAN-ISTEK] logu + systemChat; sunucu sonucu lambs_danger_planYanit (CBA globalEvent) ile geri gonderir: [PLAN-YANIT] + Zeus systemChat
    (KURULDU / KURULAMADI + nedeni / IPTAL / ONAY). Yanit hic gelmiyorsa sunucuda mod yuklu degil ya da surum farkli.
  - Test edilmedi.
+
+v8.122 - PLAN KURULAMADI TANISI
+ - Sunucu RPT 46798b74 (v8.121): [PLAN-KAPI] istek alindi, ama "uygun grup yok" (iki kez). Zincir calisiyor; filtre hangi grubu eledi bilinmiyordu.
+ - Log artik taraftaki grup sayisi, elenme nedenleri (yerel degil / oyuncu var / <3 asker / ELITE kapali / baska planda / arac / >4000 m) ve en yakin lider mesafesi.

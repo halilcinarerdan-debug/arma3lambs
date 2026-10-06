@@ -71,7 +71,26 @@ private _aday = allGroups select {
     && {isNull objectParent _l} && {(_l distance2D _obj) <= 4000}
 };
 if (_aday isEqualTo []) exitWith {
-    diag_log format ["[PLAN] KURULAMADI: %1 icin uygun grup yok (>= 3 asker, AI, 4000 m icinde, baska planda degil)", _taraf];
+    // v8.121 TANI: her gruptan hangi filtre ilk elediyse say (neden belli olsun)
+    private _tum = allGroups select {(side _x) isEqualTo _taraf};
+    private _red = createHashMap;
+    private _enYakin = 1e9;
+    {
+        private _l = leader _x;
+        private _n = ({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x));
+        private _neden = if (isNull _l || {!alive _l}) then {"lider yok / olu"}
+            else {if (!local _x) then {"grup bu makinede yerel degil (sahibi baska makine / HC)"}
+            else {if (isPlayer _l) then {"lider oyuncu"}
+            else {if (({isPlayer _x} count (units _x)) > 0) then {"grupta oyuncu var"}
+            else {if (_n < 3) then {"3'ten az saglam asker"}
+            else {if (_x getVariable ["lambs_danger_tarafKapali", false]) then {"ELITE bu taraf icin kapali"}
+            else {if (_x getVariable ["lambs_danger_planAktif", false]) then {"baska planda"}
+            else {if (!isNull objectParent _l) then {"lider aracta"}
+            else {if ((_l distance2D _obj) > 4000) then {"objektife > 4000 m"} else {"?"}}}}}}}}};
+        _red set [_neden, (_red getOrDefault [_neden, 0]) + 1];
+        if (!isNull _l) then { _enYakin = _enYakin min (_l distance2D _obj); };
+    } forEach _tum;
+    diag_log format ["[PLAN] KURULAMADI: %1 icin uygun grup yok | taraftaki grup:%2 | elenme nedenleri: %3 | objektife en yakin lider: %4 m | sunucu: isServer=%5", _taraf, count _tum, _red toArray false, round _enYakin, isServer];
     false
 };
 _aday = [_aday, [], { (rankId (leader _x)) * 1000 + ({alive _x} count (units _x)) * 10 - ((leader _x) distance2D _obj) / 100 }, "DESCEND"] call BIS_fnc_sortBy;
