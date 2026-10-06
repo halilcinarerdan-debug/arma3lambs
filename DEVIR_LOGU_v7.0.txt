@@ -1388,3 +1388,7 @@ v8.106 - CEPHANE (sakin test: bir askerde 2 sarjor, digerleri AWARE, vermediler)
   Olasi neden (RPT yok, kod okumasi): sarjor sayimi yalniz ILK sarjor sinifini sayiyordu; RHS askerlerin sarjorleri karisik siniflarda (M855A1 / izli / baska) -> verici '>= 5 ayni sinif' saglanmayabiliyor; ayrica verici, alicinin sinifina sahip olmayabiliyor (aktarim bos).
   Duzeltme: sarjor sayisi = tum uyumlu (40 mm haric) sarjorler; verici adayi = >= 5 uyumlu sarjor ve alicinin silahina uyan en az bir sinif; aktarim sinifi = alicinin sinifi vericide varsa o, yoksa vericinin uyumlu ilk sinifi.
   [CEPHANE-TANI] (30 sn'de bir, ilk 30): dusuk cephaneli asker + grupta kac asker / tabloya kac girdi (forceMove / taktikKilit / bayilmis elenir) + sakin / aktifAtes + >= 5 sarjorlu verici sayisi. Yeni RPT'de nedeni bu satir ve [CEPHANE-NEDEN] gosterecek.
+
+v8.107 - CEPHANE UST USTE AKTARIM (kullanici: 7 kisi, herkes 1-2 sarjor verdi; normal mi?)
+  Normal degil. Neden: aktarim betigi ~10-25 sn surer (verici yuruyor, yere birakiyor, alici gidip aliyor) ama grup kilidi yalniz 10 sn, alici bekleme 15 sn idi; alici sarjoru henuz almadiginda hala < 3 sayildigi icin sonraki verici baslatiliyordu (zincir).
+  Duzeltme: aktarim boyunca grup (cephaneAktif) ve alici (cephaneAliciBusy) kilitli; bitince / iptalde acilir (yarim kalan betik icin 90 sn emniyet). Sarjor adedi: alici 4 sarjora tamamlanir (1..3), verici kendinde >= 4 birakir (eskiden sabit 1-2).

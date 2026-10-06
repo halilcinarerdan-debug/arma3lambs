@@ -29,6 +29,9 @@ private _aktar = {
     private _g = group _a;
     _v setVariable [QGVAR(cephaneT), time];
     _a setVariable [QGVAR(cephaneAliciT), time];
+    // v8.107: aktarim bitene kadar grup ve alici kilitli (kullanici: 7 asker yarim kalan aktarimin ustune ust uste 1-2 sarjor verdi)
+    _g setVariable [QGVAR(cephaneAktif), true];
+    _a setVariable [QGVAR(cephaneAliciBusy), true];
     _v setVariable [QGVAR(taktikKilit), time + 60];
     _a setVariable [QGVAR(taktikKilit), time + 60];
     // 1) verici aliciya yaklasir (en cok 6 m): sakin ise
@@ -37,6 +40,7 @@ private _aktar = {
         waitUntil { sleep 1; !alive _v || {!alive _a} || {(_v distance2D _a) <= 6} || {time > (_t0 + 25)} || {(_g getVariable [QGVAR(contact), 0]) > time && {(_v distance2D _a) > 6}} };
     };
     if (!alive _v || {!alive _a} || {(_v distance2D _a) > 8}) exitWith {
+        _g setVariable [QGVAR(cephaneAktif), nil]; _a setVariable [QGVAR(cephaneAliciBusy), nil]; _a setVariable [QGVAR(cephaneAliciT), time];
         _v setVariable [QGVAR(taktikKilit), nil]; _a setVariable [QGVAR(taktikKilit), nil];
         if (alive _v) then { _v doFollow (leader _g); };
         diag_log format ["[CEPHANE] %1 | %2 -> %3 | %4 x%5 | IPTAL (ulasilamadi / temas / oldu)", groupId _g, name _v, name _a, _sinif, _adet];
@@ -90,6 +94,9 @@ private _aktar = {
         };
     };
     _a setVariable [QGVAR(taktikKilit), nil];
+    _g setVariable [QGVAR(cephaneAktif), nil];
+    _a setVariable [QGVAR(cephaneAliciBusy), nil];
+    _a setVariable [QGVAR(cephaneAliciT), time];
     if (alive _a) then { _a doFollow (leader _g); };
     diag_log format ["[CEPHANE] %1 | %2 -> %3 | %4 x%5 (%6) | yere birakti -> aldi: %7 | %8 | %9 sn", groupId _g, name _v, name _a, _sinif, count _liste, _tur, _yapilan > 0, _sebep, round (time - _t0)];
 };
@@ -127,6 +134,10 @@ private _calis = {
             private _l = leader _g;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if ((time - (_g getVariable [QGVAR(cephaneGrupT), -999])) < 5) then { continue };
+            if (_g getVariable [QGVAR(cephaneAktif), false]) then {
+                if ((time - (_g getVariable [QGVAR(cephaneGrupT), -999])) > 90) then { _g setVariable [QGVAR(cephaneAktif), nil]; };   // yarim kalan betik kilidi 90 sn sonra acilir
+                continue
+            };
             missionNamespace setVariable ["lambs_danger_cephaneAdim", format ["grup %1", groupId _g]];
             private _us = (units _g) select {
                 alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
@@ -174,7 +185,7 @@ private _calis = {
             private _aliciSec = [];
             {
                 _x params ["_u", "_sa", "_sayi", "_kap", "_gl40", "_fr", "_dm", "_w", "_uy", "_anaSn"];
-                if ((time - (_u getVariable [QGVAR(cephaneAliciT), -999])) < 15) then { continue };
+                if ((time - (_u getVariable [QGVAR(cephaneAliciT), -999])) < 15 || {_u getVariable [QGVAR(cephaneAliciBusy), false]}) then { continue };
                 if (_w isNotEqualTo "" && {_sayi < 3} && {(_sayi * _kap) < (2.5 * _kap)}) then { _aliciSec pushBack [_u, "SARJOR", _sa, 1 - (_sayi / 3)]; continue };
                 if (_gl40 < 3) then { _aliciSec pushBack [_u, "40MM", "", 0.8]; continue };
                 if (_fr isEqualTo 0 && {!(_u getUnitTrait "medic")}) then { _aliciSec pushBack [_u, "PARCALI", "", 0.4]; continue };
@@ -234,7 +245,8 @@ private _calis = {
                     default { "" };
                 };
                 if (_sinif isEqualTo "") then { continue };
-                private _adet = if (_tur isEqualTo "SARJOR") then { [1, 2] select ((_aTbl select 2) < 1) } else { 1 };
+                // sarjor: alici 4 sarjora tamamlanir (en fazla 3), verici kendinde >= 4 birakir
+                private _adet = if (_tur isEqualTo "SARJOR") then { (((4 - (_aTbl select 2)) max 1) min 3) min (((_vTbl select 2) - 4) max 1) } else { 1 };
                 private _sebep = format ["alici %1 (kalan %2 sarjor / %3 parcali / %4 duman) | verici stok %5 | %6", _tur, _aTbl select 2, _aTbl select 5, _aTbl select 6, _vTbl select 2, ["buddy / en cok stok", "esi"] select (_v isEqualTo _buddy)];
                 _basladi = true;
                 _g setVariable [QGVAR(cephaneGrupT), time + 10];
