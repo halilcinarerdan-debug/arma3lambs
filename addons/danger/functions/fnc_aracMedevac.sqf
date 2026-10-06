@@ -76,7 +76,8 @@ private _gorev = {
     };
 
     // (3) toplanma noktasina surus
-    private _tp = _yPos getPos [350, _yon];
+    // v8.129 DOKTRIN: yaralilar cepheden uzaga (CCP / geri), duşman biliniyorsa duşmandan en az 600 m (ya da yaralinin mesafesi + 250 m) uzaga tasinir; asla cepheye dogru degil
+    private _tp = if (_tehditPos isNotEqualTo [0,0,0]) then { _tehditPos getPos [(600 max ((_tehditPos distance2D _yPos) + 250)), _yon] } else { _yPos getPos [350, _yon] };
     // v8.115: aktif komutan planinin yarali toplama noktasi (CCP) 1000 m icindeyse arac oraya tasir
     private _ccpAday = (missionNamespace getVariable ["lambs_danger_planCCPlar", []]) select {(_x select 1) isEqualTo (side _vg) && {((_x select 2) distance2D _yPos) < 1000}};
     if (_ccpAday isNotEqualTo []) then { _tp = (_ccpAday select 0) select 2; };
@@ -166,6 +167,7 @@ private _calis = {
 
             // arac ara
             private _aday = [];
+            private _standoffRed = 0;
             // v8.127: Zeus 'ELITE Gorev Ata' MEDEVAC: bu tarafta atanmis arac / grup varsa yalniz atananlar kullanilir
             private _mdAtanmis = (allGroups select {(side _x) isEqualTo _taraf}) select {
                 ((_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC") || {((vehicle (leader _x)) getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC"}
@@ -178,6 +180,11 @@ private _calis = {
                 private _v = vehicle _l;
                 if (_v isEqualTo _l || {!(_v isKindOf "LandVehicle")} || {!alive _v} || {!canMove _v} || {(fuel _v) < 0.1}) then { continue };
                 if ((_v emptyPositions "cargo") < 1) then { continue };
+                if (_v getVariable [QGVAR(tasimaMesgul), false]) then { continue };
+                // v8.129 DOKTRIN: tahliye araci cepheye girmez. Standoff (duşmana en az): zirhli 300 m, yumusak arac 600 m
+                //   (kaynak: AK-74 etkili menzil 500 m, RPG-7 ~200 m, RH 6524-6541; kitapta arac standoff'u sayisi YOK -> TASARIM). Yaralidan duşmana mesafe bu kadar degilse bu arac gitmez.
+                private _zirhli = (getNumber (configOf _v >> "armor")) >= 100;
+                if (_enM < ([600, 300] select _zirhli)) then { _standoffRed = _standoffRed + 1; continue };
                 private _d = driver _v;
                 if (isNull _d || {isPlayer _d} || {!local _d} || {!alive _d} || {(group _d) isNotEqualTo _vg}) then { continue };
                 if (((units _vg) select {alive _x && {(vehicle _x) isNotEqualTo _v}}) isNotEqualTo []) then { continue };   // grup tamamen aracin icinde
@@ -192,7 +199,7 @@ private _calis = {
                 if ((time - (_bekleT getOrDefault [str _taraf, -999])) > 120 && {_logN < 40}) then {
                     _bekleT set [str _taraf, time];
                     _logN = _logN + 1;
-                    diag_log format ["[ARAC-MEDEVAC] %1 | baygin yarali %2 (%3 sn) | uygun arac YOK (kara araci + bos kargo + tamamen binmis surucu grubu + temasta degil)", _taraf, name _y, round (time - (_y getVariable [QGVAR(amYarT), time]))];
+                    diag_log format ["[ARAC-MEDEVAC] %1 | baygin yarali %2 (%3 sn) | uygun arac YOK (kara araci + bos kargo + tamamen binmis surucu grubu + temasta degil + duşman standoff: zirhli 300 / yumusak 600 m; standoff yuzunden elenen: %4)", _taraf, name _y, round (time - (_y getVariable [QGVAR(amYarT), time])), _standoffRed];
                 };
                 continue;
             };

@@ -210,7 +210,14 @@ while {true} do {
         };
         if (_faz isEqualTo "TOPLAN") then {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
-            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300}) then {
+            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]}) then {
+                // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
+                if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])}) then {
+                    _plan set ["tasimaYapildi", true];
+                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300]] spawn FUNC(aracTasima)];
+                    [_plan, "TASIMA", "arac nakli (varsa)"] call _fazGec;
+                    continue
+                };
                 if (_tip isEqualTo 1) then {
                     // SAVUN: objektif cevresinde sektorlu halka (komutan grubu merkezde degil, halkanin guvenli yaninda)
                     private _n = count _gruplar;
@@ -240,6 +247,16 @@ while {true} do {
                     } forEach _gruplar;
                     [_plan, "ORP", "ORP / destek noktasina intikal"] call _fazGec;
                 };
+            };
+            continue
+        };
+
+        // ---------------------------------------------------------------- TASIMA (arac nakli bitince TOPLAN'a doner; gruplar inis noktasindadir)
+        if (_faz isEqualTo "TASIMA") then {
+            private _th = _plan getOrDefault ["tasimaH", scriptNull];
+            if (scriptDone _th || {_fazSure > 700}) then {
+                _plan set ["tasimaTamam", true];
+                [_plan, "TOPLAN", "arac nakli bitti"] call _fazGec;
             };
             continue
         };

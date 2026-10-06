@@ -1533,3 +1533,14 @@ v8.128 - ZEUS "ELITE KARAKOL / HQ" + BASKIN (VUR-CEK) — tarihsel karakol baski
  - ELITE Objektif panel 3: "Baskin (vur-cek)" (5 / 10 dk): hedef temizlenince ya da sure dolunca TOPLANMA yerine CEKILME (tacticsRetreat). Hedefin 200 m icinde baska tarafin karakolu varsa duşman binali / mevzili sayilir ([PLAN] log).
  - Tarihsel veri (kuvvet, yon, saat, kayiplar) koda GIRILMEDI; Zeus kendi bilgisiyle manuel plan noktalari (RP / ORP / SBF / KANAT / CCP), H-saati, tempo, sure ve ELITE Gorev Ata ile kurar. Alarm bekcisi supervisor'suz.
  - Test edilmedi. HEMTT: yalniz stil uyarilari.
+
+v8.129 - KARA ARACI NAKLI / TAKSI + MEDEVAC DOKTRIN STANDOFF
+ - Kullanici: APC'ler medevac + transport icin kullanilsin ama cephenin dibine gotürmesin (doktrin ne diyorsa); kara transport araclari eklensin; "genel kullanima acik, taksi gibi".
+ - Doktrin dayanagi (ATP 4-25.13 / TC 3-21.76 / MCWP 3-11.2): yaralilar CCP'ye toplanir, arac CCP'den MTF / ambulans degisim noktasina tasir (arac cepheye girmez); piyade ORP'den once, tüfek etkili menzilinin (M16 460 m) disinda iner.
+   Kitaplarda "arac standoff" / "inis mesafesi" SAYISI YOK -> asagidaki degerler TASARIM (kaynakli sayilar: M16 460 m, AK-74 500 m, RPG-7 ~200 m).
+ - fnc_aracTasima (yeni): kara araci (APC / IFV / kamyon, AI surucu, arac grubu tamamen icinde, kargo >= 3) ile grup nakli: RP / alma noktasina gel -> bin -> hedefin max(500 m, ORP + 150 m) oncesindeki inis noktasina sur -> temas / baski olursa erken in -> piyade iner -> arac geri doner, bekler.
+   Zeus 'Gorev Ata' TASIMA atanan araclar once; yoksa uygun araclar otomatik (lambs_danger_tasimaOtomatik = false ile kapat). lambs_danger_tasimaOff = true tamamen kapatir. Log [TASIMA].
+ - Komutan plani: ele gecirde TOPLAN'da RP'de toplanan gruplar once TASIMA fazi (arac varsa); arac yoksa sorunsuz ORP'ye yurur.
+ - fnc_taksi (yeni, sunucu): yaya AI grubu aktif waypoint'i > 1200 m ise ve 600 m icinde bos arac varsa ayni nakil; inis hedefin 500 m oncesi; ayni anda <= 2 gorev; grup basina 180 sn bekleme. Plan waypoint'leri ("ELITE PLAN:") alinmaz. Log [TAKSI]. lambs_danger_taksiOff = true.
+ - aracMedevac: yarali - duşman mesafesi zirhli arac icin >= 300 m, yumusak arac icin >= 600 m degilse arac gitmez (log'da 'standoff yuzunden elenen'); yaralilar duşmandan en az 600 m (ya da yaralinin mesafesi + 250 m) uzaga tasinir. tasimaMesgul araclar medevaca alinmaz.
+ - Test edilmedi: biniş / inis (orderGetIn, doGetOut, moveInCargo) AI davranisi, taksi tetikleri, ELITE izleyicilerinin aracin icindeki piyadeyi rahatsiz etmesi. HEMTT: temiz (yalniz stil uyarilari).
