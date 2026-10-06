@@ -19,7 +19,26 @@ lambs_danger_planKapiStarted = true;
     params ["_taraf", "_obj", "_ayarCiftler"];
     if (!isServer) exitWith {};
     diag_log format ["[PLAN-KAPI] plan istegi alindi (sunucu): %1 | %2", _taraf, mapGridPosition _obj];
-    [_taraf, _obj, createHashMapFromArray _ayarCiftler] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {}]);
+    // v8.121: sonuc tum makinelere bildirilir (Zeus ekraninda systemChat); istemci RPT'sinde de gorunur
+    [_taraf, _obj, _ayarCiftler] spawn {
+        params ["_taraf", "_obj", "_ayarCiftler"];
+        private _ayar = createHashMapFromArray _ayarCiftler;
+        private _r = [_taraf, _obj, _ayar] call (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
+        ["lambs_danger_planYanit", [_taraf, _ayar getOrDefault ["tip", 0], _r isEqualTo true]] call CBA_fnc_globalEvent;
+    };
+}] call CBA_fnc_addEventHandler;
+
+// v8.121: sunucudan donen yanit (her makinede; yalniz arayuzu olan gosterir)
+["lambs_danger_planYanit", {
+    params ["_taraf", "_tip", "_ok"];
+    if (!hasInterface) exitWith {};
+    private _m = switch (_tip) do {
+        case 2: { ["IPTAL: aktif plan yok", "IPTAL: plan durduruldu"] select _ok };
+        case 3: { ["ONAY: bekleyen plan yok", "ONAY: plan baslatildi"] select _ok };
+        default { ["PLAN KURULAMADI: uygun grup yok (en az 3 canli AI asker, o taraf icin ELITE acik, objektife <= 4000 m, baska planda degil)", "PLAN KURULDU (haritada ELITE_PLAN isaretleri + grup waypoint'leri)"] select _ok };
+    };
+    diag_log format ["[PLAN-YANIT] %1 | %2", _taraf, _m];
+    if (!isNull (getAssignedCuratorLogic player)) then { systemChat format ["[ELITE] %1", _m]; };
 }] call CBA_fnc_addEventHandler;
 
 ["lambs_danger_planNoktaIstegi", {

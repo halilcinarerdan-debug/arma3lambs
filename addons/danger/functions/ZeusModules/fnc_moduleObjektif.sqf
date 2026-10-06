@@ -69,6 +69,8 @@ if (_activated && local _logic) then {
                                     ];
                                     // Zeus modulu curator'un makinesinde calisir; plan gruplarin yerel oldugu SUNUCUDA kurulur (CBA sunucu olayi; HashMap -> cift listesi)
                                     ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;
+                                    diag_log format ["[PLAN-ISTEK] sunucuya gonderildi: %1 | tip %2 | %3", _taraf, _tip, mapGridPosition _obj];
+                                    systemChat "[ELITE] Plan istegi sunucuya gonderildi - yanit gelmezse sunucuda mod yuklu / surum ayni degil";
                                 }, {}, {}, [_obj, _d1, _d2]
                             ] call EFUNC(main,showDialog);
                         }, [_args select 0, _args select 1, _data]] call CBA_fnc_execNextFrame;
