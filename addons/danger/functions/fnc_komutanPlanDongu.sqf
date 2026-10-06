@@ -239,15 +239,15 @@ while {true} do {
             { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar;
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
             if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
-                _plan set ["tasimaCtl", [false, false]];
-                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                _plan set ["tasimaCtl", [false, true, 0]];
+                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
             };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
             continue
         };
         if (_faz isEqualTo "TOPLAN") then {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
-            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]}) then {
+            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
                 // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
                 if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
                     _plan set ["reconYapildi", true];
@@ -272,11 +272,11 @@ while {true} do {
                     continue
                 };
                 // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
-                if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])}) then {
+                if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])} && {!(("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")})}) then {
                     _plan set ["tasimaYapildi", true];
                     if (!("tasimaH" in _plan) || {isNull (_plan get "tasimaH")}) then {
-                        _plan set ["tasimaCtl", [false, true]];
-                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 2500, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                        _plan set ["tasimaCtl", [false, true, 0]];
+                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
                     } else {
                         (_plan get "tasimaCtl") set [1, true];
                     };

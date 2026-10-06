@@ -1589,3 +1589,13 @@ v8.132 - SUNUCU RPT 23251a0a (v8.130) analizi: nakil, telemetri hatasi, nobetci 
  - karakolGarnizon: varis = (getPosATL birim) distance poz < 4.5; isinlanan nobetci hemen PATH kapali / doWatch ile pozisyonda sayilir.
  YAPILMADI: ARAC-SENKRON'un nakil beklerken BEKLE:135 tur saymasi (nakil muafiyeti v8.130'da; bu RPT'de nakil oncesi bekleme); topcu nedeni; recon test (bu RPT v8.130, recon yok).
  TEST EDILMEDI.
+
+v8.133 - SUNUCU RPT 7f357bf1 (v8.132): APC nakli hala yok -> kok neden: 2500 m arac arama siniri + sessiz cikis
+ BULGU: P1 plani KUR -> TOPLAN'da nakil isi basladi ama [TASIMA] logu HIC yok. Strykers grid 120-121 / 054 (12000, 5400), RP 105075 (10500, 7500): mesafe ~2580 m > 2500 m arac arama siniri
+   -> aday arac yok -> fonksiyon SESSIZCE 0 dondu. Piyade (Alpha 2-5 / 2-6) de ayni bolgede, araclarla birlikteydi. Topcu: [PLAN-TOPCU] ENVANTER 2 x M109 (yerel, canFire, mermi 155mm m795, hedef menzilde:true) -> topcu ATABILIR gorunuyor; atis KESIF'te (plan o asamaya gelmedi, oturum 90 sn sonra bitti).
+ DUZELTME:
+ - aracTasima: arac aranan yer = tasinacak piyadenin agirlik merkezi (RP degil); menzil plan icin 6000 m (taksi 600 m). Aday yoksa NEDEN LOGLANIR ("arac YOK: kara araci / menzilde / uygun / atanmis").
+ - DINAMIK ALMA: arac tasinacak piyadenin anlik merkezine gider (4 sn'de bir hedef gunceller), 60 m'de durup bindirir; RP'ye gitmez. Inis noktasina (hedeften >= 500 m) goturur; zaten inis noktasina + 150 m icindeki gruplar tasinmaz.
+ - Plan: nakil isi KUR'da baslar (hazir = true, bekleme yok); gercekten nakil yapiliyorsa (ctl[2] > 0) is bitince TOPLAN hazir sayilir (RP'ye toplanma beklenmez); nakil olmayan oturumda normal toplanma.
+ - aracTasima yine DEGISMEDI: bolme / rezerv / yigilma onleme (v8.131), tcccBusy duzeltmesi (v8.132).
+ TEST EDILMEDI.

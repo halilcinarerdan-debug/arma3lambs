@@ -29,15 +29,25 @@
  * Public: No
 */
 
-params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], ["_ctl", [false, true]]];
+params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], ["_ctl", [false, true, 0]]];
 if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0};
 
 
 // ---- arac adaylari ----
+// v8.133: arac araniyor yeri = tasinacak piyadenin AGIRLIK MERKEZI (RP degil): RPT 7f357bf1'de arac + piyade RP'ye 2580 m uzaktaydi, 2500 m sinirina takilip sessizce is yapilmadi
+private _merkezPiy = {
+    private _l = (_gruplar apply {getPosATL (leader _x)}) select {_x isNotEqualTo [0,0,0]};
+    if (_l isEqualTo []) then {_rp} else {
+        private _sx = 0; private _sy = 0;
+        { _sx = _sx + (_x select 0); _sy = _sy + (_x select 1); } forEach _l;
+        [_sx / (count _l), _sy / (count _l), 0]
+    }
+};
+private _pickRef = call _merkezPiy;
 private _tumAraclar = (vehicles select {
     alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(fuel _x) > 0.1}
     && {(_x emptyPositions "cargo") >= 3}
-    && {(_x distance2D _rp) <= _menzil}
+    && {(_x distance2D _pickRef) <= _menzil}
 });
 private _uygun = _tumAraclar select {
     private _v = _x;
@@ -53,7 +63,11 @@ private _atanan = _uygun select {((_x getVariable ["lambs_danger_gorev", ""]) is
 private _araclar = if (_atanan isNotEqualTo []) then {_atanan} else {
     if (missionNamespace getVariable ["lambs_danger_tasimaOtomatik", true]) then {_uygun} else {[]}
 };
-if (_araclar isEqualTo []) exitWith {0};
+if (_araclar isEqualTo []) exitWith {
+    diag_log format ["[TASIMA] %1 | arac YOK: kara araci(kargo>=3) %2 | menzilde %3 (<= %4 m) | uygun (AI surucu, grup ici, gorev disi) %5 | atanmis TASIMA %6", _taraf,
+        count (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {(_x emptyPositions "cargo") >= 3}}), count _tumAraclar, round _menzil, count _uygun, count _atanan];
+    0
+};
 _araclar = [_araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
 
 // ---- v8.131 MEDEVAC REZERVI: Zeus MEDEVAC atamasi yoksa ve >= 2 arac varsa objektiften en uzak (geride) arac medevac icin ayrilir (nakilde kullanilmaz) ----
@@ -67,6 +81,7 @@ if (count _araclar > 1 && {!_mdVarMi} && {missionNamespace getVariable ["lambs_d
 };
 
 // ---- birim -> arac eslesmesi: once grup TAMAMI, sigmazsa TAKIM BAZLI (FSE / Maneuver / Reserve; ayni takim ayni araca) ----
+private _dropM = (500 max (_orpM + 150));
 private _kalan = _araclar apply {[_x, _x emptyPositions "cargo"]};
 private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
@@ -86,6 +101,7 @@ private _yerlestir = {
     private _g = _x;
     private _on = (units _g) select {alive _x && {isNull objectParent _x}};
     if (_on isEqualTo []) then { continue };
+    if (((leader _g) distance2D _obj) < (_dropM + 150)) then { continue };   // zaten inis noktasina yakin: nakil gerekmez
     if ([_on, groupId _g] call _yerlestir) then { continue };
     // sigmadi: takim bazli bol
     private _takimlar = ([_g] call FUNC(splitFireTeams)) select {_x isNotEqualTo []};
@@ -101,11 +117,11 @@ if (_eslesme isEqualTo []) exitWith {
     0
 };
 
-private _dropM = (500 max (_orpM + 150));
 private _drop = _obj getPos [_dropM, _B];
 if (surfaceIsWater _drop) then { _drop = _obj getPos [(_dropM + 100), _B]; };
 private _nB = 0;
 { { _nB = _nB + count _x; } forEach (_x select 1); } forEach _eslesme;
+_ctl set [2, _nB];   // plan: gercekten nakil yapiliyor (> 0) -> is bitince TOPLAN hazir sayilir
 diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen: %4 | yaya kalan birim: %5 | inis noktasi %6 (hedeften %7 m) | atanmis arac: %8",
     _taraf, count _eslesme, _nB, _bolunen, count _yaya, mapGridPosition _drop, round _dropM, count _atanan];
 
@@ -143,13 +159,32 @@ private _isler = [];
         private _iptal = "";
 
         // (1) RP'ye gel
-        diag_log format ["[TASIMA] %1 | %2 | alma noktasina %3 m (RP) | surucu %4", groupId _vg, _ad, round (_v distance2D _rp), name _d];
-        _d doMove _rp;
-        private _t = time + (150 max (((_v distance2D _rp) / 6) min 420));   // RPT 23251a0a: araclar RP'den 1825 m uzaktaydi; 150 sn yetmiyordu
-        waitUntil { sleep 1; !alive _v || {!alive _d} || {(_v distance2D _rp) < 45} || {time > _t} || {_ctl select 0} };
+        // v8.133 DINAMIK ALMA: arac tasinacak piyadenin ANLIK merkezine gider (piyade yurumeye devam etse bile takip eder); 60 m'ye gelince durur
+        private _pickFn = {
+            params ["_gl"];
+            private _p = [];
+            { _p append ((_x select {alive _x && {isNull objectParent _x}}) apply {getPosATL _x}); } forEach _gl;
+            if (_p isEqualTo []) exitWith {[]};
+            private _sx = 0; private _sy = 0;
+            { _sx = _sx + (_x select 0); _sy = _sy + (_x select 1); } forEach _p;
+            [_sx / (count _p), _sy / (count _p), 0]
+        };
+        private _pk = [_gl] call _pickFn;
+        if (_pk isEqualTo []) then { _iptal = "tasinacak asker kalmadi"; } else {
+            diag_log format ["[TASIMA] %1 | %2 | piyadeye gidiyor: %3 m | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
+            _d doMove _pk;
+            private _t = time + (150 max (((_v distance2D _pk) / 6) min 420));
+            private _sonMove = time;
+            waitUntil {
+                sleep 1;
+                _pk = [_gl] call _pickFn;
+                if (_pk isNotEqualTo [] && {(time - _sonMove) > 4}) then { _d doMove _pk; _sonMove = time; };
+                !alive _v || {!alive _d} || {_pk isEqualTo []} || {(_v distance2D _pk) < 60} || {time > _t} || {_ctl select 0}
+            };
+        };
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
         if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
-        if (_iptal isEqualTo "" && {(_v distance2D _rp) >= 45}) then { _iptal = format ["RP'ye varilamadi (150 sn, kalan %1 m)", round (_v distance2D _rp)]; };
+        if (_iptal isEqualTo "" && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
 
         // (2) bin
         private _binen = [];
