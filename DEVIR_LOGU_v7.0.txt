@@ -1486,3 +1486,10 @@ v8.121 - PLAN YANITI (tani)
 v8.122 - PLAN KURULAMADI TANISI
  - Sunucu RPT 46798b74 (v8.121): [PLAN-KAPI] istek alindi, ama "uygun grup yok" (iki kez). Zincir calisiyor; filtre hangi grubu eledi bilinmiyordu.
  - Log artik taraftaki grup sayisi, elenme nedenleri (yerel degil / oyuncu var / <3 asker / ELITE kapali / baska planda / arac / >4000 m) ve en yakin lider mesafesi.
+
+v8.123 - PLAN: UZAK (BASKA MAKINEDEKI) GRUPLAR SUNUCUYA DEVREDILIR
+ - Sunucu RPT a5d90e6e (v8.122): BLUFOR 6 grup, 4'u "yerel degil" (Zeus istemcisinde / baska makinede), 2'si lider olu -> plan kurulamadi.
+   Planlayici yalniz sunucuya yerel gruplari aliyordu; dedicated'da Zeus ile konan gruplar curator istemcisinde yerel olabilir.
+ - fnc_komutanPlan: yerel filtresi kaldirildi; secilen uzak AI gruplari setGroupOwner 2 ile sunucuya devredilir (en fazla 6 sn bekler), [PLAN-DEVIR] logu. Oyuncu iceren gruplar yine secilmez.
+ - Etki: devredilen grubun ELITE izleyicileri artik sunucuda calisir (zaten sunucuda calisan gruplarla ayni).
+ - Test edilmedi.

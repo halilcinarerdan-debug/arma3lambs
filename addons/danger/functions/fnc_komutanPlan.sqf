@@ -64,7 +64,7 @@ if (_tip isEqualTo 3) exitWith {
 private _grupN = _ayar getOrDefault ["grupN", 4];
 private _aday = allGroups select {
     private _l = leader _x;
-    !isNull _l && {alive _l} && {local _x} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
+    !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0}
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
@@ -95,6 +95,30 @@ if (_aday isEqualTo []) exitWith {
 };
 _aday = [_aday, [], { (rankId (leader _x)) * 1000 + ({alive _x} count (units _x)) * 10 - ((leader _x) distance2D _obj) / 100 }, "DESCEND"] call BIS_fnc_sortBy;
 private _gruplar = _aday select [0, _grupN max 1];
+// v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
+// Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
+if (isServer) then {
+    private _uzak = _gruplar select {!local _x};
+    {
+        diag_log format ["[PLAN-DEVIR] %1 | sahip makine %2 -> sunucu (2)", groupId _x, groupOwner _x];
+        _x setGroupOwner 2;
+    } forEach _uzak;
+    if (_uzak isNotEqualTo []) then {
+        private _t0 = time;
+        waitUntil {sleep 0.3; ((_uzak findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 6}};
+        private _kalan = _uzak select {!local _x};
+        if (_kalan isNotEqualTo []) then {
+            diag_log format ["[PLAN-DEVIR] DEVIR OLMADI (plandan cikarildi): %1", _kalan apply {groupId _x}];
+            _gruplar = _gruplar - _kalan;
+        } else {
+            diag_log format ["[PLAN-DEVIR] %1 grup sunucuya devredildi (%2 sn)", count _uzak, (time - _t0) toFixed 1];
+        };
+    };
+};
+if (_gruplar isEqualTo []) exitWith {
+    diag_log "[PLAN] KURULAMADI: secilen gruplarin hicbiri sunucuya devredilemedi";
+    false
+};
 private _komutanG = _gruplar select 0;
 
 // ---------------------------------------------------------------------------
