@@ -352,8 +352,18 @@ while {true} do {
             };
             private _yakinM2 = 9999;
             { _yakinM2 = _yakinM2 min ((leader _x) distance2D _obj); } forEach _maneuv;
-            if ((_yakinM2 < 50 && {(time - (_plan getOrDefault ["dusmanT", _plan get "fazT"])) > 30}) || {_fazSure > 480}) then {
-                [_plan, "TOPLANMA", [format ["objektif temiz (manevra %1 m)", round _yakinM2], "SURE DOLDU (480 sn)"] select (_fazSure > 480)] call _fazGec;
+            private _baskinS = _plan getOrDefault ["baskinS", 0];
+            if (_baskinS > 0) then {
+                // v8.128 BASKIN (vur-cekil): hedef temizlenince ya da baskin suresi dolunca TOPLANMA yerine CEKILME (karakol baskini canlandirmasi)
+                private _temiz = (_yakinM2 < 50 && {(time - (_plan getOrDefault ["dusmanT", _plan get "fazT"])) > 30});
+                if (_temiz || {_fazSure > _baskinS}) then {
+                    [_plan, "CEKILME", [format ["BASKIN: hedef temiz (manevra %1 m), cekiliyor", round _yakinM2], format ["BASKIN SURESI (%1 sn) doldu, cekiliyor", _baskinS]] select (!_temiz)] call _fazGec;
+                    { [_x] call _wpTemizle; [_x, _obj] call FUNC(tacticsRetreat); } forEach _gruplar;
+                };
+            } else {
+                if ((_yakinM2 < 50 && {(time - (_plan getOrDefault ["dusmanT", _plan get "fazT"])) > 30}) || {_fazSure > 480}) then {
+                    [_plan, "TOPLANMA", [format ["objektif temiz (manevra %1 m)", round _yakinM2], "SURE DOLDU (480 sn)"] select (_fazSure > 480)] call _fazGec;
+                };
             };
             continue
         };

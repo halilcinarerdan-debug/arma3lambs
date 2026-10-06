@@ -69,7 +69,7 @@ private _aday = allGroups select {
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK"])}
-    && {isNull objectParent _l} && {(_l distance2D _obj) <= 4000}
+    && {isNull objectParent _l} && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}
 };
 if (_aday isEqualTo []) exitWith {
     // v8.121 TANI: her gruptan hangi filtre ilk elediyse say (neden belli olsun)
@@ -166,6 +166,13 @@ private _orp = [_orpM, [0, 10, -10, 20, -20]] call _konumSec;
 // grup rolleri
 private _mg = _ayar getOrDefault ["mg", false];
 private _bina = _ayar getOrDefault ["bina", false];
+// v8.128: hedef yakininda (200 m) bir KARAKOL kaydi varsa (Zeus 'ELITE Karakol') dusman binali / mevzili sayilir ve loglanir
+private _karakolHedef = (missionNamespace getVariable ["lambs_danger_karakollar", []]) select {((_x select 1) distance2D _obj) < 200 && {(_x select 0) isNotEqualTo _taraf}};
+if (_karakolHedef isNotEqualTo []) then {
+    _bina = true;
+    _ayar set ["bina", true];
+    diag_log format ["[PLAN] hedef bir KARAKOL: %1 (yaricap %2 m) -> duşman binali / mevzili sayildi", (_karakolHedef select 0) select 3, (_karakolHedef select 0) select 2];
+};
 private _zirh = _ayar getOrDefault ["zirh", false];
 private _atVar = _ayar getOrDefault ["at", false];
 private _sayi = _ayar getOrDefault ["sayi", 0];
@@ -332,7 +339,7 @@ private _plan = createHashMapFromArray [
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", _ayar getOrDefault ["tempo", 0]], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
-    ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
+    ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
     ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {

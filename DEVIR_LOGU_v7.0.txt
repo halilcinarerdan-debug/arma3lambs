@@ -1524,3 +1524,12 @@ v8.127 - ZEUS "ELITE GOREV ATA" MODULU (squad / arac gorev secimi)
    fnc_komutanPlanDongu (topcu: TOPCU_YOK atmaz; en az bir arac TOPCU ise yalniz atananlar), fnc_aracMedevac (en az bir MEDEVAC atamasi varsa yalniz atananlar), fnc_hqMedevac (MEDEVAC grubunun hekimi once secilir).
  - YAPILMADI (dürüst not): HELIKOPTER medevac yok (arac medevac yalniz kara araci); ZIRHLI destek plani yok (mekanize taktikler ertelenmisti); atama sadece Zeus oturumunda kalir (kayit yok).
  - Test edilmedi. HEMTT: yalniz stil uyarilari, hata yok.
+
+v8.128 - ZEUS "ELITE KARAKOL / HQ" + BASKIN (VUR-CEK) — tarihsel karakol baskini canlandirmasi icin altyapi
+ - Kullanici: haritadan HQ / karakol belirlenebilsin (ornegin bir karakol baskinini canlandirmak icin).
+ - Modul ELITE Karakol / HQ: haritada nokta + taraf + ad (karakol / mevzi / HQ / gozetleme / ussu) + yaricap (30-300 m) + savunma (Yok / Hemen / Alarm / KALDIR).
+   Kayit lambs_danger_karakollar (sunucu), harita isareti ELITE_KARAKOL_*, log [KARAKOL] / [KARAKOL-ISTEK]. Hemen: yaricap x1.5 icindeki savunan AI gruplari icin SAVUN plani (grupMesafe filtresi, komutanPlan).
+   Alarm: duşman 800 m icinde savunanlarca BILINIRSE (knowsAbout >= 0.5; hile yok) savunma plani otomatik kurulur.
+ - ELITE Objektif panel 3: "Baskin (vur-cek)" (5 / 10 dk): hedef temizlenince ya da sure dolunca TOPLANMA yerine CEKILME (tacticsRetreat). Hedefin 200 m icinde baska tarafin karakolu varsa duşman binali / mevzili sayilir ([PLAN] log).
+ - Tarihsel veri (kuvvet, yon, saat, kayiplar) koda GIRILMEDI; Zeus kendi bilgisiyle manuel plan noktalari (RP / ORP / SBF / KANAT / CCP), H-saati, tempo, sure ve ELITE Gorev Ata ile kurar. Alarm bekcisi supervisor'suz.
+ - Test edilmedi. HEMTT: yalniz stil uyarilari.

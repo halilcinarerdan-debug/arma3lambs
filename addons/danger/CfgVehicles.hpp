@@ -144,4 +144,22 @@ class CfgVehicles {
             };
         };
     };
+
+    class GVAR(Karakol) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(Karakol);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Karakol / HQ (haritadan)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleKarakol);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
 };
