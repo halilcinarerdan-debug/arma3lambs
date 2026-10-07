@@ -1624,3 +1624,10 @@ v8.136 - SUNUCU RPT 013ca3b7 (v8.135): "diger apcler bekledi", nakil yavas, garn
  DUZELTME: (1) rezerv yalniz bir MEDEVAC atamasi (grup) varken ve MEDEVAC atanmis ARAC yokken ayrilir; yoksa tum araclar tasir. (2) nakil suruste SAFE + FULL, inise 220 m kala AWARE + NORMAL; zaman siniri = max(240 sn, mesafe / 3.5), <= 600 sn.
    (3) garnizon havuzu: kaynak gruptan en az 3 asker (lider dahil) kalir. DEGISMEDI: plan basladiktan sonra atanan araclar o planin nakline girmez (taksi bekcisi uzak waypoint'li gruplar icin alabilir).
  TEST EDILMEDI.
+
+v8.137 - ARACA SIGMAYANLAR: SEFER (shuttle) + birim bazli filtre
+ Kullanici: "araca sigmadilar". M1126 kargo 9 koltuk ("BINDI 9 asker"); plan gruplari 13-14 kisi, 11 asker yaya kaliyordu.
+ - aracTasima: zaten inis noktasina + 150 m icinde olan askerler BIRIM bazinda elenir (grup lideri degil); takimlar yalniz uzaktaki, yaya askerlerden olusur.
+ - Plan TASIMA fazi: is bitince geride kalan (inis noktasindan > 400 m uzakta, >= 3) asker varsa 2. / 3. SEFER (arac iner, geri doner, siradaki takimlari alir; en fazla 3 sefer, faz 300 sn'ye kadar) [PLAN] TASIMA n. SEFER.
+ - aracTasima arac uygunlugu: kendi bekleme degiskeni tasimaSonT (15 sn) — sefer arasi 240 sn kilitlenmez.
+ SINIR: koltuk sayisi artmaz (FFV / turret koltuklari sayilmiyor); medevac rezervi araci seferlere katilmaz; sefer araclarinin hizi / takilmasi test edilmedi. TEST EDILMEDI.

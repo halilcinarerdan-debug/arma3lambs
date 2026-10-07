@@ -440,6 +440,19 @@ while {true} do {
                 [_plan, "TOPLAN", "arac nakli zaman asimi"] call _fazGec;
                 continue
             };
+            // v8.137 SEFER: ilk seferde araca sigmayan (> koltuk) uzaktaki askerler icin ikinci / ucuncu sefer (en fazla 3 sefer, TASIMA fazi 300 sn'ye kadar)
+            if (scriptDone _th && {(_plan getOrDefault ["sefer", 1]) < 3} && {_fazSure < 300} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}) then {
+                private _dropMS = (500 max (((_plan get "ayar") getOrDefault ["orpM", 300]) + 150));
+                private _kalan = 0;
+                { { if (alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropMS + 400)}) then { _kalan = _kalan + 1; }; } forEach (units _x); } forEach _gruplar;
+                if (_kalan >= 3) then {
+                    _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
+                    _plan set ["tasimaCtl", [false, true, 0]];
+                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                    diag_log format ["[PLAN] %1 TASIMA %2. SEFER: geride kalan %3 asker (inis noktasindan > 400 m uzakta)", _id, _plan get "sefer", _kalan];
+                    continue
+                };
+            };
             if (scriptDone _th) then {
                 _plan set ["tasimaTamam", true];
                 [_plan, "TOPLAN", "arac nakli bitti"] call _fazGec;

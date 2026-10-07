@@ -55,7 +55,7 @@ private _uygun = _tumAraclar select {
     private _vg = group _d;
     !isNull _d && {!isPlayer _d} && {local _d} && {(side _vg) isEqualTo _taraf}
     && {((units _vg) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
-    && {!(_vg getVariable [QGVAR(planAktif), false])} && {(time - (_vg getVariable [QGVAR(aracMedevacT), -999])) > 240}
+    && {!(_vg getVariable [QGVAR(planAktif), false])} && {(time - (_vg getVariable [QGVAR(tasimaSonT), -999])) > 15}
     && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"])})}
     && {(({isPlayer _x} count (crew _v)) isEqualTo 0)} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}
 };
@@ -101,12 +101,12 @@ private _yerlestir = {
 };
 {
     private _g = _x;
-    private _on = (units _g) select {alive _x && {isNull objectParent _x}};
+    // v8.137: birim bazli: zaten inis noktasina + 150 m icindeki askerler tasinmaz (sefer 2+: ilk seferde sigmayip geride kalanlar alinir)
+    private _on = (units _g) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}};
     if (_on isEqualTo []) then { continue };
-    if (((leader _g) distance2D _obj) < (_dropM + 150)) then { continue };   // zaten inis noktasina yakin: nakil gerekmez
     if ([_on, groupId _g] call _yerlestir) then { continue };
     // sigmadi: takim bazli bol
-    private _takimlar = ([_g] call FUNC(splitFireTeams)) select {_x isNotEqualTo []};
+    private _takimlar = (([_g] call FUNC(splitFireTeams)) apply {_x select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}}) select {_x isNotEqualTo []};
     _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
     private _yerlesen = 0;
     {
@@ -307,6 +307,7 @@ private _isler = [];
             if (_eskiAC) then { _d enableAI "AUTOCOMBAT"; };
         };
         _v setVariable [QGVAR(tasimaMesgul), nil];
+        _vg setVariable [QGVAR(tasimaSonT), time];
         count _binen
     });
     { _tasinan = _tasinan + count _x; } forEach _gl;
