@@ -1649,3 +1649,9 @@ v8.139 - SUNUCU RPT 045f5750 (v8.138): atanmis TASIMA araclari elendi; nakil yav
  DUZELTME / TANI: (1) [TASIMA] ATANMIS ARAC UYGUN DEGIL: <arac> | <neden> (yikildi / canMove / yakit / kargo / piyadeye uzaklik / surucu yok-oyuncu-yerel degil / taraf / grup disinda / planda / mesgul / oyuncu / etiket filtresi).
    (2) Inis noktasi 250 m icindeki YOLA cekilir (objektife >= 460 m): AI arac yolda daha hizli ve takilmaz; yol yoksa degisiklik yok ([TASIMA] inis noktasi yola cekildi).
  TEST EDILMEDI. Sonraki RPT'de atanmis arac neden elendi gorunecek.
+
+v8.140 - SUNUCU RPT 2ca0498e (v8.139): nakil 2 / 3 arac calisti, 1 arac bindirdikten sonra hareket etmedi
+ GOZLEM: 3 arac / 26 asker eslesti (yaya 0), inis noktasi yola cekildi (122055, 470 m), 2 arac 64 km/s ile gitti (yol kesinlikle isliyor: 15-19 -> 62-64 km/s). Alpha 1-6 2:20:51'de BINDI 9 asker, 20 sn sonra 0 km/s (MEKANIZE-YAVAS: komut MOVE, SAFE / FULL, hiz 0); TAKILDI? 20 sn log'u yazildi, oturum 14 sn sonra bitti
+   (kurtarma 20 / 45 / 75 sn idi).
+ NEDEN BILINMIYOR (hasar / yakit / carpisma / AI?). DUZELTME: kurtarma 8 / 18 / 35 sn; ilk mudahalede TAKILMA TANISI logu (motor, yakit, hasar, canMove, surucu + lifeState, currentCommand, PATH / MOVE AI ozellikleri, 9 m icindeki nesneler) ve PATH / MOVE / ANIM AI acma, motor acma, doStop + doMove, ileri itme.
+ TEST EDILMEDI.

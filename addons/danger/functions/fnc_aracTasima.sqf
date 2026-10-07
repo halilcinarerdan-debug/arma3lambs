@@ -316,20 +316,27 @@ private _isler = [];
                     if (_hz < 0.8 && {_dm > 90}) then {
                         if (_durgunT < 0) then { _durgunT = time; };
                         private _dg = time - _durgunT;
-                        if (_denemeN isEqualTo 0 && {_dg > 20}) then {
+                        // v8.140: daha hizli mudahale (RPT 2ca0498e: bir Stryker bindirdikten sonra 0 km/s kaldi; 20/45/75 sn cok uzundu) + tani
+                        if (_denemeN isEqualTo 0 && {_dg > 8}) then {
                             _denemeN = 1;
-                            diag_log format ["[TASIMA] %1 | TAKILDI? 20 sn hareketsiz (inise %2 m): surucu yeniden yonlendirilir + itme", groupId _vg, round _dm];
-                            _d enableAI "PATH"; _d forceSpeed -1; doStop _d; _d doMove _drop;
-                            _v setVelocityModelSpace [0, 4, 0];
-                        };
-                        if (_denemeN isEqualTo 1 && {_dg > 45}) then {
-                            _denemeN = 2;
-                            private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
-                            diag_log format ["[TASIMA] %1 | TAKILDI: 45 sn; ara noktaya (60 m) yonlendirildi", groupId _vg];
-                            _d doMove _alt;
+                            private _yakin = (nearestObjects [_v, [], 9]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}};
+                            diag_log format ["[TASIMA] %1 | TAKILMA TANISI (%2 sn hareketsiz, inise %3 m): motor %4 | yakit %5 | hasar %6 | canMove %7 | surucu %8 (%9) | komut %10 | PATH/MOVE AI: %11 / %12 | 9 m icinde nesne: %13",
+                                groupId _vg, round _dg, round _dm, isEngineOn _v, (fuel _v) toFixed 2, (damage _v) toFixed 2, canMove _v, name _d, lifeState _d, currentCommand _d,
+                                _d checkAIFeature "PATH", _d checkAIFeature "MOVE", _yakin apply {typeOf _x}];
+                            _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
+                            _d setVariable [QGVAR(forceMove), true];
+                            _v engineOn true;
+                            _d forceSpeed -1; doStop _d; _d doMove _drop;
                             _v setVelocityModelSpace [0, 5, 0];
                         };
-                        if (_dg > 75) then { _bitis = "takildi"; };
+                        if (_denemeN isEqualTo 1 && {_dg > 18}) then {
+                            _denemeN = 2;
+                            private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
+                            diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; ara noktaya (60 m) yonlendirildi", groupId _vg];
+                            _d doMove _alt;
+                            _v setVelocityModelSpace [0, 6, 0];
+                        };
+                        if (_dg > 35) then { _bitis = "takildi"; };
                     } else { _durgunT = -1; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
                     if (time > _logT) then {
                         _logT = time + 20;
