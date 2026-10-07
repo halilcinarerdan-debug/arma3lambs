@@ -59,6 +59,32 @@ private _uygun = _tumAraclar select {
     && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"])})}
     && {(({isPlayer _x} count (crew _v)) isEqualTo 0)} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}
 };
+// v8.139 TANI: Zeus TASIMA atadigi halde uygun gorulmeyen araclar icin NEDEN (RPT 045f5750: iki atanmis arac "atanmis arac: 0" olarak elendi, neden bilinmiyordu)
+{
+    private _v = _x;
+    private _d = driver _v;
+    private _vg = group _d;
+    private _gv = [_v getVariable ["lambs_danger_gorev", ""]] + (crew _v apply {(group _x) getVariable ["lambs_danger_gorev", ""]});
+    if ("TASIMA" in _gv && {!(_v in _uygun)}) then {
+        private _neden = if (!alive _v) then {"arac yikildi"} else {
+            if (!canMove _v) then {"hareket edemiyor (canMove false)"} else {
+            if ((fuel _v) <= 0.1) then {"yakit <= %10"} else {
+            if ((_v emptyPositions "cargo") < 3) then {format ["bos kargo yeri %1 (< 3)", _v emptyPositions "cargo"]} else {
+            if ((_v distance2D _pickRef) > _menzil) then {format ["piyadeye %1 m (> %2)", round (_v distance2D _pickRef), round _menzil]} else {
+            if (isNull _d) then {"surucu YOK"} else {
+            if (isPlayer _d) then {"surucu oyuncu"} else {
+            if (!local _d) then {"surucu sunucuda yerel degil"} else {
+            if ((side _vg) isNotEqualTo _taraf) then {format ["taraf %1 (plan %2)", side _vg, _taraf]} else {
+            if (((units _vg) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) >= 0) then {"arac grubundan biri aracin DISINDA"} else {
+            if (_vg getVariable [QGVAR(planAktif), false]) then {"arac grubu planda"} else {
+            if ((time - (_vg getVariable [QGVAR(tasimaSonT), -999])) <= 15) then {"son nakilden < 15 sn"} else {
+            if (_v getVariable [QGVAR(tasimaMesgul), false]) then {"zaten nakilde (mesgul)"} else {
+            if (({isPlayer _x} count (crew _v)) > 0) then {"icinde oyuncu var"} else {"gorev etiketi disinda bir filtre (HARIC / MEDEVAC / KARAKOL_ARAC ...)"}}}}}}}}}}}}}};
+        diag_log format ["[TASIMA] ATANMIS ARAC UYGUN DEGIL: %1 | %2", getText (configOf _v >> "displayName"), _neden];
+    };
+} forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"}} select {
+    private _v = _x; ("TASIMA" in ([_v getVariable ["lambs_danger_gorev", ""]] + (crew _v apply {(group _x) getVariable ["lambs_danger_gorev", ""]})))
+});
 private _atanan = _uygun select {((_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA") || {((group (driver _x)) getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"}};
 private _araclar = if (_atanan isNotEqualTo []) then {_atanan} else {
     if (missionNamespace getVariable ["lambs_danger_tasimaOtomatik", true]) then {_uygun} else {[]}
@@ -121,6 +147,13 @@ if (_eslesme isEqualTo []) exitWith {
 
 private _drop = _obj getPos [_dropM, _B];
 if (surfaceIsWater _drop) then { _drop = _obj getPos [(_dropM + 100), _B]; };
+// v8.139: inis noktasi yola cekilir (arac yolda cok daha hizli ve takilmaz; RPT 045f5750: Stryker arazide 15-19 km/s gidiyordu): 250 m icindeki yol, objektife >= 460 m (M16 etkili menzili)
+private _yollar = (_drop nearRoads 250) select {(getPosATL _x) distance2D _obj >= 460 && {!surfaceIsWater (getPosATL _x)}};
+if (_yollar isNotEqualTo []) then {
+    _yollar = [_yollar, [], {_x distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
+    _drop = getPosATL (_yollar select 0);
+    diag_log format ["[TASIMA] %1 | inis noktasi yola cekildi: %2 (yol, hedeften %3 m)", _taraf, mapGridPosition _drop, round (_drop distance2D _obj)];
+};
 private _nB = 0;
 { { _nB = _nB + count _x; } forEach (_x select 1); } forEach _eslesme;
 _ctl set [2, _nB];   // plan: gercekten nakil yapiliyor (> 0) -> is bitince TOPLAN hazir sayilir

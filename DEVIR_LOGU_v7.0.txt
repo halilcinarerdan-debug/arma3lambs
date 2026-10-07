@@ -1642,3 +1642,10 @@ v8.138 - ANI OLAYLARA DAYANIKLILIK (pusu / hasar / temas): nakil + kesif + garni
  - Karakol garnizonu: nobetci baski > 0.7 ya da hasar > 0.4 ise PATH serbest (siper alir), 90 sn sonra pozisyonuna doner. Alarm bekcisine (komutanPlanKapi) supervisor eklendi ([WATCHDOG-YENIDEN]).
  TARANAN AMA DEGISTIRILMEYEN: aracMedevac yukleme sirasinda temas (boşaltma / yuklemeye devam eder; tahliye icin kabul), TEHLIKE-ALANI (iptalMi kosulu var), TCCC (tcccMedikOk var). NOT: eski modullerin tum waitUntil'leri incelenmedi.
  TEST EDILMEDI (pusu kurali, hasar, temas iptalleri).
+
+v8.139 - SUNUCU RPT 045f5750 (v8.138): atanmis TASIMA araclari elendi; nakil yavas
+ BULGU: Alpha 2-3 ve 2-2 Zeus'ta plandan 23-28 sn ONCE TASIMA atandi (GOREV-ATAMA, nesne 2) ama plan "atanmis arac: 0" dedi; yalniz otomatik secilen Alpha 1-6 (M1126) 9 asker tasidi, 4 yaya kaldi. Elenme nedeni loglanmadigi icin bilinmiyor.
+   Alpha 1-6: 52 sn'de bindi, inis noktasina 998 m, hiz 34 -> 19 km/s (arazi: ~15-19 km/s; 960 m ~ 4 dk). Pusu / hasar kurallari tetiklenmedi (temas yok).
+ DUZELTME / TANI: (1) [TASIMA] ATANMIS ARAC UYGUN DEGIL: <arac> | <neden> (yikildi / canMove / yakit / kargo / piyadeye uzaklik / surucu yok-oyuncu-yerel degil / taraf / grup disinda / planda / mesgul / oyuncu / etiket filtresi).
+   (2) Inis noktasi 250 m icindeki YOLA cekilir (objektife >= 460 m): AI arac yolda daha hizli ve takilmaz; yol yoksa degisiklik yok ([TASIMA] inis noktasi yola cekildi).
+ TEST EDILMEDI. Sonraki RPT'de atanmis arac neden elendi gorunecek.
