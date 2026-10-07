@@ -26,6 +26,28 @@ private _calis = {
     while {true} do {
         sleep 10;
         if (missionNamespace getVariable ["lambs_danger_taksiOff", false]) then { continue };
+        // v8.142 MURETTEBAT BEKCISI: TASIMA / MEDEVAC atanmis aracin surucusu araci terk ederse (RPT 3deb224e) kayitli ekip / yakin gorevli yaya asker geri biner (temassizsa)
+        {
+            private _v = _x;
+            private _gv = _v getVariable ["lambs_danger_gorev", ""];
+            if !(_gv in ["TASIMA", "MEDEVAC"]) then { continue };
+            if (_v getVariable [QGVAR(tasimaMesgul), false]) then { continue };
+            if (!isNull (driver _v)) then { _v setVariable [QGVAR(murMesgulT), nil]; continue };
+            if ((time - (_v getVariable [QGVAR(murT), -999])) < 20) then { continue };
+            private _eg = _v getVariable ["lambs_danger_ekipGrup", grpNull];
+            if (!isNull _eg && {(time - (_eg getVariable [QGVAR(contact), -999])) < 30}) then { continue };
+            private _adaylar = [];
+            if (!isNull _eg) then { _adaylar append ((units _eg) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}}); };
+            { if (!(_x in _adaylar)) then { _adaylar pushBack _x; }; } forEach (allUnits select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {((group _x) getVariable ["lambs_danger_gorev", ""]) isEqualTo _gv} && {(_x distance2D _v) < 120}});
+            if (_adaylar isEqualTo []) then { continue };
+            _v setVariable [QGVAR(murT), time];
+            private _sr = _adaylar select 0;
+            _sr enableAI "PATH";
+            _sr assignAsDriver _v;
+            if ((_sr distance2D _v) < 25) then { _sr moveInDriver _v; } else { [_sr] orderGetIn true; };
+            if (count _adaylar > 1 && {isNull (commander _v)}) then { (_adaylar select 1) assignAsCommander _v; if (((_adaylar select 1) distance2D _v) < 25) then { (_adaylar select 1) moveInCommander _v; } else { [_adaylar select 1] orderGetIn true; }; };
+            diag_log format ["[TAKSI] MURETTEBAT BEKCISI: %1 (%2) surucusuz -> %3 (%4 m) araca donduruldu", getText (configOf _v >> "displayName"), _gv, name _sr, round (_sr distance2D _v)];
+        } forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {canMove _x}});
         _isler = _isler select {!scriptDone _x};
         if (count _isler >= 2) then { continue };
         {

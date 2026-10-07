@@ -1664,3 +1664,9 @@ v8.141 - SUNUCU RPT 3deb224e (v8.140): TASIMA atanan araclarin muretttebati arac
  - Gorev Ata arac atamasinda ekip grubu araca kaydedilir (ekipGrup).
  - telemetri: TASIMA / MEDEVAC / KARAKOL_ARAC araclarin surucusu kaybolunca [ARAC-SURUCU] satiri: aracin icindekiler, ekip uyelerinin durumu (yasam durumu, arac / yaya, mesafe, davranis, komut) — terk zamanini ve nedenini gostermek icin.
  TEST EDILMEDI.
+
+v8.142 - MURETTEBAT BEKCISI (surucusuz TASIMA / MEDEVAC araci sureklide geri doner)
+ Kullanici: araci birakan arac sahibinin APC'si hareket etmiyor. v8.141 murettebati yalniz nakil basladiginda topluyordu; arac plandan once de surucusuz kalabiliyor.
+ - fnc_taksi (sunucu, 10 sn): TASIMA / MEDEVAC atanmis (kara, hareket edebilen, nakilde olmayan) arac surucusuzsa: kayitli ekip grubu / 120 m icindeki ayni gorevli yaya askerler geri biner (surucu; 2. kisi komutan), 20 sn'de bir deneme, ekip grubu son 30 sn temasta degilse. 25 m icindeyse moveIn, uzaksa orderGetIn. Log [TAKSI] MURETTEBAT BEKCISI.
+ - NEDEN indikleri hala bilinmiyor ([ARAC-SURUCU] logu v8.141'de). Zeus'tan bilerek indirilen mürettebat da geri bindirilir (atamayi "Otomatik" yaparak durdurabilirsiniz).
+ TEST EDILMEDI.
