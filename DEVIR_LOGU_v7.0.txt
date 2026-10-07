@@ -1609,3 +1609,11 @@ v8.134 - ISTIHBARAT: "iddia" ile "gercek" ayri (Irak 2003 / yanlis bilgiyle sivi
  - TOPCU ATIS IZNI (PID): dogrulama 0 / 1: rapor gelmeden atis yok (hazirlik atisi kesif sonuna ertelenir); sivil gozlenirse atis IPTAL; dusman gozlenmediyse atis IPTAL. Dogrulama YOK: iddiaya guvenilir, atar ([PLAN-UYARI]) -> yanlis istihbaratla sivil / dost kaybi mumkun (tarihsel hata canlandirmasi; sistem engellemez, kaydeder).
  - ZARAR TAKIBI: her topcu atisinda 250 m cevredeki sivil / dost / dusman anlik listesi tutulur; plan sonunda [PLAN-ZARAR] + Zeus sohbeti: atis noktasi, kac sivil / dost / dusman oldu (nedeni kesin atanamaz) + [PLAN-ISTIHBARAT] OZET (iddia, rapor).
  - Test edilmedi. Sinir: gozlem 450 m cevresi ve knowsAbout >= 0.8; sivil tespiti yalniz side civilian CAManBase; zarar listesi atis anindaki anlik goruntu.
+
+v8.135 - SUNUCU RPT 36a51c57 (v8.134): nakil artik biniyor; surus / inis takiliyor
+ GOZLEM: MEDEVAC REZERVI calisti (1 arac geride); TAKIM BAZLI BOLME calisti (Alpha 1-4 3/3 takim, Alpha 2-1 1/3 takim; 18 asker 2 araca, 11 yaya); dinamik alma calisti ("BINDI 9 asker" x2, ~50 sn);
+ SORUNLAR: (1) Alpha 2-4 Stryker BINDI'den sonra 114046'da 2+ dk 0 km/s kaldi (MOVE komutu var; [MEKANIZE-YAVAS] forceSpeed sifirlama sonuc vermedi) -> takilma;
+   (2) Alpha 2-3 inis noktasina (111060) 20 m/s ile ~100 m kala ulasti ama 40 m kurali saglanmadi / TAMAM logu yok (log 70 sn sonra bitti); 240 sn zaman asimi disinda bitis kosulu yoktu.
+ DUZELTME (aracTasima surus dongusu): varis = < 60 m ya da (< 180 m ve hiz < 1 m/s, 6 sn); ilerleme logu 20 sn'de bir ([TASIMA] yolda: inise X m | hiz); TAKILMA: 20 sn hareketsiz -> surucu yeniden yonlendirilir (PATH ac, forceSpeed -1, doStop + doMove) + ileri itme (setVelocityModelSpace);
+   45 sn -> 60 m ara nokta + itme; 75 sn -> "TAKILDI": oldugu yerde piyade indirilir (erken inis, log). Takilmanin FIZIKSEL nedeni (arazi / carpisma / baska arac) bilinmiyor.
+ TEST EDILMEDI.

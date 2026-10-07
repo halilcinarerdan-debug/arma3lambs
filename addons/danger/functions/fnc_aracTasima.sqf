@@ -216,18 +216,58 @@ private _isler = [];
         private _erkenInis = "";
         if (_iptal isEqualTo "") then {
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
+            _d enableAI "PATH";
+            _d forceSpeed -1;
             _d doMove _drop;
             private _st = time + 240;
-            waitUntil {
+            // v8.135: ilerleme izleme + TAKILMA tespiti (RPT 36a51c57: bir Stryker 2+ dk 0 km/s MOVE komutuyla kaldi; digeri inis noktasini gecip 40 m kuralini hic saglamadi)
+            private _durgunT = -1;
+            private _denemeN = 0;
+            private _logT = time + 20;
+            private _yakinT = -1;
+            private _bitis = "";
+            while {_bitis isEqualTo ""} do {
                 sleep 1;
-                !alive _v || {!alive _d} || {(_v distance2D _drop) < 40} || {time > _st}
-                || {(_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}
-                || {(getSuppression _d) > 0.5} || {_ctl select 0}
+                private _dm = _v distance2D _drop;
+                private _hz = (speed _v) / 3.6;
+                if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
+                else { if (_ctl select 0) then { _bitis = "iptal"; }
+                else { if (time > _st) then { _bitis = "sure"; }
+                else { if ((_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0 || {(getSuppression _d) > 0.5}) then { _bitis = "temas"; }
+                else { if (_dm < 60) then { _bitis = "vardi"; }
+                else { if (_dm < 180 && {_hz < 1}) then { if (_yakinT < 0) then { _yakinT = time; }; if ((time - _yakinT) > 6) then { _bitis = "vardi"; }; } else { _yakinT = -1; }; }; }; }; }; };
+                if (_bitis isEqualTo "") then {
+                    if (_hz < 0.8 && {_dm > 90}) then {
+                        if (_durgunT < 0) then { _durgunT = time; };
+                        private _dg = time - _durgunT;
+                        if (_denemeN isEqualTo 0 && {_dg > 20}) then {
+                            _denemeN = 1;
+                            diag_log format ["[TASIMA] %1 | TAKILDI? 20 sn hareketsiz (inise %2 m): surucu yeniden yonlendirilir + itme", groupId _vg, round _dm];
+                            _d enableAI "PATH"; _d forceSpeed -1; doStop _d; _d doMove _drop;
+                            _v setVelocityModelSpace [0, 4, 0];
+                        };
+                        if (_denemeN isEqualTo 1 && {_dg > 45}) then {
+                            _denemeN = 2;
+                            private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
+                            diag_log format ["[TASIMA] %1 | TAKILDI: 45 sn; ara noktaya (60 m) yonlendirildi", groupId _vg];
+                            _d doMove _alt;
+                            _v setVelocityModelSpace [0, 5, 0];
+                        };
+                        if (_dg > 75) then { _bitis = "takildi"; };
+                    } else { _durgunT = -1; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
+                    if (time > _logT) then {
+                        _logT = time + 20;
+                        diag_log format ["[TASIMA] %1 | yolda: inise %2 m | hiz %3 km/s", groupId _vg, round _dm, round (speed _v)];
+                    };
+                };
             };
             if (!alive _v || {!alive _d}) then { _iptal = "tasima sirasinda arac / surucu oldu"; };
-            if (_iptal isEqualTo "") then {
-                if ((_v distance2D _drop) >= 40) then {
-                    _erkenInis = [format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)], "sure doldu (240 sn)"] select (time > _st);
+            if (_iptal isEqualTo "" && {_bitis isNotEqualTo "vardi"}) then {
+                _erkenInis = switch (_bitis) do {
+                    case "temas": { format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)] };
+                    case "sure": { "sure doldu (240 sn)" };
+                    case "takildi": { format ["arac TAKILDI (inise %1 m kala)", round (_v distance2D _drop)] };
+                    default { "iptal" };
                 };
             };
         };
