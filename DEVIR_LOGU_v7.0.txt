@@ -1617,3 +1617,10 @@ v8.135 - SUNUCU RPT 36a51c57 (v8.134): nakil artik biniyor; surus / inis takiliy
  DUZELTME (aracTasima surus dongusu): varis = < 60 m ya da (< 180 m ve hiz < 1 m/s, 6 sn); ilerleme logu 20 sn'de bir ([TASIMA] yolda: inise X m | hiz); TAKILMA: 20 sn hareketsiz -> surucu yeniden yonlendirilir (PATH ac, forceSpeed -1, doStop + doMove) + ileri itme (setVelocityModelSpace);
    45 sn -> 60 m ara nokta + itme; 75 sn -> "TAKILDI": oldugu yerde piyade indirilir (erken inis, log). Takilmanin FIZIKSEL nedeni (arazi / carpisma / baska arac) bilinmiyor.
  TEST EDILMEDI.
+
+v8.136 - SUNUCU RPT 013ca3b7 (v8.135): "diger apcler bekledi", nakil yavas, garnizon plan grubunu bosaltti
+ BULGULAR: P2'de 2 TASIMA araci vardi (3. ve 4. araci Zeus plan basladiktan SONRA atadi: 9:32:37 / 9:32:40); MEDEVAC REZERVI hic medevac gorevi yokken 1 araci ayirdi -> yalniz 1 arac 9 asker tasidi (11 yaya).
+   Nakil hizi 11-20 km/s (Stryker AWARE + NORMAL; 890 m ~5 dk, 240 sn sinirina takilacakti). P1 (EAST savun) 24 sn'de "grup kalmadi" ile bitti: karakol garnizonu (nobet 3 + devriye 3) plan grubunun 8 askerinden 6-7'sini aldi.
+ DUZELTME: (1) rezerv yalniz bir MEDEVAC atamasi (grup) varken ve MEDEVAC atanmis ARAC yokken ayrilir; yoksa tum araclar tasir. (2) nakil suruste SAFE + FULL, inise 220 m kala AWARE + NORMAL; zaman siniri = max(240 sn, mesafe / 3.5), <= 600 sn.
+   (3) garnizon havuzu: kaynak gruptan en az 3 asker (lider dahil) kalir. DEGISMEDI: plan basladiktan sonra atanan araclar o planin nakline girmez (taksi bekcisi uzak waypoint'li gruplar icin alabilir).
+ TEST EDILMEDI.

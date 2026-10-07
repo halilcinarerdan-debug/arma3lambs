@@ -158,9 +158,12 @@ private _calis = {
                 if ((side _g) isNotEqualTo _taraf || {isNull (leader _g)} || {isPlayer (leader _g)}) then { continue };
                 if (({isPlayer _x} count (units _g)) > 0) then { continue };
                 if ((leader _g) distance2D _poz > (_yar * 1.5)) then { continue };
-                {
-                    if (alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}) then { _havuz pushBack _x; };
-                } forEach (units _g);
+                // v8.136: kaynak gruptan EN AZ 3 asker (lider dahil) grupta kalir; aksi halde savunma plani / grup bosalir (RPT 013ca3b7: plan 24 sn'de "grup kalmadi" ile bitti)
+                private _us = (units _g) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}};
+                private _ayril = ((count (units _g select {alive _x})) - 3) max 0;
+                private _aday = (_us - [leader _g]);
+                reverse _aday;
+                { _havuz pushBack _x; } forEach (_aday select [0, _ayril min (count _aday)]);
             } forEach (allGroups select {!(call _altGrupAd)});
             // nobetci / devriye icin zaten kullanilanlar havuzda sayilmaz (altgrup disinda)
             private _atama = _durum getOrDefault ["atama", createHashMap];

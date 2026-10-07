@@ -72,7 +72,9 @@ _araclar = [_araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
 
 // ---- v8.131 MEDEVAC REZERVI: Zeus MEDEVAC atamasi yoksa ve >= 2 arac varsa objektiften en uzak (geride) arac medevac icin ayrilir (nakilde kullanilmaz) ----
 private _mdVarMi = (_tumAraclar select {("MEDEVAC" in [_x getVariable ["lambs_danger_gorev", ""], (group (driver _x)) getVariable ["lambs_danger_gorev", ""]])}) isNotEqualTo [];
-if (count _araclar > 1 && {!_mdVarMi} && {missionNamespace getVariable ["lambs_danger_tasimaMedevacRezerv", true]}) then {
+// v8.136: rezerv YALNIZ medevac gorevi varsa (Zeus MEDEVAC atamasi: hekim / medevac ekibi grubu) ayrilir; yoksa tum araclar tasir (RPT 013ca3b7: gorev olmadan rezerv arac bos bekledi)
+private _mdGrupVar = (allGroups select {(side _x) isEqualTo _taraf && {(_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "MEDEVAC"}}) isNotEqualTo [];
+if (count _araclar > 1 && {_mdGrupVar} && {!_mdVarMi} && {missionNamespace getVariable ["lambs_danger_tasimaMedevacRezerv", true]}) then {
     private _uz = [_araclar, [], {_x distance2D _obj}, "DESCEND"] call BIS_fnc_sortBy;
     private _rez = _uz select 0;
     _rez setVariable ["lambs_danger_medevacRezerv", true, true];
@@ -218,8 +220,12 @@ private _isler = [];
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
             _d enableAI "PATH";
             _d forceSpeed -1;
+            // v8.136: RPT 013ca3b7: Stryker nakilde 11-20 km/s ile gitti (890 m = 5 dk, 240 sn sinirina takildi). Arkada (dusman uzak) SAFE + FULL; inise 220 m kala AWARE + NORMAL
+            _vg setBehaviour "SAFE";
+            _vg setSpeedMode "FULL";
             _d doMove _drop;
-            private _st = time + 240;
+            private _st = time + ((240 max ((_v distance2D _drop) / 3.5)) min 600);
+            private _yavasladi = false;
             // v8.135: ilerleme izleme + TAKILMA tespiti (RPT 36a51c57: bir Stryker 2+ dk 0 km/s MOVE komutuyla kaldi; digeri inis noktasini gecip 40 m kuralini hic saglamadi)
             private _durgunT = -1;
             private _denemeN = 0;
@@ -230,6 +236,7 @@ private _isler = [];
                 sleep 1;
                 private _dm = _v distance2D _drop;
                 private _hz = (speed _v) / 3.6;
+                if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
                 else { if (_ctl select 0) then { _bitis = "iptal"; }
                 else { if (time > _st) then { _bitis = "sure"; }
