@@ -1631,3 +1631,14 @@ v8.137 - ARACA SIGMAYANLAR: SEFER (shuttle) + birim bazli filtre
  - Plan TASIMA fazi: is bitince geride kalan (inis noktasindan > 400 m uzakta, >= 3) asker varsa 2. / 3. SEFER (arac iner, geri doner, siradaki takimlari alir; en fazla 3 sefer, faz 300 sn'ye kadar) [PLAN] TASIMA n. SEFER.
  - aracTasima arac uygunlugu: kendi bekleme degiskeni tasimaSonT (15 sn) — sefer arasi 240 sn kilitlenmez.
  SINIR: koltuk sayisi artmaz (FFV / turret koltuklari sayilmiyor); medevac rezervi araci seferlere katilmaz; sefer araclarinin hizi / takilmasi test edilmedi. TEST EDILMEDI.
+
+v8.138 - ANI OLAYLARA DAYANIKLILIK (pusu / hasar / temas): nakil + kesif + garnizon + denetimsiz bekci
+ Kullanici: yolda APC pusuya ugrarsa ne olur; ani olaylarla felc olan diger acikler duzeltilsin. DENETLENEN: yeni sistemlerdeki beklemeler (waitUntil / dongu cikis kosullari). Eski modullerdeki waitUntil'lerin cogu zaman sinirli (hepsi taranmadi, bkz. asagi).
+ ESKI DAVRANIS (aracTasima): temas / baski -> arac DURUR ve herkesi indirir (olum bolgesinde durma); alma / binme sirasinda temas kontrolu yok; arac hasari (canMove) ancak 75 sn TAKILDI ile fark edilir; donus ayni rota; is hata ile olurse tasimaMesgul / forceMove / AUTOCOMBAT kapali kalir.
+ DUZELTMELER:
+ - aracTasima: PUSU kurali: duşman >= 150 m ve arac hareketli -> durmadan HIZLI GECIS (CARELESS + FULL, en fazla 40 sn; 12 sn temassiz kalirsa SAFE normal surus); duşman < 150 m (yakin pusu) ya da gecis suresi doldu -> hemen in; YAKIN PUSUDA arac 30 sn ates eder (COMBAT / RED) sonra doner; HASAR (canMove false / hasar > 0.5) -> aninda in, donus yok.
+   Alma noktasinda piyade ates altindaysa arac yaklasmaz; binerken ates varsa bindirme iptal ve binenler iner. Is hata ile ölürse bayraklar temizlenir ([TASIMA] TEMIZLIK).
+ - Plan: TASIMA fazinda plan gruplarindan biri temastaysa nakil iptal (ctl[0]); RECON gruplari temasa girince GREEN / STEALTH kapanir (YELLOW, AUTO durus, ELITE temas kesme devralir) — kesif unsuru "ates yok" modunda vurulup kalmasin ([PLAN-RECON] TEMAS).
+ - Karakol garnizonu: nobetci baski > 0.7 ya da hasar > 0.4 ise PATH serbest (siper alir), 90 sn sonra pozisyonuna doner. Alarm bekcisine (komutanPlanKapi) supervisor eklendi ([WATCHDOG-YENIDEN]).
+ TARANAN AMA DEGISTIRILMEYEN: aracMedevac yukleme sirasinda temas (boşaltma / yuklemeye devam eder; tahliye icin kabul), TEHLIKE-ALANI (iptalMi kosulu var), TCCC (tcccMedikOk var). NOT: eski modullerin tum waitUntil'leri incelenmedi.
+ TEST EDILMEDI (pusu kurali, hasar, temas iptalleri).

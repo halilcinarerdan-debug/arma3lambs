@@ -135,7 +135,7 @@ if (isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar = createHa
 
 // ALARM bekcisi: duşman karakolun 800 m icinde savunanlarca bilinirse savunma plani kurulur
 if (isServer) then {
-    [] spawn {
+    private _alarmFn = {
         while {true} do {
             sleep 5;
             if (missionNamespace getVariable ["lambs_danger_karakolOff", false]) then { continue };
@@ -153,6 +153,15 @@ if (isServer) then {
                     [_taraf, _poz, createHashMapFromArray [["tip", 1], ["grupN", 8], ["grupMesafe", _yar * 1.5], ["bina", true], ["piyade", true], ["rallyM", 250], ["orpM", 150], ["basla", 0], ["tehditY", 0]]] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
                 };
             } forEach lambs_danger_karakollar;
+        };
+    };
+    [_alarmFn] spawn {
+        params ["_fn"];
+        while {true} do {
+            private _h = [] spawn _fn;
+            waitUntil { sleep 5; scriptDone _h };
+            diag_log "[WATCHDOG-YENIDEN] karakol alarm betigi sonlandi (hata?)";
+            sleep 5;
         };
     };
 };

@@ -182,6 +182,14 @@ private _calis = {
                 private _p = _x select 0;
                 private _u = _atama getOrDefault [str _i, objNull];
                 if (alive _u && {_u in (units _nobetG)}) then {
+                    // v8.138: nobetci ates altinda / yaraliysa PATH serbest (siper alsin); 90 sn sonra pozisyonuna doner (donup kalmasin / yerinde olu ordek olmasin)
+                    if ((_u getVariable ["lambs_danger_nobet", false]) && {((getSuppression _u) > 0.7) || {(damage _u) > 0.4}}) then {
+                        _u setVariable ["lambs_danger_nobet", false, true];
+                        _u setVariable ["lambs_danger_nobetT", time + 90];
+                        _u enableAI "PATH";
+                        _u setUnitPos "AUTO";
+                        diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET %2 ates altinda (baski %3, hasar %4): serbest, 90 sn sonra pozisyona doner", _ad, name _u, (getSuppression _u) toFixed 2, (damage _u) toFixed 2];
+                    };
                     // varmadi mi? (120 sn) -> isinla; varsa PATH kapat
                     if (((getPosATL _u) distance _p) < 4.5) then {
                         if !(_u getVariable ["lambs_danger_nobet", false]) then {
@@ -194,6 +202,7 @@ private _calis = {
                             diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET pozisyonda: %2 (%3 %4)", _ad, name _u, _x select 2, mapGridPosition _p];
                         };
                     } else {
+                        if (!(_u getVariable ["lambs_danger_nobet", false]) && {time > (_u getVariable ["lambs_danger_nobetT", 0])} && {(time - (_u getVariable ["lambs_danger_nobetT", time])) <= 120}) then { _u doMove _p; };
                         if ((time - (_u getVariable ["lambs_danger_nobetT", time])) > 120 && {!(_u getVariable ["lambs_danger_nobet", false])}) then {
                             _u setPosATL _p;
                             _u setVariable ["lambs_danger_nobetT", time];

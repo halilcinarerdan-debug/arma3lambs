@@ -218,6 +218,18 @@ while {true} do {
 
         missionNamespace setVariable ["lambs_danger_planTempoGecici", _plan getOrDefault ["tempo", 0]];
         private _tempo = _plan getOrDefault ["tempo", 0];
+        // v8.138 RECON temas: gizlilik bozulduysa (GREEN = ates yok) serbest birak: YELLOW + AUTO durus; kesif unsuru donup kalmasin
+        {
+            private _rg2 = _x;
+            if (!isNull _rg2 && {[_rg2] call _temasta} && {!(_rg2 getVariable ["lambs_danger_reconCikti", false])}) then {
+                _rg2 setVariable ["lambs_danger_reconCikti", true];
+                _rg2 setCombatMode "YELLOW";
+                _rg2 setBehaviour "AWARE";
+                _rg2 setSpeedMode "NORMAL";
+                { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; }; } forEach (units _rg2);
+                diag_log format ["[PLAN-RECON] %1 | %2 TEMAS: gizlilik bozuldu -> ates serbest (YELLOW), durus AUTO, ELITE temas kesme devralir", _id, groupId _rg2];
+            };
+        } forEach (_plan getOrDefault ["reconG", []]);
         // v8.130 SIZMA / GIZLILIK ONCELIGI (tempo = sessiz / gizli, ya da baskin): toplan / ORP / kesif sirasinda temas yoksa ates yok (GREEN); objektife < 450 m'de comelerek (MIDDLE) ilerle;
         // temas olursa serbest (YELLOW, AUTO). SALDIRI baslayinca herkes AUTO + YELLOW. Doktrin: yaklasma gizli, ates ancak saldiri / temasta (sayi kitapta yok: 450 m = M16 etkili menzil tasarim kullanimi).
         if (_tempo isEqualTo 1 && {_faz in ["TOPLAN", "ORP", "KESIF", "TASIMA"]}) then {
@@ -432,6 +444,11 @@ while {true} do {
         // ---------------------------------------------------------------- TASIMA (arac nakli bitince TOPLAN'a doner; gruplar inis noktasindadir)
         if (_faz isEqualTo "TASIMA") then {
             private _th = _plan getOrDefault ["tasimaH", scriptNull];
+            // v8.138: plan gruplari ates altindaysa (arac yolda olsa bile) nakil iptal: piyade oldugu yerde savasir / plan devam eder
+            if (!scriptDone _th && {(_gruplar findIf {[_x] call _temasta}) >= 0} && {!((_plan getOrDefault ["tasimaCtl", [false]]) select 0)}) then {
+                (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
+                diag_log format ["[PLAN] %1 TASIMA: plan grubu temasta -> nakil iptal (binenler oldugu yerde iner)", _id];
+            };
             if (_fazSure > 420 && {!scriptDone _th}) then {
                 (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
                 diag_log format ["[PLAN] %1 TASIMA zaman asimi (420 sn): nakil iptal, gruplar oldugu yerden devam", _plan get "id"];

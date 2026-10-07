@@ -159,6 +159,10 @@ private _isler = [];
         _d disableAI "AUTOCOMBAT";
         private _ad = getText (configOf _v >> "displayName");
         private _iptal = "";
+        private _temasVar = {
+            params ["_ul", "_dr"];
+            ((_ul findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0) || {(getSuppression _dr) > 0.5}
+        };
 
         // (1) RP'ye gel
         // v8.133 DINAMIK ALMA: arac tasinacak piyadenin ANLIK merkezine gider (piyade yurumeye devam etse bile takip eder); 60 m'ye gelince durur
@@ -182,10 +186,12 @@ private _isler = [];
                 _pk = [_gl] call _pickFn;
                 if (_pk isNotEqualTo [] && {(time - _sonMove) > 4}) then { _d doMove _pk; _sonMove = time; };
                 !alive _v || {!alive _d} || {_pk isEqualTo []} || {(_v distance2D _pk) < 60} || {time > _t} || {_ctl select 0}
+                || {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}
             };
         };
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
         if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
+        if (_iptal isEqualTo "" && {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}) then { _iptal = "alma noktasinda piyade ates altinda (arac yaklasmadi)"; };
         if (_iptal isEqualTo "" && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
 
         // (2) bin
@@ -206,16 +212,25 @@ private _isler = [];
             waitUntil {
                 sleep 1;
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
+                || {[_hepsi, _d] call _temasVar}
                 || {(time > (_bt - 15)) && {((_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}) isEqualTo []) isEqualTo false}}
             };
+            if ([_hepsi, _d] call _temasVar) then {
+                // binerken ates: bindirme iptal; binenler iner (arac ates altinda piyadeyi yuklemez)
+                { if (alive _x && {(vehicle _x) isEqualTo _v}) then { unassignVehicle _x; doGetOut _x; }; } forEach _hepsi;
+                _iptal = "binerken temas / baski: bindirme iptal";
+            };
             // gecikenler: 40 m icindeyse arac icine al
-            { if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _hepsi;
-            _binen = _hepsi select {alive _x && {(vehicle _x) isEqualTo _v}};
-            if (_binen isEqualTo []) then { _iptal = "kimse binmedi"; };
+            { if (_iptal isEqualTo "" && {alive _x} && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _hepsi;
+            _binen = if (_iptal isEqualTo "") then {_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}} else {[]};
+            if (_iptal isEqualTo "" && {_binen isEqualTo []}) then { _iptal = "kimse binmedi"; };
         };
 
         // (3) inis noktasina sur
         private _erkenInis = "";
+        private _bitis = "";
+        private _yakinPusu = false;
+        private _gecisT = -1;
         if (_iptal isEqualTo "") then {
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
             _d enableAI "PATH";
@@ -231,7 +246,6 @@ private _isler = [];
             private _denemeN = 0;
             private _logT = time + 20;
             private _yakinT = -1;
-            private _bitis = "";
             while {_bitis isEqualTo ""} do {
                 sleep 1;
                 private _dm = _v distance2D _drop;
@@ -240,9 +254,31 @@ private _isler = [];
                 if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
                 else { if (_ctl select 0) then { _bitis = "iptal"; }
                 else { if (time > _st) then { _bitis = "sure"; }
-                else { if ((_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0 || {(getSuppression _d) > 0.5}) then { _bitis = "temas"; }
+                else { if ((!canMove _v) || {(damage _v) > 0.5}) then { _bitis = "hasar"; }
+                else { if ([_binen, _d] call _temasVar && {_gecisT < 0 || {(time - _gecisT) > 40}}) then {
+                    // PUSU (v8.138): dusman >= 150 m ve arac hareketli -> ates altinda DURMA, tam gazla gec (en fazla 40 sn); yakin pusu (< 150 m) / hasar -> hemen in
+                    private _en = _d findNearestEnemy (getPosATL _d);
+                    private _edm = if (isNull _en) then {9999} else {_v distance2D _en};
+                    if (_gecisT < 0 && {_edm >= 150}) then {
+                        _gecisT = time;
+                        _vg setBehaviour "CARELESS";
+                        _vg setSpeedMode "FULL";
+                        _d forceSpeed -1;
+                        _d doMove _drop;
+                        diag_log format ["[TASIMA] %1 | PUSU / TEMAS: dusman %2 m -> durmadan HIZLI GECIS (en fazla 40 sn), inise %3 m", groupId _vg, [round _edm, "bilinmiyor"] select (_edm >= 9999), round _dm];
+                    } else {
+                        _yakinPusu = _edm < 150;
+                        _bitis = "temas";
+                        diag_log format ["[TASIMA] %1 | %2: dusman %3 m -> HEMEN IN", groupId _vg, ["TEMAS (gecis suresi doldu)", "YAKIN PUSU"] select _yakinPusu, [round _edm, "bilinmiyor"] select (_edm >= 9999)];
+                    };
+                }
                 else { if (_dm < 60) then { _bitis = "vardi"; }
-                else { if (_dm < 180 && {_hz < 1}) then { if (_yakinT < 0) then { _yakinT = time; }; if ((time - _yakinT) > 6) then { _bitis = "vardi"; }; } else { _yakinT = -1; }; }; }; }; }; };
+                else { if (_dm < 180 && {_hz < 1}) then { if (_yakinT < 0) then { _yakinT = time; }; if ((time - _yakinT) > 6) then { _bitis = "vardi"; }; } else { _yakinT = -1; }; }; }; }; }; }; };
+                if (_bitis isEqualTo "" && {_gecisT > 0} && {!([_binen, _d] call _temasVar)} && {(time - _gecisT) > 12}) then {
+                    diag_log format ["[TASIMA] %1 | pusudan cikildi, normal surus (inise %2 m)", groupId _vg, round _dm];
+                    _gecisT = -1;
+                    _vg setBehaviour "SAFE";
+                };
                 if (_bitis isEqualTo "") then {
                     if (_hz < 0.8 && {_dm > 90}) then {
                         if (_durgunT < 0) then { _durgunT = time; };
@@ -273,6 +309,7 @@ private _isler = [];
                 _erkenInis = switch (_bitis) do {
                     case "temas": { format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)] };
                     case "sure": { "sure doldu (240 sn)" };
+                    case "hasar": { format ["arac HASARLI / hareket edemiyor (inise %1 m kala)", round (_v distance2D _drop)] };
                     case "takildi": { format ["arac TAKILDI (inise %1 m kala)", round (_v distance2D _drop)] };
                     default { "iptal" };
                 };
@@ -290,7 +327,15 @@ private _isler = [];
         diag_log format ["[TASIMA] %1 | %2 | inen %3 / %4%5", groupId _vg, ["TAMAM", "IPTAL: " + _iptal] select (_iptal isNotEqualTo ""), {alive _x && {(vehicle _x) isNotEqualTo _v}} count _binen, count _binen, ["", " | erken inis: " + _erkenInis] select (_erkenInis isNotEqualTo "")];
 
         // (5) RP'ye don, bekle
-        if (alive _v && {alive _d}) then {
+        if (alive _v && {alive _d} && {_yakinPusu}) then {
+            // yakin pusu: araci terk edilmis birakma, silahci ates etsin (30 sn), sonra don
+            _d enableAI "AUTOCOMBAT";
+            _vg setBehaviour "COMBAT";
+            _vg setCombatMode "RED";
+            sleep 30;
+            _vg setCombatMode "YELLOW";
+        };
+        if (alive _v && {alive _d} && {_bitis isNotEqualTo "hasar"}) then {
             _d doMove _rp;
             private _bt2 = time + 150;
             waitUntil { sleep 2; !alive _v || {(_v distance2D _rp) < 50} || {time > _bt2} };
@@ -314,4 +359,14 @@ private _isler = [];
 } forEach _eslesme;
 
 waitUntil { sleep 2; (_isler findIf {!scriptDone _x}) isEqualTo -1 };
+// v8.138: is hata ile olurse bayraklar sizmasin (arac sonsuza dek "mesgul" / surucu forceMove / AUTOCOMBAT kapali)
+{
+    _x params ["_v"];
+    if (!isNull _v && {_v getVariable [QGVAR(tasimaMesgul), false]}) then {
+        _v setVariable [QGVAR(tasimaMesgul), nil];
+        private _dr = driver _v;
+        if (!isNull _dr) then { _dr setVariable [QGVAR(forceMove), nil]; _dr enableAI "AUTOCOMBAT"; (group _dr) setVariable [QGVAR(isExecutingTactic), nil]; };
+        diag_log format ["[TASIMA] TEMIZLIK: %1 bayraklari sifirlandi (is beklenmedik bicimde bitti)", getText (configOf _v >> "displayName")];
+    };
+} forEach _eslesme;
 _tasinan
