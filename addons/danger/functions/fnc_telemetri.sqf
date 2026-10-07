@@ -65,6 +65,22 @@ private _calis = {
             diag_log format ["[TELEMETRI-SUNUCU] t=%1 | fps %2 (min %3) | yerel AI grup:%4 asker:%5 | taraf [grup, asker]: %6 | plan:%7 | donus animasyonunda:%8 | isServer:%9",
                 round time, round diag_fps, round diag_fpsMin, count _yerel, _asker, _taraf toArray false, _planN, _donus, isServer];
         };
+        // v8.141: gorev atanmis araclarda SURUCU kayboldu mu? (RPT 3deb224e: TASIMA araclarinin murettebati araci terk etmisti, ne zaman / neden bilinmiyordu)
+        {
+            private _v = _x;
+            private _gv = _v getVariable ["lambs_danger_gorev", ""];
+            if (_gv in ["TASIMA", "MEDEVAC", "KARAKOL_ARAC"] && {alive _v}) then {
+                private _sr = driver _v;
+                private _durumKey = format ["%1", if (isNull _sr) then {"YOK"} else {"VAR"}];
+                if ((_v getVariable ["lambs_danger_surucuLog", ""]) isNotEqualTo _durumKey) then {
+                    _v setVariable ["lambs_danger_surucuLog", _durumKey];
+                    private _eg = _v getVariable ["lambs_danger_ekipGrup", grpNull];
+                    diag_log format ["[ARAC-SURUCU] %1 (%2) | surucu %3 | arac icinde: %4 | ekip grubu %5: %6", getText (configOf _v >> "displayName"), _gv, _durumKey, (crew _v) apply {name _x},
+                        if (isNull _eg) then {"kayitsiz"} else {groupId _eg},
+                        if (isNull _eg) then {[]} else {(units _eg) apply {format ["%1 [%2, arac:%3, %4 m, beh %5, komut %6]", name _x, lifeState _x, [typeOf (vehicle _x), "yaya"] select (isNull objectParent _x), round (_x distance2D _v), behaviour _x, currentCommand _x]}}];
+                };
+            };
+        } forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"}});
         private _satir = 0;
         {
             if (_satir >= 14) exitWith {};

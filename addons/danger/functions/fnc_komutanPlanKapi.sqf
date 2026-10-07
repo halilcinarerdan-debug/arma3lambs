@@ -71,6 +71,8 @@ lambs_danger_planKapiStarted = true;
     if (_hedef isKindOf "CAManBase" && {!isNull objectParent _hedef}) then { _nesneler pushBack (vehicle _hedef); };
     if (!isNull _g) then { _nesneler pushBack _g; };
     { _x setVariable ["lambs_danger_gorev", _kod, true]; } forEach _nesneler;
+    // v8.141: arac atamasinda ekip grubu kaydi (surucu araci terk ederse yeniden binmesi icin)
+    if (!(_hedef isEqualType grpNull) && {!(_hedef isKindOf "CAManBase")} && {!isNull _g}) then { _hedef setVariable ["lambs_danger_ekipGrup", _g, true]; };
     diag_log format ["[GOREV-ATAMA] %1 -> %2 (nesne: %3)", [groupId _g, "-"] select (isNull _g), ["TEMIZLENDI", _kod] select (_kod isNotEqualTo ""), count _nesneler];
 }] call CBA_fnc_addEventHandler;
 

@@ -33,6 +33,30 @@ params ["_taraf", "_gruplar", "_rp", "_obj", "_B", "_orpM", ["_menzil", 2500], [
 if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0};
 
 
+// ---- v8.141 MURETTEBAT TOPLAMA (RPT 3deb224e: TASIMA atanan araclarin surucusu aracta degildi: "surucu YOK" x4; mürettebat aracin yaninda ayakta duruyordu) ----
+// Surucusu olmayan TASIMA aracina: kayitli ekip grubunun (ekipGrup) ya da TASIMA gorevli grupların aracin 80 m yanindaki yaya askerleri binerek surucu / komutan olur.
+{
+    private _v = _x;
+    private _adaylar = [];
+    private _eg = _v getVariable ["lambs_danger_ekipGrup", grpNull];
+    if (!isNull _eg) then { _adaylar append ((units _eg) select {alive _x && {isNull objectParent _x} && {!isPlayer _x}}); };
+    {
+        if (!(_x in _adaylar)) then { _adaylar pushBack _x; };
+    } forEach (allUnits select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(side _x) isEqualTo _taraf} && {((group _x) getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"} && {(_x distance2D _v) < 80}});
+    if (_adaylar isNotEqualTo []) then {
+        private _sr = _adaylar select 0;
+        _sr assignAsDriver _v;
+        _sr moveInDriver _v;
+        diag_log format ["[TASIMA] MURETTEBAT TOPLAMA: %1 | surucu yoktu -> %2 (%3 m yaninda, yayaydi) surucu yapildi; ekip aday %4", getText (configOf _v >> "displayName"), name _sr, round (_sr distance2D _v), count _adaylar];
+        if (count _adaylar > 1) then {
+            private _kmt = _adaylar select 1;
+            if (isNull (commander _v)) then { _kmt assignAsCommander _v; _kmt moveInCommander _v; };
+        };
+    } else {
+        diag_log format ["[TASIMA] MURETTEBAT YOK: %1 | surucu yok, ekip grubu / yakinda TASIMA gorevli yaya asker bulunamadi (ekipGrup %2)", getText (configOf _v >> "displayName"), if (isNull _eg) then {"kayitsiz"} else {groupId _eg}];
+    };
+} forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {isNull (driver _x)} && {(_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"}});
+
 // ---- arac adaylari ----
 // v8.133: arac araniyor yeri = tasinacak piyadenin AGIRLIK MERKEZI (RP degil): RPT 7f357bf1'de arac + piyade RP'ye 2580 m uzaktaydi, 2500 m sinirina takilip sessizce is yapilmadi
 private _merkezPiy = {

@@ -1655,3 +1655,12 @@ v8.140 - SUNUCU RPT 2ca0498e (v8.139): nakil 2 / 3 arac calisti, 1 arac bindirdi
    (kurtarma 20 / 45 / 75 sn idi).
  NEDEN BILINMIYOR (hasar / yakit / carpisma / AI?). DUZELTME: kurtarma 8 / 18 / 35 sn; ilk mudahalede TAKILMA TANISI logu (motor, yakit, hasar, canMove, surucu + lifeState, currentCommand, PATH / MOVE AI ozellikleri, 9 m icindeki nesneler) ve PATH / MOVE / ANIM AI acma, motor acma, doStop + doMove, ileri itme.
  TEST EDILMEDI.
+
+v8.141 - SUNUCU RPT 3deb224e (v8.140): TASIMA atanan araclarin muretttebati araci terk etmis ("surucu YOK")
+ GOZLEM: P1'de 3 atanmis arac "surucu YOK" ile elendi ([TASIMA] arac YOK ... uygun 0); P2'de 1 atanmis arac "surucu YOK". [DURUM] Alpha 2-4: Walker YAYA ayakta (anim psraswrfldnon_ai) arac yaninda — plan baslamadan once (2:28:11).
+   Araci kimin / ne zaman terk ettirdigi RPT'den cikarilamiyor (repoda mürettebati indiren kod yok: grep leaveVehicle / moveOut yalniz aracTasima + aracMedevac'ta; olasi kaynaklar: LAMBS / motor davranisi, Zeus yerlestirme).
+ DUZELTME / TANI:
+ - aracTasima basinda MURETTEBAT TOPLAMA: surucusuz TASIMA aracina kayitli ekip grubu (lambs_danger_ekipGrup) ya da araca 80 m yakin TASIMA gorevli yaya askerler binip surucu / komutan olur ([TASIMA] MURETTEBAT TOPLAMA); bulunamazsa nedeni loglanir ([TASIMA] MURETTEBAT YOK).
+ - Gorev Ata arac atamasinda ekip grubu araca kaydedilir (ekipGrup).
+ - telemetri: TASIMA / MEDEVAC / KARAKOL_ARAC araclarin surucusu kaybolunca [ARAC-SURUCU] satiri: aracin icindekiler, ekip uyelerinin durumu (yasam durumu, arac / yaya, mesafe, davranis, komut) — terk zamanini ve nedenini gostermek icin.
+ TEST EDILMEDI.
