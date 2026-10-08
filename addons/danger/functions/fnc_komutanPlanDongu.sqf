@@ -87,6 +87,11 @@ private _gozlemRapor = {
     { private _g = _x; { _g reveal [_x, 2.5]; } forEach (_hos + _siv); } forEach (_plan get "gruplar");
     diag_log format ["[PLAN-ISTIHBARAT] %1 | RAPOR: %2", _plan get "id", _rap];
     systemChat format ["[ELITE] Istihbarat (%1): %2", _plan get "id", _rap];
+    // v8.143 KESIF-ATES (RUS: sensor-atici < 4 dk, ATP 7-100.1 s. 5056): rapor gelir gelmez hazirlik atisi (izin PID kurallariyla; _topcuAt kendi izin kontrolunu yapar)
+    if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {[((_plan get "gruplar") param [0, grpNull]), "kesifAtesHizli", false] call FUNC(dk)}) then {
+        _plan set ["hazirlikAtildi", true];
+        [_plan, _obj, "HAZIRLIK (kesif-ates, doktrin)"] call _topcuAt;
+    };
     _rap
 };
 // Atis izni (PID): dogrulama 0 tam / 1 son dogrulama: rapor gelmeden atis YOK; sivil gozlenirse atis iptal; dusman gozlenmediyse atis iptal. dogrulama 2 (yok): iddiaya guvenilir, atilir (tarihsel hata canlandirmasi; [PLAN-UYARI])
@@ -107,7 +112,7 @@ private _atisIzni = {
 private _topcuAt = {
     params ["_plan", "_poz", "_ad"];
     private _taraf = _plan get "taraf";
-    private _mermi = _plan getOrDefault ["topcuN", 4];
+    private _mermi = round ((_plan getOrDefault ["topcuN", 4]) * ([((_plan getOrDefault ["gruplar", []]) param [0, grpNull]), "topcuMermiCarpan", 1] call FUNC(dk)));   // v8.143 doktrin: RUS ates agirlikli x2
     // KAYNAK: TC 3-21.76 (Ranger El Kitabi, 2017) s. 3-4 / 3-5: DANGER CLOSE = hedef dost birlige <= 600 m (havan / sahra topcusu: komut cagrisinda ilan edilir, yasak DEGIL);
     //   'risk estimate distance' (RED, %0.1 Pi) tablosu (azami sarj, ayakta): 60 mm ~145 m, 81 / 82 mm ~195 m, 105 mm ~455 m, 120 mm ~430 m. Savasta RED, egitimde MSD kullanilir (kitap).
     //   Burada: dost mesafesi < RED ise o arac ATMAZ; RED'in altinda ama <= 600 m ise 'DANGER CLOSE' loglanir. Cap cikarimi mermi / arac sinif adindan (sezgisel).
@@ -510,6 +515,7 @@ while {true} do {
             // v8.134: kesif kisa / uzun: dogrulama 0 tam (guven yetersizse x2), 1 son dogrulama (30 sn), 2 yok (20 sn)
             private _dgz = _plan getOrDefault ["dogrulama", 0];
             private _kesifS2 = switch (_dgz) do { case 1: {(_kesifS min 30)}; case 2: {20}; default {_kesifS * ([1, 2] select ((_plan getOrDefault ["guven", 1]) isEqualTo 0))} };
+            _kesifS2 = _kesifS2 * ([(_gruplar param [0, grpNull]), "kesifCarpan", 1] call FUNC(dk));   // v8.143 doktrin carpani (RUS 0.6: tempo)
             if (_fazSure > _kesifS2) then {
                 // plan gruplari bu noktaya kadar gozlediklerini rapor eder (recon raporu yoksa); sonra bekleyen hazirlik atisi yeniden degerlendirilir
                 if (_dgz isNotEqualTo 2 && {!(_plan getOrDefault ["raporHazir", false])}) then { [_plan, _gruplar, false, _fazSure, "ORP gozlemi (recon yok)"] call _gozlemRapor; };

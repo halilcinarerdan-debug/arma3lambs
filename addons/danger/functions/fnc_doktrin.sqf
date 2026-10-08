@@ -81,6 +81,7 @@ private _p = createHashMapFromArray [
     ["cekilGuvenM", 450], ["cekilEkSicrama", 9], ["cekilMaxS", 300], ["cekilGozlemM", 280], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
+    ["tasimaInisM", 500], ["tasimaOrpEk", true], ["aracDestekKal", false], ["kesifCarpan", 1], ["topcuMermiCarpan", 1], ["kesifAtesHizli", false],
     ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
 ];
 
@@ -91,7 +92,15 @@ private _tanim = [
     // ABD ordusu / NATO tipi: USMC'ye yakin, biraz daha temkinli
     ["ABD", "USMC", [["assaultM", 42], ["bndBitisM", 38], ["bantlar", [[200, 75, 15], [100, 42, 12], [0, 25, 8]]], ["cekilKayip", 0.4]]],
     // Rus (motorlu piyade): merkezi kontrol, kisa ve kati bound, daha uzak hucum baslangici, daha direncli (yuksek cekilme esigi)
-    ["RUS", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 60, 15], [100, 35, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 30, 45]], ["arkaGuvenlik", false]]],
+    // v8.143 RUS (kaynak: ATP 7-100.1 "Russian Tactics", taburu / tugay duzeyinde; manga / takim sayisi KITAPTA YOK -> asagidaki degerler TASARIM, NATO ile uyumlu):
+    //   - tasimaInisM 300 / tasimaOrpEk false: motorlu piyade "marstan taarruz" ile hedefe son ortulu mevziye (dismount line) kadar ARACLA yaklasir (kitapta mesafe sayisi YOK; NATO'da >= 500 m) [kitap satir 5486-5496]
+    //   - aracDestekKal: inis sonrasi arac "bronegruppa" gibi yerinde piyadeyi ates destegiyle izler, RP'ye donmez [4863-4868, 5993-6003]
+    //   - kesifCarpan 0.6: tempo / hiz vurgusu, kisa durak (sayi yok; "hiz kritik" 5621, 6438)
+    //   - topcuMermiCarpan 2: ana yonde ek topcu, ates agirlikli plan (kitap: 2-4 ek topcu taburu 5458-5460; oran tasarim)
+    //   - kesifAtesHizli: kesif-ates kompleksi: kesif raporu gelince hedef hemen vurulur (sensor-atici < 4 dk, 5056)
+    //   - ast inisiyatifi kitapta VURGULANIR (5554-5557): merkezilestirilmis degil, o yuzden inisiyatif kisilmadi
+    ["RUS", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 60, 15], [100, 35, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 30, 45]], ["arkaGuvenlik", false],
+        ["tasimaInisM", 300], ["tasimaOrpEk", false], ["aracDestekKal", true], ["kesifCarpan", 0.6], ["topcuMermiCarpan", 2], ["kesifAtesHizli", true]]],
     // Cin (PLA): merkezi, siki duzen, uclu hucum hucreleri; kisa kontrollu atilimlar
     ["CHN", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 55, 15], [100, 32, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 28, 45]], ["arkaGuvenlik", false]]],
     // Peshmerge: hafif / yari duzensiz, mevzi savunmasi + atik yerel hucum; gevsek bound, daha yakindan hucum

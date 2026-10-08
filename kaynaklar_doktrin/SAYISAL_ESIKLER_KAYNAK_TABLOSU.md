@@ -45,3 +45,24 @@ Tarama bir alt ajanla yapıldı; **satır numaraları ajan raporundandır**. Ben
 3. Saldırı pozisyonu: objektife ~50 m kala örtülü nokta (örnek emirde var).
 4. Dağılma: gündüz 3-5 m, gece 1-3 m aralık.
 5. Yaralı tahliyesi: > 300 m taşıma için dört kişilik sedye ekibi (CE).
+
+## 4. RUS DOKTRINI — ATP 7-100.1 "Russian Tactics" (v8.143)
+Kaynak dosya: ATP 7-100.1 (tabur / tugay duzeyinde; manga / takim sayisi yok). Satir numaralari alt ajan raporundandir; ben su maddeleri elle dogruladim: dismount line (5486-5496), ast inisiyatifi (5554-5557), ATGM %70 / %30 (4062-4063), hava emniyet mesafeleri (4466-4470), bolum / takim bosluklari (5134), sehir muharebesinde tank / BMP (5993-6003).
+Telif / kisitli metin kopyalanmadi; yalniz davranis ozetleri ve sayilar.
+
+| Konu | Kitapta | Satir | Kodda |
+|---|---|---|---|
+| Inis hatti (dismount line) | Dusmana en yakin SON ORTULU ve GIZLI mevzi; mesafe sayisi YOK; yuksek hassasiyetli silah tehdidinde daha uzakta | 5486-5496 | RUS `tasimaInisM` 300 m (TASARIM), `tasimaOrpEk` false (NATO: >= 500 m ve ORP + 150) |
+| Inis sonrasi arac | "Bronegruppa": piyadeyi ates destegiyle izler ya da zirhli manevra yedegi | 1579-1583, 4863-4868, 5993-6003 | `aracDestekKal` true: arac inis noktasinda kalir, COMBAT |
+| Ast inisiyatifi | Merkezilestirilmis degil; "decentralized execution", ast firsat degerlendirir | 5554-5557 | Inisiyatif KISILMADI (onceki "RUS merkezi" varsayimim kitapla ortusmuyor; NATO ile ayni) |
+| Marstan taarruz | Hiz kritik; sayi yok | 5621, 6438 | `kesifCarpan` 0.6 (TASARIM) |
+| Kesif-ates kompleksi | Hedef tespit - atis < 4 dk ("Strelets"); kara hedefi 12-15 dk | 5056, 2404 | `kesifAtesHizli`: kesif raporu gelince hazirlik atisi |
+| Ek topcu | Ana yonde tugaya 2-4 ek topcu taburu | 5458-5460 | `topcuMermiCarpan` 2 (oran TASARIM) |
+| Ates hasar normlari | Imha 70-90 %, tahrip 50-60 %, bastirma 30 % etki azalmasi | 3586-3594 | Kodda yok |
+| Yuruyen baraj | Ilk hat 2-4 km, sonraki 700-1000 m, son 400-600 m; hat araligi 100-300 m | 3902-3912, 3883-3886 | Kodda yok (topcu takvimi yok) |
+| Hava destegi emniyet mesafesi | Serbest roket 1000 m, helikopter topu 500 m, helikopter MG 300 m | 4466-4470 | Kodda yok (CAS yok) |
+| Savunma | Tabur 5 x 3 km; hendek hatlari 400-600 / 600-1000 m geride; bolukler arasi ~1000 m, takimlar arasi 300 m; bolugun 3 takimi; en az bir takim yedek; ATGM cepheden 2 km | 5070-5072, 4921, 5134, 5083-5086, 4950-4957 | Kodda yok (squad olcegine uymuyor) |
+| Sehir muharebesi | Tanklar sokaga girmez; BMP / BTR iki yan bina guvene alininca arkadan, hedeften ~200 m geride; ustten asagiya temizleme, bodrum son; temizledikten sonra hemen cekilir | 5993-6015 | Oda temizleme ertelenmisti |
+| ATGM hedef orani | Saldirida %70 tanklara, %30 digerlerine | 4062-4063 | Kodda yok |
+| Eselon | Birinci eselon 1/2-2/3, ikinci 1/2-1/3 (yedek degil, gorevli, firsat somurur) | 5443-5454 | Kodda yok |
+| **Kitapta SAYI YOK** | Inis mesafesi, hucum hizi, takim / manga cephesi, ates hazirligi suresi, MLRS dozaji, duman mesafesi, kayip esikleri, kademeli cekilme, savunma yedek orani, arac-piyade senkron mesafesi, gozlem suresi, oda temizleme | — | Tasarim tahmini (NATO ile uyumlu) |

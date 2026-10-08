@@ -1670,3 +1670,11 @@ v8.142 - MURETTEBAT BEKCISI (surucusuz TASIMA / MEDEVAC araci sureklide geri don
  - fnc_taksi (sunucu, 10 sn): TASIMA / MEDEVAC atanmis (kara, hareket edebilen, nakilde olmayan) arac surucusuzsa: kayitli ekip grubu / 120 m icindeki ayni gorevli yaya askerler geri biner (surucu; 2. kisi komutan), 20 sn'de bir deneme, ekip grubu son 30 sn temasta degilse. 25 m icindeyse moveIn, uzaksa orderGetIn. Log [TAKSI] MURETTEBAT BEKCISI.
  - NEDEN indikleri hala bilinmiyor ([ARAC-SURUCU] logu v8.141'de). Zeus'tan bilerek indirilen mürettebat da geri bindirilir (atamayi "Otomatik" yaparak durdurabilirsiniz).
  TEST EDILMEDI.
+
+v8.143 - RUS DOKTRINI (ATP 7-100.1 taramasi; yetki: kullanici "NATO ile harmanla, gerisi sende")
+ Kitap tabur / tugay duzeyinde; takim / manga sayisi yok. Rus profili kitaptan cikan ilkelerle + NATO uyumlu tasarim degerleriyle yenilendi (bkz. SAYISAL_ESIKLER_KAYNAK_TABLOSU.md bolum 4).
+ - Onceki varsayimim "RUS merkezi kontrol" kitapla ortusmuyor: kitap ast inisiyatifini vurgular (satir 5554-5557) -> inisiyatif kisilmadi.
+ - Yeni doktrin anahtarlari (taban GENEL degerleri NATO ile ayni): tasimaInisM 500, tasimaOrpEk true, aracDestekKal false, kesifCarpan 1, topcuMermiCarpan 1, kesifAtesHizli false.
+   RUS: tasimaInisM 300 + tasimaOrpEk false (dismount line: son ortulu mevzi), aracDestekKal true (bronegruppa), kesifCarpan 0.6, topcuMermiCarpan 2, kesifAtesHizli true (kesif raporu gelince hazirlik atisi; PID kurallari gecerli).
+ - Kodda baglandi: aracTasima (inis mesafesi, arac inis noktasinda kalir), komutanPlanDongu (kesif suresi, topcu mermi sayisi, kesif-ates).
+ - Bounding / overwatch: kitapta manga / takim duzeyinde yok; NATO modeli korunur (etiket: tasarim). TEST EDILMEDI.

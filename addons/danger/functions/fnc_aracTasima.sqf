@@ -133,7 +133,10 @@ if (count _araclar > 1 && {_mdGrupVar} && {!_mdVarMi} && {missionNamespace getVa
 };
 
 // ---- birim -> arac eslesmesi: once grup TAMAMI, sigmazsa TAKIM BAZLI (FSE / Maneuver / Reserve; ayni takim ayni araca) ----
-private _dropM = (500 max (_orpM + 150));
+private _dg0 = _gruplar param [0, grpNull];
+private _inisM = [_dg0, "tasimaInisM", 500] call FUNC(dk);
+private _dropM = if ([_dg0, "tasimaOrpEk", true] call FUNC(dk)) then { _inisM max (_orpM + 150) } else { _inisM };
+private _destekKal = [_dg0, "aracDestekKal", false] call FUNC(dk);
 private _kalan = _araclar apply {[_x, _x emptyPositions "cargo"]};
 private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
@@ -172,7 +175,7 @@ if (_eslesme isEqualTo []) exitWith {
 private _drop = _obj getPos [_dropM, _B];
 if (surfaceIsWater _drop) then { _drop = _obj getPos [(_dropM + 100), _B]; };
 // v8.139: inis noktasi yola cekilir (arac yolda cok daha hizli ve takilmaz; RPT 045f5750: Stryker arazide 15-19 km/s gidiyordu): 250 m icindeki yol, objektife >= 460 m (M16 etkili menzili)
-private _yollar = (_drop nearRoads 250) select {(getPosATL _x) distance2D _obj >= 460 && {!surfaceIsWater (getPosATL _x)}};
+private _yollar = (_drop nearRoads 250) select {(getPosATL _x) distance2D _obj >= (_dropM - 40) && {!surfaceIsWater (getPosATL _x)}};
 if (_yollar isNotEqualTo []) then {
     _yollar = [_yollar, [], {_x distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
     _drop = getPosATL (_yollar select 0);
@@ -201,8 +204,8 @@ private _isler = [];
     private _vg = group _d;
     private _rpi = [_rp, _forEachIndex, count _eslesme] call _noktaYay;
     private _dropi = [_drop, _forEachIndex, count _eslesme] call _noktaYay;
-    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl] spawn {
-        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl"];
+    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl, _destekKal, _obj] spawn {
+        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl", "_destekKal", "_obj"];
         _v setVariable [QGVAR(tasimaMesgul), true];
         _v setVariable [QGVAR(aracMedevacT), time];
         private _eskiBeh = behaviour _d;
@@ -399,11 +402,21 @@ private _isler = [];
             sleep 30;
             _vg setCombatMode "YELLOW";
         };
+        if (alive _v && {alive _d} && {_destekKal} && {_bitis isNotEqualTo "hasar"} && {_iptal isEqualTo ""}) then {
+            // RUS bronegruppa: arac inis noktasinda kalir, objektife bakar, piyadeyi ates destegiyle izler (RP'ye donmez)
+            doStop _d;
+            _d enableAI "AUTOCOMBAT";
+            _vg setBehaviour "COMBAT";
+            _vg setCombatMode "YELLOW";
+            { _x doWatch _obj; } forEach (crew _v);
+            diag_log format ["[TASIMA] %1 | BRONEGRUPPA: arac %2 inis noktasinda ates destegi icin kaldi (hedefe %3 m)", groupId _vg, _ad, round (_v distance2D _obj)];
+        } else {
         if (alive _v && {alive _d} && {_bitis isNotEqualTo "hasar"}) then {
             _d doMove _rp;
             private _bt2 = time + 150;
             waitUntil { sleep 2; !alive _v || {(_v distance2D _rp) < 50} || {time > _bt2} };
             if (alive _d) then { doStop _d; };
+        };
         };
         if (!isNull _vg) then {
             _vg setVariable [QGVAR(isExecutingTactic), nil];
