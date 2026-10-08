@@ -17,6 +17,20 @@ lambs_danger_ezmeStarted = true;
 
 diag_log "[EZME] ezme korumasi watchdog'u baslatildi (v8.144)";
 
+// v8.146 TANI: dost yaya BAYILIRSA (ACE unconscious) yakinda hizli giden arac var mi -> [EZME-BAYGIN] (ezilme mi baska sey mi kanitlansin)
+if (!isNil "CBA_fnc_addEventHandler") then {
+    ["ace_unconscious", {
+        params ["_u", "_durum"];
+        if (!_durum || {!isNull objectParent _u}) exitWith {};
+        private _adaylar = (_u nearEntities [["LandVehicle"], 40]) select {(speed _x) > 3 || {(time - (_x getVariable [QGVAR(ezmeSonT), -999])) < 5}};
+        if (_adaylar isEqualTo []) exitWith {};
+        {
+            private _d = driver _x;
+            diag_log format ["[EZME-BAYGIN] %1 (%2) bayildi | arac %3 | surucu %4 | yerel %5 | hiz %6 km/s | mesafe %7 m | fren son %8 sn once", name _u, group _u, typeOf _x, if (isNull _d) then {"yok"} else {name _d}, local _x, round speed _x, round (_u distance2D _x), round (time - (_x getVariable [QGVAR(ezmeSonT), -999]))];
+        } forEach _adaylar;
+    }] call CBA_fnc_addEventHandler;
+};
+
 private _calis = {
     while {true} do {
         sleep 0.5;
@@ -46,6 +60,11 @@ private _calis = {
                 if ((_taraf getFriend (side group _u)) < 0.6) then { continue };
                 private _rel = (getPosASL _u) vectorDiff _p;
                 _rel set [2, 0];
+                // v8.146: arac govdesine 7 m icindeki dost yaya (donus / dar manevra / geri vites) yon farketmeksizin tehlike
+                if ((vectorMagnitude _rel) < 7 && {abs _hiz > 0.4}) then {
+                    _tehlike = true;
+                    if ((vectorMagnitude _rel) < _enYakin) then { _enYakin = vectorMagnitude _rel };
+                };
                 private _boyuna = _rel vectorDotProduct _yon;
                 if (_boyuna < 0 || {_boyuna > _bak}) then { continue };
                 private _yanal = vectorMagnitude (_rel vectorDiff (_yon vectorMultiply _boyuna));

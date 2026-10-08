@@ -1705,3 +1705,9 @@ v8.145 — MURETTEBAT TAMAMLAMA + EZME KORUMASI SIKILASTIRMA (RPT 6c8708da sunuc
  5 km/s siner (kilitlenme onlemi).
  NOT: RPT'de [EZME] satiri YOK ve olum / Casualty yok; ezilme sirasi bu loglarda gorunmuyor (loglar 11:56'da bitiyor).
  Ezilme gorulurse: hangi arac, hangi an (biniste mi yolda mi) ve yaklasik saat yazilsin.
+
+v8.146 — EZME TANISI (kullanici: "adam olmuyor, bayiliyor"; RPT 6c8708da)
+ BULGU: Morris (Alpha 1-5, AT) 11:56:22'de ACE "unconscious" (anim:unconscious); dusman yok, baski 0; Stryker Alpha 2-4 11:55:59'da 9 asker
+ bindirip 37 km/s ile gitmisti; v8.144 [EZME] fren hic tetiklenmedi (RPT'de [EZME] satiri yok) -> ya serit disi gecis ya yavas / donus manevrasi.
+ YAPILDI: (1) arac govdesine 7 m icindeki dost yaya yon fark etmeksizin tehlike (donus / geri vites / dar manevra); (2) ACE "ace_unconscious"
+ olayi: yakinda (40 m) hizli / frenli arac varsa [EZME-BAYGIN] satiri (kim, arac, surucu, hiz, mesafe, son fren) -> bir sonraki RPT'de ezilme mi baska mi kesinlesir.
