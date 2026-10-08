@@ -1728,3 +1728,10 @@ v8.148 — YOLCU BEKCISI (kullanici: "apc'den hala iniyorlar"; RPT 16fa2656)
  DUZELTME (aracTasima): bindirmeden inise kadar yolcu bekcisi (0.25 sn): PATH kapali, currentCommand "GET OUT" ise doStop (log "YOLCU INME EMRI IPTAL" + grup lideri aracta mi),
  arac hareketliyken disariya cikmis yolcu 80 m icinde ise moveInCargo ile geri alinir (log "YOLCU GERI ALINDI"). Inis (4) bayrak yolcuBirak ile biter, PATH acilir.
  BILINMEYEN: GET OUT emrini veren kesin script. Loglardaki "grup lideri aracta mi" alani bunu daraltir.
+
+v8.149 — MURETTEBAT KORUMA (kullanici: "apc crewi iniyor"; RPT 6c8708da / 16fa2656)
+ BULGU: Strykerlarin komutani (ornek Rollins, Taylor) oyun basinda "komut:GET OUT" ile inip aracin 17 m yaninda ayakta kaldi, ayni anda grup liderliginde
+ "LIDER-DEVRI-HALEF" satiri vardi (zaman ortusmesi; devir kodu yalniz on hesap yapiyor, selectLeader yalniz bayilma / olumde). GET OUT emrini veren script kesin degil.
+ YAPILDI: fnc_murettebatKoru.sqf (1 sn, tum yerel kara araclari): surucu / komutan / nisanci / taret AI askerleri kayda alinir; aracta "GET OUT" -> doStop (iptal);
+ disarida (<= 60 m, atama hala bu arac, 20 sn temassiz, arac hareket edebilir, hasar <= 0.6) -> 6 sn'de bir koltuguna doner. Nakil indirmesi sirasinda dokunmaz.
+ Log: [MURETTEBAT-KORU] ... INME EMRI IPTAL (arac hizi, grup, grup lideri aracta mi) / disarida -> koltuguna dondu. Kapatma: lambs_danger_murKoruOff = true.
