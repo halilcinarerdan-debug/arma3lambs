@@ -11,3 +11,4 @@ Eksik: FM 3-21.75 (kullanici henuz metne cevirmedi).
 - DOKTRIN_KATALOG_ARMY_NETWORK.md                   (374 Army yayininin katalogu, oncelik listesi; metin yok, bkz. dosya)
 - ATP_4-25.13_2013_Casualty_Evacuation.txt          (US Army, 15 Feb 2013 — yaralı tahliyesi; Distribution A)
 - ATP_7-100.1_Russian_Ground_Forces_ve_Boevoi_Ustav_Ch3.txt (ATP 7-100.1 Ing. + Rus Boevoi Ustav ch.3 Rusca tam metin; ozet ve satir haritasi: RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md bolum 9)
+- RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md / NATO_ABD_MUFREZE_MANGA_DOKTRIN_NOTLARI.md  (davranis duzeyi ozetler, yan yana karsilastirma tablosu NATO dosyasinda bolum 8)
