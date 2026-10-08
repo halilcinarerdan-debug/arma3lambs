@@ -32,7 +32,32 @@ private _calis = {
             private _gv = _v getVariable ["lambs_danger_gorev", ""];
             if !(_gv in ["TASIMA", "MEDEVAC"]) then { continue };
             if (_v getVariable [QGVAR(tasimaMesgul), false]) then { continue };
-            if (!isNull (driver _v)) then { _v setVariable [QGVAR(murMesgulT), nil]; continue };
+            if (!isNull (driver _v)) then {
+                _v setVariable [QGVAR(murMesgulT), nil];
+                // v8.145 MURETTEBAT TAMAMLAMA: surucu iceride, ayni gruptan biri disarida (RPT 6c8708da)
+                private _dr = driver _v;
+                if (!isPlayer _dr && {local _dr} && {(time - (_v getVariable [QGVAR(murT2), -999])) > 20}) then {
+                    private _vg = group _dr;
+                    if !((time - (_vg getVariable [QGVAR(contact), -999])) < 30) then {
+                        private _dis = (units _vg) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _v) < 150}};
+                        if (_dis isNotEqualTo []) then {
+                            _v setVariable [QGVAR(murT2), time];
+                            {
+                                private _u = _x;
+                                _u enableAI "PATH";
+                                private _yakin = (_u distance2D _v) < 30;
+                                if (isNull (commander _v)) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
+                                    if (isNull (gunner _v)) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
+                                        _u assignAsCargo _v; if (_yakin) then { _u moveInCargo _v; } else { [_u] orderGetIn true; };
+                                    };
+                                };
+                            } forEach _dis;
+                            diag_log format ["[TAKSI] MURETTEBAT TAMAMLAMA: %1 (%2) | disarida %3 kisi araca donduruldu: %4", getText (configOf _v >> "displayName"), _gv, count _dis, _dis apply {name _x}];
+                        };
+                    };
+                };
+                continue
+            };
             if ((time - (_v getVariable [QGVAR(murT), -999])) < 20) then { continue };
             private _eg = _v getVariable ["lambs_danger_ekipGrup", grpNull];
             if (!isNull _eg && {(time - (_eg getVariable [QGVAR(contact), -999])) < 30}) then { continue };

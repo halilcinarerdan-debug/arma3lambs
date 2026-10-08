@@ -2,7 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * EZME KORUMASI (v8.144) — kullanici: "apc ler adamlari eziyor, onune gecemez misin?" (RPT ece75d6d: hizli nakil araclari yaya timlerin yanindan 52 km/s gecti).
- * Her makinede 0.5 sn'de bir: kendi makinemizde yerel, AI surucusu olan, hizi > 6 km/s kara araclari icin hiz yonunde (ileri bakis = 8 m + 1.6 x hiz m/s) 3.5 m seritte
+ * Her makinede 0.5 sn'de bir: kendi makinemizde yerel, AI surucusu olan, hizi > 1.5 km/s kara araclari icin hiz yonunde (ileri bakis = 10 m + 1.6 x hiz m/s) 4 m seritte
  * DOST yaya (dost = surucunun tarafi ile getFriend >= 0.6; yatan / baygin dahil) varsa surucuye forceSpeed 0 (fren); mesafe < 5 m + hiz'a gore ise ek olarak hiz yariya indirilir.
  * Yol temizlenince 1.5 sn sonra forceSpeed -1 (yalniz bu fonksiyon dondurduysa). Dusman yaya icin fren YOK (savas, kasitli).
  * Sinirlama: sadece surucu AI; oyuncu surucuye dokunmaz. Kapatma: lambs_danger_ezmeOff = true. Log: [EZME] (frenleme baslangici, arac basina en fazla 8 sn'de bir).
@@ -30,11 +30,11 @@ private _calis = {
                 continue
             };
             private _hiz = (speed _v) / 3.6;
-            if (abs _hiz < 1.7 && {!_frenli}) then { continue };
+            if (abs _hiz < 0.4 && {!_frenli}) then { continue };
             private _vel = velocity _v;
             private _yon = vectorNormalized [_vel select 0, _vel select 1, 0];
             if (_yon isEqualTo [0,0,0]) then { _yon = vectorDir _v; _yon set [2, 0]; _yon = vectorNormalized _yon };
-            private _bak = 8 + ((abs _hiz) * 1.6);
+            private _bak = 10 + ((abs _hiz) * 1.6);
             private _p = getPosASL _v;
             private _merkez = _p vectorAdd (_yon vectorMultiply (_bak / 2));
             private _taraf = side group _d;
@@ -49,12 +49,15 @@ private _calis = {
                 private _boyuna = _rel vectorDotProduct _yon;
                 if (_boyuna < 0 || {_boyuna > _bak}) then { continue };
                 private _yanal = vectorMagnitude (_rel vectorDiff (_yon vectorMultiply _boyuna));
-                if (_yanal > 3.5) then { continue };
+                if (_yanal > 4) then { continue };
                 _tehlike = true;
                 if (_boyuna < _enYakin) then { _enYakin = _boyuna };
             } forEach (_merkez nearEntities [["CAManBase"], (_bak / 2) + 4]);
             if (_tehlike) then {
-                _d forceSpeed 0;
+                // 30 sn kesintisiz fren (yoldaki dost yaya kimildamiyor): 5 km/s siner (kilitlenme onlemi)
+                if (!_frenli) then { _v setVariable [QGVAR(ezmeBaslaT), time]; };
+                private _surekli = time - (_v getVariable [QGVAR(ezmeBaslaT), time]);
+                _d forceSpeed ([0, 1.4] select (_surekli > 30));
                 _v setVariable [QGVAR(ezmeFren), true];
                 _v setVariable [QGVAR(ezmeSonT), time];
                 if (_enYakin < (4 + (abs _hiz) * 0.6) && {abs _hiz > 3}) then {
@@ -68,9 +71,10 @@ private _calis = {
                 if (_frenli && {(time - (_v getVariable [QGVAR(ezmeSonT), 0])) > 1.5}) then {
                     _d forceSpeed -1;
                     _v setVariable [QGVAR(ezmeFren), nil];
+                    _v setVariable [QGVAR(ezmeBaslaT), nil];
                 };
             };
-        } forEach (vehicles select {_x isKindOf "LandVehicle" && {alive _x} && {(speed _x) > 6 || {_x getVariable [QGVAR(ezmeFren), false]}}});
+        } forEach (vehicles select {_x isKindOf "LandVehicle" && {alive _x} && {(speed _x) > 1.5 || {_x getVariable [QGVAR(ezmeFren), false]}}});
     };
 };
 

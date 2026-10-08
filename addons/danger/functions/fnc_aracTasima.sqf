@@ -57,6 +57,31 @@ if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0}
     };
 } forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {isNull (driver _x)} && {(_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"}});
 
+// ---- v8.145 MURETTEBAT TAMAMLAMA (RPT 6c8708da: "crewden 1 kisi indi, apc islevsiz": surucu iceride, komutan 17 m disarida yayaydi -> "arac grubundan biri aracin DISINDA" ile elendi) ----
+private _tamamlandi = 0;
+{
+    private _v = _x;
+    private _d = driver _v;
+    if (isNull _d || {isPlayer _d} || {!local _d} || {_v getVariable [QGVAR(tasimaMesgul), false]}) then { continue };
+    private _vg = group _d;
+    if (_vg getVariable [QGVAR(planAktif), false] || {(time - (_vg getVariable [QGVAR(contact), -999])) < 20}) then { continue };
+    private _dis = (units _vg) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _v) < 150}};
+    if (_dis isEqualTo []) then { continue };
+    {
+        private _u = _x;
+        _u enableAI "PATH";
+        private _yakin = (_u distance2D _v) < 30;
+        if (isNull (commander _v)) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
+            if (isNull (gunner _v)) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
+                _u assignAsCargo _v; if (_yakin) then { _u moveInCargo _v; } else { [_u] orderGetIn true; };
+            };
+        };
+    } forEach _dis;
+    _tamamlandi = _tamamlandi + 1;
+    diag_log format ["[TASIMA] MURETTEBAT TAMAMLAMA: %1 | disarida kalan murettebat %2 (%3) araca donduruldu", getText (configOf _v >> "displayName"), count _dis, _dis apply {name _x}];
+} forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(_x distance2D _rp) <= (_menzil + 300)}});
+if (_tamamlandi > 0) then { sleep 6; };
+
 // ---- arac adaylari ----
 // v8.133: arac araniyor yeri = tasinacak piyadenin AGIRLIK MERKEZI (RP degil): RPT 7f357bf1'de arac + piyade RP'ye 2580 m uzaktaydi, 2500 m sinirina takilip sessizce is yapilmadi
 private _merkezPiy = {

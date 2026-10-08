@@ -1694,3 +1694,14 @@ v8.144 — EZME KORUMASI (RPT ece75d6d: "apc ler adamlari eziyor")
  Dusman yaya ve oyuncu surucu hariç. Kapatma: lambs_danger_ezmeOff. Log: [EZME]. rpt_ozet: EZME etiketi, BEKLENEN_SURUM v8.144.
  Bilinen sinirlar: aracSenkron BEKLE ile cakisirsa -1 o beklemeyi kirabilir; ACE hasar katmani degistirilmedi (HandleDamage ile dokunulmadi).
  "Askerler cirilciplak" — RPT'de neden yok; mod kiyafete dokunmuyor (removeUniform/forceAddUniform yok). Istemci RPT'si gerek (model / mod surumu).
+
+v8.145 — MURETTEBAT TAMAMLAMA + EZME KORUMASI SIKILASTIRMA (RPT 6c8708da sunucu + 36c6b6a8 istemci)
+ BULGU: Stryker'larin komutani / 2. muretteb. araca binmemisti ("komut: GET OUT", araca 17 m, 3+ dk ayakta); surucu iceride oldugu icin
+ v8.141/v8.142 (yalniz surucusuz arac) devreye girmedi; aracTasima "arac grubundan biri aracin DISINDA" ile aracları eledi
+ (3 TASIMA atanmis aractan 2'si elendi -> "yaya kalan birim: 7"). GET OUT emrini mod vermiyor (doGetOut yalniz tasima / medevac'ta).
+ DUZELTME: (1) aracTasima basinda ve taksi izleyicisinde (TASIMA / MEDEVAC atanmis, surucu VAR) ayni gruptan disaridakiler 150 m icinde
+ komutan > nisanci > kargo sirasi ile araca donduruldu (30 m icinde moveIn, uzakta orderGetIn); log [TASIMA]/[TAKSI] MURETTEBAT TAMAMLAMA;
+ (2) ezme korumasi: esik 6 -> 1.5 km/s (yavas yaklasmada da fren), serit 3.5 -> 4 m, ileri bakis 10 m + 1.6 x hiz, 30 sn kesintisiz frende
+ 5 km/s siner (kilitlenme onlemi).
+ NOT: RPT'de [EZME] satiri YOK ve olum / Casualty yok; ezilme sirasi bu loglarda gorunmuyor (loglar 11:56'da bitiyor).
+ Ezilme gorulurse: hangi arac, hangi an (biniste mi yolda mi) ve yaklasik saat yazilsin.
