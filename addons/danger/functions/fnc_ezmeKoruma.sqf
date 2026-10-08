@@ -32,14 +32,20 @@ if (!isNil "CBA_fnc_addEventHandler") then {
 };
 
 private _calis = {
+    private _nabizT = time + 60;
+    private _aracSay = 0;
+    private _yayaSay = 0;
+    private _frenSay = 0;
+    private _atlaSay = 0;
     while {true} do {
-        sleep 0.5;
+        sleep 0.25;
         if (missionNamespace getVariable ["lambs_danger_ezmeOff", false]) then { continue };
         {
             private _v = _x;
             private _d = driver _v;
             private _frenli = _v getVariable [QGVAR(ezmeFren), false];
             if (!local _v || {isNull _d} || {!alive _d} || {isPlayer _d} || {!local _d}) then {
+                _atlaSay = _atlaSay + 1;
                 if (_frenli && {!isNull _d} && {local _d}) then { _d forceSpeed -1; _v setVariable [QGVAR(ezmeFren), nil]; };
                 continue
             };
@@ -48,12 +54,16 @@ private _calis = {
             private _vel = velocity _v;
             private _yon = vectorNormalized [_vel select 0, _vel select 1, 0];
             if (_yon isEqualTo [0,0,0]) then { _yon = vectorDir _v; _yon set [2, 0]; _yon = vectorNormalized _yon };
-            private _bak = 10 + ((abs _hiz) * 1.6);
+            private _bak = 10 + ((abs _hiz) * 2.2);
             private _p = getPosASL _v;
+            // v8.147: nearEntities 2B konum ile (ASL z ile aranirsa arazi yuksek ise hic bulamayabilir: RPT 16fa2656 90 km/s gecis, 0 [EZME])
             private _merkez = _p vectorAdd (_yon vectorMultiply (_bak / 2));
             private _taraf = side group _d;
             private _tehlike = false;
             private _enYakin = 1e6;
+            private _yayalar = [_merkez select 0, _merkez select 1] nearEntities [["CAManBase"], (_bak / 2) + 4];
+            _aracSay = _aracSay + 1;
+            _yayaSay = _yayaSay + (count _yayalar);
             {
                 private _u = _x;
                 if (!alive _u || {!isNull objectParent _u} || {_u == _d}) then { continue };
@@ -71,7 +81,7 @@ private _calis = {
                 if (_yanal > 4) then { continue };
                 _tehlike = true;
                 if (_boyuna < _enYakin) then { _enYakin = _boyuna };
-            } forEach (_merkez nearEntities [["CAManBase"], (_bak / 2) + 4]);
+            } forEach _yayalar;
             if (_tehlike) then {
                 // 30 sn kesintisiz fren (yoldaki dost yaya kimildamiyor): 5 km/s siner (kilitlenme onlemi)
                 if (!_frenli) then { _v setVariable [QGVAR(ezmeBaslaT), time]; };
@@ -82,6 +92,7 @@ private _calis = {
                 if (_enYakin < (4 + (abs _hiz) * 0.6) && {abs _hiz > 3}) then {
                     _v setVelocity ((velocity _v) vectorMultiply 0.5);
                 };
+                _frenSay = _frenSay + 1;
                 if ((time - (_v getVariable [QGVAR(ezmeLogT), -999])) > 8) then {
                     _v setVariable [QGVAR(ezmeLogT), time];
                     diag_log format ["[EZME] %1 | surucu %2 | hiz %3 km/s | en yakin dost yaya %4 m onde -> FREN", typeOf _v, name _d, round speed _v, round _enYakin];
@@ -93,7 +104,13 @@ private _calis = {
                     _v setVariable [QGVAR(ezmeBaslaT), nil];
                 };
             };
-        } forEach (vehicles select {_x isKindOf "LandVehicle" && {alive _x} && {(speed _x) > 1.5 || {_x getVariable [QGVAR(ezmeFren), false]}}});
+        } forEach (vehicles select {_x isKindOf "LandVehicle" && {alive _x} && {(abs speed _x) > 1.5 || {_x getVariable [QGVAR(ezmeFren), false]}}});
+        // v8.147 NABIZ: 60 sn'de bir, izlenen hareketli arac turu / bulunan yaya / fren turu (yaya sayisi 0 ise arama bos donuyor demektir)
+        if (time > _nabizT) then {
+            _nabizT = time + 60;
+            if (_aracSay > 0 || {_atlaSay > 0}) then { diag_log format ["[EZME-NABIZ] son 60 sn: hareketli arac turu %1 | seridde taranan yaya (toplam) %2 | fren turu %3 | atlanan (yerel degil / surucusuz / oyuncu) %4", _aracSay, _yayaSay, _frenSay, _atlaSay]; };
+            _aracSay = 0; _yayaSay = 0; _frenSay = 0; _atlaSay = 0;
+        };
     };
 };
 

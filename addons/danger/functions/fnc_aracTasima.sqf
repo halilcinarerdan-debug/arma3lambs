@@ -364,6 +364,14 @@ private _isler = [];
                     _gecisT = -1;
                     _vg setBehaviour "SAFE";
                 };
+                // v8.147: MOTOR ZORLAMASI (RPT 16fa2656: Stryker 1-5 "motor false", 35 sn hareketsiz, tek engineOn yetmedi) -> yolda motor kapaliysa surekli ac
+                if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)} && {_dm > 40}) then {
+                    _v engineOn true;
+                    if !(_v getVariable [QGVAR(motorLogT), false]) then {
+                        _v setVariable [QGVAR(motorLogT), true];
+                        diag_log format ["[TASIMA] %1 | MOTOR KAPALIYDI -> engineOn true zorlandi (%2)", groupId _vg, getText (configOf _v >> "displayName")];
+                    };
+                };
                 if (_bitis isEqualTo "") then {
                     if (_hz < 0.8 && {_dm > 90}) then {
                         if (_durgunT < 0) then { _durgunT = time; };
@@ -384,7 +392,14 @@ private _isler = [];
                         if (_denemeN isEqualTo 1 && {_dg > 18}) then {
                             _denemeN = 2;
                             private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
-                            diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; ara noktaya (60 m) yonlendirildi", groupId _vg];
+                            diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; surucu yeniden oturtuldu + ara noktaya (60 m) yonlendirildi (motor %2)", groupId _vg, isEngineOn _v];
+                            // v8.147: AI surucu durumu bozuk olabilir -> koltuktan cikarip tekrar oturt (yolcular yerinde kalir)
+                            moveOut _d;
+                            sleep 0.5;
+                            _d assignAsDriver _v;
+                            _d moveInDriver _v;
+                            _v engineOn true;
+                            _d enableAI "PATH"; _d enableAI "MOVE";
                             _d doMove _alt;
                             _v setVelocityModelSpace [0, 6, 0];
                         };
