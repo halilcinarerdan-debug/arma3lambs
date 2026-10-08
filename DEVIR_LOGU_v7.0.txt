@@ -1678,3 +1678,8 @@ v8.143 - RUS DOKTRINI (ATP 7-100.1 taramasi; yetki: kullanici "NATO ile harmanla
    RUS: tasimaInisM 300 + tasimaOrpEk false (dismount line: son ortulu mevzi), aracDestekKal true (bronegruppa), kesifCarpan 0.6, topcuMermiCarpan 2, kesifAtesHizli true (kesif raporu gelince hazirlik atisi; PID kurallari gecerli).
  - Kodda baglandi: aracTasima (inis mesafesi, arac inis noktasinda kalir), komutanPlanDongu (kesif suresi, topcu mermi sayisi, kesif-ates).
  - Bounding / overwatch: kitapta manga / takim duzeyinde yok; NATO modeli korunur (etiket: tasarim). TEST EDILMEDI.
+
+[DOKUMAN] Rus müfreze/manga doktrin notları eklendi (kod değişikliği yok, sürüm aynı):
+ kaynaklar_doktrin/RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md — ATP_7-100.1.txt içindeki
+ Rusça nizamname (Bölüm 3) özetlendi; davranış düzeyi, metin kopyalanmadı;
+ ileride eklenecekler listesi 7. bölümde.
