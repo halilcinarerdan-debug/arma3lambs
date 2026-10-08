@@ -7,7 +7,7 @@
  *   - Kayitli murettebat araca aitken "GET OUT" emri alirsa -> doStop (iptal) + log.
  *   - Kayitli murettebat disarida ise (aractan <= 60 m, yaya, saglikli / yarali, grup 20 sn temassiz, arac hareket edebilir ve hasar <= 0.6, oyuncu araca binmemis):
  *     6 sn'de bir kendi koltuguna geri doner (30 m icinde moveIn, uzakta orderGetIn). Mürettebat kaydi koltugu bossa gecerli; doluysa bir sonraki bos murettebat koltugu.
- * Atlanir: araba oyuncu icerir, arac devrik / yaniyor (canMove false veya hasar > 0.6), ELITE taşıma indirmesi (tasimaMesgul ve yolcuBirak), kapatma: lambs_danger_murKoruOff = true.
+ * Atlanir: arac yaniyor (isBurning), temasta inme emri iptal edilmez; araba oyuncu icerir, arac devrik / yaniyor (canMove false veya hasar > 0.6), ELITE taşıma indirmesi (tasimaMesgul ve yolcuBirak), kapatma: lambs_danger_murKoruOff = true.
  * Log: [MURETTEBAT-KORU] (ilk inme emri / geri donus; arac basina 20 sn'de en fazla bir).
  *
  * Arguments: None
@@ -26,7 +26,7 @@ private _calis = {
         if (missionNamespace getVariable ["lambs_danger_murKoruOff", false]) then { continue };
         {
             private _v = _x;
-            if (!local _v || {!canMove _v} || {(damage _v) > 0.6}) then { continue };
+            if (!local _v || {!canMove _v} || {(damage _v) > 0.6} || {isBurning _v}) then { continue };
             if ((crew _v) findIf {isPlayer _x} >= 0) then { continue };
             private _kayit = _v getVariable [QGVAR(murKayit), []];
             // yeni murettebati kaydet
@@ -46,7 +46,8 @@ private _calis = {
                 _x params ["_u", "_rolAd"];
                 private _gr = group _u;
                 if ((vehicle _u) isEqualTo _v) then {
-                    if ((currentCommand _u) isEqualTo "GET OUT") then {
+                    // temasta (son 20 sn) inme emri iptal edilmez: ates altindaki murettebat (AT isabeti, yaklasan tehdit) cikabilir
+                    if ((currentCommand _u) isEqualTo "GET OUT" && {(time - (_gr getVariable [QGVAR(contact), -999])) >= 20}) then {
                         doStop _u;
                         if ((time - (_v getVariable [QGVAR(murLogT), -999])) > 20) then {
                             _v setVariable [QGVAR(murLogT), time];

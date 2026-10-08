@@ -1735,3 +1735,4 @@ v8.149 — MURETTEBAT KORUMA (kullanici: "apc crewi iniyor"; RPT 6c8708da / 16fa
  YAPILDI: fnc_murettebatKoru.sqf (1 sn, tum yerel kara araclari): surucu / komutan / nisanci / taret AI askerleri kayda alinir; aracta "GET OUT" -> doStop (iptal);
  disarida (<= 60 m, atama hala bu arac, 20 sn temassiz, arac hareket edebilir, hasar <= 0.6) -> 6 sn'de bir koltuguna doner. Nakil indirmesi sirasinda dokunmaz.
  Log: [MURETTEBAT-KORU] ... INME EMRI IPTAL (arac hizi, grup, grup lideri aracta mi) / disarida -> koltuguna dondu. Kapatma: lambs_danger_murKoruOff = true.
+v8.149b — murettebat koruma: yanan arac (isBurning) atlanir; temasta (son 20 sn) GET OUT iptal edilmez (ates altinda murettebat cikabilir).
