@@ -1687,3 +1687,10 @@ v8.143 - RUS DOKTRINI (ATP 7-100.1 taramasi; yetki: kullanici "NATO ile harmanla
  RUS notlarina bolum 8 (IED disi konular) ve bolum 9 (satir haritasi) eklendi. Kod degisikligi yok.
 [DOKUMAN] NATO_ABD_MUFREZE_MANGA_DOKTRIN_NOTLARI.md eklendi (ATP 3-21.8, TC 3-21.76, MCWP 3-11.1/11.2 vb.);
  RUS ile yan yana tablo (bolum 8). Kod degisikligi yok.
+
+v8.144 — EZME KORUMASI (RPT ece75d6d: "apc ler adamlari eziyor")
+ fnc_ezmeKoruma.sqf (yeni, her makinede yerel AI surucu): hiz yonunde ileri bakis (8 m + 1.6 x hiz) ve 3.5 m seritte dost yaya
+ (yatan / baygin dahil) varsa surucuye forceSpeed 0; < 4 m + 0.6 x hiz ise hiz yariya iner; yol temizlenince 1.5 sn sonra forceSpeed -1.
+ Dusman yaya ve oyuncu surucu hariç. Kapatma: lambs_danger_ezmeOff. Log: [EZME]. rpt_ozet: EZME etiketi, BEKLENEN_SURUM v8.144.
+ Bilinen sinirlar: aracSenkron BEKLE ile cakisirsa -1 o beklemeyi kirabilir; ACE hasar katmani degistirilmedi (HandleDamage ile dokunulmadi).
+ "Askerler cirilciplak" — RPT'de neden yok; mod kiyafete dokunmuyor (removeUniform/forceAddUniform yok). Istemci RPT'si gerek (model / mod surumu).
