@@ -318,6 +318,36 @@ private _isler = [];
         private _gecisT = -1;
         if (_iptal isEqualTo "") then {
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
+            // v8.148 YOLCU BEKCISI (RPT 16fa2656: Newton / Moore "komut:GET OUT" 80-90 km/s giden Stryker'da, Moore 12:12:39 28 km/s anim:unconscious = disari atlamis):
+            // tasima suresince yolcunun PATH'i kapali, "GET OUT" emri alirsa iptal (doStop), araca aitken disarida kalirsa (aractan < 80 m, arac hareketli) geri alinir. Inis (4) bayrak koyunca biter.
+            _v setVariable [QGVAR(yolcuBirak), false];
+            [_v, _binen, groupId _vg] spawn {
+                params ["_v", "_ps", "_gid"];
+                { if (alive _x) then { _x disableAI "PATH"; }; } forEach _ps;
+                private _ilk = [];
+                while {alive _v && {!(_v getVariable [QGVAR(yolcuBirak), false])} && {_v getVariable [QGVAR(tasimaMesgul), false]}} do {
+                    {
+                        private _u = _x;
+                        if (!alive _u) then { continue };
+                        if ((vehicle _u) isEqualTo _v) then {
+                            if ((currentCommand _u) isEqualTo "GET OUT") then {
+                                doStop _u;
+                                if !(_u in _ilk) then {
+                                    _ilk pushBack _u;
+                                    diag_log format ["[TASIMA] %1 | YOLCU INME EMRI IPTAL: %2 | arac hizi %3 km/s | grup %4 | grup lideri aracta mi: %5", _gid, name _u, round speed _v, groupId (group _u), (vehicle (leader (group _u))) isEqualTo _v];
+                                };
+                            };
+                        } else {
+                            if ((_u distance2D _v) < 80 && {(speed _v) > 3} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(_v emptyPositions "cargo") > 0}) then {
+                                _u moveInCargo _v;
+                                diag_log format ["[TASIMA] %1 | YOLCU GERI ALINDI: %2 | arac hizi %3 km/s", _gid, name _u, round speed _v];
+                            };
+                        };
+                    } forEach _ps;
+                    sleep 0.25;
+                };
+                { if (alive _x) then { _x enableAI "PATH"; }; } forEach _ps;
+            };
             _d enableAI "PATH";
             _d forceSpeed -1;
             // v8.136: RPT 013ca3b7: Stryker nakilde 11-20 km/s ile gitti (890 m = 5 dk, 240 sn sinirina takildi). Arkada (dusman uzak) SAFE + FULL; inise 220 m kala AWARE + NORMAL
@@ -424,6 +454,8 @@ private _isler = [];
         };
 
         // (4) in
+        _v setVariable [QGVAR(yolcuBirak), true];
+        { if (alive _x) then { _x enableAI "PATH"; }; } forEach _binen;
         doStop _d;
         {
             if (alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}) then { unassignVehicle _x; doGetOut _x; };

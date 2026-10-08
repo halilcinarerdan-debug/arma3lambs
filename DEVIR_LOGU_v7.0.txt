@@ -1720,3 +1720,11 @@ v8.147 — MOTOR ZORLAMASI + EZME TESPIT DUZELTMESI (RPT 16fa2656 sunucu + 7823e
  BULGU 2: HIZ-ANOMALI Alpha 2-4 Moore 12:12:39 28 km/s anim:unconscious (yerde yatan asker 7.7 m/s = aractan carpilmis), Stryker'lar 64-90 km/s gidiyordu;
   [EZME] hic tetiklenmedi (v8.144 sunucuda). DUZELTME: tarama 2B konum (nearEntities [x,y]), tick 0.25 sn, ileri bakis 10 + 2.2 x hiz, geri vites (abs speed),
   [EZME-NABIZ] 60 sn'de bir: hareketli arac turu / seritte taranan yaya / fren turu / atlanan arac -> arama bos mu donuyor, yerel degil mi kanitlansin.
+
+v8.148 — YOLCU BEKCISI (kullanici: "apc'den hala iniyorlar"; RPT 16fa2656)
+ BULGU: Newton / Moore (Alpha 2-4, Alpha 1-4 Stryker'inda yolcu) 12:12:20 "komut:GET OUT", lider 467-472 m uzakta, arac 78-90 km/s gidiyor; Moore 12:12:39
+ "HIZ-ANOMALI 28 km/s anim:unconscious" = hizli aractan atlayip bayilmis (ezilme degil, ejeksiyon). Mod baska yerde GetOut komutu vermiyor
+ (aracTasima / aracMedevac / taksi disinda leaveVehicle / doGetOut / moveOut yok); kaynak buyuk olasilikla vanilla: lideri disarida olan grubun kargo askeri hareket emri alinca iner.
+ DUZELTME (aracTasima): bindirmeden inise kadar yolcu bekcisi (0.25 sn): PATH kapali, currentCommand "GET OUT" ise doStop (log "YOLCU INME EMRI IPTAL" + grup lideri aracta mi),
+ arac hareketliyken disariya cikmis yolcu 80 m icinde ise moveInCargo ile geri alinir (log "YOLCU GERI ALINDI"). Inis (4) bayrak yolcuBirak ile biter, PATH acilir.
+ BILINMEYEN: GET OUT emrini veren kesin script. Loglardaki "grup lideri aracta mi" alani bunu daraltir.
