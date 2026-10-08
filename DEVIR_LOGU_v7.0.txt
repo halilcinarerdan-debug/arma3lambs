@@ -1683,3 +1683,5 @@ v8.143 - RUS DOKTRINI (ATP 7-100.1 taramasi; yetki: kullanici "NATO ile harmanla
  kaynaklar_doktrin/RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md — ATP_7-100.1.txt içindeki
  Rusça nizamname (Bölüm 3) özetlendi; davranış düzeyi, metin kopyalanmadı;
  ileride eklenecekler listesi 7. bölümde.
+[DOKUMAN] Rus nizamname kaynak metni kaynaklar_doktrin/ altina eklendi (kullanici onayi: baska sohbette PDF gerekmesin);
+ RUS notlarina bolum 8 (IED disi konular) ve bolum 9 (satir haritasi) eklendi. Kod degisikligi yok.

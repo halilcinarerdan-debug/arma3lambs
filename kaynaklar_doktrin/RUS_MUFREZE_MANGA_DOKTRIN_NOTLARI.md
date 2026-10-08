@@ -114,3 +114,59 @@ Etiketler: [KAYNAK] = nizamnamede açıkça yazan sayı/kural.
    gece muharebesi) henüz özetlenmedi; oda temizleme/el bombası en sona kalır.
 10. NATO ile karşılaştırmalı tablo: aynı kavram için ABD/USMC ve RUS sayıları
     yan yana (SAYISAL_ESIKLER_KAYNAK_TABLOSU.md'e taşınabilir).
+
+## 8. IED DIŞINDAKİ KONULAR (davranış özeti; Nizamname §madde)
+Ateş pususu (§139-145, savunma):
+- Müfreze/manga/tank, sapör ve alev atıcıyla takviyeli. Tank tehlikeli yönde cephe
+  önünde, derinde, boşluklarda veya yanlarda kurulur.
+- Mevzi: tepe geri yamacı, arazi kıvrımı, yerleşim/orman kenarı, çalılık. Gizli,
+  iyi gözlemli, çekilme yolu olan yer. Komutan savaş aracından yönetir.
+- Yakın ve çapraz ateş, mayın/engel ile birleşik, ileride gözcü, ayrılırken örtücü grup.
+- [TASARIM] Savunma planında 1 element "ateş pususu" rolü (geri yamaç, gözcü, çekilme
+  noktası, ateşe kadar HOLD FIRE).
+Yerleşim yeri savunması (§146-148):
+- Müfreze 1–2 bina, manga bir bina veya kat. Kuvvetin çoğu alt kat/bodrum; üst katta
+  münferit silah ve keskin nişancı. Ağır silah sokak/meydan boyunca ateşler.
+- Dairesel savunma, komşusuz uzun süre. Pencere/kapı kapatılıp mazgal açılır; binalar
+  arası geçit (duvar delikleri, avlular, yer altı). Tank kavşakta/meydan önünde, duvar arkasında.
+Yerleşim yeri taarruzu (§253):
+- Müfreze sokak boyunca bir/iki yanda, manga tek yanda. Karşılıklı destek = sokağın
+  karşı tarafındaki binalara ateş.
+- Önce destek ve araç grubu hedef ile komşu binayı vurur; mangalar pencere/kapı/mazgala
+  ateş ederken delik ve gizli yollardan yaklaşır. Yaklaştıkça destek ateşi üst katlara
+  kayar. Pencere/çatı atıcısına keskin nişancı; alt kat/bodruma bombaatar, alev atıcı, araç.
+- Girişte bomba ve yakın ateş; gruplar birbirini her yönden örter; merdiven başları
+  alınıp düşman bölünür; bir kısım alt katı temizler, diğeri üst katlara çıkar.
+  [Oda temizleme en sona bırakıldı.]
+Gece (§94-95, §216):
+- Savunma gündüzün devamı; araçlar geçici ileri mevzilere çıkabilir. Gece görüş
+  menziline göre ateş şeritleri; gündüzden belirlenmiş yer işaretleri, işaret mayınları.
+- Taarruz gündüz hazırlanır; yön azimutu, tanıma işaretleri, iz bırakan mermi;
+  keşif, yön tutma ve kendi konumunu zamanında işaretleme öncelikli.
+- [TASARIM] Gece taarruzunda işaretleme (IR/flaş) ve yavaş tempo.
+Orman/bataklık, dağ, çöl, kış (§163-177, §265-278):
+- Orman-bataklık: görüş kısa, çatışma yakın; küçük grup pusuları, yakın ateş, yan/arka manevra.
+- Dağ: kısıtlı yön; ayrı noktalar dairesel savunmaya hazır ve ateşle bağlı; boşluklar ateş
+  pusuları ve engellerle; müfreze ana kuvvetten kopuk ve geniş cephede durabilir.
+- Çöl/kış: geniş cephe, mesafeler büyür, keşif kolu daha uzağa gider (§301-304).
+Abluka/blokaj (§326-328):
+- Bölgeyi yalıtır, çıkış/girişi keser. Birinci kademe müfreze ≤750 m, manga ≤250 m;
+  kombine yedek kaçış yönlerini kapatır ve takip eder.
+Keşif pususu (§314-317):
+- Gözcüler, yakalama grubu (bir manga'ya kadar, araçsız), güvenlik grubu (durdurur,
+  çekilmeyi örter), kontrol/ateş destek grubu. Amaç esir, belge, silah numunesi.
+Marşta pusu (§363):
+- Araçlar hemen ateş açar, sis perdesi atar, korunan araçları ateşten çıkarır, personel iner.
+  Çıkarma imkânsızsa yaya mevzi alıp yoğun ateşle karşılık verir, mümkünse saldırır;
+  yardım gelirse düşman kaçırılmaz. (Mevcut tasima pusu mantığıyla uyumlu.)
+Zırh grubu (bronegruppa, §133):
+- Birkaç tank/BMP/BTR (genelde indirmesiz) hazır tutulur; tehdit yönünü takviye eder,
+  delikleri kapatır. [Uygulandı: aracDestekKal.]
+
+## 9. Kaynak dosyalar (başka sohbette PDF atmaya gerek yok)
+- kaynaklar_doktrin/ATP_7-100.1_Russian_Ground_Forces_ve_Boevoi_Ustav_Ch3.txt
+  İlk ~9700 satır: ATP 7-100.1 İngilizce (batalyon/tugay). Satır ~9725+: Боевой устав ч.3
+  (Rusça, müfreze/manga/tank), bölümler: 1→9753, 2→10619, 3→12561, 4→14188,
+  5→14698, 6→15148, 7→15517, 8→15747.
+- Arama: grep -n -i "засад" dosya.txt (Rusça) veya grep -n -i "ambush" (İngilizce kısım).
+- Diğer metinler: kaynaklar_doktrin/README.txt.
