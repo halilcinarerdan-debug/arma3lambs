@@ -116,6 +116,11 @@ private _reconG = allGroups select {
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {
     private _uzak = (_gruplar + _reconG) select {!local _x};
+    // v8.155: yeni yaratilmis (< 60 sn) uzak grubu hemen devretme (envanter / kiyafet kaybi, RPT 7ab83653): yasi dolana kadar bekle (en fazla 60 sn)
+    if (_uzak isNotEqualTo []) then {
+        private _t1 = time;
+        waitUntil { sleep 1; ((_uzak findIf {(time - (_x getVariable [QGVAR(gorulduT), -999])) < 60}) isEqualTo -1) || {(time - _t1) > 60} };
+    };
     {
         diag_log format ["[PLAN-DEVIR] %1 | sahip makine %2 -> sunucu (2)", groupId _x, groupOwner _x];
         _x setGroupOwner 2;

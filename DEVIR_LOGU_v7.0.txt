@@ -1775,3 +1775,11 @@ v8.154 — CEPHANE ENVANTER DOLU + [CEPHANE-ENV] (kullanici: ESKI surumle tekrar
  Kucuk squad'da MG / asistan / TL birbirinin tek ortagi: aktarim hemen baslar. Envanter DOLUYKEN alici addMagazine yapamaz; verici removeMagazines (hepsini al) + kalani geri ekle yaparken de yer / sira degisir.
  DEGISIKLIK: alici canAdd kontrolu (sigmayan sarjor verene geri doner, log "alici envanteri DOLU"); aktarim oncesi / sonrasi kiyafet / yelek / canta karsilastirmasi: [CEPHANE-ENV] DEGISTI (kiyafet kaybolursa kesin kanit).
  Kanitlanmadi: ciplaklik nedeni hala belirsiz; v8.153 (animasyon kapali) + v8.154 (canAdd + ENV logu) birlikte test edilmeli.
+
+v8.155 — CIPLAKLIK KOK NEDENI (BULUNDU): grupSunucuDevir (v8.124) Zeus'un yeni yarattigi gruplari 5-8 sn icinde setGroupOwner 2 ile devrediyordu. (RPT 7ab83653 + f5900d52)
+ KANIT: [GIYIM-TANI] ILK (ilk gorulme, devirden 5 sn sonra) EAST 3 kisilik squad'larda: gm_gc_army_antitank_* ve gm_gc_army_machinegunner_assistant_* -> kiyafet '' yelek '' canta '' migfer '' ana silah '' sarjor 0
+ (ayni squad'da MG Brockmeier TAM donanimli). Zaman cizgisi: 7:41:31-33 "Server: Object 4:30..4:53 not found" (Zeus istemcisi 4'un yeni yarattigi nesneler henuz sunucuda yok), 7:41:38 [SUNUCU-DEVIR] Alpha 1-1 / 1-2 (EAST) sahip 4 -> sunucu,
+ 7:41:43 ilk gorulmede AT + MG asistan bos. Kiyafet / yelek / canta ayri ag nesneleri: cantali roller (AT, MG asistan) en cok nesneye sahip -> en cok kayip; BLUFOR squad'i (devir 8 sn sonra) o seferde sansla saglamdi.
+ Bu fork'a ozgu (v8.124'te eklendi): kullanicinin yillardir kullandigi modlarla (orijinal LAMBS) olmuyordu. Eski surumde ve 3 kisilik squad'da (hizli devir) olmasi, 10 kisilikte olmamasi uyumlu.
+ DUZELTME: yeni yaratilan grup (ilk gorulmeden) 120 sn devredilmez (lambs_danger_sunucuDevirBekleS); plan devri (komutanPlan) yeni grubu en fazla 60 sn yasi dolana kadar bekler. Kapatma: lambs_danger_sunucuDevirOff = true.
+ GIYIM-TANI / CEPHANE-ENV izleyicileri kalir (dogrulama icin). Cephane animasyon kapatma (v8.153) ve canAdd (v8.154) onlemleri kalir ama kok neden bu degildi.
