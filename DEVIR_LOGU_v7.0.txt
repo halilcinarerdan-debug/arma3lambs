@@ -1770,3 +1770,8 @@ v8.153 — CEPHANE PutDown ANIMASYONU KAPATILDI (kullanici: "modlar yillardir ay
  verici ve alici "playActionNow PutDown" oynatir (silahi indirir / kaldirir = silah degisim animasyonu) ve removeMagazines / addMagazine yapar -> AT / MG asistan / TL ile ortusur.
  Degisiklik: animasyon varsayilan KAPALI (lambs_danger_cephaneAnimAcik = true ile acilir); aktarimin kendisi duruyor. Tam kapatma: lambs_danger_cephanePaylasOff = true. A/B: silahDegisimOff, cephanePaylasOff, giyimTaniOff anahtarlari.
  TEST EDILMEDI. Ciplaklik suruyorsa: sirasiyla lambs_danger_cephanePaylasOff = true, lambs_danger_silahDegisimOff = true, sonra fork yerine orijinal LAMBS Danger.
+
+v8.154 — CEPHANE ENVANTER DOLU + [CEPHANE-ENV] (kullanici: ESKI surumle tekrar etti: 3 kisilik squad'da MG'de 1 kisi ciplak, 10 kisilikte 0; "herkesin envanteri full, ben giydirmedim, grup halinde koydum")
+ Kucuk squad'da MG / asistan / TL birbirinin tek ortagi: aktarim hemen baslar. Envanter DOLUYKEN alici addMagazine yapamaz; verici removeMagazines (hepsini al) + kalani geri ekle yaparken de yer / sira degisir.
+ DEGISIKLIK: alici canAdd kontrolu (sigmayan sarjor verene geri doner, log "alici envanteri DOLU"); aktarim oncesi / sonrasi kiyafet / yelek / canta karsilastirmasi: [CEPHANE-ENV] DEGISTI (kiyafet kaybolursa kesin kanit).
+ Kanitlanmadi: ciplaklik nedeni hala belirsiz; v8.153 (animasyon kapali) + v8.154 (canAdd + ENV logu) birlikte test edilmeli.

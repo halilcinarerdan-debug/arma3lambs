@@ -27,6 +27,8 @@ private _aktar = {
     params ["_v", "_a", "_tur", "_sinif", "_adet", "_sebep"];
     private _t0 = time;
     private _g = group _a;
+    // v8.154: aktarim oncesi teçhizat goruntusu (kiyafet / yelek / canta); sonra karsilastirilir ([CEPHANE-ENV]) -> ciplaklik suphesi kanitlansin
+    private _once = [uniform _v, vest _v, backpack _v, uniform _a, vest _a, backpack _a];
     _v setVariable [QGVAR(cephaneT), time];
     _a setVariable [QGVAR(cephaneAliciT), time];
     // v8.107: aktarim bitene kadar grup ve alici kilitli (kullanici: 7 asker yarim kalan aktarimin ustune ust uste 1-2 sarjor verdi)
@@ -87,7 +89,11 @@ private _aktar = {
             _a doWatch objNull;
             if (missionNamespace getVariable ["lambs_danger_cephaneAnimAcik", false]) then { _a playActionNow "PutDown"; };   // yerden alma (egilme)
             sleep 1.2;
-            { _a addMagazine [_sinif, _x select 1]; _yapilan = _yapilan + 1; } forEach _liste;
+            // v8.154: envanter dolu ise (kullanici: "herkesin envanteri full") ALICI sigdirabildigini alir; sigmayan verene geri doner (kaybolmaz / yere dusmez)
+            private _sigmayan = [];
+            { if (_a canAdd _sinif) then { _a addMagazine [_sinif, _x select 1]; _yapilan = _yapilan + 1; } else { _sigmayan pushBack _x; }; } forEach _liste;
+            if (_sigmayan isNotEqualTo [] && {alive _v}) then { { if (_v canAdd _sinif) then { _v addMagazine [_sinif, _x select 1]; }; } forEach _sigmayan; };
+            if (_sigmayan isNotEqualTo []) then { diag_log format ["[CEPHANE] %1 -> %2 | %3: alici envanteri DOLU, %4 sarjor verene dondu", name _v, name _a, _sinif, count _sigmayan]; };
             deleteVehicle _tutucu;
         } else {
             // alinamadi: yerde kalir (120 sn sonra silinir; baska asker alabilir)
@@ -100,6 +106,10 @@ private _aktar = {
     _a setVariable [QGVAR(cephaneAliciT), time];
     if (alive _a) then { _a doFollow (leader _g); };
     diag_log format ["[CEPHANE] %1 | %2 -> %3 | %4 x%5 (%6) | yere birakti -> aldi: %7 | %8 | %9 sn", groupId _g, name _v, name _a, _sinif, count _liste, _tur, _yapilan > 0, _sebep, round (time - _t0)];
+    private _sonra = [uniform _v, vest _v, backpack _v, uniform _a, vest _a, backpack _a];
+    if (_sonra isNotEqualTo _once) then {
+        diag_log format ["[CEPHANE-ENV] DEGISTI | %1 -> %2 | once [kiyafet, yelek, canta] verici+alici: %3 | sonra: %4", name _v, name _a, _once, _sonra];
+    };
 };
 missionNamespace setVariable ["lambs_danger_cephaneAktarFn", _aktar];
 
