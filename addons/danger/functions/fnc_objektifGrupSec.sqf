@@ -78,5 +78,6 @@ private _alanlar = _parca apply {
         }, [_taraf, _obj, _ayar, _adaylar, _bas, _secili]] call CBA_fnc_execNextFrame;
     },
     {},
+    {},   // onLoad (v8.160: eksikti -> arguman dizisi onLoad sanilip "call [..]" hatasi verdi, OK calismadi; RPT bf897b86)
     [_taraf, _obj, _ayar, _adaylar, _bas, _secili, _parca]
 ] call EFUNC(main,showDialog);
