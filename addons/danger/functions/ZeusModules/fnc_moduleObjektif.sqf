@@ -83,7 +83,11 @@ if (_activated && local _logic) then {
                                                 ];
                                                 // v8.150: Elle grup secimi (yalniz ele gecir / savun): squad listesi paneli, secilenler "secili" ile gonderilir
                                                 if (_secimModu isEqualTo 1 && {_tip in [0, 1]}) exitWith {
-                                                    [_taraf, _obj, _ayar] call (missionNamespace getVariable ["lambs_danger_fnc_objektifGrupSec", {}]);
+                                                    // v8.162: 4/4 paneli kapanirken ayni karede yeni dialog acilamiyordu ("4/4'ten sonra yok"); diger paneller gibi sonraki karede ac
+                                                    [{
+                                                        params ["_taraf", "_obj", "_ayar"];
+                                                        [_taraf, _obj, _ayar] call (missionNamespace getVariable ["lambs_danger_fnc_objektifGrupSec", {systemChat "[ELITE] objektifGrupSec fonksiyonu bu istemcide yuklu degil (eski mod surumu?)"; diag_log "[PLAN-ISTEK] objektifGrupSec TANIMSIZ (istemci eski surum)";}]);
+                                                    }, [_taraf, _obj, _ayar]] call CBA_fnc_execNextFrame;
                                                 };
                                                 // Zeus modulu curator'un makinesinde calisir; plan gruplarin yerel oldugu SUNUCUDA kurulur (CBA sunucu olayi; HashMap -> cift listesi)
                                                 ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;

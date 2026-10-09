@@ -1830,3 +1830,8 @@ v8.161 — ELLE SECIM TANISI (kullanici: "ok basiyorum kapanmiyor", "uygun grup 
  Mesaj kaynagi belirsiz (panel: "Secilebilir grup yok" ya da sunucu yaniti: "PLAN KURULAMADI: uygun grup yok"). TANI EKLENDI: (1) panel bos ise sohbette ve RPT'de secilen taraf + taraf basina AI grup /
  >= 3 saglam asker / objektife <= 6000 m sayilari ([PLAN-ISTEK] elle secim: aday yok); (2) sunucuda elle secilen gruplar plana alinmazsa her grubun eleme nedeni ([PLAN] KURULAMADI (elle secim): taraf, lider, saglam asker,
  gorev, planAktif, tarafKapali, garnizonAlt, aracta, yerel). Dialog OK'un kapanmamasi: v8.160 showDialog imza duzeltmesi (eksik onLoad {}) sonrasi tekrar denenmeli; kapanmiyorsa istemci RPT'sinde showDialog hatasi.
+
+v8.162 — "4/4'TEN SONRA YOK" (kullanici: elle secimde 4/4 OK'tan sonra squad listesi acilmiyor)
+ NEDEN (buyuk olasilik): squad paneli, 4/4 panelinin ONAY callback'i icinde AYNI KAREDE showDialog ile aciliyordu; panel kapanirken yeni dialog acilamiyor / hemen kapaniyor.
+ Diger paneller ([{...}, [args]] call CBA_fnc_execNextFrame) sonraki karede aciyor. v8.159 oturumunda ayni noktada 24 kez showDialog hatasi vardi (dialog acildi ama onay calismadi), v8.160 imza duzeltmesinden sonra sessiz kaldi.
+ DUZELTME: objektifGrupSec cagrisi execNextFrame ile sonraki kareye alindi; fonksiyon tanimsizsa sohbette + RPT'de bildirilir. TEST EDILMEDI.
