@@ -47,7 +47,7 @@ _unit doTarget _target;
 if ((currentWeapon _unit) isNotEqualTo _launcher) then {
     if ((time - (_unit getVariable [QGVAR(atSelectTime), -999])) > 6) then {
         _unit setVariable [QGVAR(atSelectTime), time];
-        [_unit, _launcher] call CBA_fnc_selectWeapon;
+        if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_unit, _launcher] call CBA_fnc_selectWeapon };
         [{
             params ["_u", "_t"];
             if (alive _u && {alive _t} && {[_u, _t, "RPG"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {

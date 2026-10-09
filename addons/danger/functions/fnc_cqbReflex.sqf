@@ -82,7 +82,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                                 && {_e isKindOf "CAManBase"}
                                 && {(primaryWeapon _u) isNotEqualTo ""}
                             ) then {
-                                _u selectWeapon (primaryWeapon _u);
+                                if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon (primaryWeapon _u) };
                             };
 
                             _u doWatch _e;

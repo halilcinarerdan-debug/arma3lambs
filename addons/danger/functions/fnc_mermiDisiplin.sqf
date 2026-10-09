@@ -77,7 +77,7 @@ private _calis = {
                     if (_yeniK) then {
                         private _h = handgunWeapon _u;
                         if (_h isNotEqualTo "" && {((magazines _u) findIf {(toLower _x) in ((compatibleMagazines _h) apply {toLower _x})}) >= 0}) then {
-                            _u selectWeapon _h;
+                            if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon _h };
                             _say set ["tabanca", (_say getOrDefault ["tabanca", 0]) + 1];
                         };
                         _say set ["kritik", (_say getOrDefault ["kritik", 0]) + 1];

@@ -164,7 +164,7 @@ if ((missionNamespace getVariable ["lambs_danger_uglKararN", 0]) < 60) then {
 };
 _unit doWatch _target;
 _unit doTarget _target;
-_unit selectWeapon _gl;
+if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _unit selectWeapon _gl };
 
 [{
     params ["_u", "_t", "_muzzle", "_salvo"];
@@ -174,7 +174,7 @@ _unit selectWeapon _gl;
     [{
         params ["_u2", "_s2"];
         if (alive _u2 && {_s2 <= 1}) then {
-            _u2 selectWeapon (primaryWeapon _u2);
+            if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u2 selectWeapon (primaryWeapon _u2) };
             _u2 doWatch objNull;
         };
     }, [_u, _salvo], 2] call CBA_fnc_waitAndExecute;
@@ -185,13 +185,13 @@ for "_i" from 1 to ((_salvo min 3) - 1) do {
     [{
         params ["_u", "_t", "_muzzle"];
         if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0}) then {
-            _u selectWeapon _muzzle;
+            if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon _muzzle };
             [{
                 params ["_u3", "_t3", "_m3"];
                 if (alive _u3 && {!isNull _t3} && {alive _t3} && {(_u3 ammo _m3) > 0} && {[_u3, _t3, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
                     _u3 fireAtTarget [_t3, _m3];
                 };
-                [{ params ["_u4"]; if (alive _u4) then { _u4 selectWeapon (primaryWeapon _u4); }; }, [_u3], 1.5] call CBA_fnc_waitAndExecute;
+                [{ params ["_u4"]; if (alive _u4 && {!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false])}) then { _u4 selectWeapon (primaryWeapon _u4); }; }, [_u3], 1.5] call CBA_fnc_waitAndExecute;
             }, [_u, _t, _muzzle], 1] call CBA_fnc_waitAndExecute;
         };
     }, [_unit, _target, _gl], 4.5 * _i] call CBA_fnc_waitAndExecute;

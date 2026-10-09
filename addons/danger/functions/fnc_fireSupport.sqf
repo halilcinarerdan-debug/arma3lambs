@@ -152,7 +152,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                 // 1) yan silah
                 private _hg = handgunWeapon _u;
                 if (_hg isNotEqualTo "" && {(_u ammo _hg) > 0}) then {
-                    _u selectWeapon _hg;
+                    if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon _hg };
                     continue
                 };
 

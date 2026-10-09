@@ -392,7 +392,7 @@ if (EGVAR(main,debug_functions)) then {
                 if (!_atAtti) then {
                     // AT piyadeye ates ederken ana silaha don
                     if ((secondaryWeapon _x) isNotEqualTo "" && {(currentWeapon _x) isEqualTo (secondaryWeapon _x)}) then {
-                        [_x, primaryWeapon _x] call CBA_fnc_selectWeapon;
+                        if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_x, primaryWeapon _x] call CBA_fnc_selectWeapon };
                     };
                     if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
                         _x doTarget _odak;

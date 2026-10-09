@@ -102,7 +102,7 @@ if (_antiTank && { _vehicleIndex != -1 } && { _launchersAT isNotEqualTo [] || (_
         _x doTarget _targetVehicle;
 
         // extra impetuous to select launcher
-        [_x, secondaryWeapon _x] call CBA_fnc_selectWeapon;
+        if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_x, secondaryWeapon _x] call CBA_fnc_selectWeapon };
         _x setUnitPos "MIDDLE";
         [
             {
