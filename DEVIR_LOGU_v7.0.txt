@@ -1742,3 +1742,13 @@ v8.150 — OPERASYON EMRINDE ELLE SQUAD SECIMI (kullanici: "operasyon emri verir
  oyuncusuz, HARIC / MEDEVAC / TOPCU / TASIMA / KARAKOL_ARAC / RECON ve garnizon alt grubu degil) yakindan uzaga en fazla 16, panel basina 8 onay kutusu (en yakin 4 isaretli).
  Secilen netId listesi plan ayarina "secili": fnc_komutanPlan yalniz bunlari kullanir (mesafe siniri yok, grupN = secili sayisi; komutan en yuksek rutbeli secili grup lideri).
  Hic secilmezse plan istegi gonderilmez. Yalniz ele gecir / savun; IPTAL / ONAY VER etkilenmez. TEST EDILMEDI (panel akisi oyunda dogrulanmali).
+
+v8.151 — OYUNCU KOMUTASI (5 madde) + GM FRAKSIYONLARI (kullanici: "kontrol bize olsun, 5'ini de ekle", "gm factionlari ile uyumlu olsun")
+ 1) Grup bazinda "OYUNCU KOMUTASI": Gorev Ata'ya iki secenek (OYUNCU KOMUTASI / ELITE TAM ACIK); oyunculu gruplar OTOMATIK oyuncu modunda (kapatma: lambs_danger_oyuncuKomutaOtomatik = false).
+    Oyuncu modu = tarafSecim mekanizmasi (LAMBS FSM + karar izleyicileri kapali, tarafKapali): kacis / bounding / cekilme / moral karari / plan beyni oyuncunun AI'sina kontrol vermez.
+ 2) Guvenlik acik: TCCC, cephane paylasimi, IED farkindaligi (oyuncuKomutaAktif muafiyeti); ezme korumasi ve murettebat korumasi grup bayragina bakmaz (zaten acik).
+ 3) Beceri tabani: varsayilanSkill / ortamSkill iki tarafa ayni uygulanir (degisiklik yok); HQ istihbarati kapali gruplari atlar (bilgi hilesi yok).
+ 4) Fazladan koruma yok: oyuncu modundaki grup ELITE'in cekilme / panik / siper kararlarini otomatik almaz (vanilla AI gibi).
+ 5) Zeus acma / kapama: Gorev Ata modulu ve otomatik oyunculu grup. Log: [OYUNCU-KOMUTA]. Otomatige donmek icin Gorev Ata -> Otomatik.
+ GM: fnc_doktrin faction haritasina gm_gc / gm_pl -> RUS, gm_ge / gm_dk -> ABD, gm_*_pol -> GENEL (kaynaklar_doktrin/RUS... bolum 10).
+ TEST EDILMEDI.

@@ -43,6 +43,16 @@ private _calis = {
             missionNamespace setVariable ["lambs_danger_tarafAdim", format ["grup %1", groupId _g]];
             private _aktif = true;
             { if ((_x select 0) isEqualTo (side _g)) exitWith { _aktif = _x select 1; }; } forEach _durum;
+            // v8.151 OYUNCU KOMUTASI: grupta oyuncu varsa (otomatik, lambs_danger_oyuncuKomutaOtomatik=false ile kapanir) ya da Zeus 'OYUNCU KOMUTASI' dediyse grup
+            // taraf kapali gibi LAMBS FSM + karar izleyicilerinden cikar (ELITE'in taktik beyni oyuncunun AI'sina kontrol vermez); TCCC / cephane / IED / ezme / murettebat acik kalir
+            private _om = _g getVariable QGVAR(oyuncuKomuta);
+            private _oyuncuK = if (isNil "_om") then { (missionNamespace getVariable ["lambs_danger_oyuncuKomutaOtomatik", true]) && {((units _g) findIf {isPlayer _x}) >= 0} } else { _om };
+            _g setVariable [QGVAR(oyuncuKomutaAktif), _oyuncuK && _aktif];
+            if (_oyuncuK isNotEqualTo (_g getVariable [QGVAR(oyuncuLog), false])) then {
+                _g setVariable [QGVAR(oyuncuLog), _oyuncuK];
+                diag_log format ["[OYUNCU-KOMUTA] %1 | %2 | %3", groupId _g, ["ELITE taktik ACIK", "OYUNCU KOMUTASI (ELITE taktik kapali; tedavi / cephane / IED acik)"] select _oyuncuK, ["zorla (Zeus)", "otomatik"] select (isNil "_om")];
+            };
+            _aktif = _aktif && {!_oyuncuK};
             private _kapali = _g getVariable [QGVAR(tarafKapali), false];
             if (!_aktif && {!_kapali}) then {
                 _g setVariable [QGVAR(tarafKapali), true];

@@ -170,3 +170,8 @@ Zırh grubu (bronegruppa, §133):
   5→14698, 6→15148, 7→15517, 8→15747.
 - Arama: grep -n -i "засад" dosya.txt (Rusça) veya grep -n -i "ambush" (İngilizce kısım).
 - Diğer metinler: kaynaklar_doktrin/README.txt.
+
+## 10. Global Mobilization (GM) fraksiyonlari — profil eslesmesi (v8.151)
+- gm_gc* (Dogu Almanya NVA / Sinir Birlikleri) ve gm_pl* -> RUS profili (Sovyet etkisi; nizamname bu notlar).
+- gm_ge* (Bati Almanya) ve gm_dk* (Danimarka) -> ABD profili (NATO; ATP 3-21.8 / TC 3-21.76 / MCWP notlari). Polis (gm_gc_pol, gm_ge_pol) -> GENEL.
+- Soguk Savas silah / arac sinifi farki (G3, MG3, BTR-60, Leopard) profil sayilarini degistirmez; fraksiyon haritasi lambs_danger_doktrinHaritasi ile editlenebilir.

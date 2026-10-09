@@ -70,6 +70,12 @@ lambs_danger_planKapiStarted = true;
     if (!(_hedef isEqualType grpNull) && {!(_hedef isKindOf "CAManBase")}) then { _nesneler pushBack _hedef; };
     if (_hedef isKindOf "CAManBase" && {!isNull objectParent _hedef}) then { _nesneler pushBack (vehicle _hedef); };
     if (!isNull _g) then { _nesneler pushBack _g; };
+    // v8.151: oyuncu komutasi bayragi (gorev degiskenine yazilmaz): OYUNCU = true, ELITE_TAM = false, Otomatik = silinir (oyunculu grup otomatik)
+    if (_kod in ["OYUNCU", "ELITE_TAM"]) exitWith {
+        if (!isNull _g) then { _g setVariable ["lambs_danger_oyuncuKomuta", _kod isEqualTo "OYUNCU", true]; };
+        diag_log format ["[OYUNCU-KOMUTA] %1 -> %2", [groupId _g, "-"] select (isNull _g), ["ELITE TAM ACIK (zorla)", "OYUNCU KOMUTASI (ELITE taktik kapali)"] select (_kod isEqualTo "OYUNCU")];
+    };
+    if (_kod isEqualTo "" && {!isNull _g}) then { _g setVariable ["lambs_danger_oyuncuKomuta", nil, true]; };
     { _x setVariable ["lambs_danger_gorev", _kod, true]; } forEach _nesneler;
     // v8.141: arac atamasinda ekip grubu kaydi (surucu araci terk ederse yeniden binmesi icin)
     if (!(_hedef isEqualType grpNull) && {!(_hedef isKindOf "CAManBase")} && {!isNull _g}) then { _hedef setVariable ["lambs_danger_ekipGrup", _g, true]; };

@@ -294,7 +294,7 @@ private _calis = {
                 _say set [_tur, (_say getOrDefault [_tur, 0]) + 1];
                 [_v, _a, ["BOMBA", "SARJOR"] select (_tur isEqualTo "SARJOR"), _sinif, _adet, _sebep] spawn _aktarFn;
             } forEach _aliciSec;
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false]) || {_x getVariable ["lambs_danger_oyuncuKomutaAktif", false]}}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[CEPHANE-OZET] son 90 sn aktarim baslatma: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };
