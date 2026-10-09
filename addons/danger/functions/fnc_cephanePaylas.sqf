@@ -48,7 +48,8 @@ private _aktar = {
     // 2) verici YERE BIRAKIR (PutDown animasyonu): yer esyasi aliciya dogru 1.5 m onunde; alici GIDIP ALIR
     doStop _v;
     _v doWatch _a;
-    _v playActionNow "PutDown";
+    // v8.153: PutDown animasyonu varsayilan KAPALI (kullanici: AT / MG asistan / TL spawn aninda ciplak; silah degistiren animasyon suphesi); acmak: lambs_danger_cephaneAnimAcik = true
+    if (missionNamespace getVariable ["lambs_danger_cephaneAnimAcik", false]) then { _v playActionNow "PutDown"; };
     sleep 1.2;
     private _yapilan = 0;
     private _liste = [];
@@ -84,7 +85,7 @@ private _aktar = {
         waitUntil { sleep 0.7; !alive _a || {(_a distance2D _tutucu) <= 2} || {time > (_t0 + 50)} };
         if (alive _a && {(_a distance2D _tutucu) <= 3}) then {
             _a doWatch objNull;
-            _a playActionNow "PutDown";   // yerden alma (egilme)
+            if (missionNamespace getVariable ["lambs_danger_cephaneAnimAcik", false]) then { _a playActionNow "PutDown"; };   // yerden alma (egilme)
             sleep 1.2;
             { _a addMagazine [_sinif, _x select 1]; _yapilan = _yapilan + 1; } forEach _liste;
             deleteVehicle _tutucu;

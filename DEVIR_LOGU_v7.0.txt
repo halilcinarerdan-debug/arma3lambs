@@ -1764,3 +1764,9 @@ v8.152b — giyimTani: silah degisimi logu ([GIYIM-TANI] SILAH: AT / MG / MG_ASI
  modeli); bunlar sirt cantasi / sirtta roketatar bagli noktalari: AT ve cantali MG asistanlarinin ortak ozelligi. Bu modun spawn aninda silah degistiren kodu YOK (CBA selectWeapon yalniz tehdit sirasinda).
 v8.152c — A/B TESTI ANAHTARI: lambs_danger_silahDegisimOff = true -> ELITE'in TUM silah / muzzle secimi kapanir (AT roketatar, UGL, tabanca, cqb, tehdit gizlenmesi, bounding'de ana silaha donus).
  Kullanici: "ciplaklik silah degistirirken, spawn aninda; AT, MG asistan, bazen takim lideri (UGL)". Anahtar acikken ciplaklik suruyorsa kod bu modun silah degisiminden DEGIL.
+
+v8.153 — CEPHANE PutDown ANIMASYONU KAPATILDI (kullanici: "modlar yillardir ayni (CBA, ACE, A3RO, ACM, Zeus Enhanced, Simple Suppress, LAMBS Suppression / Turrets, JSRS, GM); ciplaklik AT / MG asistan (bazen TL), spawn aninda, silah degistirirken")
+ Yeni degisken bu fork: mod seti yillardir ayni, bu yuzden fork supheli. En guclu somut adaylar: fnc_cephanePaylas.sqf (v8.105-108) spawndan hemen sonra MG asistan -> MG / AT / TL arasi cephane aktarir;
+ verici ve alici "playActionNow PutDown" oynatir (silahi indirir / kaldirir = silah degisim animasyonu) ve removeMagazines / addMagazine yapar -> AT / MG asistan / TL ile ortusur.
+ Degisiklik: animasyon varsayilan KAPALI (lambs_danger_cephaneAnimAcik = true ile acilir); aktarimin kendisi duruyor. Tam kapatma: lambs_danger_cephanePaylasOff = true. A/B: silahDegisimOff, cephanePaylasOff, giyimTaniOff anahtarlari.
+ TEST EDILMEDI. Ciplaklik suruyorsa: sirasiyla lambs_danger_cephanePaylasOff = true, lambs_danger_silahDegisimOff = true, sonra fork yerine orijinal LAMBS Danger.
