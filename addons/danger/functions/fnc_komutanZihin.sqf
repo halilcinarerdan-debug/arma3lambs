@@ -40,6 +40,10 @@ if (!isServer) exitWith {true};
 
 diag_log "[KOMUTAN-ZIHIN] komutan zihni baslatildi (v8.156): algiya dayali gozlem + alıskanlik hipotezi, oturum hafizasi, hile yok";
 
+lambs_danger_zihinKisilik = createHashMap; // str taraf -> TEMKINLI / DENGELI / SALDIRGAN (oturum boyunca sabit; okunabilir)
+lambs_danger_zihinTavir = createHashMap;   // str taraf -> [ad, puan, zaman]
+{ lambs_danger_zihinKisilik set [str _x, selectRandom ["TEMKINLI", "DENGELI", "SALDIRGAN"]]; } forEach [west, east, independent];
+diag_log format ["[KOMUTAN-TAVIR] kisilikler: %1", lambs_danger_zihinKisilik toArray false];
 lambs_danger_zihinKayit = createHashMap;   // str taraf -> [[t, tip, yon, mesafe, arazi, detay], ...]
 lambs_danger_zihinHip = createHashMap;     // str taraf -> HashMap hipotez
 
@@ -211,11 +215,42 @@ private _calis = {
             private _hip = createHashMapFromArray [
                 ["yon", [-1, _yonOrt] select (_pay >= 0.5)], ["yonGuven", _guven], ["menzil", _bandAd select _bi], ["menzilPay", _bw / _toplam],
                 ["duman", _duman >= ((_nMin / 2) max 2) && {(_duman / (_n max 1)) >= 0.1}], ["arazi", _ar], ["araziPay", _arw / _toplam], ["n", _n],
+                ["sektor", _sek apply {round (_x / _toplam * 100)}], ["son", (_gz select [(_n - 5) max 0, 5]) apply {round (_x select 2)}],
                 ["topcu", _topcu >= 2], ["karsilik", _karsilik >= ((_nMin / 2) max 2)], ["karsilikGec", if (_karsilik > 0) then {_karGec / _karsilik} else {0}],
                 ["kuvvet", if (_gorusN > 0) then {_gorusInf / _gorusN} else {0}], ["zirh", _gorusN >= 3 && {(_gorusZirh / _gorusN) >= 0.25}]
             ];
             private _eski = lambs_danger_zihinHip getOrDefault [str _T, createHashMap];
             lambs_danger_zihinHip set [str _T, _hip];
+            // ---- TAVIR MOTORU (v8.158, yalniz log + gozetleme yonu): puan = hipotez uygunlugu + kisilik + doktrin; histerezis 0.12 / 180 sn ----
+            private _kis = lambs_danger_zihinKisilik getOrDefault [str _T, "DENGELI"];
+            private _dk = "";
+            { private _dv = _x getVariable "lambs_danger_doktrin"; if (!isNil "_dv") exitWith { _dk = _dv getOrDefault ["ad", ""]; }; } forEach (allGroups select {(side _x) isEqualTo _T});
+            private _pn = [];
+            private _yG = [0, _guven] select ((_hip get "yon") >= 0);
+            _pn pushBack ["YON-HAZIRLIK", 0.25 + 0.6 * _yG + ([0, 0.08] select (_kis isEqualTo "TEMKINLI")), format ["beklenen yon %1 derece, guven %2", round (_hip get "yon"), _yG toFixed 2]];
+            if (_hip get "karsilik" && {(_hip get "karsilikGec") < 4}) then {
+                _pn pushBack ["KESIF-ATISI", 0.55 + ([0, 0.12] select (_dk isEqualTo "RUS")) + ([0, 0.08] select (_kis isEqualTo "SALDIRGAN")), format ["karsilik veriyor (gecikme %1 sn): yer acigi cikarilabilir", (_hip get "karsilikGec") toFixed 1]];
+            };
+            if (!(_hip get "karsilik") && {_n >= (2 * _nMin)}) then {
+                _pn pushBack ["TACIZ-SABITLE", 0.5 + ([0, 0.06] select (_dk isEqualTo "ABD")) + ([0, 0.06] select (_kis isEqualTo "SALDIRGAN")), "karsilik vermiyor (disiplinli): taciz atisiyla sabitle, ana guc kanada"];
+            };
+            if (_hip get "zirh") then { _pn pushBack ["ZIRH-AT-HAZIR", 0.7 + ([0, 0.05] select (_kis isEqualTo "TEMKINLI")), "zirh var: AT elemanlari / engel"]; };
+            if (_hip get "topcu") then { _pn pushBack ["DAGIL-SIPER", 0.65 + ([0, 0.05] select (_kis isEqualTo "TEMKINLI")), "dolayli ates var: dagil ve siperlen"]; };
+            if (_hip get "duman") then { _pn pushBack ["DUMAN-IZLE", 0.45, "duman kullaniyor: perde arkasi yonu izle"]; };
+            _pn pushBack ["TEDBIRLI-GOZETLE", 0.3, "belirgin alisanlik yok"];
+            _pn = [_pn, [], {_x select 1}, "DESCEND"] call BIS_fnc_sortBy;
+            private _enT = _pn select 0;
+            private _mevcut = lambs_danger_zihinTavir getOrDefault [str _T, []];
+            private _yeniTavir = true;
+            if (_mevcut isNotEqualTo [] && {(time - (_mevcut select 2)) < 180}) then {
+                private _mp = _pn findIf {(_x select 0) isEqualTo (_mevcut select 0)};
+                if (_mp >= 0 && {(_enT select 1) < (((_pn select _mp) select 1) + 0.12)}) then { _yeniTavir = false; };
+            };
+            if (_yeniTavir && {(_mevcut isEqualTo []) || {(_mevcut select 0) isNotEqualTo (_enT select 0)}}) then {
+                lambs_danger_zihinTavir set [str _T, [_enT select 0, _enT select 1, time]];
+                diag_log format ["[KOMUTAN-TAVIR] %1 | tavir %2 (puan %3) | onceki %4 | kisilik %5 | doktrin %6 | neden: %7 | tum puanlar: %8",
+                    _T, _enT select 0, (_enT select 1) toFixed 2, ["yok", _mevcut select 0] select (_mevcut isNotEqualTo []), _kis, _dk, _enT select 2, _pn apply {[_x select 0, (_x select 1) toFixed 2]}];
+            };
             private _degisti = ((count _eski) isEqualTo 0)
                 || {(abs ((_eski getOrDefault ["yon", -1]) - (_hip get "yon"))) > 25}
                 || {(_eski getOrDefault ["menzil", ""]) isNotEqualTo (_hip get "menzil")}
@@ -223,6 +258,11 @@ private _calis = {
                 || {(_eski getOrDefault ["karsilik", false]) isNotEqualTo (_hip get "karsilik")}
                 || {(_eski getOrDefault ["zirh", false]) isNotEqualTo (_hip get "zirh")}
                 || {(_eski getOrDefault ["topcu", false]) isNotEqualTo (_hip get "topcu")};
+            // kanit (kullanici testi: 3 kisi ayni konumdan geldi -> yon sektoru ve son gozlemler gorunsun)
+            if (_degisti && {_logN < 120}) then {
+                _logN = _logN + 1;
+                diag_log format ["[KOMUTAN-ZIHIN] %1 (AI) KANIT | sektor yuzdeleri (K, KD, D, GD, G, GB, B, KB): %2 | son 5 gozlem yonu: %3 | yon ortalamasi %4", _T, _hip get "sektor", _hip get "son", round _yonOrt];
+            };
             if (_degisti && {_logN < 80}) then {
                 _logN = _logN + 1;
                 diag_log format ["[KOMUTAN-ZIHIN] %1 (AI) hipotez | gozlem %2 | yon %3 (guven %4) | menzil %5 (%6%7) | duman %8 | arazi %9 (%10%11) | karsilik ates %12 | zirh %13 | topcu %14 | ort. kuvvet %15",

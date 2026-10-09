@@ -1798,3 +1798,10 @@ v8.157 — KOMUTAN ZIHNI DUZELTMELERI (RPT f995e270 / e3605285; kullanici: "4 ol
  BULGU 2: "Zero divisor" (kuvvet / karsilik gec) — "[0, a / b] select (b > 0)" iki kolu da hesaplar -> if / then. Her 30 sn'de 2 hata satiri.
  BULGU 3: "yon 0 derece (guven 1.00)" — sektor komsuluk testi yanlisti (daire farki yerine (i - en + 12) mod 8) -> en iyi sektorun kendi kayitlari ortalamaya girmiyor, yon 0'a dusuyordu. DUZELTME: dairesel fark.
  GOZLEM (bozuk degil): hipotezler olusuyor (WEST 10 gozlem, EAST 36 / 151; karsilik ates: true, gecikme 1.8-2.0 sn; menzil < 100 m: yakin muharebe sahnesi).
+
+v8.158 — KOMUTAN TAVIR MOTORU (loglu) + KANIT LOGU (kullanici: "loglu yaz; ayni kosullari sagladim, 3 kisi ayni konumdan geldi")
+ [KOMUTAN-TAVIR]: taraf basina kisilik (TEMKINLI / DENGELI / SALDIRGAN; oturum boyunca sabit, ilk satir "kisilikler"). Her hipotez turunda tavir puanlari: YON-HAZIRLIK (0.25 + 0.6 x yon guveni),
+ KESIF-ATISI (karsilik veriyor + gecikme < 4 sn; RUS +0.12, SALDIRGAN +0.08), TACIZ-SABITLE (karsilik yok; ABD +0.06, SALDIRGAN +0.06), ZIRH-AT-HAZIR (0.7), DAGIL-SIPER (topcu; 0.65), DUMAN-IZLE (0.45), TEDBIRLI-GOZETLE (0.3);
+ TEMKINLI +0.05..0.08 (yon / zirh / dagil). Histerezis: mevcut tavir 180 sn ve yeni tavir +0.12'den iyi degilse korunur. Log: tavir, puan, onceki, kisilik, doktrin, neden, tum puanlar.
+ [KOMUTAN-ZIHIN] KANIT: hipotez degisince 8 sektor yuzdeleri (K, KD, D, GD, G, GB, B, KB), son 5 gozlem yonu, yon ortalamasi -> "3 kisi ayni konumdan geldi" testi dogrulanabilir.
+ Henuz YALNIZ log + gozetleme yonu; hamleler (taciz, kesif atisi, yem) sonraki dilim. TEST EDILMEDI.
