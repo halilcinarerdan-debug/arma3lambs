@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * OBJEKTIF GRUP SECIMI (v8.150) — kullanici: "operasyon emri verirken istedigimiz squadlari secebilelim, kimler katilacak".
  * Zeus makinesinde "ELITE Objektif" 4/4 panelinden sonra (Grup secimi = Elle) acilan squad listesi: o tarafin AI gruplari (objektife <= 6000 m, lider canli, oyuncusuz,
- * >= 3 saglam asker, HARIC / MEDEVAC / TOPCU / TASIMA / KARAKOL_ARAC / RECON gorevli ve garnizon alt grubu OLMAYAN) yakindan uzaga, en fazla 16; her panel 8 onay kutusu (otomatik 4 en yakin isaretli).
+ * >= 3 saglam asker, HARIC / MEDEVAC / TOPCU / TASIMA / KARAKOL_ARAC / RECON gorevli ve garnizon alt grubu OLMAYAN) yakindan uzaga, en fazla 12 piyade + 8 arac (v8.163); her panel 8 onay kutusu (otomatik 4 en yakin isaretli).
  * Secilenlerin netId listesi plan ayarina "secili" olarak eklenir; plan (fnc_komutanPlan) YALNIZ bu gruplari kullanir (mesafe siniri yok, komutan en yuksek rutbeli secili grup lideri).
  * Hicbiri secilmezse plan istegi gonderilmez.
  *
@@ -32,7 +32,20 @@ if (_adaylar isEqualTo []) then {
         && {isNull objectParent _l} && {(_l distance2D _obj) <= 6000}
     };
     _adaylar = [_adaylar, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
-    _adaylar = _adaylar select [0, 16];
+    _adaylar = _adaylar select [0, 12];
+    // v8.163: ARAC gruplari da listelenir (tank -> ZIRH DESTEK, kargo >= 3 arac -> TASIMA); onceden yalniz piyade vardi ("hangi apc katilacak yok")
+    private _aracA = allGroups select {
+        private _l = leader _x;
+        private _v = if (isNull _l) then {objNull} else {objectParent _l};
+        !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
+        && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v}
+        && {({isPlayer _x} count (units _x)) isEqualTo 0} && {!isNull (driver _v)} && {!isPlayer (driver _v)}
+        && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"])}
+        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {(_l distance2D _obj) <= 6000}
+    };
+    _aracA = [_aracA, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
+    _aracA = _aracA select [0, 8];
+    _adaylar = _adaylar + _aracA;
     if (_adaylar isEqualTo []) exitWith {
         // v8.161 TANI: hangi tarafta kac grup var / neden elendi (secilen taraf yanlis olabilir)
         private _say = {
@@ -65,13 +78,25 @@ private _alanlar = _parca apply {
     private _l = leader _g;
     private _n = {alive _x} count (units _g);
     private _rol = _g getVariable ["lambs_danger_gorev", ""];
-    [
-        format ["%1 | %2 asker | %3 m | %4%5", groupId _g, _n, round (_l distance2D _obj), rank _l, ["", " | " + _rol] select (_rol isNotEqualTo "")],
-        "BOOLEAN",
-        format ["Lider %1 (%2). Isaretli grup plana katilir; en yuksek rutbeli secili grup lideri KOMUTAN olur.", name _l, rank _l],
-        (_adaylar find _g) < 4,
-        ""
-    ]
+    private _av = objectParent _l;
+    if (!isNull _av) then {
+        private _etiket = if (_av isKindOf "Tank") then {"ZIRH DESTEK"} else { if ((_av emptyPositions "cargo") >= 3) then {format ["TASIMA %1 koltuk", _av emptyPositions "cargo"]} else {"ARAC"} };
+        [
+            format ["[%1] %2 | %3 m | %4%5", _etiket, getText (configOf _av >> "displayName"), round (_l distance2D _obj), groupId _g, ["", " | " + _rol] select (_rol isNotEqualTo "")],
+            "BOOLEAN",
+            format ["Arac grubu (surucu %1). Isaretlenirse: tank / zirhli -> ates pozisyonuna cikip objektife ates destegi verir; kargo >= 3 arac -> piyadeyi tasir (TASIMA).", name (driver _av)],
+            false,
+            ""
+        ]
+    } else {
+        [
+            format ["%1 | %2 asker | %3 m | %4%5", groupId _g, _n, round (_l distance2D _obj), rank _l, ["", " | " + _rol] select (_rol isNotEqualTo "")],
+            "BOOLEAN",
+            format ["Lider %1 (%2). Isaretli grup plana katilir; en yuksek rutbeli secili grup lideri KOMUTAN olur.", name _l, rank _l],
+            (_adaylar find _g) < 4,
+            ""
+        ]
+    }
 };
 
 [

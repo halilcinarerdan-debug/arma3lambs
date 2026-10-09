@@ -235,6 +235,8 @@ while {true} do {
                 diag_log format ["[PLAN-RECON] %1 | %2 TEMAS: gizlilik bozuldu -> ates serbest (YELLOW), durus AUTO, ELITE temas kesme devralir", _id, groupId _rg2];
             };
         } forEach (_plan getOrDefault ["reconG", []]);
+        // v8.163 ZIRH DESTEK: elle secilen tank / zirhli gruplar (ates pozisyonu, COMBAT, hedef) - her tur
+        [_plan] call FUNC(planZirh);
         // v8.130 SIZMA / GIZLILIK ONCELIGI (tempo = sessiz / gizli, ya da baskin): toplan / ORP / kesif sirasinda temas yoksa ates yok (GREEN); objektife < 450 m'de comelerek (MIDDLE) ilerle;
         // temas olursa serbest (YELLOW, AUTO). SALDIRI baslayinca herkes AUTO + YELLOW. Doktrin: yaklasma gizli, ates ancak saldiri / temasta (sayi kitapta yok: 450 m = M16 etkili menzil tasarim kullanimi).
         if (_tempo isEqualTo 1 && {_faz in ["TOPLAN", "ORP", "KESIF", "TASIMA"]}) then {
@@ -462,20 +464,40 @@ while {true} do {
                 [_plan, "TOPLAN", "arac nakli zaman asimi"] call _fazGec;
                 continue
             };
-            // v8.137 SEFER: ilk seferde araca sigmayan (> koltuk) uzaktaki askerler icin ikinci / ucuncu sefer (en fazla 3 sefer, TASIMA fazi 300 sn'ye kadar)
-            if (scriptDone _th && {(_plan getOrDefault ["sefer", 1]) < 3} && {_fazSure < 300} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}) then {
+            // v8.137 SEFER (v8.163: ERKEN): ilk seferde araca sigmayan uzaktaki askerler icin ek sefer; artik TUM araclar bindirmeyi bitirir bitirmez (nakil isi bitmeyi beklemeden) ve bos arac varsa baslar
+            private _ctlS = _plan getOrDefault ["tasimaCtl", [false, true, 0]];
+            private _bindiHepsi = ((_ctlS param [4, 0]) > 0) && {(_ctlS param [3, 0]) >= (_ctlS param [4, 0])};
+            if ((scriptDone _th || {_bindiHepsi && {_fazSure > 25}}) && {(_plan getOrDefault ["sefer", 1]) < 3} && {_fazSure < 400} && {(_ctlS param [2, 0]) > 0} && {(time - (_plan getOrDefault ["seferT", -999])) > 45}) then {
                 private _dropMS = (500 max (((_plan get "ayar") getOrDefault ["orpM", 300]) + 150));
                 private _kalan = 0;
-                { { if (alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropMS + 400)}) then { _kalan = _kalan + 1; }; } forEach (units _x); } forEach _gruplar;
-                if (_kalan >= 3) then {
-                    _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
-                    _plan set ["tasimaCtl", [false, true, 0]];
-                    _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
-                    diag_log format ["[PLAN] %1 TASIMA %2. SEFER: geride kalan %3 asker (inis noktasindan > 400 m uzakta)", _id, _plan get "sefer", _kalan];
-                    continue
+                private _kalanBirim = [];
+                { { if (alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropMS + 400)}) then { _kalan = _kalan + 1; _kalanBirim pushBack _x; }; } forEach (units _x); } forEach _gruplar;
+                if (_kalan >= 1) then {
+                    // bos (nakilde olmayan) uygun arac var mi? yoksa sayaci bosa harcama, sonra tekrar bak
+                    private _kp = [0, 0, 0];
+                    { _kp = [(_kp select 0) + ((getPosATL _x) select 0), (_kp select 1) + ((getPosATL _x) select 1), 0]; } forEach _kalanBirim;
+                    _kp = [(_kp select 0) / _kalan, (_kp select 1) / _kalan, 0];
+                    private _bosArac = vehicles select {
+                        alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(_x emptyPositions "cargo") >= 1} && {!(_x getVariable ["lambs_danger_tasimaMesgul", false])}
+                        && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")} && {(_x distance2D _kp) < 6000}
+                        && {!((group (driver _x)) getVariable ["lambs_danger_planAktif", false])}
+                    };
+                    if (_bosArac isNotEqualTo []) then {
+                        _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
+                        _plan set ["seferT", time];
+                        private _yh = [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _ctlS] spawn FUNC(aracTasima);
+                        _plan set ["tasimaYardim", (_plan getOrDefault ["tasimaYardim", []]) + [_yh]];
+                        diag_log format ["[PLAN] %1 TASIMA %2. SEFER: geride kalan %3 asker (inis noktasindan > 400 m uzakta) | bos arac %4", _id, _plan get "sefer", _kalan, count _bosArac];
+                        continue
+                    } else {
+                        if ((time - (_plan getOrDefault ["seferUyariT", -999])) > 60) then {
+                            _plan set ["seferUyariT", time];
+                            diag_log format ["[PLAN] %1 TASIMA: geride %2 asker kaldi ama bos arac yok (tum araclar nakilde / uygun degil); arac donunce tekrar bakilacak", _id, _kalan];
+                        };
+                    };
                 };
             };
-            if (scriptDone _th) then {
+            if (scriptDone _th && {((_plan getOrDefault ["tasimaYardim", []]) findIf {!scriptDone _x}) isEqualTo -1}) then {
                 _plan set ["tasimaTamam", true];
                 [_plan, "TOPLAN", "arac nakli bitti"] call _fazGec;
             };

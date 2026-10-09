@@ -64,7 +64,33 @@ if (_tip isEqualTo 3) exitWith {
 private _grupN = _ayar getOrDefault ["grupN", 4];
 // v8.150: Zeus elle sectiyse yalniz bu gruplar (netId listesi); mesafe sinirina bakilmaz
 private _secili = _ayar getOrDefault ["secili", []];
-if (_secili isNotEqualTo []) then { _grupN = count _secili; };
+// v8.163: secilen ARAC gruplari (lider kara aracinda): tank / zirhli -> plan ZIRH DESTEK unsuru (zirhG); tasima kapasiteli arac (kargo >= 3) -> TASIMA gorevi (nakilde oncelikli). Piyade secimi eskisi gibi.
+private _zirhG = [];
+if (_secili isNotEqualTo []) then {
+    private _yayaSec = [];
+    {
+        private _sg = groupFromNetId _x;
+        private _sl = if (isNull _sg) then {objNull} else {leader _sg};
+        private _sv = if (isNull _sl) then {objNull} else {objectParent _sl};
+        if (!isNull _sv && {_sv isKindOf "LandVehicle"} && {alive _sv}) then {
+            private _tasiyici = (_sv emptyPositions "cargo") >= 3 && {!(_sv isKindOf "Tank")};
+            if (_tasiyici) then {
+                _sg setVariable ["lambs_danger_gorev", "TASIMA", true];
+                _sv setVariable ["lambs_danger_gorev", "TASIMA", true];
+                _sv setVariable ["lambs_danger_ekipGrup", _sg, true];
+                diag_log format ["[PLAN-ARAC] %1 | %2 TASIMA araci olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName")];
+            } else {
+                _zirhG pushBack _sg;
+                diag_log format ["[PLAN-ARAC] %1 | %2 ZIRH DESTEK unsuru olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName")];
+            };
+        } else {
+            _yayaSec pushBack _x;
+        };
+    } forEach _secili;
+    _secili = _yayaSec;
+    _grupN = count _secili;
+    if (_secili isEqualTo []) then { _secili = ["-"]; };   // yalniz arac secildiyse piyade adayi yok (mesafe sinirina dusmesin)
+};
 private _aday = allGroups select {
     private _l = leader _x;
     !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
@@ -130,7 +156,7 @@ private _reconG = allGroups select {
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {
-    private _uzak = (_gruplar + _reconG) select {!local _x};
+    private _uzak = (_gruplar + _reconG + _zirhG) select {!local _x};
     // v8.155: yeni yaratilmis (< 60 sn) uzak grubu hemen devretme (envanter / kiyafet kaybi, RPT 7ab83653): yasi dolana kadar bekle (en fazla 60 sn)
     if (_uzak isNotEqualTo []) then {
         private _t1 = time;
@@ -148,6 +174,7 @@ if (isServer) then {
             diag_log format ["[PLAN-DEVIR] DEVIR OLMADI (plandan cikarildi): %1", _kalan apply {groupId _x}];
             _gruplar = _gruplar - _kalan;
             _reconG = _reconG - _kalan;
+            _zirhG = _zirhG - _kalan;
         } else {
             diag_log format ["[PLAN-DEVIR] %1 grup sunucuya devredildi (%2 sn)", count _uzak, (time - _t0) toFixed 1];
         };
@@ -385,6 +412,10 @@ private _isaretler = [];
 if (isNil "lambs_danger_planCCPlar") then { lambs_danger_planCCPlar = []; };
 lambs_danger_planCCPlar pushBack [_id, _taraf, _ccp];
 
+if (_zirhG isNotEqualTo []) then {
+    { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _zirhG;
+    diag_log format ["[PLAN-ZIRH] %1 | zirh destek %2 grup: %3", _id, count _zirhG, _zirhG apply {groupId _x}];
+};
 if (_reconG isNotEqualTo []) then {
     diag_log format ["[PLAN-RECON] %1 | recon %2 grup: %3 | gozlem noktasi OP %4 (objektiften %5 m)", _id, count _reconG, _reconG apply {groupId _x}, mapGridPosition _op, round (_op distance2D _obj)];
     { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _reconG;
@@ -395,7 +426,7 @@ private _plan = createHashMapFromArray [
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
-    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["op", _op], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
+    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {
     _x setVariable ["lambs_danger_planAktif", true, true];

@@ -162,7 +162,8 @@ private _dg0 = _gruplar param [0, grpNull];
 private _inisM = [_dg0, "tasimaInisM", 500] call FUNC(dk);
 private _dropM = if ([_dg0, "tasimaOrpEk", true] call FUNC(dk)) then { _inisM max (_orpM + 150) } else { _inisM };
 private _destekKal = [_dg0, "aracDestekKal", false] call FUNC(dk);
-private _kalan = _araclar apply {[_x, _x emptyPositions "cargo"]};
+// v8.163: gercek koltuk sayisi emptyPositions'tan az olabilir (RPT 69d7f8f5: Fuchs 8 gosterdi, 7 bindi, 3 asker acikta kaldi) -> tip basina OGRENILEN kapasite kullanilir
+private _kalan = _araclar apply {[_x, (_x emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _x], 99])]};
 private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
 private _bolunen = [];
@@ -223,6 +224,8 @@ private _noktaYay = {
 
 private _tasinan = 0;
 private _isler = [];
+_ctl set [3, 0];
+_ctl set [4, count _eslesme];
 {
     _x params ["_v", "_gl"];
     private _d = driver _v;
@@ -294,12 +297,27 @@ private _isler = [];
             { _x assignAsCargo _v; } forEach _hepsi;
             _hepsi orderGetIn true;
             private _bt = time + 90;
+            // v8.163: arac DOLDUYSA ya da son 12 sn'de kimse binmediyse (en az 1 binen varken) bekleme biter (eski: 75 sn bos bekleme, RPT 69d7f8f5)
+            private _bn = 0;
+            private _bTT = time;
             waitUntil {
                 sleep 1;
+                private _n = count (_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}});
+                if (_n isNotEqualTo _bn) then { _bn = _n; _bTT = time; };
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {[_hepsi, _d] call _temasVar}
-                || {(time > (_bt - 15)) && {((_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}) isEqualTo []) isEqualTo false}}
+                || {_n > 0 && {(_v emptyPositions "cargo") isEqualTo 0}}
+                || {_n > 0 && {(time - _bTT) > 12}}
             };
+            // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
+            private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};
+            private _icerde = count (_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}});
+            if (_disarida isNotEqualTo [] && {_icerde > 0} && {(_v emptyPositions "cargo") isEqualTo 0}) then {
+                missionNamespace setVariable [format ["lambs_danger_tasimaKap_%1", typeOf _v], _icerde];
+                diag_log format ["[TASIMA] %1 | KAPASITE OGRENILDI: %2 gercek %3 koltuk (emptyPositions fazla gosteriyordu); %4 asker disarida kaldi (sefer ile alinacak)", groupId _vg, typeOf _v, _icerde, count _disarida];
+            };
+            // disarida kalanlarin bu araca atamasi kalkar (sefer icin serbest)
+            { unassignVehicle _x; } forEach _disarida;
             if ([_hepsi, _d] call _temasVar) then {
                 // binerken ates: bindirme iptal; binenler iner (arac ates altinda piyadeyi yuklemez)
                 { if (alive _x && {(vehicle _x) isEqualTo _v}) then { unassignVehicle _x; doGetOut _x; }; } forEach _hepsi;
@@ -310,6 +328,8 @@ private _isler = [];
             _binen = if (_iptal isEqualTo "") then {_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}} else {[]};
             if (_iptal isEqualTo "" && {_binen isEqualTo []}) then { _iptal = "kimse binmedi"; };
         };
+        // plan: kac arac binmeyi bitirdi (v8.163: sefer bu sayac tamamlaninca BASLAR, nakil isi bitmeyi beklemez)
+        _ctl set [3, (_ctl param [3, 0]) + 1];
 
         // (3) inis noktasina sur
         private _erkenInis = "";
@@ -484,10 +504,23 @@ private _isler = [];
             diag_log format ["[TASIMA] %1 | BRONEGRUPPA: arac %2 inis noktasinda ates destegi icin kaldi (hedefe %3 m)", groupId _vg, _ad, round (_v distance2D _obj)];
         } else {
         if (alive _v && {alive _d} && {_bitis isNotEqualTo "hasar"}) then {
-            _d doMove _rp;
-            private _bt2 = time + 150;
-            waitUntil { sleep 2; !alive _v || {(_v distance2D _rp) < 50} || {time > _bt2} };
+            // v8.163: inis sonrasi arac ON HATTA (RP ~ inis noktasi, RPT 69d7f8f5: "apc'ler piyadeyi indirdikleri gibi oylece beklediler") degil, GERIDE REZERV noktasina cekilir
+            // (inis noktasindan objektiften uzaga 700 m, yola cekilmis, su disi); medevac / sefer / sonraki nakil icin hazir bekler
+            private _geriYon = _obj getDir _drop;
+            private _geri = _obj getPos [((_obj distance2D _drop) + 700), _geriYon];
+            private _gYol = (_geri nearRoads 250) select {!surfaceIsWater (getPosATL _x) && {(getPosATL _x) distance2D _obj >= ((_obj distance2D _drop) + 450)}};
+            if (_gYol isNotEqualTo []) then {
+                _gYol = [_gYol, [], {_x distance2D _geri}, "ASCEND"] call BIS_fnc_sortBy;
+                _geri = getPosATL (_gYol select 0);
+            } else {
+                if (surfaceIsWater _geri) then { _geri = _rp; };
+            };
+            diag_log format ["[TASIMA] %1 | %2 | inis sonrasi geride REZERV noktasina cekiliyor (%3 m, objektiften %4 m)", groupId _vg, _ad, round (_v distance2D _geri), round (_geri distance2D _obj)];
+            _d doMove _geri;
+            private _bt2 = time + 240;
+            waitUntil { sleep 2; !alive _v || {(_v distance2D _geri) < 60} || {time > _bt2} };
             if (alive _d) then { doStop _d; };
+            _v setVariable [QGVAR(aracRezervT), time];
         };
         };
         if (!isNull _vg) then {

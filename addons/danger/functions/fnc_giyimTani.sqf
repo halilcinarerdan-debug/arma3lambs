@@ -31,6 +31,16 @@ private _calis = {
             {
                 private _u = _x;
                 if (!alive _u || {isPlayer _u} || {!isNull objectParent _u}) then { continue };
+                // v8.163 SU TANISI (kullanici: "bazi askerler suya girdi"): yaya AI suda / sig suda ise bir kez (120 sn / asker) neden baglamiyla logla (ilk 60 satir)
+                if (surfaceIsWater (getPosATL _u) && {(time - (_u getVariable [QGVAR(suLogT), -999])) > 120} && {(missionNamespace getVariable ["lambs_danger_suLogN", 0]) < 60}) then {
+                    _u setVariable [QGVAR(suLogT), time];
+                    missionNamespace setVariable ["lambs_danger_suLogN", (missionNamespace getVariable ["lambs_danger_suLogN", 0]) + 1];
+                    private _bayraklar = ["planAktif", "isBounding", "isRetreating", "isEvading", "isBreakingContact", "isExecutingTactic"] select {_g getVariable ["lambs_danger_" + _x, false]};
+                    private _wi = currentWaypoint _g;
+                    private _wpAd = if (_wi > 0 && {_wi < count (waypoints _g)}) then { waypointName ((waypoints _g) select _wi) } else { "-" };
+                    diag_log format ["[SU-TANI] %1 | grup %2 | derinlik %3 m | hiz %4 km/s | komut %5 | bayrak %6 | waypoint '%7' | lider suda mi %8 | temas %9 sn once",
+                        name _u, groupId _g, (0 - (getTerrainHeightASL (getPosATL _u))) toFixed 2, round speed _u, currentCommand _u, _bayraklar, _wpAd, surfaceIsWater (getPosATL (leader _g)), round (time - (_g getVariable ["lambs_danger_contact", -999]))];
+                };
                 private _snap = [uniform _u, vest _u, backpack _u, headgear _u, primaryWeapon _u, secondaryWeapon _u, count (magazines _u), currentWeapon _u];
                 private _k = netId _u;
                 private _eski = _gor getOrDefault [_k, []];

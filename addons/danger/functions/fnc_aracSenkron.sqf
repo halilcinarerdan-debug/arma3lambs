@@ -54,6 +54,7 @@ private _calis = {
                 };
             };
 
+            if (_g getVariable ["lambs_danger_planZirh", false]) then { ["plan zirh destek"] call _serbest; continue };
             if !([_g, "aracSenkron", true] call FUNC(dk)) then { ["doktrin kapali"] call _serbest; continue };
             private _yolcuPiyade = ({alive _x && {(group _x) isNotEqualTo _g}} count (crew _veh)) + ({alive _x && {_x isKindOf "CAManBase"} && {(assignedVehicleRole _x) select 0 isEqualTo "cargo"}} count (units _g));
             if (_yolcuPiyade >= 2) then { ["tasiyici (yolcu >= 2)"] call _serbest; continue };

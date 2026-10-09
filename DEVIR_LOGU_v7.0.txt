@@ -1835,3 +1835,19 @@ v8.162 — "4/4'TEN SONRA YOK" (kullanici: elle secimde 4/4 OK'tan sonra squad l
  NEDEN (buyuk olasilik): squad paneli, 4/4 panelinin ONAY callback'i icinde AYNI KAREDE showDialog ile aciliyordu; panel kapanirken yeni dialog acilamiyor / hemen kapaniyor.
  Diger paneller ([{...}, [args]] call CBA_fnc_execNextFrame) sonraki karede aciyor. v8.159 oturumunda ayni noktada 24 kez showDialog hatasi vardi (dialog acildi ama onay calismadi), v8.160 imza duzeltmesinden sonra sessiz kaldi.
  DUZELTME: objektifGrupSec cagrisi execNextFrame ile sonraki kareye alindi; fonksiyon tanimsizsa sohbette + RPT'de bildirilir. TEST EDILMEDI.
+
+v8.163 — NAKIL KAPASITESI / SEFER / GERI REZERV / ZIRH DESTEK / ARAC SECIMI (kullanici raporu, RPT 69d7f8f5 + ea8947be)
+ KULLANICI: "tank mevzilenmedi aptal gibi bekledi; apc yukleme hala sakat 3 kisi acikta kaldi, 1 arac bostaydi, kalan 3'u silmek zorunda kaldim; artillery tetiklenmedi; tankta tik yok, piyadeler combata gecti tank awarede;
+  bazi askerler suya girdi; secim ekraninda sadece piyade vardi, hangi APC katilacak yok; apc'ler piyadeyi indirdikleri gibi oylece beklediler".
+ BULGU 1 (yukleme): 3 TPz 1A0 Recon (Fuchs) 24 asker eslesti (emptyPositions "cargo" = 8 x 3), her biri 7 asker aldi -> 3 asker acikta; 4. arac bos kaldi; bindirme beklemesi 75 sn bos bekledi (8. asker binemiyordu);
+  sefer sadece nakil isi bitince (arac RP'ye dondukten sonra, ~45 sn sonra) denendi, o sirada kullanici askerleri silmisti.
+  DUZELTME: (a) tip basina OGRENILEN kapasite (lambs_danger_tasimaKap_<tip>) + "KAPASITE OGRENILDI" logu; (b) bindirme arac dolunca ya da son 12 sn'de kimse binmediyse biter; (c) disarida kalanlarin atamasi silinir;
+  (d) SEFER artik tum araclar bindirmeyi bitirir bitirmez (>= 25 sn, her 45 sn'de bir, en fazla 3 sefer) ve BOS ARAC varsa baslar; geride >= 1 asker yeter; bos arac yoksa 60 sn'de bir "bos arac yok" logu;
+  sefer isleri plan 'tasimaYardim' listesinde; faz TASIMA hepsi bitince kapanir.
+ BULGU 2 (arac inis sonrasi bekleme): RP ~ inis noktasi (450 m / 500 m), "RP'ye don" fiilen ayni yerde beklemekti. DUZELTME: inis sonrasi arac (RUS bronegruppa hariç) objektiften uzaga 700 m GERIDE yola cekilmis REZERV noktasina gider (log "REZERV").
+ BULGU 3 (tank): zirhli gruplar plana alinmiyordu; aracSenkron tanki piyadeyi beklemek icin forceSpeed 0 ile tutabiliyordu. DUZELTME: fnc_planZirh.sqf — elle secilen tank / zirhli grup 'zirhG': ORP'den itibaren SBF yakininda objektife 380-680 m,
+  gorus hatti olan (VIEW / FIRE), su / bina / sik agac disi ates pozisyonu secer, doMove + varinca doStop + doWatch; savas modunda (KESIF / SALDIRI / piyade temasi) COMBAT + RED, gunner objektif cevresinde BILINEN dusmani hedefler;
+  plan bitince serbest. aracSenkron bu gruplari atlar (lambs_danger_planZirh). Log [PLAN-ZIRH] / [PLAN-ARAC].
+ BULGU 4 (secim): objektifGrupSec artik arac gruplarini da listeler (en fazla 12 piyade + 8 arac): [ZIRH DESTEK] tank, [TASIMA n koltuk] APC, [ARAC] diger; arac varsayilan isaretsiz. Secilen kargo >= 3 arac TASIMA gorevi alir.
+ BULGU 5 (artileri): plan satirinda "topcu:yok" — 4/4 panelinde ates destegi secilmemis; ayrica plan ORP'de kalmisti (KESIF / SALDIRI'ya gelmedi).
+ BULGU 6 (su): sunucu RPT'sinde nedeni yok; [SU-TANI] tanisi eklendi (giyimTani izleyicisi: suda yaya AI, derinlik, komut, bayrak, waypoint; 60 satir). TEST EDILMEDI.
