@@ -73,15 +73,16 @@ if (_secili isNotEqualTo []) then {
         private _sl = if (isNull _sg) then {objNull} else {leader _sg};
         private _sv = if (isNull _sl) then {objNull} else {objectParent _sl};
         if (!isNull _sv && {_sv isKindOf "LandVehicle"} && {alive _sv}) then {
-            private _tasiyici = (_sv emptyPositions "cargo") >= 3 && {!(_sv isKindOf "Tank")};
+            private _sinifA = [_sv] call FUNC(aracSinif);
+            private _tasiyici = (_sinifA select 0) in ["IFV", "APC", "KAMYON"];
             if (_tasiyici) then {
                 _sg setVariable ["lambs_danger_gorev", "TASIMA", true];
                 _sv setVariable ["lambs_danger_gorev", "TASIMA", true];
                 _sv setVariable ["lambs_danger_ekipGrup", _sg, true];
-                diag_log format ["[PLAN-ARAC] %1 | %2 TASIMA araci olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName")];
+                diag_log format ["[PLAN-ARAC] %1 | %2 [%3] TASIMA araci olarak secildi%4 (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName"), _sinifA select 0, [" (savas taksisi: indirir, geride rezerv)", " (IFV: indirdikten sonra ates destegi)"] select ((_sinifA select 0) isEqualTo "IFV")];
             } else {
                 _zirhG pushBack _sg;
-                diag_log format ["[PLAN-ARAC] %1 | %2 ZIRH DESTEK unsuru olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName")];
+                diag_log format ["[PLAN-ARAC] %1 | %2 [%3] ZIRH DESTEK unsuru olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName"), _sinifA select 0];
             };
         } else {
             _yayaSec pushBack _x;

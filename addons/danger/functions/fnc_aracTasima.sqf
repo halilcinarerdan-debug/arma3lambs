@@ -503,6 +503,14 @@ _ctl set [4, count _eslesme];
             { _x doWatch _obj; } forEach (crew _v);
             diag_log format ["[TASIMA] %1 | BRONEGRUPPA: arac %2 inis noktasinda ates destegi icin kaldi (hedefe %3 m)", groupId _vg, _ad, round (_v distance2D _obj)];
         } else {
+        // v8.164 IFV: piyadeyle birlikte savasir; indirdikten sonra geri cekilmez, planin ZIRH DESTEK unsuruna katilir (ates pozisyonu planZirh'te secilir). APC / KAMYON "savas taksisi": geride rezerv.
+        private _sinifV = ([_v] call FUNC(aracSinif)) select 0;
+        if (_sinifV isEqualTo "IFV" && {_ctl param [6, false]} && {[_vg, "ifvDestek", true] call FUNC(dk)} && {alive _v} && {alive _d} && {_bitis isNotEqualTo "hasar"} && {_iptal isEqualTo ""}) then {
+            private _ifvL = _ctl param [5, []];
+            _ifvL pushBackUnique _vg;
+            _ctl set [5, _ifvL];
+            diag_log format ["[TASIMA] %1 | %2 | IFV: piyadeyi indirdi, planin ZIRH DESTEK unsuruna devredildi (ates pozisyonuna cikacak; geri cekilmez)", groupId _vg, _ad];
+        } else {
         if (alive _v && {alive _d} && {_bitis isNotEqualTo "hasar"}) then {
             // v8.163: inis sonrasi arac ON HATTA (RP ~ inis noktasi, RPT 69d7f8f5: "apc'ler piyadeyi indirdikleri gibi oylece beklediler") degil, GERIDE REZERV noktasina cekilir
             // (inis noktasindan objektiften uzaga 700 m, yola cekilmis, su disi); medevac / sefer / sonraki nakil icin hazir bekler
@@ -521,6 +529,7 @@ _ctl set [4, count _eslesme];
             waitUntil { sleep 2; !alive _v || {(_v distance2D _geri) < 60} || {time > _bt2} };
             if (alive _d) then { doStop _d; };
             _v setVariable [QGVAR(aracRezervT), time];
+        };
         };
         };
         if (!isNull _vg) then {

@@ -236,6 +236,18 @@ while {true} do {
             };
         } forEach (_plan getOrDefault ["reconG", []]);
         // v8.163 ZIRH DESTEK: elle secilen tank / zirhli gruplar (ates pozisyonu, COMBAT, hedef) - her tur
+        // IFV'ler piyadeyi indirince (aracTasima, tasimaCtl[5]) ZIRH DESTEK listesine eklenir
+        {
+            if (!isNull _x && {({alive _x} count (units _x)) > 0}) then {
+                private _zl = _plan getOrDefault ["zirhG", []];
+                if !(_x in _zl) then {
+                    _zl pushBack _x;
+                    _plan set ["zirhG", _zl];
+                    _x setVariable ["lambs_danger_planAktif", true, true];
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 IFV ates destegi unsuru olarak eklendi", _id, groupId _x];
+                };
+            };
+        } forEach ((_plan getOrDefault ["tasimaCtl", []]) param [5, []]);
         [_plan] call FUNC(planZirh);
         // v8.130 SIZMA / GIZLILIK ONCELIGI (tempo = sessiz / gizli, ya da baskin): toplan / ORP / kesif sirasinda temas yoksa ates yok (GREEN); objektife < 450 m'de comelerek (MIDDLE) ilerle;
         // temas olursa serbest (YELLOW, AUTO). SALDIRI baslayinca herkes AUTO + YELLOW. Doktrin: yaklasma gizli, ates ancak saldiri / temasta (sayi kitapta yok: 450 m = M16 etkili menzil tasarim kullanimi).
@@ -337,7 +349,7 @@ while {true} do {
             { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar;
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
             if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
-                _plan set ["tasimaCtl", [false, true, 0]];
+                _plan set ["tasimaCtl", [false, true, 0, 0, 0, [], true]];
                 _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
             };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
@@ -373,7 +385,7 @@ while {true} do {
                 if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])} && {!(("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")})}) then {
                     _plan set ["tasimaYapildi", true];
                     if (!("tasimaH" in _plan) || {isNull (_plan get "tasimaH")}) then {
-                        _plan set ["tasimaCtl", [false, true, 0]];
+                        _plan set ["tasimaCtl", [false, true, 0, 0, 0, [], true]];
                         _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
                     } else {
                         (_plan get "tasimaCtl") set [1, true];

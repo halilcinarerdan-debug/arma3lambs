@@ -80,11 +80,18 @@ private _alanlar = _parca apply {
     private _rol = _g getVariable ["lambs_danger_gorev", ""];
     private _av = objectParent _l;
     if (!isNull _av) then {
-        private _etiket = if (_av isKindOf "Tank") then {"ZIRH DESTEK"} else { if ((_av emptyPositions "cargo") >= 3) then {format ["TASIMA %1 koltuk", _av emptyPositions "cargo"]} else {"ARAC"} };
+        private _sa = [_av] call FUNC(aracSinif);
+        private _etiket = switch (_sa select 0) do {
+            case "TANK": {"TANK: ZIRH DESTEK"};
+            case "IFV": {format ["IFV: tasir + ates destegi (%1 koltuk)", _sa select 1]};
+            case "APC": {format ["APC: savas taksisi (%1 koltuk)", _sa select 1]};
+            case "KAMYON": {format ["KAMYON: tasir (%1 koltuk)", _sa select 1]};
+            default {"ARAC: ZIRH DESTEK"};
+        };
         [
             format ["[%1] %2 | %3 m | %4%5", _etiket, getText (configOf _av >> "displayName"), round (_l distance2D _obj), groupId _g, ["", " | " + _rol] select (_rol isNotEqualTo "")],
             "BOOLEAN",
-            format ["Arac grubu (surucu %1). Isaretlenirse: tank / zirhli -> ates pozisyonuna cikip objektife ates destegi verir; kargo >= 3 arac -> piyadeyi tasir (TASIMA).", name (driver _av)],
+            format ["Arac grubu (surucu %1). Isaretlenirse: TANK / diger -> ates pozisyonuna cikip objektife ates destegi; IFV -> piyadeyi tasir, indirince ates destegine gecer; APC / KAMYON -> piyadeyi tasir, indirince atesten uzak geride bekler (savas taksisi).", name (driver _av)],
             false,
             ""
         ]

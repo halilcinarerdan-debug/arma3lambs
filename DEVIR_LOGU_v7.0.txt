@@ -1851,3 +1851,10 @@ v8.163 — NAKIL KAPASITESI / SEFER / GERI REZERV / ZIRH DESTEK / ARAC SECIMI (k
  BULGU 4 (secim): objektifGrupSec artik arac gruplarini da listeler (en fazla 12 piyade + 8 arac): [ZIRH DESTEK] tank, [TASIMA n koltuk] APC, [ARAC] diger; arac varsayilan isaretsiz. Secilen kargo >= 3 arac TASIMA gorevi alir.
  BULGU 5 (artileri): plan satirinda "topcu:yok" — 4/4 panelinde ates destegi secilmemis; ayrica plan ORP'de kalmisti (KESIF / SALDIRI'ya gelmedi).
  BULGU 6 (su): sunucu RPT'sinde nedeni yok; [SU-TANI] tanisi eklendi (giyimTani izleyicisi: suda yaya AI, derinlik, komut, bayrak, waypoint; 60 satir). TEST EDILMEDI.
+
+v8.164 — APC / IFV ROL AYRIMI (kullanici: "apc ile ifv'nin gorevlerine dikkat et")
+ fnc_aracSinif.sqf (config'ten, tip basina onbellek, log [ARAC-SINIF]): TANK (isKindOf Tank), IFV (kargo >= 3 + top [mermi hit >= 25] ya da ATGM [shotMissile, airLock < 2]), APC (kargo >= 3, topsuz, zirh >= 120), KAMYON (kargo >= 3, yumusak), DIGER (kargo < 3).
+ DOKTRIN (tasarim, kitapta sayi yok): APC = "savas taksisi" (Stryker ICV / BTR / Fuchs): piyadeyi atesin disinda indirir, geride rezerv, savasmaz. IFV (Bradley / BMP / Marder) piyadeyle savasir: indirdikten sonra geri cekilmez,
+  planin ZIRH DESTEK unsuruna katilir (planZirh: ates pozisyonu, COMBAT, hedef). RUS: tum araclar bronegruppa (aracDestekKal). Yeni doktrin anahtari ifvDestek (varsayilan true).
+ Elle secim listesi etiketleri: TANK: ZIRH DESTEK / IFV: tasir + ates destegi / APC: savas taksisi / KAMYON: tasir / ARAC: ZIRH DESTEK. IFV kargosu ile otomatik taksi (plan disi) eskisi gibi RP'ye doner (yalniz plan nakli [tasimaCtl[6] = true] IFV'yi ates destegine alir).
+ TEST EDILMEDI.

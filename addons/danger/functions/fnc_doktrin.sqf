@@ -81,7 +81,7 @@ private _p = createHashMapFromArray [
     ["cekilGuvenM", 450], ["cekilEkSicrama", 9], ["cekilMaxS", 300], ["cekilGozlemM", 280], ["baskiKirmaEsik", 0.5], ["baskiKirmaMaxS", 14],
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
-    ["tasimaInisM", 500], ["tasimaOrpEk", true], ["aracDestekKal", false], ["kesifCarpan", 1], ["topcuMermiCarpan", 1], ["kesifAtesHizli", false],
+    ["tasimaInisM", 500], ["tasimaOrpEk", true], ["aracDestekKal", false], ["ifvDestek", true], ["kesifCarpan", 1], ["topcuMermiCarpan", 1], ["kesifAtesHizli", false],
     ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
 ];
 
