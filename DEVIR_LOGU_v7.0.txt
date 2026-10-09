@@ -1783,3 +1783,11 @@ v8.155 — CIPLAKLIK KOK NEDENI (BULUNDU): grupSunucuDevir (v8.124) Zeus'un yeni
  Bu fork'a ozgu (v8.124'te eklendi): kullanicinin yillardir kullandigi modlarla (orijinal LAMBS) olmuyordu. Eski surumde ve 3 kisilik squad'da (hizli devir) olmasi, 10 kisilikte olmamasi uyumlu.
  DUZELTME: yeni yaratilan grup (ilk gorulmeden) 120 sn devredilmez (lambs_danger_sunucuDevirBekleS); plan devri (komutanPlan) yeni grubu en fazla 60 sn yasi dolana kadar bekler. Kapatma: lambs_danger_sunucuDevirOff = true.
  GIYIM-TANI / CEPHANE-ENV izleyicileri kalir (dogrulama icin). Cephane animasyon kapatma (v8.153) ve canAdd (v8.154) onlemleri kalir ama kok neden bu degildi.
+
+v8.156 — KOMUTAN ZIHNI v1 (kullanici: "karsida bir komutan var desin; AI oyuncunun hareketlerini ogrensin, alıskanlik edinsin; orta-hizli; SQL / tablo yok; hile yok; AI'nin dogru girdileri / yeterli verisi olsun, dedektif gibi")
+ fnc_komutanZihin.sqf (yeni; her makinede atis bildirimi, sunucuda analiz). ADIL BILGI (hile yok): AI yalnizca kendi askerlerinin DUYDUGU / GORDUGU / bildigi seyi kaydeder, gurultulu tahminle:
+ GIRDI KANALLARI: ATIS (450 m ses), DUMAN (300 m), TOPCU / havan (1500 m), KARSILIK (AI tarafi son 12 sn ates ettiyse ve karsi taraf ayni yone karsilik verdiyse + gecikme),
+ TEMAS (InContact: grubun BILDIGI en yakin dusman), GORUS (nearTargets: AI liderinin algiladigi hedefler; piyade / arac sayisi, merkez yonu), KAYIP (olen askerin grubunun o an bildigi en yakin dusmana yon; agirlik x1.5).
+ HIPOTEZLER (30 sn'de bir; en az 4 gozlem x 1/hiz; 25 dk yari omur; oturum hafizasi, dosya / SQL yok): YON (8 sektor, pay >= %50), MENZIL bandi, DUMAN, ARAZI (sehir / orman / acik), KARSILIK (taciz atisina karsilik veriyor mu + gecikme),
+ ZIRH, TOPCU, ortalama KUVVET. ETKI (kucuk): guven >= 0.45 iken duran, temassiz, planda olmayan AI gruplarinin lideri beklenen yone bakar (doWatch, 6 grup / 45 sn). Log: [KOMUTAN-ZIHIN] hipotez / OZET (5 dk).
+ Kapatma: lambs_danger_zihinOff = true; hiz: lambs_danger_zihinHiz (1 = orta-hizli). SONRAKI DILIMLER: hamle repertuari (taciz / yem / hileli saldiri / sabitle-kanatla) hipotezlere gore. TEST EDILMEDI.
