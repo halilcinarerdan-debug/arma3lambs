@@ -163,14 +163,18 @@ private _inisM = [_dg0, "tasimaInisM", 500] call FUNC(dk);
 private _dropM = if ([_dg0, "tasimaOrpEk", true] call FUNC(dk)) then { _inisM max (_orpM + 150) } else { _inisM };
 private _destekKal = [_dg0, "aracDestekKal", false] call FUNC(dk);
 // v8.163: gercek koltuk sayisi emptyPositions'tan az olabilir (RPT 69d7f8f5: Fuchs 8 gosterdi, 7 bindi, 3 asker acikta kaldi) -> tip basina OGRENILEN kapasite kullanilir
-private _kalan = _araclar apply {[_x, (_x emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _x], 99])]};
+private _kapGercek = _araclar apply {[_x, (_x emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _x], 99])]};
+private _kalan = [];
 private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
 private _bolunen = [];
+// v8.165: en BOSTAKI araca yerlestir (worst-fit): tum atanmis araclar dolar, hicbiri bos kalmaz (RPT c4f70534: 5 arac atandi, ilk uyan 3 araca 24 asker dolduruldu, 2 arac bos)
 private _yerlestir = {
     params ["_birimler", "_ad"];
     private _n = count _birimler;
-    private _i = _kalan findIf {(_x select 1) >= _n};
+    private _i = -1;
+    private _en = -1;
+    { if ((_x select 1) >= _n && {(_x select 1) > _en}) then { _en = _x select 1; _i = _forEachIndex; }; } forEach _kalan;
     if (_i < 0) exitWith { false };
     (_kalan select _i) set [1, ((_kalan select _i) select 1) - _n];
     private _v = (_kalan select _i) select 0;
@@ -178,21 +182,32 @@ private _yerlestir = {
     if (_e < 0) then { _eslesme pushBack [_v, [_birimler]]; } else { ((_eslesme select _e) select 1) pushBack _birimler; };
     true
 };
-{
-    private _g = _x;
-    // v8.137: birim bazli: zaten inis noktasina + 150 m icindeki askerler tasinmaz (sefer 2+: ilk seferde sigmayip geride kalanlar alinir)
-    private _on = (units _g) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}};
-    if (_on isEqualTo []) then { continue };
-    if ([_on, groupId _g] call _yerlestir) then { continue };
-    // sigmadi: takim bazli bol
-    private _takimlar = (([_g] call FUNC(splitFireTeams)) apply {_x select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}}) select {_x isNotEqualTo []};
-    _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
-    private _yerlesen = 0;
+private _tumBirim = 0;
+{ _tumBirim = _tumBirim + count ((units _x) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}); } forEach _gruplar;
+private _yumusak = (ceil (_tumBirim / (count _araclar))) max 5;
+for "_tur" from 0 to 1 do {
+    // tur 0: arac basina yumusak tavan (dengeli dagilim); sigmayan olursa tur 1: gercek kapasite
+    _kalan = _kapGercek apply {[_x select 0, if (_tur isEqualTo 0) then {(_x select 1) min _yumusak} else {_x select 1}]};
+    _eslesme = [];
+    _yaya = [];
+    _bolunen = [];
     {
-        if ([_x, groupId _g] call _yerlestir) then { _yerlesen = _yerlesen + 1; } else { _yaya pushBack [_g, count _x]; };
-    } forEach _takimlar;
-    if (_yerlesen > 0) then { _bolunen pushBack format ["%1 (%2/%3 takim)", groupId _g, _yerlesen, count _takimlar]; };
-} forEach _gruplar;
+        private _g = _x;
+        // v8.137: birim bazli: zaten inis noktasina + 150 m icindeki askerler tasinmaz (sefer 2+: ilk seferde sigmayip geride kalanlar alinir)
+        private _on = (units _g) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}};
+        if (_on isEqualTo []) then { continue };
+        if ([_on, groupId _g] call _yerlestir) then { continue };
+        // sigmadi: takim bazli bol
+        private _takimlar = (([_g] call FUNC(splitFireTeams)) apply {_x select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}}) select {_x isNotEqualTo []};
+        _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
+        private _yerlesen = 0;
+        {
+            if ([_x, groupId _g] call _yerlestir) then { _yerlesen = _yerlesen + 1; } else { _yaya pushBack [_g, count _x]; };
+        } forEach _takimlar;
+        if (_yerlesen > 0) then { _bolunen pushBack format ["%1 (%2/%3 takim)", groupId _g, _yerlesen, count _takimlar]; };
+    } forEach _gruplar;
+    if (_yaya isEqualTo []) exitWith {};
+};
 if (_eslesme isEqualTo []) exitWith {
     diag_log format ["[TASIMA] %1 | arac var (%2) ama hicbir takim sigmadi -> yuruyerek", _taraf, count _araclar];
     0
@@ -212,6 +227,9 @@ private _nB = 0;
 _ctl set [2, _nB];   // plan: gercekten nakil yapiliyor (> 0) -> is bitince TOPLAN hazir sayilir
 diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen: %4 | yaya kalan birim: %5 | inis noktasi %6 (hedeften %7 m) | atanmis arac: %8",
     _taraf, count _eslesme, _nB, _bolunen, count _yaya, mapGridPosition _drop, round _dropM, count _atanan];
+
+// v8.165 BEKLE: eslesen askerler oldugu yerde DURUR ve arac gelene kadar yurumez (RPT c4f70534: piyade RP'ye kosuyor, arac peşinden 90-120 sn kovaliyordu)
+{ { { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
 
 // ---- v8.131 YIGILMA ONLEME: araclar ayni noktaya gitmesin; alma / inis noktasi yanal 24 m aralikla dagitilir ----
 private _noktaYay = {
@@ -250,6 +268,11 @@ _ctl set [4, count _eslesme];
         private _temasVar = {
             params ["_ul", "_dr"];
             ((_ul findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0) || {(getSuppression _dr) > 0.5}
+        };
+
+        private _birak = {
+            params ["_gl2"];
+            { { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; }; } forEach _x; } forEach _gl2;
         };
 
         // (1) RP'ye gel
@@ -294,6 +317,7 @@ _ctl set [4, count _eslesme];
             };
             private _hepsi = [];
             { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
+            [_gl] call _birak;
             { _x assignAsCargo _v; } forEach _hepsi;
             _hepsi orderGetIn true;
             private _bt = time + 90;
@@ -544,12 +568,15 @@ _ctl set [4, count _eslesme];
         };
         _v setVariable [QGVAR(tasimaMesgul), nil];
         _vg setVariable [QGVAR(tasimaSonT), time];
+        [_gl] call _birak;
         count _binen
     });
     { _tasinan = _tasinan + count _x; } forEach _gl;
 } forEach _eslesme;
 
 waitUntil { sleep 2; (_isler findIf {!scriptDone _x}) isEqualTo -1 };
+// v8.165: is hata ile olursa bekleyen askerler sabit kalmasin
+{ { { if (alive _x && {_x getVariable [QGVAR(tasimaBekle), false]}) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; }; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
 // v8.138: is hata ile olurse bayraklar sizmasin (arac sonsuza dek "mesgul" / surucu forceMove / AUTOCOMBAT kapali)
 {
     _x params ["_v"];
