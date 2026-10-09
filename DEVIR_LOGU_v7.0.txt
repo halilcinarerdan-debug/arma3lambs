@@ -1759,3 +1759,6 @@ v8.152 — GIYIM TANISI + GM FRAKSIYON ADI DUZELTMESI (kullanici: "AT ve MG asis
   removeMagazines, teslimiyette DropWeapon). Sunucu logunda bazi askerler dogdugu anda "RIFLE | sarjor:0 | anim:...nonwnon" (silahsiz): bos teçhizatla yaratilmis olabilir.
   Kesin cevap icin fnc_giyimTani.sqf (yalniz log): AT / MG / MG_ASIST ve kiyafetsiz / silahsiz dogan her askerin ILK teçhizat goruntusu + sonradan kayip ([GIYIM-TANI] ILK / DEGISTI).
   Kapatma: lambs_danger_giyimTaniOff = true. Sonraki RPT'de ILK satirinda kiyafet '' ise mod disi (GM / gorev betigi / Zeus), DEGISTI satiri varsa mod suclu.
+v8.152b — giyimTani: silah degisimi logu ([GIYIM-TANI] SILAH: AT / MG / MG_ASIST ya da ilk 120 sn; eski -> yeni silah, animasyon, kiyafet / canta / roketatar, temas). Kullanici: "silah degistirirken oluyor, spawnlandiklari anda, zeustan yerlestirildi, RHS'de de oluyordu".
+ NOT: RPT'de (istemci + sunucu) acilista "Error: Bone slot_backpack / slot_backwpnr / slot_backwpnl / slot_buttpack / hips / headcutscene doesn't exist in skeleton OFP2_ManSkeleton" var (baska bir modun
+ modeli); bunlar sirt cantasi / sirtta roketatar bagli noktalari: AT ve cantali MG asistanlarinin ortak ozelligi. Bu modun spawn aninda silah degistiren kodu YOK (CBA selectWeapon yalniz tehdit sirasinda).

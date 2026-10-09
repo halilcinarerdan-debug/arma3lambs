@@ -31,11 +31,12 @@ private _calis = {
             {
                 private _u = _x;
                 if (!alive _u || {isPlayer _u} || {!isNull objectParent _u}) then { continue };
-                private _snap = [uniform _u, vest _u, backpack _u, headgear _u, primaryWeapon _u, secondaryWeapon _u, count (magazines _u)];
+                private _snap = [uniform _u, vest _u, backpack _u, headgear _u, primaryWeapon _u, secondaryWeapon _u, count (magazines _u), currentWeapon _u];
                 private _k = netId _u;
                 private _eski = _gor getOrDefault [_k, []];
                 if (_eski isEqualTo []) then {
                     _gor set [_k, _snap];
+                    _u setVariable [QGVAR(giyimIlkT), time];
                     private _rol = [_u] call _rolFn;
                     if (_logN < 120 && {(_rol in ["AT", "MG", "MG_ASIST"]) || {(_snap select 0) isEqualTo ""} || {(_snap select 4) isEqualTo ""}}) then {
                         _logN = _logN + 1;
@@ -50,6 +51,17 @@ private _calis = {
                         _logN = _logN + 1;
                         diag_log format ["[GIYIM-TANI] DEGISTI | %1 (%2) | rol %3 | KAYIP: %4 | once %5 | sonra %6 | t=%7 | tcccMesgul %8 | cephaneT %9 | grup %10 | teslim %11",
                             name _u, typeOf _u, [_u] call _rolFn, _kayip, _eski, _snap, round time, time < (_u getVariable [QGVAR(tcccBusy), 0]), _u getVariable [QGVAR(cephaneT), -1], groupId _g, _u getVariable [QGVAR(teslim), false]];
+                    };
+                    // v8.152b: silah degisimi ani ("silah degistirirken ciplak oluyor", spawn aninda): AT / MG / MG_ASIST ya da ilk 120 sn
+                    if ((_eski param [7, ""]) isNotEqualTo (_snap select 7)) then {
+                        private _ilkT = _u getVariable [QGVAR(giyimIlkT), time];
+                        _u setVariable [QGVAR(giyimIlkT), _ilkT];
+                        private _rol2 = [_u] call _rolFn;
+                        if (_logN < 250 && {(_rol2 in ["AT", "MG", "MG_ASIST"]) || {(time - _ilkT) < 120}}) then {
+                            _logN = _logN + 1;
+                            diag_log format ["[GIYIM-TANI] SILAH | %1 (%2) | rol %3 | %4 -> %5 | anim %6 | kiyafet '%7' | canta '%8' | roketatar '%9' | grup %10 | temas %11 sn once | t=%12",
+                                name _u, typeOf _u, _rol2, _eski param [7, ""], _snap select 7, animationState _u, _snap select 0, _snap select 2, _snap select 5, groupId _g, round (time - (_g getVariable [QGVAR(contact), -999])), round time];
+                        };
                     };
                     _gor set [_k, _snap];
                 };
