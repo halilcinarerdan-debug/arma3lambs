@@ -47,6 +47,8 @@ private _calis = {
                     // kayip: kiyafet / yelek / canta / ana silah dolu iken bos oldu
                     private _kayip = [];
                     { if ((_eski select _x) isNotEqualTo "" && {(_snap select _x) isEqualTo ""}) then { _kayip pushBack (["kiyafet", "yelek", "canta", "migfer", "ana silah", "roketatar"] select _x); }; } forEach [0, 1, 2, 3, 4, 5];
+                    // v8.159b: bayilan askerin silahi dusmesi ACE'in normal davranisi (kullanici dogruladi) -> silah kaybi bayilmis askerde loglanmaz
+                    if ((_u getVariable ["ACE_isUnconscious", false]) || {(lifeState _u) isEqualTo "INCAPACITATED"}) then { _kayip = _kayip - ["ana silah", "roketatar"]; };
                     if (_kayip isNotEqualTo [] && {_logN < 200}) then {
                         _logN = _logN + 1;
                         diag_log format ["[GIYIM-TANI] DEGISTI | %1 (%2) | rol %3 | KAYIP: %4 | once %5 | sonra %6 | t=%7 | tcccMesgul %8 | cephaneT %9 | grup %10 | teslim %11",

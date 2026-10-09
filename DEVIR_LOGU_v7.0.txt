@@ -1818,3 +1818,4 @@ v8.159 — 3 SAATLIK TEST ANALIZI (1 saat oyun + 2 saat AFK; RPT d638f596 / 1e29
  SORUN 3 (log gurultusu): [ANOMALI] YURUMUYOR AFK'da 333 satir (Podolski "MOVE komutu ama 7646 sn duruyor": varmis ama komut silinmemis) -> ilk 120 sn sonra 300 sn'de bir; [SUNUCU-DEVIR-OZET] 92 satir -> yalniz degisince.
  YENI BULGU (arastirilacak): [GIYIM-TANI] DEGISTI 9 kez "ana silah KAYBI" (Thiesen 8:54:00, Wildt 8:55:51, Kramer 8:56:21, Beck 8:56:26 ...): kiyafet / yelek / canta / roketatar kalirken ana silah "" oluyor; teslim 0 (moral DropWeapon degil),
    cephaneT -1 (cephane aktarimi degil). v8.159: DEGISTI-BAGLAM satiri (lifeState, ACE bayilma, anim, yakinda silah yigini, hasar, baski) eklendi: bayilinca silah dusuyor mu? kanitlanacak.
+v8.159b — "ana silah KAYBI" bulgusu kapatildi: kullanici: bayilan askerin silahini dusurmesi ACE'in normal davranisi. giyimTani artik bayilmis askerde silah / roketatar kaybini loglamaz (kiyafet / yelek / canta kaybi hala loglanir).
