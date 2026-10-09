@@ -1805,3 +1805,5 @@ v8.158 — KOMUTAN TAVIR MOTORU (loglu) + KANIT LOGU (kullanici: "loglu yaz; ayn
  TEMKINLI +0.05..0.08 (yon / zirh / dagil). Histerezis: mevcut tavir 180 sn ve yeni tavir +0.12'den iyi degilse korunur. Log: tavir, puan, onceki, kisilik, doktrin, neden, tum puanlar.
  [KOMUTAN-ZIHIN] KANIT: hipotez degisince 8 sektor yuzdeleri (K, KD, D, GD, G, GB, B, KB), son 5 gozlem yonu, yon ortalamasi -> "3 kisi ayni konumdan geldi" testi dogrulanabilir.
  Henuz YALNIZ log + gozetleme yonu; hamleler (taciz, kesif atisi, yem) sonraki dilim. TEST EDILMEDI.
+
+[DOKUMAN] OZELLIKLER_LISTESI.md (v8.158, bolum 10c) ve OZELLIKLER_DETAYLI.md (G3) v8.131 - v8.158 icin guncellendi (kod degisikligi yok).

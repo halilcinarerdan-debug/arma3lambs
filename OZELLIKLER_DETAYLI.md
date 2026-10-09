@@ -153,7 +153,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 
 ---
 
-## G2. KOMUTAN PLANI VE ZEUS MODÜLLERİ (v8.113 – v8.130)
+## G2. KOMUTAN PLANI VE ZEUS MODÜLLERİ (v8.113 – v8.130; devamı G3)
 
 - **ELITE Objektif** (3 panel: görev / düşman / kısıt-destek-mesafe): tip (ele geçir, savun, iptal, onay ver), tempo, H-saati (Zeus onayı), süre, tehdit yönü, düşman bilgisi, ROE kısıtları, topçu, rally (250–900 m, 450), ORP (100–400 m, 300), Baskın (5 / 10 dk).
 - **Fazlar** (`komutanPlanDongu`, 3 sn): KUR → TOPLAN → (TASIMA) → ORP → KEŞİF (60 / 90 / 30 sn short halt) → SALDIRI → TOPLANMA / ÇEKİLME; savunma: MEVZİ → BEKLE (1200 sn). Baskın: hedef temiz / süre dolunca ÇEKİLME.
@@ -167,6 +167,34 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - **Telemetri** (`telemetri`): `[TELEMETRI-SUNUCU]` (FPS ort / min, yerel AI, taraf, plan, dönme animasyonu), `[TELEMETRI-GRUP]` (≤ 14 satır / 20 sn), `[HIZ-ANOMALI]` (> 26 km/s yaya), `[DONUS-OZET]`.
 - **Dönme animasyon hızı**: `lambs_danger_turnCoef` 1.15 (yalnız "turn" animasyonunda; v8.125).
 - Kaynaklı / tasarım eşik ayrımı: `kaynaklar_doktrin/SAYISAL_ESIKLER_KAYNAK_TABLOSU.md`.
+
+---
+
+## G3. v8.131 – v8.158 AYRINTILARI
+
+**Plan / istihbarat**
+- `fnc_komutanPlan`: Zeus rol ezmesi (MANEVRA / DESTEK / YEDEK `[PLAN-ATAMA]`), uzak grup devri (`[PLAN-DEVIR]`, yeni grup 60 sn yaşlanır), `secili` (elle grup seçimi, netId listesi, mesafe sınırı yok), RECON seçimi + OP arama (450 / 520 / 600 m, ±45°, LOS, yükseklik, örtü).
+- `komutanPlanDongu`: `_gozlemRapor` (düşman / sivil sayısı, iddia ≠ gözlem), `_atisIzni` (PID kapısı), `_topcuAt` (mermi x `topcuMermiCarpan`, ATIS YOK nedenleri), TASIMA fazı (420 sn, en çok 3 sefer), RECON fazı (gözlem 90 / 45 / 20 sn), keşif süresi `kesifCarpan`, AAR `[PLAN-ISTIHBARAT] OZET` + `[PLAN-ZARAR]`.
+- Objektif paneli: 1/4 görev (+ Grup seçimi), 2/4 düşman, 3/4 kısıt / mesafe / baskın, 4/4 istihbarat + topçu; Elle seçimde `fnc_objektifGrupSec` (panel başına 8 onay kutusu).
+
+**Nakil / araç** (`aracTasima`, `taksi`, `murettebatKoru`, `ezmeKoruma`)
+- Aday süzgeci: kara aracı, hareket edebilir, yakıt > %10, kargo ≥ 3, AI sürücü, araç grubu tamamen içinde, planda / medevac / karakolda değil; `[TASIMA] ATANMIS ARAC UYGUN DEGIL` nedeni.
+- Mürettebat tamamlama (150 m içindeki dışarıdaki aynı grup askerleri komutan > nişancı > kargo), yolcu bekçisi (0.25 sn: PATH kapalı, `GET OUT` → `doStop`, hareketli araçtan atlayan 80 m içinde ise geri al), motor zorlaması (yolda kapalıysa `engineOn true` her sn), takılma kurtarma (8 / 18 / 35 sn, sürücü `moveOut` + `moveInDriver`).
+- Ezme koruması: 0.25 sn tarama, ileri bakış 10 m + 2.2 x hız, 4 m şerit, 7 m harim (yön fark etmez), 30 sn kesintisiz fren sonrası 5 km/s süzülme; kapatma `lambs_danger_ezmeOff`. Mürettebat koruma: 1 sn, `lambs_danger_murKoruOff`.
+
+**Doktrin**
+- RUS profil anahtarları: `tasimaInisM 300`, `tasimaOrpEk false`, `aracDestekKal true`, `kesifCarpan 0.6`, `topcuMermiCarpan 2`, `kesifAtesHizli true`; ayrıntı `kaynaklar_doktrin/RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md`, `NATO_ABD_MUFREZE_MANGA_DOKTRIN_NOTLARI.md`.
+- Fraksiyon haritası: `gm_fc_gc` / `gm_fc_pl` → RUS, `gm_fc_ge` / `gm_fc_dk` → ABD, `gm_*_pol` → GENEL.
+- Oyuncu komutası: grup değişkeni `lambs_danger_oyuncuKomuta` (true / false / yok = otomatik), `oyuncuKomutaAktif` (yalnız yerel); `tarafSecim` mekanizmasıyla LAMBS FSM + karar izleyicileri kapalı; TCCC / cephane / IED muaf.
+
+**Komutan zihni** (`komutanZihin`, v8.156 – v8.158)
+- Gözlem türleri: ATIS (450 m ses), DUMAN (300 m), TOPCU (1500 m), KARSILIK (12 sn içinde karşı ateş + gecikme), TEMAS (grubun bildiği en yakın düşman), GORUS (`nearTargets`, `knowsAbout > 0.5`), KAYIP (x1.5). Gürültü: mesafe ±%6, yön ±8°.
+- Hafıza: taraf başına ≤ 160 kayıt, yarı ömür 25 dk, en az 4 gözlem (`lambs_danger_zihinHiz` ile ölçeklenir). Hipotez: YON (8 sektör, pay ≥ %50), MENZIL, DUMAN, ARAZI, KARSILIK, ZIRH, TOPCU, KUVVET. Log `[KOMUTAN-ZIHIN] hipotez / KANIT / OZET`.
+- Tavır motoru: YON-HAZIRLIK, KESIF-ATISI, TACIZ-SABITLE, ZIRH-AT-HAZIR, DAGIL-SIPER, DUMAN-IZLE, TEDBIRLI-GOZETLE; kişilik + doktrin bonusu, histerezis 0.12 / 180 sn, log `[KOMUTAN-TAVIR]`. Etki yalnız beklenen yöne gözetleme (güven ≥ 0.45).
+
+**Tanı / A/B anahtarları**
+- `[GIYIM-TANI]` (ILK / DEGISTI / SILAH), `[CEPHANE-ENV]`, `lambs_danger_giyimTaniOff`, `silahDegisimOff`, `cephanePaylasOff`, `cephaneAnimAcik`, `sunucuDevirBekleS` (varsayılan 120), `sunucuDevirOff`.
+- `tools/rpt_ozet.py` etiketleri: TASIMA, ARAC-SURUCU, PLAN-RECON, PLAN-ISTIHBARAT, PLAN-ZARAR, EZME(-NABIZ / -BAYGIN), MURETTEBAT-KORU, OYUNCU-KOMUTA, GIYIM-TANI, CEPHANE-ENV, KOMUTAN-ZIHIN, KOMUTAN-TAVIR.
 
 ---
 

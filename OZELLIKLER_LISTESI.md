@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.130)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.158)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -98,6 +98,19 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Sunucu devri** (`grupSunucuDevir`): istemcide kalan AI grupları sunucuya devredilir (Zeus PC yükü); plan da uzak grupları devralır.
 - **MP**: Zeus modülleri CBA sunucu olayı gönderir (plan sunucuda kurulur), sonuç `[PLAN-YANIT]` ve Zeus sohbetinde.
 
+## 10c. v8.131 – v8.158 eklemeleri
+- **Keşif unsuru (RECON)** (T): Gorev Ata → RECON grubu gözlem noktasına (OP) STEALTH + GREEN sızar, ateş gelene kadar ateş etmez, plana rapor verir (gözlenen düşman / sivil sayısı).
+- **İstihbarat / PID** (T): "iddia ≠ gerçek" (Irak 2003 örneği). Bilgi güvenilirliği (yetersiz / orta / kesin) + doğrulama disiplini (tam keşif / son doğrulama / yok); topçu yalnız rapor + sivil yoksa atar; sivil gözlenirse atış iptal; atış sonrası sivil / dost zararı `[PLAN-ZARAR]`.
+- **Plan nakli** (T): kara aracı (APC / kamyon) plan toplanmasında erken başlar, takım bazlı bölme, sığmayanlar için sefer (en çok 3), medevac varsa 1 araç rezerv, iniş doktrin mesafesinde (RUS 300 m, diğer 500 m), yol üstü inişe sürme.
+- **Nakil dayanıklılığı**: dinamik alma noktası, pusu (uzak: geç, yakın: in), takılma tanısı + kurtarma (motor zorlaması, sürücü yeniden oturtma, ara nokta), mürettebat toplama / tamamlama, yolcu bekçisi (hareketli araçtan inme emrini iptal), zırh grubu kalma (RUS).
+- **Ezme koruması** (T): hareketli araç AI sürücüsü dost yayaya (yatan dahil) önde / 7 m yakında fren yapar; 30 sn kilitlenme önlemi. Log `[EZME] [EZME-NABIZ] [EZME-BAYGIN]`.
+- **Mürettebat koruma** (T): sürücü / komutan / nişancı araçtan inme emrini iptal eder, dışarıda kalan geri döner; yanan araçta ve temasta devre dışı.
+- **Rus doktrini** (ATP 7-100.1 + nizamname Bölüm 3): keşif atışı hızlı, topçu x2, 300 m iniş, zırh grubu; GM Doğu Almanya (`gm_fc_gc`) RUS, Batı Almanya / Danimarka ABD. NATO / RUS müfreze-manga notları `kaynaklar_doktrin/`.
+- **Oyuncu komutası** (T): oyunculu gruplar ya da Gorev Ata "OYUNCU KOMUTASI" → ELITE taktik katmanı kapalı; TCCC / cephane / IED / ezme / mürettebat açık. "ELITE TAM AÇIK" ile ezilir.
+- **Objektif paneli 4 / 4 + elle squad seçimi** (T): "Grup seçimi: Elle" → squad listesi (en çok 16), yalnız seçilenler plana girer.
+- **Komutan zihni + tavır motoru** (T): karşı taraf hakkında yalnız algılananlardan (ateş, duman, topçu, görüş, temas, kayıp) gözlem defteri; alışkanlık hipotezleri (yön, menzil, duman, arazi, karşılık, zırh, topçu); kişilik (temkinli / dengeli / saldırgan) + doktrin ile tavır puanlama (loglu); şimdilik etki: beklenen yöne gözetleme. Oturum hafızası, SQL yok.
+- **Tanı / düzeltmeler**: sunucu devri yeni gruba 120 sn bekler (çıplak / boş envanter kökü), giyim tanısı `[GIYIM-TANI]`, cephane animasyonu varsayılan kapalı + envanter dolu kontrolü + `[CEPHANE-ENV]`, A/B anahtarları `lambs_danger_silahDegisimOff` / `cephanePaylasOff` / `giyimTaniOff`.
+
 ## 11. Geliştirici araçları
 - **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --grup` RPT özetleri, sürüm kontrolü.
 - **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
@@ -106,6 +119,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
 
 ## Planlanan / bekleyen
+- Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
 - Helikopter medevac / hava nakli (şu an yalnız kara aracı).
 - Zırhlı destek planı (mekanize taktikler).
 - Karakolda MG / AT yerleşimi, nöbet rotasyonu.
