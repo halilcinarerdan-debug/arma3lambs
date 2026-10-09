@@ -1791,3 +1791,10 @@ v8.156 — KOMUTAN ZIHNI v1 (kullanici: "karsida bir komutan var desin; AI oyunc
  HIPOTEZLER (30 sn'de bir; en az 4 gozlem x 1/hiz; 25 dk yari omur; oturum hafizasi, dosya / SQL yok): YON (8 sektor, pay >= %50), MENZIL bandi, DUMAN, ARAZI (sehir / orman / acik), KARSILIK (taciz atisina karsilik veriyor mu + gecikme),
  ZIRH, TOPCU, ortalama KUVVET. ETKI (kucuk): guven >= 0.45 iken duran, temassiz, planda olmayan AI gruplarinin lideri beklenen yone bakar (doWatch, 6 grup / 45 sn). Log: [KOMUTAN-ZIHIN] hipotez / OZET (5 dk).
  Kapatma: lambs_danger_zihinOff = true; hiz: lambs_danger_zihinHiz (1 = orta-hizli). SONRAKI DILIMLER: hamle repertuari (taciz / yem / hileli saldiri / sabitle-kanatla) hipotezlere gore. TEST EDILMEDI.
+
+v8.157 — KOMUTAN ZIHNI DUZELTMELERI (RPT f995e270 / e3605285; kullanici: "4 olay ayni sayida ayni yerden geldi")
+ BULGU 1 (4 AYNI HATA): fnc_komutanZihin.sqf satir 140: "Error <: Type Object, expected Number" x4 (8:24:20, 8:26:50, 8:27:50, 8:29:20): nearTargets elemani [konum, tur, taraf, maliyet, NESNE, konum dogrulugu]
+  -> (_x select 4) NESNE, sayi sanilip < 30 ile karsilastirildi; GORUS ornekleyici her turda coktu. DUZELTME: knowsAbout (nesne) > 0.5 ve dogruluk (select 5) < 80 m.
+ BULGU 2: "Zero divisor" (kuvvet / karsilik gec) — "[0, a / b] select (b > 0)" iki kolu da hesaplar -> if / then. Her 30 sn'de 2 hata satiri.
+ BULGU 3: "yon 0 derece (guven 1.00)" — sektor komsuluk testi yanlisti (daire farki yerine (i - en + 12) mod 8) -> en iyi sektorun kendi kayitlari ortalamaya girmiyor, yon 0'a dusuyordu. DUZELTME: dairesel fark.
+ GOZLEM (bozuk degil): hipotezler olusuyor (WEST 10 gozlem, EAST 36 / 151; karsilik ates: true, gecikme 1.8-2.0 sn; menzil < 100 m: yakin muharebe sahnesi).

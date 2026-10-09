@@ -137,7 +137,8 @@ private _calis = {
             private _T = side _g;
             private _l = leader _g;
             if (!local _g || {isNull _l} || {isPlayer _l} || {!alive _l} || {(time - (_g getVariable [QGVAR(zihinGorusT), -999])) < 25}) then { continue };
-            private _hedef = (_l nearTargets 800) select {((_T getFriend (_x select 2)) < 0.6) && {(_x select 4) < 30}};
+            // nearTargets: [konum, tur, taraf, maliyet, nesne, konum dogrulugu]; yalniz GERCEKTEN bilinen (knowsAbout > 0.5) ve konum hatasi < 80 m hedefler
+            private _hedef = (_l nearTargets 800) select {((_T getFriend (_x select 2)) < 0.6) && {(_x select 5) < 80} && {(_l knowsAbout (_x select 4)) > 0.5}};
             if (_hedef isEqualTo []) then { continue };
             _g setVariable [QGVAR(zihinGorusT), time];
             _ornek = _ornek + 1;
@@ -196,7 +197,9 @@ private _calis = {
                 _x params ["_t", "_tip", "_yon"];
                 if (_tip in ["DUMAN", "TOPCU", "KARSILIK"]) then { continue };
                 private _i = (round (_yon / 45)) mod 8;
-                if (((_i - _en + 12) mod 8) <= 1 || {((_en - _i + 12) mod 8) <= 1}) then { _vx = _vx + sin _yon; _vy = _vy + cos _yon; };
+                private _dif = abs (_i - _en);
+                _dif = _dif min (8 - _dif);
+                if (_dif <= 1) then { _vx = _vx + sin _yon; _vy = _vy + cos _yon; };
             } forEach _gz;
             private _yonOrt = (_vx atan2 _vy + 360) mod 360;
             private _guven = ((_n / (2.5 * _nMin)) min 1) * _pay;
@@ -208,8 +211,8 @@ private _calis = {
             private _hip = createHashMapFromArray [
                 ["yon", [-1, _yonOrt] select (_pay >= 0.5)], ["yonGuven", _guven], ["menzil", _bandAd select _bi], ["menzilPay", _bw / _toplam],
                 ["duman", _duman >= ((_nMin / 2) max 2) && {(_duman / (_n max 1)) >= 0.1}], ["arazi", _ar], ["araziPay", _arw / _toplam], ["n", _n],
-                ["topcu", _topcu >= 2], ["karsilik", _karsilik >= ((_nMin / 2) max 2)], ["karsilikGec", [0, _karGec / _karsilik] select (_karsilik > 0)],
-                ["kuvvet", [0, _gorusInf / _gorusN] select (_gorusN > 0)], ["zirh", _gorusN >= 3 && {(_gorusZirh / _gorusN) >= 0.25}]
+                ["topcu", _topcu >= 2], ["karsilik", _karsilik >= ((_nMin / 2) max 2)], ["karsilikGec", if (_karsilik > 0) then {_karGec / _karsilik} else {0}],
+                ["kuvvet", if (_gorusN > 0) then {_gorusInf / _gorusN} else {0}], ["zirh", _gorusN >= 3 && {(_gorusZirh / _gorusN) >= 0.25}]
             ];
             private _eski = lambs_danger_zihinHip getOrDefault [str _T, createHashMap];
             lambs_danger_zihinHip set [str _T, _hip];
