@@ -1752,3 +1752,10 @@ v8.151 — OYUNCU KOMUTASI (5 madde) + GM FRAKSIYONLARI (kullanici: "kontrol biz
  5) Zeus acma / kapama: Gorev Ata modulu ve otomatik oyunculu grup. Log: [OYUNCU-KOMUTA]. Otomatige donmek icin Gorev Ata -> Otomatik.
  GM: fnc_doktrin faction haritasina gm_gc / gm_pl -> RUS, gm_ge / gm_dk -> ABD, gm_*_pol -> GENEL (kaynaklar_doktrin/RUS... bolum 10).
  TEST EDILMEDI.
+
+v8.152 — GIYIM TANISI + GM FRAKSIYON ADI DUZELTMESI (kullanici: "AT ve MG asistanlar ciplak, istisnasiz, bizim modla alakali"; RPT 391409e8 / c855053b, harita gm_weferlingen_summer)
+ BULGU 1: GM fraksiyon sinifi "gm_fc_gc" (gm_gc DEGIL): [DOKTRIN-PROFIL] "faction:gm_fc_gc -> GENEL" -> haritaya gm_fc_gc / gm_fc_ge / gm_fc_dk / gm_fc_pl eklendi.
+ BULGU 2 (ciplaklik): bu modda kiyafet / teçhizat degistiren kod YOK (forceAddUniform, removeUniform, setUnitLoadout, removeAllWeapons yok; yalniz cephane addMagazine /
+  removeMagazines, teslimiyette DropWeapon). Sunucu logunda bazi askerler dogdugu anda "RIFLE | sarjor:0 | anim:...nonwnon" (silahsiz): bos teçhizatla yaratilmis olabilir.
+  Kesin cevap icin fnc_giyimTani.sqf (yalniz log): AT / MG / MG_ASIST ve kiyafetsiz / silahsiz dogan her askerin ILK teçhizat goruntusu + sonradan kayip ([GIYIM-TANI] ILK / DEGISTI).
+  Kapatma: lambs_danger_giyimTaniOff = true. Sonraki RPT'de ILK satirinda kiyafet '' ise mod disi (GM / gorev betigi / Zeus), DEGISTI satiri varsa mod suclu.
