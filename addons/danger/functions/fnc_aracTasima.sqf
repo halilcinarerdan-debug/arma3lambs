@@ -98,6 +98,20 @@ private _tumAraclar = (vehicles select {
     && {(_x emptyPositions "cargo") >= 3}
     && {(_x distance2D _pickRef) <= _menzil}
 });
+// v8.166: TASIMA atanmis ama surucu grubu baska makinede (Zeus istemcisi) ise sunucuya devret (yerel degilse arac hic hareket etmiyordu)
+if (isServer) then {
+    private _uzakSurucu = [];
+    {
+        private _gv = [_x getVariable ["lambs_danger_gorev", ""]] + (crew _x apply {(group _x) getVariable ["lambs_danger_gorev", ""]});
+        private _dr = driver _x;
+        if ("TASIMA" in _gv && {!isNull _dr} && {!isPlayer _dr} && {!local _dr} && {(side (group _dr)) isEqualTo _taraf} && {(time - ((group _dr) getVariable [QGVAR(gorulduT), -999])) >= 60}) then { _uzakSurucu pushBackUnique (group _dr); };
+    } forEach _tumAraclar;
+    if (_uzakSurucu isNotEqualTo []) then {
+        { diag_log format ["[TASIMA] SURUCU GRUBU DEVIR: %1 | sahip makine %2 -> sunucu", groupId _x, groupOwner _x]; _x setGroupOwner 2; } forEach _uzakSurucu;
+        private _t0 = time;
+        waitUntil { sleep 0.3; ((_uzakSurucu findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 6} };
+    };
+};
 private _uygun = _tumAraclar select {
     private _v = _x;
     private _d = driver _v;

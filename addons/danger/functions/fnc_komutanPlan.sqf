@@ -66,6 +66,7 @@ private _grupN = _ayar getOrDefault ["grupN", 4];
 private _secili = _ayar getOrDefault ["secili", []];
 // v8.163: secilen ARAC gruplari (lider kara aracinda): tank / zirhli -> plan ZIRH DESTEK unsuru (zirhG); tasima kapasiteli arac (kargo >= 3) -> TASIMA gorevi (nakilde oncelikli). Piyade secimi eskisi gibi.
 private _zirhG = [];
+private _tasG = [];   // v8.166: secilen tasima araci gruplari (sunucuya devredilir; RPT 8640024e: surucu sunucuda yerel degildi, arac hic kipirdamadi)
 if (_secili isNotEqualTo []) then {
     private _yayaSec = [];
     {
@@ -76,6 +77,7 @@ if (_secili isNotEqualTo []) then {
             private _sinifA = [_sv] call FUNC(aracSinif);
             private _tasiyici = (_sinifA select 0) in ["IFV", "APC", "KAMYON"];
             if (_tasiyici) then {
+                _tasG pushBack _sg;
                 _sg setVariable ["lambs_danger_gorev", "TASIMA", true];
                 _sv setVariable ["lambs_danger_gorev", "TASIMA", true];
                 _sv setVariable ["lambs_danger_ekipGrup", _sg, true];
@@ -157,7 +159,7 @@ private _reconG = allGroups select {
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {
-    private _uzak = (_gruplar + _reconG + _zirhG) select {!local _x};
+    private _uzak = (_gruplar + _reconG + _zirhG + _tasG) select {!local _x};
     // v8.155: yeni yaratilmis (< 60 sn) uzak grubu hemen devretme (envanter / kiyafet kaybi, RPT 7ab83653): yasi dolana kadar bekle (en fazla 60 sn)
     if (_uzak isNotEqualTo []) then {
         private _t1 = time;
@@ -176,6 +178,7 @@ if (isServer) then {
             _gruplar = _gruplar - _kalan;
             _reconG = _reconG - _kalan;
             _zirhG = _zirhG - _kalan;
+            _tasG = _tasG - _kalan;
         } else {
             diag_log format ["[PLAN-DEVIR] %1 grup sunucuya devredildi (%2 sn)", count _uzak, (time - _t0) toFixed 1];
         };

@@ -1863,3 +1863,9 @@ v8.165 - NAKIL: dengeli dagitim + piyade BEKLER (RPT c4f70534)
  Bulgu: 5 TASIMA araci atandi ama ilk-uyan yerlestirme 24 askeri 3 araca doldurdu (2 arac bos); varsayilan kapasite 8, gercek koltuk 5-7 -> 19/24 bindi. Piyade RP'ye kosuyor, arac 90-120 sn kovaliyordu.
  fnc_aracTasima: yerlestirme artik en BOS araca (worst-fit) ve arac basina yumusak tavanla (ceil(asker/arac), en az 5) yapilir; sigmayan olursa 2. tur gercek kapasiteyle. Esleşen askerler doStop + disableAI PATH + lambs_danger_tasimaBekle ile oldugu yerde BEKLER; arac gelip bindirmeye baslarken (orderGetIn oncesi), is bitince ve olasi hata durumunda PATH geri acilir.
  TEST EDILMEDI.
+
+v8.166 - TASIMA araclari sunucuya DEVREDILIR (RPT 8640024e)
+ Bulgu: 4 atanmis Fuchs "surucu sunucuda yerel degil" -> hicbiri nakilde kullanilmadi, kipirdamadi. Elle secilen tasima araci gruplari (tasiyici) plan devir listesine (_uzak) dahil degildi (yalniz piyade / recon / zirh).
+ fnc_komutanPlan: _tasG listesi devir listesine eklendi. fnc_aracTasima: TASIMA etiketli ama surucusu uzak makinede olan (>= 60 sn yasli) gruplar nakil baslarken setGroupOwner 2 ile devralinir ([TASIMA] SURUCU GRUBU DEVIR).
+ Ayrica ayni kayitta Alpha 1-2 devri olmadi (plandan cikarildi) -> plan 1 grupla kuruldu.
+ TEST EDILMEDI.
