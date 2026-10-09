@@ -62,6 +62,9 @@ if (_tip isEqualTo 3) exitWith {
 // KATILAN GRUPLAR: taraf, yerel, AI lider, >= 3 asker, baska plana bagli degil, objektife <= 4000 m; en yuksek rutbe + buyuk grup + yakin
 // ---------------------------------------------------------------------------
 private _grupN = _ayar getOrDefault ["grupN", 4];
+// v8.150: Zeus elle sectiyse yalniz bu gruplar (netId listesi); mesafe sinirina bakilmaz
+private _secili = _ayar getOrDefault ["secili", []];
+if (_secili isNotEqualTo []) then { _grupN = count _secili; };
 private _aday = allGroups select {
     private _l = leader _x;
     !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
@@ -70,7 +73,7 @@ private _aday = allGroups select {
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
-    && {isNull objectParent _l} && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}
+    && {isNull objectParent _l} && {(_secili isEqualTo [] && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}) || {(netId _x) in _secili}}
 };
 if (_aday isEqualTo []) exitWith {
     // v8.121 TANI: her gruptan hangi filtre ilk elediyse say (neden belli olsun)

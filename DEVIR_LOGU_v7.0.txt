@@ -1736,3 +1736,9 @@ v8.149 — MURETTEBAT KORUMA (kullanici: "apc crewi iniyor"; RPT 6c8708da / 16fa
  disarida (<= 60 m, atama hala bu arac, 20 sn temassiz, arac hareket edebilir, hasar <= 0.6) -> 6 sn'de bir koltuguna doner. Nakil indirmesi sirasinda dokunmaz.
  Log: [MURETTEBAT-KORU] ... INME EMRI IPTAL (arac hizi, grup, grup lideri aracta mi) / disarida -> koltuguna dondu. Kapatma: lambs_danger_murKoruOff = true.
 v8.149b — murettebat koruma: yanan arac (isBurning) atlanir; temasta (son 20 sn) GET OUT iptal edilmez (ates altinda murettebat cikabilir).
+
+v8.150 — OPERASYON EMRINDE ELLE SQUAD SECIMI (kullanici: "operasyon emri verirken istedigimiz squadlari secebilelim")
+ ELITE Objektif 1/4 paneline "Grup secimi" (Otomatik sayi / Elle sec). Elle ise 4/4'ten sonra fnc_objektifGrupSec: o tarafin AI gruplari (objektife <= 6000 m, >= 3 saglam asker,
+ oyuncusuz, HARIC / MEDEVAC / TOPCU / TASIMA / KARAKOL_ARAC / RECON ve garnizon alt grubu degil) yakindan uzaga en fazla 16, panel basina 8 onay kutusu (en yakin 4 isaretli).
+ Secilen netId listesi plan ayarina "secili": fnc_komutanPlan yalniz bunlari kullanir (mesafe siniri yok, grupN = secili sayisi; komutan en yuksek rutbeli secili grup lideri).
+ Hic secilmezse plan istegi gonderilmez. Yalniz ele gecir / savun; IPTAL / ONAY VER etkilenmez. TEST EDILMEDI (panel akisi oyunda dogrulanmali).

@@ -22,7 +22,8 @@ if (_activated && local _logic) then {
             ["Baslama (H-saati)", "LIST", "Plan kurulunca ne zaman harekete gecilsin. 'Zeus onayi': plan kurulur, harita isaretleri cikar, siz 'ONAY VER' modulunu koyana kadar beklenir.", ["Hemen", "30 sn", "60 sn", "120 sn", "300 sn", "Zeus onayi bekle"], 0],
             ["Sure siniri", "LIST", "Sure dolunca: ele gecirde (hedef alinmadiysa) CEKILME, savunmada plan biter.", ["Sinirsiz", "10 dk", "20 dk", "30 dk", "45 dk"], 0],
             ["Tehdit yonu (savunma)", "LIST", "Duşmanin objektife geldigi yon (objektiften duşmana). Savunma sektorleri bu yone yogunlasir; MG / destek grubu tam karsisinda.", ["Bilinmiyor", "Kuzey", "Kuzeydogu", "Dogu", "Guneydogu", "Guney", "Guneybati", "Bati", "Kuzeybati"], 0],
-            ["Katilacak grup sayisi", "SLIDER", "En yetkili (rutbe) ve en yakin gruplardan secilir; en yuksek rutbeli lider KOMUTAN olur.", [1, 8], [1, 1], 4, 0]
+            ["Katilacak grup sayisi", "SLIDER", "Otomatik secimde: en yetkili (rutbe) ve en yakin gruplardan secilir; en yuksek rutbeli lider KOMUTAN olur.", [1, 8], [1, 1], 4, 0],
+            ["Grup secimi", "LIST", "Otomatik: yukaridaki sayiya gore. Elle: panellerin sonunda squad listesi acilir, katilacaklari siz isaretlersiniz (mesafe siniri yok).", ["Otomatik (sayi)", "Elle sec (liste)"], 0]
         ],
         {
             params ["_data", "_args"];
@@ -70,7 +71,7 @@ if (_activated && local _logic) then {
                                             {
                                                 params ["_data", "_args"];
                                                 _args params ["_obj", "_d1", "_d2", "_d3"];
-                                                _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_tehditY", "_grupN"];
+                                                _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_tehditY", "_grupN", "_secimModu"];
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
                                                 _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin"];
                                                 _data params ["_guven", "_dogr", "_topcu", "_topcuN"];
@@ -80,6 +81,10 @@ if (_activated && local _logic) then {
                                                     ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp], ["baskin", _baskin], ["guven", _guven], ["dogrulama", _dogr],
                                                     ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN]
                                                 ];
+                                                // v8.150: Elle grup secimi (yalniz ele gecir / savun): squad listesi paneli, secilenler "secili" ile gonderilir
+                                                if (_secimModu isEqualTo 1 && {_tip in [0, 1]}) exitWith {
+                                                    [_taraf, _obj, _ayar] call (missionNamespace getVariable ["lambs_danger_fnc_objektifGrupSec", {}]);
+                                                };
                                                 // Zeus modulu curator'un makinesinde calisir; plan gruplarin yerel oldugu SUNUCUDA kurulur (CBA sunucu olayi; HashMap -> cift listesi)
                                                 ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;
                                                 diag_log format ["[PLAN-ISTEK] sunucuya gonderildi: %1 | tip %2 | %3 | guven %4 dogrulama %5", _taraf, _tip, mapGridPosition _obj, _guven, _dogr];
