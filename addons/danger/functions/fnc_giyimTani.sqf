@@ -51,6 +51,7 @@ private _calis = {
                         _logN = _logN + 1;
                         diag_log format ["[GIYIM-TANI] DEGISTI | %1 (%2) | rol %3 | KAYIP: %4 | once %5 | sonra %6 | t=%7 | tcccMesgul %8 | cephaneT %9 | grup %10 | teslim %11",
                             name _u, typeOf _u, [_u] call _rolFn, _kayip, _eski, _snap, round time, time < (_u getVariable [QGVAR(tcccBusy), 0]), _u getVariable [QGVAR(cephaneT), -1], groupId _g, _u getVariable [QGVAR(teslim), false]];
+                        diag_log format ["[GIYIM-TANI] DEGISTI-BAGLAM | %1 | lifeState %2 | ACE bayilma %3 | anim %4 | yakinda silah yigini (6 m) %5 | hasar %6 | baski %7", name _u, lifeState _u, _u getVariable ["ACE_isUnconscious", false], animationState _u, count (nearestObjects [_u, ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSimulated"], 6]), (damage _u) toFixed 2, (getSuppression _u) toFixed 2];
                     };
                     // v8.152b: silah degisimi ani ("silah degistirirken ciplak oluyor", spawn aninda): AT / MG / MG_ASIST ya da ilk 120 sn
                     if ((_eski param [7, ""]) isNotEqualTo (_snap select 7)) then {

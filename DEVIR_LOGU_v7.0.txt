@@ -1807,3 +1807,14 @@ v8.158 — KOMUTAN TAVIR MOTORU (loglu) + KANIT LOGU (kullanici: "loglu yaz; ayn
  Henuz YALNIZ log + gozetleme yonu; hamleler (taciz, kesif atisi, yem) sonraki dilim. TEST EDILMEDI.
 
 [DOKUMAN] OZELLIKLER_LISTESI.md (v8.158, bolum 10c) ve OZELLIKLER_DETAYLI.md (G3) v8.131 - v8.158 icin guncellendi (kod degisikligi yok).
+
+v8.159 — 3 SAATLIK TEST ANALIZI (1 saat oyun + 2 saat AFK; RPT d638f596 / 1e29bfc7) + DUZELTMELER
+ SAGLAM: sunucu 8:46 - 11:54 (3 saat), script hatasi 0, [WATCHDOG-YENIDEN] 0; FPS 63-70 (min 32-63) sabit, grup 4, asker 23 -> 13 (oyunda kayip), bellek / log buyumesi yok (24 bin satir).
+ KOMUTAN ZIHNI: 3 kisi ayni konumdan geldi testi dogrulandi (8:52:30 WEST sektor [0,0,0,0,0,90,0,10], yon 226 derece ~ GB); kisilikler WEST DENGELI / EAST SALDIRGAN; RUS (EAST) KESIF-ATISI, ABD (WEST) YON-HAZIRLIK / KESIF-ATISI.
+ SORUN 1 (tavir titremesi): WEST 9:18:00 / 9:18:30, 8:53:00 / 8:53:30 gibi 30 sn araliklarla tavir degisti: 180 sn sonra esitlige yakin puanlar yeni tavri tetikliyor; yon hipotezi pay %50 esiginde titriyor.
+   DUZELTME: guven 50/50 yumusatma, en az 90 sn tutma, sonra +0.05 (ilk 180 sn +0.12).
+ SORUN 2 (bayat hipotez): AFK'da gozlem < esik olunca hipotez donuyordu (10:12'den 11:52'ye ayni "yon 358, n 4"); tavir / gozetleme bayat bilgiyle suruyordu.
+   DUZELTME: taze gozlem < esik ise hipotez + tavir silinir (log "hipotez SONA ERDI").
+ SORUN 3 (log gurultusu): [ANOMALI] YURUMUYOR AFK'da 333 satir (Podolski "MOVE komutu ama 7646 sn duruyor": varmis ama komut silinmemis) -> ilk 120 sn sonra 300 sn'de bir; [SUNUCU-DEVIR-OZET] 92 satir -> yalniz degisince.
+ YENI BULGU (arastirilacak): [GIYIM-TANI] DEGISTI 9 kez "ana silah KAYBI" (Thiesen 8:54:00, Wildt 8:55:51, Kramer 8:56:21, Beck 8:56:26 ...): kiyafet / yelek / canta / roketatar kalirken ana silah "" oluyor; teslim 0 (moral DropWeapon degil),
+   cephaneT -1 (cephane aktarimi degil). v8.159: DEGISTI-BAGLAM satiri (lifeState, ACE bayilma, anim, yakinda silah yigini, hasar, baski) eklendi: bayilinca silah dusuyor mu? kanitlanacak.

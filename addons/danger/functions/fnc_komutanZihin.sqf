@@ -163,7 +163,15 @@ private _calis = {
             private _l = lambs_danger_zihinKayit getOrDefault [str _T, []];
             private _gz = _l select {(time - (_x select 0)) < 2400};
             private _n = count _gz;
-            if (_n < _nMin) then { continue };
+            if (_n < _nMin) then {
+                // v8.159: gozlemler eskidi (AFK / sakin donem): bayat hipotez ve tavir silinir, tedbirli gozetlemeye don
+                if ((count (lambs_danger_zihinHip getOrDefault [str _T, createHashMap])) > 0) then {
+                    lambs_danger_zihinHip deleteAt (str _T);
+                    lambs_danger_zihinTavir deleteAt (str _T);
+                    diag_log format ["[KOMUTAN-ZIHIN] %1 (AI) hipotez SONA ERDI | taze gozlem %2 < esik %3 (eski kayitlar unutuldu)", _T, _n, _nMin];
+                };
+                continue
+            };
             private _toplam = 0;
             private _sek = [0, 0, 0, 0, 0, 0, 0, 0];
             private _bandlar = [0, 0, 0, 0];
@@ -206,7 +214,10 @@ private _calis = {
                 if (_dif <= 1) then { _vx = _vx + sin _yon; _vy = _vy + cos _yon; };
             } forEach _gz;
             private _yonOrt = (_vx atan2 _vy + 360) mod 360;
-            private _guven = ((_n / (2.5 * _nMin)) min 1) * _pay;
+            private _guven0 = ((_n / (2.5 * _nMin)) min 1) * _pay;
+            // v8.159: guven yumusatma (esik civarinda titremesin): onceki hipotez varsa 50 / 50
+            private _onceki = lambs_danger_zihinHip getOrDefault [str _T, createHashMap];
+            private _guven = if ((count _onceki) > 0) then { 0.5 * (_onceki getOrDefault ["yonGuven", _guven0]) + 0.5 * _guven0 } else { _guven0 };
             private _bandAd = ["<100 m", "100-250 m", "250-500 m", ">500 m"];
             private _bi = 0; private _bw = 0;
             { if (_x > _bw) then { _bw = _x; _bi = _forEachIndex; }; } forEach _bandlar;
@@ -242,9 +253,11 @@ private _calis = {
             private _enT = _pn select 0;
             private _mevcut = lambs_danger_zihinTavir getOrDefault [str _T, []];
             private _yeniTavir = true;
-            if (_mevcut isNotEqualTo [] && {(time - (_mevcut select 2)) < 180}) then {
+            if (_mevcut isNotEqualTo []) then {
+                // en az 90 sn tut; sonra yeni tavir mevcuttan en az 0.05 (ilk 180 sn icinde 0.12) iyi olmali
                 private _mp = _pn findIf {(_x select 0) isEqualTo (_mevcut select 0)};
-                if (_mp >= 0 && {(_enT select 1) < (((_pn select _mp) select 1) + 0.12)}) then { _yeniTavir = false; };
+                private _esik = [0.05, 0.12] select ((time - (_mevcut select 2)) < 180);
+                if ((time - (_mevcut select 2)) < 90 || {_mp >= 0 && {(_enT select 1) < (((_pn select _mp) select 1) + _esik)}}) then { _yeniTavir = false; };
             };
             if (_yeniTavir && {(_mevcut isEqualTo []) || {(_mevcut select 0) isNotEqualTo (_enT select 0)}}) then {
                 lambs_danger_zihinTavir set [str _T, [_enT select 0, _enT select 1, time]];

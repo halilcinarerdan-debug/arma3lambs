@@ -61,7 +61,10 @@ private _calis = {
         } forEach allGroups;
         if (time > _ozetT) then {
             _ozetT = time + 120;
-            if (_toplam > 0) then { diag_log format ["[SUNUCU-DEVIR-OZET] bugune kadar %1 grup devredildi", _toplam]; };
+            if (_toplam > 0 && {_toplam isNotEqualTo (missionNamespace getVariable ["lambs_danger_sunucuDevirSonOzet", -1])}) then {
+                missionNamespace setVariable ["lambs_danger_sunucuDevirSonOzet", _toplam];
+                diag_log format ["[SUNUCU-DEVIR-OZET] bugune kadar %1 grup devredildi", _toplam];
+            };
         };
         missionNamespace setVariable ["lambs_danger_sunucuDevirAdim", "tur bitti"];
     };

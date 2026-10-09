@@ -111,7 +111,10 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                 if (_bsk >= 0.85) then { _ezilmis = _ezilmis + 1; };
                 if ((currentCommand _u) isEqualTo "MOVE" && {(speed _u) < 0.8} && {_bsk < 0.85}) then {
                     if ((_u getVariable [QGVAR(saglikMoveT), -1]) < 0) then { _u setVariable [QGVAR(saglikMoveT), time]; };
-                    if ((time - (_u getVariable [QGVAR(saglikMoveT), time])) > 15) then {
+                    // v8.159: AFK / varmis ama komutu silinmemis askerde ayni uyari saatlerce tekrarlanmasin (ilk 120 sn serbest, sonra 300 sn'de bir)
+                    private _durS = time - (_u getVariable [QGVAR(saglikMoveT), time]);
+                    if (_durS > 15 && {_durS < 120 || {(time - (_u getVariable [QGVAR(saglikYurLogT), -999])) > 300}}) then {
+                        _u setVariable [QGVAR(saglikYurLogT), time];
                         ["YURUMUYOR", _g, format ["%1 | MOVE komutu ama %2 sn duruyor | gorev:%3 | stance:%4 | bayrak:%5 | fm:%6", name _u, round (time - (_u getVariable [QGVAR(saglikMoveT), time])), _u getVariable [QEGVAR(main,currentTask), "-"], stance _u, _bStr, _u getVariable [QGVAR(forceMove), false]]] call _isaretle;
                     };
                 } else {
