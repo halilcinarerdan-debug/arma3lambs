@@ -66,6 +66,33 @@ if (_adaylar isEqualTo []) exitWith {};
 private _parca = _adaylar select [_bas, 8];
 if (_parca isEqualTo []) exitWith {
     if (_secili isEqualTo []) exitWith { systemChat "[ELITE] Hic grup secilmedi - plan istegi gonderilmedi"; };
+    // v8.167 KAPASITE UYARISI: secilen tasima araclarinin kargo koltugu ile secilen piyade sayisi esit degilse uyar
+    private _asker = 0;
+    private _koltuk = 0;
+    private _aracSay = 0;
+    {
+        private _sg = groupFromNetId _x;
+        if (isNull _sg) then { continue };
+        private _sv = objectParent (leader _sg);
+        if (!isNull _sv && {_sv isKindOf "LandVehicle"}) then {
+            private _sn = ([_sv] call (missionNamespace getVariable ["lambs_danger_fnc_aracSinif", {["DIGER"]}])) select 0;
+            if (_sn in ["IFV", "APC", "KAMYON"]) then {
+                _aracSay = _aracSay + 1;
+                _koltuk = _koltuk + ((_sv emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _sv], 99]));
+            };
+        } else {
+            _asker = _asker + ({alive _x && {isNull objectParent _x}} count (units _sg));
+        };
+    } forEach _secili;
+    if (_aracSay > 0 && {_asker isNotEqualTo _koltuk}) then {
+        private _msg = if (_asker > _koltuk) then {
+            format ["[ELITE] UYARI: %1 piyade secildi ama %2 tasima aracinin toplam %3 kargo koltugu var -> %4 asker ilk seferde sigmaz (ek sefer / yuruyus)", _asker, _aracSay, _koltuk, _asker - _koltuk]
+        } else {
+            format ["[ELITE] UYARI: %1 piyade secildi, %2 tasima aracinin %3 kargo koltugu var -> %4 koltuk bos kalir (bazi araclar bos olabilir)", _asker, _aracSay, _koltuk, _koltuk - _asker]
+        };
+        systemChat _msg;
+        diag_log _msg;
+    };
     _ayar set ["secili", _secili];
     _ayar set ["grupN", count _secili];
     ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;

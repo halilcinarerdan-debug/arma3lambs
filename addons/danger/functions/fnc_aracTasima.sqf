@@ -419,10 +419,37 @@ _ctl set [4, count _eslesme];
             private _denemeN = 0;
             private _logT = time + 20;
             private _yakinT = -1;
+            private _frenli = false;
+            private _frenBas = -1;
+            private _frenLogT = -999;
             while {_bitis isEqualTo ""} do {
                 sleep 1;
                 private _dm = _v distance2D _drop;
                 private _hz = (speed _v) / 3.6;
+                // v8.167 CARPISMA GUVENLIGI: onde (+-35 derece, 40 m) baska kara araci varsa arac hizina gore mesafe tutar; cok yakinsa durur. Tikaniklik: bir engelleme en fazla 20 sn frenler (sonra takilma kurtarmasi devreye girer)
+                if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
+                    private _onde = ((getPosATL _v) nearEntities ["LandVehicle", 40]) select {
+                        _x isNotEqualTo _v && {alive _x} && {!(_x isKindOf "StaticWeapon")} && {private _r = _v getRelDir _x; _r < 35 || {_r > 325}}
+                    };
+                    private _en = objNull;
+                    private _enD = 9999;
+                    { private _dx = _v distance2D _x; if (_dx < _enD) then { _enD = _dx; _en = _x; }; } forEach _onde;
+                    private _emniyet = 12 + (_hz * 1.0);
+                    if (!isNull _en && {_enD < _emniyet} && {(_frenBas < 0) || {(time - _frenBas) < 20}}) then {
+                        if (_frenBas < 0) then { _frenBas = time; };
+                        _frenli = true;
+                        private _hedefHz = if (_enD < 10) then {0} else {((speed _en) max 0) / 3.6 * 0.8};
+                        _d forceSpeed (_hedefHz min (_hz max 0));
+                        _durgunT = -1;
+                        if ((time - _frenLogT) > 15) then {
+                            _frenLogT = time;
+                            diag_log format ["[TASIMA] %1 | CARPISMA GUVENLIGI: onde %2 %3 m | hiz %4 km/s -> frenleniyor", groupId _vg, getText (configOf _en >> "displayName"), round _enD, round (speed _v)];
+                        };
+                    } else {
+                        if (_frenli) then { _frenli = false; _d forceSpeed -1; };
+                        if (isNull _en && {_frenBas >= 0}) then { _frenBas = -1; };
+                    };
+                };
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
                 else { if (_ctl select 0) then { _bitis = "iptal"; }
@@ -577,6 +604,7 @@ _ctl set [4, count _eslesme];
             _vg setVariable [QGVAR(aracMedevacT), time];
         };
         if (alive _d) then {
+            _d forceSpeed -1;
             _d setVariable [QGVAR(forceMove), nil];
             if (_eskiAC) then { _d enableAI "AUTOCOMBAT"; };
         };

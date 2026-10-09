@@ -1869,3 +1869,8 @@ v8.166 - TASIMA araclari sunucuya DEVREDILIR (RPT 8640024e)
  fnc_komutanPlan: _tasG listesi devir listesine eklendi. fnc_aracTasima: TASIMA etiketli ama surucusu uzak makinede olan (>= 60 sn yasli) gruplar nakil baslarken setGroupOwner 2 ile devralinir ([TASIMA] SURUCU GRUBU DEVIR).
  Ayrica ayni kayitta Alpha 1-2 devri olmadi (plandan cikarildi) -> plan 1 grupla kuruldu.
  TEST EDILMEDI.
+
+v8.167 - Arac carpisma guvenligi + elle secimde kapasite uyarisi
+ fnc_aracTasima (yol dongusu): onde (+-35 derece, 40 m) kara araci varsa mesafe < 12 m + hiz*1 s ise forceSpeed ile frenler (< 10 m: durur, yoksa onundekinin hizinin %80'i); engelleme basina en fazla 20 sn frenler (sonra takilma kurtarmasi), 15 sn'de bir [TASIMA] CARPISMA GUVENLIGI logu; is sonunda forceSpeed sifirlanir.
+ fnc_objektifGrupSec: plan istegi gonderilirken secilen piyade sayisi ile secilen tasima araclarinin (IFV / APC / KAMYON) kargo koltugu (ogrenilen kapasite dahil) esit degilse systemChat + RPT uyarisi (fazla asker: ilk seferde sigmaz; fazla koltuk: bos kalir). Uyari engellemez, plan yine gonderilir.
+ TEST EDILMEDI.
