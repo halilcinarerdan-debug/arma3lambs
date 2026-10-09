@@ -1825,3 +1825,8 @@ v8.160 — ELLE SQUAD SECIMI OK CALISMIYOR (RPT bf897b86; kullanici: "elle secil
  NEDEN: fnc_objektifGrupSec showDialog'a [baslik, alanlar, onConfirm, onCancel, ARGS] verdi; diger modullerin kullandigi imza [baslik, alanlar, onConfirm, onCancel, onLoad, ARGS] (ornek "}, {}, {}, [args]").
   Eksik onLoad yuzunden arguman dizisi onLoad sanildi ve "call [..]" hatasi verdi; panel acilsa da onay calismadi.
  DUZELTME: eksik {} (onLoad) eklendi. Diger Zeus modulleri ayni imzayi zaten dogru kullaniyor. TEST EDILMEDI.
+
+v8.161 — ELLE SECIM TANISI (kullanici: "ok basiyorum kapanmiyor", "uygun grup yok diyor")
+ Mesaj kaynagi belirsiz (panel: "Secilebilir grup yok" ya da sunucu yaniti: "PLAN KURULAMADI: uygun grup yok"). TANI EKLENDI: (1) panel bos ise sohbette ve RPT'de secilen taraf + taraf basina AI grup /
+ >= 3 saglam asker / objektife <= 6000 m sayilari ([PLAN-ISTEK] elle secim: aday yok); (2) sunucuda elle secilen gruplar plana alinmazsa her grubun eleme nedeni ([PLAN] KURULAMADI (elle secim): taraf, lider, saglam asker,
+ gorev, planAktif, tarafKapali, garnizonAlt, aracta, yerel). Dialog OK'un kapanmamasi: v8.160 showDialog imza duzeltmesi (eksik onLoad {}) sonrasi tekrar denenmeli; kapanmiyorsa istemci RPT'sinde showDialog hatasi.

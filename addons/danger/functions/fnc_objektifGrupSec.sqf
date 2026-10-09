@@ -34,7 +34,18 @@ if (_adaylar isEqualTo []) then {
     _adaylar = [_adaylar, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
     _adaylar = _adaylar select [0, 16];
     if (_adaylar isEqualTo []) exitWith {
-        systemChat "[ELITE] Secilebilir grup yok (en az 3 canli AI asker, oyuncusuz, objektife <= 6000 m, HARIC / MEDEVAC / TOPCU / TASIMA / RECON degil)";
+        // v8.161 TANI: hangi tarafta kac grup var / neden elendi (secilen taraf yanlis olabilir)
+        private _say = {
+            params ["_t"];
+            private _hepsi = allGroups select {(side _x) isEqualTo _t && {!isNull (leader _x)} && {!isPlayer (leader _x)}};
+            private _saglam = _hepsi select {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3};
+            private _yakin = _saglam select {((leader _x) distance2D _obj) <= 6000};
+            [count _hepsi, count _saglam, count _yakin]
+        };
+        private _ad = switch (_taraf) do { case west: {"BLUFOR"}; case east: {"OPFOR"}; case independent: {"INDEP"}; default {str _taraf} };
+        private _bw = [west] call _say; private _be = [east] call _say; private _bi = [independent] call _say;
+        systemChat format ["[ELITE] Secilebilir grup yok | secilen taraf: %1 | AI grup / >=3 saglam asker / objektife <= 6000 m -> BLUFOR %2, OPFOR %3, INDEP %4 | HARIC / MEDEVAC / TOPCU / TASIMA / RECON ve garnizon alt grubu elenir", _ad, _bw, _be, _bi];
+        diag_log format ["[PLAN-ISTEK] elle secim: aday yok | taraf %1 | BLUFOR %2 OPFOR %3 INDEP %4", _ad, _bw, _be, _bi];
     };
 };
 if (_adaylar isEqualTo []) exitWith {};

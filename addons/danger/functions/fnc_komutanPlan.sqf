@@ -76,6 +76,21 @@ private _aday = allGroups select {
     && {isNull objectParent _l} && {(_secili isEqualTo [] && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}) || {(netId _x) in _secili}}
 };
 if (_aday isEqualTo []) exitWith {
+    // v8.161 TANI (elle secim): secilen her grubun neden elendigi tek tek
+    if (_secili isNotEqualTo []) then {
+        {
+            private _sg = groupFromNetId _x;
+            if (isNull _sg) then {
+                diag_log format ["[PLAN] KURULAMADI (elle secim): netId %1 -> GRUP YOK (bu makinede bulunamadi)", _x];
+            } else {
+                private _sl = leader _sg;
+                diag_log format ["[PLAN] KURULAMADI (elle secim): %1 (%2) | istenen taraf %3 | lider %4 (oyuncu %5) | saglam asker %6 | gorev '%7' | planAktif %8 | tarafKapali %9 | garnizonAlt '%10' | aracta %11 | yerel %12",
+                    groupId _sg, side _sg, _taraf, if (isNull _sl) then {"yok"} else {name _sl}, !isNull _sl && {isPlayer _sl},
+                    {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _sg), _sg getVariable ["lambs_danger_gorev", ""], _sg getVariable ["lambs_danger_planAktif", false],
+                    _sg getVariable ["lambs_danger_tarafKapali", false], _sg getVariable ["lambs_danger_garnizonAlt", ""], !isNull _sl && {!isNull objectParent _sl}, local _sg];
+            };
+        } forEach _secili;
+    };
     // v8.121 TANI: her gruptan hangi filtre ilk elediyse say (neden belli olsun)
     private _tum = allGroups select {(side _x) isEqualTo _taraf};
     private _red = createHashMap;
