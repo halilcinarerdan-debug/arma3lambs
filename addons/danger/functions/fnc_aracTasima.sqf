@@ -757,6 +757,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                 if (surfaceIsWater _geri) then { _geri = _rp; };
             };
             diag_log format ["[TASIMA] %1 | %2 | inis sonrasi geride REZERV noktasina cekiliyor (%3 m, objektiften %4 m)", groupId _vg, _ad, round (_v distance2D _geri), round (_geri distance2D _obj)];
+            _v setVariable [QGVAR(rezervNokta), _geri];
             _d doMove _geri;
             private _bt2 = time + 240;
             waitUntil { sleep 2; !alive _v || {(_v distance2D _geri) < 60} || {time > _bt2} };
@@ -764,6 +765,39 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
             _v setVariable [QGVAR(aracRezervT), time];
         };
         };
+        };
+        // v8.176 ARAC DURUM RAPORU (kullanici: "arkada kalan apc'nin neden orada kaldigini yakalayalim"): is sonunda NEDEN + tam durum, sonra park halindeyken 45 sn'de bir (en cok 8 kez) yeniden
+        private _sinifSon = ([_v] call FUNC(aracSinif)) select 0;
+        private _neden = if (!alive _v || {!alive _d}) then {"arac / surucu yok"} else {
+            if (_iptal isNotEqualTo "") then {format ["nakil IPTAL: %1", _iptal]} else {
+            if (_bitis isEqualTo "hasar") then {"arac hasarli / hareket edemiyor"} else {
+            if (_destekKal) then {"RUS bronegruppa: inis noktasinda destek atesi icin KALDI (tasarim)"} else {
+            if (_sinifSon isEqualTo "IFV" && {_ctl param [6, false]}) then {"IFV: planin ZIRH DESTEK unsuruna devredildi, planZirh ates pozisyonuna cikaracak (tasarim)"} else {
+                format ["%1 savas taksisi: indirdi, geride REZERV noktasinda bekliyor (tasarim; rezerv %2)", _sinifSon, mapGridPosition (_v getVariable [QGVAR(rezervNokta), getPosATL _v])]
+            }}}}};
+        [_v, _d, _vg, _obj, _drop, _rp, _neden, _bitis, _erkenInis, _sinifSon, count _binen] spawn {
+            params ["_v", "_d", "_vg", "_obj", "_drop", "_rp", "_neden", "_bitis", "_erkenInis", "_sinif", "_n"];
+            for "_i" from 0 to 7 do {
+                if (!alive _v) exitWith { diag_log format ["[ARAC-DURUM] %1 | arac YOK EDILDI", getText (configOf _v >> "displayName")]; };
+                private _dr = driver _v;
+                private _fl = [];
+                private _plan = (values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) select {(_x get "taraf") isEqualTo (side (group _dr)) && {((_x get "obj") distance2D _obj) < 400}};
+                private _planFaz = if (_plan isEqualTo []) then {"plan yok"} else {(_plan select 0) getOrDefault ["faz", "?"]};
+                private _dostPiyade = (allGroups select {(side _x) isEqualTo (side (group _dr)) && {(count (units _x)) > 2} && {isNull objectParent (leader _x)}}) apply {(leader _x) distance2D _v};
+                _dostPiyade sort true;
+                if (!isNull _dr) then {
+                    _fl = ["tasimaMesgul", "forceMove", "isExecutingTactic", "planAktif", "planZirh", "aracMedevacT", "aracRezervT"] select {((_v getVariable ["lambs_danger_" + _x, objNull]) isNotEqualTo objNull) || {((_dr getVariable ["lambs_danger_" + _x, objNull]) isNotEqualTo objNull)} || {(((group _dr) getVariable ["lambs_danger_" + _x, objNull]) isNotEqualTo objNull)}};
+                };
+                diag_log format ["[ARAC-DURUM] #%1 %2 (%3) | NEDEN: %4 | bitis '%5' erken inis '%6' | binen %7 | konum %8 | hedefe %9 m, inise %10 m, RP'ye %11 m, en yakin dost piyade %12 m | hiz %13 km/s motor %14 canMove %15 yakit %16 hasar %17 | surucu %18 %19 komut '%20' beh %21 mod %22 hiz modu %23 PATH %24 MOVE %25 | gorev '%26' | bayraklar %27 | plan fazi %28 | rezerv yasi %29 sn",
+                    _i, getText (configOf _v >> "displayName"), groupId (group _dr), _neden, _bitis, _erkenInis, _n, mapGridPosition _v,
+                    round (_v distance2D _obj), round (_v distance2D _drop), round (_v distance2D _rp), if (_dostPiyade isEqualTo []) then {-1} else {round (_dostPiyade select 0)},
+                    round (speed _v), isEngineOn _v, canMove _v, (fuel _v) toFixed 2, (damage _v) toFixed 2,
+                    if (isNull _dr) then {"YOK"} else {name _dr}, if (isNull _dr) then {"-"} else {lifeState _dr}, if (isNull _dr) then {""} else {currentCommand _dr}, if (isNull _dr) then {""} else {behaviour _dr}, if (isNull _dr) then {""} else {combatMode (group _dr)}, if (isNull _dr) then {""} else {speedMode (group _dr)},
+                    if (isNull _dr) then {false} else {_dr checkAIFeature "PATH"}, if (isNull _dr) then {false} else {_dr checkAIFeature "MOVE"},
+                    _v getVariable ["lambs_danger_gorev", ""], _fl, _planFaz, round (time - (_v getVariable [QGVAR(aracRezervT), time]))];
+                if ((speed _v) > 3 && {_i > 0}) exitWith {};
+                sleep 45;
+            };
         };
         if (!isNull _vg) then {
             _vg setVariable [QGVAR(isExecutingTactic), nil];

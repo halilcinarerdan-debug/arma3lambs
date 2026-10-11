@@ -163,6 +163,24 @@ class CfgVehicles {
         };
     };
 
+    class GVAR(KarakolKaldir) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(KarakolKaldir);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Karakol / Plan KALDIR (listeden sec)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleKarakolKaldir);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(KarakolGarnizon) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(KarakolGarnizon);

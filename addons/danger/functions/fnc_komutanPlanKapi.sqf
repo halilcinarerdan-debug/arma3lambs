@@ -85,7 +85,7 @@ lambs_danger_planKapiStarted = true;
 // v8.128: Zeus 'ELITE Karakol / HQ' — karakol kaydi + harita isareti + savunma plani (hemen / alarm)
 if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
 ["lambs_danger_karakolIstegi", {
-    params ["_taraf", "_poz", "_adI", "_yar", "_sav"];
+    params ["_taraf", "_poz", "_adI", "_yar", "_sav", ["_elle", false]];
     if (!isServer) exitWith {};
     private _adlar = ["KARAKOL", "MEVZI", "HQ", "GOZETLEME", "USSU"];
     private _ad = _adlar select (_adI max 0 min 4);
@@ -104,10 +104,87 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
     private _kayit = [_taraf, _poz, _yar, _ad, _sav, _mn, false];
     lambs_danger_karakollar pushBack _kayit;
     diag_log format ["[KARAKOL] %1 | %2 | %3 | yaricap %4 m | savunma %5", _taraf, _ad, mapGridPosition _poz, _yar, ["YOK", "HEMEN", "ALARM"] select (_sav min 2)];
-    if (_sav isEqualTo 1) then {
+    if (_sav isEqualTo 1 && {_elle}) then {
+        _kayit set [6, true];
+        diag_log format ["[KARAKOL] %1 | savunma grubu ELLE secilecek (Zeus squad listesi); otomatik plan kurulmadi", mapGridPosition _poz];
+    };
+    if (_sav isEqualTo 1 && {!_elle}) then {
         _kayit set [6, true];
         [_taraf, _poz, createHashMapFromArray [["tip", 1], ["grupN", 8], ["grupMesafe", _yar * 1.5], ["bina", true], ["piyade", true], ["rallyM", 250], ["orpM", 150], ["basla", 0]]] spawn (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
     };
+}] call CBA_fnc_addEventHandler;
+
+// v8.176: Zeus 'ELITE Karakol / Plan KALDIR' - liste istegi (sunucu) -> liste (istemci panel) -> kaldirma istegi (sunucu)
+["lambs_danger_kaldirListeIstegi", {
+    params ["_sahip"];
+    if (!isServer) exitWith {};
+    private _liste = [];
+    {
+        _x params ["_t", "_p", "_y", "_ad", "_sav", "_mn"];
+        _liste pushBack [format ["K:%1", _mn], format ["KARAKOL | %1 | %2 | %3 | yaricap %4 m | %5", _t, _ad, mapGridPosition _p, _y, ["savunma YOK", "savunma HEMEN", "ALARM"] select (_sav min 2)], _p];
+    } forEach lambs_danger_karakollar;
+    if (!isNil "lambs_danger_planlar") then {
+        {
+            private _pl = _y;
+            if (!((_pl getOrDefault ["faz", ""]) in ["BITTI", "IPTAL"])) then {
+                _liste pushBack [format ["P:%1", _x], format ["PLAN %1 | %2 | %3 | %4 | faz %5 | %6 grup", _x, _pl get "taraf", ["ELE GECIR", "SAVUN"] select ((_pl getOrDefault ["tip", 0]) isEqualTo 1), mapGridPosition (_pl get "obj"), _pl getOrDefault ["faz", "?"], count (_pl getOrDefault ["gruplar", []])], _pl get "obj"];
+            };
+        } forEach lambs_danger_planlar;
+    };
+    diag_log format ["[KALDIR] liste istendi: %1 kayit (sahip %2)", count _liste, _sahip];
+    ["lambs_danger_kaldirListe", [_liste], _sahip] call CBA_fnc_ownerEvent;
+}] call CBA_fnc_addEventHandler;
+["lambs_danger_kaldirListe", {
+    params ["_liste"];
+    if (!hasInterface) exitWith {};
+    [{
+        params ["_liste"];
+        [_liste, 0, []] call (missionNamespace getVariable ["lambs_danger_fnc_kaldirPanel", {}]);
+    }, [_liste]] call CBA_fnc_execNextFrame;
+}] call CBA_fnc_addEventHandler;
+["lambs_danger_kaldirIstegi", {
+    params ["_anahtarlar"];
+    if (!isServer) exitWith {};
+    private _kal = 0;
+    private _ipt = 0;
+    {
+        private _a = _x;
+        if ((_a select [0, 2]) isEqualTo "K:") then {
+            private _mn = _a select [2];
+            private _i = lambs_danger_karakollar findIf {(_x select 5) isEqualTo _mn};
+            if (_i >= 0) then {
+                private _k = lambs_danger_karakollar select _i;
+                private _kp = _k select 1;
+                deleteMarker _mn;
+                if (!isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar set [_mn, createHashMap]; };
+                lambs_danger_karakollar deleteAt _i;
+                _kal = _kal + 1;
+                diag_log format ["[KALDIR] karakol KALDIRILDI: %1 | %2 | %3", _k select 3, _k select 0, mapGridPosition _kp];
+                // yanindaki aktif SAVUN plani (ayni taraf, yaricap x1.5 + 100 m)
+                if (!isNil "lambs_danger_planlar") then {
+                    {
+                        private _pl = _y;
+                        if ((_pl get "taraf") isEqualTo (_k select 0) && {(_pl getOrDefault ["tip", 0]) isEqualTo 1} && {((_pl get "obj") distance2D _kp) < (((_k select 2) * 1.5) + 100)} && {!((_pl getOrDefault ["faz", ""]) in ["BITTI", "IPTAL"])}) then {
+                            _pl set ["faz", "IPTAL"];
+                            _ipt = _ipt + 1;
+                            diag_log format ["[KALDIR] karakola bagli savunma plani IPTAL: %1", _x];
+                        };
+                    } forEach lambs_danger_planlar;
+                };
+            };
+        } else {
+            if ((_a select [0, 2]) isEqualTo "P:" && {!isNil "lambs_danger_planlar"}) then {
+                private _id = _a select [2];
+                private _pl = lambs_danger_planlar getOrDefault [_id, createHashMap];
+                if (count _pl > 0 && {!((_pl getOrDefault ["faz", ""]) in ["BITTI", "IPTAL"])}) then {
+                    _pl set ["faz", "IPTAL"];
+                    _ipt = _ipt + 1;
+                    diag_log format ["[KALDIR] plan IPTAL: %1", _id];
+                };
+            };
+        };
+    } forEach _anahtarlar;
+    ["lambs_danger_garnizonYanit", [format ["Kaldirildi: %1 karakol/mevzi, %2 plan iptal", _kal, _ipt]]] call CBA_fnc_globalEvent;
 }] call CBA_fnc_addEventHandler;
 
 // v8.130: Zeus 'ELITE Karakol Garnizon' — ayar kaydi (nobet / devriye / ust kat / arac); uygulama fnc_karakolGarnizon bekcisinde

@@ -28,7 +28,7 @@ if (_adaylar isEqualTo []) then {
         && {({isPlayer _x} count (units _x)) isEqualTo 0}
         && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
         && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
-        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
+        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {!(_x getVariable ["lambs_danger_planAktif", false])}
         && {isNull objectParent _l} && {(_l distance2D _obj) <= 6000}
     };
     _adaylar = [_adaylar, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
@@ -41,7 +41,7 @@ if (_adaylar isEqualTo []) then {
         && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v}
         && {({isPlayer _x} count (units _x)) isEqualTo 0} && {!isNull (driver _v)} && {!isPlayer (driver _v)}
         && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"])}
-        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {(_l distance2D _obj) <= 6000}
+        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {(_l distance2D _obj) <= 6000}
     };
     _aracA = [_aracA, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
     _aracA = _aracA select [0, 8];
@@ -93,6 +93,20 @@ if (_parca isEqualTo []) exitWith {
         systemChat _msg;
         diag_log _msg;
     };
+    // v8.176 KULLANICI HATASI KORUMASI: en az bir PIYADE grubu sart (yalniz arac secilirse plan kurulamaz); savunmada 1200 m'den uzak piyade uyarisi
+    private _piyadeSec = _secili select {private _g = groupFromNetId _x; !isNull _g && {isNull objectParent (leader _g)}};
+    if (_piyadeSec isEqualTo []) exitWith {
+        systemChat "[ELITE] HATA: hic PIYADE grubu secilmedi (yalniz arac secildi) - istek gonderilmedi; yeniden deneyin";
+        diag_log "[PLAN-ISTEK] elle secim reddedildi: piyade grubu yok";
+    };
+    if ((_ayar getOrDefault ["tip", 0]) isEqualTo 1) then {
+        private _uzak = _piyadeSec select {private _g = groupFromNetId _x; !isNull _g && {((leader _g) distance2D _obj) > 1200}};
+        if (_uzak isNotEqualTo []) then {
+            private _m = format ["[ELITE] UYARI: %1 secili grup mevziye 1200 m'den uzak (%2) - yuruyerek gelecek", count _uzak, _uzak apply {groupId (groupFromNetId _x)}];
+            systemChat _m;
+            diag_log _m;
+        };
+    };
     _ayar set ["secili", _secili];
     _ayar set ["grupN", count _secili];
     ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;
@@ -134,7 +148,7 @@ private _alanlar = _parca apply {
 };
 
 [
-    format ["ELITE Objektif: katilacak squadlar (%1-%2 / %3)", _bas + 1, _bas + count _parca, count _adaylar],
+    format ["%1 (%2-%3 / %4)", _ayar getOrDefault ["baslik", "ELITE Objektif: katilacak squadlar"], _bas + 1, _bas + count _parca, count _adaylar],
     _alanlar,
     {
         params ["_deger", "_args"];

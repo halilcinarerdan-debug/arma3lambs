@@ -1925,3 +1925,10 @@ v8.175 - Topcu yer degistirme (min menzil), tank rolu, cift plan engeli, mevzide
  fnc_planZirh: TANK ROLU (aracSinif TANK): ates pozisyonu 650 m (SALDIRI'da 450 m'ye sicrar), hedef onceligi, bilinen hedef yoksa objektif alanina bastirma atesi (dost 70 m disinda, 12 sn'de bir).
  fnc_mevziKur: bina yoksa her asker sektor noktasina en yakin AYRI obje (agac / kaya / duvar / bina / cali / enkaz) arkasina gider (tehdit yonune gore), comelir ve sektore bakar.
  TEST EDILMEDI.
+
+v8.176 - Karakol / plan KALDIR modulu, mevzi squad atamasi (elle secim + dogrulama), ARAC-DURUM tanisi
+ 1) Yeni Zeus modulu "ELITE Karakol / Plan KALDIR (listeden sec)": sunucudaki karakol / HQ / mevzi kayitlari + AKTIF planlar listelenir (panel basina 8 onay kutusu); isaretlenenler kaldirilir: karakol -> kayit + harita isareti + yanindaki (yaricap x1.5 + 100 m) aktif SAVUN plani IPTAL; plan -> IPTAL fazi (gruplar serbest). Akis: modul -> lambs_danger_kaldirListeIstegi -> sunucu listeyi ownerEvent ile gonderir -> fnc_kaldirPanel -> lambs_danger_kaldirIstegi. Loglar [KALDIR] [KALDIR-ISTEK]. config.cpp units[] + CfgVehicles + XEH_PREP guncellendi.
+ 2) "ELITE Karakol / HQ" modulu: yeni alan "Grup secimi" (Otomatik / Elle). 'Savunma plani HEMEN' + Elle: karakol kaydi yapilir (otomatik plan KURULMAZ), hemen fnc_objektifGrupSec squad listesi acilir ("ELITE Karakol / Mevzi: atanacak squadlar"); secilenler SAVUN plani ile mevziye atanir. Varsayilan Elle.
+ 3) Kullanici hatasi korumasi (fnc_objektifGrupSec): baska planda olan (planAktif) gruplar listeye girmez; hic PIYADE grubu secilmezse (yalniz arac) istek reddedilir; SAVUN planinda mevzi 1200 m'den uzak secili piyade icin uyari; kapasite uyarisi (v8.167) korunur. Onceki turdan: ayni noktada 150 m icinde cift plan engeli.
+ 4) [ARAC-DURUM]: tasima isi sonunda ve park halindeyken 45 sn'de bir (en cok 8): NEDEN (tasarim: APC rezerv / IFV zirh destek / bronegruppa / nakil IPTAL / hasar) + bitis, erken inis, binen, konum, hedef / inis / RP mesafesi, en yakin dost piyade, hiz, motor, canMove, yakit, hasar, surucu durumu + komut + davranis + PATH / MOVE, gorev etiketi, bayraklar, plan fazi, rezerv yasi.
+ TEST EDILMEDI.
