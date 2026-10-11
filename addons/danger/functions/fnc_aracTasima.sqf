@@ -516,7 +516,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 };
                 { if (alive _x) then { _x enableAI "PATH"; }; } forEach _ps;
             };
-            if (((_v nearEntities [["LandVehicle"], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "StaticWeapon")}}) isNotEqualTo []) then {
+            if (((_v nearEntities [["LandVehicle"], 7]) select {_x isNotEqualTo _v && {!(_x isKindOf "StaticWeapon")}}) isNotEqualTo []) then {   // v8.185: 12 -> 7 m (setVehiclePosition ile gereksiz tasima kalkisi bozuyor olabilir; yalniz ic ice park)
                 private _cp = [_v, _drop] call _cikisFn;
                 if (_cp isNotEqualTo []) then {
                     private _eskiP = getPosATL _v;
@@ -554,6 +554,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             private _logT = time + 20;
             private _yakinT = -1;
             private _senkT = 0;
+            private _itmeT = -999;
             private _senkli = false;
             private _senkLogT = -999;
             private _ilerD = 1e6;
@@ -712,7 +713,21 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac %2 m uzaktaki bos konuma tasindi (komsulara >= 9 m) (inise %3 m)", groupId _vg, round (_eskiSp distance2D _sp), round _dm];
                             };
                         };
-                        if (_dg > 35) then { _bitis = "takildi"; };
+                        // v8.185 SABIR: inise > 800 m kala hala kalkamadiysa askerleri yolun ortasinda indirmek yerine 120 sn'ye kadar dener (itme + waypoint yenileme, 6 sn'de bir); 35 sn'lik eski sinir yalniz inise < 800 m icin
+                        if (_dm > 800 && {_dg > 30} && {(time - _itmeT) > 6}) then {
+                            _itmeT = time;
+                            _d action ["EngineOn", _v];
+                            _v engineOn true;
+                            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+                            _v setVelocityModelSpace [0, 4, 0];
+                            private _wpI = _vg addWaypoint [_drop, 0];
+                            _wpI setWaypointType "MOVE"; _wpI setWaypointName "ELITE NAKIL"; _wpI setWaypointSpeed "FULL";
+                            _vg setCurrentWaypoint _wpI;
+                            if (_dg < 40 || {(round _dg) mod 30 < 7}) then {
+                                diag_log format ["[TASIMA] %1 | TAKILMA SABIR: %2 sn, inise %3 m - itme + waypoint yenilendi | ezme fren %4 sn once | senkron '%5' (ata %6 sn)", groupId _vg, round _dg, round _dm, round (time - (_v getVariable [QGVAR(ezmeSonT), -999])), _d getVariable [QGVAR(senkDurum), ""], round ((_d getVariable [QGVAR(senkT), 0]) - time)];
+                            };
+                        };
+                        if (_dg > ([35, 120] select (_dm > 800))) then { _bitis = "takildi"; };
                     } else { _durgunT = -1; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
                     if (time > _logT) then {
                         _logT = time + 20;
