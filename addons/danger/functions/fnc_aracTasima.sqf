@@ -248,8 +248,10 @@ diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen
 // ---- v8.131 YIGILMA ONLEME: araclar ayni noktaya gitmesin; alma / inis noktasi yanal 24 m aralikla dagitilir ----
 private _noktaYay = {
     params ["_nokta", "_i", "_n"];
-    private _of = (_i - (_n - 1) / 2) * 24;
+    // v8.177: araclar ayni yerde YIGILMASIN (kullanici: "apc'ler sikisiyor, hareket edemiyor"): yanal 45 m aralik + tek / cift siralar arasi 35 m derinlik (objektiften uzaga) = en az ~55 m birbirinden
+    private _of = (_i - (_n - 1) / 2) * 45;
     private _p = _nokta getPos [abs _of, _B + ([90, -90] select (_of < 0))];
+    _p = _p getPos [(_i mod 2) * 35, _B];
     if (surfaceIsWater _p) then { _p = _nokta; };
     _p
 };
@@ -259,7 +261,7 @@ private _isler = [];
 _ctl set [3, 0];
 _ctl set [4, count _eslesme];
 // v8.171 SENKRON: [inen arac sayisi, toplam arac, araclar] - konvoy hiz eslemesi ve inis sonrasi toplanma bu diziyi kullanir
-private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
+private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: rezerv noktalari (araclar rezervde de dagilsin)
 {
     _x params ["_v", "_gl"];
     private _d = driver _v;
@@ -571,7 +573,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                         diag_log format ["[TASIMA] %1 | %2: dusman %3 m -> HEMEN IN", groupId _vg, ["TEMAS (gecis suresi doldu)", "YAKIN PUSU"] select _yakinPusu, [round _edm, "bilinmiyor"] select (_edm >= 9999)];
                     };
                 }
-                else { if (_dm < 60) then { _bitis = "vardi"; }
+                else { if (_dm < 45) then { _bitis = "vardi"; }
                 else { if (_dm < 180 && {_hz < 1}) then { if (_yakinT < 0) then { _yakinT = time; }; if ((time - _yakinT) > 6) then { _bitis = "vardi"; }; } else { _yakinT = -1; }; }; }; }; }; }; };
                 if (_bitis isEqualTo "" && {_gecisT > 0} && {!([_binen, _d] call _temasVar)} && {(time - _gecisT) > 12}) then {
                     diag_log format ["[TASIMA] %1 | pusudan cikildi, normal surus (inise %2 m)", groupId _vg, round _dm];
@@ -682,9 +684,10 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                 _u setVariable [QGVAR(tasimaBekle), true];
                 _u enableAI "PATH";
                 (group _u) setBehaviour "COMBAT";
-                private _c = (nearestTerrainObjects [getPosATL _u, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE"], 40, true, true]) select {(_x distance2D _v) > 12};
-                private _tp = if (_c isNotEqualTo []) then { (getPosATL (_c select 0)) getPos [2.2, _yon + 180] } else { (getPosATL _u) getPos [18 + (_forEachIndex * 3), (_v getDir _u) + ((_forEachIndex mod 3) - 1) * 25] };
-                if (surfaceIsWater _tp || {(_tp distance2D _v) < 10}) then { _tp = (getPosATL _u) getPos [20, (_v getDir _u)]; };
+                // v8.177: aractan >= 25 m (arka / yan / on fark etmez); siper objesi de aractan > 20 m olmali; yoksa 28 m + her askere ayri aci
+                private _c = (nearestTerrainObjects [getPosATL _u, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE"], 55, true, true]) select {(_x distance2D _v) > 20};
+                private _tp = if (_c isNotEqualTo []) then { (getPosATL (_c select 0)) getPos [2.2, _yon + 180] } else { (getPosATL _u) getPos [28 + (_forEachIndex * 3), (_v getDir _u) + ((_forEachIndex mod 3) - 1) * 30] };
+                if (surfaceIsWater _tp || {(_tp distance2D _v) < 22}) then { _tp = (getPosATL _v) getPos [30, (_v getDir _u) + (_forEachIndex * 20)]; };
                 if (surfaceIsWater _tp) then { _tp = getPosATL _u; };
                 _hedefler pushBack _tp;
                 _u setUnitPos "AUTO";
@@ -718,6 +721,11 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
         };
         diag_log format ["[TASIMA] %1 | %2 | inen %3 / %4%5", groupId _vg, ["TAMAM", "IPTAL: " + _iptal] select (_iptal isNotEqualTo ""), {alive _x && {(vehicle _x) isNotEqualTo _v}} count _binen, count _binen, ["", " | erken inis: " + _erkenInis] select (_erkenInis isNotEqualTo "")];
 
+        // v8.177 EZILME ONLEME: araci yolcular ARAC CEVRESINDEN (on / arka / yan, 14 m) cikana kadar (en cok 25 sn) hareket ettirme
+        if (alive _v) then {
+            private _tUz = time + 25;
+            waitUntil { sleep 1; (time > _tUz) || {!alive _v} || {({alive _x && {isNull objectParent _x} && {(_x distance2D _v) < 14}} count _binen) isEqualTo 0} };
+        };
         // (5) RP'ye don, bekle
         if (alive _v && {alive _d} && {_yakinPusu}) then {
             // yakin pusu: araci terk edilmis birakma, silahci ates etsin (30 sn), sonra don
@@ -757,6 +765,15 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                 if (surfaceIsWater _geri) then { _geri = _rp; };
             };
             diag_log format ["[TASIMA] %1 | %2 | inis sonrasi geride REZERV noktasina cekiliyor (%3 m, objektiften %4 m)", groupId _vg, _ad, round (_v distance2D _geri), round (_geri distance2D _obj)];
+            // v8.177: rezerv noktalari de dagilir - diger araclarin rezerv noktalarina < 45 m ise yan / geri kaydirilir
+            private _rzv = _senk select 3;
+            private _deneme = 0;
+            while {(_rzv findIf {(_x distance2D _geri) < 45}) >= 0 && {_deneme < 8}} do {
+                _deneme = _deneme + 1;
+                _geri = (_geri getPos [45, _geriYon + 90 + (_deneme * 40)]);
+                if (surfaceIsWater _geri) then { _geri = _geri getPos [45, _geriYon]; };
+            };
+            _rzv pushBack _geri;
             _v setVariable [QGVAR(rezervNokta), _geri];
             _d doMove _geri;
             private _bt2 = time + 240;

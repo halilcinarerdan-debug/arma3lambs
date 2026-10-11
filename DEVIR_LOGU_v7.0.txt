@@ -1932,3 +1932,8 @@ v8.176 - Karakol / plan KALDIR modulu, mevzi squad atamasi (elle secim + dogrula
  3) Kullanici hatasi korumasi (fnc_objektifGrupSec): baska planda olan (planAktif) gruplar listeye girmez; hic PIYADE grubu secilmezse (yalniz arac) istek reddedilir; SAVUN planinda mevzi 1200 m'den uzak secili piyade icin uyari; kapasite uyarisi (v8.167) korunur. Onceki turdan: ayni noktada 150 m icinde cift plan engeli.
  4) [ARAC-DURUM]: tasima isi sonunda ve park halindeyken 45 sn'de bir (en cok 8): NEDEN (tasarim: APC rezerv / IFV zirh destek / bronegruppa / nakil IPTAL / hasar) + bitis, erken inis, binen, konum, hedef / inis / RP mesafesi, en yakin dost piyade, hiz, motor, canMove, yakit, hasar, surucu durumu + komut + davranis + PATH / MOVE, gorev etiketi, bayraklar, plan fazi, rezerv yasi.
  TEST EDILMEDI.
+
+v8.177 - Arac yayilmasi (iniste + rezervde) ve ezilme onleme
+ Kullanici: "her apc ayni yerde durmasin, objektifin orada degilse cok sikisiyorlar, apc hareket edemiyor; piyadeler apc'nin arkasindan yanindan her yerinden uzaklassin, sonuc ezilme".
+ fnc_aracTasima: (1) iniste arac noktalari yanal 24 -> 45 m + tek / cift sira 35 m derinlik farki (en az ~55 m); varis esigi 60 -> 45 m; (2) REZERV noktalari birbirinden >= 45 m (paylasilan liste _senk[3], yan kaydirma); (3) inen asker en yakin siper objesine (aractan > 20 m) ya da aractan >= 28 m uzaga gider (onceki 12 / 18 m); (4) arac, yolcular aracin 14 m cevresinden (on / arka / yan) cikana kadar (en cok 25 sn) HAREKET ETMEZ (rezerv, IFV devri, RP donusu). Mevcut ezme korumasi (fnc_ezmeKoruma) aynen duruyor.
+ TEST EDILMEDI.
