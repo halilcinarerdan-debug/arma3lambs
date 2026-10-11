@@ -1971,3 +1971,8 @@ v8.182 - Aractan / yanan-etkisiz araclardan uzak durma; topcu Zeus'tan elle tasi
  main/fnc_findCover: murettebatsiz arac siper sayiliyordu; artik yalniz sag (alive) ve yanmayan araclar siper (enkaz / yanan arac siper degil).
  Topcu yer degistirme (v8.181) Zeus'ta elle tasinan topu ezmesin diye: 300 sn korumasi var; elle tasima sonrasi gerekirse top menzil disiysa yine yer degistirir (kapatma icin: lambs_danger_topcuKonumOff eklenmedi - istenirse eklenir).
  TEST EDILMEDI.
+
+v8.183 - Topcu: dost RED'den yakinsa nisan objektifin derinligine kaydirilir (RPT ce7738ae)
+ Bulgu: P4'te top menzildeydi ama her seansta "ATMADI: en yakin dost 447 m < RED 455 m" (155 mm RED, TC 3-21.76 Tablo 3-3); ORP 440 m + saldiri sirasinda dost 376-447 m -> top fiilen HIC atamiyordu (varsayilan ORP 300-440 m ile her 155 mm plani etkilenir).
+ fnc_komutanPlanDongu _topcuAt: dost < RED ise nisan noktasi, objektifin en yakin dostun TERS yonunde 40 / 80 / 120 / 160 / 200 m derinligine kaydirilir; kaydirilmis noktada en yakin dost >= RED + 20 m ve nokta su degilse atis yapilir ([PLAN-TOPCU] NISAN KAYDIRILDI). Kaydirmayla da yetmiyorsa eskisi gibi ATMAZ (RED korunur).
+ TEST EDILMEDI.

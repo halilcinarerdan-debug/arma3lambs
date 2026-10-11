@@ -145,18 +145,37 @@ private _topcuAt = {
         if ((_cap find "81mm") >= 0 || {(_cap find "82mm") >= 0}) then { _red = 195; };
         if ((_cap find "120mm") >= 0) then { _red = 430; };
         if ((_cap find "105mm") >= 0 || {(_cap find "155mm") >= 0} || {(_cap find "152mm") >= 0}) then { _red = 455; };
+        // v8.183 NISAN KAYDIRMA (kullanici: "artilerry?"; RPT ce7738ae: dost 376-447 m, RED 455 m -> top hic atmadi): dost RED'den yakinsa nisan noktasi dostlarin ters yonune
+        //   (objektifin DERINLIGINE, en cok 200 m) kaydirilir; kaydirilmis noktada en yakin dost >= RED + 20 m ise atis yapilir (kaynak ilkesi korunur: dost mesafesi < RED ise ATMAZ)
+        private _nokta = _poz;
+        private _dE = _dostEn;
         if (_dostEn < _red) then {
-            diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 ATMADI: en yakin dost %4 m < RED %5 m (TC 3-21.76 Tablo 3-3, %6)", _plan get "id", _ad, typeOf _v, round _dostEn, _red, _mg];
+            private _fp = objNull;
+            private _fd = 99999;
+            { if (alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _poz) < _fd}) then { _fd = _x distance2D _poz; _fp = _x; }; } forEach allUnits;
+            if (!isNull _fp) then {
+                private _yon = (getPosATL _fp) getDir _poz;
+                {
+                    private _cand = _poz getPos [_x, _yon];
+                    private _dc = 99999;
+                    { if (alive _x && {(side (group _x)) isEqualTo _taraf}) then { _dc = _dc min (_x distance2D _cand); }; } forEach allUnits;
+                    if (_dc >= (_red + 20) && {!surfaceIsWater _cand}) exitWith { _nokta = _cand; _dE = _dc; };
+                } forEach [40, 80, 120, 160, 200];
+            };
+        };
+        if (_dE < _red) then {
+            diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 ATMADI: en yakin dost %4 m < RED %5 m, 200 m derinlige kaydirmayla da yeterli mesafe yok (TC 3-21.76 Tablo 3-3, %6)", _plan get "id", _ad, typeOf _v, round _dostEn, _red, _mg];
         } else {
-            if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
-                private _hd = _poz getPos [random 30, random 360];
+            if (_mg isNotEqualTo "" && {_nokta inRangeOfArtillery [[_v], _mg]}) then {
+                private _hd = _nokta getPos [random 30, random 360];
+                if (_nokta isNotEqualTo _poz) then { diag_log format ["[PLAN-TOPCU] %1 | %2 | NISAN KAYDIRILDI: dost %3 m < RED %4 m -> nisan noktasi objektifin %5 m derinligine (dost %6 m)", _plan get "id", _ad, round _dostEn, _red, round (_nokta distance2D _poz), round _dE]; };
                 _v doArtilleryFire [_hd, _mg, _mermi];
                 // ZARAR TAKIBI: atis noktasinin 250 m cevresindeki sivil / dost / dusman anlik listesi (plan sonunda kimlerin oldugu [PLAN-ZARAR] ile yazilir)
                 private _yakin = _hd nearEntities ["CAManBase", 250];
                 (_plan getOrDefault ["atislar", []]) pushBack [time, _hd, _yakin select {(side _x) isEqualTo civilian}, _yakin select {(side (group _x)) isEqualTo (_plan get "taraf")}, _yakin select {(side _x) isNotEqualTo civilian && {((_plan get "taraf") getFriend (side _x)) < 0.6}}];
                 _plan set ["atislar", _plan getOrDefault ["atislar", []]];
                 _atan = _atan + 1;
-                diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 -> %4 | %5 mermi (%6) | ETA %7 sn | en yakin dost %8 m (RED %9 m)%10", _plan get "id", _ad, typeOf _v, mapGridPosition _hd, _mermi, _mg, round (_v getArtilleryETA [_hd, _mg]), round _dostEn, _red, ["", " | DANGER CLOSE (<= 600 m)"] select (_dostEn <= 600)];
+                diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 -> %4 | %5 mermi (%6) | ETA %7 sn | en yakin dost %8 m (RED %9 m)%10", _plan get "id", _ad, typeOf _v, mapGridPosition _hd, _mermi, _mg, round (_v getArtilleryETA [_hd, _mg]), round _dE, _red, ["", " | DANGER CLOSE (<= 600 m)"] select (_dE <= 600)];
             };
         };
     } forEach _araclar;
