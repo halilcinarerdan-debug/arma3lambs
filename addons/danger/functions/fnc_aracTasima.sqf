@@ -301,23 +301,54 @@ _ctl set [4, count _eslesme];
             [_sx / (count _p), _sy / (count _p), 0]
         };
         private _pk = [_gl] call _pickFn;
+        private _yayaGelsin = false;   // v8.168: arac piyadeye varamazsa / piyade yakinsa piyade araca YURUR
         if (_pk isEqualTo []) then { _iptal = "tasinacak asker kalmadi"; } else {
-            diag_log format ["[TASIMA] %1 | %2 | piyadeye gidiyor: %3 m | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
-            _d doMove _pk;
-            private _t = time + (150 max (((_v distance2D _pk) / 6) min 420));
-            private _sonMove = time;
-            waitUntil {
-                sleep 1;
-                _pk = [_gl] call _pickFn;
-                if (_pk isNotEqualTo [] && {(time - _sonMove) > 4}) then { _d doMove _pk; _sonMove = time; };
-                !alive _v || {!alive _d} || {_pk isEqualTo []} || {(_v distance2D _pk) < 60} || {time > _t} || {_ctl select 0}
-                || {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}
+            if ((_v distance2D _pk) < 120) then {
+                // v8.168: piyade zaten 120 m icinde: arac HAREKET ETMEZ, piyade araca biner (RPT 5792af8a: 61 / 77 m'deki araclar 0 km/s MOVE ile hic kipirdamadi)
+                _yayaGelsin = true;
+                diag_log format ["[TASIMA] %1 | %2 | piyade yakin (%3 m): arac beklemede, piyade araca biner | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
+            } else {
+                diag_log format ["[TASIMA] %1 | %2 | piyadeye gidiyor: %3 m | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
+                _d doMove _pk;
+                private _t = time + (150 max (((_v distance2D _pk) / 6) min 420));
+                private _sonMove = time;
+                private _durT = -1;
+                private _kurt = 0;
+                private _vazgec = false;
+                waitUntil {
+                    sleep 1;
+                    _pk = [_gl] call _pickFn;
+                    if (_pk isNotEqualTo [] && {(time - _sonMove) > 4}) then { _d doMove _pk; _sonMove = time; };
+                    // v8.168 TAKILMA KURTARMA (alma yolu): 8 sn hareketsiz -> motor / AI ozellikleri / yeniden komut; 18 sn -> surucu yeniden otur; 30 sn -> vazgec, piyade araca yurur
+                    if (alive _v && {(speed _v) < 1} && {_pk isNotEqualTo []} && {(_v distance2D _pk) > 60}) then {
+                        if (_durT < 0) then { _durT = time; };
+                        private _dg = time - _durT;
+                        if (_kurt isEqualTo 0 && {_dg > 8}) then {
+                            _kurt = 1;
+                            diag_log format ["[TASIMA] %1 | ALMA TAKILMASI (8 sn hareketsiz, piyadeye %2 m): motor %3 | canMove %4 | PATH/MOVE %5 / %6 | komut %7", groupId _vg, round (_v distance2D _pk), isEngineOn _v, canMove _v, _d checkAIFeature "PATH", _d checkAIFeature "MOVE", currentCommand _d];
+                            _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
+                            _v engineOn true; _d forceSpeed -1; doStop _d; _d doMove _pk; _sonMove = time;
+                        };
+                        if (_kurt isEqualTo 1 && {_dg > 18}) then {
+                            _kurt = 2;
+                            moveOut _d; sleep 0.5; _d assignAsDriver _v; _d moveInDriver _v; _v engineOn true;
+                            _d enableAI "PATH"; _d enableAI "MOVE"; _d doMove _pk; _sonMove = time;
+                        };
+                        if (_dg > 30) then { _vazgec = true; };
+                    } else { _durT = -1; };
+                    !alive _v || {!alive _d} || {_pk isEqualTo []} || {(_v distance2D _pk) < 60} || {time > _t} || {_ctl select 0} || {_vazgec}
+                    || {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}
+                };
+                if (_pk isNotEqualTo [] && {alive _v} && {(_v distance2D _pk) >= 60} && {(_v distance2D _pk) < 450} && {!(_ctl select 0)}) then {
+                    _yayaGelsin = true;
+                    diag_log format ["[TASIMA] %1 | %2 | arac piyadeye varamadi (%3 m kaldi) -> piyade araca YURUYOR", groupId _vg, _ad, round (_v distance2D _pk)];
+                };
             };
         };
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
         if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
         if (_iptal isEqualTo "" && {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}) then { _iptal = "alma noktasinda piyade ates altinda (arac yaklasmadi)"; };
-        if (_iptal isEqualTo "" && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
+        if (_iptal isEqualTo "" && {!_yayaGelsin} && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
 
         // (2) bin
         private _binen = [];
@@ -345,7 +376,7 @@ _ctl set [4, count _eslesme];
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {[_hepsi, _d] call _temasVar}
                 || {_n > 0 && {(_v emptyPositions "cargo") isEqualTo 0}}
-                || {_n > 0 && {(time - _bTT) > 12}}
+                || {_n > 0 && {(time - _bTT) > 15}}
             };
             // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
             private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};

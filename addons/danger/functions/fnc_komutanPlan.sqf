@@ -171,7 +171,7 @@ if (isServer) then {
     } forEach _uzak;
     if (_uzak isNotEqualTo []) then {
         private _t0 = time;
-        waitUntil {sleep 0.3; ((_uzak findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 6}};
+        waitUntil {sleep 0.3; ((_uzak findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 15}};
         private _kalan = _uzak select {!local _x};
         if (_kalan isNotEqualTo []) then {
             diag_log format ["[PLAN-DEVIR] DEVIR OLMADI (plandan cikarildi): %1", _kalan apply {groupId _x}];

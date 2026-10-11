@@ -1874,3 +1874,9 @@ v8.167 - Arac carpisma guvenligi + elle secimde kapasite uyarisi
  fnc_aracTasima (yol dongusu): onde (+-35 derece, 40 m) kara araci varsa mesafe < 12 m + hiz*1 s ise forceSpeed ile frenler (< 10 m: durur, yoksa onundekinin hizinin %80'i); engelleme basina en fazla 20 sn frenler (sonra takilma kurtarmasi), 15 sn'de bir [TASIMA] CARPISMA GUVENLIGI logu; is sonunda forceSpeed sifirlanir.
  fnc_objektifGrupSec: plan istegi gonderilirken secilen piyade sayisi ile secilen tasima araclarinin (IFV / APC / KAMYON) kargo koltugu (ogrenilen kapasite dahil) esit degilse systemChat + RPT uyarisi (fazla asker: ilk seferde sigmaz; fazla koltuk: bos kalir). Uyari engellemez, plan yine gonderilir.
  TEST EDILMEDI.
+
+v8.168 - NAKIL: yakin piyade araca biner, alma takilma kurtarma, devir bekleme 15 sn (RPT 5792af8a)
+ Bulgu: 3 Fuchs / 12 asker (3x4) eslesti; piyade 50-77 m icinde ama Alpha 1-4 ve 1-5 araclari 0 km/s "komut MOVE" ile 60+ sn kipirdamadi (alma yolunda takilma kurtarma yoktu); yalniz Alpha 1-3 bindirip gitti, digerleri acikta kaldi. Ayrica ilk plan istegi "DEVIR OLMADI" (6 sn yetmedi), ikinci denemede kuruldu.
+ fnc_aracTasima: piyade araca < 120 m ise arac hic hareket etmez, piyade araca biner ([TASIMA] ... piyade yakin). Daha uzaksa arac gider; 8 sn hareketsiz -> motor / AI ozellikleri / yeniden komut ([TASIMA] ALMA TAKILMASI), 18 sn -> surucu yeniden oturtulur, 30 sn -> vazgec ve piyade araca YURUR (< 450 m). Bindirme "son binenden bu yana" bekleme 12 -> 15 sn.
+ fnc_komutanPlan: sunucu devir bekleme 6 -> 15 sn.
+ TEST EDILMEDI.
