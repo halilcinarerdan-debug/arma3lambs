@@ -137,6 +137,8 @@ private _topcuAt = {
     {
         private _v = _x;
         private _mg = (getArtilleryAmmo [_v]) param [0, ""];
+        // v8.181: top hedefe gore menzil disindaysa yer degistirir (min menzil ihlali / uzak); bu seans atmaz, bir sonraki seansta menzil icinde olur
+        if (_mg isNotEqualTo "" && {!(_poz inRangeOfArtillery [[_v], _mg])}) then { [_v, _poz, _plan get "id"] call FUNC(topcuKonumla); };
         private _cap = toLower (_mg + "|" + typeOf _v);
         private _red = 300;
         if ((_cap find "60mm") >= 0) then { _red = 145; };
@@ -174,6 +176,28 @@ private _topcuAt = {
         diag_log format ["[PLAN-TOPCU] %1 | %2 ATIS YOK (%3 aday arac) | nedenler: %4 | hedef %5", _plan get "id", _ad, count _araclar, _ned, mapGridPosition _poz];
     };
     _atan > 0
+};
+
+// v8.181: SAVUNMA MEVZI NOKTASI - verilen sektor noktasinin cevresinde (0 / 20 / 40 m, 4 yon) arazi objesi yogunlugu (siper) en yuksek, su / cukur / dik egim olmayan nokta
+private _siperNokta = {
+    params ["_p0"];
+    private _en = _p0;
+    private _enS = -1e9;
+    {
+        private _r = _x;
+        {
+            private _p = if (_r isEqualTo 0) then {_p0} else {_p0 getPos [_r, _x]};
+            if (!surfaceIsWater _p) then {
+                private _obje = count (nearestTerrainObjects [_p, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE", "BUSH"], 25, false, true]);
+                private _hOrt = 0;
+                for "_k" from 0 to 3 do { _hOrt = _hOrt + (getTerrainHeightASL (_p getPos [30, _k * 90])); };
+                private _cukur = ((_hOrt / 4) - (getTerrainHeightASL _p)) > 2.5;
+                private _s = ((_obje min 20) * 1.5) - ([0, 25] select _cukur) - ([0, 15] select (((surfaceNormal _p) select 2) < 0.95)) - 0.15 * (_p distance2D _p0);
+                if (_s > _enS) then { _enS = _s; _en = _p; };
+            };
+        } forEach ([0, 90, 180, 270] select [0, [4, 1] select (_r isEqualTo 0)]);
+    } forEach [0, 20, 40];
+    _en
 };
 
 private _wpTemizle = {
@@ -474,7 +498,7 @@ while {true} do {
                     {
                         private _g = _x;
                         private _a = if (_th >= 0) then { _th + (if (_n <= 1) then {0} else {-110 + 220 * (_forEachIndex / (_n - 1))}) } else { _B + (360 / _n) * _forEachIndex };
-                        private _poz = _obj getPos [55, _a];
+                        private _poz = [_obj getPos [55, _a]] call _siperNokta;   // v8.181: sektor noktasi 40 m icinde siper yogunlugu en yuksek, kuru, cukur olmayan nokta
                         (_plan get "notlar") set [groupId _g, [_poz, _a]];
                         [_g, [[_poz, "MOVE", format ["MEVZI sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
                     } forEach _sirali;

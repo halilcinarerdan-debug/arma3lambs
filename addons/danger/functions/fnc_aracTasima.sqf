@@ -513,12 +513,27 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                     diag_log format ["[TASIMA] %1 | PARK CIKISI: komsu arac < 12 m -> %2 m ileri / yana bos konuma tasindi", groupId _vg, round (_eskiP distance2D _cp)];
                 };
             };
+            // v8.181 KALKIS: motor kapaliysa once AI "EngineOn" eylemi + engineOn, acilana kadar (en cok 6 sn) bekle (RPT ce7738ae: kalkamayan 4 aracin hepsinde "MOTOR KAPALIYDI"; yalniz grup WAYPOINT'i hareket ettirdi)
+            if !(isEngineOn _v) then {
+                _d action ["EngineOn", _v];
+                _v engineOn true;
+                private _tM = time + 6;
+                waitUntil { sleep 0.5; (isEngineOn _v) || {time > _tM} };
+            };
             _d enableAI "PATH";
             _d forceSpeed -1;
             // v8.136: RPT 013ca3b7: Stryker nakilde 11-20 km/s ile gitti (890 m = 5 dk, 240 sn sinirina takildi). Arkada (dusman uzak) SAFE + FULL; inise 220 m kala AWARE + NORMAL
             _vg setBehaviour "SAFE";
             _vg setSpeedMode "FULL";
             _d doMove _drop;
+            // v8.181: doMove'a EK olarak grup WAYPOINT'i (v8.180 kaydinda tek calisan yol); inis / is sonunda "ELITE NAKIL" adli waypoint'ler silinir
+            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+            private _wpS = _vg addWaypoint [_drop, 0];
+            _wpS setWaypointType "MOVE";
+            _wpS setWaypointName "ELITE NAKIL";
+            _wpS setWaypointSpeed "FULL";
+            _wpS setWaypointBehaviour "SAFE";
+            _vg setCurrentWaypoint _wpS;
             private _st = time + ((240 max ((_v distance2D _drop) / 3.5)) min 600);
             private _yavasladi = false;
             // v8.135: ilerleme izleme + TAKILMA tespiti (RPT 36a51c57: bir Stryker 2+ dk 0 km/s MOVE komutuyla kaldi; digeri inis noktasini gecip 40 m kuralini hic saglamadi)
@@ -548,7 +563,9 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                     private _enD = 9999;
                     { private _dx = _v distance2D _x; if (_dx < _enD) then { _enD = _dx; _en = _x; }; } forEach _onde;
                     private _emniyet = 12 + (_hz * 1.0);
-                    if (!isNull _en && {_enD < _emniyet} && {(_frenBas < 0) || {(time - _frenBas) < 8}}) then {
+                    // v8.181: yalniz YAKLASIYORSA frenle (ayni hizda giden konvoy yavaslatilmaz: RPT ce7738ae 49 km/s'te 25 m'de gereksiz fren); < 9 m her zaman
+                    private _yaklasma = _hz - (if (isNull _en) then {0} else {((speed _en) max 0) / 3.6});
+                    if (!isNull _en && {_enD < _emniyet} && {_yaklasma > 1.5 || {_enD < 9}} && {(_frenBas < 0) || {(time - _frenBas) < 8}}) then {
                         if (_frenBas < 0) then { _frenBas = time; };
                         _frenli = true;
                         private _hedefHz = if (_enD < 10) then {0} else {((speed _en) max 0) / 3.6 * 0.8};
@@ -614,6 +631,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 };
                 // v8.147: MOTOR ZORLAMASI (RPT 16fa2656: Stryker 1-5 "motor false", 35 sn hareketsiz, tek engineOn yetmedi) -> yolda motor kapaliysa surekli ac
                 if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)} && {_dm > 40}) then {
+                    _d action ["EngineOn", _v];
                     _v engineOn true;
                     if !(_v getVariable [QGVAR(motorLogT), false]) then {
                         _v setVariable [QGVAR(motorLogT), true];
@@ -649,8 +667,9 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         // v8.180: 12 sn - doMove sonuc vermediyse WAYPOINT ile yurut (grup waypoint'i: bazi AI suruculer tekil doMove'u yok sayiyor)
                         if (_denemeN isEqualTo 1 && {_dg > 12} && {!(_v getVariable [QGVAR(wpDenendi), false])}) then {
                             _v setVariable [QGVAR(wpDenendi), true];
-                            { deleteWaypoint [_vg, 0]; } forEach (waypoints _vg);
+                            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
                             private _wpD = _vg addWaypoint [_drop, 0];
+                            _wpD setWaypointName "ELITE NAKIL";
                             _wpD setWaypointType "MOVE";
                             _wpD setWaypointSpeed "FULL";
                             _wpD setWaypointBehaviour "SAFE";
@@ -714,6 +733,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             waitUntil { sleep 1; !alive _v || {!alive _d} || {!surfaceIsWater (getPosATL _v)} || {time > _wt} };
         };
         // (4) in
+        { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));   // v8.181: nakil waypoint'i inisten sonra arac dusurmesin
         _v setVariable [QGVAR(yolcuBirak), true];
         { if (alive _x) then { _x enableAI "PATH"; }; } forEach _binen;
         doStop _d;

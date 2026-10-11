@@ -262,19 +262,22 @@ private _konumSec = {
                 private _ac = _pr getOrDefault ["aciklik", "KARISIK"];
                 _s = _s + ([0, 10, 20] select (((["ACIK", "KARISIK", "KAPALI"]) find _ac) max 0));
                 if (_pr getOrDefault ["ufukRisk", false]) then { _s = _s - 25; };
+                // v8.181 STRATEJIK / KORUNAKLI NOKTA: 40 m icindeki arazi objesi yogunlugu (agac / kaya / duvar / bina / cali) = siper; ortulu ama asiri yogun (> 45 = girilmez orman) degil; arac erisimi icin yol 120 m icinde ise bonus
+                private _obje = count (nearestTerrainObjects [_p, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE", "BUSH"], 40, false, true]);
+                _s = _s + ((_obje min 24) * 1.2) - ([0, 12] select (_obje > 45)) + ([0, 8] select ((_p nearRoads 120) isNotEqualTo []));
                 _s = _s - 0.05 * abs _a - 0.02 * (_p distance2D _merkez);
                 _s = _s - 15 * _islak - ([0, 30] select _cukur) - ([0, 20] select _egim);
                 if (_s > _enS) then { _enS = _s; _en = _p; };
             };
-        } forEach [_d - 40, _d, _d + 40];
+        } forEach [_d - 50, _d, _d + 50];
     } forEach _aciListesi;
     if (_en isEqualTo []) then { _en = _obj getPos [_d, _B]; };
     _en
 };
 private _rallyM = _ayar getOrDefault ["rallyM", 450];
 private _orpM = _ayar getOrDefault ["orpM", 300];
-private _rp = [_rallyM, [0, 12, -12, 24, -24, 36, -36]] call _konumSec;
-private _orp = [_orpM, [0, 10, -10, 20, -20]] call _konumSec;
+private _rp = [_rallyM, [0, 12, -12, 24, -24, 36, -36, 52, -52, 70, -70]] call _konumSec;
+private _orp = [_orpM, [0, 10, -10, 20, -20, 35, -35]] call _konumSec;
 
 // grup rolleri
 private _mg = _ayar getOrDefault ["mg", false];
@@ -519,22 +522,8 @@ if ((_ayar getOrDefault ["topcu", 0]) > 0) then {
                 private _ici = [];
                 for "_d" from 500 to 20000 step 500 do { if (((getPosATL _v) getPos [_d, _yonT]) inRangeOfArtillery [[_v], _m]) then { _ici pushBack _d; }; };
                 diag_log format ["[PLAN-TOPCU] %1 | MENZIL TANISI: hedef %2 m'de MENZIL DISI | menzil ici mesafeler (500 m adim): %3 .. %4 m (%5 nokta)", _id, round (_v distance2D _obj), if (_ici isEqualTo []) then {"yok"} else {_ici select 0}, if (_ici isEqualTo []) then {"yok"} else {_ici select (count _ici - 1)}, count _ici];
-                // v8.175 TOPCU YER DEGISTIRME: hedef minimum menzilin icindeyse (RPT 3c7286a5: M109G 3500 m'den yakini atamiyor, hedef 2402 m) AI muretteballi top, hedeften (min menzil + 700 m) uzaga, hedefin ters yonune kurulur; varinca _topcuAt atar
-                if (_ici isNotEqualTo [] && {(_v distance2D _obj) < (_ici select 0)} && {!isNull (driver _v)} && {!isPlayer (driver _v)} && {local _v} && {(time - (_v getVariable ["lambs_danger_topcuKonumT", -999])) > 300}) then {
-                    private _hP = _obj getPos [(_ici select 0) + 700, _obj getDir _v];
-                    private _bos = _hP findEmptyPosition [0, 150, typeOf _v];
-                    if (_bos isNotEqualTo []) then { _hP = _bos; };
-                    if (surfaceIsWater _hP) then { _hP = _obj getPos [(_ici select 0) + 700, (_obj getDir _v) + 40]; };
-                    if (!surfaceIsWater _hP) then {
-                        _v setVariable ["lambs_danger_topcuKonumT", time];
-                        private _dr = driver _v;
-                        (group _dr) setBehaviour "SAFE"; (group _dr) setSpeedMode "NORMAL";
-                        _dr enableAI "PATH"; _dr enableAI "MOVE"; _dr forceSpeed -1;
-                        _v engineOn true;
-                        _dr doMove _hP;
-                        diag_log format ["[PLAN-TOPCU] %1 | TOPCU YER DEGISTIRIYOR: %2 -> %3 (hedeften %4 m; minimum menzil %5 m) | atis konuma varinca", _id, typeOf _v, mapGridPosition _hP, round (_hP distance2D _obj), _ici select 0];
-                    };
-                };
+                // v8.181: yer degistirme ortak fonksiyonda (fnc_topcuKonumla); atis sirasinda da cagrilir
+                [_v, _obj, _id] call FUNC(topcuKonumla);
             };
         } forEach _tAr;
     };
