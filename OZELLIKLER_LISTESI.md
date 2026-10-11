@@ -123,6 +123,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
 
 ## Planlanan / bekleyen
+- **Hat saldırısı / siper hattı planı (Ukrayna benzeri, her şey stabil olduktan SONRA)**: iki noktalı hat (başlangıç / bitiş) → 3–6 hedef kesim, kesim başına squad, dost cephe sınırı HQ'dan hatta, geri çekilme sınırın gerisine; topçu/havan hazırlığı + sızma + siper temizleme. Ön koşul: bina/oda temizleme + el bombası yeniden yazımı, siper temizleme kaynakları (ATP 3-21.8 / MCWP 3-11.2).
 - Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
 - Helikopter medevac / hava nakli (şu an yalnız kara aracı).
 - Zırh: hull-down / yer değiştirme (kaynak bekleniyor; ATP 3-20.15, 3-90.1).

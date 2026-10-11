@@ -1983,3 +1983,5 @@ v8.184 - Topcu "TANK" siniflanip cepheye surulmustu; surucu gir-cik; korunakli i
  3) Korunakli inis noktasi (kullanici: indikleri gibi atis yiyorlar): inis yolu adaylari (en yakin 25 yol) puanlanir: objektife gorus hatti KAPALI +30, 40 m obje yogunlugu (siper, 24'e kadar x1.2), nominal noktaya yakinlik; MCWP 3-11.1 s. 6-37 "dismount point in relative protection". Log [TASIMA] inis noktasi korunak puani.
  4) ARAC-UZAK: asker 10 sn'de bir ayni aractan uzaklastirilip geri geliyordu; hedefe giderken lambs_danger_forceMove bayragi (en cok 14 sn) koyulur.
  TEST EDILMEDI.
+
+NOT (v8.184 sonrasi, kararlar): Ukrayna benzeri "HAT SALDIRISI" plani (iki noktali hat, 3-6 hedef kesim, dost cephe siniri HQ'dan hatta) kullanici karariyla SIMDILIK YAPILMAYACAK; mevcut sistemin her yonu dogrulandiktan sonra eklenecek. On kosul: bina / oda temizleme + el bombasi yeniden yazimi, siper temizleme kaynaklari.
