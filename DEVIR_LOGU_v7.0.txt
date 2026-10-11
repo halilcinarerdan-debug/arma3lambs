@@ -1964,3 +1964,10 @@ v8.181 - Kalkis (motor + waypoint), topcu yer degistirme ortak fonksiyonu, strat
  Bulgu 3 (oyun coktu): istemci xaudio2_9.DLL'de (Windows ses) cokmus - betikle ilgisiz. Sunucu RPT'de 1 LAMBS hatasi: GroupAction/fnc_doGroupStaticPack.sqf satir 36 "_guns" tanimsiz (repoda yok, ust akim LAMBS dosyasi).
  Stratejik nokta secimi (kullanici onerisi): RP / ORP adaylari artik 40 m icindeki arazi objesi yogunlugunu (agac / kaya / duvar / bina / cali; 24'e kadar x1.2 puan, > 45 icin ceza) ve 120 m icinde yol (arac erisimi, +8) puanlar; aday sayisi artti (RP 11 aci x 3 mesafe, ORP 7 aci x 3 mesafe, mesafe +-50 m). SAVUN mevzi (sektor) noktalari 55 m'deki nominal noktadan 0 / 20 / 40 m, 4 yonde taranir: obje yogunlugu (siper), su / cukur / dik egim cezasi; en iyisi secilir.
  TEST EDILMEDI. Animasyon dongusu: birimin adi + saat gerekli (RPT'de iz bulunamadi).
+
+v8.182 - Aractan / yanan-etkisiz araclardan uzak durma; topcu Zeus'tan elle tasindi notu
+ Kullanici: topcuyu Zeus'tan kendisi kipirdatmis (menzil degisikligi aciklandi); "combat sirasinda apc'den uzaklasmiyorlar; yanan araclardan ve etkisiz hale gelmis araclardan uzak dursunlar".
+ Yeni fnc_aracUzak (her makinede 3 sn, yerel AI yaya asker basina >= 8 sn aralik): (1) TEHLIKE: 35 m icinde yanan (isBurning), son 150 sn'de imha olmus ya da etkisiz (hareket edemez + hasar > 0.7) kara / hava araci -> >= 40 m uzaga, arada siper veren obje arkasi tercih; (2) KALABALIK: grup son 12 sn'de temasta ve asker 12 m icinde murettebatli dost arac yaninda -> >= 26 m uzaga (arac hedef olur, ilerleyemez, ezme riski). Atlanir: oyuncu, aracta, TCCC mesgul, nakil bekleme / inis toplanma bayragi. Kapatma: lambs_danger_aracUzakOff. Log [ARAC-UZAK].
+ main/fnc_findCover: murettebatsiz arac siper sayiliyordu; artik yalniz sag (alive) ve yanmayan araclar siper (enkaz / yanan arac siper degil).
+ Topcu yer degistirme (v8.181) Zeus'ta elle tasinan topu ezmesin diye: 300 sn korumasi var; elle tasima sonrasi gerekirse top menzil disiysa yine yer degistirir (kapatma icin: lambs_danger_topcuKonumOff eklenmedi - istenirse eklenir).
+ TEST EDILMEDI.

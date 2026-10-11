@@ -104,6 +104,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     private _vehicles = (nearestObjects [_unit, ["building", "Car"], _range]) select {
         !(_x in _terrainObjects)
         && {((crew _x) findIf {alive _x}) isEqualTo -1}
+        && {alive _x} && {!(isBurning _x)}   // v8.182: enkaz / yanan arac siper sayilmaz
     };
 
     private _allObjs = [];
