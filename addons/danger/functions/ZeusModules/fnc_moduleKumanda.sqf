@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-// ELITE fork (v8.33): "ELITE Kumanda (HQ)" Zeus modulu (LAMBS Danger kategorisi).
+// ELITE fork (v8.33; v8.179: adi "Koordinasyon" - HQ / US NOKTASI degil, gruplar arasi telsiz agi: istihbarat paylasimi / takviye / kanat; HQ / US icin "ELITE HQ / US Kur"): "ELITE Koordinasyon" Zeus modulu (LAMBS Danger kategorisi).
 // Yerlestirilince secenek penceresi acilir; Tamam = kumanda aktif (lambs_danger_hqAktif, herkese yayinlanir). Kumanda baska hicbir yolla acilmaz.
 // Ayni modul tekrar yerlestirilip "Kumanda aktif" kapatilirsa kumanda durur.
 
@@ -13,7 +13,7 @@ if (_activated && local _logic) then {
     };
 
     [
-        "ELITE Kumanda (HQ)",
+        "ELITE Koordinasyon (gruplar arasi telsiz agi)",
         [
             ["Kumanda aktif", "BOOLEAN", "Kapali: kumanda hicbir sey yapmaz. Acik: gruplar arasi koordinasyon calisir (asagidaki secenekler).", true, ""],
             ["Istihbarat paylasimi (SPOTREP agi)", "BOOLEAN", "Bir grubun gordugu dusman telsiz menzilindeki (1500 m) diger gruplara 2-6 sn gecikmeyle bildirilir.", ["lambs_danger_hqIstihbaratV1", true] call _tip, ""],

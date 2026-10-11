@@ -15,7 +15,7 @@
 
 params [["_liste", []], ["_bas", 0], ["_secili", []]];
 
-if (_liste isEqualTo []) exitWith { systemChat "[ELITE] Kaldirilacak karakol / mevzi / aktif plan YOK"; };
+if (_liste isEqualTo []) exitWith { systemChat "[ELITE] Kaldirilacak karakol / mevzi / HQ-US YOK"; };
 
 private _parca = _liste select [_bas, 8];
 if (_parca isEqualTo []) exitWith {
@@ -26,11 +26,11 @@ if (_parca isEqualTo []) exitWith {
 };
 
 private _alanlar = _parca apply {
-    [_x select 1, "BOOLEAN", "Isaretlenirse KALDIRILIR (karakol: kayit + harita isareti + yanindaki savunma plani; plan: iptal edilir, gruplar serbest kalir).", false, ""]
+    [_x select 1, "BOOLEAN", "Isaretlenirse KALDIRILIR (karakol / mevzi: kayit + harita isareti + yanindaki savunma plani; HQ / US: kayit + harita isareti + squad atamalari).", false, ""]
 };
 
 [
-    format ["ELITE Kaldir: karakol / mevzi / plan (%1-%2 / %3)", _bas + 1, _bas + count _parca, count _liste],
+    format ["ELITE Kaldir: karakol / mevzi / HQ-US (%1-%2 / %3)", _bas + 1, _bas + count _parca, count _liste],
     _alanlar,
     {
         params ["_deger", "_args"];

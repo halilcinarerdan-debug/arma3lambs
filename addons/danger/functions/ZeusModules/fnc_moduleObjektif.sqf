@@ -75,7 +75,7 @@ if (_activated && local _logic) then {
                                             {
                                                 params ["_data", "_args"];
                                                 _args params ["_obj", "_d1", "_d2", "_d3"];
-                                                _d1 params ["_tarafI", "_tip", "_hqI", "_tempo", "_basla", "_sure", "_grupN", "_secimModu"];
+                                                _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_hqI", "_grupN", "_secimModu"];   // alan sirasi: Taraf, Gorev tipi, Tempo, Baslama, Sure, HQ / US, Grup sayisi, Grup secimi
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
                                                 _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY"];
                                                 _data params ["_guven", "_dogr", "_topcu", "_topcuN"];

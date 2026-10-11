@@ -76,7 +76,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(Kumanda);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Kumanda (HQ)";
+        displayName = "ELITE Koordinasyon (gruplar arasi telsiz agi; HQ / US degil)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\intel_ca.paa";
@@ -150,7 +150,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(Karakol);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Karakol / HQ (haritadan)";
+        displayName = "ELITE Karakol / Mevzi (savunma noktasi)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
@@ -186,7 +186,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(KarakolKaldir);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Karakol / Plan KALDIR (listeden sec)";
+        displayName = "ELITE Karakol / Mevzi / HQ KALDIR (listeden sec)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";

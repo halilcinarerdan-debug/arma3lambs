@@ -9,5 +9,5 @@ params ["_logic", "", "_activated"];
 if (_activated && local _logic) then {
     deleteVehicle _logic;
     ["lambs_danger_kaldirListeIstegi", [clientOwner]] call CBA_fnc_serverEvent;
-    systemChat "[ELITE] Karakol / plan listesi sunucudan isteniyor...";
+    systemChat "[ELITE] Karakol / mevzi / HQ-US listesi sunucudan isteniyor...";
 };

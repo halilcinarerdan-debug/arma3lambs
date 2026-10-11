@@ -1,6 +1,6 @@
 #include "script_component.hpp"
 
-// ELITE fork (v8.128): "ELITE Karakol / HQ" Zeus modulu — HARITADA (modulun birakildigi noktada) bir karakol / mevzi / komuta noktasi tanimlar.
+// ELITE fork (v8.128): "ELITE Karakol / Mevzi (savunma noktasi)" Zeus modulu — HARITADA (modulun birakildigi noktada) bir karakol / mevzi / komuta noktasi tanimlar.
 // Tarihsel canlandirma (ornegin bir karakol baskini): savunan taraf icin karakol; saldiran icin ELITE Objektif ile (Baskin = vur-cek) hedef.
 //   Tanim: taraf, ad (hazir liste), yaricap (30-300 m), savunma sekli.
 //   Savunma: 'Yok' yalniz isaret + kayit; 'Hemen' yaricap x1.5 icindeki savunan AI gruplari icin SAVUN plani (sektor + garrison) kurulur;
@@ -14,12 +14,12 @@ if (_activated && local _logic) then {
     private _poz = getPosATL _logic;
     deleteVehicle _logic;
     [
-        "ELITE Karakol / HQ",
+        "ELITE Karakol / Mevzi",
         [
             ["Taraf (savunan / sahip)", "LIST", "Karakolun ait oldugu taraf.", ["BLUFOR", "OPFOR", "INDEP"], 0],
-            ["Ad / tur", "LIST", "Harita isaretindeki ad.", ["Karakol", "Mevzi", "HQ / Komuta noktasi", "Gozetleme noktasi", "Ussu"], 0],
+            ["Ad / tur", "LIST", "Harita isaretindeki ad.", ["Karakol", "Mevzi", "Gozetleme noktasi"], 0],
             ["Yaricap (m)", "SLIDER", "Karakolun cevre yaricapi; savunma sektorleri ve 'icindeki gruplar' buna gore.", [30, 300], [10, 50], 120, 0],
-            ["Savunma", "LIST", "Yok: yalniz isaret. Hemen: yaricap x1.5 icindeki savunan AI gruplari icin savunma plani. Alarm: duşman 800 m icinde savunanlarca bilinince plan otomatik kurulur. KALDIR: bu noktadaki karakolu sil.", ["Yok (yalniz isaret)", "Savunma plani HEMEN", "Alarm (duşman yaklasinca)", "KALDIR"], 0],
+            ["Savunma", "LIST", "Yok: yalniz isaret. Hemen: yaricap x1.5 icindeki savunan AI gruplari icin savunma plani. Alarm: duşman 800 m icinde savunanlarca bilinince plan otomatik kurulur.", ["Yok (yalniz isaret)", "Savunma plani HEMEN", "Alarm (duşman yaklasinca)"], 0],
             ["Grup secimi (yalniz 'HEMEN' icin)", "LIST", "Otomatik: yaricap x1.5 icindeki savunan gruplar kendiliginden alinir (yanlis grup girebilir). Elle: istek gonderildikten sonra squad listesi acilir, mevziye atanacaklari siz isaretlersiniz.", ["Otomatik (yaricap x1.5)", "Elle sec (liste)"], 1]
         ],
         {
