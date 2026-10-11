@@ -1990,3 +1990,8 @@ v8.185 - Kalkamayan arac sabri (RPT 2eac326d, test ~2 dk)
  Bulgu: 6 arac / 39 asker; 2-4 / 1-5 / 2-3 yine kalkamadi (komut MOVE, waypoint eklendi, MOTOR KAPALIYDI), 2:07:35'te Alpha 2-4 8 askeri inise 2011 m kala indirdi (35 sn sinir). Kesin neden hala belirsiz (EZME freni yalniz 3 tur, komsu yok, komutan / nisanci koltugu yok). PARK CIKISI (setVehiclePosition) suphe listesinde.
  fnc_aracTasima: inise > 800 m iken kalkamama siniri 35 -> 120 sn; 30 sn'den sonra 6 sn'de bir itme (setVelocityModelSpace), EngineOn, waypoint yenileme, [TASIMA] TAKILMA SABIR logu (ezme freni yasi, aracSenkron durumu); PARK CIKISI esigi 12 -> 7 m.
  TEST EDILMEDI. Test cok kisa (2 dk) ve kullanici "herseyi sacmaladi" dedi ama ayrinti vermedi: hangi davranislar bekleniyor / ne goruldu sorulacak.
+
+v8.186 - Topcu titremesi: aracSenkron topcuyu piyadeye eskort sayiyordu (RPT 2eac326d)
+ Bulgu: M109G (Alpha 2-6) 2:01:48'den itibaren "ARAC-SENKRON ... SENKRON / YAVASLA | piyade Alpha 3-3 (3 kisi, 0 km/s)" dongusu (hiz siniri 1.4 m/sn, onunde 13-42 m) = sagda solda titreme; ayrica v8.181 yer degistirme emriyle (125864) cakisiyor.
+ fnc_aracSenkron: artilleryScanner > 0 ya da gorev TOPCU / TOPCU_YOK olan arac (veya grup) senkrondan MUAF ("topcu araci"). 
+ TEST EDILMEDI. "apc'den adamlar cok indi / almadi": onceki kayitlardaki kalkamama + 35 sn'de yolun ortasinda indirme (v8.185 ile 120 sn sabir).

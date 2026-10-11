@@ -55,6 +55,8 @@ private _calis = {
             };
 
             if (_g getVariable ["lambs_danger_planZirh", false]) then { ["plan zirh destek"] call _serbest; continue };
+            // v8.186: topcu (M109 / havan) piyadeye eskort DEGIL (RPT 2eac326d: M109G Alpha 3-3 piyadesine SENKRON / YAVASLA ile saga sola titredi)
+            if ((getNumber (configOf _veh >> "artilleryScanner")) > 0 || {((_veh getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK"])} || {(_g getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK"]}) then { ["topcu araci"] call _serbest; continue };
             if !([_g, "aracSenkron", true] call FUNC(dk)) then { ["doktrin kapali"] call _serbest; continue };
             private _yolcuPiyade = ({alive _x && {(group _x) isNotEqualTo _g}} count (crew _veh)) + ({alive _x && {_x isKindOf "CAManBase"} && {(assignedVehicleRole _x) select 0 isEqualTo "cargo"}} count (units _g));
             if (_yolcuPiyade >= 2) then { ["tasiyici (yolcu >= 2)"] call _serbest; continue };
