@@ -170,7 +170,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 
 ---
 
-## G3. v8.131 – v8.158 AYRINTILARI
+## G3. v8.131 – v8.168 AYRINTILARI
 
 **Plan / istihbarat**
 - `fnc_komutanPlan`: Zeus rol ezmesi (MANEVRA / DESTEK / YEDEK `[PLAN-ATAMA]`), uzak grup devri (`[PLAN-DEVIR]`, yeni grup 60 sn yaşlanır), `secili` (elle grup seçimi, netId listesi, mesafe sınırı yok), RECON seçimi + OP arama (450 / 520 / 600 m, ±45°, LOS, yükseklik, örtü).
@@ -181,6 +181,15 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - Aday süzgeci: kara aracı, hareket edebilir, yakıt > %10, kargo ≥ 3, AI sürücü, araç grubu tamamen içinde, planda / medevac / karakolda değil; `[TASIMA] ATANMIS ARAC UYGUN DEGIL` nedeni.
 - Mürettebat tamamlama (150 m içindeki dışarıdaki aynı grup askerleri komutan > nişancı > kargo), yolcu bekçisi (0.25 sn: PATH kapalı, `GET OUT` → `doStop`, hareketli araçtan atlayan 80 m içinde ise geri al), motor zorlaması (yolda kapalıysa `engineOn true` her sn), takılma kurtarma (8 / 18 / 35 sn, sürücü `moveOut` + `moveInDriver`).
 - Ezme koruması: 0.25 sn tarama, ileri bakış 10 m + 2.2 x hız, 4 m şerit, 7 m harim (yön fark etmez), 30 sn kesintisiz fren sonrası 5 km/s süzülme; kapatma `lambs_danger_ezmeOff`. Mürettebat koruma: 1 sn, `lambs_danger_murKoruOff`.
+
+**Nakil ve araç rolleri (v8.163 – v8.168)**
+- `fnc_aracSinif`: `[sınıf, kargo, top, atgm]`, tip başına önbellek, `[ARAC-SINIF]`. IFV = kargo ≥ 3 + top (mermi hit ≥ 25) ya da ATGM; APC = kargo ≥ 3, topsuz, zırh ≥ 120; sayılar tasarım tahmini.
+- `fnc_planZirh`: tank / elle seçilen zırh grubu plan tick'inde ateş pozisyonuna gider (hedeften 380-680 m, görüş hattı, su / bina / sık ağaç dışı), durur + gözetler, temasta COMBAT / RED; IPTAL / BITTI'de serbest. IFV'ler indirdikten sonra `tasimaCtl[5]` ile zırh desteğine eklenir. Hull-down / yer değiştirme YOK (kaynak bekleniyor: ATP 3-20.15 / 3-90.1).
+- `fnc_aracTasima` dağıtım: en boş araca yerleştirme (worst-fit), araç başına yumuşak tavan `max(5, ceil(asker/araç))`, sığmazsa 2. tur gerçek kapasite. Öğrenilen kapasite `lambs_danger_tasimaKap_<tip>`; `KAPASITE OGRENILDI`, erken sefer (en çok 3).
+- Bekleme: eşleşen asker `doStop` + PATH kapalı + `lambs_danger_tasimaBekle`; bindirme öncesi / iş sonunda / hata temizliğinde açılır. Piyade < 120 m ise araç hareket etmez; daha uzaksa araç gider (8 sn → motor / AI / komut `ALMA TAKILMASI`, 18 sn → sürücü yeniden otur, 30 sn → vazgeç, piyade < 450 m yürür).
+- Sunucu devri: elle seçilen taşıma aracı grupları plan devir listesinde (`_tasG`) ve nakil başında `SURUCU GRUBU DEVIR` (≥ 60 sn yaşlı grup); devir bekleme 15 sn.
+- Çarpışma güvenliği: ±35°, 40 m, güvenli mesafe 12 m + hız x 1 sn, < 10 m dur; engelleme başına ≤ 20 sn.
+- Elle seçim kapasite uyarısı (`fnc_objektifGrupSec`): piyade sayısı ≠ IFV / APC / kamyon kargo koltuk toplamı.
 
 **Doktrin**
 - RUS profil anahtarları: `tasimaInisM 300`, `tasimaOrpEk false`, `aracDestekKal true`, `kesifCarpan 0.6`, `topcuMermiCarpan 2`, `kesifAtesHizli true`; ayrıntı `kaynaklar_doktrin/RUS_MUFREZE_MANGA_DOKTRIN_NOTLARI.md`, `NATO_ABD_MUFREZE_MANGA_DOKTRIN_NOTLARI.md`.

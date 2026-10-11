@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.158)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.168)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -98,7 +98,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Sunucu devri** (`grupSunucuDevir`): istemcide kalan AI grupları sunucuya devredilir (Zeus PC yükü); plan da uzak grupları devralır.
 - **MP**: Zeus modülleri CBA sunucu olayı gönderir (plan sunucuda kurulur), sonuç `[PLAN-YANIT]` ve Zeus sohbetinde.
 
-## 10c. v8.131 – v8.158 eklemeleri
+## 10c. v8.131 – v8.168 eklemeleri
 - **Keşif unsuru (RECON)** (T): Gorev Ata → RECON grubu gözlem noktasına (OP) STEALTH + GREEN sızar, ateş gelene kadar ateş etmez, plana rapor verir (gözlenen düşman / sivil sayısı).
 - **İstihbarat / PID** (T): "iddia ≠ gerçek" (Irak 2003 örneği). Bilgi güvenilirliği (yetersiz / orta / kesin) + doğrulama disiplini (tam keşif / son doğrulama / yok); topçu yalnız rapor + sivil yoksa atar; sivil gözlenirse atış iptal; atış sonrası sivil / dost zararı `[PLAN-ZARAR]`.
 - **Plan nakli** (T): kara aracı (APC / kamyon) plan toplanmasında erken başlar, takım bazlı bölme, sığmayanlar için sefer (en çok 3), medevac varsa 1 araç rezerv, iniş doktrin mesafesinde (RUS 300 m, diğer 500 m), yol üstü inişe sürme.
@@ -109,6 +109,10 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Oyuncu komutası** (T): oyunculu gruplar ya da Gorev Ata "OYUNCU KOMUTASI" → ELITE taktik katmanı kapalı; TCCC / cephane / IED / ezme / mürettebat açık. "ELITE TAM AÇIK" ile ezilir.
 - **Objektif paneli 4 / 4 + elle squad seçimi** (T): "Grup seçimi: Elle" → squad listesi (en çok 16), yalnız seçilenler plana girer.
 - **Komutan zihni + tavır motoru** (T): karşı taraf hakkında yalnız algılananlardan (ateş, duman, topçu, görüş, temas, kayıp) gözlem defteri; alışkanlık hipotezleri (yön, menzil, duman, arazi, karşılık, zırh, topçu); kişilik (temkinli / dengeli / saldırgan) + doktrin ile tavır puanlama (loglu); şimdilik etki: beklenen yöne gözetleme. Oturum hafızası, SQL yok.
+- **Araç sınıfı + roller** (T, v8.163-164): `aracSinif` TANK / IFV / APC / KAMYON; APC = savaş taksisi (indirir, geride rezerv), IFV indirdikten sonra zırh ateş desteğine katılır (`planZirh`: ateş pozisyonu 380-680 m, tasarım tahmini), tank elle seçimle zırh desteği olur. Elle seçim listesinde TANK / IFV / APC / KAMYON etiketleri.
+- **Nakil iyileştirmeleri** (T, v8.163-168): öğrenilen gerçek koltuk kapasitesi, erken sefer, en boş araca dengeli dağıtım (hiçbir araç boş kalmaz), eşleşen piyade araç gelene kadar BEKLER, piyade 120 m içindeyse araç gitmez piyade biner, alma yolunda takılma kurtarma, araç gelemezse piyade araca yürür, araç grubu sunucuya devri (sürücü yerel değilse hareket etmiyordu), devir bekleme 15 sn.
+- **Araç çarpışma güvenliği** (T, v8.167): nakilde önde kara aracı varsa mesafe tutar / frenler (en çok 20 sn). Log `[TASIMA] CARPISMA GUVENLIGI`.
+- **Kapasite uyarısı** (T, v8.167): elle seçimde piyade sayısı ≠ taşıma aracı koltuk toplamı ise sohbet + RPT uyarısı.
 - **Tanı / düzeltmeler**: sunucu devri yeni gruba 120 sn bekler (çıplak / boş envanter kökü), giyim tanısı `[GIYIM-TANI]`, cephane animasyonu varsayılan kapalı + envanter dolu kontrolü + `[CEPHANE-ENV]`, A/B anahtarları `lambs_danger_silahDegisimOff` / `cephanePaylasOff` / `giyimTaniOff`.
 
 ## 11. Geliştirici araçları
@@ -121,7 +125,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 ## Planlanan / bekleyen
 - Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
 - Helikopter medevac / hava nakli (şu an yalnız kara aracı).
-- Zırhlı destek planı (mekanize taktikler).
+- Zırh: hull-down / yer değiştirme (kaynak bekleniyor; ATP 3-20.15, 3-90.1).
 - Karakolda MG / AT yerleşimi, nöbet rotasyonu.
 - Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
 - Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
