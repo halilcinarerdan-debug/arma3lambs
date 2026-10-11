@@ -141,3 +141,11 @@ a. yerel guvenlik; b. ates unsuru atanmis konumlara cekilir; c. her unsura ates 
 6. Formasyon aralik varsayimlari: KOD DEGISMEDI. MCWP 3-11.2: 'exact distances and intervals not important as long as control not lost; sight or voice contact'. Mevcut buddyBond esikleri (calm 25 / 40 m) 'kontrol / gorus teması' ilkesine aykiri degil; rakamlar TASARIM.
 7. Pusu doktrini: YAPILDI (v8.35). Kapi / oda: YAPILDI (v8.36). Rota zinciri: YAPILDI (v8.36).
 KALAN: hendek / mevzi (VBS #6; mevzi araligi 5-20 m, MCWP 3-11.2 ates timi icinde).
+
+## Mekanize iniş ve senkron saldırı (v8.171) — MCWP 3-11.1 (2014) s. 6-36 / 6-37
+- **Birlikte ilerleme:** zırhlı araçlar ve piyade taşıyıcıları karşılıklı destek mesafesinde birlikte ilerler; piyade, mümkün olduğunca araçta kalır ("balancing the desire to dismount close to the enemy with the enemy's antiarmor capability").
+- **İniş noktası:** hedefin önünde, hedefte ya da hedefi geçince olabilir; zamanlama kritik — çok erken inmek hızı keser ve piyadeyi gereksiz ateşe açar, çok geç inmek araçları aynı ateşe açar.
+- **Hedefin önünde inmenin avantajı (kitap):** "Unit cohesion is enhanced by establishing control in the relative protection of the dismount point before committing to the assault" — yani **önce iniş noktasında kontrol kurulur, sonra birlikte saldırıya girilir**. İlk ulaşan kendi başına ilerlemez.
+- **Dezavantaj (kitap):** piyade ileri yürürken düşman ateşine daha uzun süre açık kalır; iniş noktaları düşman direkt/endirekt ateşine hedef olabilir.
+- **Kod karşılığı (tasarım, sayılar tahmin):** konvoyda önde giden araç, >250 m geride kalan araca hız eşler (en çok 90 sn); inen askerler tüm araçlar inene kadar (en çok 75 sn, temasta hemen) çevre emniyetinde COMBAT + çömelmiş bekler; sonra birlikte ORP'ye COMBAT ile ilerler. Lider geride kalıp askerler önden gitmesin diye iniş noktasında toparlanma zorunludur.
+- **Savunma (MEVZI):** kitap genel ilkesi — MG / AT mevzileri ve bina savunması; sektör noktasına en yakın kapalı bina garrison, boş statik silahlar MG'ci ile doldurulur, COMBAT + çömelme (sayılar tasarım).

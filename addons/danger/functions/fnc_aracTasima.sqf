@@ -258,16 +258,33 @@ private _tasinan = 0;
 private _isler = [];
 _ctl set [3, 0];
 _ctl set [4, count _eslesme];
+// v8.171 SENKRON: [inen arac sayisi, toplam arac, araclar] - konvoy hiz eslemesi ve inis sonrasi toplanma bu diziyi kullanir
+private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
 {
     _x params ["_v", "_gl"];
     private _d = driver _v;
     private _vg = group _d;
     private _rpi = [_rp, _forEachIndex, count _eslesme] call _noktaYay;
     private _dropi = [_drop, _forEachIndex, count _eslesme] call _noktaYay;
-    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl, _destekKal, _obj] spawn {
-        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl", "_destekKal", "_obj"];
+    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl, _destekKal, _obj, _senk] spawn {
+        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl", "_destekKal", "_obj", "_senk"];
+        private _senkSay = false;
+        private _senkBitti = { if (!_senkSay) then { _senkSay = true; _senk set [0, (_senk select 0) + 1]; }; };
         _v setVariable [QGVAR(tasimaMesgul), true];
         _v setVariable [QGVAR(aracMedevacT), time];
+        if !(_v getVariable [QGVAR(atesEH), false]) then {
+            _v setVariable [QGVAR(atesEH), true];
+            _v setVariable [QGVAR(atesSay), 0];
+            _v addEventHandler ["Fired", {
+                params ["_veh", "_wpn", "", "", "", "", "_proj"];
+                private _n = (_veh getVariable [QGVAR(atesSay), 0]) + 1;
+                _veh setVariable [QGVAR(atesSay), _n];
+                if (_n isEqualTo 1 || {(time - (_veh getVariable [QGVAR(atesLogT), -999])) > 30}) then {
+                    _veh setVariable [QGVAR(atesLogT), time];
+                    diag_log format ["[ARAC-ATES] %1 | silah %2 | atis #%3 | hiz %4 km/s", getText (configOf _veh >> "displayName"), _wpn, _n, round (speed _veh)];
+                };
+            }];
+        };
         private _eskiBeh = behaviour _d;
         private _eskiHiz = speedMode _vg;
         private _eskiAC = _d checkAIFeature "AUTOCOMBAT";
@@ -450,6 +467,10 @@ _ctl set [4, count _eslesme];
             private _denemeN = 0;
             private _logT = time + 20;
             private _yakinT = -1;
+            private _sonHedefT = -999;
+            private _senkT = 0;
+            private _senkli = false;
+            private _senkLogT = -999;
             private _ilerD = 1e6;
             private _ilerT = time;
             private _frenli = false;
@@ -484,6 +505,22 @@ _ctl set [4, count _eslesme];
                     };
                 };
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
+                // v8.171 KONVOY SENKRONU (MCWP 3-11.1 s. 6-36: tank / piyade araclari karsilikli destek mesafesinde birlikte ilerler; inis noktasinda kontrol kurulup birlikte saldirilir): hizli arac, ardindaki arac(lar)i > 250 m geride birakmasin
+                if (_bitis isEqualTo "" && {!_frenli} && {_dm > 350} && {alive _v} && {alive _d}) then {
+                    private _geri = (_senk select 2) select {
+                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false} && {(_x distance2D _drop) > (_dm + 250)}
+                    };
+                    if (_geri isNotEqualTo [] && {_senkT < 90}) then {
+                        private _en = 9999;
+                        { _en = _en min ((speed _x) / 3.6); } forEach _geri;
+                        _d forceSpeed ((_en * 1.15) max 5);
+                        _senkT = _senkT + 1;
+                        _senkli = true;
+                        if ((time - _senkLogT) > 20) then { _senkLogT = time; diag_log format ["[TASIMA] %1 | KONVOY SENKRONU: %2 arac > 250 m geride -> hiz %3 km/s'ya dusuruldu (toplam %4 sn)", groupId _vg, count _geri, round (((_en * 1.15) max 5) * 3.6), _senkT]; };
+                    } else {
+                        if (_senkli) then { _senkli = false; _d forceSpeed -1; };
+                    };
+                };
                 // v8.169 ILERLEME: inise < 800 m iken 35 sn boyunca mesafe 20 m bile azalmadiysa (yavas surunme hiz esigini sifirlayip kilitliyordu: RPT 59d6c742, 3-6 km/s ile 340-400 m'de dakikalarca) -> hemen in
                 if (_bitis isEqualTo "" && {_dm < 800}) then {
                     if (_dm < (_ilerD - 20)) then { _ilerD = _dm; _ilerT = time; } else { if ((time - _ilerT) > 35) then { _bitis = "ilerlemedi"; }; };
@@ -515,6 +552,17 @@ _ctl set [4, count _eslesme];
                     diag_log format ["[TASIMA] %1 | pusudan cikildi, normal surus (inise %2 m)", groupId _vg, round _dm];
                     _gecisT = -1;
                     _vg setBehaviour "SAFE";
+                };
+                // v8.171 ARAC SILAHCISI KARSILIK: temasta (pusu / gecis) silahci (surucu degil) bilinen en yakin dusmana (<= 800 m) ates eder; atis sayaci [ARAC-ATES] (kullanici: "apc atesle karsilik vermis mi?")
+                if (_bitis isEqualTo "" && {_gecisT > 0} && {(time - _sonHedefT) > 3}) then {
+                    _sonHedefT = time;
+                    private _gn = gunner _v;
+                    private _hd = _d findNearestEnemy (getPosATL _d);
+                    if (!isNull _gn && {_gn isNotEqualTo _d} && {alive _gn} && {!isNull _hd} && {(_v distance2D _hd) <= 800}) then {
+                        _gn enableAI "TARGET"; _gn enableAI "AUTOTARGET";
+                        _gn doTarget _hd;
+                        _gn doFire _hd;
+                    };
                 };
                 // v8.147: MOTOR ZORLAMASI (RPT 16fa2656: Stryker 1-5 "motor false", 35 sn hareketsiz, tek engineOn yetmedi) -> yolda motor kapaliysa surekli ac
                 if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)} && {_dm > 40}) then {
@@ -594,6 +642,39 @@ _ctl set [4, count _eslesme];
         sleep 10;
         { if (alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}) then { moveOut _x; }; } forEach _binen;
         { if (alive _x) then { _x doFollow (leader (group _x)); }; } forEach _binen;
+        call _senkBitti;
+        // v8.171 INIS SONRASI TOPLANMA: inenler tum araclar inene kadar (en fazla 75 sn) cevre emniyetiyle COMBAT + comelmis bekler, sonra BIRLIKTE ilerler (kullanici: komutanlar arkada, askerler onden gidiyordu)
+        [_binen select {_x isNotEqualTo _d}, _senk, _obj] spawn {
+            params ["_ps", "_senk", "_obj"];
+            _ps = _ps select {alive _x && {isNull objectParent _x}};
+            if (_ps isEqualTo []) exitWith {};
+            private _yon = (getPosATL (_ps select 0)) getDir _obj;
+            {
+                _x setVariable [QGVAR(tasimaBekle), true];
+                doStop _x;
+                _x disableAI "PATH";
+                _x setUnitPos "MIDDLE";
+                _x doWatch ((getPosATL _x) getPos [150, _yon + ([0, 110, -110] select (_forEachIndex mod 3))]);
+                (group _x) setBehaviour "COMBAT";
+            } forEach _ps;
+            diag_log format ["[TASIMA] INIS TOPLANMA: %1 asker cevre emniyetinde bekliyor (inen arac %2 / %3)", count _ps, _senk select 0, _senk select 1];
+            private _t0 = time;
+            waitUntil {
+                sleep 1;
+                ((_senk select 0) >= (_senk select 1)) || {(time - _t0) > 75}
+                || {(_ps findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}
+            };
+            diag_log format ["[TASIMA] INIS TOPLANMA bitti: %1 sn | inen arac %2 / %3 -> birlikte ilerleme", round (time - _t0), _senk select 0, _senk select 1];
+            {
+                if (alive _x) then {
+                    _x setVariable [QGVAR(tasimaBekle), nil];
+                    _x enableAI "PATH";
+                    _x setUnitPos "AUTO";
+                    _x doWatch objNull;
+                    _x doFollow (leader (group _x));
+                };
+            } forEach _ps;
+        };
         diag_log format ["[TASIMA] %1 | %2 | inen %3 / %4%5", groupId _vg, ["TAMAM", "IPTAL: " + _iptal] select (_iptal isNotEqualTo ""), {alive _x && {(vehicle _x) isNotEqualTo _v}} count _binen, count _binen, ["", " | erken inis: " + _erkenInis] select (_erkenInis isNotEqualTo "")];
 
         // (5) RP'ye don, bekle
@@ -657,6 +738,7 @@ _ctl set [4, count _eslesme];
         _v setVariable [QGVAR(tasimaMesgul), nil];
         _vg setVariable [QGVAR(tasimaSonT), time];
         [_gl] call _birak;
+        call _senkBitti;
         count _binen
     });
     { _tasinan = _tasinan + count _x; } forEach _gl;

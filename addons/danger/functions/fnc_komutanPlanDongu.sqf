@@ -411,13 +411,15 @@ while {true} do {
                     [_plan, "MEVZI", format ["%1 sektor", _n]] call _fazGec;
                 } else {
                     private _i = 0;
+                    // v8.171: arac nakliyle inildiyse ORP'ye COMBAT ile (dusmana dogru, savas durusu) ilerle
+                    private _orpBeh = ["AWARE", "COMBAT"] select ((((_plan getOrDefault ["tasimaCtl", []]) param [2, 0]) > 0));
                     {
                         private _g = _x;
                         private _r = _roller getOrDefault [groupId _g, "MANEVRA"];
                         private _hedef = if (_r isEqualTo "DESTEK") then { _sbf } else { [_orp, _i, _B] call _ofset };
                         if (_r isNotEqualTo "DESTEK") then { _i = _i + 1; };
                         (_plan get "notlar") set [groupId _g, _hedef];
-                        [_g, [[_hedef, "MOVE", format ["%1 -> %2", _r, ["ORP", "SBF"] select (_r isEqualTo "DESTEK")], "AWARE", "NORMAL", 40]]] call _wpYaz;
+                        [_g, [[_hedef, "MOVE", format ["%1 -> %2", _r, ["ORP", "SBF"] select (_r isEqualTo "DESTEK")], _orpBeh, "NORMAL", 40]]] call _wpYaz;
                         diag_log format ["[PLAN] %1 ROL %2 = %3 | hedef %4", _id, groupId _g, _r, mapGridPosition _hedef];
                     } forEach _gruplar;
                     [_plan, "ORP", "ORP / destek noktasina intikal"] call _fazGec;
@@ -690,14 +692,8 @@ while {true} do {
                 {
                     private _g = _x;
                     private _n = _notlar getOrDefault [groupId _g, [_obj, _B]];
-                    private _bina = (nearestObjects [_n select 0, ["House"], 70]) select {count (_x buildingPos -1) > 0};
-                    if (_bina isNotEqualTo []) then {
-                        [_g, _obj] call FUNC(tacticsGarrison);
-                    } else {
-                        _g setBehaviour "AWARE";
-                        _g setCombatMode "YELLOW";
-                        { if (alive _x && {isNull objectParent _x} && {!(time < (_x getVariable [QGVAR(tcccBusy), 0]))}) then { doStop _x; _x doWatch ((_n select 0) getPos [150, _n select 1]); }; } forEach (units _g);
-                    };
+                    // v8.171: en yakin bina (garrison) + bos statik silahlar + COMBAT / comelme -> fnc_mevziKur
+                    [_g, _n select 0, _n select 1] call FUNC(mevziKur);
                 } forEach _gruplar;
                 [_plan, "BEKLE", "sektorlar tutuldu, garrison / mevzi"] call _fazGec;
             };

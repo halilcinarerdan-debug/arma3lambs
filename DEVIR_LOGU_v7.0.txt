@@ -1891,3 +1891,12 @@ v8.170 - Nakil: ilerleme kilidi, su korumasi, yakin piyade esigi 250 m (RPT 59d6
  fnc_aracTasima: (1) ILERLEME: inise < 800 m iken 35 sn'de mesafe 20 m azalmadiysa _bitis = "ilerlemedi" -> hemen in; (2) SU KORUMASI: inis aninda arac yol disi suyun icindeyse en fazla 25 sn kuru zemine surulur ([TASIMA] inis noktasi suda); (3) yakin piyade esigi 120 -> 250 m.
  fnc_komutanPlan: [PLAN-TOPCU] ENVANTER logu hedefe mesafeyi de yazar (menzil ici / disi tanisi icin).
  TEST EDILMEDI. Topcu: plan KESIF'e ulasinca [PLAN-TOPCU] satirlarina bakilacak.
+
+v8.171 - Senkron saldiri (konvoy hiz eslemesi + inis toplanmasi), savunmada MEVZI KUR (garrison + statik + COMBAT), arac silahcisi karsilik (RPT ae29f8a1)
+ Bulgu: 6 arac farkli hizda, 20 sn arayla bindi, ilk iki IFV 4 dk'da vardi, diger 4 APC 70 sn sonra temas yuzunden "nakil iptal" ile arazide indi; inenler komutanlari geride kalarak onden gidiyordu. IFV ekibi (Alpha 2-1) temasta "Fleeing (vehicle)" ile araci terk etti (surucu YOK). Savunma MEVZI yalniz bina varsa garrison, yoksa AWARE + doStop idi; statik silah kullanilmiyordu. APC / IFV'nin karsilik verip vermedigi loglanmiyordu (nakilde surucu AUTOCOMBAT kapali, grup SAFE / CARELESS).
+ Kitap (MCWP 3-11.1 s. 6-36/37): "inis noktasinda kontrol kurulur, sonra saldiriya girilir" -> ilk ulasan tek basina ilerlemez; zirh / tasiyicilar karsilikli destek mesafesinde birlikte ilerler (DOKTRIN_KAYNAKLARI.md).
+ fnc_aracTasima: [KONVOY SENKRONU] onde giden arac, > 250 m geride kalan (hala nakilde) araca hiz esler (en az 5 m/s, en cok 90 sn); [INIS TOPLANMA] inenler (doStop, PATH kapali, COMBAT, comelme, 3 yone gozetleme) tum araclar inene ya da 75 sn / temasa kadar bekler, sonra doFollow ile birlikte ilerler; temas / gecis sirasinda araç SILAHCISI (surucu degil) en yakin bilinen dusmana (<= 800 m) doTarget / doFire; [ARAC-ATES] Fired sayaci (ilk atis + 30 sn'de bir).
+ fnc_komutanPlanDongu: nakliyle inildiyse ORP waypoint'i COMBAT. SAVUN MEVZI -> fnc_mevziKur.
+ fnc_mevziKur (yeni): 120 m icinde bos statik silah (en cok 2) MG'ci / en yakin asker ile doldurulur; kalanlar sektor noktasina en yakin kapali binada garrison (tacticsGarrison), bina yoksa sektor yonune bakan comelmis halka; grup COMBAT + YELLOW, comelme. Log [MEVZI].
+ rpt_ozet: ARAC-ATES, MEVZI etiketleri.
+ TEST EDILMEDI. Acik: IFV ekibinin temasta "Fleeing (vehicle)" ile araci terk etmesi (murettebatKoru yalniz GET OUT'u iptal ediyor, LAMBS kacis gorevi baska yoldan) - ayri inceleme.
