@@ -285,6 +285,32 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                 };
             }];
         };
+        // v8.172 SILAHCI KARSILIK (kullanici: "apc kacamayacaksa karsilik versin, turret dusmani gorur gormez, donuste de"): is boyunca ve bitisten 180 sn sonrasina kadar silahci (yoksa komutan; surucu degil)
+        // bilinen en yakin dusmana (<= 900 m) doTarget / doFire; yol / inis / geri donus fark etmez; tasima grubunun ates modu GREEN / BLUE ise YELLOW'a alinir
+        _v setVariable [QGVAR(silahciSon), time + 99999];
+        if ((combatMode _vg) in ["GREEN", "BLUE"]) then { _vg setCombatMode "YELLOW"; };
+        if !(_v getVariable [QGVAR(silahciVar), false]) then { _v setVariable [QGVAR(silahciVar), true]; [_v] spawn {
+            params ["_v"];
+            private _logT = -999;
+            while {alive _v && {time < (_v getVariable [QGVAR(silahciSon), 0])}} do {
+                private _dr = driver _v;
+                private _gn = if (!isNull (gunner _v) && {(gunner _v) isNotEqualTo _dr}) then {gunner _v} else {commander _v};
+                if (!isNull _gn && {alive _gn} && {_gn isNotEqualTo _dr} && {(lifeState _gn) in ["HEALTHY", "INJURED"]}) then {
+                    private _hd = _gn findNearestEnemy (getPosATL _v);
+                    if (!isNull _hd && {alive _hd} && {(_v distance2D _hd) <= 900} && {(_gn knowsAbout _hd) > 0.3}) then {
+                        _gn enableAI "TARGET"; _gn enableAI "AUTOTARGET";
+                        _gn doTarget _hd;
+                        _gn doFire _hd;
+                        if ((time - _logT) > 20) then {
+                            _logT = time;
+                            diag_log format ["[ARAC-ATES] %1 | silahci %2 hedefe donuyor: %3 m | arac hizi %4 km/s", getText (configOf _v >> "displayName"), name _gn, round (_v distance2D _hd), round (speed _v)];
+                        };
+                    };
+                };
+                sleep 2;
+            };
+            _v setVariable [QGVAR(silahciVar), nil];
+        }; };
         private _eskiBeh = behaviour _d;
         private _eskiHiz = speedMode _vg;
         private _eskiAC = _d checkAIFeature "AUTOCOMBAT";
@@ -467,7 +493,6 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
             private _denemeN = 0;
             private _logT = time + 20;
             private _yakinT = -1;
-            private _sonHedefT = -999;
             private _senkT = 0;
             private _senkli = false;
             private _senkLogT = -999;
@@ -552,17 +577,6 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                     diag_log format ["[TASIMA] %1 | pusudan cikildi, normal surus (inise %2 m)", groupId _vg, round _dm];
                     _gecisT = -1;
                     _vg setBehaviour "SAFE";
-                };
-                // v8.171 ARAC SILAHCISI KARSILIK: temasta (pusu / gecis) silahci (surucu degil) bilinen en yakin dusmana (<= 800 m) ates eder; atis sayaci [ARAC-ATES] (kullanici: "apc atesle karsilik vermis mi?")
-                if (_bitis isEqualTo "" && {_gecisT > 0} && {(time - _sonHedefT) > 3}) then {
-                    _sonHedefT = time;
-                    private _gn = gunner _v;
-                    private _hd = _d findNearestEnemy (getPosATL _d);
-                    if (!isNull _gn && {_gn isNotEqualTo _d} && {alive _gn} && {!isNull _hd} && {(_v distance2D _hd) <= 800}) then {
-                        _gn enableAI "TARGET"; _gn enableAI "AUTOTARGET";
-                        _gn doTarget _hd;
-                        _gn doFire _hd;
-                    };
                 };
                 // v8.147: MOTOR ZORLAMASI (RPT 16fa2656: Stryker 1-5 "motor false", 35 sn hareketsiz, tek engineOn yetmedi) -> yolda motor kapaliysa surekli ac
                 if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)} && {_dm > 40}) then {
@@ -739,6 +753,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
         _vg setVariable [QGVAR(tasimaSonT), time];
         [_gl] call _birak;
         call _senkBitti;
+        _v setVariable [QGVAR(silahciSon), time + 180];
         count _binen
     });
     { _tasinan = _tasinan + count _x; } forEach _gl;

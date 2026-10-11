@@ -1900,3 +1900,7 @@ v8.171 - Senkron saldiri (konvoy hiz eslemesi + inis toplanmasi), savunmada MEVZ
  fnc_mevziKur (yeni): 120 m icinde bos statik silah (en cok 2) MG'ci / en yakin asker ile doldurulur; kalanlar sektor noktasina en yakin kapali binada garrison (tacticsGarrison), bina yoksa sektor yonune bakan comelmis halka; grup COMBAT + YELLOW, comelme. Log [MEVZI].
  rpt_ozet: ARAC-ATES, MEVZI etiketleri.
  TEST EDILMEDI. Acik: IFV ekibinin temasta "Fleeing (vehicle)" ile araci terk etmesi (murettebatKoru yalniz GET OUT'u iptal ediyor, LAMBS kacis gorevi baska yoldan) - ayri inceleme.
+
+v8.172 - Arac silahcisi her zaman karsilik verir (yol, inis, geri donus)
+ Kullanici: "apc kacamayacaksa karsilik versin, turret dusmani gorur gormez, donuste de". v8.171'deki yalniz pusu / gecis sirasindaki hedefleme kaldirildi; yerine is boyunca ve bitisten 180 sn sonrasina kadar calisan silahci izleyicisi: silahci (yoksa komutan; surucu degil) bilinen (knowsAbout > 0.3) en yakin dusmana <= 900 m doTarget / doFire, 2 sn'de bir; TARGET / AUTOTARGET acik; grup ates modu GREEN / BLUE ise YELLOW. Arac basina tek izleyici. Log [ARAC-ATES] "silahci hedefe donuyor" (20 sn'de bir) + Fired sayaci.
+ TEST EDILMEDI. Surucu kacma / araci terk etme (Fleeing vehicle) hala acik.
