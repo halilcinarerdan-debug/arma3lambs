@@ -45,7 +45,7 @@ if (_adaylar isEqualTo []) then {
         private _l = leader _x;
         private _v = if (isNull _l) then {objNull} else {objectParent _l};
         !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
-        && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v}
+        && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v} && {(getNumber (configOf _v >> "artilleryScanner")) isEqualTo 0}
         && {({isPlayer _x} count (units _x)) isEqualTo 0} && {!isNull (driver _v)} && {!isPlayer (driver _v)}
         && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"])}
         && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {_atamaModu || {!(_x getVariable ["lambs_danger_planAktif", false])}} && {[_x] call _hqSuz} && {_atamaModu || {_hqId isNotEqualTo ""} || {(_l distance2D _obj) <= 6000}}

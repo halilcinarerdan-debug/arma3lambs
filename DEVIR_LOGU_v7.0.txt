@@ -1976,3 +1976,10 @@ v8.183 - Topcu: dost RED'den yakinsa nisan objektifin derinligine kaydirilir (RP
  Bulgu: P4'te top menzildeydi ama her seansta "ATMADI: en yakin dost 447 m < RED 455 m" (155 mm RED, TC 3-21.76 Tablo 3-3); ORP 440 m + saldiri sirasinda dost 376-447 m -> top fiilen HIC atamiyordu (varsayilan ORP 300-440 m ile her 155 mm plani etkilenir).
  fnc_komutanPlanDongu _topcuAt: dost < RED ise nisan noktasi, objektifin en yakin dostun TERS yonunde 40 / 80 / 120 / 160 / 200 m derinligine kaydirilir; kaydirilmis noktada en yakin dost >= RED + 20 m ve nokta su degilse atis yapilir ([PLAN-TOPCU] NISAN KAYDIRILDI). Kaydirmayla da yetmiyorsa eskisi gibi ATMAZ (RED korunur).
  TEST EDILMEDI.
+
+v8.184 - Topcu "TANK" siniflanip cepheye surulmustu; surucu gir-cik; korunakli inis noktasi; ARAC-UZAK geri cekilmesi (RPT 94057b17)
+ 1) KOK NEDEN "artilerry saçmaladi": Zeus elle seciminde M109G grubu (Alpha 2-4) [TANK] siniflanip "ZIRH DESTEK" secildi, planZirh onu objektife 650 m ates pozisyonuna surdu (mevzide 21:56:56) ve imha oldu; plan KESIF / SALDIRI'da "toplam topcu araci 0" (atis yok). fnc_aracSinif: artilleryScanner > 0 -> yeni sinif "TOPCU"; plan elle seciminde TOPCU atlanir ([PLAN-ARAC] ... plana KATILMAZ), elle secim listesinde arac olarak gosterilmez (topcu Zeus 'Gorev Ata -> TOPCU' + ENVANTER ile calisir).
+ 2) "apc crewi surekli gir-cik": ALMA / TAKILDI kurtarmasindaki moveOut + moveInDriver (v8.147) murettebat korumayla (MURETTEBAT-KORU 'disarida -> koltuguna dondu') cakisiyordu. moveOut / moveIn KALDIRILDI (v8.181 kaydinda zaten waypoint + motor action yeterli); yalniz AI "EngineOn" eylemi. Doktrin: murettebat aracla kalir, yalniz yolcu iner.
+ 3) Korunakli inis noktasi (kullanici: indikleri gibi atis yiyorlar): inis yolu adaylari (en yakin 25 yol) puanlanir: objektife gorus hatti KAPALI +30, 40 m obje yogunlugu (siper, 24'e kadar x1.2), nominal noktaya yakinlik; MCWP 3-11.1 s. 6-37 "dismount point in relative protection". Log [TASIMA] inis noktasi korunak puani.
+ 4) ARAC-UZAK: asker 10 sn'de bir ayni aractan uzaklastirilip geri geliyordu; hedefe giderken lambs_danger_forceMove bayragi (en cok 14 sn) koyulur.
+ TEST EDILMEDI.

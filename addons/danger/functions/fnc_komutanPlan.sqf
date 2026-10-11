@@ -117,6 +117,9 @@ if (_secili isNotEqualTo []) then {
         if (!isNull _sv && {_sv isKindOf "LandVehicle"} && {alive _sv}) then {
             private _sinifA = [_sv] call FUNC(aracSinif);
             private _tasiyici = (_sinifA select 0) in ["IFV", "APC", "KAMYON"];
+            if ((_sinifA select 0) isEqualTo "TOPCU") then {
+                diag_log format ["[PLAN-ARAC] %1 | %2 [TOPCU] plana KATILMAZ (topcu ayri atis destegi olarak calisir; secimden cikarildi)", groupId _sg, getText (configOf _sv >> "displayName")];
+            } else {
             if (_tasiyici) then {
                 _tasG pushBack _sg;
                 _sg setVariable ["lambs_danger_gorev", "TASIMA", true];
@@ -126,6 +129,7 @@ if (_secili isNotEqualTo []) then {
             } else {
                 _zirhG pushBack _sg;
                 diag_log format ["[PLAN-ARAC] %1 | %2 [%3] ZIRH DESTEK unsuru olarak secildi (Zeus elle secim)", groupId _sg, getText (configOf _sv >> "displayName"), _sinifA select 0];
+            };
             };
         } else {
             _yayaSec pushBack _x;

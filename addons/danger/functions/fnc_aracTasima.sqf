@@ -232,8 +232,20 @@ if (surfaceIsWater _drop) then { _drop = _obj getPos [(_dropM + 100), _B]; };
 // v8.139: inis noktasi yola cekilir (arac yolda cok daha hizli ve takilmaz; RPT 045f5750: Stryker arazide 15-19 km/s gidiyordu): 250 m icindeki yol, objektife >= 460 m (M16 etkili menzili)
 private _yollar = (_drop nearRoads 250) select {(getPosATL _x) distance2D _obj >= (_dropM - 40) && {!surfaceIsWater (getPosATL _x)}};
 if (_yollar isNotEqualTo []) then {
+    // v8.184 KORUNAKLI INIS NOKTASI (kullanici: "indikleri gibi atis yiyorlar, acik arazi"; MCWP 3-11.1 s. 6-37: iniste "relative protection"): adaylar (en yakin 25 yol) objektife gorus hatti KAPALI (+30), cevre obje yogunlugu (siper, 24'e kadar x1.2) ve nominal noktaya yakinlik ile puanlanir
     _yollar = [_yollar, [], {_x distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
-    _drop = getPosATL (_yollar select 0);
+    _yollar = _yollar select [0, 25];
+    private _eniY = _yollar select 0;
+    private _eniS = -1e9;
+    {
+        private _yp = getPosATL _x;
+        private _engel = (lineIntersectsSurfaces [(AGLToASL [_yp select 0, _yp select 1, 2]), (AGLToASL [_obj select 0, _obj select 1, 1.5]), objNull, objNull, true, 1, "VIEW", "FIRE"]) isNotEqualTo [];
+        private _ob = count (nearestTerrainObjects [_yp, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE", "BUSH"], 40, false, true]);
+        private _sc = ([0, 30] select _engel) + ((_ob min 24) * 1.2) - 0.05 * (_yp distance2D _drop);
+        if (_sc > _eniS) then { _eniS = _sc; _eniY = _x; };
+    } forEach _yollar;
+    _drop = getPosATL _eniY;
+    diag_log format ["[TASIMA] %1 | inis noktasi korunak puani: %2 (aday %3)", _taraf, round _eniS, count _yollar];
     diag_log format ["[TASIMA] %1 | inis noktasi yola cekildi: %2 (yol, hedeften %3 m)", _taraf, mapGridPosition _drop, round (_drop distance2D _obj)];
 };
 private _nB = 0;
@@ -398,7 +410,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         };
                         if (_kurt isEqualTo 1 && {_dg > 18}) then {
                             _kurt = 2;
-                            moveOut _d; sleep 0.5; _d assignAsDriver _v; _d moveInDriver _v; _v engineOn true;
+                            _d action ["EngineOn", _v]; _v engineOn true;   // v8.184: moveOut / moveIn kaldirildi (surucu gir-cik yapiyordu; RPT 94057b17)
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d doMove _pk; _sonMove = time;
                         };
                         if (_dg > 30) then { _vazgec = true; };
@@ -681,10 +693,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
                             diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; surucu yeniden oturtuldu + ara noktaya (60 m) yonlendirildi (motor %2)", groupId _vg, isEngineOn _v];
                             // v8.147: AI surucu durumu bozuk olabilir -> koltuktan cikarip tekrar oturt (yolcular yerinde kalir)
-                            moveOut _d;
-                            sleep 0.5;
-                            _d assignAsDriver _v;
-                            _d moveInDriver _v;
+                            _d action ["EngineOn", _v];   // v8.184: moveOut / moveIn kaldirildi (surucu gir-cik yapiyordu); koltukta kalir
                             _v engineOn true;
                             _d enableAI "PATH"; _d enableAI "MOVE";
                             _d doMove _alt;

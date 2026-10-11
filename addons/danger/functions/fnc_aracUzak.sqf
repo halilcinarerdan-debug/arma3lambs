@@ -60,7 +60,9 @@ private _calis = {
                 if (_tp isEqualTo [] || {surfaceIsWater _tp} || {(_tp distance2D _ks) < _gerek}) then { _tp = _ks getPos [_gerek + 6, _ks getDir _pu]; };
                 if (surfaceIsWater _tp) then { continue };
                 _u setVariable [QGVAR(aracUzakT), time + 8 + random 4];
+                _u setVariable [QGVAR(forceMove), true];
                 _u doMove _tp;
+                [_u, _tp] spawn { params ["_u", "_tp"]; private _t = time + 14; waitUntil { sleep 1; !alive _u || {(_u distance2D _tp) < 4} || {time > _t} }; if (alive _u) then { _u setVariable [QGVAR(forceMove), nil]; }; };   // v8.184: LAMBS geri cekmesin (ayni asker 10 sn'de bir tekrar uzaklastirilip geri geliyordu)
                 if (_logN < 80) then {
                     _logN = _logN + 1;
                     diag_log format ["[ARAC-UZAK] %1 | %2 | %3 (%4) %5 m -> %6 m uzaga | %7", groupId _g, name _u, getText (configOf _kaynak >> "displayName"), ["etkisiz / yanan / enkaz", "dost arac (temas)"] select (_gerek < 40), round (_u distance2D _kaynak), round (_tp distance2D _ks), mapGridPosition _tp];
