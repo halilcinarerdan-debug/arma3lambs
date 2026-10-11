@@ -44,7 +44,8 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
 
 // v8.178: DONUS fazinda (HQ'ya donus) zirh destek gruplari komuta dongusunun emrinde: ates pozisyonunu tekrar atamaz
 if (_faz isEqualTo "DONUS") exitWith {};
-if (_faz in ["KUR", "TOPLAN", "TASIMA", "RECON"]) exitWith {};
+// v8.180: tank / zirh destek TOPLAN / TASIMA / RECON fazlarinda da hemen ates pozisyonuna gider (kullanici: "tanklar kipirdamiyor"; piyadeyi beklemez, destek mevzisi saldiriden ONCE kurulur); yalniz plan KUR asamasinda bekler
+if (_faz isEqualTo "KUR") exitWith {};
 
 private _piyadeTemas = ((_plan getOrDefault ["gruplar", []]) findIf {((_x getVariable ["lambs_danger_contact", 0]) > time)}) >= 0;
 private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piyadeTemas};
@@ -96,7 +97,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             {
                 private _a = _x;
                 private _p = _obj getPos [_dist, _yon + _a];
-                if (!surfaceIsWater _p && {(nearestObjects [_p, ["House"], 10]) isEqualTo []} && {(count (nearestTerrainObjects [_p, ["TREE"], 12])) < 4}) then {
+                if (!surfaceIsWater _p && {(nearestObjects [_p, ["House"], 10]) isEqualTo []} && {(count (nearestTerrainObjects [_p, ["TREE"], 12])) < 4} && {((_plan getOrDefault ["zirhPozlar", []]) findIf {(_x distance2D _p) < 70}) < 0}) then {
                     private _e1 = (AGLToASL [_p select 0, _p select 1, 0]) vectorAdd [0, 0, 2.4];
                     private _e2 = (AGLToASL [_obj select 0, _obj select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];
@@ -109,6 +110,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800], [450, 400, 500, 350, 550, 600]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         _poz = _en;
+        (_plan getOrDefault ["zirhPozlar", []]) pushBack _poz;   // v8.180: zirh araclari ayni noktaya yigilmaz (>= 70 m aralik)
+        _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
         _g setVariable ["lambs_danger_planZirhPoz", _poz];
         _g setVariable ["lambs_danger_planZirhT", time];
         _g setBehaviour "COMBAT";

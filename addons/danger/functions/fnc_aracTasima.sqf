@@ -329,6 +329,28 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             ((_ul findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0) || {(getSuppression _dr) > 0.5}
         };
 
+        // v8.180 PARK CIKISI: arac baska arac(lar)a 12 m'den yakin park halindeyse (Zeus ayni yere dizmis; RPT 01650734: yan yana iki M113 LATGM kalkamadi, 8 asker 4.4 km geride indi) komsulardan >= 9 m uzak, su / bina / duvar disi bos bir konuma (14 / 20 / 28 m, 8 yon) tasinir
+        private _cikisFn = {
+            params ["_v", "_drop"];
+            private _en = [];
+            private _enS = -1;
+            {
+                private _m = _x;
+                {
+                    private _a = (_v getDir _drop) + _x;
+                    private _p = (getPosATL _v) getPos [_m, _a];
+                    if (!surfaceIsWater _p
+                        && {((_p nearEntities [["LandVehicle", "Air"], 9]) select {_x isNotEqualTo _v}) isEqualTo []}
+                        && {(nearestTerrainObjects [_p, ["BUILDING", "WALL", "TREE", "ROCK"], 5, false, true]) isEqualTo []}
+                        && {((surfaceNormal _p) select 2) > 0.9}) then {
+                        // oncelik: inise bakan yon (|aci| kucuk)
+                        private _s = 100 - abs _x - _m;
+                        if (_s > _enS) then { _enS = _s; _en = _p; };
+                    };
+                } forEach [0, 45, -45, 90, -90, 135, -135, 180];
+            } forEach [14, 20, 28];
+            _en
+        };
         private _birak = {
             params ["_gl2"];
             { { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; }; } forEach _x; } forEach _gl2;
@@ -482,6 +504,15 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 };
                 { if (alive _x) then { _x enableAI "PATH"; }; } forEach _ps;
             };
+            if (((_v nearEntities [["LandVehicle"], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "StaticWeapon")}}) isNotEqualTo []) then {
+                private _cp = [_v, _drop] call _cikisFn;
+                if (_cp isNotEqualTo []) then {
+                    private _eskiP = getPosATL _v;
+                    _v setVehiclePosition [_cp, [], 0, "NONE"];
+                    _v setDir (_v getDir _drop);
+                    diag_log format ["[TASIMA] %1 | PARK CIKISI: komsu arac < 12 m -> %2 m ileri / yana bos konuma tasindi", groupId _vg, round (_eskiP distance2D _cp)];
+                };
+            };
             _d enableAI "PATH";
             _d forceSpeed -1;
             // v8.136: RPT 013ca3b7: Stryker nakilde 11-20 km/s ile gitti (890 m = 5 dk, 240 sn sinirina takildi). Arkada (dusman uzak) SAFE + FULL; inise 220 m kala AWARE + NORMAL
@@ -600,11 +631,31 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             diag_log format ["[TASIMA] %1 | TAKILMA TANISI (%2 sn hareketsiz, inise %3 m): motor %4 | yakit %5 | hasar %6 | canMove %7 | surucu %8 (%9) | komut %10 | PATH/MOVE AI: %11 / %12 | 9 m icinde nesne: %13",
                                 groupId _vg, round _dg, round _dm, isEngineOn _v, (fuel _v) toFixed 2, (damage _v) toFixed 2, canMove _v, name _d, lifeState _d, currentCommand _d,
                                 _d checkAIFeature "PATH", _d checkAIFeature "MOVE", _yakin apply {typeOf _x}];
+                            // v8.180 DERIN TANI: kalkamayan arac icin tum kosullar (komsu araclar, koltuklar, grup lideri, waypoint, AI ozellikleri, egim, bayraklar)
+                            diag_log format ["[TASIMA-TAKILMA] %1 | %2 | koltuklar: surucu %3 / komutan %4 / nisanci %5 | grup lideri %6 (aracta %7) | grup beh %8 mod %9 hiz modu %10 formasyon %11 | waypoint %12 (aktif %13) | AI: AUTOTARGET %14 TARGET %15 FSM %16 AUTOCOMBAT %17 | unitReady %18 | forceSpeed %19 | egim %20 | komsu araclar (<= 20 m): %21 | bayraklar: forceMove %22 yolcuBirak %23 tasimaMesgul %24 isExecutingTactic %25 | hiz vektoru %26",
+                                groupId _vg, getText (configOf _v >> "displayName"), name (driver _v), name (commander _v), name (gunner _v), name (leader _vg), (vehicle (leader _vg)) isEqualTo _v,
+                                behaviour _d, combatMode _vg, speedMode _vg, formation _vg, count (waypoints _vg), currentWaypoint _vg,
+                                _d checkAIFeature "AUTOTARGET", _d checkAIFeature "TARGET", _d checkAIFeature "FSM", _d checkAIFeature "AUTOCOMBAT", unitReady _d, "?",
+                                (surfaceNormal (getPosATL _v)) select 2,
+                                ((_v nearEntities [["LandVehicle"], 20]) select {_x isNotEqualTo _v}) apply {[typeOf _x, round (_v distance2D _x), round (speed _x)]},
+                                _d getVariable [QGVAR(forceMove), false], _v getVariable [QGVAR(yolcuBirak), false], _v getVariable [QGVAR(tasimaMesgul), false], _vg getVariable [QGVAR(isExecutingTactic), false],
+                                (velocity _v) apply {round _x}];
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
                             _d setVariable [QGVAR(forceMove), true];
                             _v engineOn true;
                             _d forceSpeed -1; doStop _d; _d doMove _drop;
                             _v setVelocityModelSpace [0, 5, 0];
+                        };
+                        // v8.180: 12 sn - doMove sonuc vermediyse WAYPOINT ile yurut (grup waypoint'i: bazi AI suruculer tekil doMove'u yok sayiyor)
+                        if (_denemeN isEqualTo 1 && {_dg > 12} && {!(_v getVariable [QGVAR(wpDenendi), false])}) then {
+                            _v setVariable [QGVAR(wpDenendi), true];
+                            { deleteWaypoint [_vg, 0]; } forEach (waypoints _vg);
+                            private _wpD = _vg addWaypoint [_drop, 0];
+                            _wpD setWaypointType "MOVE";
+                            _wpD setWaypointSpeed "FULL";
+                            _wpD setWaypointBehaviour "SAFE";
+                            _vg setCurrentWaypoint _wpD;
+                            diag_log format ["[TASIMA] %1 | TAKILMA: doMove sonuc vermedi -> grup WAYPOINT ile yurutuluyor (hedef %2 m)", groupId _vg, round _dm];
                         };
                         if (_denemeN isEqualTo 1 && {_dg > 18}) then {
                             _denemeN = 2;
@@ -623,13 +674,14 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         // v8.175: son care - arac hala kimildamadiysa (guc hatti diregi / cit / cukur) 28 sn'de inise dogru bos bir konuma tasinir; boylece 8 askeri 1.4 km geride indirmek yerine yola devam eder
                         if (_denemeN isEqualTo 2 && {_dg > 28} && {_dm > 150}) then {
                             _denemeN = 3;
-                            private _sp = ((getPosATL _v) getPos [12, (getPosATL _v) getDir _drop]) findEmptyPosition [0, 30, typeOf _v];
-                            if (_sp isNotEqualTo [] && {!surfaceIsWater _sp}) then {
+                            private _sp = [_v, _drop] call _cikisFn;
+                            if (_sp isNotEqualTo []) then {
+                                private _eskiSp = getPosATL _v;
                                 _v setVehiclePosition [_sp, [], 0, "NONE"];
                                 _v setDir ((getPosATL _v) getDir _drop);
                                 _v engineOn true;
                                 _d doMove _drop;
-                                diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac inise dogru %2 m ilerideki bos konuma tasindi (inise %3 m)", groupId _vg, round ((getPosATL _v) distance2D _sp), round _dm];
+                                diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac %2 m uzaktaki bos konuma tasindi (komsulara >= 9 m) (inise %3 m)", groupId _vg, round (_eskiSp distance2D _sp), round _dm];
                             };
                         };
                         if (_dg > 35) then { _bitis = "takildi"; };
