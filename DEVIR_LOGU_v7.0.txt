@@ -1904,3 +1904,6 @@ v8.171 - Senkron saldiri (konvoy hiz eslemesi + inis toplanmasi), savunmada MEVZ
 v8.172 - Arac silahcisi her zaman karsilik verir (yol, inis, geri donus)
  Kullanici: "apc kacamayacaksa karsilik versin, turret dusmani gorur gormez, donuste de". v8.171'deki yalniz pusu / gecis sirasindaki hedefleme kaldirildi; yerine is boyunca ve bitisten 180 sn sonrasina kadar calisan silahci izleyicisi: silahci (yoksa komutan; surucu degil) bilinen (knowsAbout > 0.3) en yakin dusmana <= 900 m doTarget / doFire, 2 sn'de bir; TARGET / AUTOTARGET acik; grup ates modu GREEN / BLUE ise YELLOW. Arac basina tek izleyici. Log [ARAC-ATES] "silahci hedefe donuyor" (20 sn'de bir) + Fired sayaci.
  TEST EDILMEDI. Surucu kacma / araci terk etme (Fleeing vehicle) hala acik.
+
+v8.173 - XEH_PREP: olmayan iki dosya kaydi kaldirildi (RPT 54cb378c)
+ "Script \z\lambs\addons\danger\functions\fnc_classifyVehicle.sqf not found" ve fnc_armorSupport.sqf: PREP(classifyVehicle) / PREP(armorSupport) satirlari ilk surum commit'inden (77c012a) kalmisti, dosyalari ne repoda ne yukleyici pakette var, hicbir yerde cagrilmiyor (arac siniflama bizde fnc_aracSinif). Satirlar silindi; islevsel degisiklik yok.
