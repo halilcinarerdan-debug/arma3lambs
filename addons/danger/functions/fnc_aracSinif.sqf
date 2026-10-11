@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * ARAC SINIFI (v8.164) — kullanici: "apc ile ifv'nin gorevlerine dikkat et".
  * Config'ten (silahlar + koltuk + zirh) sinif cikarir, tip basina onbellek (lambs_danger_aracSinifCache):
- *   TANK   : isKindOf "Tank"                                        -> ZIRH DESTEK (ates pozisyonu, objektife ates)
+ *   TANK   : isKindOf "Tank" ve kargo < 3                                      -> ZIRH DESTEK (ates pozisyonu, objektife ates)
  *   IFV    : kargo >= 3 ve top (mermi hit >= 25) ya da ATGM (shotMissile)   -> TASIR + indirdikten sonra ates destegi (RUS: bronegruppa; ABD: ates pozisyonu)
  *   APC    : kargo >= 3, top yok (yalniz MG / GMG), zirh >= 120      -> "savas taksisi": piyadeyi atesin disinda indirir, geride REZERV, savasmaz
  *   KAMYON : kargo >= 3, topsuz, zirh < 120 (yumusak)               -> APC gibi tasir / geride rezerv
@@ -42,7 +42,8 @@ private _atgm = false;
 } forEach ([[-1]] + (allTurrets _v));
 
 private _zirh = getNumber (configOf _v >> "armor");
-private _sinif = if (_v isKindOf "Tank") then {"TANK"} else {
+// v8.169: "Tank" taban sinifi tum paletli araclari kapsar (M113 / Marder / BMP kargo tasir; RPT 94f3b4aa: M113A1G TANK sayilip zirh destege atandi, nakilde kullanilmadi) -> yalniz kargosu < 3 olanlar TANK
+private _sinif = if (_v isKindOf "Tank" && {_kargo < 3}) then {"TANK"} else {
     if (_kargo >= 3 && {_top || _atgm}) then {"IFV"} else {
         if (_kargo >= 3 && {_zirh >= 120}) then {"APC"} else {
             if (_kargo >= 3) then {"KAMYON"} else {"DIGER"}

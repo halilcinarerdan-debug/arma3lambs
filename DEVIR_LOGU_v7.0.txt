@@ -1880,3 +1880,8 @@ v8.168 - NAKIL: yakin piyade araca biner, alma takilma kurtarma, devir bekleme 1
  fnc_aracTasima: piyade araca < 120 m ise arac hic hareket etmez, piyade araca biner ([TASIMA] ... piyade yakin). Daha uzaksa arac gider; 8 sn hareketsiz -> motor / AI ozellikleri / yeniden komut ([TASIMA] ALMA TAKILMASI), 18 sn -> surucu yeniden oturtulur, 30 sn -> vazgec ve piyade araca YURUR (< 450 m). Bindirme "son binenden bu yana" bekleme 12 -> 15 sn.
  fnc_komutanPlan: sunucu devir bekleme 6 -> 15 sn.
  TEST EDILMEDI.
+
+v8.169 - Paletli APC (M113) TANK sayiliyordu (RPT 94f3b4aa)
+ Bulgu: P1 nakli sorunsuzdu (3 arac, 12/12 bindi, hepsi indi). P3'te elle secilen 3 M113A1G "[TANK]" siniflanip ZIRH DESTEK'e atandi (isKindOf "Tank" tum paletlileri kapsar), nakilde yalniz 2 Fuchs kaldi: 16 asker eslesti, 2 takim yaya kaldi, 14 bindi; M113'ler "arac grubu planda" diye elendi.
+ fnc_aracSinif: TANK yalniz isKindOf "Tank" VE kargo < 3 ise; kargo >= 3 paletliler IFV / APC olur (M113 -> APC, savas taksisi). Onbellek tip basinadir (oyun baslayinca yeniden hesaplanir).
+ TEST EDILMEDI.
