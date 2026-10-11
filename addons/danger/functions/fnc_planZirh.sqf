@@ -58,6 +58,27 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     _g setVariable ["lambs_danger_planZirh", true];
     _g setVariable ["lambs_danger_planAktif", true, true];
 
+    // v8.174 ZIRH DOKTRINI (MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur): SALDIRI basinda ates pozisyonu bir kez 350 m civarina ilerletilir
+    if (_faz isEqualTo "SALDIRI" && {!(_g getVariable ["lambs_danger_planZirhYakin", false])}) then {
+        _g setVariable ["lambs_danger_planZirhYakin", true];
+        _g setVariable ["lambs_danger_planZirhPoz", []];
+        _g setVariable ["lambs_danger_planZirhVardi", nil];
+        diag_log format ["[PLAN-ZIRH] %1 | %2 SALDIRI basladi: ates pozisyonu piyadeyle karsilikli destek icin ileri sicrayacak (~350 m)", _id, groupId _g];
+    };
+    // v8.174 CEKILME: zirh ates ederek RALLY POINT'e doner (piyade ile bulusma); ates pozisyonunda kalmaz
+    if (_faz isEqualTo "CEKILME") then {
+        if !(_g getVariable ["lambs_danger_planZirhCek", false]) then {
+            _g setVariable ["lambs_danger_planZirhCek", true];
+            _g setVariable ["lambs_danger_planZirhVardi", nil];
+            private _rpP = (_plan get "rp") getPos [12 * (_forEachIndex + 1), (_plan get "B") + 90];
+            _g setVariable ["lambs_danger_planZirhPoz", _rpP];
+            _g setVariable ["lambs_danger_planZirhT", time];
+            _g setBehaviour "COMBAT"; _g setCombatMode "RED"; _g setSpeedMode "FULL";
+            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+            _d doMove _rpP;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 CEKILME: rally point'e donuyor (%3 m) - ates ederek", _id, groupId _g, round (_v distance2D _rpP)];
+        };
+    };
     // ---- ates pozisyonu (bir kez) ----
     private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
     if (_poz isEqualTo []) then {
@@ -74,13 +95,13 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     private _e2 = (AGLToASL [_obj select 0, _obj select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];
                     private _s = [0, 100] select _gor;
-                    _s = _s - (abs (_dist - 500)) / 10 - (abs _a) * 0.2;
+                    _s = _s - (abs (_dist - ([500, 350] select (_g getVariable ["lambs_danger_planZirhYakin", false])))) / 10 - (abs _a) * 0.2;
                     if (isOnRoad _p) then { _s = _s - 5; };
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30];
-        } forEach [500, 450, 550, 400, 600, 650];
-        if (_en isEqualTo []) then { _en = _obj getPos [500, _yon]; };
+        } forEach ([[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select (_g getVariable ["lambs_danger_planZirhYakin", false]));
+        if (_en isEqualTo []) then { _en = _obj getPos [[500, 350] select (_g getVariable ["lambs_danger_planZirhYakin", false]), _yon]; };
         _poz = _en;
         _g setVariable ["lambs_danger_planZirhPoz", _poz];
         _g setVariable ["lambs_danger_planZirhT", time];
@@ -121,7 +142,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     };
 
     // ---- hedef: objektif cevresinde BILINEN dusman ----
-    if (_vardi && {_savas} && {(time - (_g getVariable ["lambs_danger_planZirhHedefT", -999])) > 6}) then {
+    if ((_vardi || {_faz isEqualTo "CEKILME"}) && {_savas} && {(time - (_g getVariable ["lambs_danger_planZirhHedefT", -999])) > 6}) then {
         _g setVariable ["lambs_danger_planZirhHedefT", time];
         private _hedefler = (_l nearTargets 900) select {((side _g) getFriend (_x select 2)) < 0.6 && {((_x select 0) distance2D _obj) < 450} && {(_l knowsAbout (_x select 4)) > 0.5}};
         if (_hedefler isNotEqualTo []) then {

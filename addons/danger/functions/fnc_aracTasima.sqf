@@ -658,19 +658,34 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
         { if (alive _x) then { _x doFollow (leader (group _x)); }; } forEach _binen;
         call _senkBitti;
         // v8.171 INIS SONRASI TOPLANMA: inenler tum araclar inene kadar (en fazla 75 sn) cevre emniyetiyle COMBAT + comelmis bekler, sonra BIRLIKTE ilerler (kullanici: komutanlar arkada, askerler onden gidiyordu)
-        [_binen select {_x isNotEqualTo _d}, _senk, _obj] spawn {
-            params ["_ps", "_senk", "_obj"];
+        [_binen select {_x isNotEqualTo _d}, _senk, _obj, _v] spawn {
+            params ["_ps", "_senk", "_obj", "_v"];
             _ps = _ps select {alive _x && {isNull objectParent _x}};
             if (_ps isEqualTo []) exitWith {};
             private _yon = (getPosATL (_ps select 0)) getDir _obj;
+            // v8.174: inenler en yakin siperi / engeli bulup koser (arac onunde yigilmaz, arac ilerleyebilir); siper yoksa aractan >= 18 m uzaklasir; sonra cevre emniyetinde bekler
+            private _hedefler = [];
             {
-                _x setVariable [QGVAR(tasimaBekle), true];
+                private _u = _x;
+                _u setVariable [QGVAR(tasimaBekle), true];
+                _u enableAI "PATH";
+                (group _u) setBehaviour "COMBAT";
+                private _c = (nearestTerrainObjects [getPosATL _u, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE"], 40, true, true]) select {(_x distance2D _v) > 12};
+                private _tp = if (_c isNotEqualTo []) then { (getPosATL (_c select 0)) getPos [2.2, _yon + 180] } else { (getPosATL _u) getPos [18 + (_forEachIndex * 3), (_v getDir _u) + ((_forEachIndex mod 3) - 1) * 25] };
+                if (surfaceIsWater _tp || {(_tp distance2D _v) < 10}) then { _tp = (getPosATL _u) getPos [20, (_v getDir _u)]; };
+                if (surfaceIsWater _tp) then { _tp = getPosATL _u; };
+                _hedefler pushBack _tp;
+                _u setUnitPos "AUTO";
+                _u doMove _tp;
+            } forEach _ps;
+            private _tSiper = time + 18;
+            waitUntil { sleep 1; (time > _tSiper) || {({alive _x && {(_x distance2D (_hedefler select (_ps find _x))) > 4}} count _ps) isEqualTo 0} || {(_ps findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0} };
+            {
                 doStop _x;
                 _x disableAI "PATH";
                 _x setUnitPos "MIDDLE";
                 _x doWatch ((getPosATL _x) getPos [150, _yon + ([0, 110, -110] select (_forEachIndex mod 3))]);
-                (group _x) setBehaviour "COMBAT";
-            } forEach _ps;
+            } forEach (_ps select {alive _x});
             diag_log format ["[TASIMA] INIS TOPLANMA: %1 asker cevre emniyetinde bekliyor (inen arac %2 / %3)", count _ps, _senk select 0, _senk select 1];
             private _t0 = time;
             waitUntil {

@@ -1,4 +1,20 @@
 #include "script_component.hpp"
+// v8.174: main/script_component.hpp'de tanimli degilse (RPT d0839622: 3600+ "Undefined variable ELITE_COVER_*" hatasi, siper bulma tamamen calismadi) varsayilanlar; tanimliysa o gecerli
+#ifndef ELITE_COVER_RANGE
+#define ELITE_COVER_RANGE 30
+#endif
+#ifndef ELITE_COVER_MAX_RESULTS
+#define ELITE_COVER_MAX_RESULTS 3
+#endif
+#ifndef ELITE_COVER_MIN_DIST
+#define ELITE_COVER_MIN_DIST 25
+#endif
+#ifndef ELITE_COVER_BUILDING_POS
+#define ELITE_COVER_BUILDING_POS 4
+#endif
+#ifndef ELITE_COVER_CACHE_TIME
+#define ELITE_COVER_CACHE_TIME 2
+#endif
 /*
  * Author: diwako (ELITE fork: Cinar)
  * Returns position and stance of the best cover locations.

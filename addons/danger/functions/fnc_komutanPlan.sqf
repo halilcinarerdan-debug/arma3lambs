@@ -207,13 +207,21 @@ private _konumSec = {
         private _a = _x;
         {
             private _p = _obj getPos [_x, _B + _a];
-            if (!surfaceIsWater _p && {!isOnRoad _p} && {(nearestObjects [_p, ["House"], 8]) isEqualTo []}) then {
+            // v8.174 ISLAK / CUKUR ARAZI ELEME (kullanici: "sulak dere gibi yerlere waypoint atmasin, daha duz yerlere atsin"): 20 / 45 m halkada su ornegi, cevreye gore cukur (dere yatagi) ve egim
+            private _islak = 0;
+            { private _r = _x; for "_k" from 0 to 7 do { if (surfaceIsWater (_p getPos [_r, _k * 45])) then { _islak = _islak + 1; }; }; } forEach [20, 45];
+            private _hOrt = 0;
+            for "_k" from 0 to 7 do { _hOrt = _hOrt + (getTerrainHeightASL (_p getPos [40, _k * 45])); };
+            private _cukur = ((_hOrt / 8) - (getTerrainHeightASL _p)) > 2.5;
+            private _egim = ((surfaceNormal _p) select 2) < 0.95;
+            if (!surfaceIsWater _p && {_islak < 3} && {!isOnRoad _p} && {(nearestObjects [_p, ["House"], 8]) isEqualTo []}) then {
                 private _pr = [_p, 30, _obj] call _araziFn;
                 private _s = 100 * (_pr getOrDefault ["olu", 0]);
                 private _ac = _pr getOrDefault ["aciklik", "KARISIK"];
                 _s = _s + ([0, 10, 20] select (((["ACIK", "KARISIK", "KAPALI"]) find _ac) max 0));
                 if (_pr getOrDefault ["ufukRisk", false]) then { _s = _s - 25; };
                 _s = _s - 0.05 * abs _a - 0.02 * (_p distance2D _merkez);
+                _s = _s - 15 * _islak - ([0, 30] select _cukur) - ([0, 20] select _egim);
                 if (_s > _enS) then { _enS = _s; _en = _p; };
             };
         } forEach [_d - 40, _d, _d + 40];
@@ -463,6 +471,13 @@ if ((_ayar getOrDefault ["topcu", 0]) > 0) then {
             diag_log format ["[PLAN-TOPCU] %1 | ENVANTER: %2 | gunner:%3 (oyuncu:%4) | yerel:%5 | canFire:%6 | mermi:%7 | hedef menzilde:%8 | Zeus:%9 | hedefe mesafe %10 m",
                 _id, typeOf _v, [name (gunner _v), "YOK"] select (isNull (gunner _v)), isPlayer (gunner _v), local _v, canFire _v, _m,
                 ["?", _obj inRangeOfArtillery [[_v], _m]] select (_m isNotEqualTo ""), _v getVariable ["lambs_danger_gorev", ""], round (_v distance2D _obj)];
+            // v8.174 MENZIL TANISI: hedef menzil disiysa, topun hedef yonunde 500 m adimlarla hangi mesafelerin menzil ici oldugunu bul (min / maks menzil)
+            if (_m isNotEqualTo "" && {!(_obj inRangeOfArtillery [[_v], _m])}) then {
+                private _yonT = (getPosATL _v) getDir _obj;
+                private _ici = [];
+                for "_d" from 500 to 20000 step 500 do { if (((getPosATL _v) getPos [_d, _yonT]) inRangeOfArtillery [[_v], _m]) then { _ici pushBack _d; }; };
+                diag_log format ["[PLAN-TOPCU] %1 | MENZIL TANISI: hedef %2 m'de MENZIL DISI | menzil ici mesafeler (500 m adim): %3 .. %4 m (%5 nokta)", _id, round (_v distance2D _obj), if (_ici isEqualTo []) then {"yok"} else {_ici select 0}, if (_ici isEqualTo []) then {"yok"} else {_ici select (count _ici - 1)}, count _ici];
+            };
         } forEach _tAr;
     };
 };

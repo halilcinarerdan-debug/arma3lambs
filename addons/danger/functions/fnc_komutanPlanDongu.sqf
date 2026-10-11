@@ -277,6 +277,29 @@ while {true} do {
             continue
         };
         if (_faz isEqualTo "CEKILME") then {
+            // v8.174 BASARISIZLIKTA BULUSMA: geride REZERV bekleyen tasima araclari (APC / kamyon) rally point'e gelir; piyade ile bulusur (kullanici: "mission fail olunca rally pointte bulusmadilar")
+            if !(_plan getOrDefault ["cekilmeAraclar", false]) then {
+                _plan set ["cekilmeAraclar", true];
+                private _zg = _plan getOrDefault ["zirhG", []];
+                private _sayi = 0;
+                {
+                    private _v = _x;
+                    private _d = driver _v;
+                    if (alive _v && {!isNull _d} && {!isPlayer _d} && {local _d} && {(side (group _d)) isEqualTo (_plan get "taraf")} && {!((group _d) in _zg)}
+                        && {((_v getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA") || {((group _d) getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"}}
+                        && {!(_v getVariable ["lambs_danger_tasimaMesgul", false])}) then {
+                        private _rpA = (_plan get "rp") getPos [14 * (_sayi + 1), (_plan get "B") - 90];
+                        _sayi = _sayi + 1;
+                        (group _d) setVariable ["lambs_danger_aracMedevacT", time];
+                        (group _d) setBehaviour "SAFE";
+                        (group _d) setSpeedMode "FULL";
+                        _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+                        _v engineOn true;
+                        _d doMove _rpA;
+                        diag_log format ["[PLAN] %1 CEKILME: %2 (%3) rally point'e cagrildi (%4 m)", _id, getText (configOf _v >> "displayName"), groupId (group _d), round (_v distance2D _rpA)];
+                    };
+                } forEach (vehicles select {_x isKindOf "LandVehicle"});
+            };
             if (_fazSure > 150) then { [_plan, "BITTI", "cekilme tamamlandi"] call _fazGec; };
             continue
         };
@@ -486,13 +509,15 @@ while {true} do {
                 private _kalan = 0;
                 private _kalanBirim = [];
                 { { if (alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropMS + 400)}) then { _kalan = _kalan + 1; _kalanBirim pushBack _x; }; } forEach (units _x); } forEach _gruplar;
-                if (_kalan >= 1) then {
+                // v8.174: 2-3 askeri icin sefer yapilmaz (RPT d0839622: 2 asker icin sivil sihhiye kamyonuyla 2 sefer, nakil 568 sn surdu); en az 4 asker ya da tasinanin %20'si
+                if (_kalan >= 4 || {_kalan >= 2 && {_kalan >= (0.2 * (_ctlS param [2, 0]))}}) then {
                     // bos (nakilde olmayan) uygun arac var mi? yoksa sayaci bosa harcama, sonra tekrar bak
                     private _kp = [0, 0, 0];
                     { _kp = [(_kp select 0) + ((getPosATL _x) select 0), (_kp select 1) + ((getPosATL _x) select 1), 0]; } forEach _kalanBirim;
                     _kp = [(_kp select 0) / _kalan, (_kp select 1) / _kalan, 0];
                     private _bosArac = vehicles select {
                         alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(_x emptyPositions "cargo") >= 1} && {!(_x getVariable ["lambs_danger_tasimaMesgul", false])}
+                        && {(getNumber (configOf _x >> "attendant")) isEqualTo 0} && {!(_x getVariable ["lambs_danger_gorev", ""] in ["MEDEVAC", "HARIC", "KARAKOL_ARAC"])} && {!((group (driver _x)) getVariable ["lambs_danger_gorev", ""] in ["MEDEVAC", "HARIC", "KARAKOL_ARAC"])}
                         && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")} && {(_x distance2D _kp) < 6000}
                         && {!((group (driver _x)) getVariable ["lambs_danger_planAktif", false])}
                     };
@@ -511,7 +536,14 @@ while {true} do {
                     };
                 };
             };
-            if (scriptDone _th && {((_plan getOrDefault ["tasimaYardim", []]) findIf {!scriptDone _x}) isEqualTo -1}) then {
+            // v8.174: sefer en cok 150 sn; sure dolarsa yardimci isler iptal edilir ve faz biter
+            private _yardimBitti = ((_plan getOrDefault ["tasimaYardim", []]) findIf {!scriptDone _x}) isEqualTo -1;
+            if (scriptDone _th && {!_yardimBitti} && {(time - (_plan getOrDefault ["seferT", time])) > 150}) then {
+                (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
+                diag_log format ["[PLAN] %1 TASIMA: sefer 150 sn'yi asti, kalanlar yuruyerek devam", _id];
+                _yardimBitti = true;
+            };
+            if (scriptDone _th && {_yardimBitti}) then {
                 _plan set ["tasimaTamam", true];
                 [_plan, "TOPLAN", "arac nakli bitti"] call _fazGec;
             };

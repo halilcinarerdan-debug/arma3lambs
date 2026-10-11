@@ -1907,3 +1907,13 @@ v8.172 - Arac silahcisi her zaman karsilik verir (yol, inis, geri donus)
 
 v8.173 - XEH_PREP: olmayan iki dosya kaydi kaldirildi (RPT 54cb378c)
  "Script \z\lambs\addons\danger\functions\fnc_classifyVehicle.sqf not found" ve fnc_armorSupport.sqf: PREP(classifyVehicle) / PREP(armorSupport) satirlari ilk surum commit'inden (77c012a) kalmisti, dosyalari ne repoda ne yukleyici pakette var, hicbir yerde cagrilmiyor (arac siniflama bizde fnc_aracSinif). Satirlar silindi; islevsel degisiklik yok.
+
+v8.174 - ELITE_COVER makrolari, sefer sinirlari, basarisizlikta rally point, inen asker siperi, islak arazi eleme, IFV zirh doktrini, topcu menzil tanisi (RPT d0839622)
+ 1) KRITIK: main/fnc_findCover.sqf + fnc_doCover.sqf "Undefined variable ELITE_COVER_RANGE / _MAX_RESULTS / _MIN_DIST / _BUILDING_POS / _CACHE_TIME": 3600+ hata, siper bulma TAMAMEN calismadi (onceki RPT'lerde 0 hata). Makrolar main/script_component.hpp'de (repoda YOK, kullanicinin yerel dosyasi) - bu pakette tanimsiz. Her iki dosyaya #ifndef korumali varsayilanlar eklendi (RANGE 30, MAX_RESULTS 3, MIN_DIST 25, BUILDING_POS 4, CACHE_TIME 2); kullanicinin script_component.hpp'si tanimliysa o gecerli. Kullanici script_component.hpp'nin pakete girdigini kontrol etmeli.
+ 2) Nakil 568 sn surdu: 2 asker icin sivil sihhiye kamyonuyla (Truck 2t Medical) 2. / 3. sefer. Sefer artik >= 4 asker ya da tasinanin %20'si (>= 2) icin; sihhiye (attendant) / MEDEVAC / HARIC / KARAKOL_ARAC araclari sefere katilmaz; sefer en cok 150 sn (sonra iptal, kalanlar yuruyerek).
+ 3) Plan CEKILME (basarisizlik): geride REZERV bekleyen TASIMA araclari rally point'e cagrilir ([PLAN] CEKILME: ... rally point'e cagrildi); planZirh IFV'leri CEKILME'de ates ederek (COMBAT / RED, silahci hedefleme) rally point'e doner ([PLAN-ZIRH] CEKILME).
+ 4) Inen asker (INIS TOPLANMA): en yakin siper/engele (agac / kaya / duvar / bina, aractan > 12 m, objektife kars arkasi) kosar; siper yoksa aractan >= 18 m uzaklasir (arac onunde yigilmaz, arac ilerleyebilir); 18 sn sonra cevre emniyeti + comelme, bekleme eskisi gibi.
+ 5) Islak arazi: RP / ORP secimi 20 / 45 m halkada su, cevreye gore cukur (> 2.5 m, dere yatagi) ve egimi (normal z < 0.95) cezalandirir; 3+ su ornegi olan aday elenir.
+ 6) IFV doktrini: SALDIRI basinda ates pozisyonu ~350 m'ye ilerler (MCWP 3-11.1 s. 6-36: arac piyade temizledikce ileri sicrar, destek surer); CEKILME'de rally point'e ates ederek doner.
+ 7) Topcu: P2 plani M109G hedefe 2618 m'de "menzilde:false" (onceki testte 3433 m'de true) -> minimum menzil suphesi; [PLAN-TOPCU] MENZIL TANISI hedef yonunde 500 m adimlarla menzil ici mesafeleri loglar. Plan P2 bu testte zaten KESIF'e hic ulasmadi (nakil 568 sn, sonra cekilme).
+ TEST EDILMEDI.
