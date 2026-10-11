@@ -509,14 +509,15 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 private _hz = (speed _v) / 3.6;
                 // v8.167 CARPISMA GUVENLIGI: onde (+-35 derece, 40 m) baska kara araci varsa arac hizina gore mesafe tutar; cok yakinsa durur. Tikaniklik: bir engelleme en fazla 20 sn frenler (sonra takilma kurtarmasi devreye girer)
                 if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
-                    private _onde = ((getPosATL _v) nearEntities ["LandVehicle", 40]) select {
-                        _x isNotEqualTo _v && {alive _x} && {!(_x isKindOf "StaticWeapon")} && {private _r = _v getRelDir _x; _r < 35 || {_r > 325}}
-                    };
+                    // v8.178: duragan baslangicta (< 2 m/s) FREN YOK (RPT 2491473c: yan yana duran araclar birbirini 8 m onde sayip forceSpeed 0 ile kilitlendi, 8 asker 1.3 km geride indi); koni +-25 derece
+                    private _onde = if (_hz < 2) then {[]} else { ((getPosATL _v) nearEntities ["LandVehicle", 40]) select {
+                        _x isNotEqualTo _v && {alive _x} && {!(_x isKindOf "StaticWeapon")} && {private _r = _v getRelDir _x; _r < 25 || {_r > 335}}
+                    } };
                     private _en = objNull;
                     private _enD = 9999;
                     { private _dx = _v distance2D _x; if (_dx < _enD) then { _enD = _dx; _en = _x; }; } forEach _onde;
                     private _emniyet = 12 + (_hz * 1.0);
-                    if (!isNull _en && {_enD < _emniyet} && {(_frenBas < 0) || {(time - _frenBas) < 20}}) then {
+                    if (!isNull _en && {_enD < _emniyet} && {(_frenBas < 0) || {(time - _frenBas) < 8}}) then {
                         if (_frenBas < 0) then { _frenBas = time; };
                         _frenli = true;
                         private _hedefHz = if (_enD < 10) then {0} else {((speed _en) max 0) / 3.6 * 0.8};
@@ -527,7 +528,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             diag_log format ["[TASIMA] %1 | CARPISMA GUVENLIGI: onde %2 %3 m | hiz %4 km/s -> frenleniyor", groupId _vg, getText (configOf _en >> "displayName"), round _enD, round (speed _v)];
                         };
                     } else {
-                        if (_frenli) then { _frenli = false; _d forceSpeed -1; };
+                        if (_frenli) then { _frenli = false; _d forceSpeed -1; _d doMove _drop; };
                         if (isNull _en && {_frenBas >= 0}) then { _frenBas = -1; };
                     };
                 };

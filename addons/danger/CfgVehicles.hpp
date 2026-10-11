@@ -163,6 +163,24 @@ class CfgVehicles {
         };
     };
 
+    class GVAR(HQ) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(HQ);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE HQ / US Kur (kategori + squad atama)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleHQ);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(KarakolKaldir) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(KarakolKaldir);

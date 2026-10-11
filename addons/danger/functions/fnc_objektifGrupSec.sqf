@@ -20,6 +20,13 @@
 */
 
 params ["_taraf", "_obj", "_ayar", ["_adaylar", []], ["_bas", 0], ["_secili", []]];
+// v8.178 HQ: ayar "hqId" doluysa YALNIZ o HQ / US kategorisine atanmis squadlar listelenir (tum taraf yerine); ayar "mod" = "HQ_ATAMA": HQ'ya squad atama paneli (sonunda hqAtama olayi)
+private _hqId = _ayar getOrDefault ["hqId", ""];
+private _atamaModu = (_ayar getOrDefault ["mod", ""]) isEqualTo "HQ_ATAMA";
+private _hqSuz = {
+    params ["_g"];
+    (_atamaModu) || {_hqId isEqualTo ""} || {(_g getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}
+};
 
 if (_adaylar isEqualTo []) then {
     _adaylar = allGroups select {
@@ -28,11 +35,11 @@ if (_adaylar isEqualTo []) then {
         && {({isPlayer _x} count (units _x)) isEqualTo 0}
         && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
         && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
-        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {!(_x getVariable ["lambs_danger_planAktif", false])}
-        && {isNull objectParent _l} && {(_l distance2D _obj) <= 6000}
+        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {(_atamaModu || {!(_x getVariable ["lambs_danger_planAktif", false])})}
+        && {isNull objectParent _l} && {[_x] call _hqSuz} && {_atamaModu || {_hqId isNotEqualTo ""} || {(_l distance2D _obj) <= 6000}}
     };
     _adaylar = [_adaylar, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
-    _adaylar = _adaylar select [0, 12];
+    _adaylar = _adaylar select [0, [12, 16] select (_hqId isNotEqualTo "" || _atamaModu)];
     // v8.163: ARAC gruplari da listelenir (tank -> ZIRH DESTEK, kargo >= 3 arac -> TASIMA); onceden yalniz piyade vardi ("hangi apc katilacak yok")
     private _aracA = allGroups select {
         private _l = leader _x;
@@ -41,11 +48,15 @@ if (_adaylar isEqualTo []) then {
         && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v}
         && {({isPlayer _x} count (units _x)) isEqualTo 0} && {!isNull (driver _v)} && {!isPlayer (driver _v)}
         && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"])}
-        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {(_l distance2D _obj) <= 6000}
+        && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {_atamaModu || {!(_x getVariable ["lambs_danger_planAktif", false])}} && {[_x] call _hqSuz} && {_atamaModu || {_hqId isNotEqualTo ""} || {(_l distance2D _obj) <= 6000}}
     };
     _aracA = [_aracA, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
-    _aracA = _aracA select [0, 8];
+    _aracA = _aracA select [0, [8, 12] select (_hqId isNotEqualTo "" || _atamaModu)];
     _adaylar = _adaylar + _aracA;
+    if (_adaylar isEqualTo [] && {_hqId isNotEqualTo ""}) exitWith {
+        systemChat format ["[ELITE] %1 kategorisine atanmis uygun squad yok - once 'ELITE HQ / US Kur' modulu ile squad atayin (>= 3 saglam asker, AI, planda olmayan)", _hqId];
+        diag_log format ["[PLAN-ISTEK] elle secim: %1 icin atanmis uygun squad yok", _hqId];
+    };
     if (_adaylar isEqualTo []) exitWith {
         // v8.161 TANI: hangi tarafta kac grup var / neden elendi (secilen taraf yanlis olabilir)
         private _say = {
@@ -65,6 +76,11 @@ if (_adaylar isEqualTo []) exitWith {};
 
 private _parca = _adaylar select [_bas, 8];
 if (_parca isEqualTo []) exitWith {
+    if (_atamaModu) exitWith {
+        ["lambs_danger_hqAtama", [_hqId, _secili]] call CBA_fnc_serverEvent;
+        diag_log format ["[HQ-ISTEK] atama sunucuya gonderildi: %1 | %2 squad", _hqId, count _secili];
+        systemChat format ["[ELITE] %1: %2 squad atandi (secilmeyen eski atamalar kaldirildi)", _hqId, count _secili];
+    };
     if (_secili isEqualTo []) exitWith { systemChat "[ELITE] Hic grup secilmedi - plan istegi gonderilmedi"; };
     // v8.167 KAPASITE UYARISI: secilen tasima araclarinin kargo koltugu ile secilen piyade sayisi esit degilse uyar
     private _asker = 0;

@@ -114,6 +114,49 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
     };
 }] call CBA_fnc_addEventHandler;
 
+// v8.178: HQ / US kayitlari (kategori: HQ1 / HQ2 / HQ3 / US) + squad atamasi. Objektif planlari bir HQ'dan baslar; katilacak squadlar HQ'ya atananlardir; iptal / basarisizlikta HQ'ya donulur.
+// Kayit: [id, taraf, poz, kategori, yaricap, marker]; istemci arayuzu icin lambs_danger_hqListe (publicVariable): [id, taraf (str), kategori, poz, yaricap, atanan_grup_sayisi]
+if (isNil "lambs_danger_hqlar") then { lambs_danger_hqlar = []; };
+if (isNil "lambs_danger_hqListe") then { lambs_danger_hqListe = []; };
+lambs_danger_hqYayinla = {
+    if (!isServer) exitWith {};
+    lambs_danger_hqListe = lambs_danger_hqlar apply {
+        private _id = _x select 0;
+        [_id, str (_x select 1), _x select 3, _x select 2, _x select 4, {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _id} count allGroups]
+    };
+    publicVariable "lambs_danger_hqListe";
+};
+["lambs_danger_hqIstegi", {
+    params ["_taraf", "_poz", "_katI", "_yar"];
+    if (!isServer) exitWith {};
+    private _kat = ["HQ1", "HQ2", "HQ3", "US"] select (_katI max 0 min 3);
+    private _id = format ["%1_%2", _kat, _taraf];
+    private _eski = lambs_danger_hqlar findIf {(_x select 0) isEqualTo _id};
+    if (_eski >= 0) then { deleteMarker ((lambs_danger_hqlar select _eski) select 5); lambs_danger_hqlar deleteAt _eski; };
+    private _mn = format ["ELITE_HQ_%1", _id];
+    deleteMarker _mn;
+    createMarker [_mn, _poz];
+    _mn setMarkerType (["b_hq", "b_hq", "b_hq", "mil_flag"] select (_katI max 0 min 3));
+    _mn setMarkerColor (switch (_taraf) do { case west: {"ColorBLUFOR"}; case east: {"ColorOPFOR"}; default {"ColorIndependent"} });
+    _mn setMarkerText format ["%1 (%2 m)", _kat, _yar];
+    lambs_danger_hqlar pushBack [_id, _taraf, +_poz, _kat, round _yar, _mn];
+    call lambs_danger_hqYayinla;
+    diag_log format ["[HQ] %1 KURULDU / GUNCELLENDI | %2 | %3 | yaricap %4 m | atanmis squad %5", _id, _taraf, mapGridPosition _poz, round _yar, {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _id} count allGroups];
+    ["lambs_danger_garnizonYanit", [format ["%1 (%2) kuruldu: %3", _kat, _taraf, mapGridPosition _poz]]] call CBA_fnc_globalEvent;
+}] call CBA_fnc_addEventHandler;
+["lambs_danger_hqAtama", {
+    params ["_id", "_netIdler"];
+    if (!isServer) exitWith {};
+    if ((lambs_danger_hqlar findIf {(_x select 0) isEqualTo _id}) < 0) exitWith { diag_log format ["[HQ] atama reddedildi: %1 kayitli degil", _id]; };
+    private _yeni = _netIdler apply {groupFromNetId _x} select {!isNull _x};
+    // bu HQ'daki eski atamalar (secilmeyenler) temizlenir; secilenler baska HQ'dan alinir
+    { if ((_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _id && {!(_x in _yeni)}) then { _x setVariable ["lambs_danger_hqId", nil, true]; }; } forEach allGroups;
+    { _x setVariable ["lambs_danger_hqId", _id, true]; } forEach _yeni;
+    call lambs_danger_hqYayinla;
+    diag_log format ["[HQ] %1 | squad atandi: %2 grup: %3", _id, count _yeni, _yeni apply {groupId _x}];
+    ["lambs_danger_garnizonYanit", [format ["%1: %2 squad atandi", _id, count _yeni]]] call CBA_fnc_globalEvent;
+}] call CBA_fnc_addEventHandler;
+
 // v8.176: Zeus 'ELITE Karakol / Plan KALDIR' - liste istegi (sunucu) -> liste (istemci panel) -> kaldirma istegi (sunucu)
 ["lambs_danger_kaldirListeIstegi", {
     params ["_sahip"];
@@ -123,6 +166,10 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
         _x params ["_t", "_p", "_y", "_ad", "_sav", "_mn"];
         _liste pushBack [format ["K:%1", _mn], format ["KARAKOL | %1 | %2 | %3 | yaricap %4 m | %5", _t, _ad, mapGridPosition _p, _y, ["savunma YOK", "savunma HEMEN", "ALARM"] select (_sav min 2)], _p];
     } forEach lambs_danger_karakollar;
+    {
+        _x params ["_hid", "_ht", "_hp", "_hk", "_hy"];
+        _liste pushBack [format ["H:%1", _hid], format ["%1 | %2 | %3 | yaricap %4 m | %5 squad atanmis", _hk, _ht, mapGridPosition _hp, _hy, {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hid} count allGroups], _hp];
+    } forEach lambs_danger_hqlar;
     if (!isNil "lambs_danger_planlar") then {
         {
             private _pl = _y;
@@ -173,6 +220,18 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
                 };
             };
         } else {
+            if ((_a select [0, 2]) isEqualTo "H:") then {
+                private _hid = _a select [2];
+                private _hi = lambs_danger_hqlar findIf {(_x select 0) isEqualTo _hid};
+                if (_hi >= 0) then {
+                    deleteMarker ((lambs_danger_hqlar select _hi) select 5);
+                    lambs_danger_hqlar deleteAt _hi;
+                    { if ((_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hid) then { _x setVariable ["lambs_danger_hqId", nil, true]; }; } forEach allGroups;
+                    call lambs_danger_hqYayinla;
+                    _kal = _kal + 1;
+                    diag_log format ["[KALDIR] HQ KALDIRILDI: %1 (atamalar temizlendi)", _hid];
+                };
+            };
             if ((_a select [0, 2]) isEqualTo "P:" && {!isNil "lambs_danger_planlar"}) then {
                 private _id = _a select [2];
                 private _pl = lambs_danger_planlar getOrDefault [_id, createHashMap];

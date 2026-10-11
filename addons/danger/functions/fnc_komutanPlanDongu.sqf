@@ -267,7 +267,7 @@ while {true} do {
         };
         private _sureSn = _plan getOrDefault ["sureSn", 0];
         // SURE SINIRI: ele gecirde hedef alinmadiysa CEKILME; savunmada plan biter
-        if (_sureSn > 0 && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "BITTI", "IPTAL"])}) then {
+        if (_sureSn > 0 && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "DONUS", "BITTI", "IPTAL"])}) then {
             if (_tip isEqualTo 0) then {
                 [_plan, "CEKILME", format ["SURE SINIRI (%1 sn) doldu, objektif alinamadi", _sureSn]] call _fazGec;
                 { [_x] call _wpTemizle; [_x, _obj] call FUNC(tacticsRetreat); } forEach _gruplar;
@@ -300,7 +300,54 @@ while {true} do {
                     };
                 } forEach (vehicles select {_x isKindOf "LandVehicle"});
             };
-            if (_fazSure > 150) then { [_plan, "BITTI", "cekilme tamamlandi"] call _fazGec; };
+            if (_fazSure > 150) then {
+                // v8.178: rally point sonrasi HQ / US'ye DONUS (aynı ciddiyette)
+                if ((_plan getOrDefault ["hqPoz", []]) isNotEqualTo []) then { _plan set ["donusNeden", "basarisiz (cekilme)"]; [_plan, "DONUS", "rally point sonrasi HQ / US'ye donus"] call _fazGec; } else { [_plan, "BITTI", "cekilme tamamlandi"] call _fazGec; };
+            };
+            continue
+        };
+        // ---------------------------------------------------------------- DONUS (v8.178): iptal / basarisizlik sonrasi gruplar + araclar HQ / US'ye geri doner
+        if (_faz isEqualTo "DONUS") then {
+            private _hqP = _plan getOrDefault ["hqPoz", []];
+            if (_hqP isEqualTo []) then { [_plan, "BITTI", "DONUS: HQ konumu yok"] call _fazGec; continue };
+            if !(_plan getOrDefault ["donusBasladi", false]) then {
+                _plan set ["donusBasladi", true];
+                (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];   // devam eden / bekleyen nakil isleri iptal
+                private _hqI = 0;
+                {
+                    private _g = _x;
+                    private _hedef = _hqP getPos [25 + 18 * _hqI, 70 * _hqI];
+                    _hqI = _hqI + 1;
+                    (_plan get "notlar") set [groupId _g, _hedef];
+                    [_g, [[_hedef, "MOVE", format ["HQ'ya donus (%1)", _plan getOrDefault ["hqId", "HQ"]], "AWARE", "NORMAL", 40]]] call _wpYaz;
+                    _g setCombatMode "YELLOW";
+                    { _x setUnitPos "AUTO"; _x doWatch objNull; _x setVariable ["lambs_danger_tasimaBekle", nil]; _x enableAI "PATH"; } forEach ((units _g) select {alive _x && {isNull objectParent _x}});
+                } forEach _gruplar;
+                // araclar: zirh destek gruplari + plana bagli TASIMA araclari HQ cevresine (yayilarak)
+                private _araclar = [];
+                { private _v = vehicle (leader _x); if (_v isNotEqualTo (leader _x)) then { _araclar pushBackUnique _v; }; } forEach (_plan getOrDefault ["zirhG", []]);
+                { if (alive _x && {(_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "TASIMA"} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")}) then { _araclar pushBackUnique _x; }; } forEach (vehicles select {_x isKindOf "LandVehicle"});
+                private _aI = 0;
+                {
+                    private _v = _x;
+                    private _d = driver _v;
+                    if (alive _v && {!isNull _d} && {!isPlayer _d} && {local _d}) then {
+                        private _hv = _hqP getPos [60 + 40 * _aI, 35 + 60 * _aI];
+                        _aI = _aI + 1;
+                        (group _d) setVariable ["lambs_danger_planZirh", nil];
+                        (group _d) setVariable ["lambs_danger_aracMedevacT", time];
+                        (group _d) setBehaviour "SAFE"; (group _d) setSpeedMode "NORMAL";
+                        _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+                        _v engineOn true;
+                        _d doMove _hv;
+                        diag_log format ["[PLAN] %1 DONUS: %2 (%3) HQ'ya (%4 m)", _id, getText (configOf _v >> "displayName"), groupId (group _d), round (_v distance2D _hv)];
+                    };
+                } forEach _araclar;
+                diag_log format ["[PLAN] %1 DONUS basladi (%2): %3 grup + %4 arac -> %5 (%6)", _id, _plan getOrDefault ["donusNeden", "?"], count _gruplar, count _araclar, _plan getOrDefault ["hqId", "HQ"], mapGridPosition _hqP];
+            };
+            private _esik = ((_plan getOrDefault ["hqYar", 100]) * 0.7) max 80;
+            private _vardiD = {(leader _x) distance2D _hqP < _esik} count _gruplar;
+            if (_vardiD >= (count _gruplar) || {_fazSure > 900}) then { [_plan, "BITTI", format ["HQ'ya donuldu (%1/%2 grup)", _vardiD, count _gruplar]] call _fazGec; };
             continue
         };
 

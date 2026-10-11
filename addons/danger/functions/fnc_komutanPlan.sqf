@@ -54,7 +54,15 @@ if (_tip isEqualTo 2) exitWith {
     {
         private _p = _y;
         if ((_p get "taraf") isEqualTo _taraf) then {
-            _p set ["faz", "IPTAL"];
+            // v8.178: HQ / US'ten baslayan plan iptal edilirse gruplar ve araclar HQ'ya geri doner (DONUS fazi); HQ'suz plan eskisi gibi hemen IPTAL
+            if ((_p getOrDefault ["hqPoz", []]) isNotEqualTo [] && {!((_p getOrDefault ["faz", ""]) in ["DONUS", "BITTI", "IPTAL"])}) then {
+                _p set ["faz", "DONUS"];
+                _p set ["fazT", time];
+                _p set ["fazBasT", time];
+                _p set ["donusNeden", "Zeus IPTAL"];
+            } else {
+                _p set ["faz", "IPTAL"];
+            };
             _n = _n + 1;
         };
     } forEach lambs_danger_planlar;
@@ -79,6 +87,21 @@ if (_tip isEqualTo 3) exitWith {
 // ---------------------------------------------------------------------------
 // KATILAN GRUPLAR: taraf, yerel, AI lider, >= 3 asker, baska plana bagli degil, objektife <= 4000 m; en yuksek rutbe + buyuk grup + yakin
 // ---------------------------------------------------------------------------
+// v8.178 HQ / US: ELE GECIR bir komuta noktasindan baslar; katilacak gruplar o kategoriye atananlardir
+private _hqId = _ayar getOrDefault ["hqId", ""];
+private _hqKayit = [];
+if (_hqId isNotEqualTo "" && {!isNil "lambs_danger_hqlar"}) then {
+    private _hqi = lambs_danger_hqlar findIf {(_x select 0) isEqualTo _hqId};
+    if (_hqi >= 0) then { _hqKayit = lambs_danger_hqlar select _hqi; };
+};
+if (_tip isEqualTo 0 && {_hqKayit isEqualTo []} && {missionNamespace getVariable ["lambs_danger_hqZorunlu", true]}) exitWith {
+    diag_log format ["[PLAN] KURULAMADI: %1 icin ELE GECIR bir HQ / US gerektirir (secilen: '%2'); once 'ELITE HQ / US Kur' modulu", _taraf, _hqId];
+    false
+};
+if (_hqKayit isNotEqualTo [] && {(_hqKayit select 1) isNotEqualTo _taraf}) exitWith {
+    diag_log format ["[PLAN] KURULAMADI: HQ %1 tarafi (%2) plan tarafi (%3) ile ayni degil", _hqId, _hqKayit select 1, _taraf];
+    false
+};
 private _grupN = _ayar getOrDefault ["grupN", 4];
 // v8.150: Zeus elle sectiyse yalniz bu gruplar (netId listesi); mesafe sinirina bakilmaz
 private _secili = _ayar getOrDefault ["secili", []];
@@ -120,7 +143,8 @@ private _aday = allGroups select {
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
-    && {isNull objectParent _l} && {(_secili isEqualTo [] && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}) || {(netId _x) in _secili}}
+    && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
+    && {isNull objectParent _l} && {(_secili isEqualTo [] && {_hqKayit isNotEqualTo [] || {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}}) || {(netId _x) in _secili}}
 };
 if (_aday isEqualTo []) exitWith {
     // v8.161 TANI (elle secim): secilen her grubun neden elendigi tek tek
@@ -451,7 +475,7 @@ if (_reconG isNotEqualTo []) then {
     { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _reconG;
 };
 private _plan = createHashMapFromArray [
-    ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
+    ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["hqId", _hqId], ["hqPoz", if (_hqKayit isEqualTo []) then {[]} else {+(_hqKayit select 2)}], ["hqYar", if (_hqKayit isEqualTo []) then {100} else {_hqKayit select 4}], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],

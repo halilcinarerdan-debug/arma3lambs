@@ -13,6 +13,9 @@ if (_activated && local _logic) then {
     private _obj = getPosATL _logic;
     // modul nesnesi hemen silinir (pencere hata verse / kapansa bile modul tekrar tetiklenmez; RPT ffdca817: hata dongusu Zeus'u kilitledi)
     deleteVehicle _logic;
+    // v8.178: HQ / US listesi (sunucudan yayinlanan lambs_danger_hqListe): [id, taraf, kategori, poz, yaricap, atanan_grup_sayisi]
+    private _hqL = missionNamespace getVariable ["lambs_danger_hqListe", []];
+    private _hqSecenekler = ["(secilmedi - ELE GECIR icin zorunlu)"] + (_hqL apply {format ["%1 | %2 | %3 | %4 squad", _x select 2, _x select 1, mapGridPosition (_x select 3), _x select 5]});
     [
         "ELITE Objektif 1/4: gorev",
         [
@@ -21,7 +24,7 @@ if (_activated && local _logic) then {
             ["Tempo / komutan niyeti", "LIST", "Dengeli: normal. Sessiz / gizli: AWARE-STEALTH, yavas, saldiriya kadar ates disiplini (GREEN). Hizli / agresif: tam hiz, kisa kesif.", ["Dengeli", "Sessiz / gizli", "Hizli / agresif"], 0],
             ["Baslama (H-saati)", "LIST", "Plan kurulunca ne zaman harekete gecilsin. 'Zeus onayi': plan kurulur, harita isaretleri cikar, siz 'ONAY VER' modulunu koyana kadar beklenir.", ["Hemen", "30 sn", "60 sn", "120 sn", "300 sn", "Zeus onayi bekle"], 0],
             ["Sure siniri", "LIST", "Sure dolunca: ele gecirde (hedef alinmadiysa) CEKILME, savunmada plan biter.", ["Sinirsiz", "10 dk", "20 dk", "30 dk", "45 dk"], 0],
-            ["Tehdit yonu (savunma)", "LIST", "Duşmanin objektife geldigi yon (objektiften duşmana). Savunma sektorleri bu yone yogunlasir; MG / destek grubu tam karsisinda.", ["Bilinmiyor", "Kuzey", "Kuzeydogu", "Dogu", "Guneydogu", "Guney", "Guneybati", "Bati", "Kuzeybati"], 0],
+            ["Komuta noktasi (HQ / US)", "LIST", "Plan bu HQ / US kategorisinden baslar; katilacak squadlar YALNIZ bu kategoriye atananlardir (ELITE HQ / US Kur). ELE GECIR icin ZORUNLU. Iptal / basarisizlikta gruplar buraya doner.", _hqSecenekler, 0],
             ["Katilacak grup sayisi", "SLIDER", "Otomatik secimde: en yetkili (rutbe) ve en yakin gruplardan secilir; en yuksek rutbeli lider KOMUTAN olur.", [1, 8], [1, 1], 4, 0],
             ["Grup secimi", "LIST", "Otomatik: yukaridaki sayiya gore. Elle: panellerin sonunda squad listesi acilir, katilacaklari siz isaretlersiniz (mesafe siniri yok).", ["Otomatik (sayi)", "Elle sec (liste)"], 0]
         ],
@@ -53,7 +56,8 @@ if (_activated && local _logic) then {
                                     ["Kisit: binalara agir silah / bomba yasak", "BOOLEAN", "Binadaki hedefe roket / fuze / 40 mm / bomba atilmaz (mermi iptal, [PLAN-ROE]).", false, ""],
                                     ["Rally point mesafesi (m)", "SLIDER", "Toplanma noktasi objektiften bu kadar geride, ortulu.", [250, 900], [10, 50], 450, 0],
                                     ["ORP mesafesi (m)", "SLIDER", "Objektif toplanma noktasi. KAYNAK: TC 3-21.76 s. 7-15: ORP tipik olarak objektiften 200-400 m (veya en az bir buyuk arazi ogesi geride); sinirli gorusta 100-200 m (s. 7-20). Ses ve gorus disinda olmali.", [100, 400], [10, 25], 300, 0],
-                                    ["Baskin (vur-cek)", "LIST", "Hayir: hedef alinirsa toparlanma + cevre savunmasi. Evet: hedef temizlenince ya da sure dolunca CEKILME (karakol baskini / vur-cek canlandirmasi). Sure saldiri basladigindan itibaren.", ["Hayir (ele gecir)", "Evet: 5 dk", "Evet: 10 dk"], 0]
+                                    ["Baskin (vur-cek)", "LIST", "Hayir: hedef alinirsa toparlanma + cevre savunmasi. Evet: hedef temizlenince ya da sure dolunca CEKILME (karakol baskini / vur-cek canlandirmasi). Sure saldiri basladigindan itibaren.", ["Hayir (ele gecir)", "Evet: 5 dk", "Evet: 10 dk"], 0],
+                                    ["Tehdit yonu (savunma)", "LIST", "Duşmanin objektife geldigi yon (objektiften duşmana). Savunma sektorleri bu yone yogunlasir; MG / destek grubu tam karsisinda.", ["Bilinmiyor", "Kuzey", "Kuzeydogu", "Dogu", "Guneydogu", "Guney", "Guneybati", "Bati", "Kuzeybati"], 0]
                                 ],
                                 {
                                     params ["_data", "_args"];
@@ -71,12 +75,24 @@ if (_activated && local _logic) then {
                                             {
                                                 params ["_data", "_args"];
                                                 _args params ["_obj", "_d1", "_d2", "_d3"];
-                                                _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_tehditY", "_grupN", "_secimModu"];
+                                                _d1 params ["_tarafI", "_tip", "_hqI", "_tempo", "_basla", "_sure", "_grupN", "_secimModu"];
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
-                                                _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin"];
+                                                _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY"];
                                                 _data params ["_guven", "_dogr", "_topcu", "_topcuN"];
                                                 private _taraf = [west, east, independent] select (_tarafI max 0 min 2);
+                                                // v8.178 HQ DOGRULAMA (kullanici hatasi korumasi): ELE GECIR icin HQ / US zorunlu; secilen HQ'nun tarafi plan tarafi ile ayni olmali
+                                                private _hqLi = missionNamespace getVariable ["lambs_danger_hqListe", []];
+                                                private _hq = if (_hqI > 0 && {_hqI <= count _hqLi}) then {_hqLi select (_hqI - 1)} else {[]};
+                                                if (_tip isEqualTo 0 && {_hq isEqualTo []}) exitWith {
+                                                    systemChat "[ELITE] HATA: ELE GECIR icin bir HQ / US secin (once 'ELITE HQ / US Kur' modulu ile kurup squad atayin). Plan kurulmadi.";
+                                                    diag_log "[PLAN-ISTEK] reddedildi: HQ / US secilmedi";
+                                                };
+                                                if (_hq isNotEqualTo [] && {(_hq select 1) isNotEqualTo (str _taraf)}) exitWith {
+                                                    systemChat format ["[ELITE] HATA: secilen %1 (%2) ile plan tarafi (%3) ayni degil. Plan kurulmadi.", _hq select 2, _hq select 1, str _taraf];
+                                                    diag_log format ["[PLAN-ISTEK] reddedildi: HQ tarafi %1 != plan tarafi %2", _hq select 1, str _taraf];
+                                                };
                                                 private _ayar = createHashMapFromArray [
+                                                    ["hqId", if (_hq isEqualTo []) then {""} else {format ["%1_%2", _hq select 2, _hq select 1]}],
                                                     ["tip", _tip], ["grupN", round _grupN], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
                                                     ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp], ["baskin", _baskin], ["guven", _guven], ["dogrulama", _dogr],
                                                     ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN]

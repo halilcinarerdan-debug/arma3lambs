@@ -42,6 +42,8 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
     } forEach _zg;
 };
 
+// v8.178: DONUS fazinda (HQ'ya donus) zirh destek gruplari komuta dongusunun emrinde: ates pozisyonunu tekrar atamaz
+if (_faz isEqualTo "DONUS") exitWith {};
 if (_faz in ["KUR", "TOPLAN", "TASIMA", "RECON"]) exitWith {};
 
 private _piyadeTemas = ((_plan getOrDefault ["gruplar", []]) findIf {((_x getVariable ["lambs_danger_contact", 0]) > time)}) >= 0;
