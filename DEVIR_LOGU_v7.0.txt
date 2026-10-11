@@ -1917,3 +1917,11 @@ v8.174 - ELITE_COVER makrolari, sefer sinirlari, basarisizlikta rally point, ine
  6) IFV doktrini: SALDIRI basinda ates pozisyonu ~350 m'ye ilerler (MCWP 3-11.1 s. 6-36: arac piyade temizledikce ileri sicrar, destek surer); CEKILME'de rally point'e ates ederek doner.
  7) Topcu: P2 plani M109G hedefe 2618 m'de "menzilde:false" (onceki testte 3433 m'de true) -> minimum menzil suphesi; [PLAN-TOPCU] MENZIL TANISI hedef yonunde 500 m adimlarla menzil ici mesafeleri loglar. Plan P2 bu testte zaten KESIF'e hic ulasmadi (nakil 568 sn, sonra cekilme).
  TEST EDILMEDI.
+
+v8.175 - Topcu yer degistirme (min menzil), tank rolu, cift plan engeli, mevzide obje arkasi siper, takilma son care (RPT 3c7286a5)
+ Bulgu: ELITE_COVER hatalari bitti (0 hata, "Found N cover positions" 309 kez). Topcu: M109G menzil ici mesafeler 3500..18500 m; hedef 2402 m (< minimum menzil 3500 m) -> atis imkansiz [PLAN-TOPCU MENZIL TANISI]. Ayni objektife (130869) ayni saniyede iki SAVUN plani (P2 + P3). Alpha 1-5 (M113 LATGM = IFV, atgm) kalkista takildi, 8 askeri inis noktasindan 1456 m geride indirdi; sonra ZIRH destege (ates pozisyonu 126868) gitti = "farkli yere giden APC" (IFV / ATGM tasiyicisi tasarim geregi indirdikten sonra destek ates pozisyonuna gider; digerleri 650 m geride REZERV).
+ fnc_komutanPlan: (1) hedef minimum menzilde ise AI murettebatli top (min menzil + 700 m) hedefin ters yonune yer degistirir [PLAN-TOPCU TOPCU YER DEGISTIRIYOR]; (2) COKLU PLAN ENGELI: ayni taraf + ayni tur icin 150 m icinde aktif plan ya da son 20 sn'de baslayan istek varsa yenisi kurulmaz.
+ fnc_aracTasima: TAKILMA SON CARE: 28 sn hareketsizlikte arac inise dogru 12 m ilerideki bos konuma setVehiclePosition ile tasinir.
+ fnc_planZirh: TANK ROLU (aracSinif TANK): ates pozisyonu 650 m (SALDIRI'da 450 m'ye sicrar), hedef onceligi, bilinen hedef yoksa objektif alanina bastirma atesi (dost 70 m disinda, 12 sn'de bir).
+ fnc_mevziKur: bina yoksa her asker sektor noktasina en yakin AYRI obje (agac / kaya / duvar / bina / cali / enkaz) arkasina gider (tehdit yonune gore), comelir ve sektore bakar.
+ TEST EDILMEDI.

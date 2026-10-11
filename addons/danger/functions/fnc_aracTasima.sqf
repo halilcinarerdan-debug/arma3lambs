@@ -617,6 +617,18 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}];
                             _d doMove _alt;
                             _v setVelocityModelSpace [0, 6, 0];
                         };
+                        // v8.175: son care - arac hala kimildamadiysa (guc hatti diregi / cit / cukur) 28 sn'de inise dogru bos bir konuma tasinir; boylece 8 askeri 1.4 km geride indirmek yerine yola devam eder
+                        if (_denemeN isEqualTo 2 && {_dg > 28} && {_dm > 150}) then {
+                            _denemeN = 3;
+                            private _sp = ((getPosATL _v) getPos [12, (getPosATL _v) getDir _drop]) findEmptyPosition [0, 30, typeOf _v];
+                            if (_sp isNotEqualTo [] && {!surfaceIsWater _sp}) then {
+                                _v setVehiclePosition [_sp, [], 0, "NONE"];
+                                _v setDir ((getPosATL _v) getDir _drop);
+                                _v engineOn true;
+                                _d doMove _drop;
+                                diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac inise dogru %2 m ilerideki bos konuma tasindi (inise %3 m)", groupId _vg, round ((getPosATL _v) distance2D _sp), round _dm];
+                            };
+                        };
                         if (_dg > 35) then { _bitis = "takildi"; };
                     } else { _durgunT = -1; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
                     if (time > _logT) then {

@@ -74,10 +74,40 @@ if (_binalar isNotEqualTo [] && {_yaya isNotEqualTo []}) then {
     if (isNil "_bina") then { _bina = false; };
 };
 if (!_bina) then {
-    // bina yok: sektor yonune bakan comelmis halka
+    // v8.175: bina yok -> her asker sektor noktasina en yakin AYRI siper objesine (agac / kaya / duvar / bina / cali / enkaz) gider, objenin tehdit yonune GORE ARKASINA (kullanici: "objelere cover yok"); obje yoksa sektor yonune bakan comelmis halka
+    private _adayObj = nearestTerrainObjects [_poz, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE", "BUSH", "SMALL TREE"], 60, true, true];
+    _adayObj = _adayObj + ((_poz nearEntities [["Car", "Tank", "Wreck"], 50]) select {!(alive _x) || {(count (crew _x)) isEqualTo 0}});
+    _adayObj = [_adayObj, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
+    private _kullanilan = [];
     {
-        doStop _x;
-        _x doWatch (_poz getPos [150, _yon + (_forEachIndex * 25) - 40]);
+        private _u = _x;
+        private _o = objNull;
+        { if !(_x in _kullanilan) exitWith { _o = _x; }; } forEach _adayObj;
+        if (!isNull _o) then {
+            _kullanilan pushBack _o;
+            private _tp = (getPosATL _o) getPos [2.0, _yon + 180];
+            if (!surfaceIsWater _tp) then {
+                _u setVariable [QGVAR(tasimaBekle), nil];
+                _u enableAI "PATH";
+                _u doMove _tp;
+                [_u, _yon, _poz] spawn {
+                    params ["_u", "_yon", "_poz"];
+                    private _t = time + 25;
+                    waitUntil { sleep 1; !alive _u || {unitReady _u} || {time > _t} };
+                    if (alive _u) then {
+                        doStop _u;
+                        _u setUnitPos "MIDDLE";
+                        _u doWatch (_poz getPos [150, _yon]);
+                    };
+                };
+            } else {
+                doStop _u;
+                _u doWatch (_poz getPos [150, _yon + (_forEachIndex * 25) - 40]);
+            };
+        } else {
+            doStop _x;
+            _x doWatch (_poz getPos [150, _yon + (_forEachIndex * 25) - 40]);
+        };
     } forEach _yaya;
 };
 

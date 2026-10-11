@@ -28,6 +28,24 @@ if (isNil "lambs_danger_planlar") then { lambs_danger_planlar = createHashMap; }
 
 private _tip = _ayar getOrDefault ["tip", 0];
 
+// v8.175 COKLU PLAN ENGELI (kullanici: "ayni yere birden fazla hq / mevzi koyamayalim"): ayni taraf + ayni tur icin 150 m icinde AKTIF plan ya da son 20 sn'de baslayan istek varsa yenisi kurulmaz
+if (_tip in [0, 1]) then {
+    if (isNil "lambs_danger_planRezerv") then { lambs_danger_planRezerv = []; };
+    lambs_danger_planRezerv = lambs_danger_planRezerv select {(time - (_x select 3)) < 20};
+    private _cift = (lambs_danger_planRezerv findIf {(_x select 0) isEqualTo _taraf && {(_x select 2) isEqualTo _tip} && {((_x select 1) distance2D _obj) < 150}}) >= 0;
+    if (!_cift && {(count lambs_danger_planlar) > 0}) then {
+        _cift = ((values lambs_danger_planlar) findIf {
+            (_x get "taraf") isEqualTo _taraf && {((_x get "obj") distance2D _obj) < 150} && {(_x getOrDefault ["tip", 0]) isEqualTo _tip} && {!((_x get "faz") in ["BITTI", "IPTAL"])}
+        }) >= 0;
+    };
+    if (_cift) exitWith {
+        diag_log format ["[PLAN] KURULAMADI: %1 icin ayni noktada (150 m) zaten %2 plani var / kuruluyor (cift plan engellendi)", _taraf, ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1)];
+        systemChat "[ELITE] Bu noktada zaten ayni turde plan var - yenisi kurulmadi";
+        false
+    };
+    lambs_danger_planRezerv pushBack [_taraf, +_obj, _tip, time];
+};
+
 // ---------------------------------------------------------------------------
 // IPTAL: bu taraftaki aktif planlari durdur
 // ---------------------------------------------------------------------------
@@ -477,6 +495,22 @@ if ((_ayar getOrDefault ["topcu", 0]) > 0) then {
                 private _ici = [];
                 for "_d" from 500 to 20000 step 500 do { if (((getPosATL _v) getPos [_d, _yonT]) inRangeOfArtillery [[_v], _m]) then { _ici pushBack _d; }; };
                 diag_log format ["[PLAN-TOPCU] %1 | MENZIL TANISI: hedef %2 m'de MENZIL DISI | menzil ici mesafeler (500 m adim): %3 .. %4 m (%5 nokta)", _id, round (_v distance2D _obj), if (_ici isEqualTo []) then {"yok"} else {_ici select 0}, if (_ici isEqualTo []) then {"yok"} else {_ici select (count _ici - 1)}, count _ici];
+                // v8.175 TOPCU YER DEGISTIRME: hedef minimum menzilin icindeyse (RPT 3c7286a5: M109G 3500 m'den yakini atamiyor, hedef 2402 m) AI muretteballi top, hedeften (min menzil + 700 m) uzaga, hedefin ters yonune kurulur; varinca _topcuAt atar
+                if (_ici isNotEqualTo [] && {(_v distance2D _obj) < (_ici select 0)} && {!isNull (driver _v)} && {!isPlayer (driver _v)} && {local _v} && {(time - (_v getVariable ["lambs_danger_topcuKonumT", -999])) > 300}) then {
+                    private _hP = _obj getPos [(_ici select 0) + 700, _obj getDir _v];
+                    private _bos = _hP findEmptyPosition [0, 150, typeOf _v];
+                    if (_bos isNotEqualTo []) then { _hP = _bos; };
+                    if (surfaceIsWater _hP) then { _hP = _obj getPos [(_ici select 0) + 700, (_obj getDir _v) + 40]; };
+                    if (!surfaceIsWater _hP) then {
+                        _v setVariable ["lambs_danger_topcuKonumT", time];
+                        private _dr = driver _v;
+                        (group _dr) setBehaviour "SAFE"; (group _dr) setSpeedMode "NORMAL";
+                        _dr enableAI "PATH"; _dr enableAI "MOVE"; _dr forceSpeed -1;
+                        _v engineOn true;
+                        _dr doMove _hP;
+                        diag_log format ["[PLAN-TOPCU] %1 | TOPCU YER DEGISTIRIYOR: %2 -> %3 (hedeften %4 m; minimum menzil %5 m) | atis konuma varinca", _id, typeOf _v, mapGridPosition _hP, round (_hP distance2D _obj), _ici select 0];
+                    };
+                };
             };
         } forEach _tAr;
     };

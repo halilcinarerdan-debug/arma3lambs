@@ -55,6 +55,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     if (_v isEqualTo _l || {!alive _v}) then { continue };
     private _d = driver _v;
     if (isNull _d || {isPlayer _d}) then { continue };
+    // v8.175 TANK ROLU: kargosuz tank uzaktan agir ates destegi (650 m, SALDIRI'da 450 m'ye sicrar), hedef onceligi zirh > AT > MG; ates acik alana gelince objektif alanina bastirma atesi (dost 70 m disinda)
+    private _tankMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "TANK";
     _g setVariable ["lambs_danger_planZirh", true];
     _g setVariable ["lambs_danger_planAktif", true, true];
 
@@ -79,6 +81,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             diag_log format ["[PLAN-ZIRH] %1 | %2 CEKILME: rally point'e donuyor (%3 m) - ates ederek", _id, groupId _g, round (_v distance2D _rpP)];
         };
     };
+    private _yk = _g getVariable ["lambs_danger_planZirhYakin", false];
+    private _merkezD = if (_tankMi) then {[650, 450] select _yk} else {[500, 350] select _yk};
     // ---- ates pozisyonu (bir kez) ----
     private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
     if (_poz isEqualTo []) then {
@@ -95,13 +99,13 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     private _e2 = (AGLToASL [_obj select 0, _obj select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];
                     private _s = [0, 100] select _gor;
-                    _s = _s - (abs (_dist - ([500, 350] select (_g getVariable ["lambs_danger_planZirhYakin", false])))) / 10 - (abs _a) * 0.2;
+                    _s = _s - (abs (_dist - _merkezD)) / 10 - (abs _a) * 0.2;
                     if (isOnRoad _p) then { _s = _s - 5; };
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30];
-        } forEach ([[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select (_g getVariable ["lambs_danger_planZirhYakin", false]));
-        if (_en isEqualTo []) then { _en = _obj getPos [[500, 350] select (_g getVariable ["lambs_danger_planZirhYakin", false]), _yon]; };
+        } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800], [450, 400, 500, 350, 550, 600]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
+        if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         _poz = _en;
         _g setVariable ["lambs_danger_planZirhPoz", _poz];
         _g setVariable ["lambs_danger_planZirhT", time];
@@ -152,6 +156,16 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                 private _gn = gunner _v;
                 if (!isNull _gn) then { _gn doTarget _hd; _gn doFire _hd; };
             };
+        };
+    };
+
+    // ---- TANK: bilinen hedef yoksa objektif alanina bastirma atesi (dost piyade 70 m disinda), 12 sn'de bir ----
+    if (_tankMi && {_vardi} && {_savas} && {_faz in ["SALDIRI", "KESIF", "TOPLANMA"]} && {(time - (_g getVariable ["lambs_danger_planZirhBasT", -999])) > 12}) then {
+        _g setVariable ["lambs_danger_planZirhBasT", time];
+        private _dost = (_obj nearEntities ["CAManBase", 70]) select {(side group _x) isEqualTo (side _g)};
+        private _gn2 = gunner _v;
+        if (_dost isEqualTo [] && {!isNull _gn2} && {alive _gn2}) then {
+            _gn2 doSuppressiveFire (_obj getPos [random 25, random 360]);
         };
     };
 } forEach _zg;
