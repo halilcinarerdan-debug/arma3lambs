@@ -303,8 +303,8 @@ _ctl set [4, count _eslesme];
         private _pk = [_gl] call _pickFn;
         private _yayaGelsin = false;   // v8.168: arac piyadeye varamazsa / piyade yakinsa piyade araca YURUR
         if (_pk isEqualTo []) then { _iptal = "tasinacak asker kalmadi"; } else {
-            if ((_v distance2D _pk) < 120) then {
-                // v8.168: piyade zaten 120 m icinde: arac HAREKET ETMEZ, piyade araca biner (RPT 5792af8a: 61 / 77 m'deki araclar 0 km/s MOVE ile hic kipirdamadi)
+            if ((_v distance2D _pk) < 250) then {
+                // v8.168: piyade zaten 250 m icinde: arac HAREKET ETMEZ, piyade araca biner (RPT 5792af8a: 61 / 77 m'deki araclar 0 km/s MOVE ile hic kipirdamadi)
                 _yayaGelsin = true;
                 diag_log format ["[TASIMA] %1 | %2 | piyade yakin (%3 m): arac beklemede, piyade araca biner | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
             } else {
@@ -450,6 +450,8 @@ _ctl set [4, count _eslesme];
             private _denemeN = 0;
             private _logT = time + 20;
             private _yakinT = -1;
+            private _ilerD = 1e6;
+            private _ilerT = time;
             private _frenli = false;
             private _frenBas = -1;
             private _frenLogT = -999;
@@ -482,6 +484,10 @@ _ctl set [4, count _eslesme];
                     };
                 };
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
+                // v8.169 ILERLEME: inise < 800 m iken 35 sn boyunca mesafe 20 m bile azalmadiysa (yavas surunme hiz esigini sifirlayip kilitliyordu: RPT 59d6c742, 3-6 km/s ile 340-400 m'de dakikalarca) -> hemen in
+                if (_bitis isEqualTo "" && {_dm < 800}) then {
+                    if (_dm < (_ilerD - 20)) then { _ilerD = _dm; _ilerT = time; } else { if ((time - _ilerT) > 35) then { _bitis = "ilerlemedi"; }; };
+                };
                 if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
                 else { if (_ctl select 0) then { _bitis = "iptal"; }
                 else { if (time > _st) then { _bitis = "sure"; }
@@ -563,12 +569,21 @@ _ctl set [4, count _eslesme];
                     case "temas": { format ["temas / baski (inise %1 m kala)", round (_v distance2D _drop)] };
                     case "sure": { "sure doldu (240 sn)" };
                     case "hasar": { format ["arac HASARLI / hareket edemiyor (inise %1 m kala)", round (_v distance2D _drop)] };
+                    case "ilerlemedi": { format ["35 sn ilerleme yok (inise %1 m kala)", round (_v distance2D _drop)] };
                     case "takildi": { format ["arac TAKILDI (inise %1 m kala)", round (_v distance2D _drop)] };
                     default { "iptal" };
                 };
             };
         };
 
+        // v8.169 SU KORUMASI: arac yol disi suyun icindeyse (dere / goletsiz gecit) yolcular suya inmesin; en fazla 25 sn kuru zemine surulur
+        if (alive _v && {alive _d} && {surfaceIsWater (getPosATL _v)} && {!(isOnRoad _v)}) then {
+            diag_log format ["[TASIMA] %1 | %2 | inis noktasi suda: kuru zemine surulecek (en fazla 25 sn)", groupId _vg, _ad];
+            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+            _d doMove ((getPosATL _v) getPos [60, _v getDir _drop]);
+            private _wt = time + 25;
+            waitUntil { sleep 1; !alive _v || {!alive _d} || {!surfaceIsWater (getPosATL _v)} || {time > _wt} };
+        };
         // (4) in
         _v setVariable [QGVAR(yolcuBirak), true];
         { if (alive _x) then { _x enableAI "PATH"; }; } forEach _binen;

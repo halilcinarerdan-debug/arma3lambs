@@ -1885,3 +1885,9 @@ v8.169 - Paletli APC (M113) TANK sayiliyordu (RPT 94f3b4aa)
  Bulgu: P1 nakli sorunsuzdu (3 arac, 12/12 bindi, hepsi indi). P3'te elle secilen 3 M113A1G "[TANK]" siniflanip ZIRH DESTEK'e atandi (isKindOf "Tank" tum paletlileri kapsar), nakilde yalniz 2 Fuchs kaldi: 16 asker eslesti, 2 takim yaya kaldi, 14 bindi; M113'ler "arac grubu planda" diye elendi.
  fnc_aracSinif: TANK yalniz isKindOf "Tank" VE kargo < 3 ise; kargo >= 3 paletliler IFV / APC olur (M113 -> APC, savas taksisi). Onbellek tip basinadir (oyun baslayinca yeniden hesaplanir).
  TEST EDILMEDI.
+
+v8.170 - Nakil: ilerleme kilidi, su korumasi, yakin piyade esigi 250 m (RPT 59d6c742)
+ Bulgu: 6 arac / 26 asker (M113 artik APC) eslesti. Yolculuk 50-100 km/s ile akti ama inis noktasina 330-400 m kala araclar 3-6 km/s ile sureklemeye basladi: "hareketsiz" esigi (0.8 m/s) hic tetiklenmedigi icin takilma sayaci sifirlaniyor, arac dakikalarca inmiyor (Alpha 1-6 log sonuna kadar inmedi); yolcular YOLCU GERI ALINDI dongusune girdi. Baslangicta 130-175 m'deki piyade icin araclar 8 sn "motor false MOVE" ile kalkmadi, 30 sn sonra piyade yurudu. Alpha 1-2 askerleri GET OUT ile suya (surfaceIsWater) indi [SU-TANI]. Plan 300 sn TOPLAN'da bekledi, nakil bitmedigi icin KESIF / SALDIRI'ya (topcu) hic gecilemedi; [PLAN-TOPCU] "hedef menzilde:false" (M109G).
+ fnc_aracTasima: (1) ILERLEME: inise < 800 m iken 35 sn'de mesafe 20 m azalmadiysa _bitis = "ilerlemedi" -> hemen in; (2) SU KORUMASI: inis aninda arac yol disi suyun icindeyse en fazla 25 sn kuru zemine surulur ([TASIMA] inis noktasi suda); (3) yakin piyade esigi 120 -> 250 m.
+ fnc_komutanPlan: [PLAN-TOPCU] ENVANTER logu hedefe mesafeyi de yazar (menzil ici / disi tanisi icin).
+ TEST EDILMEDI. Topcu: plan KESIF'e ulasinca [PLAN-TOPCU] satirlarina bakilacak.

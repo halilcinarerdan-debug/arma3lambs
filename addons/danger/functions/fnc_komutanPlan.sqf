@@ -460,9 +460,9 @@ if ((_ayar getOrDefault ["topcu", 0]) > 0) then {
         {
             private _v = _x;
             private _m = (getArtilleryAmmo [_v]) param [0, ""];
-            diag_log format ["[PLAN-TOPCU] %1 | ENVANTER: %2 | gunner:%3 (oyuncu:%4) | yerel:%5 | canFire:%6 | mermi:%7 | hedef menzilde:%8 | Zeus:%9",
+            diag_log format ["[PLAN-TOPCU] %1 | ENVANTER: %2 | gunner:%3 (oyuncu:%4) | yerel:%5 | canFire:%6 | mermi:%7 | hedef menzilde:%8 | Zeus:%9 | hedefe mesafe %10 m",
                 _id, typeOf _v, [name (gunner _v), "YOK"] select (isNull (gunner _v)), isPlayer (gunner _v), local _v, canFire _v, _m,
-                ["?", _obj inRangeOfArtillery [[_v], _m]] select (_m isNotEqualTo ""), _v getVariable ["lambs_danger_gorev", ""]];
+                ["?", _obj inRangeOfArtillery [[_v], _m]] select (_m isNotEqualTo ""), _v getVariable ["lambs_danger_gorev", ""], round (_v distance2D _obj)];
         } forEach _tAr;
     };
 };
