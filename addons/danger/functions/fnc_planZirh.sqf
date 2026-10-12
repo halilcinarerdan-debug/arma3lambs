@@ -154,8 +154,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                 if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > 25 && {(_v distance2D _poz) > 80}) then {
                     _g setVariable ["lambs_danger_planZirhDurT", time];
                     private _ara = (getPosATL _v) getPos [220, ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
-                    private _yl = nearestRoad [_ara, 120] ;
-                    if (!isNull _yl) then { _ara = getPosATL _yl; };
+                    private _yl = _ara nearRoads 120;
+                    if (_yl isNotEqualTo []) then { _ara = getPosATL (_yl select 0); };
                     if (surfaceIsWater _ara) then { _ara = _poz; };
                     _d action ["EngineOn", _v];
                     _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
