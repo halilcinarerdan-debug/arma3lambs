@@ -581,7 +581,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
                     if (!surfaceIsWater (getPosATL _v)) then { _sonKuru = getPosATL _v; }
                     else {
-                        if (!(canFloat _v) && {_suN < 3} && {(time - _suT) > 25}) then {
+                        if ((getNumber (configOf _v >> "canFloat")) isEqualTo 0 && {_suN < 3} && {(time - _suT) > 25}) then {
                             _suT = time; _suN = _suN + 1;
                             private _ara = [];
                             {
