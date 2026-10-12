@@ -2041,3 +2041,9 @@ v8.193 RECON GERI DONUS (kullanici: "yolda tanklar zarar gordu, pusu zannettiler
  fnc_reconArac: ilerleme = hedefe yaklasma YA DA >12 m yer degistirme (hareket eden arac "takildi" sayilmaz). GERI DONUS: OP'ye > 700 m varken tasima basarisizsa (takilma / sure / temas) ve arac hareket edebiliyorsa recon yolda INDIRILMEZ; arac HQ'ya (plan hqPoz, yoksa RP) doner, orada indirir; plan reconG bosaltilir (recon beklenmez, rapor planin kendi gozlemi / canli dogrulama), recon gruplari serbest. OP'ye yakin (<= 700 m) ya da arac hasarliysa eski davranis (oldugu yerde iner, yaya devam). Log: [RECON-ARAC] GERI DONUS.
  Dayanak: tasarim karari (kesif unsuru gorevi basarisiz olunca dost hatta/HQ'ya doner); belli bir doktrin metnine dayandirilmadi.
  Not: TEST EDILMEDI.
+
+v8.194 DOKTRIN: RECON KARARI + TANK HULL-DOWN (kullanici: "bence goreve devam etsinler, daha gercekci hale getirebiliriz"; doktrinler.txt: FM 3-98, ATP 3-20.15, ATP 4-01.45)
+ fnc_reconArac: geri donus (HQ) yalniz temasta dusman / recon >= 3 ya da recon gucu < %50 ise; takilma / sure / kucuk temas: recon iner ve yaya devam eder (FM 3-98 3-56, 4-43, 4-17). Esikler TASARIM degeri. Log: [RECON-ARAC] TEMAS ... geri cekilme olcutu ASILMADI / GERI CEKILME OLCUTU.
+ fnc_planZirh: tank mevzi puanina hull-down (+25: taret hatti acik, govde hatti kapali) ve yedek mevzi; mevzideki tank hasar alirsa (>= 0.08) 60 sn'de bir yedek mevziye gecer ([PLAN-ZIRH] YER DEGISTIRIYOR).
+ DOKTRIN_KAYNAKLARI.md: madde numaralariyla eklendi.
+ Not: TEST EDILMEDI.

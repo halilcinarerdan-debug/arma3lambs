@@ -92,6 +92,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         private _yon = _obj getDir _sbf;
         private _en = [];
         private _enS = -1e9;
+        private _adaylar = [];
         {
             private _dist = _x;
             {
@@ -102,13 +103,24 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     private _e2 = (AGLToASL [_obj select 0, _obj select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];
                     private _s = [0, 100] select _gor;
+                    // v8.194 HULL-DOWN (ATP 3-20.15 3-76: koruma / gizlenme + engelsiz gozlem + acik ates alani): taret yuksekliginden hedef gorunur AMA govde yuksekliginden (1.0 m) gorunmez = hull-down
+                    if (_gor && {_tankMi}) then {
+                        private _eH = (AGLToASL [_p select 0, _p select 1, 0]) vectorAdd [0, 0, 1.0];
+                        if ((lineIntersectsSurfaces [_eH, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isNotEqualTo []) then { _s = _s + 25; };
+                    };
                     _s = _s - (abs (_dist - _merkezD)) / 10 - (abs _a) * 0.2;
                     if (isOnRoad _p) then { _s = _s - 5; };
+                    _adaylar pushBack [_s, _p];
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30, 45, -45, 60, -60];
         } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
+        // v8.194 YEDEK MEVZI (ATP 3-20.15 3-76: birincil ve yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinir): en iyi mevziden >= 60 m uzakta en yuksek puanli aday
+        private _alt = [];
+        private _altS = -1e9;
+        { if ((_x select 1) distance2D _en >= 60 && {(_x select 0) > _altS}) then { _altS = _x select 0; _alt = _x select 1; }; } forEach _adaylar;
+        _g setVariable ["lambs_danger_planZirhAlt", _alt];
         _poz = _en;
         (_plan getOrDefault ["zirhPozlar", []]) pushBack _poz;   // v8.180: zirh araclari ayni noktaya yigilmaz (>= 70 m aralik)
         _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
@@ -171,6 +183,25 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     diag_log format ["[PLAN-ZIRH] %1 | %2 TAKILDI (<1.5 km/s, 25 sn): ara noktaya yonlendirildi (%3 m) | pozisyona %4 m", _id, groupId _g, round (_v distance2D _ara), round (_v distance2D _poz)];
                 };
             } else { _g setVariable ["lambs_danger_planZirhDurT", -1]; };
+        };
+    };
+
+    // ---- v8.194 YER DEGISTIR: mevzideki tank hasar aldiysa (>= 0.08) yedek mevziye gecer (60 sn'de en fazla bir kez; eski mevzi yeni yedek olur)
+    if (_vardi && {_tankMi} && {_savas}) then {
+        private _hs0 = _g getVariable ["lambs_danger_planZirhHasar", -1];
+        if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", damage _v]; _hs0 = damage _v; };
+        private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];
+        if ((damage _v) >= (_hs0 + 0.08) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60}) then {
+            _g setVariable ["lambs_danger_planZirhYerT", time];
+            _g setVariable ["lambs_danger_planZirhAlt", _poz];
+            _g setVariable ["lambs_danger_planZirhPoz", _alt2];
+            _g setVariable ["lambs_danger_planZirhVardi", nil];
+            _g setVariable ["lambs_danger_planZirhT", time];
+            _g setVariable ["lambs_danger_planZirhMax", 120];
+            _g setVariable ["lambs_danger_planZirhHasar", damage _v];
+            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+            _d doMove _alt2;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 YER DEGISTIRIYOR: hasar %3 -> yedek mevzi %4 (%5 m)", _id, groupId _g, (damage _v) toFixed 2, mapGridPosition _alt2, round (_v distance2D _alt2)];
         };
     };
 

@@ -168,7 +168,22 @@ while {_bitis isEqualTo ""} do {
 
 // ---- 3b) GERI DONUS (kullanici: "yolda recon birligi indi; kitaba uygunsa HQ'ya geri donsun"): OP'ye > 700 m varken tasima basarisiz (takilma / sure / temas) ise recon yol ortasinda INDIRILMEZ;
 //   arac hareket edebiliyorsa HQ'ya (yoksa RP'ye) doner, orada indirir; plan recon'u beklemez (reconG bosaltilir, rapor planin kendi gozlemiyle). Tasarim karari (kaynak dogrulanmadi).
-private _geriDon = (_bitis in ["takildi", "sure", "temas"]) && {(_v distance2D _op) > 700} && {alive _v} && {alive _d} && {canMove _v};
+// v8.194 KARAR (FM 3-98 3-56 / 4-43 / 4-17): geri cekilme yalniz ENEMY-TABANLI olcutle: temasta dusman / dost orani >= 3 ya da recon gucu < %50 (sayilar tasarim degeri, kitapta yok).
+//   Takilma / sure / kucuk temas: recon iner ve YAYA devam eder (arac gidemiyorsa yaya kesif: 4-17); "oldu" / hasar zaten yaya.
+private _ilkN = count _birimler;
+private _canliN = { alive _x } count _birimler;
+private _dusmanN = 0;
+if (_bitis isEqualTo "temas") then {
+    private _tf = side _vg;
+    private _gor = [];
+    { { if (((_tf getFriend (_x select 2)) < 0.6) && {(_x select 4) isNotEqualTo objNull}) then { _gor pushBackUnique (_x select 4); }; } forEach ((leader _x) nearTargets 700); } forEach _rg;
+    _dusmanN = count _gor;
+};
+private _zayif = _canliN < (_ilkN * 0.5);
+private _ezici = _dusmanN >= (3 * (_canliN max 1));
+private _geriDon = (_bitis isEqualTo "temas") && {_zayif || _ezici} && {(_v distance2D _op) > 700} && {alive _v} && {alive _d} && {canMove _v};
+if (_bitis isEqualTo "temas" && {!_geriDon}) then { diag_log format ["[RECON-ARAC] %1 | %2 | TEMAS: dusman %3 / recon %4 (%5 basladi) -> geri cekilme olcutu ASILMADI, recon iner ve yaya devam eder", _id, _ad, _dusmanN, _canliN, _ilkN]; };
+if (_geriDon) then { diag_log format ["[RECON-ARAC] %1 | %2 | GERI CEKILME OLCUTU: dusman %3 / recon %4 (%5 basladi) | zayif %6 ezici %7", _id, _ad, _dusmanN, _canliN, _ilkN, _zayif, _ezici]; };
 if (_geriDon) then {
     private _hq = _plan getOrDefault ["hqPoz", []];
     if (_hq isEqualTo []) then { _hq = _plan get "rp"; };
