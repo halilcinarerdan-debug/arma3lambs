@@ -2061,3 +2061,7 @@ v8.196 ZEUS TOPCU TEST MODULU (kullanici: "topcu neden hic calismiyor? -> evet e
  Modul "ELITE Topcu TEST (bu noktaya 3 mermi)": modulun konuldugu noktaya, plan zamanlamasi / dogrulama kosullari OLMADAN, sahadaki tum artilleryScanner'li araclara (AI gunner) 3 mermilik atis emri verir. Sonuc Zeus'a systemChat ve sunucu RPT'de [TOPCU-TEST]: gunner yok / oyuncu / yerel degil / canFire false / mermi yok / MENZIL DISI (yer degistirme emri) / ATES EMRI VERILDI (ETA).
  Dosyalar: ZeusModules/fnc_moduleTopcuTest.sqf (yeni), fnc_komutanPlanKapi.sqf (sunucu + yanit olaylari), CfgVehicles.hpp, config.cpp units[], XEH_PREP.hpp.
  Not: TEST EDILMEDI. Hedefe yakin dost / sivil kontrolu YOK (bilerek: test araci); hedefi dost birliklerden uzak secin.
+
+v8.197 SU KURTARMA MUAFIYETI (kullanici: "su alti ekipleri donanma gibi unsurlar etkilenecek mi")
+ fnc_giyimTani SU KURTARMA: araclardaki / teknedeki birimler zaten kapsam disi; dalgic / donanma muafiyeti genisletildi: tip + uniforma + yelek + gozluk + migfer adinda diver / diving / wetsuit / rebreather / scuba / frogman / uwsdv / swimmer / navy / seal / uw_ geciyorsa muaf; ayrica birim ya da grup degiskeni lambs_danger_suMuaf = true ise muaf. Yuzeyde yuzenler (z >= -0.6 m) zaten etkilenmez.
+ Not: TEST EDILMEDI; GM / baska modun dalgic kiyafet adlari bu listede yoksa elle suMuaf isaretlenmeli.

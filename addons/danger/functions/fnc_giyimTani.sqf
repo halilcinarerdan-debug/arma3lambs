@@ -42,7 +42,7 @@ private _calis = {
                         name _u, groupId _g, (0 - (getTerrainHeightASL (getPosATL _u))) toFixed 2, round speed _u, currentCommand _u, _bayraklar, _wpAd, surfaceIsWater (getPosATL (leader _g)), round (time - (_g getVariable ["lambs_danger_contact", -999]))];
                 };
                 // v8.195 SU KURTARMA (RPT f82d65d0: karakol devriyesi 65 m derin suda yurutuldu, 3 asker bogulup oldu): yaya AI > 6 sn suda ise en yakin karaya yurutulur, > 20 sn ise en yakin karaya isinlanir
-                if (surfaceIsWater (getPosATL _u) && {(getPosASL _u) select 2 < -0.6} && {!((toLower (goggles _u)) find "diving" >= 0)} && {!((toLower (uniform _u)) find "diving" >= 0)} && {!((toLower (uniform _u)) find "wetsuit" >= 0)}) then {
+                if (surfaceIsWater (getPosATL _u) && {(getPosASL _u) select 2 < -0.6} && {!(_u getVariable [QGVAR(suMuaf), false])} && {!(_g getVariable [QGVAR(suMuaf), false])} && {private _giy = toLower (format ["%1|%2|%3|%4|%5", typeOf _u, uniform _u, vest _u, goggles _u, headgear _u]); (["diver", "diving", "wetsuit", "rebreather", "scuba", "frogman", "uwsdv", "swimmer", "navy", "seal", "uw_"] findIf {(_giy find _x) >= 0}) < 0}) then {
                     if ((_u getVariable [QGVAR(suGirisT), -1]) < 0) then { _u setVariable [QGVAR(suGirisT), time]; };
                     private _suS = time - (_u getVariable [QGVAR(suGirisT), time]);
                     if (_suS > 6 && {(time - (_u getVariable [QGVAR(suKurtT), -999])) > 8}) then {
