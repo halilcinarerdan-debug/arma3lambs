@@ -157,6 +157,40 @@ lambs_danger_hqYayinla = {
     ["lambs_danger_garnizonYanit", [format ["%1: %2 squad atandi", _id, count _yeni]]] call CBA_fnc_globalEvent;
 }] call CBA_fnc_addEventHandler;
 
+// v8.196: Zeus 'ELITE Topcu TEST' - plan mantigindan bagimsiz atis denemesi (sunucu)
+["lambs_danger_topcuTestIstegi", {
+    params ["_poz", "_sahip"];
+    if (!isServer) exitWith {};
+    private _rapor = [];
+    private _araclar = vehicles select {alive _x && {(getNumber (configOf _x >> "artilleryScanner")) > 0}};
+    if (_araclar isEqualTo []) then { _rapor pushBack "sahada artilleryScanner'li arac YOK"; };
+    {
+        private _v = _x;
+        private _ad = format ["%1 (%2)", getText (configOf _v >> "displayName"), side (group _v)];
+        private _g = gunner _v;
+        private _mg = (getArtilleryAmmo [_v]) param [0, ""];
+        if (isNull _g) then { _rapor pushBack format ["%1: topcu (gunner) YOK", _ad]; continue };
+        if (isPlayer _g) then { _rapor pushBack format ["%1: gunner OYUNCU - AI atis emri verilmez", _ad]; continue };
+        if (!local _v) then { _rapor pushBack format ["%1: sunucuda YEREL DEGIL (sahip %2)", _ad, owner _v]; continue };
+        if (!canFire _v) then { _rapor pushBack format ["%1: canFire FALSE (hasar / mermi)", _ad]; continue };
+        if (_mg isEqualTo "") then { _rapor pushBack format ["%1: mermi YOK (getArtilleryAmmo bos)", _ad]; continue };
+        if !(_poz inRangeOfArtillery [[_v], _mg]) then {
+            private _kon = [_v, _poz, "TEST"] call (missionNamespace getVariable ["lambs_danger_fnc_topcuKonumla", {false}]);
+            _rapor pushBack format ["%1: hedef %2 m'de MENZIL DISI -> %3", _ad, round (_v distance2D _poz), ["yer degistirme emri verilemedi (300 sn kilit / surucu yok)", "yer degistiriyor, 1-2 dk sonra tekrar deneyin"] select _kon];
+            continue
+        };
+        _v doArtilleryFire [_poz getPos [random 25, random 360], _mg, 3];
+        _rapor pushBack format ["%1: ATES EMRI VERILDI (%2 m, %3, 3 mermi, ETA %4 sn)", _ad, round (_v distance2D _poz), _mg, round (_v getArtilleryETA [_poz, _mg])];
+    } forEach _araclar;
+    { diag_log format ["[TOPCU-TEST] %1 | %2", mapGridPosition _poz, _x]; } forEach _rapor;
+    ["lambs_danger_topcuTestYanit", [_rapor], _sahip] call CBA_fnc_ownerEvent;
+}] call CBA_fnc_addEventHandler;
+["lambs_danger_topcuTestYanit", {
+    params ["_rapor"];
+    if (!hasInterface) exitWith {};
+    { systemChat format ["[ELITE Topcu TEST] %1", _x]; } forEach _rapor;
+}] call CBA_fnc_addEventHandler;
+
 // v8.176: Zeus 'ELITE Karakol / Plan KALDIR' - liste istegi (sunucu) -> liste (istemci panel) -> kaldirma istegi (sunucu)
 ["lambs_danger_kaldirListeIstegi", {
     params ["_sahip"];

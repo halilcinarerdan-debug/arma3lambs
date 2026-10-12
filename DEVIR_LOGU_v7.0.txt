@@ -2056,3 +2056,8 @@ v8.195 SU / YOL AC / BUDDY / TOPCU (kullanici: "piyade askerler suda yuzdugu ici
  fnc_buddyBond: "Group Garrison" gorevindeki grup atlanir.
  fnc_komutanPlanDongu: canli gozlem dogrulamasi recon VARKEN de gecerli (recon / plan gruplari objektifin 500 m cevresinde dusman biliyorsa); hazirlik atisi TOPLAN / RECON / TASIMA fazlarinda 10 sn'de bir denenir.
  Not: TEST EDILMEDI.
+
+v8.196 ZEUS TOPCU TEST MODULU (kullanici: "topcu neden hic calismiyor? -> evet ekle")
+ Modul "ELITE Topcu TEST (bu noktaya 3 mermi)": modulun konuldugu noktaya, plan zamanlamasi / dogrulama kosullari OLMADAN, sahadaki tum artilleryScanner'li araclara (AI gunner) 3 mermilik atis emri verir. Sonuc Zeus'a systemChat ve sunucu RPT'de [TOPCU-TEST]: gunner yok / oyuncu / yerel degil / canFire false / mermi yok / MENZIL DISI (yer degistirme emri) / ATES EMRI VERILDI (ETA).
+ Dosyalar: ZeusModules/fnc_moduleTopcuTest.sqf (yeni), fnc_komutanPlanKapi.sqf (sunucu + yanit olaylari), CfgVehicles.hpp, config.cpp units[], XEH_PREP.hpp.
+ Not: TEST EDILMEDI. Hedefe yakin dost / sivil kontrolu YOK (bilerek: test araci); hedefi dost birliklerden uzak secin.

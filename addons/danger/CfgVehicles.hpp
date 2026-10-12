@@ -181,6 +181,24 @@ class CfgVehicles {
         };
     };
 
+    class GVAR(TopcuTest) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(TopcuTest);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Topcu TEST (bu noktaya 3 mermi)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\destroy_ca.paa";
+        function = QFUNC(moduleTopcuTest);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(KarakolKaldir) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(KarakolKaldir);
