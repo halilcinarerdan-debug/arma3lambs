@@ -99,6 +99,8 @@ private _gozlemRapor = {
 private _atisIzni = {
     params ["_plan"];
     private _dg = _plan getOrDefault ["dogrulama", 0];
+    // v8.199 BASIT TOPCU (kullanici: "artillery basit olsun, opsiyonel secilebilsin"): dogrulama beklenmez; RED / menzil kurallari _topcuAt icinde kalir
+    if ((_plan getOrDefault ["topcuBasit", 0]) isEqualTo 1) exitWith { [true, "BASIT topcu modu: dogrulama beklenmedi", false] };
     if (_dg isEqualTo 2) exitWith { [true, format ["DOGRULAMA YOK: iddiaya guvenildi (guven %1)", ["yetersiz", "orta", "kesin"] select ((_plan getOrDefault ["guven", 1]) min 2)], false] };
     // v8.192 CANLI GOZLEM: recon yoksa (ya da rapor gelmediyse) taraftaki HERKES dogrulayabilir: herhangi bir dost grup liderinin objektifin 500 m cevresinde bildigi (knowsAbout > 0.5) dusman gozlenmis sayilir
     private _objC = _plan get "obj";

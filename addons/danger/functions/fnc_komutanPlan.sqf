@@ -103,6 +103,31 @@ if (_hqKayit isNotEqualTo [] && {(_hqKayit select 1) isNotEqualTo _taraf}) exitW
     false
 };
 private _grupN = _ayar getOrDefault ["grupN", 4];
+// v8.199 HQ TAMAMI (kullanici: "hq lar mevziler karakollar butun halde objektife saldirabilsin"): HQ'ya bagli TUM squadlar + cevredeki karakol garnizonlari + ayni HQ'nun savunma plani mevzi squadlari
+private _tumHQ = (_ayar getOrDefault ["tumHQ", false]) && {_hqKayit isNotEqualTo []} && {_tip isEqualTo 0};
+if (_tumHQ) then {
+    private _hqP = _hqKayit select 2;
+    private _hqY = (_hqKayit select 4) max 300;
+    private _serbestFn = missionNamespace getVariable ["lambs_danger_garnizonSerbestFn", {}];
+    {
+        _x params ["_kt", "_kp", "_ky", "_kad", "_ksav", "_kmn"];
+        if (_kt isEqualTo _taraf && {(_kp distance2D _hqP) < (_hqY * 1.5 + 200)}) then {
+            [_kmn] call _serbestFn;
+            if (!isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar deleteAt _kmn; };
+            diag_log format ["[PLAN-HQ-TUM] %1 | karakol %2 garnizonu serbest birakildi (garnizon ayari silindi)", _hqId, _kad];
+        };
+    } forEach (missionNamespace getVariable ["lambs_danger_karakollar", []]);
+    {
+        private _p = _y;
+        if ((_p get "taraf") isEqualTo _taraf && {(_p getOrDefault ["hqId", ""]) isEqualTo _hqId} && {(_p getOrDefault ["tip", 0]) isEqualTo 1} && {!((_p getOrDefault ["faz", ""]) in ["BITTI", "IPTAL", "DONUS"])}) then {
+            { _x setVariable ["lambs_danger_planAktif", nil, true]; } forEach (_p getOrDefault ["gruplar", []]);
+            _p set ["gruplar", []];
+            _p set ["faz", "IPTAL"];
+            diag_log format ["[PLAN-HQ-TUM] %1 | savunma plani %2 durduruldu, mevzi squadlari saldiriya alindi", _hqId, _p getOrDefault ["id", "?"]];
+        };
+    } forEach lambs_danger_planlar;
+    _grupN = 99;
+};
 // v8.150: Zeus elle sectiyse yalniz bu gruplar (netId listesi); mesafe sinirina bakilmaz
 private _secili = _ayar getOrDefault ["secili", []];
 // v8.163: secilen ARAC gruplari (lider kara aracinda): tank / zirhli -> plan ZIRH DESTEK unsuru (zirhG); tasima kapasiteli arac (kargo >= 3) -> TASIMA gorevi (nakilde oncelikli). Piyade secimi eskisi gibi.
@@ -191,6 +216,13 @@ if (_aday isEqualTo []) exitWith {
 // v8.127: Zeus 'ELITE Gorev Ata' ile MANEVRA / DESTEK / YEDEK atananlar once gelir ve grup sayisi sinirina bakilmaksizin plana girer
 private _atanmis = _aday select {(_x getVariable ["lambs_danger_gorev", ""]) in ["MANEVRA", "DESTEK", "YEDEK"]};
 _aday = [_aday, [], { ([0, 100000] select ((_x getVariable ["lambs_danger_gorev", ""]) in ["MANEVRA", "DESTEK", "YEDEK"])) + (rankId (leader _x)) * 1000 + ({alive _x} count (units _x)) * 10 - ((leader _x) distance2D _obj) / 100 }, "DESCEND"] call BIS_fnc_sortBy;
+// v8.199: HQ TAMAMI (guvenlik birakilir): en zayif squad HQ'da kalir (cevre emniyeti)
+if (_tumHQ && {_ayar getOrDefault ["tumHQGuvenlik", false]} && {(count _aday) > 2}) then {
+    private _zayif = _aday select 0;
+    { if (({alive _x} count (units _x)) < ({alive _x} count (units _zayif))) then { _zayif = _x; }; } forEach _aday;
+    _aday = _aday - [_zayif];
+    diag_log format ["[PLAN-HQ-TUM] %1 | guvenlik: %2 (%3 asker) HQ'da birakildi", _hqId, groupId _zayif, {alive _x} count (units _zayif)];
+};
 private _gruplar = _aday select [0, (_grupN max 1) max (count _atanmis)];
 if (_atanmis isNotEqualTo []) then {
     diag_log format ["[PLAN-ATAMA] Zeus atamali gruplar plana alindi: %1", _atanmis apply {format ["%1=%2", groupId _x, _x getVariable ["lambs_danger_gorev", ""]]}];
@@ -486,7 +518,7 @@ private _plan = createHashMapFromArray [
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
-    ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]],
+    ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]], ["topcuBasit", _ayar getOrDefault ["topcuBasit", 0]],
     ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {

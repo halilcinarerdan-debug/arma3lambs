@@ -26,7 +26,7 @@ if (_activated && local _logic) then {
             ["Sure siniri", "LIST", "Sure dolunca: ele gecirde (hedef alinmadiysa) CEKILME, savunmada plan biter.", ["Sinirsiz", "10 dk", "20 dk", "30 dk", "45 dk"], 0],
             ["Komuta noktasi (HQ / US)", "LIST", "Plan bu HQ / US kategorisinden baslar; katilacak squadlar YALNIZ bu kategoriye atananlardir (ELITE HQ / US Kur). ELE GECIR icin ZORUNLU. Iptal / basarisizlikta gruplar buraya doner.", _hqSecenekler, 0],
             ["Katilacak grup sayisi", "SLIDER", "Otomatik secimde: en yetkili (rutbe) ve en yakin gruplardan secilir; en yuksek rutbeli lider KOMUTAN olur.", [1, 8], [1, 1], 4, 0],
-            ["Grup secimi", "LIST", "Otomatik: yukaridaki sayiya gore. Elle: panellerin sonunda squad listesi acilir, katilacaklari siz isaretlersiniz (mesafe siniri yok).", ["Otomatik (sayi)", "Elle sec (liste)"], 0]
+            ["Grup secimi", "LIST", "Otomatik: yukaridaki sayiya gore. Elle: panellerin sonunda squad listesi acilir, katilacaklari siz isaretlersiniz (mesafe siniri yok). HQ TAMAMI: secilen HQ / US'ye bagli TUM squadlar ve HQ yaricapinin cevresindeki karakol garnizonlari (nobet / devriye serbest birakilir, garnizon ayari silinir) ile birlikte saldirir - sayi sinirsiz; 'guvenlik birakilir' en zayif squadi HQ'da tutar (cevre emniyeti, MCWP 3-11.1); 'hepsi' hicbirini birakmaz. Savunma plani altindaki mevzi squadlari da alinir (o savunma plani durdurulur).", ["Otomatik (sayi)", "Elle sec (liste)", "HQ TAMAMI (guvenlik birakilir)", "HQ TAMAMI (hepsi)"], 0]
         ],
         {
             params ["_data", "_args"];
@@ -70,7 +70,8 @@ if (_activated && local _logic) then {
                                                 ["Bilgi guvenilirligi (iddia)", "LIST", "Komutanin ELINDEKI bilgi: Yetersiz = iddia var, delil yok (komutan cok temkinli: gizli tempo, uzun kesif); Orta = tek kaynak; Kesin = 'kesin' deniyor AMA yine IDDIA: gercek sahne (sayi, sivil) komutandan gizlidir ve farkli olabilir.", ["Yetersiz (iddia var, delil yok)", "Orta (tek kaynak)", "Kesin (ama yine iddia)"], 1],
                                                 ["Dogrulama disiplini", "LIST", "Tam kesif: gozlem raporu gelmeden topcu atmaz; sivil gozlenirse atis iptal (PID). Son dogrulama: kisa gozlem (30-45 sn), sonra atis. YOK: komutan iddiaya guvenir, dogrulamadan atar / saldirir - yanlis istihbaratla sivil / dost kaybi canlandirmasi ([PLAN-ZARAR] AAR).", ["Tam kesif", "Son dogrulama (kisa)", "YOK (iddiaya guvenilir)"], 0],
                                                 ["Ates destegi (topcu / havan)", "LIST", "Tarafin topcu / havan araclari (artilleryScanner) kullanilir. Hazirlik: kesiften sonra saldiriya kadar objektife. Cagri: saldiri basinda ve objektif temizlenmezse. Dost mesafesi < RED (TC 3-21.76 Tablo 3-3: 60 mm ~145, 82 mm ~195, 120 mm ~430, 105 / 155 mm ~455 m) ise o arac ATMAZ; <= 600 m: DANGER CLOSE loglanir. Topcu yoksa atlanir.", ["Yok", "Hazirlik atesi", "Cagri atesi", "Hazirlik + cagri"], 0],
-                                                ["Topcu atis sayisi (mermi)", "SLIDER", "Atis seansi basina mermi.", [1, 12], [1, 2], 4, 0]
+                                                ["Topcu atis sayisi (mermi)", "SLIDER", "Atis seansi basina mermi.", [1, 12], [1, 2], 4, 0],
+                                                ["Topcu modu", "LIST", "Standart: Dogrulama disiplini ve dost mesafesi (RED) kurallari uygulanir. BASIT: dogrulama beklenmez, plan baslar baslamaz (topcu menzile girdiginde) objektife atar; yalniz dost mesafesi (RED) ve menzil kurallari kalir. Topcu 'yok' ise etkisiz.", ["Standart (dogrulamali)", "BASIT (dogrulamasiz, hemen)"], 0]
                                             ],
                                             {
                                                 params ["_data", "_args"];
@@ -78,7 +79,7 @@ if (_activated && local _logic) then {
                                                 _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_hqI", "_grupN", "_secimModu"];   // alan sirasi: Taraf, Gorev tipi, Tempo, Baslama, Sure, HQ / US, Grup sayisi, Grup secimi
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
                                                 _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY"];
-                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN"];
+                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN", ["_topcuBasit", 0]];
                                                 private _taraf = [west, east, independent] select (_tarafI max 0 min 2);
                                                 // v8.178 HQ DOGRULAMA (kullanici hatasi korumasi): ELE GECIR icin HQ / US zorunlu; secilen HQ'nun tarafi plan tarafi ile ayni olmali
                                                 private _hqLi = missionNamespace getVariable ["lambs_danger_hqListe", []];
@@ -93,9 +94,9 @@ if (_activated && local _logic) then {
                                                 };
                                                 private _ayar = createHashMapFromArray [
                                                     ["hqId", if (_hq isEqualTo []) then {""} else {format ["%1_%2", _hq select 2, _hq select 1]}],
-                                                    ["tip", _tip], ["grupN", round _grupN], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
+                                                    ["tip", _tip], ["grupN", round _grupN], ["tumHQ", _secimModu in [2, 3]], ["tumHQGuvenlik", _secimModu isEqualTo 2], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
                                                     ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp], ["baskin", _baskin], ["guven", _guven], ["dogrulama", _dogr],
-                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN]
+                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN], ["topcuBasit", _topcuBasit]
                                                 ];
                                                 // v8.150: Elle grup secimi (yalniz ele gecir / savun): squad listesi paneli, secilenler "secili" ile gonderilir
                                                 if (_secimModu isEqualTo 1 && {_tip in [0, 1]}) exitWith {

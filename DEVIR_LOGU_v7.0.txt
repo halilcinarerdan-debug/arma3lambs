@@ -2071,3 +2071,9 @@ v8.198 ARAC SUYA GIRDI + SAVUNMA TANKI HEDEFI (kullanici: "dusman tanki karsilik
  fnc_aracTasima: SU KACINMA - yuzemeyen (canFloat false) arac suya girerse son kuru konuma doner, inise dogru su icermeyen (15 m adim) +-0..100 derece bir yonde 200 m'lik ara noktadan gecer; 3 deneme / 25 sn aralik. [ARAC-SU]
  fnc_planZirh: SAVUNMA planinda (tip 1) tank, kendi menzilindeki (1100 m) bilinen dusmani (knowsAbout > 0.3) objektife uzakliktan bagimsiz hedef alir; [PLAN-ZIRH] HEDEF logu (20 sn'de bir).
  Not: TEST EDILMEDI.
+
+v8.199 BASIT TOPCU + HQ TAMAMI (kullanici: "artillery basit olsun opsiyonel secilebilsin; hq / mevzi / karakol butun halde objektife saldirabilsin, her sey ayarlanabilsin; destek gelebilsin; kitaba gore")
+ Objektif paneli 4/4: "Topcu modu" = Standart (dogrulamali) | BASIT (dogrulamasiz, hemen). BASIT: _atisIzni dogrulama beklemeden izin verir; dost mesafesi (RED) ve menzil kurallari _topcuAt icinde KALIR.
+ Objektif paneli 1/4 "Grup secimi": 3. ve 4. secenek = "HQ TAMAMI (guvenlik birakilir)" / "HQ TAMAMI (hepsi)" (yalniz ELE GECIR): secilen HQ / US'ye bagli TUM squadlar (sayi siniri yok) + HQ yaricapi x1.5 + 200 m icindeki ayni taraf karakol garnizonlari ([serbest birak], garnizon AYARI SILINIR - Garnizon modulu yeniden calistirilmali) + ayni HQ'nun SAVUNMA plani mevzi squadlari (o savunma plani IPTAL, squadlar saldiriya). "Guvenlik birakilir": en zayif squad HQ'da kalir (cevre emniyeti; MCWP 3-11.1 genel ilke - sayisal olcut tasarim). Log: [PLAN-HQ-TUM].
+ Destek: yeni bir mekanizma EKLENMEDI; mevcut HQ takviyesi (hqTakviye, 900 m, musait gruplar) calisir. Karakol / mevzi squadlari plan disindayken takviye olarak gonderilmez (garnizon alt gruplari ve planAktif gruplari musait sayilmaz).
+ Not: TEST EDILMEDI. Mevzi garnizonundaki (LAMBS Garrison) askerlerin binalardan cikarilmasi gozlenmedi.
