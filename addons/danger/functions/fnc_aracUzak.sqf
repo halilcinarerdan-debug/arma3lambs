@@ -41,7 +41,7 @@ private _calis = {
                         if ((_v getVariable [QGVAR(enkazT), -1]) < 0) then { _v setVariable [QGVAR(enkazT), time]; };
                         _tehlike = (time - (_v getVariable [QGVAR(enkazT), time])) < 150;
                     } else {
-                        _tehlike = (isBurning _v) || {(!canMove _v) && {(damage _v) > 0.7} && {!(_v isKindOf "StaticWeapon")}};
+                        _tehlike = (isBurning _v) || {(!canMove _v) && {(damage _v) > 0.05} && {!(_v isKindOf "StaticWeapon")}};   // v8.187: etkisiz = hareket edemez + hasar > 0.05 (palet isabeti dusuk hasarla da araci durdurur; RPT 95be8b53: 3 APC "HASARLI" ama tehlike sayilmadi)
                     };
                     if (_tehlike) exitWith { _kaynak = _v; _gerek = 40; };
                 } forEach _yakin;

@@ -498,7 +498,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         private _u = _x;
                         if (!alive _u) then { continue };
                         if ((vehicle _u) isEqualTo _v) then {
-                            if ((currentCommand _u) isEqualTo "GET OUT") then {
+                            if ((currentCommand _u) isEqualTo "GET OUT" && {(speed _v) > 5}) then {   // v8.187: arac DURMUSKEN (temas / hasar / takilma) inme emri iptal edilmez (RPT 95be8b53: durmus aracta 1-2 asker inemedi)
                                 doStop _u;
                                 if !(_u in _ilk) then {
                                     _ilk pushBack _u;
@@ -766,6 +766,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         } forEach _binen;
         sleep 10;
         { if (alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}) then { moveOut _x; }; } forEach _binen;
+        sleep 3;
+        // v8.187: hala aracta kalan varsa (inemeyen 1-2 asker) tekrar indir + log
+        private _kalanIc = _binen select {alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}};
+        if (_kalanIc isNotEqualTo []) then {
+            { unassignVehicle _x; moveOut _x; _x enableAI "PATH"; } forEach _kalanIc;
+            diag_log format ["[TASIMA] %1 | INEMEYEN ASKER: %2 kisi 3 sn sonra hala aractaydi -> zorla indirildi: %3", groupId _vg, count _kalanIc, _kalanIc apply {name _x}];
+        };
         { if (alive _x) then { _x doFollow (leader (group _x)); }; } forEach _binen;
         call _senkBitti;
         // v8.171 INIS SONRASI TOPLANMA: inenler tum araclar inene kadar (en fazla 75 sn) cevre emniyetiyle COMBAT + comelmis bekler, sonra BIRLIKTE ilerler (kullanici: komutanlar arkada, askerler onden gidiyordu)

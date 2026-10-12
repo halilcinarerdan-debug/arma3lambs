@@ -264,6 +264,22 @@ while {true} do {
         _plan set ["gruplar", _gruplar];
         private _fazSure = time - (_plan get "fazT");
 
+        // v8.187 SENKRON KALKIS KAPISI: hazir bayragi (tasimaCtl[1]) gozlem tamam VE tanklar mevzilerine yaklasmis (< 450 m) / 420 sn dolmus iken acilir
+        if (_plan getOrDefault ["hazirBekle", false] && {_faz in ["TOPLAN", "RECON", "TASIMA", "KUR"]}) then {
+            private _reconOk = ((_plan getOrDefault ["reconG", []]) isEqualTo []) || {_plan getOrDefault ["reconTamam", false]} || {(_plan getOrDefault ["dogrulama", 0]) isEqualTo 2};
+            private _tankOk = ((_plan getOrDefault ["zirhG", []]) findIf {
+                private _zg = _x;
+                private _zv = vehicle (leader _zg);
+                private _zp = _zg getVariable ["lambs_danger_planZirhPoz", []];
+                !isNull _zg && {_zv isNotEqualTo (leader _zg)} && {(_zp isEqualTo []) || {(_zv distance2D _zp) > 450}} && {!(_zg getVariable ["lambs_danger_planZirhVardi", false])}
+            }) < 0;
+            if ((_reconOk && _tankOk) || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
+                _plan set ["hazirBekle", false];
+                (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
+                diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
+            };
+        };
+
         missionNamespace setVariable ["lambs_danger_planTempoGecici", _plan getOrDefault ["tempo", 0]];
         private _tempo = _plan getOrDefault ["tempo", 0];
         // v8.138 RECON temas: gizlilik bozulduysa (GREEN = ates yok) serbest birak: YELLOW + AUTO durus; kesif unsuru donup kalmasin
@@ -462,7 +478,11 @@ while {true} do {
             { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar;
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
             if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
-                _plan set ["tasimaCtl", [false, true, 0, 0, 0, [], true]];
+                // v8.187 SENKRON KALKIS: kesif unsuru (RECON) ya da zirh destek (tank) varsa nakil araclari piyadeyi alip BEKLER (hazir = false); gozlem bitince ve tanklar mevzilerine yaklasinca (komuta dongusu) serbest birakilir
+                private _bekleKos = ((_plan getOrDefault ["reconG", []]) isNotEqualTo [] && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) || {(_plan getOrDefault ["zirhG", []]) isNotEqualTo []};
+                _plan set ["tasimaCtl", [false, !_bekleKos, 0, 0, 0, [], true]];
+                _plan set ["hazirBekle", _bekleKos];
+                if (_bekleKos) then { diag_log format ["[PLAN] %1 SENKRON: nakil araclari piyadeyi alip bekleyecek (gozlem: %2 | tank / zirh: %3) - serbest birakma kosullari: gozlem tamam + tanklar mevzisine yakin (en cok 420 sn)", _id, (_plan getOrDefault ["reconG", []]) isNotEqualTo [], (_plan getOrDefault ["zirhG", []]) isNotEqualTo []]; };
                 _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
             };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
@@ -470,7 +490,9 @@ while {true} do {
         };
         if (_faz isEqualTo "TOPLAN") then {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
-            if (_hazir >= (ceil ((count _gruplar) * 0.75)) || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
+            // v8.187: kesif unsuru varsa TOPLAN'in 300 sn zaman asimini beklemeden HEMEN gozleme gonderilir (once recon, sonra digerleri)
+            private _reconOnce = (_tip isNotEqualTo 1) && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2};
+            if (_reconOnce || {_hazir >= (ceil ((count _gruplar) * 0.75))} || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
                 // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
                 if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2} && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
                     _plan set ["reconYapildi", true];

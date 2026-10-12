@@ -106,14 +106,15 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     if (isOnRoad _p) then { _s = _s - 5; };
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
-            } forEach [0, 15, -15, 30, -30];
-        } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800], [450, 400, 500, 350, 550, 600]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
+            } forEach [0, 15, -15, 30, -30, 45, -45, 60, -60];
+        } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         _poz = _en;
         (_plan getOrDefault ["zirhPozlar", []]) pushBack _poz;   // v8.180: zirh araclari ayni noktaya yigilmaz (>= 70 m aralik)
         _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
         _g setVariable ["lambs_danger_planZirhPoz", _poz];
         _g setVariable ["lambs_danger_planZirhT", time];
+        _g setVariable ["lambs_danger_planZirhMax", (240 max (((_v distance2D _poz) / 2.2) min 900))];   // v8.187: zaman asimi mesafeye gore (RPT 95be8b53: tank 1089 m kala 240 sn dolunca "mevzide" sayildi)
         _g setBehaviour "COMBAT";
         _g setCombatMode "YELLOW";
         _g setSpeedMode "NORMAL";
@@ -140,6 +141,28 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         };
     };
 
+    // ---- v8.187 GRUBUN DIGER ARACLARI (RPT 95be8b53: 2 tankli grupta ikinci tank hic kipirdamadi - yalniz lider aracin surucusu komut aliyordu): her arac poz'a 45 m yanal aralikla gider, varinca durup objektife bakar ----
+    private _digerAr = [];
+    { private _xv = vehicle _x; if (_xv isNotEqualTo _x && {_xv isNotEqualTo _v} && {alive _xv}) then { _digerAr pushBackUnique _xv; }; } forEach (units _g);
+    {
+        private _ov = _x;
+        private _od = driver _ov;
+        if (!isNull _od && {!isPlayer _od} && {local _od} && {(time - (_ov getVariable ["lambs_danger_planZirhOvT", -999])) > 20}) then {
+            _ov setVariable ["lambs_danger_planZirhOvT", time];
+            private _op = _poz getPos [45 * (_forEachIndex + 1), (_obj getDir _poz) + 90];
+            if (surfaceIsWater _op) then { _op = _poz; };
+            if ((_ov distance2D _op) > 35) then {
+                (group _od) setVariable ["lambs_danger_planZirh", true];
+                _od enableAI "PATH"; _od enableAI "MOVE"; _od forceSpeed -1;
+                _od action ["EngineOn", _ov];
+                _od doMove _op;
+            } else {
+                doStop _od;
+                { _x doWatch _obj; } forEach (crew _ov);
+            };
+        };
+    } forEach _digerAr;
+
     // ---- savas modu ----
     private _modu = ["YELLOW", "RED"] select _savas;
     if ((_g getVariable ["lambs_danger_planZirhMod", ""]) isNotEqualTo _modu) then {
@@ -160,6 +183,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             if (!isNull _hd) then {
                 private _gn = gunner _v;
                 if (!isNull _gn) then { _gn doTarget _hd; _gn doFire _hd; };
+                { private _g2 = gunner _x; if (!isNull _g2) then { _g2 doTarget _hd; _g2 doFire _hd; }; } forEach _digerAr;
             };
         };
     };
