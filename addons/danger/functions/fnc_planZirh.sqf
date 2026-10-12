@@ -240,11 +240,17 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     // ---- hedef: objektif cevresinde BILINEN dusman ----
     if ((_vardi || {_faz isEqualTo "CEKILME"}) && {_savas} && {(time - (_g getVariable ["lambs_danger_planZirhHedefT", -999])) > 6}) then {
         _g setVariable ["lambs_danger_planZirhHedefT", time];
-        private _hedefler = (_l nearTargets 900) select {((side _g) getFriend (_x select 2)) < 0.6 && {((_x select 0) distance2D _obj) < 450} && {(_l knowsAbout (_x select 4)) > 0.5}};
+        // v8.198 SAVUNMA TANKI (kullanici: "dusman tanki karsilik vermedi"; RPT 9f47fa43: savunan T-55 635 m'de mevzide COMBAT / RED, hic atis yok - saldiranlar objektife 550 m'de indi, 450 m filtresinin disinda): savunma planinda tankin KENDI menzilindeki (1100 m) bilinen dusman da hedeftir (esik 0.3)
+        private _sav = (_plan getOrDefault ["tip", 0]) isEqualTo 1;
+        private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)}};
         if (_hedefler isNotEqualTo []) then {
             _hedefler = [_hedefler, [], {(_x select 3)}, "DESCEND"] call BIS_fnc_sortBy;
             private _hd = (_hedefler select 0) select 4;
             if (!isNull _hd) then {
+                if ((time - (_g getVariable ["lambs_danger_planZirhHedefLogT", -999])) > 20) then {
+                    _g setVariable ["lambs_danger_planZirhHedefLogT", time];
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 HEDEF: %3 (%4 m, tank -> hedef) | savunma %5", _id, groupId _g, typeOf _hd, round (_v distance2D _hd), _sav];
+                };
                 private _gn = gunner _v;
                 if (!isNull _gn) then { _gn doTarget _hd; _gn doFire _hd; };
                 { private _g2 = gunner _x; if (!isNull _g2) then { _g2 doTarget _hd; _g2 doFire _hd; }; } forEach _digerAr;

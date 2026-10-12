@@ -568,11 +568,43 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             private _ilerT = time;
             private _frenli = false;
             private _frenBas = -1;
+            private _sonKuru = getPosATL _v;
+            private _suN = 0;
+            private _suT = -999;
             private _frenLogT = -999;
             while {_bitis isEqualTo ""} do {
                 sleep 1;
                 private _dm = _v distance2D _drop;
                 private _hz = (speed _v) / 3.6;
+                // v8.198 SU KACINMA (kullanici: "bazi apcler suyu boylamis"; RPT 9f47fa43: Alpha 2-2 inise 423 m kala suya girdi, murettebat araci terk etti, 8 asker suda): yuzemeyen arac suya girerse son kuru konuma doner,
+                //   inise dogru kuru bir cizgi (15 m adimla su yok) veren +-0..70 derece yonde 200 m'lik ara noktadan gecer (en fazla 3 deneme, 25 sn aralik)
+                if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
+                    if (!surfaceIsWater (getPosATL _v)) then { _sonKuru = getPosATL _v; }
+                    else {
+                        if (!(canFloat _v) && {_suN < 3} && {(time - _suT) > 25}) then {
+                            _suT = time; _suN = _suN + 1;
+                            private _ara = [];
+                            {
+                                if (_ara isEqualTo []) then {
+                                    private _a = (_sonKuru getDir _drop) + _x;
+                                    private _p2 = _sonKuru getPos [200, _a];
+                                    private _kuru = true;
+                                    for "_i" from 15 to 200 step 15 do { if (surfaceIsWater (_sonKuru getPos [_i, _a])) then { _kuru = false; }; };
+                                    if (_kuru) then { _ara = _p2; };
+                                };
+                            } forEach [0, 25, -25, 50, -50, 70, -70, 100, -100];
+                            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+                            _d doMove _sonKuru;
+                            [_d, _sonKuru, _ara, _drop] spawn {
+                                params ["_d", "_kuru", "_ara", "_drop"];
+                                private _v2 = vehicle _d;
+                                waitUntil { sleep 1; !alive _d || {(_v2 distance2D _kuru) < 25} || {!surfaceIsWater (getPosATL _v2)} };
+                                if (alive _d && {_ara isNotEqualTo []}) then { _d doMove _ara; sleep 20; if (alive _d) then { _d doMove _drop; }; };
+                            };
+                            diag_log format ["[ARAC-SU] %1 | %2 | arac SUDA (inise %3 m): son kuru konuma donuyor, ara nokta %4 (deneme %5)", groupId _vg, _ad, round _dm, if (_ara isEqualTo []) then {"YOK (dogrudan inise)"} else {mapGridPosition _ara}, _suN];
+                        };
+                    };
+                };
                 // v8.167 CARPISMA GUVENLIGI: onde (+-35 derece, 40 m) baska kara araci varsa arac hizina gore mesafe tutar; cok yakinsa durur. Tikaniklik: bir engelleme en fazla 20 sn frenler (sonra takilma kurtarmasi devreye girer)
                 if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
                     // v8.178: duragan baslangicta (< 2 m/s) FREN YOK (RPT 2491473c: yan yana duran araclar birbirini 8 m onde sayip forceSpeed 0 ile kilitlendi, 8 asker 1.3 km geride indi); koni +-25 derece

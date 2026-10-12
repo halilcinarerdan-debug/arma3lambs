@@ -2065,3 +2065,9 @@ v8.196 ZEUS TOPCU TEST MODULU (kullanici: "topcu neden hic calismiyor? -> evet e
 v8.197 SU KURTARMA MUAFIYETI (kullanici: "su alti ekipleri donanma gibi unsurlar etkilenecek mi")
  fnc_giyimTani SU KURTARMA: araclardaki / teknedeki birimler zaten kapsam disi; dalgic / donanma muafiyeti genisletildi: tip + uniforma + yelek + gozluk + migfer adinda diver / diving / wetsuit / rebreather / scuba / frogman / uwsdv / swimmer / navy / seal / uw_ geciyorsa muaf; ayrica birim ya da grup degiskeni lambs_danger_suMuaf = true ise muaf. Yuzeyde yuzenler (z >= -0.6 m) zaten etkilenmez.
  Not: TEST EDILMEDI; GM / baska modun dalgic kiyafet adlari bu listede yoksa elle suMuaf isaretlenmeli.
+
+v8.198 ARAC SUYA GIRDI + SAVUNMA TANKI HEDEFI (kullanici: "dusman tanki karsilik vermedi, artillery calisti, bazi apcler suyu boylamis")
+ RPT 9f47fa43: (1) Topcu CALISTI (kullanici dogruladi; log: HAZIRLIK atis izni "DOGRULAMA YOK"). (2) Alpha 2-2 APC inise 423 m kala suya girdi, murettebat araci terk etti, 8 asker suda [SU-TANI] (NOT: "derinlik" logu terrainHeightASL'in tersi - harita ~72 m yuksekte, deger gercek derinlik DEGIL). (3) Savunan T-55 (Alpha 1-3) 635 m'de mevzide COMBAT / RED, HIC atis yok: hedef filtresi objektife 450 m idi, saldiranlar objektife 550 m'de indi.
+ fnc_aracTasima: SU KACINMA - yuzemeyen (canFloat false) arac suya girerse son kuru konuma doner, inise dogru su icermeyen (15 m adim) +-0..100 derece bir yonde 200 m'lik ara noktadan gecer; 3 deneme / 25 sn aralik. [ARAC-SU]
+ fnc_planZirh: SAVUNMA planinda (tip 1) tank, kendi menzilindeki (1100 m) bilinen dusmani (knowsAbout > 0.3) objektife uzakliktan bagimsiz hedef alir; [PLAN-ZIRH] HEDEF logu (20 sn'de bir).
+ Not: TEST EDILMEDI.
