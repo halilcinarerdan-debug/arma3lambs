@@ -122,7 +122,7 @@ _d doMove _dur;
 { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
 private _w2 = _vg addWaypoint [_dur, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
 private _ts = time + 600;
-private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20;
+private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20; private _pozEski = getPosATL _v;
 private _bitis = "";
 while {_bitis isEqualTo ""} do {
     sleep 1;
@@ -132,7 +132,8 @@ while {_bitis isEqualTo ""} do {
     else { if (_dm < 45) then { _bitis = "vardi"; }
     else { if (time > _ts) then { _bitis = "sure"; }
     else { if (!(canMove _v)) then { _bitis = "hasar"; }; }; }; }; };
-    if (_bitis isEqualTo "" && {_dm < (_ilerD - 15)}) then { _ilerD = _dm; _ilerT = time; _kurtN = 0; };
+    // v8.193: ILERLEME = hedefe yaklasma YA DA gercek yer degistirme (RPT bc090fa2: yol OP'den uzaga dolanirken hedefe mesafe artti, arac 17-35 km/s giderken "takildi" sayildi, recon 2956 m geride indi)
+    if (_bitis isEqualTo "" && {(_dm < (_ilerD - 15)) || {(_v distance2D _pozEski) > 12}}) then { _ilerD = _dm min _ilerD; _pozEski = getPosATL _v; _ilerT = time; _kurtN = 0; };
     // v8.191 KURTARMA (RPT bda5fbde: recon araci OP'ye 454 m kala 45 sn ilerlemeyince hemen "takildi" sayildi, recon 375 m geride indi): 18 sn itme + emir yenile, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi; 75 sn'de pes
     if (_bitis isEqualTo "") then {
         private _dtk = time - _ilerT;
@@ -165,6 +166,31 @@ while {_bitis isEqualTo ""} do {
     if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)}) then { _d action ["EngineOn", _v]; _v engineOn true; };
 };
 
+// ---- 3b) GERI DONUS (kullanici: "yolda recon birligi indi; kitaba uygunsa HQ'ya geri donsun"): OP'ye > 700 m varken tasima basarisiz (takilma / sure / temas) ise recon yol ortasinda INDIRILMEZ;
+//   arac hareket edebiliyorsa HQ'ya (yoksa RP'ye) doner, orada indirir; plan recon'u beklemez (reconG bosaltilir, rapor planin kendi gozlemiyle). Tasarim karari (kaynak dogrulanmadi).
+private _geriDon = (_bitis in ["takildi", "sure", "temas"]) && {(_v distance2D _op) > 700} && {alive _v} && {alive _d} && {canMove _v};
+if (_geriDon) then {
+    private _hq = _plan getOrDefault ["hqPoz", []];
+    if (_hq isEqualTo []) then { _hq = _plan get "rp"; };
+    diag_log format ["[RECON-ARAC] %1 | %2 | GERI DONUS: tasima %3 (OP'ye %4 m) -> recon yolda indirilmiyor, %5 noktasina (%6 m) donuluyor", _id, _ad, _bitis, round (_v distance2D _op), ["HQ", "RP"] select ((_plan getOrDefault ["hqPoz", []]) isEqualTo []), round (_v distance2D _hq)];
+    _plan set ["reconIptal", true];
+    _plan set ["reconG", []];
+    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+    _vg setBehaviour (["SAFE", "AWARE"] select (_bitis isEqualTo "temas")); _vg setCombatMode "YELLOW"; _vg setSpeedMode "FULL";
+    _d forceSpeed -1;
+    _d doMove _hq;
+    private _wH = _vg addWaypoint [_hq, 0]; _wH setWaypointType "MOVE"; _wH setWaypointName "ELITE RECON-ARAC"; _wH setWaypointSpeed "FULL"; _vg setCurrentWaypoint _wH;
+    private _tgH = time + 480;
+    private _pE = getPosATL _v; private _pT = time;
+    waitUntil {
+        sleep 2;
+        if ((_v distance2D _pE) > 12) then { _pE = getPosATL _v; _pT = time; };
+        if ((time - _pT) > 20 && {alive _d}) then { _pT = time; _d action ["EngineOn", _v]; _v engineOn true; _d doMove _hq; };
+        !alive _v || {!alive _d} || {!canMove _v} || {(_v distance2D _hq) < 60} || {time > _tgH}
+    };
+    { if (!isNull _x) then { _x setVariable ["lambs_danger_planAktif", nil, true]; _x setBehaviour "AWARE"; _x setCombatMode "YELLOW"; _x setSpeedMode "NORMAL"; }; } forEach _rg;
+};
+
 // ---- 4) inis
 diag_log format ["[RECON-ARAC] %1 | %2 | sessiz surus bitti (%3): OP'ye %4 m, inise %5 m -> recon iniyor", _id, _ad, _bitis, round (_v distance2D _op), round (_v distance2D _dur)];
 _v setVariable [QGVAR(yolcuBirak), true];
@@ -178,7 +204,7 @@ _plan set ["reconAracInis", true];
 
 // ---- 5) arac sessizce 250 m geri cekilir, orada bekler (recon alma / destek icin); isiklar kapali
 private _geri = _dur getPos [250, (_plan get "rp") getDir _dur];
-if (!surfaceIsWater _geri && {alive _v} && {alive _d} && {canMove _v}) then {
+if (!_geriDon && {!surfaceIsWater _geri} && {alive _v} && {alive _d} && {canMove _v}) then {
     _d forceSpeed 9;
     _d doMove _geri;
     private _tg = time + 120;
