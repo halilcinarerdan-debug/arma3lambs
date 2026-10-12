@@ -100,23 +100,31 @@ private _atisIzni = {
     params ["_plan"];
     private _dg = _plan getOrDefault ["dogrulama", 0];
     if (_dg isEqualTo 2) exitWith { [true, format ["DOGRULAMA YOK: iddiaya guvenildi (guven %1)", ["yetersiz", "orta", "kesin"] select ((_plan getOrDefault ["guven", 1]) min 2)], false] };
-    if !(_plan getOrDefault ["raporHazir", false]) exitWith { [false, "dogrulama bekleniyor (rapor yok)", true] };
-    private _gs = _plan getOrDefault ["gozSivil", 0];
-    private _gd = _plan getOrDefault ["gozDusman", 0];
-    if (_gs > 0) exitWith { [false, format ["SIVIL GOZLENDI (%1): atis IPTAL (PID)", _gs], false] };
-    // v8.190: rapor sonrasi canli gozlem (RPT 2a205c2b: saldiri temasinda bile "gozlenmedi" -> 0 atis): plan gruplarinin bildigi dusman objektifin 500 m cevresinde ise sayilir
-    if (_gd < 1) then {
-        private _objL = _plan get "obj";
-        private _tf = _plan get "taraf";
-        {
-            private _gl = leader _x;
-            if (!isNull _gl) then {
-                { if (((_tf getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objL) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5}) then { _gd = _gd + 1; }; } forEach (_gl nearTargets 900);
-            };
-        } forEach (_plan getOrDefault ["gruplar", []]);
-        if (_gd > 0) then { _plan set ["gozDusman", _gd]; };
+    // v8.192 CANLI GOZLEM: recon yoksa (ya da rapor gelmediyse) taraftaki HERKES dogrulayabilir: herhangi bir dost grup liderinin objektifin 500 m cevresinde bildigi (knowsAbout > 0.5) dusman gozlenmis sayilir
+    private _objC = _plan get "obj";
+    private _tfC = _plan get "taraf";
+    private _canli = 0;
+    {
+        private _gl = leader _x;
+        if (!isNull _gl && {alive _gl} && {(side _x) isEqualTo _tfC}) then {
+            { if (((_tfC getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objC) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5}) then { _canli = _canli + 1; }; } forEach (_gl nearTargets 900);
+        };
+    } forEach allGroups;
+    if !(_plan getOrDefault ["raporHazir", false]) then {
+        if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {_canli > 0}) then {
+            _plan set ["gozDusman", _canli];
+        } else {
+            _plan set ["canliN", _canli];
+        };
     };
-    if (_gd < 1) exitWith { [false, "hedefte dusman gozlenmedi: atis IPTAL", false] };
+    if !(_plan getOrDefault ["raporHazir", false]) exitWith {
+        if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {_canli > 0}) then { [true, format ["canli gozlem (recon yok): %1 dusman bilgisi, 0 sivil gozlenmedi", _canli], false] }
+        else { [false, "dogrulama bekleniyor (rapor yok)", true] }
+    };
+    private _gs = _plan getOrDefault ["gozSivil", 0];
+    private _gd = (_plan getOrDefault ["gozDusman", 0]) max _canli;
+    if (_gs > 0) exitWith { [false, format ["SIVIL GOZLENDI (%1): atis IPTAL (PID)", _gs], false] };
+    if (_gd < 1) exitWith { [false, "hedefte dusman gozlenmedi: atis IPTAL", true] };
     [true, format ["dogrulandi: %1 dusman, 0 sivil", _gd], false]
 };
 
@@ -507,6 +515,39 @@ while {true} do {
             continue
         };
         if (_faz isEqualTo "TOPLAN") then {
+            // v8.192 GEC KATILAN RECON (RPT 038c2564: Zeus 'RECON' gorevi plan kurulduktan 70 sn SONRA atandi -> "recon yola cikmadi"): TOPLAN suresince atanan recon plana alinir
+            if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["reconG", []]) isEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) then {
+                private _yeniR = allGroups select {
+                    private _rl = leader _x;
+                    (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _rl} && {alive _rl} && {!isPlayer _rl} && {(side _x) isEqualTo (_plan get "taraf")}
+                    && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _rl}
+                    && {(_rl distance2D _obj) <= 4000} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+                };
+                if (_yeniR isNotEqualTo []) then {
+                    private _opY = _obj getPos [520, _B];
+                    if (surfaceIsWater _opY) then { _opY = _obj getPos [450, _B]; };
+                    _plan set ["reconG", _yeniR];
+                    _plan set ["op", _opY];
+                    { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _yeniR;
+                    if !(_plan getOrDefault ["reconTamam", false]) then {
+                        _plan set ["hazirBekle", true];
+                        private _ctlR = _plan getOrDefault ["tasimaCtl", []];
+                        if (count _ctlR > 1) then { _ctlR set [1, false]; };
+                    };
+                    if !(_plan getOrDefault ["reconAracDene", false]) then {
+                        _plan set ["reconAracDene", true];
+                        private _raY = ["SEC", _plan] call FUNC(reconArac);
+                        if (!isNull _raY) then { _plan set ["reconArac", _raY]; };
+                    };
+                    diag_log format ["[PLAN-RECON] %1 | GEC KATILDI: recon %2 grup: %3 | OP %4 (objektiften %5 m) | nakil piyadeyi alip bekleyecek", _id, count _yeniR, _yeniR apply {groupId _x}, mapGridPosition _opY, round (_opY distance2D _obj)];
+                };
+            };
+            // v8.192: recon yoksa canli gozlemle (herkes dogrulayabilir) hazirlik atisi KESIF'i beklemeden denenir (10 sn'de bir)
+            if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {!(_plan getOrDefault ["hazirlikAtildi", false])} && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+                _plan set ["topcuDenT", time];
+                private _firedC = [_plan, _obj, "HAZIRLIK (canli gozlem, recon yok)"] call _topcuAt;
+                if (_firedC || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
+            };
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
             // v8.187: kesif unsuru varsa TOPLAN'in 300 sn zaman asimini beklemeden HEMEN gozleme gonderilir (once recon, sonra digerleri)
             private _reconOnce = (_tip isNotEqualTo 1) && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2};
@@ -651,6 +692,12 @@ while {true} do {
         // ---------------------------------------------------------------- TASIMA (arac nakli bitince TOPLAN'a doner; gruplar inis noktasindadir)
         if (_faz isEqualTo "TASIMA") then {
             private _th = _plan getOrDefault ["tasimaH", scriptNull];
+            // v8.192: recon yoksa canli gozlemle (herkes dogrulayabilir) hazirlik atisi KESIF'i beklemeden denenir (10 sn'de bir)
+            if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {!(_plan getOrDefault ["hazirlikAtildi", false])} && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+                _plan set ["topcuDenT", time];
+                private _firedC = [_plan, _obj, "HAZIRLIK (canli gozlem, recon yok)"] call _topcuAt;
+                if (_firedC || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
+            };
             // v8.138: plan gruplari ates altindaysa (arac yolda olsa bile) nakil iptal: piyade oldugu yerde savasir / plan devam eder
             if (!scriptDone _th && {(_gruplar findIf {[_x] call _temasta}) >= 0} && {!((_plan getOrDefault ["tasimaCtl", [false]]) select 0)}) then {
                 (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
@@ -737,7 +784,8 @@ while {true} do {
         };
         if (_faz isEqualTo "KESIF") then {
             private _topcuTip = _plan getOrDefault ["topcu", 0];
-            if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]}) then {
+            if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+                _plan set ["topcuDenT", time];
                 private _fired = [_plan, _obj, "HAZIRLIK"] call _topcuAt;
                 if (_fired || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
             };

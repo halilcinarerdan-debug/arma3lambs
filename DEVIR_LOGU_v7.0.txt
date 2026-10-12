@@ -2030,3 +2030,8 @@ v8.191 KURTARMA (kullanici: "bazi askerler geride kaldi neden? ayrica artillery 
  fnc_reconArac: ilerleme kurtarmasi (18 sn itme + emir, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi, 75 sn pes), 20 sn'de bir [RECON-ARAC] yolda logu, sure siniri 420 -> 600 sn.
  fnc_planZirh: IFV ayni konumda 2. kez takilirsa kaldir, 3. kez 25 m tasi.
  Not: TEST EDILMEDI. Donma NEDENI hala kanitli degil; [TASIMA-FIZIK] bir sonraki ipucu.
+
+v8.192 GEC RECON + CANLI DOGRULAMA (kullanici: "artillery hala ates etmedi, recon yola cikmadi neden? ayrica recon yoksa herkes dogrulayabilsin")
+ RPT 038c2564: (1) Recon: Zeus 'RECON' gorevi plan kurulduktan (23:27:55) 70 sn SONRA (23:29:05) atandi; plan recon gruplarini yalniz kurulus aninda topluyordu -> "gozlem: false", recon hic yola cikmadi. (2) Topcu: rapor (recon) olmadigi icin "dogrulama bekleniyor"; test KESIF'e varmadan bitti (TASIMA'nin 2. dk'si).
+ fnc_komutanPlanDongu: TOPLAN suresince atanan RECON gruplari plana alinir (OP = objektiften 520 m, nakil piyadeyi alip bekler, recon araci secilir; [PLAN-RECON] GEC KATILDI). _atisIzni: recon YOKSA taraftaki herhangi bir dost grup liderinin objektifin 500 m cevresinde bildigi dusman dogrulama sayilir (rapor gerekmez); "dusman gozlenmedi" artik KALICI iptal degil (tekrar denenir, 10 sn'de bir). TOPLAN / TASIMA fazlarinda recon yoksa hazirlik atisi canli gozlemle KESIF'i beklemeden denenir. Sivil gozlenirse yine iptal (PID).
+ Not: TEST EDILMEDI. Recon VARSA kural ayni: rapor gelince dogrulanir (+ canli gozlem eklenir).
