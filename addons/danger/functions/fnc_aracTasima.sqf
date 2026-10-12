@@ -727,6 +727,21 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac %2 m uzaktaki bos konuma tasindi (komsulara >= 9 m) (inise %3 m)", groupId _vg, round (_eskiSp distance2D _sp), round _dm];
                             };
                         };
+                        // v8.191 KALDIR + TASI (RPT bda5fbde: Milan APC 17 dk ayni konumda DONMUS - itme, SON CARE 14 m sonrasi bile): 40 sn'de burun duzeltilip 0.8 m kaldirilir, 55 sn'de 30 m inise dogru tasinir; fizik tanisi loglanir
+                        if (_denemeN isEqualTo 3 && {_dg > 40}) then {
+                            _denemeN = 4;
+                            diag_log format ["[TASIMA-FIZIK] %1 | z %2 | vectorUp %3 | yerde %4 | su %5 | hiz vektoru %6 | yuzey %7", groupId _vg, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}, isTouchingGround _v, surfaceIsWater (getPosATL _v), (velocity _v) apply {round _x}, surfaceType (getPosATL _v)];
+                            _v setVectorUp [0, 0, 1];
+                            _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
+                            _d doMove _drop;
+                        };
+                        if (_denemeN isEqualTo 4 && {_dg > 55} && {_dm > 150}) then {
+                            _denemeN = 5;
+                            _v setVehiclePosition [(getPosATL _v) getPos [30, (getPosATL _v) getDir _drop], [], 0, "NONE"];
+                            _v engineOn true;
+                            _d doMove _drop;
+                            diag_log format ["[TASIMA] %1 | TAKILMA KALDIR-TASI: arac 30 m inise dogru tasindi (inise %2 m)", groupId _vg, round _dm];
+                        };
                         // v8.185 SABIR: inise > 800 m kala hala kalkamadiysa askerleri yolun ortasinda indirmek yerine 120 sn'ye kadar dener (itme + waypoint yenileme, 6 sn'de bir); 35 sn'lik eski sinir yalniz inise < 800 m icin
                         if (_dm > 800 && {_dg > 30} && {(time - _itmeT) > 6}) then {
                             _itmeT = time;

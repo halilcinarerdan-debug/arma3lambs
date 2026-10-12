@@ -157,6 +157,14 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     private _yl = _ara nearRoads 120;
                     if (_yl isNotEqualTo []) then { _ara = getPosATL (_yl select 0); };
                     if (surfaceIsWater _ara) then { _ara = _poz; };
+                    // v8.191: 2. kez takildiysa kaldir + 25 m tasi (RPT bda5fbde: IFV 17 dk ayni konumda, ara nokta emri islemedi)
+                    private _tkN = (_g getVariable ["lambs_danger_planZirhTakN", 0]) + 1;
+                    _g setVariable ["lambs_danger_planZirhTakN", _tkN];
+                    if (_tkN >= 2) then {
+                        _v setVectorUp [0, 0, 1];
+                        _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
+                        if (_tkN >= 3) then { _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _poz], [], 0, "NONE"]; };
+                    };
                     _d action ["EngineOn", _v];
                     _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
                     _d doMove _ara;

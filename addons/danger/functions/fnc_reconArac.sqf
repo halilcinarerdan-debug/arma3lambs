@@ -121,8 +121,8 @@ _v setPilotLight false; _v setCollisionLight false;
 _d doMove _dur;
 { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
 private _w2 = _vg addWaypoint [_dur, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
-private _ts = time + 420;
-private _ilerD = 1e6; private _ilerT = time;
+private _ts = time + 600;
+private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20;
 private _bitis = "";
 while {_bitis isEqualTo ""} do {
     sleep 1;
@@ -132,8 +132,36 @@ while {_bitis isEqualTo ""} do {
     else { if (_dm < 45) then { _bitis = "vardi"; }
     else { if (time > _ts) then { _bitis = "sure"; }
     else { if (!(canMove _v)) then { _bitis = "hasar"; }; }; }; }; };
-    if (_bitis isEqualTo "" && {_dm < (_ilerD - 15)}) then { _ilerD = _dm; _ilerT = time; };
-    if (_bitis isEqualTo "" && {(time - _ilerT) > 45}) then { _bitis = "takildi"; };
+    if (_bitis isEqualTo "" && {_dm < (_ilerD - 15)}) then { _ilerD = _dm; _ilerT = time; _kurtN = 0; };
+    // v8.191 KURTARMA (RPT bda5fbde: recon araci OP'ye 454 m kala 45 sn ilerlemeyince hemen "takildi" sayildi, recon 375 m geride indi): 18 sn itme + emir yenile, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi; 75 sn'de pes
+    if (_bitis isEqualTo "") then {
+        private _dtk = time - _ilerT;
+        if (_dtk > 18 && {_kurtN isEqualTo 0}) then {
+            _kurtN = 1;
+            _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9;
+            _d doMove _dur; _v setVelocityModelSpace [0, 4, 0];
+            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 1: %3 sn ilerleme yok (kalan %4 m, hiz %5 km/s, motor %6) -> itme + emir yenilendi", _id, _ad, round _dtk, round _dm, round (speed _v), isEngineOn _v];
+        };
+        if (_dtk > 32 && {_kurtN isEqualTo 1}) then {
+            _kurtN = 2;
+            _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
+            private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
+            if (surfaceIsWater _alt) then { _alt = _dur; };
+            _d doMove _alt;
+            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
+        };
+        if (_dtk > 50 && {_kurtN isEqualTo 2}) then {
+            _kurtN = 3;
+            _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _dur], [], 0, "NONE"];
+            _d doMove _dur;
+            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 3: arac 25 m ileri tasindi", _id, _ad];
+        };
+        if (time > _logT) then {
+            _logT = time + 20;
+            diag_log format ["[RECON-ARAC] %1 | %2 | yolda: kalan %3 m | hiz %4 km/s | motor %5 | komut %6", _id, _ad, round _dm, round (speed _v), isEngineOn _v, currentCommand _d];
+        };
+    };
+    if (_bitis isEqualTo "" && {(time - _ilerT) > 75}) then { _bitis = "takildi"; };
     if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)}) then { _d action ["EngineOn", _v]; _v engineOn true; };
 };
 

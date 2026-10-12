@@ -2023,3 +2023,10 @@ v8.190 SAGLIK / RECON HIZ / TOPCU IZNI (kullanici: "saglik sistemi ve artillery 
  fnc_tccc: tedavi sirasinda hekimde esya yoksa yaralidan / 25 m icindeki dostlardan alinir ([TCCC-ESYA]); yaklasma suresi ilerledikce uzar (3 m ilerleme = +12 sn, toplam 150 sn); varis esigi 3 -> 4.5 m.
  fnc_komutanPlanDongu: _atisIzni - rapor sonrasi plan gruplarinin canli bildigi dusman (objektif 500 m, knowsAbout > 0.5) gozlenmis sayilir (PID kurali: yine de dusman gorunmeden atis YOK).
  Not: TEST EDILMEDI.
+
+v8.191 KURTARMA (kullanici: "bazi askerler geride kaldi neden? ayrica artillery calismadi")
+ RPT bda5fbde: (1) Neden: Milan APC Alpha 2-3 baslangictan 17 dk AYNI konumda DONMUS (itme, SON CARE 14 m, planZirh ara noktalari sonuc vermedi; [TASIMA-SIM]: simulasyon acik, dinamik sim kapali, baglanti yok -> bu hipotezler ELENDI); 8 asker 121 sn sonra 2890 m geride indi, 2. sefer ancak 3.5 dk sonra basladi. 4 arac "35 sn ilerleme yok" ile 490-620 m kala indirdi. (2) Recon araci 387 sn'de 2100 m (ort. 20 km/s), OP'ye 454 m kala 45 sn ilerlemeyince "takildi", recon 375 m geride indi; plan 821 sn recon'da kaldi. (3) Topcu: gozlem 0 dusman (recon OP'ye varamadi) -> HAZIRLIK iptal; oyun KESIF'e varmadan bitti.
+ fnc_aracTasima: SON CARE sonrasi hala kimildamayan arac: 40 sn'de burun duzeltilip 0.8 m kaldirilir ([TASIMA-FIZIK] tani: z, vectorUp, yerde mi, yuzey), 55 sn'de inise dogru 30 m tasinir.
+ fnc_reconArac: ilerleme kurtarmasi (18 sn itme + emir, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi, 75 sn pes), 20 sn'de bir [RECON-ARAC] yolda logu, sure siniri 420 -> 600 sn.
+ fnc_planZirh: IFV ayni konumda 2. kez takilirsa kaldir, 3. kez 25 m tasi.
+ Not: TEST EDILMEDI. Donma NEDENI hala kanitli degil; [TASIMA-FIZIK] bir sonraki ipucu.
