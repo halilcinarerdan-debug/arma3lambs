@@ -2016,3 +2016,10 @@ v8.189 KONVOY / TANK YOL / TOPCU HAZIRLIK (kullanici: "arkadaki askerler cepheye
  fnc_planZirh: "mevzide" zaman asimi artik planZirhMax (mesafe / 2.2 m/sn, 240-900 sn); temas yokken ve > 700 m varken SAFE + FULL (yakininda COMBAT / NORMAL); 25 sn < 1.5 km/s -> 220 m'lik yola oturtulmus ara noktaya yonlendirme ([PLAN-ZIRH] TAKILDI).
  fnc_komutanPlanDongu: topcu HAZIRLIK atisi recon raporu gelir gelmez (KESIF'i beklemez); izin (PID, RED, min menzil) _topcuAt icinde.
  Not: TEST EDILMEDI. Milan APC'lerin baslangicta kalkmama NEDENI kanitli degil; [TASIMA-SIM] satiri ilk ipucunu verir.
+
+v8.190 SAGLIK / RECON HIZ / TOPCU IZNI (kullanici: "saglik sistemi ve artillery calismiyor, recon apcsi asiri yavas, dur-kalk stealth'tan olabilir")
+ RPT 2a205c2b: (1) Recon APC 5-13 km/s: surucu grubu STEALTH + LIMITED; ayrica mekanizeIzle forceSpeed'i her 20 sn sifirliyordu. (2) TCCC: hekim yaralinin 8-39 m'sinde "sure doldu (yetisemedi)" iptalleri (25-72 sn), hekim Scharf'ta hic tibbi esya yok (YOK-ESYA x10+). (3) Topcu: menzil disi -> yer degistirdi (4201 m) ama hazirlik "hedefte dusman gozlenmedi" (recon 90 sn 0 dusman gordu), saldiri basi CAGRI da ayni (rapor sonrasi canli gozlem sayilmiyordu).
+ fnc_reconArac: surucu grubu SAFE / NORMAL + forceSpeed 9 (~32 km/s), senkT ile mekanizeIzle muaf; recon askerleri STEALTH + GREEN kalir; isiklar kapali.
+ fnc_tccc: tedavi sirasinda hekimde esya yoksa yaralidan / 25 m icindeki dostlardan alinir ([TCCC-ESYA]); yaklasma suresi ilerledikce uzar (3 m ilerleme = +12 sn, toplam 150 sn); varis esigi 3 -> 4.5 m.
+ fnc_komutanPlanDongu: _atisIzni - rapor sonrasi plan gruplarinin canli bildigi dusman (objektif 500 m, knowsAbout > 0.5) gozlenmis sayilir (PID kurali: yine de dusman gorunmeden atis YOK).
+ Not: TEST EDILMEDI.

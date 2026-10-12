@@ -104,6 +104,18 @@ private _atisIzni = {
     private _gs = _plan getOrDefault ["gozSivil", 0];
     private _gd = _plan getOrDefault ["gozDusman", 0];
     if (_gs > 0) exitWith { [false, format ["SIVIL GOZLENDI (%1): atis IPTAL (PID)", _gs], false] };
+    // v8.190: rapor sonrasi canli gozlem (RPT 2a205c2b: saldiri temasinda bile "gozlenmedi" -> 0 atis): plan gruplarinin bildigi dusman objektifin 500 m cevresinde ise sayilir
+    if (_gd < 1) then {
+        private _objL = _plan get "obj";
+        private _tf = _plan get "taraf";
+        {
+            private _gl = leader _x;
+            if (!isNull _gl) then {
+                { if (((_tf getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objL) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5}) then { _gd = _gd + 1; }; } forEach (_gl nearTargets 900);
+            };
+        } forEach (_plan getOrDefault ["gruplar", []]);
+        if (_gd > 0) then { _plan set ["gozDusman", _gd]; };
+    };
     if (_gd < 1) exitWith { [false, "hedefte dusman gozlenmedi: atis IPTAL", false] };
     [true, format ["dogrulandi: %1 dusman, 0 sivil", _gd], false]
 };

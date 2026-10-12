@@ -113,12 +113,14 @@ diag_log format ["[RECON-ARAC] %1 | %2 | %3 recon askeri bindi -> OP'ye sessiz s
 private _dur = _op getPos [150, _op getDir (_plan get "rp")];
 private _yol = (_dur nearRoads 120) select {!surfaceIsWater (getPosATL _x)};
 if (_yol isNotEqualTo []) then { _yol = [_yol, [], {_x distance2D _dur}, "ASCEND"] call BIS_fnc_sortBy; _dur = getPosATL (_yol select 0); };
-_vg setBehaviour "STEALTH"; _vg setCombatMode "GREEN"; _vg setSpeedMode "LIMITED";
-_d forceSpeed 7;
+// v8.190: surucu grubu SAFE / NORMAL + forceSpeed 9 (~32 km/s): STEALTH + LIMITED araci 5-13 km/s'e dusuruyordu ve mekanizeIzle forceSpeed'i her 20 sn sifirliyordu (RPT 2a205c2b); sessizlik: ates yok (GREEN), isiksiz, recon askerleri STEALTH
+_vg setBehaviour "SAFE"; _vg setCombatMode "GREEN"; _vg setSpeedMode "NORMAL";
+_d setVariable [QGVAR(senkT), time + 900];
+_d forceSpeed 9;
 _v setPilotLight false; _v setCollisionLight false;
 _d doMove _dur;
 { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
-private _w2 = _vg addWaypoint [_dur, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "STEALTH"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "LIMITED"; _vg setCurrentWaypoint _w2;
+private _w2 = _vg addWaypoint [_dur, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
 private _ts = time + 420;
 private _ilerD = 1e6; private _ilerT = time;
 private _bitis = "";
@@ -149,7 +151,7 @@ _plan set ["reconAracInis", true];
 // ---- 5) arac sessizce 250 m geri cekilir, orada bekler (recon alma / destek icin); isiklar kapali
 private _geri = _dur getPos [250, (_plan get "rp") getDir _dur];
 if (!surfaceIsWater _geri && {alive _v} && {alive _d} && {canMove _v}) then {
-    _d forceSpeed 7;
+    _d forceSpeed 9;
     _d doMove _geri;
     private _tg = time + 120;
     waitUntil { sleep 2; !alive _v || {(_v distance2D _geri) < 40} || {time > _tg} };
@@ -163,7 +165,7 @@ if (!isNull _vg) then {
     _vg setCombatMode _eskiMod;
     _vg setVariable [QGVAR(aracMedevacT), time];
 };
-if (alive _d) then { _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
+if (alive _d) then { _d setVariable [QGVAR(senkT), nil]; _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
 _v setVariable [QGVAR(tasimaMesgul), nil];
 _vg setVariable [QGVAR(tasimaSonT), time];
 diag_log format ["[RECON-ARAC] %1 | %2 | geri cekildi, rezerv", _id, _ad];

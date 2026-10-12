@@ -99,6 +99,23 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
     private _tx = {
         params ["_m", "_c", "_part", "_cls"];
         if (isNil "lambs_danger_tcccTxN") then { lambs_danger_tcccTxN = 0; };
+        // v8.190 ESYA TEDARIGI (RPT 2a205c2b: hekim Scharf "tibbi esyalar: []" - 10+ adim YOK-ESYA, yarali tedavi edilemedi): hekimde yoksa yaralidan / 25 m icindeki dostlardan alinir
+        if !([_m, _cls] call lambs_danger_tcccVarMi) then {
+            private _l0 = lambs_danger_tcccMalzeme getOrDefault [toLower _cls, []];
+            if (_l0 isNotEqualTo []) then {
+                private _kaynaklar = [_c] + (((getPosATL _m) nearEntities ["CAManBase", 25]) select {alive _x && {_x isNotEqualTo _m} && {_x isNotEqualTo _c} && {(side (group _x)) isEqualTo (side (group _m))}});
+                {
+                    private _src = _x;
+                    private _ix = (items _src) findIf {(toLower _x) in _l0};
+                    if (_ix >= 0) exitWith {
+                        private _it = (items _src) select _ix;
+                        _src removeItem _it;
+                        _m addItem _it;
+                        diag_log format ["[TCCC-ESYA] %1 hekimde %2 yok -> %3 kaynagindan alindi (%4)", name _m, _cls, name _src, _it];
+                    };
+                } forEach _kaynaklar;
+            };
+        };
         if !([_m, _cls] call lambs_danger_tcccVarMi) exitWith {
             if (lambs_danger_tcccTxN < 120) then {
                 lambs_danger_tcccTxN = lambs_danger_tcccTxN + 1;
@@ -191,6 +208,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         _m setUnitPos "UP";
         _m doMove (getPosATL _c);
         private _tazeT = time + 1.5;
+        private _enYakin = _m distance2D _c;
         private _durPos = getPosATL _m; private _durT = time; private _durKademe = 0;
         waitUntil {
             sleep 0.7;
@@ -226,10 +244,12 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             };
             // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
             if (time > _tazeT && {([_m] call lambs_danger_tcccMedikOk)} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
-            !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 3} || {time > _bitis}
+            // v8.190: yaklasiyorsa (3 m+ ilerleme) sure uzar (toplam 150 sn'ye kadar); RPT 2a205c2b: 8-39 m'de "sure doldu" iptalleri
+            if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) < (_enYakin - 3)}) then { _enYakin = _m distance2D _c; _bitis = (_bitis max (time + 12)) min (_t0 + 150); };
+            !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 4.5} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
         };
-        if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 5}) exitWith {
+        if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 6}) exitWith {
             // v8.80 IPTAL NEDENI (RPT f8015d87: 5 hekim atandi, 1 yaraliyi bitirdi; digerleri sessizce birakildi)
             diag_log format ["[TCCC] %1 | %2 -> %3 | IPTAL (yaklasma): %4 | mesafe %5 m | hekim baski %6 | %7 sn", groupId _g, name _m, name _c,
                 ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!([_m] call lambs_danger_tcccMedikOk))),
