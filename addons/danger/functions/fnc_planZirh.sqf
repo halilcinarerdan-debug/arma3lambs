@@ -127,7 +127,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
 
     // ---- varis ----
     private _vardi = _g getVariable ["lambs_danger_planZirhVardi", false];
-    if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > 240}}) then {
+    if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
         _vardi = true;
         _g setVariable ["lambs_danger_planZirhVardi", true];
         doStop _d;
@@ -138,6 +138,31 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhMoveT", time];
             _d doMove _poz;
+        };
+        // v8.189 YOL YURUYUSU: temas yokken ve pozisyona > 700 m varken SAFE + FULL (COMBAT / NORMAL tanki 15 km/s'te yuruyordu: RPT aee29fdd tank 4 dk'da 700 m); yaklasinca COMBAT
+        if (!_vardi) then {
+            private _uzak = (_v distance2D _poz) > 700 && {!_savas} && {_faz in ["TOPLAN", "RECON", "TASIMA", "KUR", "ORP"]};
+            if (_uzak isNotEqualTo (_g getVariable ["lambs_danger_planZirhYol", false])) then {
+                _g setVariable ["lambs_danger_planZirhYol", _uzak];
+                if (_uzak) then { _g setBehaviour "SAFE"; _g setSpeedMode "FULL"; } else { _g setBehaviour "COMBAT"; _g setSpeedMode "NORMAL"; };
+                _d forceSpeed -1;
+                diag_log format ["[PLAN-ZIRH] %1 | %2 yol yuruyusu %3 (pozisyona %4 m)", _id, groupId _g, ["KAPALI: COMBAT / NORMAL", "ACIK: SAFE / FULL"] select _uzak, round (_v distance2D _poz)];
+            };
+            // takilma: 25 sn'den uzun < 1.5 km/s ise 220 m'lik (yola oturtulmus, +-50 derece) ara noktaya yonlendirilir
+            if ((speed _v) < 1.5) then {
+                if ((_g getVariable ["lambs_danger_planZirhDurT", -1]) < 0) then { _g setVariable ["lambs_danger_planZirhDurT", time]; };
+                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > 25 && {(_v distance2D _poz) > 80}) then {
+                    _g setVariable ["lambs_danger_planZirhDurT", time];
+                    private _ara = (getPosATL _v) getPos [220, ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
+                    private _yl = nearestRoad [_ara, 120] ;
+                    if (!isNull _yl) then { _ara = getPosATL _yl; };
+                    if (surfaceIsWater _ara) then { _ara = _poz; };
+                    _d action ["EngineOn", _v];
+                    _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+                    _d doMove _ara;
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 TAKILDI (<1.5 km/s, 25 sn): ara noktaya yonlendirildi (%3 m) | pozisyona %4 m", _id, groupId _g, round (_v distance2D _ara), round (_v distance2D _poz)];
+                };
+            } else { _g setVariable ["lambs_danger_planZirhDurT", -1]; };
         };
     };
 

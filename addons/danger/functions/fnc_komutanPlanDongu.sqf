@@ -626,6 +626,11 @@ while {true} do {
                 // RAPOR (recon grubunun gozlemi): dusman + sivil sayisi, iddia farki, komutan inanci guncellenir
                 private _rap = [_plan, [_rg, _gruplar] select (_rg isEqualTo []), _bozuldu, _gozlemS, "recon"] call _gozlemRapor;
                 _plan set ["reconTamam", true];
+                // v8.189: topcu hazirligi recon raporundan HEMEN sonra (piyade yaklasirken); onceden ancak ORP'de (KESIF) atiliyordu ve plan oraya hic ulasmiyordu (RPT aee29fdd: 15 dk, 0 atis). Izin / RED kurallari _topcuAt icinde
+                if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]}) then {
+                    private _firedR = [_plan, _obj, "HAZIRLIK (recon raporu sonrasi)"] call _topcuAt;
+                    if (_firedR || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
+                };
                 [_plan, "TOPLAN", "recon raporu alindi"] call _fazGec;
             };
             continue

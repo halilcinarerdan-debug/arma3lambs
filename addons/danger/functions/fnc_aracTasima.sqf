@@ -330,6 +330,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         private _eskiHiz = speedMode _vg;
         private _eskiAC = _d checkAIFeature "AUTOCOMBAT";
         _vg setVariable [QGVAR(aracMedevacT), time];   // medevac / diger arac gorevleri 240 sn almasin
+        _v enableDynamicSimulation false; _vg enableDynamicSimulation false;   // v8.189: uzak arac dinamik simulasyonla donmasin
         _vg setVariable [QGVAR(isExecutingTactic), true];
         _d setVariable [QGVAR(forceMove), true];
         _vg setBehaviour "AWARE";
@@ -490,8 +491,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             // v8.148 YOLCU BEKCISI (RPT 16fa2656: Newton / Moore "komut:GET OUT" 80-90 km/s giden Stryker'da, Moore 12:12:39 28 km/s anim:unconscious = disari atlamis):
             // tasima suresince yolcunun PATH'i kapali, "GET OUT" emri alirsa iptal (doStop), araca aitken disarida kalirsa (aractan < 80 m, arac hareketli) geri alinir. Inis (4) bayrak koyunca biter.
             _v setVariable [QGVAR(yolcuBirak), false];
-            [_v, _binen, groupId _vg] spawn {
-                params ["_v", "_ps", "_gid"];
+            [_v, _binen, groupId _vg, _drop] spawn {
+                params ["_v", "_ps", "_gid", "_drop"];
+                // v8.189: inis noktasindan > 600 m uzaktaki arac (takilsa bile) yolcusunu birakmaz: lider onden inince takipciler "GET OUT" alir (RPT aee29fdd: lideri onde inen 5 asker 1.8 km geride indi)
+                private _uzakTut = {
+                    (alive _v) && {(_v distance2D _drop) > 600} && {(damage _v) < 0.6}
+                    && {((_v nearEntities [["CAManBase", "LandVehicle"], 300]) findIf {alive _x && {((side _x) getFriend (side (group (driver _v)))) < 0.6}}) < 0}
+                };
                 { if (alive _x) then { _x disableAI "PATH"; }; } forEach _ps;
                 private _ilk = [];
                 while {alive _v && {!(_v getVariable [QGVAR(yolcuBirak), false])} && {_v getVariable [QGVAR(tasimaMesgul), false]}} do {
@@ -499,7 +505,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         private _u = _x;
                         if (!alive _u) then { continue };
                         if ((vehicle _u) isEqualTo _v) then {
-                            if ((currentCommand _u) isEqualTo "GET OUT" && {(speed _v) > 5}) then {   // v8.187: arac DURMUSKEN (temas / hasar / takilma) inme emri iptal edilmez (RPT 95be8b53: durmus aracta 1-2 asker inemedi)
+                            if ((currentCommand _u) isEqualTo "GET OUT" && {(speed _v) > 5 || {call _uzakTut}}) then {   // v8.187: arac DURMUSKEN (temas / hasar / takilma) inme emri iptal edilmez (RPT 95be8b53: durmus aracta 1-2 asker inemedi)
                                 doStop _u;
                                 if !(_u in _ilk) then {
                                     _ilk pushBack _u;
@@ -507,7 +513,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 };
                             };
                         } else {
-                            if ((_u distance2D _v) < 80 && {(speed _v) > 3} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(_v emptyPositions "cargo") > 0}) then {
+                            if ((_u distance2D _v) < 80 && {(speed _v) > 3 || {call _uzakTut}} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(_v emptyPositions "cargo") > 0}) then {
                                 _u moveInCargo _v;
                                 diag_log format ["[TASIMA] %1 | YOLCU GERI ALINDI: %2 | arac hizi %3 km/s", _gid, name _u, round speed _v];
                             };
@@ -598,7 +604,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 // v8.171 KONVOY SENKRONU (MCWP 3-11.1 s. 6-36: tank / piyade araclari karsilikli destek mesafesinde birlikte ilerler; inis noktasinda kontrol kurulup birlikte saldirilir): hizli arac, ardindaki arac(lar)i > 250 m geride birakmasin
                 if (_bitis isEqualTo "" && {!_frenli} && {_dm > 350} && {alive _v} && {alive _d}) then {
                     private _geri = (_senk select 2) select {
-                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false} && {(_x distance2D _drop) > (_dm + 250)}
+                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false} && {(_x distance2D _drop) > (_dm + 250)} && {(_x getVariable [QGVAR(durgunSn), 0]) < 10}
                     };
                     if (_geri isNotEqualTo [] && {_senkT < 90}) then {
                         private _en = 9999;
@@ -656,6 +662,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                     if (_hz < 0.8 && {_dm > 90}) then {
                         if (_durgunT < 0) then { _durgunT = time; };
                         private _dg = time - _durgunT;
+                        _v setVariable [QGVAR(durgunSn), _dg];   // v8.189: konvoy senkronu takili araci beklemez
                         // v8.140: daha hizli mudahale (RPT 2ca0498e: bir Stryker bindirdikten sonra 0 km/s kaldi; 20/45/75 sn cok uzundu) + tani
                         if (_denemeN isEqualTo 0 && {_dg > 8}) then {
                             _denemeN = 1;
@@ -672,7 +679,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 ((_v nearEntities [["LandVehicle"], 20]) select {_x isNotEqualTo _v}) apply {[typeOf _x, round (_v distance2D _x), round (speed _x)]},
                                 _d getVariable [QGVAR(forceMove), false], _v getVariable [QGVAR(yolcuBirak), false], _v getVariable [QGVAR(tasimaMesgul), false], _vg getVariable [QGVAR(isExecutingTactic), false],
                                 (velocity _v) apply {round _x}];
-                            _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
+                            // v8.189: baslangicta hic kalkmayan Milan APC'ler (RPT aee29fdd: itme hizi 0, motor acik, canMove true): simulasyon / dinamik simulasyon / baglanma tanisi + uyandirma
+                            diag_log format ["[TASIMA-SIM] %1 | simulasyon %2 | dinamik sim arac %3 grup %4 | baglanti %5 | kilit %6 | gizli %7 | takim yolcu %8",
+                                groupId _vg, simulationEnabled _v, dynamicSimulationEnabled _v, dynamicSimulationEnabled _vg, attachedTo _v, locked _v, isObjectHidden _v, count (crew _v)];
+                            _v enableDynamicSimulation false; _vg enableDynamicSimulation false;
+                            if (!simulationEnabled _v) then { _v enableSimulationGlobal true; };
+                            if (!isNull (attachedTo _v)) then { detach _v; };
+                                            _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
                             _d setVariable [QGVAR(forceMove), true];
                             _v engineOn true;
                             _d forceSpeed -1; doStop _d; _d doMove _drop;
@@ -729,7 +742,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             };
                         };
                         if (_dg > ([35, 120] select (_dm > 800))) then { _bitis = "takildi"; };
-                    } else { _durgunT = -1; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
+                    } else { _durgunT = -1; _v setVariable [QGVAR(durgunSn), 0]; if (_denemeN > 0 && {_hz > 2}) then { _denemeN = 0; }; };
                     if (time > _logT) then {
                         _logT = time + 20;
                         diag_log format ["[TASIMA] %1 | yolda: inise %2 m | hiz %3 km/s", groupId _vg, round _dm, round (speed _v)];
