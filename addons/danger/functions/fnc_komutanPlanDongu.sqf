@@ -479,6 +479,12 @@ while {true} do {
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
             if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
                 // v8.187 SENKRON KALKIS: kesif unsuru (RECON) ya da zirh destek (tank) varsa nakil araclari piyadeyi alip BEKLER (hazir = false); gozlem bitince ve tanklar mevzilerine yaklasinca (komuta dongusu) serbest birakilir
+                // v8.188: recon unsuru icin tek bir arac ayrilir (ana nakilden once secilir; aracTasima isaretli araci almaz)
+                if ((_plan getOrDefault ["reconG", []]) isNotEqualTo [] && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2} && {!(_plan getOrDefault ["reconAracDene", false])}) then {
+                    _plan set ["reconAracDene", true];
+                    private _ra = ["SEC", _plan] call FUNC(reconArac);
+                    if (!isNull _ra) then { _plan set ["reconArac", _ra]; };
+                };
                 private _bekleKos = ((_plan getOrDefault ["reconG", []]) isNotEqualTo [] && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) || {(_plan getOrDefault ["zirhG", []]) isNotEqualTo []};
                 _plan set ["tasimaCtl", [false, !_bekleKos, 0, 0, 0, [], true]];
                 _plan set ["hazirBekle", _bekleKos];
@@ -501,6 +507,8 @@ while {true} do {
                     {
                         private _g = _x;
                         private _poz = _opN getPos [10 * _forEachIndex, _B + ([90, -90] select (_forEachIndex % 2 isEqualTo 1))];
+                        // v8.188: recon araci varsa yaya waypoint ARAC INISINDAN sonra (RECON dali) yazilir
+                        if (isNull (_plan getOrDefault ["reconArac", objNull])) then {
                         [_g, [[_poz, "MOVE", "RECON -> OP", "STEALTH", "LIMITED", 25]]] call _wpYaz;
                         private _wr = (waypoints _g) select ((count (waypoints _g)) - 1);
                         _wr setWaypointBehaviour "STEALTH";
@@ -510,8 +518,12 @@ while {true} do {
                         _g setCombatMode "GREEN";
                         _g setSpeedMode "LIMITED";
                         { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "MIDDLE"; }; } forEach (units _g);
+                        };
                         (_plan get "notlar") set [format ["%1_op", groupId _g], [_poz, -1]];
                     } forEach _rgl;
+                    if (!isNull (_plan getOrDefault ["reconArac", objNull])) then {
+                        _plan set ["reconAracH", ["CALIS", _plan, _rgl, _opN] spawn FUNC(reconArac)];
+                    };
                     diag_log format ["[PLAN-RECON] %1 | recon OP'ye gidiyor (STEALTH + GREEN: ates gelene kadar ates yok) | %2 grup | OP %3", _id, count _rgl, mapGridPosition _opN];
                     [_plan, "RECON", format ["%1 grup gozlem noktasina", count _rgl]] call _fazGec;
                     continue
@@ -569,12 +581,34 @@ while {true} do {
             private _rg = (_plan get "reconG") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
             private _vardi = 0;
             private _bozuldu = false;
+            // v8.188 RECON ARACI: arac sessizce goturup indirene kadar bekle; sonra (ya da basarisizsa) yaya STEALTH waypoint yazilir
+            private _raVar = !isNull (_plan getOrDefault ["reconArac", objNull]);
+            private _raBitti = (_plan getOrDefault ["reconAracInis", false]) || {_plan getOrDefault ["reconAracBasarisiz", false]} || {!_raVar};
+            if (_raVar && {_raBitti} && {!(_plan getOrDefault ["reconYayaYazildi", false])}) then {
+                _plan set ["reconYayaYazildi", true];
+                _plan set ["reconFazT", time];
+                private _opR = _plan get "op";
+                {
+                    private _g = _x;
+                    private _poz = (_notlar getOrDefault [format ["%1_op", groupId _g], [_opR, -1]]) select 0;
+                    [_g, [[_poz, "MOVE", "RECON -> OP", "STEALTH", "LIMITED", 25]]] call _wpYaz;
+                    private _wr = (waypoints _g) select ((count (waypoints _g)) - 1);
+                    _wr setWaypointBehaviour "STEALTH";
+                    _wr setWaypointCombatMode "GREEN";
+                    _wr setWaypointSpeed "LIMITED";
+                    _g setBehaviour "STEALTH";
+                    _g setCombatMode "GREEN";
+                    _g setSpeedMode "LIMITED";
+                } forEach _rg;
+                diag_log format ["[PLAN-RECON] %1 | recon araci isi bitti (%2) -> son yaklasma yaya", _id, ["basarisiz", "indirdi"] select (_plan getOrDefault ["reconAracInis", false])];
+            };
+            private _fazSureR = if (_raVar) then {time - (_plan getOrDefault ["reconFazT", time])} else {_fazSure};
             {
                 private _g = _x;
                 private _t = _notlar getOrDefault [format ["%1_op", groupId _g], []];
                 if ([_g] call _temasta) then { _bozuldu = true; };
-                if (_t isNotEqualTo []) then {
-                    if (((leader _g) distance2D (_t select 0)) < 40 || {_fazSure > 240}) then {
+                if (_t isNotEqualTo [] && {_raBitti}) then {
+                    if (((leader _g) distance2D (_t select 0)) < 40 || {_fazSureR > 240}) then {
                         if ((_t select 1) < 0) then {
                             _t set [1, time];
                             { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "DOWN"; }; } forEach (units _g);
@@ -588,7 +622,7 @@ while {true} do {
             if (_vardi >= (count _rg) && {!("reconVarT" in _plan)}) then { _plan set ["reconVarT", time]; };
             private _gozlemS = if (!("reconVarT" in _plan)) then {0} else {time - (_plan get "reconVarT")};
             private _gozlemHedef = [90, 45, 20] select ((_plan getOrDefault ["dogrulama", 0]) min 2);
-            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= _gozlemHedef} || {_fazSure > 420}) then {
+            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= _gozlemHedef} || {_fazSure > 900} || {_fazSureR > 420}) then {
                 // RAPOR (recon grubunun gozlemi): dusman + sivil sayisi, iddia farki, komutan inanci guncellenir
                 private _rap = [_plan, [_rg, _gruplar] select (_rg isEqualTo []), _bozuldu, _gozlemS, "recon"] call _gozlemRapor;
                 _plan set ["reconTamam", true];

@@ -95,6 +95,7 @@ private _merkezPiy = {
 private _pickRef = call _merkezPiy;
 private _tumAraclar = (vehicles select {
     alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(fuel _x) > 0.1}
+    && {!(_x getVariable ["lambs_danger_reconArac", false])}
     && {(_x emptyPositions "cargo") >= 3}
     && {(_x distance2D _pickRef) <= _menzil}
 });

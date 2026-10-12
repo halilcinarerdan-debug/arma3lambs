@@ -2003,3 +2003,9 @@ v8.187 - Senkron kalkis (once recon, tanklar mevzi yakini), 2. tank, inemeyen yo
  fnc_aracTasima: durmus aracta (< 5 km/s) "GET OUT" iptal edilmez; inis sonrasi 3 sn icinde hala aracta kalan zorla indirilir ([TASIMA] INEMEYEN ASKER).
  fnc_aracUzak: etkisiz arac = hareket edemez + hasar > 0.05.
  Not: recon APC ile gitsin istegi: recon su an yaya (STEALTH). TEST EDILMEDI.
+
+v8.188 RECON ARACI (kullanici: "RECON apc ile gitsin, bir apc recona ayrilsin, yuruyerek cok zor ama yine sessiz olsun")
+ fnc_reconArac (YENI): SEC = plan kurulurken recon icin TEK arac ayirir (AI surucu, kargo >= recon askeri, APC > kamyon > IFV, <= 4000 m; "lambs_danger_reconArac" isareti, aracTasima bu araci almaz). CALIS = recon grubu alinir (uzaksa arac gider, piyade biner), STEALTH + GREEN + LIMITED, ~25 km/s, isiksiz, OP'ye 150 m kala (RP yonunden, yola oturtulmus) durup indirir; arac 250 m geri cekilir. Temas / takilma / zaman asimi -> oldugu yerde iner. Log: [RECON-ARAC].
+ fnc_komutanPlanDongu: KUR'da SEC; RECON baslangicinda arac varsa yaya waypoint yazilmaz, CALIS baslar; RECON fazinda arac bitince (indirdi / basarisiz) yaya STEALTH waypoint yazilir, varis / gozlem sureleri o andan sayilir (tavan 900 sn). Arac yoksa eski davranis (yaya).
+ fnc_aracTasima: recon aracini ana nakilden haric tutar.
+ Not: TEST EDILMEDI. Beklenen log: [RECON-ARAC] arac secildi -> [PLAN-RECON] recon OP'ye gidiyor -> inis -> "son yaklasma yaya".
