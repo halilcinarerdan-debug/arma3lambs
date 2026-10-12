@@ -2077,3 +2077,9 @@ v8.199 BASIT TOPCU + HQ TAMAMI (kullanici: "artillery basit olsun opsiyonel seci
  Objektif paneli 1/4 "Grup secimi": 3. ve 4. secenek = "HQ TAMAMI (guvenlik birakilir)" / "HQ TAMAMI (hepsi)" (yalniz ELE GECIR): secilen HQ / US'ye bagli TUM squadlar (sayi siniri yok) + HQ yaricapi x1.5 + 200 m icindeki ayni taraf karakol garnizonlari ([serbest birak], garnizon AYARI SILINIR - Garnizon modulu yeniden calistirilmali) + ayni HQ'nun SAVUNMA plani mevzi squadlari (o savunma plani IPTAL, squadlar saldiriya). "Guvenlik birakilir": en zayif squad HQ'da kalir (cevre emniyeti; MCWP 3-11.1 genel ilke - sayisal olcut tasarim). Log: [PLAN-HQ-TUM].
  Destek: yeni bir mekanizma EKLENMEDI; mevcut HQ takviyesi (hqTakviye, 900 m, musait gruplar) calisir. Karakol / mevzi squadlari plan disindayken takviye olarak gonderilmez (garnizon alt gruplari ve planAktif gruplari musait sayilmaz).
  Not: TEST EDILMEDI. Mevzi garnizonundaki (LAMBS Garrison) askerlerin binalardan cikarilmasi gozlenmedi.
+
+v8.200 RECON BEKLEME (kullanici: "otomatik sayi calismiyor, kimse hareket etmedi")
+ RPT 59babdf1: otomatik sayi CALISTI (WEST ELE GECIR 4 grup / 40 asker, 6 arac eslesti). "Kimse hareket etmedi" = SENKRON kapisi: nakil araclari recon bitene (en cok 420 sn) kadar piyadeyi alip bekliyordu; recon araci (RHS Stryker M1126) binmeden sonra 14 km/s'ten 0'a dustu, KURTARMA 1-3 sonuc vermedi (konum ayni, komut '' = AI emri dusurdu) - oyun 420 sn dolmadan bitti. DONMUS ARAC NEDENI hala bilinmiyor (Milan APC, M1126, farkli mod / harita - genel); EZME / aracSenkron bu aracta devrede degildi.
+ fnc_komutanPlanDongu: SENKRON - recon yaya yola ciktiktan (reconFazT) 120 sn sonra ve tanklar hazirsa ana kol beklemez (ATP 4-01.45: kesif ana kolun onunde ayrik gider).
+ fnc_reconArac: ilerleme yok sayma 75 -> 60 sn; KURTARMA 1'de [RECON-ARAC-TANI] (yerellik / sahip, koltuklar, grup lideri, waypoint, komut, bayraklar, engel, yuzey).
+ Not: TEST EDILMEDI.

@@ -142,6 +142,11 @@ while {_bitis isEqualTo ""} do {
             _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9;
             _d doMove _dur; _v setVelocityModelSpace [0, 4, 0];
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 1: %3 sn ilerleme yok (kalan %4 m, hiz %5 km/s, motor %6) -> itme + emir yenilendi", _id, _ad, round _dtk, round _dm, round (speed _v), isEngineOn _v];
+            // v8.200 TANI (donmus arac nedeni hala bilinmiyor): yerellik, koltuklar, grup lideri, waypoint, komut, engel, sinirlayici bayraklar
+            diag_log format ["[RECON-ARAC-TANI] %1 | arac yerel %2 sahip %3 | surucu yerel %4 | koltuklar surucu %5 / komutan %6 / nisanci %7 | grup lideri %8 (aracta %9) | waypoint %10 aktif %11 | beh %12 mod %13 hiz modu %14 | komut %15 | unitReady %16 | bayraklar ezmeFren %17 senkT %18 forceMove %19 | 12 m icinde nesne %20 | komsu arac %21 | yuzey %22",
+                _id, local _v, owner _v, local _d, name (driver _v), name (commander _v), name (gunner _v), name (leader _vg), (vehicle (leader _vg)) isEqualTo _v, count (waypoints _vg), currentWaypoint _vg, behaviour _d, combatMode _vg, speedMode _vg, currentCommand _d, unitReady _d,
+                _v getVariable [QGVAR(ezmeFren), false], _d getVariable [QGVAR(senkT), 0], _d getVariable [QGVAR(forceMove), false],
+                ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
         };
         if (_dtk > 32 && {_kurtN isEqualTo 1}) then {
             _kurtN = 2;
@@ -162,7 +167,7 @@ while {_bitis isEqualTo ""} do {
             diag_log format ["[RECON-ARAC] %1 | %2 | yolda: kalan %3 m | hiz %4 km/s | motor %5 | komut %6", _id, _ad, round _dm, round (speed _v), isEngineOn _v, currentCommand _d];
         };
     };
-    if (_bitis isEqualTo "" && {(time - _ilerT) > 75}) then { _bitis = "takildi"; };
+    if (_bitis isEqualTo "" && {(time - _ilerT) > 60}) then { _bitis = "takildi"; };
     if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)}) then { _d action ["EngineOn", _v]; _v engineOn true; };
 };
 

@@ -295,7 +295,9 @@ while {true} do {
                 private _zp = _zg getVariable ["lambs_danger_planZirhPoz", []];
                 !isNull _zg && {_zv isNotEqualTo (leader _zg)} && {(_zp isEqualTo []) || {(_zv distance2D _zp) > 450}} && {!(_zg getVariable ["lambs_danger_planZirhVardi", false])}
             }) < 0;
-            if ((_reconOk && _tankOk) || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
+            // v8.200: recon araci tasimayi bitirdi / basarisiz oldu ve recon yaya yola ciktiktan 120 sn sonra ana kol beklemez (RPT 59babdf1: recon Stryker takildi, herkes 420 sn'lik tavani bekledi, "kimse hareket etmedi"); ATP 4-01.45: kesif unsuru ana kolun onunde ayrik gider, ana kol bekletilmez
+            private _reconYaya = ("reconFazT" in _plan) && {(time - (_plan get "reconFazT")) > 120};
+            if ((_reconOk && _tankOk) || {_reconYaya && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
                 diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
