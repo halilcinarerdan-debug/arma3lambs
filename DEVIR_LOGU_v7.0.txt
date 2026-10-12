@@ -2047,3 +2047,12 @@ v8.194 DOKTRIN: RECON KARARI + TANK HULL-DOWN (kullanici: "bence goreve devam et
  fnc_planZirh: tank mevzi puanina hull-down (+25: taret hatti acik, govde hatti kapali) ve yedek mevzi; mevzideki tank hasar alirsa (>= 0.08) 60 sn'de bir yedek mevziye gecer ([PLAN-ZIRH] YER DEGISTIRIYOR).
  DOKTRIN_KAYNAKLARI.md: madde numaralariyla eklendi.
  Not: TEST EDILMEDI.
+
+v8.195 SU / YOL AC / BUDDY / TOPCU (kullanici: "piyade askerler suda yuzdugu icin oldu, buddy team calisiyor mu, artillery hala calismiyor, askerler apcyi blokluyor, Marco Adler loopa girdi")
+ RPT f82d65d0 + ae632d64: (1) SU: karakol garnizon DEVRIYE rotasi (yaricap x0.6, 5 nokta) su kontrolsuzdu -> Alpha 1-4 (Knoska / Brockmeier / Bierhoff) 65 m derin suda [SU-TANI] ve oldu. (2) APC: nakil bu kez akici (3 km, 58 km/s), ama inis noktasinda durmus APC'nin 5 m onunde dost yaya -> EZME fren 16+ sn (hiz 0), bir asker (Klein) arac yakinda bayildi [EZME-BAYGIN]. (3) BUDDY: Alpha 1-2'de Jung / Klein "izole 126 m" -> "Krest yanina donuyor" her 12 sn, 90+ sn sonuc yok: bu askerler LAMBS "Group Garrison" gorevinde (binalara dagilmis), buddy bagi onlari disari cekmeye calisiyordu. Buddy diger gruplarda calisiyor ("es kopmasi 35-37 m -> yanina donuyor"). (4) Marco Adler: sunucu RPT'sinde Alpha 1-2 lideri 8 dk ayni konumda DURUYOR (nakil bekleme, doStop + PATH kapali) ve animasyon [DURUM] ornekleri "sraswrfldnon_g01 / _g03" = ELLE ISARETI (gesture) animasyonlari (son 16 karakter); sunucu loglari baska bir dongu kaniti vermiyor -> NEDENI KANITLANMADI. (5) Topcu: recon OP'ye 1:10:28'de vardi, oyun 1:11:52'de bitti; recon varken canli dogrulama kullanilmiyordu.
+ fnc_karakolGarnizon: devriye noktalari karada ve su kenarindan >= 12 m (yaricap 0.6 / 0.45 / 0.3 ve +-20 derece denenir), alarm noktasi suda ise lider konumu.
+ fnc_giyimTani: SU KURTARMA - yaya AI derin suda (> 0.6 m) 6 sn kalirsa en yakin karaya yurutulur, 20 sn'de karaya isinlanir ([SU-KURTAR]); dalis giysisi muaf.
+ fnc_ezmeKoruma: YOL AC - arac duruyor ve 2 sn'den uzun suredir seritte dost AI yaya varsa yaya arac yonune dik 12 m kacirilir ([EZME-YOL-AC]).
+ fnc_buddyBond: "Group Garrison" gorevindeki grup atlanir.
+ fnc_komutanPlanDongu: canli gozlem dogrulamasi recon VARKEN de gecerli (recon / plan gruplari objektifin 500 m cevresinde dusman biliyorsa); hazirlik atisi TOPLAN / RECON / TASIMA fazlarinda 10 sn'de bir denenir.
+ Not: TEST EDILMEDI.

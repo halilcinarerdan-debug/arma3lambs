@@ -261,6 +261,7 @@ private _calis = {
                         _dg setVariable ["lambs_danger_devAlarm", true];
                         { deleteWaypoint _x } forEach _wl;
                         private _gp = _poz getPos [_yar * 0.7, (_poz getDir (leader _dg)) ];
+                        if (surfaceIsWater _gp) then { _gp = getPosATL (leader _dg); };   // v8.195
                         _dg setBehaviour "COMBAT";
                         _dg setCombatMode "RED";
                         (leader _dg) doMove _gp;
@@ -272,7 +273,16 @@ private _calis = {
                         { deleteWaypoint _x } forEach (waypoints _dg);
                         private _a0 = _idx * (360 / (_devN max 1));
                         for "_j" from 0 to 4 do {
-                            private _wp = _dg addWaypoint [(_poz getPos [_yar * 0.6, _a0 + _j * 72]), 8];
+                            // v8.195: devriye noktasi suda / su kenarinda olmaz (RPT f82d65d0: 65 m derin suya yuruyen devriye bogulup oldu): yaricap 0.6 -> 0.45 -> 0.3, aci +-20 derece denenir
+                            private _wpPos = [];
+                            {
+                                if (_wpPos isEqualTo []) then {
+                                    private _rr = _yar * _x;
+                                    { private _cp = _poz getPos [_rr, _a0 + _j * 72 + _x]; if (_wpPos isEqualTo [] && {!surfaceIsWater _cp} && {(count ([0, 90, 180, 270] select {surfaceIsWater (_cp getPos [12, _x])})) isEqualTo 0}) then { _wpPos = _cp; }; } forEach [0, 20, -20];
+                                };
+                            } forEach [0.6, 0.45, 0.3];
+                            if (_wpPos isEqualTo []) then { continue };
+                            private _wp = _dg addWaypoint [_wpPos, 8];
                             _wp setWaypointType "MOVE";
                             _wp setWaypointName "ELITE GARNIZON: devriye";
                             _wp setWaypointBehaviour "AWARE";

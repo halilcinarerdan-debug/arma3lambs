@@ -41,6 +41,34 @@ private _calis = {
                     diag_log format ["[SU-TANI] %1 | grup %2 | derinlik %3 m | hiz %4 km/s | komut %5 | bayrak %6 | waypoint '%7' | lider suda mi %8 | temas %9 sn once",
                         name _u, groupId _g, (0 - (getTerrainHeightASL (getPosATL _u))) toFixed 2, round speed _u, currentCommand _u, _bayraklar, _wpAd, surfaceIsWater (getPosATL (leader _g)), round (time - (_g getVariable ["lambs_danger_contact", -999]))];
                 };
+                // v8.195 SU KURTARMA (RPT f82d65d0: karakol devriyesi 65 m derin suda yurutuldu, 3 asker bogulup oldu): yaya AI > 6 sn suda ise en yakin karaya yurutulur, > 20 sn ise en yakin karaya isinlanir
+                if (surfaceIsWater (getPosATL _u) && {(getPosASL _u) select 2 < -0.6} && {!((toLower (goggles _u)) find "diving" >= 0)} && {!((toLower (uniform _u)) find "diving" >= 0)} && {!((toLower (uniform _u)) find "wetsuit" >= 0)}) then {
+                    if ((_u getVariable [QGVAR(suGirisT), -1]) < 0) then { _u setVariable [QGVAR(suGirisT), time]; };
+                    private _suS = time - (_u getVariable [QGVAR(suGirisT), time]);
+                    if (_suS > 6 && {(time - (_u getVariable [QGVAR(suKurtT), -999])) > 8}) then {
+                        _u setVariable [QGVAR(suKurtT), time];
+                        private _kara = [];
+                        private _uPos = getPosATL _u;
+                        for "_r" from 15 to 240 step 15 do {
+                            if (_kara isEqualTo []) then {
+                                for "_a" from 0 to 345 step 30 do {
+                                    private _c = _uPos getPos [_r, _a];
+                                    if (_kara isEqualTo [] && {!surfaceIsWater _c} && {!surfaceIsWater (_c getPos [4, 0])} && {!surfaceIsWater (_c getPos [4, 180])}) then { _kara = _c; };
+                                };
+                            };
+                        };
+                        if (_kara isNotEqualTo []) then {
+                            if (_suS > 20) then {
+                                _u setPosATL [_kara select 0, _kara select 1, 0];
+                                _u setVariable [QGVAR(suGirisT), -1];
+                                diag_log format ["[SU-KURTAR] %1 | grup %2 | %3 sn suda -> karaya isinlandi (%4 m)", name _u, groupId _g, round _suS, round (_uPos distance2D _kara)];
+                            } else {
+                                _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1; _u doMove _kara;
+                                diag_log format ["[SU-KURTAR] %1 | grup %2 | suda (%3 sn) -> karaya yurutuluyor (%4 m)", name _u, groupId _g, round _suS, round (_uPos distance2D _kara)];
+                            };
+                        };
+                    };
+                } else { if ((_u getVariable [QGVAR(suGirisT), -1]) >= 0) then { _u setVariable [QGVAR(suGirisT), -1]; }; };
                 private _snap = [uniform _u, vest _u, backpack _u, headgear _u, primaryWeapon _u, secondaryWeapon _u, count (magazines _u), currentWeapon _u];
                 private _k = netId _u;
                 private _eski = _gor getOrDefault [_k, []];

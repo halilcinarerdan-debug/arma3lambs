@@ -111,14 +111,14 @@ private _atisIzni = {
         };
     } forEach allGroups;
     if !(_plan getOrDefault ["raporHazir", false]) then {
-        if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {_canli > 0}) then {
+        if (_canli > 0) then {
             _plan set ["gozDusman", _canli];
         } else {
             _plan set ["canliN", _canli];
         };
     };
     if !(_plan getOrDefault ["raporHazir", false]) exitWith {
-        if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {_canli > 0}) then { [true, format ["canli gozlem (recon yok): %1 dusman bilgisi, 0 sivil gozlenmedi", _canli], false] }
+        if (_canli > 0) then { [true, format ["canli gozlem (%1): %2 dusman bilgisi, sivil gozlenmedi", ["recon yok", "recon / plan gruplari"] select ((_plan getOrDefault ["reconG", []]) isNotEqualTo []), _canli], false] }
         else { [false, "dogrulama bekleniyor (rapor yok)", true] }
     };
     private _gs = _plan getOrDefault ["gozSivil", 0];
@@ -543,7 +543,7 @@ while {true} do {
                 };
             };
             // v8.192: recon yoksa canli gozlemle (herkes dogrulayabilir) hazirlik atisi KESIF'i beklemeden denenir (10 sn'de bir)
-            if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {!(_plan getOrDefault ["hazirlikAtildi", false])} && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+            if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
                 _plan set ["topcuDenT", time];
                 private _firedC = [_plan, _obj, "HAZIRLIK (canli gozlem, recon yok)"] call _topcuAt;
                 if (_firedC || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
@@ -631,6 +631,12 @@ while {true} do {
         // ---------------------------------------------------------------- RECON (gozlem noktasinda bilgi toplama; temas arama, ates yok)
         if (_faz isEqualTo "RECON") then {
             private _notlar = _plan get "notlar";
+            // v8.195: recon gozlemi surerken de (rapor beklemeden) canli gozlem dogrulamasiyla hazirlik atisi denenir (RPT f82d65d0: recon OP'ye vardiktan 1.5 dk sonra oyun bitti, rapor gelmedi)
+            if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+                _plan set ["topcuDenT", time];
+                private _firedV = [_plan, _obj, "HAZIRLIK (recon gozlemi sirasinda)"] call _topcuAt;
+                if (_firedV || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };
+            };
             private _rg = (_plan get "reconG") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
             private _vardi = 0;
             private _bozuldu = false;
@@ -693,7 +699,7 @@ while {true} do {
         if (_faz isEqualTo "TASIMA") then {
             private _th = _plan getOrDefault ["tasimaH", scriptNull];
             // v8.192: recon yoksa canli gozlemle (herkes dogrulayabilir) hazirlik atisi KESIF'i beklemeden denenir (10 sn'de bir)
-            if ((_plan getOrDefault ["reconG", []]) isEqualTo [] && {!(_plan getOrDefault ["hazirlikAtildi", false])} && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
+            if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]} && {(time - (_plan getOrDefault ["topcuDenT", -99])) > 10}) then {
                 _plan set ["topcuDenT", time];
                 private _firedC = [_plan, _obj, "HAZIRLIK (canli gozlem, recon yok)"] call _topcuAt;
                 if (_firedC || {(_plan getOrDefault ["atisRet", ""]) isNotEqualTo "BEKLE"}) then { _plan set ["hazirlikAtildi", true]; };

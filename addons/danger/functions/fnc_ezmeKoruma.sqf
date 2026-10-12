@@ -61,6 +61,7 @@ private _calis = {
             private _taraf = side group _d;
             private _tehlike = false;
             private _enYakin = 1e6;
+            private _seritU = [];
             private _yayalar = [_merkez select 0, _merkez select 1] nearEntities [["CAManBase"], (_bak / 2) + 4];
             _aracSay = _aracSay + 1;
             _yayaSay = _yayaSay + (count _yayalar);
@@ -80,6 +81,7 @@ private _calis = {
                 private _yanal = vectorMagnitude (_rel vectorDiff (_yon vectorMultiply _boyuna));
                 if (_yanal > 4) then { continue };
                 _tehlike = true;
+                _seritU pushBack [_u, _rel vectorDiff (_yon vectorMultiply _boyuna)];
                 if (_boyuna < _enYakin) then { _enYakin = _boyuna };
             } forEach _yayalar;
             if (_tehlike) then {
@@ -87,6 +89,23 @@ private _calis = {
                 if (!_frenli) then { _v setVariable [QGVAR(ezmeBaslaT), time]; };
                 private _surekli = time - (_v getVariable [QGVAR(ezmeBaslaT), time]);
                 _d forceSpeed ([0, 1.4] select (_surekli > 30));
+                // v8.195 YOL AC (kullanici: "askerler hala apcyi blokluyor, apc yakininda asker varsa kafayi yiyor"; RPT f82d65d0: durmus APC'nin 5 m onunde dost yaya, fren 16+ sn surdu): arac duruyor ve 2 sn'den uzun suredir seritte dost yaya varsa AI yaya yana (arac yonune dik, 12 m) kacirilir
+                if (abs _hiz < 1 && {_surekli > 2}) then {
+                    {
+                        _x params ["_uk", "_yanalV"];
+                        if (local _uk && {!isPlayer _uk} && {(lifeState _uk) in ["HEALTHY", "INJURED"]} && {(time - (_uk getVariable [QGVAR(ezmeKacT), -999])) > 6}) then {
+                            _uk setVariable [QGVAR(ezmeKacT), time];
+                            private _yonK = if ((vectorMagnitude _yanalV) > 0.8) then { vectorNormalized _yanalV } else { [(_yon select 1), 0 - (_yon select 0), 0] };
+                            private _hedefK = (getPosATL _uk) vectorAdd (_yonK vectorMultiply 12);
+                            _uk enableAI "PATH"; _uk enableAI "MOVE"; _uk forceSpeed -1;
+                            _uk doMove _hedefK;
+                            if ((missionNamespace getVariable ["lambs_danger_ezmeKacN", 0]) < 40) then {
+                                missionNamespace setVariable ["lambs_danger_ezmeKacN", (missionNamespace getVariable ["lambs_danger_ezmeKacN", 0]) + 1];
+                                diag_log format ["[EZME-YOL-AC] %1 (%2) araca %3 m onde, arac duruyor (%4 sn) -> yana cekiliyor | arac %5", name _uk, groupId (group _uk), round (_uk distance2D _v), round _surekli, typeOf _v];
+                            };
+                        };
+                    } forEach _seritU;
+                };
                 _v setVariable [QGVAR(ezmeFren), true];
                 _v setVariable [QGVAR(ezmeSonT), time];
                 if (_enYakin < (4 + (abs _hiz) * 0.6) && {abs _hiz > 3}) then {
