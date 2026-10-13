@@ -52,9 +52,9 @@ diag_log format ["[SURME-TANI-CEVRE] %1 | yakin araclar(25 m) %2 | yakin nesne(8
         sleep 0.5;
         private _icerde = (vehicle _d4) isEqualTo _v4;
         if (_icerdeEski && {!_icerde}) then {
-            diag_log format ["[SURME-TANI-CIKTI] %1 | surucu %2 ARACTAN CIKTI (t+%3 sn) | komut %4 | atanmis arac %5 rol %6 | lider %7 (surucu mu %8) | grup bayraklar: planAktif %9 tasimaMesgul(arac) %10 yolcuBirak(arac) %11 | birey degiskenler %12 | grup degiskenler %13 | hiz %14 km/s",
+            diag_log format ["[SURME-TANI-CIKTI] %1 | surucu %2 ARACTAN CIKTI (t+%3 sn) | komut %4 | atanmis arac %5 rol %6 | lider %7 (surucu mu %8) | grup bayraklar: planAktif %9 tasimaMesgul(arac) %10 yolcuBirak(arac) %11 | birey degiskenler %12 | grup degiskenler %13 | hiz %14 km/s | SON DENEY ADIMI %15",
                 _et4, name _d4, _k * 0.5, currentCommand _d4, assignedVehicle _d4, (assignedVehicleRole _d4) select 0, name leader group _d4, (leader group _d4) isEqualTo _d4, (group _d4) getVariable ["lambs_danger_planAktif", false], _v4 getVariable ["lambs_danger_tasimaMesgul", false], _v4 getVariable ["lambs_danger_yolcuBirak", false],
-                (allVariables _d4) select {(toLower _x) find "lambs" >= 0}, (allVariables (group _d4)) select {(toLower _x) find "lambs" >= 0}, round speed _v4];
+                (allVariables _d4) select {(toLower _x) find "lambs" >= 0}, (allVariables (group _d4)) select {(toLower _x) find "lambs" >= 0}, round speed _v4, _v4 getVariable ["lambs_danger_deneyAdim", "-"]];
         };
         _icerdeEski = _icerde;
     };
