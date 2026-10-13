@@ -2206,3 +2206,9 @@ v8.222 TASIMA ARAC SURUCU GRUBU DEVRI: 60 -> 15 SN (kullanici RPT b9f821df: "hal
  fnc_aracTasima: devir esigi 60 -> 15 sn, devir bekleme tavani 6 -> 10 sn. Kayit: gorulduT grup ilk gorulme zamani (yeni yaratilan grup birimleri tamamlansin diye eskiden 60 sn bekleniyordu).
  Ayrica: bu log yalniz 34 sn (20:03:36-20:04:10) — recon yaya kapisi (v8.221, 90 sn) test edilemedi.
  Not: TEST EDILMEDI.
+
+v8.223 NAKIL KAPISI VARSAYILAN KAPALI (kullanici RPT 1481a235: "apcler hic calismadi, beklemeye gerek yok, artik coz")
+ Bulgu: v8.222 ile 4 aractan 3'u eslesti (devir duzeldi), AMA 3 APC "RP'de, piyadenin toplanmasi bekleniyor" ile BINMEDEN bekledi (SENKRON kapisi: recon gozlemi bitene kadar). Recon yaya 2 km yurudugu icin kapi 90 sn (v8.221) - 420 sn arasi kapali; kullanici ~54 sn sonra oyundan cikti: APC hic hareket etmedi.
+ fnc_komutanPlanDongu: _bekleKos artik YALNIZ lambs_danger_nakilKapiAktif = true iken aktif (varsayilan false) -> nakil araclari plan baslayinca piyadeyi hemen alir ve gider; recon / tank beklemesi yok. Eski kapi isteniyorsa debug konsolundan lambs_danger_nakilKapiAktif = true.
+ Etki: ana kol recon raporundan ONCE ORP'ye varabilir; topcu dogrulamali modda rapor yoksa atis olmaz (BASIT modda atar). Recon APC'li ise recon zaten hizli gider.
+ Not: TEST EDILMEDI.
