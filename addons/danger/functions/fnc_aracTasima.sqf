@@ -738,6 +738,12 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         if (_denemeN isEqualTo 1 && {_dg > 18}) then {
                             _denemeN = 2;
                             private _alt = (getPosATL _v) getPos [60, (getPosATL _v) getDir _drop];
+                            // v8.202 YOL ONCELIGI (RPT d1e8872e: ziplama sinamasi fizigin SERBEST oldugunu gosterdi - 16.5 t Stryker 3 m/s'de 0.31 m yukseldi -> sorun AI yol bulma / surucu emri; tekerlekli araclar (RHS Stryker) hep, paletli GM M113 neredeyse hic): 300 m icinde, hem araca hem inise yakin en iyi yol noktasi ara nokta olur
+                            private _yollar = (getPosATL _v) nearRoads 300;
+                            if (_yollar isNotEqualTo []) then {
+                                _yollar = [_yollar, [], {(_x distance2D _v) + 0.5 * (_x distance2D _drop)}, "ASCEND"] call BIS_fnc_sortBy;
+                                _alt = getPosATL (_yollar select 0);
+                            };
                             diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; surucu yeniden oturtuldu + ara noktaya (60 m) yonlendirildi (motor %2)", groupId _vg, isEngineOn _v];
                             // v8.147: AI surucu durumu bozuk olabilir -> koltuktan cikarip tekrar oturt (yolcular yerinde kalir)
                             _d action ["EngineOn", _v];   // v8.184: moveOut / moveIn kaldirildi (surucu gir-cik yapiyordu); koltukta kalir
@@ -772,6 +778,16 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 for "_i" from 1 to 12 do { sleep 0.1; _zMax = _zMax max ((getPosASL _v2) select 2); };
                                 diag_log format ["[TASIMA-ZIPLAMA] %1 | z artisi %2 m (>0.3 = fizik serbest) | hiz %3 | kutle %4 | yerel %5 | yakit %6", _gid, (_zMax - _z0) toFixed 2, (velocity _v2) apply {_x toFixed 1}, getMass _v2, local _v2, (fuel _v2) toFixed 2];
                             };
+                            // v8.202 YOL HESABI TANISI: motorun bu arac sinifi icin araca -> inise rota bulup bulamadigi (dugum sayisi / uzunluk); 2 dugum = rota yok / dogrudan
+                            private _ajan = calculatePath [["wheeled_APC", "tank"] select (((toLower (getText (configOf _v >> "simulation"))) find "tank") >= 0), "safe", getPosATL _v, _drop];
+                            _ajan setVariable ["gid", groupId _vg];
+                            _ajan addEventHandler ["PathCalculated", {
+                                params ["_a", "_yol"];
+                                private _u = 0;
+                                for "_i" from 1 to ((count _yol) - 1) do { _u = _u + ((_yol select (_i - 1)) distance2D (_yol select _i)); };
+                                diag_log format ["[TASIMA-YOL] %1 | rota dugum %2 | uzunluk %3 m | dogrudan %4 m", _a getVariable ["gid", "?"], count _yol, round _u, if (count _yol > 1) then {round ((_yol select 0) distance2D (_yol select ((count _yol) - 1)))} else {-1}];
+                                deleteVehicle _a;
+                            }];
                             _v setVectorUp [0, 0, 1];
                             _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
                             _d doMove _drop;
