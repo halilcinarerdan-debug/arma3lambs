@@ -709,11 +709,11 @@ while {true} do {
                 private _t = _notlar getOrDefault [format ["%1_op", groupId _g], []];
                 if ([_g] call _temasta) then { _bozuldu = true; };
                 if (_t isNotEqualTo [] && {_raBitti}) then {
-                    if (((leader _g) distance2D (_t select 0)) < 40 || {_fazSureR > 240}) then {
+                    if (((leader _g) distance2D (_t select 0)) < 40 || {(time - (_plan getOrDefault ["reconOpT", time - _fazSureR])) > 240}) then {
                         if ((_t select 1) < 0) then {
                             _t set [1, time];
                             { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "DOWN"; }; } forEach (units _g);
-                            (leader _g) doWatch _obj;
+                            (leader _g) doWatch (_t param [2, _obj]);
                             diag_log format ["[PLAN-RECON] %1 | %2 OP'ye vardi (%3 m), gozlem basladi", _id, groupId _g, round ((leader _g) distance2D _obj)];
                         };
                         _vardi = _vardi + 1;
@@ -723,10 +723,45 @@ while {true} do {
             if (_vardi >= (count _rg) && {!("reconVarT" in _plan)}) then { _plan set ["reconVarT", time]; };
             private _gozlemS = if (!("reconVarT" in _plan)) then {0} else {time - (_plan get "reconVarT")};
             private _gozlemHedef = [90, 45, 20] select ((_plan getOrDefault ["dogrulama", 0]) min 2);
-            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= _gozlemHedef} || {_fazSure > 900} || {_fazSureR > 420}) then {
+            // v8.216 RECON EK GOZLEM: objektif OP gozlemi bitince siradaki DUSMAN noktasina gizlice gecilir (STEALTH + GREEN); her noktada bilinen dusman sayisi raporlanir
+            private _ekL = _plan getOrDefault ["reconEkNoktalar", []];
+            if (_rg isNotEqualTo [] && {!_bozuldu} && {_gozlemS >= _gozlemHedef} && {_fazSure < 1800} && {(_ekL isNotEqualTo []) || {"reconEkSimdi" in _plan}}) then {
+                private _simdi = _plan getOrDefault ["reconEkSimdi", []];
+                if (_simdi isNotEqualTo []) then {
+                    private _sayi = 0;
+                    private _tr2 = _plan get "taraf";
+                    { private _u = _x; if (alive _u && {(_tr2 getFriend (side _u)) < 0.6} && {(_u distance2D (_simdi select 1)) < 250} && {(_rg findIf {_x knowsAbout _u > 0.3}) >= 0}) then { _sayi = _sayi + 1; }; } forEach (allUnits select {_x isKindOf "CAManBase"});
+                    (_plan get "reconEkSonuc") pushBack format ["%1 %2: %3 dusman bilindi", _simdi select 2, mapGridPosition (_simdi select 1), _sayi];
+                    diag_log format ["[PLAN-RECON-EK] %1 | gozlem sonucu: %2", _id, (_plan get "reconEkSonuc") select (((count (_plan get "reconEkSonuc")) - 1) max 0)];
+                    _plan deleteAt "reconEkSimdi";
+                };
+                if (_ekL isNotEqualTo []) then {
+                    private _sirada = _ekL deleteAt 0;
+                    _plan set ["reconEkNoktalar", _ekL];
+                    _plan set ["reconEkSimdi", _sirada];
+                    _plan set ["reconOpT", time];
+                    _plan deleteAt "reconVarT";
+                    {
+                        private _g = _x;
+                        private _poz = (_sirada select 0) getPos [8 * _forEachIndex, random 360];
+                        [_g, [[_poz, "MOVE", "RECON -> EK OP", "STEALTH", "LIMITED", 25]]] call _wpYaz;
+                        _g setBehaviour "STEALTH"; _g setCombatMode "GREEN"; _g setSpeedMode "LIMITED";
+                        { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "MIDDLE"; _x doMove _poz; }; } forEach (units _g);
+                        _notlar set [format ["%1_op", groupId _g], [_poz, -1, _sirada select 1]];
+                    } forEach _rg;
+                    diag_log format ["[PLAN-RECON-EK] %1 | siradaki dusman noktasi: %2 %3 (gozlem noktasi %4, kalan %5)", _id, _sirada select 2, mapGridPosition (_sirada select 1), mapGridPosition (_sirada select 0), count _ekL];
+                    continue
+                };
+            };
+            if (_rg isEqualTo [] || {_bozuldu} || {_gozlemS >= _gozlemHedef} || {_fazSure > 2400} || {_fazSureR > 420 + 420 * (count (_plan getOrDefault ["reconEkSonuc", []]) + count _ekL + ([0, 1] select ("reconEkSimdi" in _plan)))}) then {
                 // RAPOR (recon grubunun gozlemi): dusman + sivil sayisi, iddia farki, komutan inanci guncellenir
                 private _rap = [_plan, [_rg, _gruplar] select (_rg isEqualTo []), _bozuldu, _gozlemS, "recon"] call _gozlemRapor;
                 _plan set ["reconTamam", true];
+                if ((_plan getOrDefault ["reconEkSonuc", []]) isNotEqualTo []) then {
+                    diag_log format ["[PLAN-RECON-EK] %1 | OZET: %2", _id, _plan get "reconEkSonuc"];
+                    private _cuE = (allCurators apply {getAssignedCuratorUnit _x}) select {!isNull _x};
+                    if (_cuE isNotEqualTo []) then { [format ["ELITE PLAN %1 RECON ek gozlem: %2", _id, (_plan get "reconEkSonuc") joinString " | "]] remoteExec ["systemChat", _cuE]; };
+                };
                 // v8.189: topcu hazirligi recon raporundan HEMEN sonra (piyade yaklasirken); onceden ancak ORP'de (KESIF) atiliyordu ve plan oraya hic ulasmiyordu (RPT aee29fdd: 15 dk, 0 atis). Izin / RED kurallari _topcuAt icinde
                 if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {(_plan getOrDefault ["topcu", 0]) in [1, 3]}) then {
                     private _firedR = [_plan, _obj, "HAZIRLIK (recon raporu sonrasi)"] call _topcuAt;

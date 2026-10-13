@@ -57,7 +57,8 @@ if (_activated && local _logic) then {
                                     ["Rally point mesafesi (m)", "SLIDER", "Toplanma noktasi objektiften bu kadar geride, ortulu.", [250, 900], [10, 50], 450, 0],
                                     ["ORP mesafesi (m)", "SLIDER", "Objektif toplanma noktasi. KAYNAK: TC 3-21.76 s. 7-15: ORP tipik olarak objektiften 200-400 m (veya en az bir buyuk arazi ogesi geride); sinirli gorusta 100-200 m (s. 7-20). Ses ve gorus disinda olmali.", [100, 400], [10, 25], 300, 0],
                                     ["Baskin (vur-cek)", "LIST", "Hayir: hedef alinirsa toparlanma + cevre savunmasi. Evet: hedef temizlenince ya da sure dolunca CEKILME (karakol baskini / vur-cek canlandirmasi). Sure saldiri basladigindan itibaren.", ["Hayir (ele gecir)", "Evet: 5 dk", "Evet: 10 dk"], 0],
-                                    ["Tehdit yonu (savunma)", "LIST", "Duşmanin objektife geldigi yon (objektiften duşmana). Savunma sektorleri bu yone yogunlasir; MG / destek grubu tam karsisinda.", ["Bilinmiyor", "Kuzey", "Kuzeydogu", "Dogu", "Guneydogu", "Guney", "Guneybati", "Bati", "Kuzeybati"], 0]
+                                    ["Tehdit yonu (savunma)", "LIST", "Duşmanin objektife geldigi yon (objektiften duşmana). Savunma sektorleri bu yone yogunlasir; MG / destek grubu tam karsisinda.", ["Bilinmiyor", "Kuzey", "Kuzeydogu", "Dogu", "Guneydogu", "Guney", "Guneybati", "Bati", "Kuzeybati"], 0],
+                                    ["Toplanma noktasi (dost karakol / mevzi)", "LIST", "Otomatik: arazi analizi objektiften geride ortulu bir nokta secer (haritada dusman mevzisine denk gelebilir). Isaretli nokta: haritadaki dost 'ELITE Karakol / Mevzi / Gozetleme' noktasi toplanma (RP) olur.", ["Otomatik (arazi analizi)"] + (([(allMapMarkers select {(_x find format ["ELITE_KARAKOL_%1_", str ([west, east, independent] select (((_d1 select 0) max 0) min 2))]) isEqualTo 0}), [], {(markerPos _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy) apply { format ["%1 [%2]", markerText _x, mapGridPosition (markerPos _x)] }), 0]
                                 ],
                                 {
                                     params ["_data", "_args"];
@@ -72,15 +73,16 @@ if (_activated && local _logic) then {
                                                 ["Ates destegi (topcu / havan)", "LIST", "Tarafin topcu / havan araclari (artilleryScanner) kullanilir. Hazirlik: kesiften sonra saldiriya kadar objektife. Cagri: saldiri basinda ve objektif temizlenmezse. Dost mesafesi < RED (TC 3-21.76 Tablo 3-3: 60 mm ~145, 82 mm ~195, 120 mm ~430, 105 / 155 mm ~455 m) ise o arac ATMAZ; <= 600 m: DANGER CLOSE loglanir. Topcu yoksa atlanir.", ["Yok", "Hazirlik atesi", "Cagri atesi", "Hazirlik + cagri"], 0],
                                                 ["Topcu atis sayisi (mermi)", "SLIDER", "Atis seansi basina mermi.", [1, 12], [1, 2], 4, 0],
                                                 ["Topcu modu", "LIST", "Standart: Dogrulama disiplini ve dost mesafesi (RED) kurallari uygulanir. BASIT: dogrulama beklenmez, plan baslar baslamaz (topcu menzile girdiginde) objektife atar; yalniz dost mesafesi (RED) ve menzil kurallari kalir. Topcu 'yok' ise etkisiz.", ["Standart (dogrulamali)", "BASIT (dogrulamasiz, hemen)"], 0],
-                                                ["Hedef zinciri (cephe)", "LIST", "Hayir: bagimsiz plan. Zincire ekle: AYNI taraftaki AKTIF ele gecir planinin SIRADAKI hedefi olur; plan objektifi alinca (OBJEKTIF ALINDI) hayatta kalan gruplar duzenlenip siradaki hedefe otomatik ilerler (tek tek yeni plan kurmadan, cephe hatti ilerler). Aktif plan yoksa normal plan kurulur.", ["Hayir (bagimsiz plan)", "Zincire ekle (siradaki hedef)"], 0]
+                                                ["Hedef zinciri (cephe)", "LIST", "Hayir: bagimsiz plan. Zincire ekle: AYNI taraftaki AKTIF ele gecir planinin SIRADAKI hedefi olur; plan objektifi alinca (OBJEKTIF ALINDI) hayatta kalan gruplar duzenlenip siradaki hedefe otomatik ilerler (tek tek yeni plan kurmadan, cephe hatti ilerler). Aktif plan yoksa normal plan kurulur.", ["Hayir (bagimsiz plan)", "Zincire ekle (siradaki hedef)"], 0],
+                                                ["Recon: ek gozlem (dusman noktalari)", "LIST", "Hayir: recon yalniz objektif gozlem noktasina gider. Evet: objektifin 2 km icindeki DUSMAN karakol / mevzi / gozetleme noktalarini da sirayla gizlice (STEALTH, ates yok) gozlemler ve raporlar.", ["Hayir", "Evet (gizlice incele)"], 0]
                                             ],
                                             {
                                                 params ["_data", "_args"];
                                                 _args params ["_obj", "_d1", "_d2", "_d3"];
                                                 _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_hqI", "_grupN", "_secimModu"];   // alan sirasi: Taraf, Gorev tipi, Tempo, Baslama, Sure, HQ / US, Grup sayisi, Grup secimi
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
-                                                _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY"];
-                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN", ["_topcuBasit", 0], ["_zincir", 0]];
+                                                _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY", ["_rpIsaretI", 0]];
+                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN", ["_topcuBasit", 0], ["_zincir", 0], ["_reconEk", 0]];
                                                 private _taraf = [west, east, independent] select (_tarafI max 0 min 2);
                                                 // v8.178 HQ DOGRULAMA (kullanici hatasi korumasi): ELE GECIR icin HQ / US zorunlu; secilen HQ'nun tarafi plan tarafi ile ayni olmali
                                                 private _hqLi = missionNamespace getVariable ["lambs_danger_hqListe", []];
@@ -93,11 +95,16 @@ if (_activated && local _logic) then {
                                                     systemChat format ["[ELITE] HATA: secilen %1 (%2) ile plan tarafi (%3) ayni degil. Plan kurulmadi.", _hq select 2, _hq select 1, str _taraf];
                                                     diag_log format ["[PLAN-ISTEK] reddedildi: HQ tarafi %1 != plan tarafi %2", _hq select 1, str _taraf];
                                                 };
+                                                private _rpIsaret = "";
+                                                if (_rpIsaretI > 0) then {
+                                                    private _mkL = [(allMapMarkers select {(_x find format ["ELITE_KARAKOL_%1_", str _taraf]) isEqualTo 0}), [], {(markerPos _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
+                                                    _rpIsaret = _mkL param [_rpIsaretI - 1, ""];
+                                                };
                                                 private _ayar = createHashMapFromArray [
                                                     ["hqId", if (_hq isEqualTo []) then {""} else {format ["%1_%2", _hq select 2, _hq select 1]}],
                                                     ["tip", _tip], ["grupN", round _grupN], ["tumHQ", _secimModu in [2, 3]], ["tumHQGuvenlik", _secimModu isEqualTo 2], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
                                                     ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp], ["baskin", _baskin], ["guven", _guven], ["dogrulama", _dogr],
-                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN], ["topcuBasit", _topcuBasit], ["zincir", _zincir isEqualTo 1]
+                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN], ["topcuBasit", _topcuBasit], ["zincir", _zincir isEqualTo 1], ["reconEk", _reconEk isEqualTo 1], ["rpIsaret", _rpIsaret]
                                                 ];
                                                 // v8.150: Elle grup secimi (yalniz ele gecir / savun): squad listesi paneli, secilenler "secili" ile gonderilir
                                                 if (_secimModu isEqualTo 1 && {_tip in [0, 1]}) exitWith {

@@ -334,6 +334,12 @@ private _rallyM = _ayar getOrDefault ["rallyM", 450];
 private _orpM = _ayar getOrDefault ["orpM", 300];
 private _rp = [_rallyM, [0, 12, -12, 24, -24, 36, -36, 52, -52, 70, -70]] call _konumSec;
 private _orp = [_orpM, [0, 10, -10, 20, -20, 35, -35]] call _konumSec;
+// v8.216 DOST TOPLANMA NOKTASI (kullanici: "objektif direk son nokta oluyor, dusman mevzisine rally koyuyorlar"): Zeus'ta secilen dost karakol / mevzi / gozetleme isareti RP olur (arazi analizi yerine)
+private _rpIsaret = _ayar getOrDefault ["rpIsaret", ""];
+if (_rpIsaret isNotEqualTo "" && {(markerPos _rpIsaret) isNotEqualTo [0, 0, 0]}) then {
+    _rp = markerPos _rpIsaret;
+    diag_log format ["[PLAN-RP-ISARET] %1 | toplanma noktasi dost isaret: %2 (%3), objektife %4 m", _taraf, markerText _rpIsaret, mapGridPosition _rp, round (_rp distance2D _obj)];
+};
 
 // grup rolleri
 private _mg = _ayar getOrDefault ["mg", false];
@@ -427,6 +433,23 @@ if (_reconG isNotEqualTo []) then {
         } forEach [450, 520, 600];
     } forEach [-45, -25, 0, 25, 45];
     if (_op isEqualTo []) then { _op = _obj getPos [500, _B]; };
+};
+
+// v8.216 RECON EK GOZLEM (kullanici: "recon dusman pozisyonlarini gizlice gozlemlesin"): objektifin 2 km icindeki DUSMAN karakol / mevzi / gozetleme noktalari; her biri icin 250 m geriden gozlem noktasi (OP -> nokta yonunden)
+private _reconEkN = [];
+if (_ayar getOrDefault ["reconEk", false]) then {
+    private _dK = (missionNamespace getVariable ["lambs_danger_karakollar", []]) select {(_x select 0) isNotEqualTo _taraf && {((_x select 1) distance2D _obj) < 2000} && {((_x select 1) distance2D _obj) > 120}};
+    private _son = _op;
+    while {_dK isNotEqualTo []} do {
+        _dK = [_dK, [], {(_x select 1) distance2D _son}, "ASCEND"] call BIS_fnc_sortBy;
+        private _k = _dK deleteAt 0;
+        private _hp = _k select 1;
+        private _gp = _hp getPos [250, _hp getDir _son];
+        if (surfaceIsWater _gp) then { _gp = _hp getPos [150, _hp getDir _son]; };
+        _reconEkN pushBack [_gp, _hp, _k select 3];
+        _son = _gp;
+    };
+    diag_log format ["[PLAN-RECON] %1 | ek gozlem noktalari: %2 dusman noktasi (%3)", _taraf, count _reconEkN, _reconEkN apply {format ["%1 %2", _x select 2, mapGridPosition (_x select 1)]}];
 };
 
 // kanat noktalari (>= 2 manevra grubu ve MG / bina / sayi >= 8): objektiften 110 m, eksenin +-75 derecesi
@@ -539,7 +562,7 @@ private _plan = createHashMapFromArray [
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]], ["topcuBasit", _ayar getOrDefault ["topcuBasit", 0]],
-    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
+    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["reconEkNoktalar", _reconEkN], ["reconEkSonuc", []], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {
     _x setVariable ["lambs_danger_planAktif", true, true];

@@ -64,6 +64,52 @@ _g setVariable ["lambs_danger_gozetleDongu", true];
                 _yerlesti = _mk;
             };
         };
+        // v8.216 ARAC GRUPLARI (kullanici: "tank atandigi karakola gitmedi" — piyade dongusu aractakileri atliyordu): surucu araci noktanin icine surer, durunca nisanci disa bakar
+        if (local _g2 && {!_temasta}) then {
+            private _araclar = [];
+            { private _av = vehicle _x; if (_av isNotEqualTo _x && {_av isKindOf "LandVehicle"} && {alive _av}) then { _araclar pushBackUnique _av; }; } forEach (units _g2);
+            {
+                private _av = _x;
+                private _sr = driver _av;
+                if (!isNull _sr && {alive _sr} && {local _sr} && {!isPlayer _sr}) then {
+                    private _hp = _av getVariable ["lambs_danger_gozetlePoz", []];
+                    if (_hp isEqualTo [] || {(_av getVariable ["lambs_danger_gozetleMk", ""]) isNotEqualTo _mk}) then {
+                        _hp = [_merkez, 0, (_r * 0.6) min 80, 7, 0, 0.3, 0] call BIS_fnc_findSafePos;
+                        _av setVariable ["lambs_danger_gozetlePoz", _hp];
+                        _av setVariable ["lambs_danger_gozetleMk", _mk];
+                        _av setVariable ["lambs_danger_gozetleT", time];
+                        _av setVariable ["lambs_danger_gozetleKonum", getPosATL _av];
+                        diag_log format ["[GOZETLE-ARAC] %1 | %2 -> %3 (noktaya %4 m, hedef konum %5)", groupId _g2, getText (configOf _av >> "displayName"), markerText _mk, round (_av distance2D _merkez), mapGridPosition _hp];
+                    };
+                    if ((_av distance2D _hp) > 30) then {
+                        _sr enableAI "PATH"; _sr enableAI "MOVE"; _sr forceSpeed -1;
+                        (group _sr) setBehaviour "AWARE"; (group _sr) setSpeedMode "NORMAL";
+                        _sr doMove _hp;
+                        // 45 sn'de 5 m'den az ilerlediyse: motor + itme + en yakin yola yonlendirme (TASIMA 18 sn kurtarmasiyla ayni), log
+                        if ((time - (_av getVariable ["lambs_danger_gozetleT", time])) > 45) then {
+                            if ((_av distance2D (_av getVariable ["lambs_danger_gozetleKonum", getPosATL _av])) < 5) then {
+                                _av engineOn true;
+                                private _yl = (getPosATL _av) nearRoads 200;
+                                if (_yl isNotEqualTo []) then { _sr doMove (getPosATL (([_yl, [], {(_x distance2D _hp)}, "ASCEND"] call BIS_fnc_sortBy) select 0)); };
+                                _av setVelocityModelSpace [0, 6, 0];
+                                diag_log format ["[GOZETLE-ARAC] %1 | %2 45 sn ilerlemedi (noktaya %3 m): motor + itme + yola yonlendirme | komut %4", groupId _g2, getText (configOf _av >> "displayName"), round (_av distance2D _hp), currentCommand _sr];
+                            };
+                            _av setVariable ["lambs_danger_gozetleT", time];
+                            _av setVariable ["lambs_danger_gozetleKonum", getPosATL _av];
+                        };
+                    } else {
+                        if (!(_av getVariable ["lambs_danger_gozetleVardi", false])) then {
+                            _av setVariable ["lambs_danger_gozetleVardi", true];
+                            doStop _sr;
+                            private _dir = (_merkez getDir _hp) + 180;
+                            { if (alive _x) then { _x doWatch (_av getPos [300, _dir]); }; } forEach ((crew _av) select {_x isNotEqualTo _sr});
+                            diag_log format ["[GOZETLE-ARAC] %1 | %2 noktaya VARDI (%3 m), %4 derece gozetliyor", groupId _g2, getText (configOf _av >> "displayName"), round (_av distance2D _merkez), round _dir];
+                        };
+                    };
+                    if ((_av distance2D _hp) > 30) then { _av setVariable ["lambs_danger_gozetleVardi", false]; };
+                };
+            } forEach _araclar;
+        };
         sleep 20;
     };
     _g2 setVariable ["lambs_danger_gozetleDongu", nil];
