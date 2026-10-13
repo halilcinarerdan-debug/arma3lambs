@@ -41,9 +41,10 @@ _v setVariable [QGVAR(kinSurus), true];
     private _t3 = time;
     private _sonLog = time;
     private _yayaT3 = -99;
+    private _disN3 = 0;
     private _ilerPoz3 = getPosATL _v3;
     private _ilerT3 = time;
-    while {alive _v3 && {alive _d3} && {(vehicle _d3) isEqualTo _v3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
+    while {alive _v3 && {alive _d3} && {_disN3 < 80} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
         // v8.208 PURUZSUZ SURUS (kullanici: "arkadaki arabalar titreyerek gitti"): (1) setDir her 0.1 sn egim / yatis sifirliyordu -> yatay donus vektoru, dikey vektor korunur; (2) hiz dunya eksenine degil ARACIN KENDI eksenine verilir (yan kayma yok);
         //   (3) rota 25 m ilerisindeki dugume yonlendirilir (sik dugum zikzagi yok); (AI devralma tespiti denendi ve KALDIRILDI: serbest birakinca yuvarlanan arac yanlis "AI suruyor" sayilip duruyordu)
         while {(_i3 < ((count _yol3) - 1)) && {(_v3 distance2D (_yol3 select _i3)) < 25}} do { _i3 = _i3 + 1; };
@@ -66,12 +67,19 @@ _v setVariable [QGVAR(kinSurus), true];
             } forEach _engelYaya3;
         };
         if (_engelArac3 isNotEqualTo []) then { _yon3 = _yon3 + 40; };
+        // v8.219 SURUCU DISARIDA (RPT fecd8147: surucu KURTARMA 1'den ~3 sn sonra aractan cikiyor [MURETTEBAT-KORU]; kinematik surus 2 sn'de bitiyordu; v8.217 surucusuz arac surulmesin diye durduruyordu): surucu araca ISINLANIR (moveInDriver), disaridayken arac 0 hizda bekler; 8 sn toplam disarida kalirsa biter
+        private _icerde3 = (vehicle _d3) isEqualTo _v3;
+        if (!_icerde3) then {
+            _disN3 = _disN3 + 1;
+            if (_disN3 isEqualTo 1 || {_disN3 % 30 isEqualTo 0}) then { diag_log format ["[TASIMA-KIN] %1 | surucu %2 aracin DISINDA (%3 m) -> moveInDriver (%4. deneme) | komut %5", _gid3, name _d3, round (_d3 distance2D _v3), _disN3, currentCommand _d3]; };
+            if ((_d3 distance2D _v3) < 25) then { _d3 moveInDriver _v3; };
+        };
         private _hdg3 = getDir _v3;
         private _fark3 = ((_yon3 - _hdg3 + 540) mod 360) - 180;
         private _dlt3 = (_fark3 max -2.5) min 2.5;
         private _vd3 = vectorDir _v3;
         private _yeniDir3 = [(_vd3 select 0) * (cos _dlt3) + (_vd3 select 1) * (sin _dlt3), (_vd3 select 1) * (cos _dlt3) - (_vd3 select 0) * (sin _dlt3), _vd3 select 2];
-        private _hiz3 = if (_engelYaya3 isNotEqualTo []) then {0} else { if (_engelArac3 isNotEqualTo []) then {2} else { if ((abs _fark3) > 35) then {3} else {7.5} } };
+        private _hiz3 = if (!_icerde3 || {_engelYaya3 isNotEqualTo []}) then {0} else { if (_engelArac3 isNotEqualTo []) then {2} else { if ((abs _fark3) > 35) then {3} else {7.5} } };
         _v3 setVectorDirAndUp [_yeniDir3, vectorUp _v3];
         _v3 setVelocityModelSpace [0, _hiz3, (velocityModelSpace _v3) select 2];
         // v8.211 SERBEST BIRAK (kullanici: aracı Zeus'ta bos yere surukleyince gitti): 8 sn'de 3 m'den az ilerlediyse arac Zeus'un yaptigi gibi en yakin BOS noktaya tasinir (suya / yaya uzerine degil)

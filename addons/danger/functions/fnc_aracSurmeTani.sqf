@@ -44,6 +44,22 @@ diag_log format ["[SURME-TANI-CEVRE] %1 | yakin araclar(25 m) %2 | yakin nesne(8
     _et, _komsu apply {format ["%1@%2m", typeOf _x, round (_v distance _x)]}, ((nearestObjects [_v, [], 8]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, surfaceType (getPosATL _v), (surfaceNormal (getPosATL _v)) apply {_x toFixed 2}, surfaceIsWater (getPosATL _v), isOnRoad _v, isTouchingGround _v];
 
 // G) SINAMA: 60 m ileri yakin hedef — AI hic mi surmuyor, yoksa yalniz uzak rota mi sorunlu?
+// I) SURUCU IZLEME: 14 sn boyunca 0.5 sn aralikla surucu aracta mi; cikarsa an, komut, atanmis arac, grup bayraklari, lider ve LAMBS degiskenleri loglanir (kim cikarttiysa onu bulmak icin)
+[_v, _d, _et] spawn {
+    params ["_v4", "_d4", "_et4"];
+    private _icerdeEski = (vehicle _d4) isEqualTo _v4;
+    for "_k" from 1 to 28 do {
+        sleep 0.5;
+        private _icerde = (vehicle _d4) isEqualTo _v4;
+        if (_icerdeEski && {!_icerde}) then {
+            diag_log format ["[SURME-TANI-CIKTI] %1 | surucu %2 ARACTAN CIKTI (t+%3 sn) | komut %4 | atanmis arac %5 rol %6 | lider %7 (surucu mu %8) | grup bayraklar: planAktif %9 tasimaMesgul(arac) %10 yolcuBirak(arac) %11 | birey degiskenler %12 | grup degiskenler %13 | hiz %14 km/s",
+                _et4, name _d4, _k * 0.5, currentCommand _d4, assignedVehicle _d4, (assignedVehicleRole _d4) select 0, name leader group _d4, (leader group _d4) isEqualTo _d4, (group _d4) getVariable ["lambs_danger_planAktif", false], _v4 getVariable ["lambs_danger_tasimaMesgul", false], _v4 getVariable ["lambs_danger_yolcuBirak", false],
+                (allVariables _d4) select {(toLower _x) find "lambs" >= 0}, (allVariables (group _d4)) select {(toLower _x) find "lambs" >= 0}, round speed _v4];
+        };
+        _icerdeEski = _icerde;
+    };
+};
+
 if (_sinama) then {[_v, _d, _et] spawn {
     params ["_v2", "_d2", "_et2"];
     private _p0 = getPosATL _v2;

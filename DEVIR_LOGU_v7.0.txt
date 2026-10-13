@@ -2184,3 +2184,9 @@ v8.218 RECON ARACI YOL ONCELIKLI KURTARMA (kullanici: "hayir, Zeus'tan havaya ka
  TASIMA RPT 5290bbed: Alpha 3-5 duran Stryker 18 sn asamasinda (yola ara nokta doMove + 6 m/s itme) kurtuldu. fnc_reconArac KURTARMA 1 (8 sn) ayni yontemi kullanir: 300 m icinde hedefe yakin en iyi yol noktasi ara nokta + 6 m/s itme.
  fnc_aracSurmeTani: 4. parametre _sinama; recon KURTARMA 1'de KAPALI (60 m ileri doMove kurtarma emrini eziyordu). Tasima'da acik.
  Not: TEST EDILMEDI.
+
+v8.219 KIN SURUS: SURUCU DISARI CIKARSA ISINLA + CIKIS IZLEME (kullanici RPT fecd8147: "apc gitmiyor, gitmesi lazim")
+ Bulgu: recon Stryker 19:06:13'te bindi; KURTARMA 1 (19:06:22) ~3 sn sonra surucu Hall aractan CIKTI ([MURETTEBAT-KORU] "disarida (2 m) -> koltuguna dondu"); kinematik surus (19:06:29) v8.217 koruma kosulu yuzunden 2 sn'de bitti ("surucu aracta degil"); KURTARMA 1-2-3 dongusu 2.5 dakika boyunca tekrarlandi, arac 2391 m'de hic ilerlemedi. Ayni olay v8.216 logunda da (Morgan) var; v8.214 logunda (ceaca545) YOKTU. Kim cikartiyor BILINMIYOR (komutan duzeltmesi v8.217'de kalkti, yine oluyor).
+ fnc_aracKinSurus: surucu disaridaysa (25 m icinde) moveInDriver ile aracta SOKULUR, o sirada arac 0 hizda bekler; toplam 8 sn disarida kalirsa biter [TASIMA-KIN "surucu aracin DISINDA"]. Surucusuz arac yine surulmez.
+ fnc_aracSurmeTani: YENI surucu izleme (14 sn, 0.5 sn aralik): surucu aractan cikarsa [SURME-TANI-CIKTI] an, komut, atanmis arac / rol, grup lideri, bayraklar, lambs degiskenleri.
+ Not: TEST EDILMEDI. [SURME-TANI-CIKTI] satiri cikaranin kim oldugunu gosterecek.
