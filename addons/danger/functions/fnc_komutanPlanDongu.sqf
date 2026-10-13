@@ -1107,8 +1107,10 @@ while {true} do {
                     [_plan, "BITTI", format ["savunma kaybi %1%% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
                 } else {
                     if ((count _dusN) >= 2 && {(_kayipS >= 0.25) || {_yakinD <= 150}} && {(time - (_plan getOrDefault ["savKarsiT", -999])) > 150}) then {
-                        private _yedekG = _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK" && {({alive _x} count (units _x)) >= 3} && {!([_x] call _temasta)}};
-                        if (_yedekG isEqualTo []) then { _yedekG = _gruplar select {({alive _x} count (units _x)) >= 4 && {!([_x] call _temasta)}}; _yedekG = _yedekG select [0, 1]; };
+                        // v8.231 TEK GRUP KARSI SALDIRI YAPMAZ (RPT 92fcbcbb: tek savunma grubu hendege yerlesti, 3 sn sonra "KARSI SALDIRI" ile hendekten cikip dusmana saldirdi — "mevzilenmiyorlar"): karsi saldiri YEDEKTIR; savunmada en az bir grup mevzide KALIR
+                        //   (YEDEK rolu en az 2 grup, rolsuz yedek yalniz >= 3 grup varken; mevziyi tutan gruplar karsi saldiriya alinmaz)
+                        private _yedekG = if ((count _gruplar) >= 2) then { _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK" && {({alive _x} count (units _x)) >= 3} && {!([_x] call _temasta)}} } else {[]};
+                        if (_yedekG isEqualTo [] && {(count _gruplar) >= 3}) then { _yedekG = _gruplar select {({alive _x} count (units _x)) >= 4 && {!([_x] call _temasta)} && {!(_x getVariable [QGVAR(hendekte), false])}}; _yedekG = _yedekG select [0, 1]; };
                         if (_yedekG isNotEqualTo []) then {
                             private _ep = [0, 0, 0];
                             { _ep = _ep vectorAdd (getPosATL _x); } forEach _dusN;
