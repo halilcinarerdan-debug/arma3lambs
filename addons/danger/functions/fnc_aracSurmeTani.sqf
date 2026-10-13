@@ -16,7 +16,7 @@
  * Public: No
 */
 
-params [["_v", objNull, [objNull]], ["_d", objNull, [objNull]], ["_et", "?", [""]]];
+params [["_v", objNull, [objNull]], ["_d", objNull, [objNull]], ["_et", "?", [""]], ["_sinama", true, [true]]];
 if (isNull _v || {isNull _d} || {(time - (_v getVariable [QGVAR(surmeTaniT), -999])) < 90}) exitWith {};
 _v setVariable [QGVAR(surmeTaniT), time];
 
@@ -44,7 +44,7 @@ diag_log format ["[SURME-TANI-CEVRE] %1 | yakin araclar(25 m) %2 | yakin nesne(8
     _et, _komsu apply {format ["%1@%2m", typeOf _x, round (_v distance _x)]}, ((nearestObjects [_v, [], 8]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, surfaceType (getPosATL _v), (surfaceNormal (getPosATL _v)) apply {_x toFixed 2}, surfaceIsWater (getPosATL _v), isOnRoad _v, isTouchingGround _v];
 
 // G) SINAMA: 60 m ileri yakin hedef — AI hic mi surmuyor, yoksa yalniz uzak rota mi sorunlu?
-[_v, _d, _et] spawn {
+if (_sinama) then {[_v, _d, _et] spawn {
     params ["_v2", "_d2", "_et2"];
     private _p0 = getPosATL _v2;
     private _hedef = _v2 modelToWorld [0, 60, 0];
@@ -54,4 +54,4 @@ diag_log format ["[SURME-TANI-CEVRE] %1 | yakin araclar(25 m) %2 | yakin nesne(8
     private _git = (getPosATL _v2) distance2D _p0;
     diag_log format ["[SURME-TANI-SINAMA] %1 | 60 m ileri doMove: 6 sn'de %2 m gitti (%3) | komut %4 | hiz %5 km/s | hazir %6 basarisiz %7",
         _et2, round _git, ["AI HIC SURMUYOR (yakin hedef bile)", "yakin hedef CALISIYOR -> sorun uzak rota / yol bulma"] select (_git > 3), currentCommand _d2, round (speed _v2), unitReady _d2, moveToFailed _d2];
-};
+};};

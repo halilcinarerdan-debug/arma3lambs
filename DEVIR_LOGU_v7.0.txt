@@ -2178,3 +2178,9 @@ v8.217 KOMUTAN DUZELTMESI GERI ALINDI + KIN SURUS SURUCU GUVENLIGI (kullanici RP
  GERI ALINDI: fnc_aracKomutanDuzelt ve tum cagrilari (aracTasima, reconArac, aracSurmeTani) silindi (hipotez zaten desteklenmiyordu: Alpha 3-5 yabanci turet komutaniyla da 65 km/s gitmisti).
  fnc_aracKinSurus: dongu artik SURUCU ARAC ICINDE degilse durur ((vehicle _d3) isEqualTo _v3) — surucusuz arac surulmez / kimseyi ezmez.
  Not: TEST EDILMEDI. AI surucunun neden yakin hedefe bile gitmedigi (SINAMA: 0 m, hedef DoNotPlan) hala bilinmiyor; kinematik surus gecici cozum olarak kaliyor.
+
+v8.218 RECON ARACI YOL ONCELIKLI KURTARMA (kullanici: "hayir, Zeus'tan havaya kaldirip yola biraktim, APC sabit duruyordu")
+ Duzeltme: v8.217'de surucunun cikip ezilmesini v8.215'e baglamistim; kullanici o sirada APC'yi Zeus'tan kaldirip birakiyordu (elle mudahale) -> nedeni KANITLANMIS DEGIL (benim moveOut'um da zamanlamada vardi; geri alma yine de dogru: hipotez yanlisti). APC'nin SABIT durmasi kullanici tarafindan da dogrulandi.
+ TASIMA RPT 5290bbed: Alpha 3-5 duran Stryker 18 sn asamasinda (yola ara nokta doMove + 6 m/s itme) kurtuldu. fnc_reconArac KURTARMA 1 (8 sn) ayni yontemi kullanir: 300 m icinde hedefe yakin en iyi yol noktasi ara nokta + 6 m/s itme.
+ fnc_aracSurmeTani: 4. parametre _sinama; recon KURTARMA 1'de KAPALI (60 m ileri doMove kurtarma emrini eziyordu). Tasima'da acik.
+ Not: TEST EDILMEDI.
