@@ -309,7 +309,9 @@ while {true} do {
             }) < 0;
             // v8.200: recon araci tasimayi bitirdi / basarisiz oldu ve recon yaya yola ciktiktan 120 sn sonra ana kol beklemez (RPT 59babdf1: recon Stryker takildi, herkes 420 sn'lik tavani bekledi, "kimse hareket etmedi"); ATP 4-01.45: kesif unsuru ana kolun onunde ayrik gider, ana kol bekletilmez
             private _reconYaya = ("reconFazT" in _plan) && {(time - (_plan get "reconFazT")) > 120};
-            if ((_reconOk && _tankOk) || {_reconYaya && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
+            // v8.221 RECON YAYA (RPT 0ea7ba5a: recon araci yok -> recon 2 km yuruyerek gidiyor, nakil araclari 96 sn+ piyadeyi ALMADAN bekledi, "apcler tasimadi"): recon APC'siz ise RECON fazi basladiktan 90 sn sonra ana kol beklemez (ATP 4-01.45 kesif ayrik gider)
+            private _reconYayaAracsiz = isNull (_plan getOrDefault ["reconArac", objNull]) && {_faz isEqualTo "RECON"} && {_fazSure > 90};
+            if ((_reconOk && _tankOk) || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
                 diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
