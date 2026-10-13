@@ -2141,3 +2141,8 @@ v8.210 KINEMATIK SURUS ENGEL YONETIMI (kullanici RPT 5c93f6bb: "recon sorunlu")
  Bulgu: recon Stryker KURTARMA 2 ile kinematik surusa gecti, 27 km/s ile dugum 2'ye kadar gitti, sonra "hiz 0" - sabit kaldi (1463 -> 1469 m). Neden: onde 5 m icinde piyade / arac varken hiz 0 yapiliyordu; kalabalik RP alaninda engel hic kalkmiyordu.
  fnc_aracKinSurus: onde piyade varsa (yerel, oyuncu olmayan, saglam) 12 m yana cekilme emri (doMove, 3 sn'de bir; yan = getRelDir'e gore); onde arac varsa +40 derece sapma ile 2 m/s. Piyade durumunda hiz yine 0 (ezmemek icin) ama engel kendisi kaciyor.
  Not: TEST EDILMEDI. Piyade doMove emrine uymazsa (ornegin yolcu / baska sahip) takilma suruyor olabilir.
+
+v8.211 KINEMATIK SURUS: TAKILIRSA BOS NOKTAYA TASI (kullanici: "aracı Zeus'ta bos yere surukleyip biraktim, gitti; yoksa gitmeyecekti")
+ Bulgu: arac kalabalik / engelli RP alaninda sabit kaliyor, bos yere tasininca hareket ediyor (cevre engeli hipotezi).
+ fnc_aracKinSurus: 8 sn'de 3 m'den az ilerleme -> arac 14-44 m yaricapinda ilk bos (su degil, 7 m icinde arac / yaya yok) noktaya setVehiclePosition ile tasinir, [TASIMA-KIN] "bos noktaya tasindi" logu.
+ Not: TEST EDILMEDI. Bos nokta bulunamazsa tasinmaz (sonraki 8 sn'de yeniden denenir).

@@ -41,6 +41,8 @@ _v setVariable [QGVAR(kinSurus), true];
     private _t3 = time;
     private _sonLog = time;
     private _yayaT3 = -99;
+    private _ilerPoz3 = getPosATL _v3;
+    private _ilerT3 = time;
     while {alive _v3 && {alive _d3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
         // v8.208 PURUZSUZ SURUS (kullanici: "arkadaki arabalar titreyerek gitti"): (1) setDir her 0.1 sn egim / yatis sifirliyordu -> yatay donus vektoru, dikey vektor korunur; (2) hiz dunya eksenine degil ARACIN KENDI eksenine verilir (yan kayma yok);
         //   (3) rota 25 m ilerisindeki dugume yonlendirilir (sik dugum zikzagi yok); (AI devralma tespiti denendi ve KALDIRILDI: serbest birakinca yuvarlanan arac yanlis "AI suruyor" sayilip duruyordu)
@@ -72,6 +74,23 @@ _v setVariable [QGVAR(kinSurus), true];
         private _hiz3 = if (_engelYaya3 isNotEqualTo []) then {0} else { if (_engelArac3 isNotEqualTo []) then {2} else { if ((abs _fark3) > 35) then {3} else {7.5} } };
         _v3 setVectorDirAndUp [_yeniDir3, vectorUp _v3];
         _v3 setVelocityModelSpace [0, _hiz3, (velocityModelSpace _v3) select 2];
+        // v8.211 SERBEST BIRAK (kullanici: aracı Zeus'ta bos yere surukleyince gitti): 8 sn'de 3 m'den az ilerlediyse arac Zeus'un yaptigi gibi en yakin BOS noktaya tasinir (suya / yaya uzerine degil)
+        if ((time - _ilerT3) > 8) then {
+            if ((_v3 distance2D _ilerPoz3) < 3) then {
+                private _bos3 = [];
+                for "_r3" from 0 to 5 do {
+                    private _aday3 = (getPosATL _v3) getPos [14 + _r3 * 6, (getDir _v3) + _r3 * 60];
+                    if (_bos3 isEqualTo [] && {!surfaceIsWater _aday3} && {(_aday3 nearEntities [["LandVehicle", "CAManBase"], 7]) isEqualTo []}) then { _bos3 = _aday3; };
+                };
+                if (_bos3 isNotEqualTo []) then {
+                    _v3 setVehiclePosition [_bos3, [], 0, "NONE"];
+                    _v3 setVelocity [0, 0, 0];
+                    diag_log format ["[TASIMA-KIN] %1 | 8 sn ilerleyemedi: arac bos noktaya tasindi (%2 m)", _gid3, round (_v3 distance2D _ilerPoz3)];
+                };
+            };
+            _ilerPoz3 = getPosATL _v3;
+            _ilerT3 = time;
+        };
         if ((time - _sonLog) > 20) then {
             _sonLog = time;
             diag_log format ["[TASIMA-KIN] %1 | kinematik surus: inise %2 m | dugum %3/%4 | hiz %5 km/s", _gid3, round (_v3 distance2D _drop3), _i3, count _yol3, round (speed _v3)];
