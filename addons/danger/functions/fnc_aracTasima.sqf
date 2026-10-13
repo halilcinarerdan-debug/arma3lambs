@@ -746,6 +746,20 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             };
                             diag_log format ["[TASIMA] %1 | TAKILDI: 18 sn; surucu yeniden oturtuldu + ara noktaya (60 m) yonlendirildi (motor %2)", groupId _vg, isEngineOn _v];
                             // v8.147: AI surucu durumu bozuk olabilir -> koltuktan cikarip tekrar oturt (yolcular yerinde kalir)
+                            // v8.203: 18 sn'de de rota hesabi + setDriveOnPath denemesi (tekerlekli araclar: sorun yol bulma olabilir, ziplama sinamasi fizigin serbest oldugunu gosterdi)
+                            private _ajan0 = calculatePath [["wheeled_APC", "tank"] select (((toLower (getText (configOf _v >> "simulation"))) find "tank") >= 0), "safe", getPosATL _v, _drop];
+                            _ajan0 setVariable ["gid", groupId _vg];
+                            _ajan0 setVariable ["arac", _v];
+                            _ajan0 addEventHandler ["PathCalculated", {
+                                params ["_a", "_yol"];
+                                diag_log format ["[TASIMA-YOL] %1 | (18 sn) rota dugum %2 | dogrudan %3 m", _a getVariable ["gid", "?"], count _yol, if (count _yol > 1) then {round ((_yol select 0) distance2D (_yol select ((count _yol) - 1)))} else {-1}];
+                                private _av = _a getVariable ["arac", objNull];
+                                if (!isNull _av && {alive _av} && {(speed _av) < 3} && {count _yol > 2}) then {
+                                    _av setDriveOnPath _yol;
+                                    diag_log format ["[TASIMA-YOL] %1 | setDriveOnPath uygulandi (%2 dugum)", _a getVariable ["gid", "?"], count _yol];
+                                };
+                                deleteVehicle _a;
+                            }];
                             _d action ["EngineOn", _v];   // v8.184: moveOut / moveIn kaldirildi (surucu gir-cik yapiyordu); koltukta kalir
                             _v engineOn true;
                             _d enableAI "PATH"; _d enableAI "MOVE";
@@ -781,11 +795,18 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             // v8.202 YOL HESABI TANISI: motorun bu arac sinifi icin araca -> inise rota bulup bulamadigi (dugum sayisi / uzunluk); 2 dugum = rota yok / dogrudan
                             private _ajan = calculatePath [["wheeled_APC", "tank"] select (((toLower (getText (configOf _v >> "simulation"))) find "tank") >= 0), "safe", getPosATL _v, _drop];
                             _ajan setVariable ["gid", groupId _vg];
+                            _ajan setVariable ["arac", _v];
                             _ajan addEventHandler ["PathCalculated", {
                                 params ["_a", "_yol"];
                                 private _u = 0;
                                 for "_i" from 1 to ((count _yol) - 1) do { _u = _u + ((_yol select (_i - 1)) distance2D (_yol select _i)); };
                                 diag_log format ["[TASIMA-YOL] %1 | rota dugum %2 | uzunluk %3 m | dogrudan %4 m", _a getVariable ["gid", "?"], count _yol, round _u, if (count _yol > 1) then {round ((_yol select 0) distance2D (_yol select ((count _yol) - 1)))} else {-1}];
+                                // v8.203: arac hala duruyorsa hesaplanan rota dogrudan surucuye verilir (setDriveOnPath)
+                                private _av = _a getVariable ["arac", objNull];
+                                if (!isNull _av && {alive _av} && {(speed _av) < 3} && {count _yol > 2}) then {
+                                    _av setDriveOnPath _yol;
+                                    diag_log format ["[TASIMA-YOL] %1 | setDriveOnPath uygulandi (%2 dugum)", _a getVariable ["gid", "?"], count _yol];
+                                };
                                 deleteVehicle _a;
                             }];
                             _v setVectorUp [0, 0, 1];
