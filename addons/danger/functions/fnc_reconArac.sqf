@@ -154,6 +154,8 @@ while {_bitis isEqualTo ""} do {
             private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
             if (surfaceIsWater _alt) then { _alt = _dur; };
             _d doMove _alt;
+            // v8.209: recon araci da AI surmuyorsa (RPT 91b5ffbd: Stryker 2.4 km'de hic kalkmadi, recon yola cikmadi) ortak kinematik surus (fnc_aracKinSurus) devreye girer
+            [_v, _d, _dur, _id] call FUNC(aracKinSurus);
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
         if (_dtk > 50 && {_kurtN isEqualTo 2}) then {

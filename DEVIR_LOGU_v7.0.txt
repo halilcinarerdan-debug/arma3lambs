@@ -2130,3 +2130,9 @@ v8.208 KINEMATIK SURUS PURUZSUZ (kullanici RPT 77520229: "arkadaki arabalar titr
  fnc_aracTasima: kinematik surus: dondurme vektoru yatay doner (dikey korunur: setVectorDirAndUp), hiz aracin kendi eksenine (setVelocityModelSpace), hedef 25 m ilerideki dugum, donus en cok 2.5 derece / 0.1 sn.
  NOT: AI'nin neden setDriveOnPath'i bile yurutmedigi hala bilinmiyor (rota hesaplaniyor, fizik serbest, emir alindi). Kinematik surus gecici cozumdur.
  Not: TEST EDILMEDI.
+
+v8.209 RECON ARACI DA KINEMATIK SURUS (kullanici RPT 91b5ffbd: "recon arabasi yola cikmadi")
+ Bulgu: recon Stryker (M1126 M2) binmeden sonra 2.5 km'de hic ilerlemedi; KURTARMA 1-3 (itme / kaldirma / 25 m tasima) sonuc vermedi - recon aracinin KENDI kurtarma zincirinde kinematik surus yoktu (yalniz fnc_aracTasima'da vardi). Tani: unitReady false, komut MOVE, beh SAFE / GREEN, ezmeFren false, yerel true (sahip 2) -> AI emri aliyor ama surmuyor (diger araclarla ayni sorun).
+ fnc_aracKinSurus (YENI): kinematik surusu ortak fonksiyona cikardim (fnc_aracTasima'daki satir ici betik kaldirildi - cift islev yok). calculatePath rotasi tazeden hesaplanir; puruzsuz surus (v8.208).
+ fnc_reconArac: KURTARMA 2 (32 sn ilerleme yok) asamasinda fnc_aracKinSurus cagrilir; inise (OP'ye 150 m kala nokta) 45 m kala "vardi".
+ Not: TEST EDILMEDI. AI'nin neden surmedigi hala bilinmiyor.
