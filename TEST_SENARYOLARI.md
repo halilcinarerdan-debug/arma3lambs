@@ -129,3 +129,12 @@ Kapatma anahtarlari: lambs_danger_hazirlikOff, lambs_danger_baskiTufekciOff, lam
 - Ayni test, 600 m uzakta + ikisinde telsiz (ItemRadio) -> `YOLDA` loglari sonra `KATILDI`; telsizsiz iken `uygun dost grup YOK`.
 - Saldiri / bastirma sirasinda `--form` salinim tespiti: WEDGE<->LINE gidip gelme olmamali.
 - Bir squad temasta + kayip >= %25, ikinci squad 300 m+ uzakta bounding'de -> `[HQ-EMIR] ... bounding iptal edildi` ve TAKVIYE.
+
+## T-HENDEK / T-TOP (v8.228 – v8.229): gelen topçu tepkisi + hendek alanı
+Ortam: kısa harita bölgesi, düz arazi, sunucuda ELITE + RHS (US/RUS). Zaman: ~6 dk. Her adımdan sonra RPT'de `[TOP-GELEN]`, `[HENDEK-YERLES]`, `[ANOMALI]`.
+1. **Düz arazide tepki (hendek yok)**: Batı 1 squad (8 AI), 400 m uzağa 1 havan (RHS 82 mm) + Zeus "ELITE Topçu TEST". Squad'ı 150 m içine bırak. Beklenen: atıştan önce `[TOP-GELEN] ... kalan 6.x sn`, askerler düşme noktasından uzaklaşıp yatar, patlamadan ~7 sn sonra kalkar. Ölçüt: kaç asker yaralandı/öldü (aynı senaryoyu `lambs_danger_topSiperOff = true` ile tekrarla ve karşılaştır).
+2. **Hendek tek başına yürüme**: Eden'de 20-30 m hendek (1,4 m derin, 4 m geniş) + iki ucuna rampa. Üstüne dikdörtgen işaret koy: ad `elite_hendek_1`, boyut hendeğin YARI uzunluk/genişliği, yön hendeğin yönü. Bir squad'a Zeus'tan hendek içine `doMove`. Beklenen: giriyor, rampadan çıkıyor; takılırsa `[ANOMALI] YURUMUYOR`.
+3. **SAVUN + hendek**: aynı hendeğin 150 m yakınına ELITE Objektif → SAVUN (objektif hendeğe ≤ 350 m). Beklenen: `[PLAN] ... SAVUN: <grup> hendek alanına yerleşecek` ve `[HENDEK-YERLES]`; askerler hendek ekseninde dağılıp çömelir, dışa bakar.
+4. **Topçu + hendek**: 3'teki squad'a topçu ateşi (1'deki gibi). Beklenen: hendek ≥ 8 m uzaktaysa hendeğe koşup yatar (aynı log, sonuç: hendek içinde kalan sayısı).
+5. **Olumsuz durum**: hendek işaretini sil/yanlış adla (ör. `hendek_1`) → eski davranış (düz arazide yat) — hata/log kirliliği olmamalı.
+Başarı ölçütü: 1'de açık farkla daha az kayıp; 2'de ≥ %80 asker hendeğe girip çıkabiliyor; 3-4'te `[HENDEK-YERLES]` ve çömelen asker sayısı ≥ %70. Not: hepsi doğrulanmamış (T).
