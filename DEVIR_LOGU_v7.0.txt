@@ -2105,3 +2105,10 @@ v8.204 SATRANC TAHTASI 1-2-3 (kullanici: "1 2 3'e basla, sonra 4 5 6")
  Dayanak: FM 3-98 3-56 (olcutlu geri cekilme) ve savunmada yedek karsi saldirisi genel ilkesi; yedek karsi saldirisi icin belirli bir madde numarasi DOGRULANMADI; tum esikler (%25 / %50 / %60 / 150 m / 400 m) TASARIM degeri.
  Siradaki: 4 (ates kaydirma, sis, karsi-batarya), 5 (araçli hareket / pusuya tepki / kurtarma), 6 (hedef zinciri, cephe hatti).
  Not: TEST EDILMEDI.
+
+v8.205 TASIMA: KINEMATIK SURUS + SAVUN DUZELTMELERI (kullanici RPT cbe5b5ed: "yine gitmedi; savun diyince canli AI yok diyor; objektifte kendisi waypoint atiyor")
+ Bulgular: (1) Tasima YINE hic baslamadi: RHS Stryker (tekerlekli) VE M113A3 (PALETLI) TAMAMI bindirmeden sonra kalkmadi -> "yalniz tekerlekli" hipotezi YANLIS; hepsi RHS arac (GM M113 onceki surumlerde gidiyordu). Ziplama sinamasi her seferinde fizigin serbest oldugunu gosterdi (0.32 / 0.62 m). Oyun 40 sn asamasindan 20 sn sonra kapandi, [TASIMA-YOL] satiri uretilemedi. (2) "uygun grup yok / canli AI yok": 2. ve 3. SAVUN istekleri ilk (elle secimli 3 gruplu) planin gruplarini "baska planda" bulup reddetti (+ cift plan engeli) - mesaj yaniltici idi. (3) SAVUN plani gruplari objektifteyken bile RP (200 m) waypoint'ine topluyordu.
+ fnc_aracTasima: 40 sn'de hala duruyorsa KINEMATIK SURUS (son care, HILE): rota (calculatePath dugumleri, yoksa dogrudan cizgi) boyunca betikle surulur - 7.5 m/s, yon en cok 4 derece / 0.1 sn, 9 m onunde arac / yaya varsa durur, inise 45 m kala biter, yolcular aracta. [TASIMA-KIN]. AI surerse kendiliginden devam eder (hiz > 3 olunca ana dongu sayaclari sifirlanir) ama betik inis / sure bitene kadar calisir.
+ fnc_komutanPlan / fnc_komutanPlanKapi: plan reddedilince GERCEK neden istemciye gider ("bu noktada zaten bir SAVUN plani var - once IPTAL", "elenme nedenleri: baska planda 3" vb.).
+ fnc_komutanPlanDongu: SAVUN planinda RP'ye toplanma atlanir (gruplar Zeus'un koydugu yerde mevzi alir).
+ Not: TEST EDILMEDI. Kinematik surus bir kacis kapagidir, donmanin gercek nedeni (RHS surucu AI / mod etkilesimi) hala bilinmiyor.

@@ -754,6 +754,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 params ["_a", "_yol"];
                                 diag_log format ["[TASIMA-YOL] %1 | (18 sn) rota dugum %2 | dogrudan %3 m", _a getVariable ["gid", "?"], count _yol, if (count _yol > 1) then {round ((_yol select 0) distance2D (_yol select ((count _yol) - 1)))} else {-1}];
                                 private _av = _a getVariable ["arac", objNull];
+                                if (!isNull _av && {count _yol > 1}) then { _av setVariable ["lambs_danger_yolDugum", _yol]; };
                                 if (!isNull _av && {alive _av} && {(speed _av) < 3} && {count _yol > 2}) then {
                                     _av setDriveOnPath _yol;
                                     diag_log format ["[TASIMA-YOL] %1 | setDriveOnPath uygulandi (%2 dugum)", _a getVariable ["gid", "?"], count _yol];
@@ -803,12 +804,49 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 diag_log format ["[TASIMA-YOL] %1 | rota dugum %2 | uzunluk %3 m | dogrudan %4 m", _a getVariable ["gid", "?"], count _yol, round _u, if (count _yol > 1) then {round ((_yol select 0) distance2D (_yol select ((count _yol) - 1)))} else {-1}];
                                 // v8.203: arac hala duruyorsa hesaplanan rota dogrudan surucuye verilir (setDriveOnPath)
                                 private _av = _a getVariable ["arac", objNull];
+                                if (!isNull _av && {count _yol > 1}) then { _av setVariable ["lambs_danger_yolDugum", _yol]; };
                                 if (!isNull _av && {alive _av} && {(speed _av) < 3} && {count _yol > 2}) then {
                                     _av setDriveOnPath _yol;
                                     diag_log format ["[TASIMA-YOL] %1 | setDriveOnPath uygulandi (%2 dugum)", _a getVariable ["gid", "?"], count _yol];
                                 };
                                 deleteVehicle _a;
                             }];
+                            // v8.205 KINEMATIK SURUS (SON CARE; kullanici RPT cbe5b5ed: RHS Stryker + M113A3 TAMAMI AI emriyle kalkmadi, fizik serbest -> sorun AI surucu): 40 sn'de hala duruyorsa arac, hesaplanan rota (yoksa dogrudan cizgi) boyunca betikle surulur:
+                            //   7.5 m/s (~27 km/s), yon her 0.1 sn'de en cok 4 derece, 9 m onunde arac / yaya varsa durur; yolcular aracta kalir, inise 45 m kala biter. Gercek surucu hala "suruyor" gorunur (tekerler doner), ama bu bir HILEDIR: yalniz AI hic kalkmadiginda devreye girer.
+                            if !(_v getVariable ["lambs_danger_kinSurus", false]) then {
+                                _v setVariable ["lambs_danger_kinSurus", true];
+                                [_v, _d, _drop, _vg] spawn {
+                                    params ["_v3", "_d3", "_drop3", "_vg3"];
+                                    private _gid3 = groupId _vg3;
+                                    sleep 3;
+                                    private _yol3 = _v3 getVariable ["lambs_danger_yolDugum", []];
+                                    if (count _yol3 < 2) then { _yol3 = [getPosATL _v3, _drop3]; };
+                                    diag_log format ["[TASIMA-KIN] %1 | AI surmuyor: kinematik surus basladi (%2 dugum, inise %3 m)", _gid3, count _yol3, round (_v3 distance2D _drop3)];
+                                    private _i3 = 1;
+                                    private _t3 = time;
+                                    private _sonLog = time;
+                                    while {alive _v3 && {alive _d3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700}} do {
+                                        private _hedef3 = _yol3 select (_i3 min ((count _yol3) - 1));
+                                        if ((_v3 distance2D _hedef3) < 18 && {_i3 < ((count _yol3) - 1)}) then { _i3 = _i3 + 1; sleep 0.05; continue };
+                                        private _yon3 = _v3 getDir _hedef3;
+                                        private _hdg3 = getDir _v3;
+                                        private _fark3 = ((_yon3 - _hdg3 + 540) mod 360) - 180;
+                                        private _yeni3 = _hdg3 + ((_fark3 max -4) min 4);
+                                        private _engel3 = ((_v3 modelToWorld [0, 9, 0]) nearEntities [["LandVehicle", "CAManBase"], 5]) select {_x isNotEqualTo _v3 && {alive _x} && {(vehicle _x) isNotEqualTo _v3}};
+                                        private _hiz3 = if (_engel3 isNotEqualTo []) then {0} else { if ((abs _fark3) > 35) then {3} else {7.5} };
+                                        _v3 setDir _yeni3;
+                                        private _dv3 = [sin _yeni3, cos _yeni3, 0] vectorMultiply _hiz3;
+                                        _v3 setVelocity [_dv3 select 0, _dv3 select 1, (velocity _v3) select 2];
+                                        if ((time - _sonLog) > 20) then {
+                                            _sonLog = time;
+                                            diag_log format ["[TASIMA-KIN] %1 | kinematik surus: inise %2 m | dugum %3/%4 | hiz %5 km/s", _gid3, round (_v3 distance2D _drop3), _i3, count _yol3, round (speed _v3)];
+                                        };
+                                        sleep 0.1;
+                                    };
+                                    if (alive _v3) then { _v3 setVelocity [0, 0, (velocity _v3) select 2]; };
+                                    diag_log format ["[TASIMA-KIN] %1 | kinematik surus bitti: inise %2 m", _gid3, round (_v3 distance2D _drop3)];
+                                };
+                            };
                             _v setVectorUp [0, 0, 1];
                             _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
                             _d doMove _drop;

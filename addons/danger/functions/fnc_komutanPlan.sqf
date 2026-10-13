@@ -40,6 +40,7 @@ if (_tip in [0, 1]) then {
     };
     if (_cift) exitWith {
         diag_log format ["[PLAN] KURULAMADI: %1 icin ayni noktada (150 m) zaten %2 plani var / kuruluyor (cift plan engellendi)", _taraf, ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1)];
+        missionNamespace setVariable ["lambs_danger_planRedNeden", format ["bu noktada (150 m) zaten bir %1 plani var - once ELITE Objektif -> IPTAL ile durdurun", ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1)]];
         systemChat "[ELITE] Bu noktada zaten ayni turde plan var - yenisi kurulmadi";
         false
     };
@@ -96,10 +97,12 @@ if (_hqId isNotEqualTo "" && {!isNil "lambs_danger_hqlar"}) then {
 };
 if (_tip isEqualTo 0 && {_hqKayit isEqualTo []} && {missionNamespace getVariable ["lambs_danger_hqZorunlu", true]}) exitWith {
     diag_log format ["[PLAN] KURULAMADI: %1 icin ELE GECIR bir HQ / US gerektirir (secilen: '%2'); once 'ELITE HQ / US Kur' modulu", _taraf, _hqId];
+    missionNamespace setVariable ["lambs_danger_planRedNeden", "ELE GECIR icin bir HQ / US secilmeli (once 'ELITE HQ / US Kur' modulu)"];
     false
 };
 if (_hqKayit isNotEqualTo [] && {(_hqKayit select 1) isNotEqualTo _taraf}) exitWith {
     diag_log format ["[PLAN] KURULAMADI: HQ %1 tarafi (%2) plan tarafi (%3) ile ayni degil", _hqId, _hqKayit select 1, _taraf];
+    missionNamespace setVariable ["lambs_danger_planRedNeden", format ["secilen HQ / US (%1) baska bir tarafa ait (%2)", _hqId, _hqKayit select 1]];
     false
 };
 private _grupN = _ayar getOrDefault ["grupN", 4];
@@ -211,6 +214,7 @@ if (_aday isEqualTo []) exitWith {
         if (!isNull _l) then { _enYakin = _enYakin min (_l distance2D _obj); };
     } forEach _tum;
     diag_log format ["[PLAN] KURULAMADI: %1 icin uygun grup yok | taraftaki grup:%2 | elenme nedenleri: %3 | objektife en yakin lider: %4 m | sunucu: isServer=%5", _taraf, count _tum, _red toArray false, round _enYakin, isServer];
+    missionNamespace setVariable ["lambs_danger_planRedNeden", format ["uygun grup yok (taraftaki grup %1; elenme nedenleri: %2). 'baska planda' = grup zaten bir plana bagli; eski plani IPTAL edin", count _tum, _red toArray false]];
     false
 };
 // v8.127: Zeus 'ELITE Gorev Ata' ile MANEVRA / DESTEK / YEDEK atananlar once gelir ve grup sayisi sinirina bakilmaksizin plana girer
@@ -264,6 +268,7 @@ if (isServer) then {
 };
 if (_gruplar isEqualTo []) exitWith {
     diag_log "[PLAN] KURULAMADI: secilen gruplarin hicbiri sunucuya devredilemedi";
+    missionNamespace setVariable ["lambs_danger_planRedNeden", "secilen gruplarin hicbiri sunucuya devredilemedi"];
     false
 };
 private _komutanG = _gruplar select 0;

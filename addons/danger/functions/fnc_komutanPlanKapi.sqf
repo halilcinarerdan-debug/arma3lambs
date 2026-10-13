@@ -24,18 +24,21 @@ lambs_danger_planKapiStarted = true;
         params ["_taraf", "_obj", "_ayarCiftler"];
         private _ayar = createHashMapFromArray _ayarCiftler;
         private _r = [_taraf, _obj, _ayar] call (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
-        ["lambs_danger_planYanit", [_taraf, _ayar getOrDefault ["tip", 0], _r isEqualTo true]] call CBA_fnc_globalEvent;
+        // v8.205: reddedilirse GERCEK neden istemciye gider ("canli AI yok" mesaji yaniltici idi: asil neden cogunlukla 'zaten planda')
+        private _neden = if (_r isEqualTo true) then {""} else { missionNamespace getVariable ["lambs_danger_planRedNeden", ""] };
+        missionNamespace setVariable ["lambs_danger_planRedNeden", ""];
+        ["lambs_danger_planYanit", [_taraf, _ayar getOrDefault ["tip", 0], _r isEqualTo true, _neden]] call CBA_fnc_globalEvent;
     };
 }] call CBA_fnc_addEventHandler;
 
 // v8.121: sunucudan donen yanit (her makinede; yalniz arayuzu olan gosterir)
 ["lambs_danger_planYanit", {
-    params ["_taraf", "_tip", "_ok"];
+    params ["_taraf", "_tip", "_ok", ["_neden", ""]];
     if (!hasInterface) exitWith {};
     private _m = switch (_tip) do {
         case 2: { ["IPTAL: aktif plan yok", "IPTAL: plan durduruldu"] select _ok };
         case 3: { ["ONAY: bekleyen plan yok", "ONAY: plan baslatildi"] select _ok };
-        default { ["PLAN KURULAMADI: uygun grup yok (en az 3 canli AI asker, o taraf icin ELITE acik, objektife <= 4000 m, baska planda degil)", "PLAN KURULDU (haritada ELITE_PLAN isaretleri + grup waypoint'leri)"] select _ok };
+        default { [if (_neden isNotEqualTo "") then {format ["PLAN KURULAMADI: %1", _neden]} else {"PLAN KURULAMADI: uygun grup yok (en az 3 canli AI asker, o taraf icin ELITE acik, objektife <= 4000 m, baska planda degil)"}, "PLAN KURULDU (haritada ELITE_PLAN isaretleri + grup waypoint'leri)"] select _ok };
     };
     diag_log format ["[PLAN-YANIT] %1 | %2", _taraf, _m];
     if (!isNull (getAssignedCuratorLogic player)) then { systemChat format ["[ELITE] %1", _m]; };
