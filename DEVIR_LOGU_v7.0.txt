@@ -2216,3 +2216,9 @@ v8.223 NAKIL KAPISI VARSAYILAN KAPALI (kullanici RPT 1481a235: "apcler hic calis
 v8.224 HIZLI KURTARMA (kullanici: "test icin beklemeye gerek yok dedim, tum sorunlari duzelt")
  Kullanici loglari 35-55 sn'de kesiyor; beklemeyi gerektiren her sey (deney, uzun takilma esikleri) ise yaramaz. Degisiklikler: (1) fnc_reconArac: surme deneyi VARSAYILAN KAPALI (lambs_danger_surmeDeneyOff default true), kinematik surus esigi 14 -> 10 sn, 25 m tasima 40 -> 30 sn. (2) fnc_aracTasima: takilma kademeleri SON CARE 28 -> 20 sn, kinematik surus (40 sn asamasi) 40 -> 28 sn, KALDIR-TASI 55 -> 45 sn. Hedef: AI surmeyen arac bindikten ~30 sn sonra kinematik surusle gider. (3) v8.223 kapisi kapali, v8.222 devir 15 sn duruyor.
  Not: TEST EDILMEDI.
+
+v8.225 YUKLE-VE-BEKLE (kullanici: "her sey kitaba gore olmali")
+ Doktrin ilkesi (ATP 4-01.45 hareket / FM 3-98 kesif; kitapta bu davranis icin SAYISAL SURE YOK): piyade toplanma bolgesinde araca YUKLENIR, birlik hareket baslangic noktasini (SP) zamaninda gecer; kesif unsuru ana kolun ONUNDE gider. Yuklenmeden beklemek doktrinde yoktur; v8.187 kapisi binmeyi tutuyordu (hata), v8.223 kapiyi tamamen kaldirmisti (kesif onde gitme ilkesini de yok ediyordu).
+ fnc_aracTasima: binme ARTIK kapiyi beklemez. Binme bittikten sonra kalkis kapisi (tasimaCtl[1]) tutar: "YUKLENDI, kalkis kapisi (SP) bekleniyor" en fazla lambs_danger_nakilTutmaS sn (varsayilan 60 = TASARIM DEGERI). Kapi komuta dongusunde: recon gozlemi tamam / recon APC indirdikten 120 sn / recon yaya iken RECON fazinin 90. sn'si / 420 sn tavan. fnc_komutanPlanDongu: v8.223 bayragi (nakilKapiAktif) kaldirildi.
+ DURUST NOT: kinematik surus (fnc_aracKinSurus) ve takilma zamanlari (20 / 28 / 45 sn, recon 8 / 10 / 30 sn) doktrin DEGIL, motor sorununa karsi gecici cozum / tasarim degeridir. AI surucunun neden surmedigi bilinmiyor.
+ Not: TEST EDILMEDI.

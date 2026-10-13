@@ -435,12 +435,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         private _binen = [];
         if (_iptal isEqualTo "") then {
             doStop _d;
-            // v8.132: piyade toplanana kadar (plan TOPLAN hazir) RP'de bekle (en fazla 600 sn)
-            if !(_ctl select 1) then {
-                diag_log format ["[TASIMA] %1 | %2 | RP'de, piyadenin toplanmasi bekleniyor", groupId _vg, _ad];
-                private _wt = time + 600;
-                waitUntil { sleep 2; !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _wt} };
-            };
+            // v8.225 YUKLE-VE-BEKLE (kullanici: "her sey kitaba gore olmali"; ATP 4-01.45 / FM 3-98: piyade toplanma bolgesinde ARACA YUKLENIR, hareket baslangic noktasini (SP) zamaninda gecer; yuklenmeden beklemek doktrinde yok): binme ARTIK kapiyi beklemez; kapi (tasimaCtl[1]) yalnizca KALKISI tutar (asagida)
             private _hepsi = [];
             { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
             [_gl] call _birak;
@@ -480,6 +475,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         };
         // plan: kac arac binmeyi bitirdi (v8.163: sefer bu sayac tamamlaninca BASLAR, nakil isi bitmeyi beklemez)
         _ctl set [3, (_ctl param [3, 0]) + 1];
+        // v8.225 KALKIS KAPISI (SP zamani): kesif unsuru onde gider, ana kol YUKLU bekler (en fazla lambs_danger_nakilTutmaS = 60 sn; tasarim degeri, kitapta sayi YOK); kapi: recon gozlemi tamam / tank mevzide / 420 sn (komuta dongusu)
+        if (_iptal isEqualTo "" && {alive _v} && {!(_ctl select 1)}) then {
+            private _tutS = missionNamespace getVariable ["lambs_danger_nakilTutmaS", 60];
+            diag_log format ["[TASIMA] %1 | YUKLENDI, kalkis kapisi (SP) bekleniyor (en fazla %2 sn): kesif unsuru once gider", groupId _vg, _tutS];
+            private _tt = time + _tutS;
+            waitUntil { sleep 1; !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _tt} };
+        };
 
         // (3) inis noktasina sur
         private _erkenInis = "";

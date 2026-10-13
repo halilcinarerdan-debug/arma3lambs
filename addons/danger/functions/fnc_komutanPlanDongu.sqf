@@ -549,8 +549,8 @@ while {true} do {
                     private _ra = ["SEC", _plan] call FUNC(reconArac);
                     if (!isNull _ra) then { _plan set ["reconArac", _ra]; };
                 };
-                // v8.223 NAKIL KAPISI KAPALI (kullanici RPT 1481a235: "apcler hic calismadi, beklemeye gerek yok"): kapi binmeyi bile tutuyordu (recon yaya 2 km giderken APC'ler 7 dk piyadeyi almadi). Varsayilan: nakil hemen baslar. Eski davranis: lambs_danger_nakilKapiAktif = true
-                private _bekleKos = (((_plan getOrDefault ["reconG", []]) isNotEqualTo [] && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) || {(_plan getOrDefault ["zirhG", []]) isNotEqualTo []}) && {missionNamespace getVariable ["lambs_danger_nakilKapiAktif", false]};
+                // v8.225: kapi KALKISI tutar (yuklen-ve-bekle, en fazla 60 sn); binme beklemez (aracTasima)
+                private _bekleKos = (((_plan getOrDefault ["reconG", []]) isNotEqualTo [] && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) || {(_plan getOrDefault ["zirhG", []]) isNotEqualTo []});
                 _plan set ["tasimaCtl", [false, !_bekleKos, 0, 0, 0, [], true]];
                 _plan set ["hazirBekle", _bekleKos];
                 if (_bekleKos) then { diag_log format ["[PLAN] %1 SENKRON: nakil araclari piyadeyi alip bekleyecek (gozlem: %2 | tank / zirh: %3) - serbest birakma kosullari: gozlem tamam + tanklar mevzisine yakin (en cok 420 sn)", _id, (_plan getOrDefault ["reconG", []]) isNotEqualTo [], (_plan getOrDefault ["zirhG", []]) isNotEqualTo []]; };
