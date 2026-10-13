@@ -512,7 +512,7 @@ while {true} do {
             { _ilkSay set [groupId _x, {alive _x} count (units _x)]; } forEach _gruplar;
             _plan set ["ilkSayi", _ilkSay];
             // v8.205: SAVUNMA planinda gruplar zaten objektifte (Zeus'un koydugu yerde); RP'ye toplanmak onlari yerinden ederdi (kullanici: "objektifte kendisi waypoint atiyor, degisik") -> RP waypoint'i yazilmaz, TOPLAN atlanir
-            if (_tip isNotEqualTo 1) then { { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar; };
+            if (_tip isNotEqualTo 1 || {!(missionNamespace getVariable ["lambs_danger_savunmaRpAtla", true])}) then { { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar; };
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca
             if (_tip isNotEqualTo 1 && {!(missionNamespace getVariable ["lambs_danger_tasimaOff", false])}) then {
                 // v8.187 SENKRON KALKIS: kesif unsuru (RECON) ya da zirh destek (tank) varsa nakil araclari piyadeyi alip BEKLER (hazir = false); gozlem bitince ve tanklar mevzilerine yaklasinca (komuta dongusu) serbest birakilir
@@ -568,7 +568,7 @@ while {true} do {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
             // v8.187: kesif unsuru varsa TOPLAN'in 300 sn zaman asimini beklemeden HEMEN gozleme gonderilir (once recon, sonra digerleri)
             private _reconOnce = (_tip isNotEqualTo 1) && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2};
-            if (_reconOnce || {_tip isEqualTo 1} || {_hazir >= (ceil ((count _gruplar) * 0.75))} || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
+            if (_reconOnce || {_tip isEqualTo 1 && {missionNamespace getVariable ["lambs_danger_savunmaRpAtla", true]}} || {_hazir >= (ceil ((count _gruplar) * 0.75))} || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
                 // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
                 if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2} && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
                     _plan set ["reconYapildi", true];
@@ -853,7 +853,7 @@ while {true} do {
         // ---------------------------------------------------------------- SALDIRI
         if (_faz isEqualTo "SALDIRI") then {
             // v8.204 FRAGO - SALDIRI BASARISIZ (FM 3-98 3-56: geri cekilme olcutu onceden verilir, dusman / kayip tabanli; sayilar TASARIM): saldiri gruplarinin toplam kaybi >= %50 ve objektif temizlenmediyse CEKILME
-            if ((time - (_plan getOrDefault ["fragoT", -99])) > 10) then {
+            if ((time - (_plan getOrDefault ["fragoT", -99])) > 10 && {!(missionNamespace getVariable ["lambs_danger_fragoOff", false])}) then {
                 _plan set ["fragoT", time];
                 private _ilkF = _plan getOrDefault ["ilkSayi", createHashMap];
                 private _ilkFT = 0; private _simFT = 0;
@@ -982,7 +982,7 @@ while {true} do {
             // v8.204 SAVUNMA KOMUTANI (kullanici: "savunma sadece bekliyor"; FM 3-98 engagement / disengagement + MCWP 3-11.1 savunmada yedek karsi saldirisi - genel ilke, esikler TASARIM degeri):
             //   ortak resim = plan gruplari liderlerinin objektif 400 m cevresinde bildigi dusman; YEDEK grup, (dusman >= 2 ve (savunma kaybi >= %25 ya da dusman objektife <= 150 m)) olunca dusmanin agirlik merkezine KARSI SALDIRI emri alir (150 sn'de bir);
             //   toplam kayip >= %60 ise savunma "mevzi kaybedildi" sayilir ve hayatta kalanlar cekilir (plan BITTI, gruplar serbest).
-            if ((time - (_plan getOrDefault ["savDenT", -99])) > 10) then {
+            if ((time - (_plan getOrDefault ["savDenT", -99])) > 10 && {!(missionNamespace getVariable ["lambs_danger_savunmaKomutanOff", false])}) then {
                 _plan set ["savDenT", time];
                 private _tfS = _plan get "taraf";
                 private _dusN = [];

@@ -2118,3 +2118,9 @@ v8.206 ATIS PACELEME (kullanici RPT ad7a3eb4: "herseyi guzel gitti, apcler harek
  fnc_komutanPlanDongu (_topcuAt): mermiler 2'serli partiler halinde (lambs_danger_topcuPartiN, varsayilan 2) 6 sn arayla (lambs_danger_topcuAralikS), toplar 3 sn arayla baslar. Ayni anda en cok 2 mermi/top yerine 8 mermi dusmesin diye. Plan "topcuN" (mermi/seans) korunur.
  ONERILEN SUNUCU AYARLARI (CBA, ELITE disi; adlar ACE'e gore dogrulanmali): ace_frag_enabled / ace_frag_spallEnabled / ace_frag_reflectionsEnabled kapat, ace_frag_maxTrack ve ace_frag_maxTrackPerFrame dusur. Zeus topcu testinde ayni donma olursa nedeni ACE frag'dir.
  Not: TEST EDILMEDI.
+
+v8.207 SUNUCU DONMASI AYIKLAMA ANAHTARLARI (kullanici: "ace balistik interval 0.1 ile yillardir oynuyorum bunu ilk kez yasadim", "sistemim cok rahat kaldirir")
+ RPT 5eb15151 (v8.205): tek M109, 3 mermi (ETA 29 sn), ATIS 4:35:08, dusus ~4:35:37, log 4:35:46'da KESILDI (olu yok, ACE frag hatasi yok, FPS 69). Onceki donma (ad7a3eb4, v8.205): 4:13:25. Ikisinde de v8.204/205 yeni parcalari vardi (kumanda planla otomatik acilis, savunma komutani, FRAGO, SAVUN'da RP atlama); v8.200-203'te iki M109 x 7 mermi gercek atis yapildi, donma YOK. Kod incelemesi: ELITE patlama olayina bagli islem yapmiyor (yalniz Killed / Hit tipi dinleyiciler).
+ Yuk iddiasi (frag / ragdoll) geri cekildi: FPS 64-85, olu yok. Neden BILINMIYOR.
+ AYIKLAMA ANAHTARLARI (hata ayiklama konsolunda sunucuda: missionNamespace setVariable ["...", true, true]): lambs_danger_hqPlanOtomatikOff (kumanda planla acilmasin), lambs_danger_savunmaKomutanOff (BEKLE karsi saldiri / kayip), lambs_danger_fragoOff (saldiri cekilme dali), lambs_danger_savunmaRpAtla = false (SAVUN yine RP'ye toplansin). Her anahtar tek tek acilip ayni senaryo tekrarlanarak donmaya sebep olan parca bulunabilir.
+ Not: TEST EDILMEDI.
