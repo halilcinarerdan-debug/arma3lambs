@@ -191,7 +191,19 @@ private _topcuAt = {
             if (_mg isNotEqualTo "" && {_nokta inRangeOfArtillery [[_v], _mg]}) then {
                 private _hd = _nokta getPos [random 30, random 360];
                 if (_nokta isNotEqualTo _poz) then { diag_log format ["[PLAN-TOPCU] %1 | %2 | NISAN KAYDIRILDI: dost %3 m < RED %4 m -> nisan noktasi objektifin %5 m derinligine (dost %6 m)", _plan get "id", _ad, round _dostEn, _red, round (_nokta distance2D _poz), round _dE]; };
-                _v doArtilleryFire [_hd, _mg, _mermi];
+                // v8.206 ATIS PACELEME (kullanici RPT ad7a3eb4: 2 M109 x 4 mermi ayni anda 21 askerin ustune dustu; ACE frag "Cannot create non-ai vehicle ace_explosion_reflection_*" x34 + 8 olum + ragdoll, 5 sn sonra SUNUCU DONDU): mermiler 2'serli partiler halinde 6 sn arayla, toplar 3 sn arayla baslar
+                [_v, _nokta, _mg, _mermi, _forEachIndex] spawn {
+                    params ["_tv", "_tn", "_tm", "_tk", "_ti"];
+                    private _parti = missionNamespace getVariable ["lambs_danger_topcuPartiN", 2];
+                    private _aralik = missionNamespace getVariable ["lambs_danger_topcuAralikS", 6];
+                    sleep (3 * _ti);
+                    while {_tk > 0 && {alive _tv} && {canFire _tv} && {!isNull (gunner _tv)}} do {
+                        private _n = _parti min _tk;
+                        _tv doArtilleryFire [_tn getPos [random 30, random 360], _tm, _n];
+                        _tk = _tk - _n;
+                        if (_tk > 0) then { sleep _aralik; };
+                    };
+                };
                 // ZARAR TAKIBI: atis noktasinin 250 m cevresindeki sivil / dost / dusman anlik listesi (plan sonunda kimlerin oldugu [PLAN-ZARAR] ile yazilir)
                 private _yakin = _hd nearEntities ["CAManBase", 250];
                 (_plan getOrDefault ["atislar", []]) pushBack [time, _hd, _yakin select {(side _x) isEqualTo civilian}, _yakin select {(side (group _x)) isEqualTo (_plan get "taraf")}, _yakin select {(side _x) isNotEqualTo civilian && {((_plan get "taraf") getFriend (side _x)) < 0.6}}];
