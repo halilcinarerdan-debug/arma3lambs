@@ -2083,3 +2083,8 @@ v8.200 RECON BEKLEME (kullanici: "otomatik sayi calismiyor, kimse hareket etmedi
  fnc_komutanPlanDongu: SENKRON - recon yaya yola ciktiktan (reconFazT) 120 sn sonra ve tanklar hazirsa ana kol beklemez (ATP 4-01.45: kesif ana kolun onunde ayrik gider).
  fnc_reconArac: ilerleme yok sayma 75 -> 60 sn; KURTARMA 1'de [RECON-ARAC-TANI] (yerellik / sahip, koltuklar, grup lideri, waypoint, komut, bayraklar, engel, yuzey).
  Not: TEST EDILMEDI.
+
+v8.201 DONMUS ARAC ZIPLAMA SINAMASI (kullanici RPT 45d5a9bb, yorum yok)
+ Bulgular: (1) HQ TAMAMI (guvenlik birakilir) CALISTI: [PLAN-HQ-TUM] guvenlik Alpha 2-1 HQ'da birakildi; WEST plani 4 grup / 40 asker kuruldu. (2) TOPCU CALISTI: 2 x M109 "HAZIRLIK (canli gozlem, recon yok) ... 7 mermi, ETA 48 sn, en yakin dost 2792 m" (dogrulama yok modu). (3) 7 RHS Stryker'in TAMAMI bindirmeden sonra hic kalkmadi (42 [TASIMA] yolda ornegi hep 0 km/s; fizik tanisi: z 0.03, yerde, vectorUp ~1, yuzey #WLGrass1, hiz vektoru 0; ezme / aracSenkron devrede degil: "ezme fren 1645 sn once"); 120 sn sonra yolcular 2.35-2.4 km geride indi ("erken inis: arac TAKILDI"). GM M113 ayni surumde akici gidiyordu (RPT 9f47fa43) - sorun arac / mod ozel (RHS Stryker, GM Milan APC) olabilir.
+ fnc_aracTasima: TAKILMA KALDIR-TASI asamasinda [TASIMA-ZIPLAMA]: arac 3 m/s yukari firlatilir, z artisi + hiz + kutle + yerellik + yakit loglanir. z artisi > 0.3 m = fizik serbest (sorun AI / fren / surucu); ~0 = nesne donmus (simulasyon / baglanti / PhysX).
+ Not: TEST EDILMEDI; bu bir TANI adimidir, donmayi cozmez.

@@ -763,6 +763,15 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         if (_denemeN isEqualTo 3 && {_dg > 40}) then {
                             _denemeN = 4;
                             diag_log format ["[TASIMA-FIZIK] %1 | z %2 | vectorUp %3 | yerde %4 | su %5 | hiz vektoru %6 | yuzey %7", groupId _vg, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}, isTouchingGround _v, surfaceIsWater (getPosATL _v), (velocity _v) apply {round _x}, surfaceType (getPosATL _v)];
+                            // v8.201 ZIPLAMA SINAMASI (RPT 45d5a9bb: 7 Stryker'in tamami baslangicta HIC kalkmadi; itme, tasima, kaldirma sonuc vermedi): arac 3 m/s yukari firlatilir; zipliyorsa fizik serbest (sorun AI / fren / surucu tarafinda), ziplamiyorsa nesne donmus (simulasyon / baglanti / PhysX)
+                            [_v, groupId _vg] spawn {
+                                params ["_v2", "_gid"];
+                                private _z0 = (getPosASL _v2) select 2;
+                                _v2 setVelocity [0, 0, 3];
+                                private _zMax = _z0;
+                                for "_i" from 1 to 12 do { sleep 0.1; _zMax = _zMax max ((getPosASL _v2) select 2); };
+                                diag_log format ["[TASIMA-ZIPLAMA] %1 | z artisi %2 m (>0.3 = fizik serbest) | hiz %3 | kutle %4 | yerel %5 | yakit %6", _gid, (_zMax - _z0) toFixed 2, (velocity _v2) apply {_x toFixed 1}, getMass _v2, local _v2, (fuel _v2) toFixed 2];
+                            };
                             _v setVectorUp [0, 0, 1];
                             _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
                             _d doMove _drop;
