@@ -318,6 +318,13 @@ while {true} do {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
                 diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
+                private _kapiNeden = if (_reconOk && _tankOk) then {"recon gozlemi tamam + tanklar mevzide"} else { if (_reconOnde && _tankOk) then {"recon APC yolun %60'ini gecti"} else { if (_reconYaya && _tankOk) then {"recon APC indirdi + 120 sn"} else { if (_reconYayaAracsiz && _tankOk) then {"APCsiz recon: RECON fazi 90 sn"} else {"420 sn TAVAN"} } } };
+                ["KAPI-ACILDI", format ["neden: %1 | recon tamam %2 | recon onde %3 | tank %4", _kapiNeden, _reconOk, _reconOnde, _tankOk]] call FUNC(planZaman);
+            } else {
+                if ((time - (_plan getOrDefault ["kapiLogT", 0])) > 20) then {
+                    _plan set ["kapiLogT", time];
+                    diag_log format ["[PLAN-KAPI] %1 | kapi KAPALI | recon tamam %2 | recon APC onde %3 (kalan %4 m / baslangic %5 m) | APC indirdi+120 sn %6 | APCsiz recon 90 sn %7 | tank mevzide %8 | faz %9 %10 sn", _id, _reconOk, _reconOnde, if (isNull _raG) then {-1} else {round (_raG distance2D (_plan get "op"))}, round (_plan getOrDefault ["reconAracD0", 0]), _reconYaya, _reconYayaAracsiz, _tankOk, _faz, round _fazSure];
+                };
             };
         };
 

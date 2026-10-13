@@ -112,6 +112,7 @@ private _icerde = _birimler select {alive _x && {(vehicle _x) isEqualTo _v}};
 if (_icerde isEqualTo []) exitWith { ["kimse binmedi"] call _basarisiz; };
 { _x disableAI "PATH"; } forEach _icerde;   // sessiz seyir: yolcu kendi basina inmez
 diag_log format ["[RECON-ARAC] %1 | %2 | %3 recon askeri bindi -> OP'ye sessiz surus (%4 m)", _id, _ad, count _icerde, round (_v distance2D _op)];
+["RECON-BINDI", format ["%1 asker | arac %2 | OP'ye %3 m", count _icerde, _ad, round (_v distance2D _op)]] call FUNC(planZaman);
 
 // ---- 3) sessiz surus
 private _dur = _op getPos [150, _op getDir (_plan get "rp")];
@@ -143,7 +144,8 @@ while {_bitis isEqualTo ""} do {
         private _dtk = time - _ilerT;
         if (_dtk > 8 && {_kurtN isEqualTo 0}) then {
             _kurtN = 1;
-            if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", true]) then { _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9; };
+            // v8.227: surucu izleme + teshis EYLEMLERDEN ONCE baslar (surucu KURTARMA 1'den hemen sonra araçtan cikiyor; hangi eylemden sonra oldugu [SURME-TANI-CIKTI] "SON DENEY ADIMI" ile gorunur)
+            [_v, _d, _id, false] call FUNC(aracSurmeTani);
             // v8.218 YOL ONCELIGI (RPT 5290bbed: TASIMA 18 sn kurtarmasi - yola 60 m ara nokta + 6 m/s itme - duran Stryker'i kurtardi): hedefe yakin en iyi yol noktasi (300 m) ara nokta; yoksa dogrudan hedef
             private _yolK = (getPosATL _v) nearRoads 300;
             private _araK = _dur;
@@ -152,7 +154,17 @@ while {_bitis isEqualTo ""} do {
                 _araK = getPosATL (_yolK select 0);
             };
             if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", true]) then {
-                _d doMove _araK; _v setVelocityModelSpace [0, 6, 0];
+                [_v, _d, _araK] spawn {
+                    params ["_v5", "_d5", "_ara5"];
+                    private _adm = [
+                        ["EngineOn", { params ["_v", "_d", "_a"]; _d action ["EngineOn", _v]; _v engineOn true; }],
+                        ["AI-OZELLIK", { params ["_v", "_d", "_a"]; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9; }],
+                        ["doMove-yol", { params ["_v", "_d", "_a"]; _d doMove _a; }],
+                        ["itme-6ms", { params ["_v", "_d", "_a"]; _v setVelocityModelSpace [0, 6, 0]; }]
+                    ];
+                    { _x params ["_ad5", "_kod5"]; _v5 setVariable ["lambs_danger_deneyAdim", _ad5]; [_v5, _d5, _ara5] call _kod5; sleep 0.6; } forEach _adm;
+                    _v5 setVariable ["lambs_danger_deneyAdim", "-"];
+                };
             } else {
                 // v8.220: nedeni bulmak icin adim adim eylem + onlem deneyi (kinematik surus deney bitene kadar bekler)
                 [_v, _d, _dur, _id] call FUNC(aracSurmeDeney);
@@ -163,7 +175,6 @@ while {_bitis isEqualTo ""} do {
                 _id, local _v, owner _v, local _d, name (driver _v), name (commander _v), name (gunner _v), name (leader _vg), (vehicle (leader _vg)) isEqualTo _v, count (waypoints _vg), currentWaypoint _vg, behaviour _d, combatMode _vg, speedMode _vg, currentCommand _d, unitReady _d,
                 _v getVariable [QGVAR(ezmeFren), false], _d getVariable [QGVAR(senkT), 0], _d getVariable [QGVAR(forceMove), false],
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
-            [_v, _d, _id, false] call FUNC(aracSurmeTani);   // v8.213: olasi nedenler (sinama KAPALI: 60 m doMove kurtarma emrini eziyordu)
         };
         if (_dtk > 10 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 2;
@@ -173,6 +184,7 @@ while {_bitis isEqualTo ""} do {
             _d doMove _alt;
             // v8.209: recon araci da AI surmuyorsa (RPT 91b5ffbd: Stryker 2.4 km'de hic kalkmadi, recon yola cikmadi) ortak kinematik surus (fnc_aracKinSurus) devreye girer
             [_v, _d, _dur, _id] call FUNC(aracKinSurus);
+            ["RECON-KIN-BASLADI", format ["AI surmedi (bindikten sonra) | arac %1 | OP'ye %2 m", _ad, round _dm]] call FUNC(planZaman);
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
         if (_dtk > 30 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
@@ -183,7 +195,7 @@ while {_bitis isEqualTo ""} do {
         };
         if (time > _logT) then {
             _logT = time + 20;
-            diag_log format ["[RECON-ARAC] %1 | %2 | yolda: kalan %3 m | hiz %4 km/s | motor %5 | komut %6", _id, _ad, round _dm, round (speed _v), isEngineOn _v, currentCommand _d];
+            diag_log format ["[RECON-ARAC] %1 | %2 | yolda: kalan %3 m (yolun yuzde %7 kadari) | hiz %4 km/s | motor %5 | komut %6 | surucu aracta %8", _id, _ad, round _dm, round (speed _v), isEngineOn _v, currentCommand _d, round (100 * (1 - _dm / ((_plan getOrDefault ["reconAracD0", _dm]) max 1))), (vehicle _d) isEqualTo _v];
         };
     };
     if (_bitis isEqualTo "" && {(time - _ilerT) > 60}) then { _bitis = "takildi"; };
@@ -232,6 +244,7 @@ if (_geriDon) then {
 
 // ---- 4) inis
 diag_log format ["[RECON-ARAC] %1 | %2 | sessiz surus bitti (%3): OP'ye %4 m, inise %5 m -> recon iniyor", _id, _ad, _bitis, round (_v distance2D _op), round (_v distance2D _dur)];
+["RECON-INDI", format ["sebep %1 | arac OP'ye %2 m", _bitis, round (_v distance2D _op)]] call FUNC(planZaman);
 _v setVariable [QGVAR(yolcuBirak), true];
 doStop _d;
 { if (alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}) then { unassignVehicle _x; _x enableAI "PATH"; doGetOut _x; }; } forEach _icerde;

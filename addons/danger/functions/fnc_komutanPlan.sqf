@@ -571,6 +571,7 @@ private _plan = createHashMapFromArray [
 } forEach _gruplar;
 lambs_danger_planlar set [_id, _plan];
 
+missionNamespace setVariable ["lambs_danger_planZamanId", _id]; missionNamespace setVariable ["lambs_danger_planZamanT0", time];
 diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | %7 grup: %8 | RP %9 (%10 m) | ORP %11 (%12 m) | SBF %13 | yaklasma ekseni %14 | duşman: piyade:%15 zirh:%16 AT:%17 MG:%18 nisanci:%19 bina:%20 sayi:%21 | kanat gerekli:%22 | tempo:%23 | H-saati:%24 | sure sinir:%25 sn | tehdit yonu:%26 | siviller:%27 agir silah yasak:%28 | topcu:%29",
     _id, _taraf, ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1), mapGridPosition _obj, groupId _komutanG, rank (leader _komutanG), _gn,
     _gruplar apply {format ["%1=%2 (%3)", groupId _x, _roller get (groupId _x), {alive _x} count (units _x)]},
@@ -580,6 +581,7 @@ diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | 
     ["hemen", "30 sn", "60 sn", "120 sn", "300 sn", "ZEUS ONAYI BEKLENIYOR"] select ((_ayar getOrDefault ["basla", 0]) min 5),
     _plan get "sureSn", [_plan get "tehditB", "bilinmiyor"] select ((_plan get "tehditB") < 0), _plan get "sivil", _plan get "agirYasak",
     ["yok", "hazirlik", "cagri", "hazirlik + cagri"] select ((_ayar getOrDefault ["topcu", 0]) min 3)];
+["PLAN-KURULDU", format ["tip %1 | grup %2 | obje %3", _tip, count _gruplar, mapGridPosition _obj]] call FUNC(planZaman);
 // v8.204 ORTAK RESIM: ELITE plani kurulunca KUMANDA cekirdegi (istihbarat / SPOTREP agi, takviye, kanat, feint, destek, medevac) otomatik acilir - onceki testlerde Zeus 'Kumanda' modulu konmadigi icin bu katman HIC calismiyordu ([HQ-TAHTA] / [HQ-ISTIHBARAT] satiri yok). Kapatma: lambs_danger_hqPlanOtomatikOff = true
 if (!(missionNamespace getVariable ["lambs_danger_hqPlanOtomatikOff", false]) && {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then {
     missionNamespace setVariable ["lambs_danger_hqAktif", true, true];

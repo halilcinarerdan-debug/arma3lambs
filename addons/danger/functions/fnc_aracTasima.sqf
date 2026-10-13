@@ -479,8 +479,19 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         if (_iptal isEqualTo "" && {alive _v} && {!(_ctl select 1)}) then {
             private _tutS = missionNamespace getVariable ["lambs_danger_nakilTutmaS", 240];
             diag_log format ["[TASIMA] %1 | YUKLENDI, kalkis kapisi (SP) bekleniyor (en fazla %2 sn): kesif unsuru once gider", groupId _vg, _tutS];
+            [format ["NAKIL-YUKLENDI %1", groupId _vg], format ["%1 asker | arac %2 | kapi bekliyor (en fazla %3 sn)", count _binen, typeOf _v, _tutS]] call FUNC(planZaman);
             private _tt = time + _tutS;
-            waitUntil { sleep 1; !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _tt} };
+            private _bt0 = time;
+            private _logT = time + 20;
+            waitUntil {
+                sleep 1;
+                if (time > _logT) then { _logT = time + 20; diag_log format ["[TASIMA] %1 | kalkis kapisi hala kapali: %2 sn bekledi (tavan %3 sn)", groupId _vg, round (time - _bt0), _tutS]; };
+                !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _tt}
+            };
+            private _kn = if (_ctl select 0) then {"plan iptal"} else { if (_ctl select 1) then {"kapi ACILDI"} else { if (time > _tt) then {"TAVAN doldu (kapi hala kapali)"} else {"arac oldu"} } };
+            [format ["NAKIL-KALKTI %1", groupId _vg], format ["%1 sn bekledi | neden: %2", round (time - _bt0), _kn]] call FUNC(planZaman);
+        } else {
+            [format ["NAKIL-KALKTI %1", groupId _vg], "beklemedi (kapi acik)"] call FUNC(planZaman);
         };
 
         // (3) inis noktasina sur

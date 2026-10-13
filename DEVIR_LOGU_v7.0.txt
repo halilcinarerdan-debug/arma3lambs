@@ -2229,3 +2229,10 @@ v8.226 OZEL RECON ARACI + KESIF ONDE (kullanici RPT 77295ac6: "recona ozel apc a
  fnc_reconArac SEC: oncelik KADEMELERI: Gorev Ata "RECON ARACI" (4) > MEDEVAC takimi araci (3, MEDEVAC artik dislanmaz) > gorevsiz arac (2) > TASIMA atanmis arac (1, son care); sonra sinif, sonra yakinlik. Log "gorev etiketi" gosterir. YENI Gorev Ata kodu RECON_ARAC (arac / arac grubu); nakil, medevac, taksi, plan grup secimi RECON_ARAC'i disliyor; aracMedevac recon aracini almaz.
  Kalkis kapisi: recon APC OP'ye giden yolun %60'ini gectiyse (veya eski kosullar) ana kol kalkar (%60 TASARIM degeri); kapi tavani 60 -> 240 sn (nakilTutmaS). Boylece recon fiilen onde gider.
  Not: TEST EDILMEDI. Recon icin MEDEVAC araci kullanilirsa o sure medevac yapamaz.
+
+v8.227 LOG GUCLENDIRME (kullanici: "hepsi recon aracti, recon grubu 4 kisi, 1 arac yetti - benim hatam; loglari guclendir")
+ Not: 21:53 testinde 4 araca RECON_ARAC verilmisti, recon 4 kisi oldugu icin 1'i yetti, digerleri bosta kaldi (beklenen); P1 (21:57) grup / araclar Zeus'tan silindi.
+ YENI fnc_planZaman -> [PLAN-ZAMAN] <plan> | t+<sn> | <olay> | <ayrinti>: PLAN-KURULDU, RECON-BINDI, RECON-KIN-BASLADI, RECON-INDI, NAKIL-YUKLENDI <grup>, NAKIL-KALKTI <grup> (bekleme suresi + neden: kapi ACILDI / TAVAN doldu / iptal), KAPI-ACILDI (neden: recon tamam / recon APC %60 / APC indirdi 120 sn / APCsiz recon 90 sn / 420 sn tavan). Plan basina ayni olay bir kez.
+ [PLAN-KAPI] 20 sn'de bir: kapi KAPALI iken recon tamam / recon APC onde (kalan / baslangic m) / yaya kosullari / tank / faz suresi. [TASIMA] "kalkis kapisi hala kapali: X sn" 20 sn'de bir.
+ fnc_reconArac: "yolda" logu artik yolun yuzdesini ve surucunun aracta olup olmadigini gosterir. Surucu izleme (fnc_aracSurmeTani) KURTARMA 1 eylemlerinden ONCE baslar; eylemler adim adim (EngineOn / AI-OZELLIK / doMove-yol / itme-6ms, 0.6 sn arayla) ve [SURME-TANI-CIKTI] "SON DENEY ADIMI" suruyu hangi eylemden sonra cikardigini gosterir.
+ Not: TEST EDILMEDI.
