@@ -139,7 +139,7 @@ while {_bitis isEqualTo ""} do {
         private _dtk = time - _ilerT;
         if (_dtk > 8 && {_kurtN isEqualTo 0}) then {
             _kurtN = 1;
-            if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", false]) then { _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9; };
+            if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", true]) then { _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9; };
             // v8.218 YOL ONCELIGI (RPT 5290bbed: TASIMA 18 sn kurtarmasi - yola 60 m ara nokta + 6 m/s itme - duran Stryker'i kurtardi): hedefe yakin en iyi yol noktasi (300 m) ara nokta; yoksa dogrudan hedef
             private _yolK = (getPosATL _v) nearRoads 300;
             private _araK = _dur;
@@ -147,7 +147,7 @@ while {_bitis isEqualTo ""} do {
                 _yolK = [_yolK, [], {(_x distance2D _v) + 0.5 * (_x distance2D _dur)}, "ASCEND"] call BIS_fnc_sortBy;
                 _araK = getPosATL (_yolK select 0);
             };
-            if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", false]) then {
+            if (missionNamespace getVariable ["lambs_danger_surmeDeneyOff", true]) then {
                 _d doMove _araK; _v setVelocityModelSpace [0, 6, 0];
             } else {
                 // v8.220: nedeni bulmak icin adim adim eylem + onlem deneyi (kinematik surus deney bitene kadar bekler)
@@ -161,7 +161,7 @@ while {_bitis isEqualTo ""} do {
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
             [_v, _d, _id, false] call FUNC(aracSurmeTani);   // v8.213: olasi nedenler (sinama KAPALI: 60 m doMove kurtarma emrini eziyordu)
         };
-        if (_dtk > 14 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+        if (_dtk > 10 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 2;
             _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
             private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
@@ -171,7 +171,7 @@ while {_bitis isEqualTo ""} do {
             [_v, _d, _dur, _id] call FUNC(aracKinSurus);
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
-        if (_dtk > 40 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+        if (_dtk > 30 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 3;
             _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _dur], [], 0, "NONE"];
             _d doMove _dur;

@@ -2212,3 +2212,7 @@ v8.223 NAKIL KAPISI VARSAYILAN KAPALI (kullanici RPT 1481a235: "apcler hic calis
  fnc_komutanPlanDongu: _bekleKos artik YALNIZ lambs_danger_nakilKapiAktif = true iken aktif (varsayilan false) -> nakil araclari plan baslayinca piyadeyi hemen alir ve gider; recon / tank beklemesi yok. Eski kapi isteniyorsa debug konsolundan lambs_danger_nakilKapiAktif = true.
  Etki: ana kol recon raporundan ONCE ORP'ye varabilir; topcu dogrulamali modda rapor yoksa atis olmaz (BASIT modda atar). Recon APC'li ise recon zaten hizli gider.
  Not: TEST EDILMEDI.
+
+v8.224 HIZLI KURTARMA (kullanici: "test icin beklemeye gerek yok dedim, tum sorunlari duzelt")
+ Kullanici loglari 35-55 sn'de kesiyor; beklemeyi gerektiren her sey (deney, uzun takilma esikleri) ise yaramaz. Degisiklikler: (1) fnc_reconArac: surme deneyi VARSAYILAN KAPALI (lambs_danger_surmeDeneyOff default true), kinematik surus esigi 14 -> 10 sn, 25 m tasima 40 -> 30 sn. (2) fnc_aracTasima: takilma kademeleri SON CARE 28 -> 20 sn, kinematik surus (40 sn asamasi) 40 -> 28 sn, KALDIR-TASI 55 -> 45 sn. Hedef: AI surmeyen arac bindikten ~30 sn sonra kinematik surusle gider. (3) v8.223 kapisi kapali, v8.222 devir 15 sn duruyor.
+ Not: TEST EDILMEDI.

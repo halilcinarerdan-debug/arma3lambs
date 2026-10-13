@@ -769,7 +769,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             _v setVelocityModelSpace [0, 6, 0];
                         };
                         // v8.175: son care - arac hala kimildamadiysa (guc hatti diregi / cit / cukur) 28 sn'de inise dogru bos bir konuma tasinir; boylece 8 askeri 1.4 km geride indirmek yerine yola devam eder
-                        if (_denemeN isEqualTo 2 && {_dg > 28} && {_dm > 150}) then {
+                        if (_denemeN isEqualTo 2 && {_dg > 20} && {_dm > 150}) then {
                             _denemeN = 3;
                             private _sp = [_v, _drop] call _cikisFn;
                             if (_sp isNotEqualTo []) then {
@@ -782,7 +782,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             };
                         };
                         // v8.191 KALDIR + TASI (RPT bda5fbde: Milan APC 17 dk ayni konumda DONMUS - itme, SON CARE 14 m sonrasi bile): 40 sn'de burun duzeltilip 0.8 m kaldirilir, 55 sn'de 30 m inise dogru tasinir; fizik tanisi loglanir
-                        if (_denemeN isEqualTo 3 && {_dg > 40}) then {
+                        if (_denemeN isEqualTo 3 && {_dg > 28}) then {
                             _denemeN = 4;
                             diag_log format ["[TASIMA-FIZIK] %1 | z %2 | vectorUp %3 | yerde %4 | su %5 | hiz vektoru %6 | yuzey %7", groupId _vg, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}, isTouchingGround _v, surfaceIsWater (getPosATL _v), (velocity _v) apply {round _x}, surfaceType (getPosATL _v)];
                             // v8.201 ZIPLAMA SINAMASI (RPT 45d5a9bb: 7 Stryker'in tamami baslangicta HIC kalkmadi; itme, tasima, kaldirma sonuc vermedi): arac 3 m/s yukari firlatilir; zipliyorsa fizik serbest (sorun AI / fren / surucu tarafinda), ziplamiyorsa nesne donmus (simulasyon / baglanti / PhysX)
@@ -820,7 +820,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
                             _d doMove _drop;
                         };
-                        if (_denemeN isEqualTo 4 && {_dg > 55} && {_dm > 150}) then {
+                        if (_denemeN isEqualTo 4 && {_dg > 45} && {_dm > 150}) then {
                             _denemeN = 5;
                             _v setVehiclePosition [(getPosATL _v) getPos [30, (getPosATL _v) getDir _drop], [], 0, "NONE"];
                             _v engineOn true;

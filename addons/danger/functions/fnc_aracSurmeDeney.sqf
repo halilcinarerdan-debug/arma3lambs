@@ -11,7 +11,7 @@
  *   YOL-DUZ          : setDriveOnPath [konum, hedef] (iki nokta)
  *   PATH-YENILE      : PATH ozelligi kapat/ac + doMove
  *   FSM-KAPAT        : surucu FSM ozelligi kapali + doMove (4 sn sonra tekrar acilir)
- * Kapatma: lambs_danger_surmeDeneyOff = true.  Log: [SURME-DENEY]
+ * VARSAYILAN KAPALI (v8.224: kullanici beklemek istemiyor); acmak icin lambs_danger_surmeDeneyOff = false.  Log: [SURME-DENEY]
  *
  * Arguments:
  * 0: Arac <OBJECT>
