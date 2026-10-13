@@ -2124,3 +2124,9 @@ v8.207 SUNUCU DONMASI AYIKLAMA ANAHTARLARI (kullanici: "ace balistik interval 0.
  Yuk iddiasi (frag / ragdoll) geri cekildi: FPS 64-85, olu yok. Neden BILINMIYOR.
  AYIKLAMA ANAHTARLARI (hata ayiklama konsolunda sunucuda: missionNamespace setVariable ["...", true, true]): lambs_danger_hqPlanOtomatikOff (kumanda planla acilmasin), lambs_danger_savunmaKomutanOff (BEKLE karsi saldiri / kayip), lambs_danger_fragoOff (saldiri cekilme dali), lambs_danger_savunmaRpAtla = false (SAVUN yine RP'ye toplansin). Her anahtar tek tek acilip ayni senaryo tekrarlanarak donmaya sebep olan parca bulunabilir.
  Not: TEST EDILMEDI.
+
+v8.208 KINEMATIK SURUS PURUZSUZ (kullanici RPT 77520229: "arkadaki arabalar titreyerek gitti; server fps 88; tanklar hq'yu korudu - iyi")
+ Bulgular (v8.207): (1) AI YINE kalkmadi: 11 Stryker 18 sn'de TAKILDI; calculatePath rotasi bulundu (~250 dugum, uzunluk ~4.1 km, dogrudan ~2.55 km) -> rota HESAPLANABILIYOR, yol bulma sorunu DEGIL; setDriveOnPath uygulandi ama hiz 0 kaldi; 40 sn'de [TASIMA-KIN] kinematik surus 27 km/s ile devraldi (araclar yola cikti). Sunucu FPS 88. (2) TITREME: kinematik betik her 0.1 sn setDir (egim / yatis sifirlar) + dunya eksenli setVelocity (yan kayma) + sik rota dugumlerini (~16 m) ardisik kovalama -> titrek hareket. (3) HQ TAMAMI (guvenlik birakilir): en zayif squad (tanklar dahil) HQ'yu korudu - istenen davranis.
+ fnc_aracTasima: kinematik surus: dondurme vektoru yatay doner (dikey korunur: setVectorDirAndUp), hiz aracin kendi eksenine (setVelocityModelSpace), hedef 25 m ilerideki dugum, donus en cok 2.5 derece / 0.1 sn.
+ NOT: AI'nin neden setDriveOnPath'i bile yurutmedigi hala bilinmiyor (rota hesaplaniyor, fizik serbest, emir alindi). Kinematik surus gecici cozumdur.
+ Not: TEST EDILMEDI.

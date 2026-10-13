@@ -825,24 +825,31 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                     private _i3 = 1;
                                     private _t3 = time;
                                     private _sonLog = time;
-                                    while {alive _v3 && {alive _d3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700}} do {
+                                    private _sayac = 0;
+                                    private _hizSon = 0;
+                                    private _devir = false;
+                                    while {alive _v3 && {alive _d3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} && {!_devir}} do {
+                                        // v8.208 PURUZSUZ SURUS (kullanici: "arkadaki arabalar titreyerek gitti"): (1) setDir her 0.1 sn egim / yatis sifirliyordu -> yatay donus vektoru, dikey vektor korunur; (2) hiz dunya eksenine degil ARACIN KENDI eksenine verilir (yan kayma yok);
+                                        //   (3) rota 25 m ilerisindeki dugume yonlendirilir (sik dugum zikzagi yok); (AI devralma tespiti denendi ve KALDIRILDI: serbest birakinca yuvarlanan arac yanlis "AI suruyor" sayilip duruyordu)
+                                        while {(_i3 < ((count _yol3) - 1)) && {(_v3 distance2D (_yol3 select _i3)) < 25}} do { _i3 = _i3 + 1; };
                                         private _hedef3 = _yol3 select (_i3 min ((count _yol3) - 1));
-                                        if ((_v3 distance2D _hedef3) < 18 && {_i3 < ((count _yol3) - 1)}) then { _i3 = _i3 + 1; sleep 0.05; continue };
                                         private _yon3 = _v3 getDir _hedef3;
                                         private _hdg3 = getDir _v3;
                                         private _fark3 = ((_yon3 - _hdg3 + 540) mod 360) - 180;
-                                        private _yeni3 = _hdg3 + ((_fark3 max -4) min 4);
+                                        private _dlt3 = (_fark3 max -2.5) min 2.5;
+                                        private _vd3 = vectorDir _v3;
+                                        private _yeniDir3 = [(_vd3 select 0) * (cos _dlt3) + (_vd3 select 1) * (sin _dlt3), (_vd3 select 1) * (cos _dlt3) - (_vd3 select 0) * (sin _dlt3), _vd3 select 2];
                                         private _engel3 = ((_v3 modelToWorld [0, 9, 0]) nearEntities [["LandVehicle", "CAManBase"], 5]) select {_x isNotEqualTo _v3 && {alive _x} && {(vehicle _x) isNotEqualTo _v3}};
                                         private _hiz3 = if (_engel3 isNotEqualTo []) then {0} else { if ((abs _fark3) > 35) then {3} else {7.5} };
-                                        _v3 setDir _yeni3;
-                                        private _dv3 = [sin _yeni3, cos _yeni3, 0] vectorMultiply _hiz3;
-                                        _v3 setVelocity [_dv3 select 0, _dv3 select 1, (velocity _v3) select 2];
+                                        _v3 setVectorDirAndUp [_yeniDir3, vectorUp _v3];
+                                        _v3 setVelocityModelSpace [0, _hiz3, (velocityModelSpace _v3) select 2];
                                         if ((time - _sonLog) > 20) then {
                                             _sonLog = time;
                                             diag_log format ["[TASIMA-KIN] %1 | kinematik surus: inise %2 m | dugum %3/%4 | hiz %5 km/s", _gid3, round (_v3 distance2D _drop3), _i3, count _yol3, round (speed _v3)];
                                         };
                                         sleep 0.1;
                                     };
+                                    if (_devir) then { diag_log format ["[TASIMA-KIN] %1 | AI surmeye basladi (hiz dusmuyor): kinematik surus birakildi", _gid3]; };
                                     if (alive _v3) then { _v3 setVelocity [0, 0, (velocity _v3) select 2]; };
                                     diag_log format ["[TASIMA-KIN] %1 | kinematik surus bitti: inise %2 m", _gid3, round (_v3 distance2D _drop3)];
                                 };
