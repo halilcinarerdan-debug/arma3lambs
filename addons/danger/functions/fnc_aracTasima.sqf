@@ -120,7 +120,7 @@ private _uygun = _tumAraclar select {
     !isNull _d && {!isPlayer _d} && {local _d} && {(side _vg) isEqualTo _taraf}
     && {((units _vg) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
     && {!(_vg getVariable [QGVAR(planAktif), false])} && {(time - (_vg getVariable [QGVAR(tasimaSonT), -999])) > 15}
-    && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"])})}
+    && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON_ARAC"])})}
     && {(({isPlayer _x} count (crew _v)) isEqualTo 0)} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}
 };
 // v8.139 TANI: Zeus TASIMA atadigi halde uygun gorulmeyen araclar icin NEDEN (RPT 045f5750: iki atanmis arac "atanmis arac: 0" olarak elendi, neden bilinmiyordu)
@@ -475,9 +475,9 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         };
         // plan: kac arac binmeyi bitirdi (v8.163: sefer bu sayac tamamlaninca BASLAR, nakil isi bitmeyi beklemez)
         _ctl set [3, (_ctl param [3, 0]) + 1];
-        // v8.225 KALKIS KAPISI (SP zamani): kesif unsuru onde gider, ana kol YUKLU bekler (en fazla lambs_danger_nakilTutmaS = 60 sn; tasarim degeri, kitapta sayi YOK); kapi: recon gozlemi tamam / tank mevzide / 420 sn (komuta dongusu)
+        // v8.225 KALKIS KAPISI (SP zamani): kesif unsuru onde gider, ana kol YUKLU bekler (en fazla lambs_danger_nakilTutmaS = 240 sn; tasarim degeri, kitapta sayi YOK); kapi: recon gozlemi tamam / tank mevzide / 420 sn (komuta dongusu)
         if (_iptal isEqualTo "" && {alive _v} && {!(_ctl select 1)}) then {
-            private _tutS = missionNamespace getVariable ["lambs_danger_nakilTutmaS", 60];
+            private _tutS = missionNamespace getVariable ["lambs_danger_nakilTutmaS", 240];
             diag_log format ["[TASIMA] %1 | YUKLENDI, kalkis kapisi (SP) bekleniyor (en fazla %2 sn): kesif unsuru once gider", groupId _vg, _tutS];
             private _tt = time + _tutS;
             waitUntil { sleep 1; !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _tt} };

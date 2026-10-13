@@ -311,7 +311,10 @@ while {true} do {
             private _reconYaya = ("reconFazT" in _plan) && {(time - (_plan get "reconFazT")) > 120};
             // v8.221 RECON YAYA (RPT 0ea7ba5a: recon araci yok -> recon 2 km yuruyerek gidiyor, nakil araclari 96 sn+ piyadeyi ALMADAN bekledi, "apcler tasimadi"): recon APC'siz ise RECON fazi basladiktan 90 sn sonra ana kol beklemez (ATP 4-01.45 kesif ayrik gider)
             private _reconYayaAracsiz = isNull (_plan getOrDefault ["reconArac", objNull]) && {_faz isEqualTo "RECON"} && {_fazSure > 90};
-            if ((_reconOk && _tankOk) || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
+            // v8.226 KESIF ONDE (ATP 4-01.45 / FM 3-98: kesif unsuru ana kolun onunde gider): recon APC OP'ye giden yolun %60'ini gectiyse ana kol kalkar (%60 tasarim degeri)
+            private _raG = _plan getOrDefault ["reconArac", objNull];
+            private _reconOnde = !isNull _raG && {alive _raG} && {(_plan getOrDefault ["reconAracD0", 0]) > 0} && {(_raG distance2D (_plan get "op")) < 0.4 * (_plan get "reconAracD0")};
+            if ((_reconOk && _tankOk) || {_reconOnde && {_tankOk}} || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
                 diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
@@ -620,6 +623,7 @@ while {true} do {
                         (_plan get "notlar") set [format ["%1_op", groupId _g], [_poz, -1]];
                     } forEach _rgl;
                     if (!isNull (_plan getOrDefault ["reconArac", objNull])) then {
+                        _plan set ["reconAracD0", (_plan getOrDefault ["reconArac", objNull]) distance2D _opN];
                         _plan set ["reconAracH", ["CALIS", _plan, _rgl, _opN] spawn FUNC(reconArac)];
                     };
                     diag_log format ["[PLAN-RECON] %1 | recon OP'ye gidiyor (STEALTH + GREEN: ates gelene kadar ates yok) | %2 grup | OP %3", _id, count _rgl, mapGridPosition _opN];

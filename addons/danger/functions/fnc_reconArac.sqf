@@ -34,7 +34,7 @@ if (_mod isEqualTo "SEC") exitWith {
         && {(_v distance2D _mrk) <= 4000}
         && {!(_v getVariable [QGVAR(tasimaMesgul), false])} && {!(_v getVariable [QGVAR(reconArac), false])}
         && {!((group _d) getVariable [QGVAR(planAktif), false])}
-        && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
+        && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
         && {((units (group _d)) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
         && {(getNumber (configOf _v >> "attendant")) isEqualTo 0}
         && {(([_v] call FUNC(aracSinif)) select 0) in ["APC", "KAMYON", "IFV"]}
@@ -45,12 +45,16 @@ if (_mod isEqualTo "SEC") exitWith {
     };
     private _puan = {
         private _s = ([_this] call FUNC(aracSinif)) select 0;
-        ([0, 1, 2] select (["IFV", "KAMYON", "APC"] find _s)) * 100000 - (_this distance2D _mrk)
+        // v8.226 OZEL RECON ARACI (kullanici: "recona ozel apc atayalim, diger turlu isler karisiyor"; log 77295ac6: recon araci TASIMA atanmis 6 APC'den biri secildi, ana nakil 5 aractan 3'u eslesti):
+        //   oncelik: Gorev Ata "RECON ARACI" (4) > MEDEVAC takimi araci (3) > gorevsiz arac (2) > TASIMA atanmis arac (1, son care); sonra sinif, sonra yakinlik
+        private _gv = [_this getVariable ["lambs_danger_gorev", ""], (group (driver _this)) getVariable ["lambs_danger_gorev", ""]];
+        private _kademe = if ("RECON_ARAC" in _gv) then {4} else { if ("MEDEVAC" in _gv) then {3} else { if ("TASIMA" in _gv) then {1} else {2} } };
+        _kademe * 10000000 + ([0, 1, 2] select (["IFV", "KAMYON", "APC"] find _s)) * 100000 - (_this distance2D _mrk)
     };
     _aday = [_aday, [], {-(_x call _puan)}, "ASCEND"] call BIS_fnc_sortBy;
     private _v = _aday select 0;
     _v setVariable [QGVAR(reconArac), true];
-    diag_log format ["[RECON-ARAC] %1 | recon araci secildi: %2 [%3] (%4 koltuk, %5 m) | recon %6 asker", _plan get "id", getText (configOf _v >> "displayName"), ([_v] call FUNC(aracSinif)) select 0, _v emptyPositions "cargo", round (_v distance2D _mrk), count _birimler];
+    diag_log format ["[RECON-ARAC] %1 | recon araci secildi: %2 [%3] (%4 koltuk, %5 m) | recon %6 asker | gorev etiketi %7", _plan get "id", getText (configOf _v >> "displayName"), ([_v] call FUNC(aracSinif)) select 0, _v emptyPositions "cargo", round (_v distance2D _mrk), count _birimler, [_v getVariable ["lambs_danger_gorev", ""], (group (driver _v)) getVariable ["lambs_danger_gorev", ""]]];
     _v
 };
 

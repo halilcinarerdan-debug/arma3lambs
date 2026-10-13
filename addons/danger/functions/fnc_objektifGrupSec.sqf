@@ -34,7 +34,7 @@ if (_adaylar isEqualTo []) then {
         !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
         && {({isPlayer _x} count (units _x)) isEqualTo 0}
         && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
-        && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON"])}
+        && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
         && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {(_atamaModu || {!(_x getVariable ["lambs_danger_planAktif", false])})}
         && {isNull objectParent _l} && {[_x] call _hqSuz} && {_atamaModu || {_hqId isNotEqualTo ""} || {(_l distance2D _obj) <= 6000}}
     };
@@ -47,7 +47,7 @@ if (_adaylar isEqualTo []) then {
         !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
         && {!isNull _v} && {_v isKindOf "LandVehicle"} && {alive _v} && {canMove _v} && {(getNumber (configOf _v >> "artilleryScanner")) isEqualTo 0}
         && {({isPlayer _x} count (units _x)) isEqualTo 0} && {!isNull (driver _v)} && {!isPlayer (driver _v)}
-        && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON"])}
+        && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
         && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""} && {_atamaModu || {!(_x getVariable ["lambs_danger_planAktif", false])}} && {[_x] call _hqSuz} && {_atamaModu || {_hqId isNotEqualTo ""} || {(_l distance2D _obj) <= 6000}}
     };
     _aracA = [_aracA, [], {(leader _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;

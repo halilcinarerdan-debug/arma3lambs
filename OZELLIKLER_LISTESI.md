@@ -122,7 +122,7 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
   - *HQ otomatik*: ELITE planı kurulunca Kumanda modülü gerekmeden açılır (`hqPlanOtomatikOff`). *HQ TAMAMI* modu: HQ'ya bağlı tüm squadlar + karakol garnizonları saldırır (güvenlik elemanı bırakma seçeneğiyle).
   - *Ret nedeni*: plan reddedilince gerçek neden Zeus'a gösterilir. *Hedef zinciri*: aktif plana sıradaki hedef eklenir, hedef alınınca hayatta kalan gruplar otomatik ilerler (`[PLAN-ZINCIR]`).
   - *Dost toplanma noktası* (panel 3/4): RP olarak haritadaki dost karakol/mevzi/gözetleme noktası seçilebilir (`[PLAN-RP-ISARET]`). *Recon ek gözlem* (panel 4/4): düşman karakol/mevzi noktaları sırayla gizlice gözlenir (`[PLAN-RECON-EK]`).
-- **Keşif (RECON)**: recon için ayrı APC, sessiz sürüş (SAFE/GREEN), geç katılan recon, canlı gözlemle herkes doğrulayabilir, temasta geri dönüş kriteri (FM 3-98), araç yoksa yaya.
+- **Keşif (RECON)**: recon için ayrı APC (Görev Ata "RECON ARACI" > MEDEVAC takımı aracı > görevsiz > TASIMA atanmış; v8.226), ana kol recon APC yolun %60'ını geçince kalkar (keşif önde), sessiz sürüş (SAFE/GREEN), geç katılan recon, canlı gözlemle herkes doğrulayabilir, temasta geri dönüş kriteri (FM 3-98), araç yoksa yaya.
 - **Topçu**: canlı gözlem doğrulaması, BASIT mod (doğrulamasız), atış paceleme (2'şer mermi/6 sn), Zeus "ELITE Topçu TEST", **duman perdesi**, **karşı-batarya**, **ateş kaydırma** (derinliğe), RED/dost mesafesi kuralları (TC 3-21.76). Ayıklama anahtarları: `topcuPartiN`, `topcuAralikS`.
 - **Nakil / mekanize**
   - Yükle-ve-bekle (ATP 4-01.45 ilkesi): binme beklemez, kalkış kapısı en fazla 60 sn (`nakilTutmaS`, tasarım değeri). Sürücü grubu sunucuya 15 sn sonra devredilir. Konvoy takılan aracı beklemez.
