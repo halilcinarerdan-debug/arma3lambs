@@ -2200,3 +2200,9 @@ v8.221 NAKIL KAPISI: RECON YAYA ISE ANA KOL 90 SN SONRA BEKLEMEZ (kullanici RPT 
  Bulgu: iki planda da "recon araci YOK (kargo >= 4, AI surucu, planda / mesgul degil) -> recon yaya gidecek"; 6 APC piyadeye 66-134 m'de "RP'de, piyadenin toplanmasi bekleniyor" mesajindan sonra HIC binmedi / yola cikmadi: SENKRON KAPISI (hazirBekle) recon gozlemi bitene kadar binmeyi bile tutuyor (aracTasima binmeden once ctl[1] bekler). Recon 2+ km yurumek zorunda -> kapi 420 sn tavanina kadar kapali; plan 105. sn'de (grup kalmadi: kullanici Zeus'tan sildi/iptal etti) bitti, TASIMA "IPTAL: kimse binmedi".
  fnc_komutanPlanDongu: recon ARACSIZ ve plan RECON fazinda > 90 sn ise kapi acilir ([PLAN] SENKRON: nakil serbest birakildi) — ana kol kesif yurur giderken beklemez (v8.200 mantiginin aracsiz recon icin karsiligi).
  Not: TEST EDILMEDI. Recon yaya ana koldan cok geride kalir; kesif raporu ana kol ORP'ye varmadan gelmeyebilir (saldiri raporsuz baslayabilir) — istenirse 90 sn artirilir. Ayrica "uygun arac YOK" sebebi: tum Stryker'lar zaten TASIMA gorevinde (recon icin ayri arac gerekir) — Zeus'ta bir araci 'RECON' degil, ana nakilden AYRI birakmak gerekir.
+
+v8.222 TASIMA ARAC SURUCU GRUBU DEVRI: 60 -> 15 SN (kullanici RPT b9f821df: "hala ayni")
+ Bulgu: Zeus'tan 4 Stryker'a TASIMA atandi (20:02:39-46), plan 20:03:36'da kuruldu (~50 sn sonra). "SURUCU GRUBU DEVIR" yalniz Alpha 1-5 icin yapildi (gorulduT >= 60 sn kosulu); Alpha 1-6 / 2-1 / 2-2 icin "ATANMIS ARAC UYGUN DEGIL: surucu sunucuda yerel degil" -> "1 arac / 9 asker eslesti" — 4 aractan YALNIZ 1'i tasidi, plan 1 grupla kuruldu.
+ fnc_aracTasima: devir esigi 60 -> 15 sn, devir bekleme tavani 6 -> 10 sn. Kayit: gorulduT grup ilk gorulme zamani (yeni yaratilan grup birimleri tamamlansin diye eskiden 60 sn bekleniyordu).
+ Ayrica: bu log yalniz 34 sn (20:03:36-20:04:10) — recon yaya kapisi (v8.221, 90 sn) test edilemedi.
+ Not: TEST EDILMEDI.

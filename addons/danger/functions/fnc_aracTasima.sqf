@@ -105,12 +105,12 @@ if (isServer) then {
     {
         private _gv = [_x getVariable ["lambs_danger_gorev", ""]] + (crew _x apply {(group _x) getVariable ["lambs_danger_gorev", ""]});
         private _dr = driver _x;
-        if ("TASIMA" in _gv && {!isNull _dr} && {!isPlayer _dr} && {!local _dr} && {(side (group _dr)) isEqualTo _taraf} && {(time - ((group _dr) getVariable [QGVAR(gorulduT), -999])) >= 60}) then { _uzakSurucu pushBackUnique (group _dr); };
+        if ("TASIMA" in _gv && {!isNull _dr} && {!isPlayer _dr} && {!local _dr} && {(side (group _dr)) isEqualTo _taraf} && {(time - ((group _dr) getVariable [QGVAR(gorulduT), -999])) >= 15}) then { _uzakSurucu pushBackUnique (group _dr); };   // v8.222: 60 -> 15 sn (RPT b9f821df: Zeus ile 50 sn once TASIMA atanan 3 arac "surucu sunucuda yerel degil" diye elendi, 4 aractan YALNIZ 1 tasidi)
     } forEach _tumAraclar;
     if (_uzakSurucu isNotEqualTo []) then {
         { diag_log format ["[TASIMA] SURUCU GRUBU DEVIR: %1 | sahip makine %2 -> sunucu", groupId _x, groupOwner _x]; _x setGroupOwner 2; } forEach _uzakSurucu;
         private _t0 = time;
-        waitUntil { sleep 0.3; ((_uzakSurucu findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 6} };
+        waitUntil { sleep 0.3; ((_uzakSurucu findIf {!local _x}) isEqualTo -1) || {(time - _t0) > 10} };
     };
 };
 private _uygun = _tumAraclar select {
