@@ -207,6 +207,16 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 
 ---
 
+## G4. v8.169 – v8.225 AYRINTILARI (özet; ayrıntı için `DEVIR_LOGU_v7.0.txt`)
+- `fnc_aracKinSurus`: `calculatePath` rotası; yatay dönüş ≤ 2,5°/0,1 sn, hız 7,5 m/s (keskin dönüşte 3), engelde: yaya yana çekilir (`doMove` 12 m), araç +40° sapma; sürücü dışarıdaysa `moveInDriver` (en çok 8 sn); 8 sn'de 3 m'den az ilerlerse boş noktaya taşınır; 700 sn tavan. Çağıranlar: `fnc_aracTasima` (28 sn), `fnc_reconArac` (10 sn).
+- `fnc_aracSurmeTani`: nedenleri sınıflar (AI özellik / değişken / hasar / grup / çevre / sürücü çıkışı); `fnc_aracSurmeDeney` (kapalı): 7 önlemi sırayla dener, kazananı hatırlar.
+- `fnc_topcuDestek`: `SIS` (duman mermisi varsa), `KARSI` (bilinen düşman topçusu, dost ≥ 200 m, 90 sn'de bir). Plan döngüsü: karşı-batarya 40 sn, ateş kaydırma 60 sn.
+- `fnc_gozetleAta` + `fnc_moduleGozetleAta`: nöbet; piyade halkada dağılır (disa bakar), araç gruplarında sürücü noktaya sürer, 45 sn ilerlemezse itme + yola yönlendirme.
+- Zincir: `zincir` ayarı → `fnc_komutanPlan` ana planın `zincir` listesine ekler; `BITTI` + "OBJEKTIF ALINDI" ise `fnc_komutanPlanDongu` sıradaki hedefle yeni plan kurar (≥ 2 askerli gruplar `secili` ile devredilir).
+- `rpIsaret`, `reconEk`: bkz. `fnc_komutanPlan` (RP geçersiz kılma, ek gözlem noktaları) ve `fnc_komutanPlanDongu` RECON fazı.
+- Nakil: devir 15 sn, yükle-ve-bekle (`nakilTutmaS` 60), kapı serbest bırakma koşulları (recon tamam / APC 120 sn / yaya recon 90 sn / 420 sn).
+- Geri alınanlar: v8.215 `aracKomutanDuzelt` (kanıtsız hipotez, silindi); v8.223 kapıyı tamamen kapatma (v8.225 ile yükle-ve-bekle).
+
 ## H. ALTYAPI VE İZLEME
 
 - **Watchdog bekçisi**: her izleyici hata ile ölürse yeniden başlar (`[WATCHDOG-YENIDEN]`).

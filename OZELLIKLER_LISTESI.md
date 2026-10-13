@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.168)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.225)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -115,6 +115,25 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Kapasite uyarısı** (T, v8.167): elle seçimde piyade sayısı ≠ taşıma aracı koltuk toplamı ise sohbet + RPT uyarısı.
 - **Tanı / düzeltmeler**: sunucu devri yeni gruba 120 sn bekler (çıplak / boş envanter kökü), giyim tanısı `[GIYIM-TANI]`, cephane animasyonu varsayılan kapalı + envanter dolu kontrolü + `[CEPHANE-ENV]`, A/B anahtarları `lambs_danger_silahDegisimOff` / `cephanePaylasOff` / `giyimTaniOff`.
 
+## 10d. v8.169 – v8.225 eklemeleri
+Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değeridir** (kitapta sayı yok), kaynaklı olanlar `DOKTRIN_KAYNAKLARI.md` içindedir.
+- **Komuta ve plan**
+  - *Savunma komutanı* (BEKLE fazı): ortak düşman resmi (lider bilgisi), YEDEK grupla karşı saldırı, ağır kayıpta (%60) mevzi kaybı. *FRAGO*: saldırıda toplam kayıp %50 ise CEKILME. Kapatma: `savunmaKomutanOff`, `fragoOff`.
+  - *HQ otomatik*: ELITE planı kurulunca Kumanda modülü gerekmeden açılır (`hqPlanOtomatikOff`). *HQ TAMAMI* modu: HQ'ya bağlı tüm squadlar + karakol garnizonları saldırır (güvenlik elemanı bırakma seçeneğiyle).
+  - *Ret nedeni*: plan reddedilince gerçek neden Zeus'a gösterilir. *Hedef zinciri*: aktif plana sıradaki hedef eklenir, hedef alınınca hayatta kalan gruplar otomatik ilerler (`[PLAN-ZINCIR]`).
+  - *Dost toplanma noktası* (panel 3/4): RP olarak haritadaki dost karakol/mevzi/gözetleme noktası seçilebilir (`[PLAN-RP-ISARET]`). *Recon ek gözlem* (panel 4/4): düşman karakol/mevzi noktaları sırayla gizlice gözlenir (`[PLAN-RECON-EK]`).
+- **Keşif (RECON)**: recon için ayrı APC, sessiz sürüş (SAFE/GREEN), geç katılan recon, canlı gözlemle herkes doğrulayabilir, temasta geri dönüş kriteri (FM 3-98), araç yoksa yaya.
+- **Topçu**: canlı gözlem doğrulaması, BASIT mod (doğrulamasız), atış paceleme (2'şer mermi/6 sn), Zeus "ELITE Topçu TEST", **duman perdesi**, **karşı-batarya**, **ateş kaydırma** (derinliğe), RED/dost mesafesi kuralları (TC 3-21.76). Ayıklama anahtarları: `topcuPartiN`, `topcuAralikS`.
+- **Nakil / mekanize**
+  - Yükle-ve-bekle (ATP 4-01.45 ilkesi): binme beklemez, kalkış kapısı en fazla 60 sn (`nakilTutmaS`, tasarım değeri). Sürücü grubu sunucuya 15 sn sonra devredilir. Konvoy takılan aracı beklemez.
+  - Takılma kademeleri (tasarım değeri): 8/12/18/20/28/45 sn; **kinematik sürüş** (`fnc_aracKinSurus`, **motor sorununa karşı geçici çözüm, doktrin değil**): AI sürücü sürmüyorsa araç betikle rota boyunca sürülür; sürücüyü koltuğa ışınlar, yayayı yana çeker, aracı dolanır.
+  - *Araç kurtarma*: hasarla devre dışı kalan aracın yolcuları boş rezerv araçlarla yeniden nakil ister (`[TASIMA-KURTARMA]`). Su kaçınma (`[ARAC-SU]`), asker su kurtarma (`[SU-KURTAR]`, dalgıç/donanma muaf).
+  - Tank: hull-down puanlaması + hasar sonrası yedek mevzi (ATP 3-20.15), savunmada hedef seçimi, SAFE/FULL yol yürüyüşü, `planZirhMax`.
+- **Karakol / gözetleme**: Zeus modülü "ELITE Gözetleme Ata": squad (tank dahil) seçilen karakol/mevzi/gözetleme noktasında nöbet tutar (`[GOZETLE]`, `[GOZETLE-ARAC]`). Karakol devriye noktaları sudan kaçınır.
+- **Sağlık/diğer**: TCCC malzeme toplama (`[TCCC-ESYA]`), buddy bağı garnizon gruplarını atlar, EZME yol açma (`[EZME-YOL-AC]`).
+- **Tanı**: `[SURME-TANI-*]` (AI özellikleri, hasar, grup, çevre, sürücü çıkışı), `[SURME-DENEY]` (varsayılan KAPALI; açmak için `surmeDeneyOff = false`), `[TASIMA-KIN]`, `[TASIMA-FIZIK]`. Sunucu donması ayıklama anahtarları (v8.207).
+- **Bilinen açık sorun**: RHS Stryker/M113 AI sürücüsü duran araçta "MOVE" tutup sürmüyor (hedef `DoNotPlan`); nedeni bilinmiyor, kinematik sürüş geçici çözüm.
+
 ## 11. Geliştirici araçları
 - **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --grup` RPT özetleri, sürüm kontrolü.
 - **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
@@ -126,8 +145,10 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Hat saldırısı / siper hattı planı (Ukrayna benzeri, her şey stabil olduktan SONRA)**: iki noktalı hat (başlangıç / bitiş) → 3–6 hedef kesim, kesim başına squad, dost cephe sınırı HQ'dan hatta, geri çekilme sınırın gerisine; topçu/havan hazırlığı + sızma + siper temizleme. Ön koşul: bina/oda temizleme + el bombası yeniden yazımı, siper temizleme kaynakları (ATP 3-21.8 / MCWP 3-11.2).
 - Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
 - Helikopter medevac / hava nakli (şu an yalnız kara aracı).
-- Zırh: hull-down / yer değiştirme (kaynak bekleniyor; ATP 3-20.15, 3-90.1).
-- Karakolda MG / AT yerleşimi, nöbet rotasyonu.
+- Karakolda MG / AT yerleşimi, nöbet rotasyonu (temel gözetleme ataması v8.214'te var).
+- Hedef zinciri: alınan noktada tutucu birlik ve ayrı cephe çizgisi yok; HQ takviyesinde "hangi grup hangi hedefe izinli" kısıtı yok.
+- Mühendis / engel (yol haritası 7), HQ güvenlik elemanını role göre seçme.
+- AI sürücü kök nedeni (kinematik sürüşü gereksiz kılar).
 - Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
 - Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
 - Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.
