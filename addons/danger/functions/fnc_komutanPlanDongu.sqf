@@ -661,7 +661,11 @@ while {true} do {
                         private _g = _x;
                         private _a = if (_th >= 0) then { _th + (if (_n <= 1) then {0} else {-110 + 220 * (_forEachIndex / (_n - 1))}) } else { _B + (360 / _n) * _forEachIndex };
                         private _poz = [_obj getPos [55, _a]] call _siperNokta;   // v8.181: sektor noktasi 40 m icinde siper yogunlugu en yuksek, kuru, cukur olmayan nokta
-                        (_plan get "notlar") set [groupId _g, [_poz, _a]];
+                        // v8.229 HENDEK: sektor noktasinin 150 m icinde (objektife <= 350 m) elle konmus hendek alani varsa grup orayi tutar
+                        private _hdk = ["EN-YAKIN", _poz, 150, _plan get "taraf"] call FUNC(hendekAlani);
+                        private _hdkI = -1;
+                        if (_hdk isNotEqualTo [] && {((_hdk select 0) distance2D _obj) <= 350}) then { _poz = _hdk select 0; _hdkI = _hdk select 1; diag_log format ["[PLAN] %1 SAVUN: %2 hendek alanina yerlesecek (alan %3, sektor noktasindan %4 m)", _id, groupId _g, _hdkI, round (_hdk select 2)]; };
+                        (_plan get "notlar") set [groupId _g, [_poz, _a, _hdkI]];
                         [_g, [[_poz, "MOVE", format ["MEVZI sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
                     } forEach _sirali;
                     [_plan, "MEVZI", format ["%1 sektor", _n]] call _fazGec;
@@ -1054,7 +1058,7 @@ while {true} do {
                     private _g = _x;
                     private _n = _notlar getOrDefault [groupId _g, [_obj, _B]];
                     // v8.171: en yakin bina (garrison) + bos statik silahlar + COMBAT / comelme -> fnc_mevziKur
-                    [_g, _n select 0, _n select 1] call FUNC(mevziKur);
+                    if ((_n param [2, -1]) >= 0) then { [_g, _n select 2, (_n select 1)] call FUNC(hendekYerles); } else { [_g, _n select 0, _n select 1] call FUNC(mevziKur); };
                 } forEach _gruplar;
                 [_plan, "BEKLE", "sektorlar tutuldu, garrison / mevzi"] call _fazGec;
             };

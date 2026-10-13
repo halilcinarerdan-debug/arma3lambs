@@ -80,6 +80,12 @@ lambs_danger_topLogN = 0;
                 private _kos = (((_R - _d) + 6) min (_eta * 3.5) min 18) max 4;
                 private _hdf = (getPosATL _u) getPos [_kos, _ip getDir _u];
                 if (surfaceIsWater _hdf) then { _hdf = (getPosATL _u) getPos [_kos, (_ip getDir _u) + 70]; };
+                // v8.229 HENDEK: elle konmus hendek alani (isaret "elite_hendek*") erisilebilir mesafedeyse (sure x 3.5 m/sn, en cok 40 m) ve dusme noktasindan >= 8 m uzaktaysa SIGINAK olarak orasi secilir
+                private _hn = ["EN-YAKIN", getPosATL _u, ((_eta - 1.2) * 3.5) min 40, side (group _u)] call FUNC(hendekAlani);
+                if (_hn isNotEqualTo [] && {((_hn select 0) distance2D _ip) >= 8}) then {
+                    _hdf = (_hn select 0) getPos [random 1.2, random 360];
+                    _u setVariable [QGVAR(topHendek), true];
+                };
                 if (!surfaceIsWater _hdf) then {
                     _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1;
                     _u setUnitPos "UP"; _u setSpeedMode "FULL";
@@ -99,5 +105,5 @@ lambs_danger_topLogN = 0;
     } forEach _aday;
 }] call CBA_fnc_addEventHandler;
 
-diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228): 7 sn uyari, uzaklas + yat, 7 sn yatik";
+diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228; v8.229 hendek alani): 7 sn uyari, uzaklas / hendege + yat, 7 sn yatik";
 true
