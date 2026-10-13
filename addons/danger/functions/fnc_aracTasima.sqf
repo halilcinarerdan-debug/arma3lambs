@@ -714,6 +714,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             // v8.189: baslangicta hic kalkmayan Milan APC'ler (RPT aee29fdd: itme hizi 0, motor acik, canMove true): simulasyon / dinamik simulasyon / baglanma tanisi + uyandirma
                             diag_log format ["[TASIMA-SIM] %1 | simulasyon %2 | dinamik sim arac %3 grup %4 | baglanti %5 | kilit %6 | gizli %7 | takim yolcu %8",
                                 groupId _vg, simulationEnabled _v, dynamicSimulationEnabled _v, dynamicSimulationEnabled _vg, attachedTo _v, locked _v, isObjectHidden _v, count (crew _v)];
+                            [_v, _d, groupId _vg] call FUNC(aracSurmeTani);   // v8.213: olasi nedenler A-G ayrintili log + 60 m yakin hedef sinamasi
                             _v enableDynamicSimulation false; _vg enableDynamicSimulation false;
                             if (!simulationEnabled _v) then { _v enableSimulationGlobal true; };
                             if (!isNull (attachedTo _v)) then { detach _v; };
@@ -887,6 +888,22 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             diag_log format ["[TASIMA] %1 | INEMEYEN ASKER: %2 kisi 3 sn sonra hala aractaydi -> zorla indirildi: %3", groupId _vg, count _kalanIc, _kalanIc apply {name _x}];
         };
         { if (alive _x) then { _x doFollow (leader (group _x)); }; } forEach _binen;
+        // v8.214 ARAC KURTARMA (yol haritasi 5; ATP 4-01.45 kurtarma / yedek arac): arac HASARLA devre disi kaldiysa ve yolcular inise > 600 m uzaktaysa (yakinda dusman yok) yolcu gruplari
+        //   BOS REZERV araclarla yeniden nakil ister (ayni aracTasima akisi, RP = yolcularin bulundugu yer). Grup basina 300 sn'de bir.
+        if (_bitis isEqualTo "hasar" && {(_v distance2D _drop) > 600}) then {
+            private _yolcuG = [];
+            { if (alive _x && {(group _x) isNotEqualTo _vg}) then { _yolcuG pushBackUnique (group _x); }; } forEach _binen;
+            _yolcuG = _yolcuG select {(time - (_x getVariable [QGVAR(kurtarmaT), -999])) > 300};
+            private _enKurt = (getPosATL _v) nearEntities ["CAManBase", 300];
+            if (_yolcuG isNotEqualTo [] && {(_enKurt findIf {alive _x && {(_taraf getFriend (side _x)) < 0.6}}) < 0}) then {
+                { _x setVariable [QGVAR(kurtarmaT), time]; } forEach _yolcuG;
+                diag_log format ["[TASIMA-KURTARMA] %1 | %2 hasarli (hasar %3, canMove %4), inise %5 m: %6 yolcu grubu yedek arac icin yeniden nakil istiyor", groupId _vg, _ad, (damage _v) toFixed 2, canMove _v, round (_v distance2D _drop), count _yolcuG];
+                [_taraf, _yolcuG, getPosATL _v, _drop, _drop getDir _v, 150, 2500, [false, true, 0]] spawn {
+                    sleep 8;
+                    _this call FUNC(aracTasima);
+                };
+            };
+        };
         call _senkBitti;
         // v8.171 INIS SONRASI TOPLANMA: inenler tum araclar inene kadar (en fazla 75 sn) cevre emniyetiyle COMBAT + comelmis bekler, sonra BIRLIKTE ilerler (kullanici: komutanlar arkada, askerler onden gidiyordu)
         [_binen select {_x isNotEqualTo _d}, _senk, _obj, _v] spawn {

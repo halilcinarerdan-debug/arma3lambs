@@ -85,6 +85,13 @@ lambs_danger_planKapiStarted = true;
     diag_log format ["[GOREV-ATAMA] %1 -> %2 (nesne: %3)", [groupId _g, "-"] select (isNull _g), ["TEMIZLENDI", _kod] select (_kod isNotEqualTo ""), count _nesneler];
 }] call CBA_fnc_addEventHandler;
 
+// v8.214: Zeus 'ELITE Gozetleme Ata' -> grup secilen karakol / mevzi isaretinde nobet tutar (fnc_gozetleAta)
+["lambs_danger_gozetleAta", {
+    params ["_gNet", "_mn"];
+    if (!isServer) exitWith {};
+    [groupFromNetId _gNet, _mn] call (missionNamespace getVariable ["lambs_danger_fnc_gozetleAta", {}]);
+}] call CBA_fnc_addEventHandler;
+
 // v8.128: Zeus 'ELITE Karakol / HQ' — karakol kaydi + harita isareti + savunma plani (hemen / alarm)
 if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
 ["lambs_danger_karakolIstegi", {

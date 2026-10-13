@@ -28,6 +28,21 @@ if (isNil "lambs_danger_planlar") then { lambs_danger_planlar = createHashMap; }
 
 private _tip = _ayar getOrDefault ["tip", 0];
 
+// v8.214 HEDEF ZINCIRI (yol haritasi 6; Ukrayna tarzi sirali hedefler): "zincir" istegi ayni taraftaki AKTIF ele gecir planinin sirasina eklenir; plan objektifi alinca siradaki hedefe otomatik gecilir (fnc_komutanPlanDongu BITTI blogu)
+private _zincirAna = createHashMap;
+if (_tip isEqualTo 0 && {_ayar getOrDefault ["zincir", false]}) then {
+    private _adaylar = (values lambs_danger_planlar) select {(_x get "taraf") isEqualTo _taraf && {(_x getOrDefault ["tip", 0]) isEqualTo 0} && {!((_x getOrDefault ["faz", ""]) in ["BITTI", "IPTAL", "DONUS", "CEKILME", "TOPLANMA"])}};
+    if (_adaylar isNotEqualTo []) then { _zincirAna = _adaylar select 0; };
+};
+if (count _zincirAna > 0) exitWith {
+    private _kuyruk = _zincirAna getOrDefault ["zincir", []];
+    _kuyruk pushBack [+_obj, +_ayar];
+    _zincirAna set ["zincir", _kuyruk];
+    diag_log format ["[PLAN-ZINCIR] %1 | siradaki hedef eklendi: %2 (zincir %3 hedef)", _zincirAna get "id", mapGridPosition _obj, count _kuyruk];
+    systemChat format ["[ELITE] Plan %1 icin siradaki hedef eklendi: %2 (toplam %3)", _zincirAna get "id", mapGridPosition _obj, count _kuyruk];
+    true
+};
+
 // v8.175 COKLU PLAN ENGELI (kullanici: "ayni yere birden fazla hq / mevzi koyamayalim"): ayni taraf + ayni tur icin 150 m icinde AKTIF plan ya da son 20 sn'de baslayan istek varsa yenisi kurulmaz
 if (_tip in [0, 1]) then {
     if (isNil "lambs_danger_planRezerv") then { lambs_danger_planRezerv = []; };

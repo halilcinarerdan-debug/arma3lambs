@@ -217,6 +217,24 @@ class CfgVehicles {
         };
     };
 
+    class GVAR(GozetleAta) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(GozetleAta);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Gozetleme Ata (squad -> karakol / mevzi nobeti)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
+        function = QFUNC(moduleGozetleAta);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(KarakolGarnizon) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(KarakolGarnizon);

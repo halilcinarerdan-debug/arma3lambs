@@ -360,6 +360,11 @@ while {true} do {
                 _g setCombatMode (["GREEN", "YELLOW"] select _tm);
             } forEach _gruplar;
         };
+        // v8.214 KARSI-BATARYA: bilinen dusman topcu / havan araci icin 40 sn'de bir (yalniz topcu destegi acik planlarda, ates fazlarinda)
+        if ((_plan getOrDefault ["topcu", 0]) > 0 && {_faz in ["ORP", "KESIF", "SALDIRI", "BEKLE"]} && {(time - (_plan getOrDefault ["karsiBatT", 0])) > 40}) then {
+            _plan set ["karsiBatT", time];
+            [_plan get "taraf", _obj, "KARSI", _id] call FUNC(topcuDestek);
+        };
         private _sureSn = _plan getOrDefault ["sureSn", 0];
         // SURE SINIRI: ele gecirde hedef alinmadiysa CEKILME; savunmada plan biter
         if (_sureSn > 0 && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "DONUS", "BITTI", "IPTAL"])}) then {
@@ -488,6 +493,26 @@ while {true} do {
                 if (_scu isNotEqualTo []) then { [format ["ELITE PLAN %1 ZARAR: %2", _id, _zrr joinString " | "]] remoteExec ["systemChat", _scu]; };
             };
             diag_log _aar;
+            // v8.214 ZINCIR: objektif alindiysa siradaki hedefe gec (hayatta kalan gruplar elle secim olarak devredilir; yeni plan TOPLAN-ORP-KESIF-SALDIRI akisini bastan yurutur)
+            private _zincirK = _plan getOrDefault ["zincir", []];
+            if (_zincirK isNotEqualTo [] && {_sonuc isEqualTo "OBJEKTIF ALINDI"}) then {
+                private _sirada = _zincirK select 0;
+                private _yeniAyar = +(_sirada select 1);
+                _yeniAyar set ["zincir", false];
+                _yeniAyar set ["secili", ((_plan get "gruplar") select {({alive _x} count (units _x)) >= 2}) apply {netId _x}];
+                private _kalan = +(_zincirK select [1, 99]);
+                diag_log format ["[PLAN-ZINCIR] %1 | objektif alindi -> siradaki hedef %2 (%3 grup devredildi, kalan zincir %4)", _id, mapGridPosition (_sirada select 0), count (_yeniAyar get "secili"), count _kalan];
+                [_plan get "taraf", _sirada select 0, _yeniAyar, _kalan] spawn {
+                    params ["_zt", "_zo", "_za", "_zk"];
+                    sleep 4;
+                    private _ok = [_zt, _zo, _za] call FUNC(komutanPlan);
+                    if (_ok isEqualTo true && {_zk isNotEqualTo []}) then {
+                        // kalan zincir yeni planin sirasina tasinir
+                        private _yp = (values lambs_danger_planlar) select {(_x get "taraf") isEqualTo _zt && {((_x get "obj") distance2D _zo) < 5} && {!((_x getOrDefault ["faz", ""]) in ["BITTI", "IPTAL"])}};
+                        if (_yp isNotEqualTo []) then { (_yp select 0) set ["zincir", _zk]; };
+                    };
+                };
+            };
             private _cu = (allCurators apply {getAssignedCuratorUnit _x}) select {!isNull _x};
             if (_cu isNotEqualTo []) then { [format ["ELITE PLAN %1: %2 (%3 sn)", _id, _sonuc, round (time - (_plan getOrDefault ["kurT", _plan get "t0"]))]] remoteExec ["systemChat", _cu]; };
             diag_log format ["[PLAN] %1 BITTI (%2) | %3 sn", _id, ["tamam", ["iptal", "grup kalmadi"] select (_gruplar isEqualTo [])] select (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []}), round (time - (_plan get "t0"))];
@@ -844,6 +869,10 @@ while {true} do {
                 } forEach _maneuv;
                 { if ((_roller getOrDefault [groupId _x, ""]) isEqualTo "DESTEK") then { _x setCombatMode (["RED", "YELLOW"] select (_plan getOrDefault ["sivil", false])); _x setBehaviour "COMBAT"; } else { _x setCombatMode "YELLOW"; }; } forEach _gruplar;
                 if ((_plan getOrDefault ["topcu", 0]) in [2, 3]) then { [_plan, _obj, "CAGRI (saldiri basi)"] call _topcuAt; _plan set ["cagriT", time]; };
+                // v8.214 DUMAN PERDESI: hedefin 60 m onune (yaklasma yonunde) duman mermisi (dusman gozetlemesini kor eder)
+                if ((_plan getOrDefault ["topcu", 0]) in [2, 3] && {_maneuv isNotEqualTo []}) then {
+                    [_plan get "taraf", _obj getPos [60, _obj getDir (leader (_maneuv select 0))], "SIS", _id] call FUNC(topcuDestek);
+                };
                 { _x setVariable ["lambs_danger_gizliPos", ""]; { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; }; } forEach (units _x); _x setCombatMode "YELLOW"; } forEach _gruplar;
                 [_plan, "SALDIRI", format ["manevra %1 grup, destek ates baslar", count _maneuv]] call _fazGec;
             };
@@ -915,6 +944,11 @@ while {true} do {
             };
             private _yakinM2 = 9999;
             { _yakinM2 = _yakinM2 min ((leader _x) distance2D _obj); } forEach _maneuv;
+            // v8.214 ATES KAYDIRMA (topcu): manevra objektife < 250 m yaklasinca ates objektifin DERINLIGINE (120 m, yaklasma yonunun tersi) kaydirilir; RED kurallari _topcuAt icinde (dost < RED ise atmaz)
+            if ((_plan getOrDefault ["topcu", 0]) in [2, 3] && {_yakinM2 < 250} && {_dusmanVar} && {(time - (_plan getOrDefault ["kaydirT", -999])) > 60} && {_maneuv isNotEqualTo []}) then {
+                _plan set ["kaydirT", time];
+                [_plan, _obj getPos [120, (leader (_maneuv select 0)) getDir _obj], "ATES KAYDIRMA (derinlik)"] call _topcuAt;
+            };
             private _baskinS = _plan getOrDefault ["baskinS", 0];
             if (_baskinS > 0) then {
                 // v8.128 BASKIN (vur-cekil): hedef temizlenince ya da baskin suresi dolunca TOPLANMA yerine CEKILME (karakol baskini canlandirmasi)

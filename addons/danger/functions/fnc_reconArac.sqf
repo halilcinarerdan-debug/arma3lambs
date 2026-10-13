@@ -147,6 +147,7 @@ while {_bitis isEqualTo ""} do {
                 _id, local _v, owner _v, local _d, name (driver _v), name (commander _v), name (gunner _v), name (leader _vg), (vehicle (leader _vg)) isEqualTo _v, count (waypoints _vg), currentWaypoint _vg, behaviour _d, combatMode _vg, speedMode _vg, currentCommand _d, unitReady _d,
                 _v getVariable [QGVAR(ezmeFren), false], _d getVariable [QGVAR(senkT), 0], _d getVariable [QGVAR(forceMove), false],
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
+            [_v, _d, _id] call FUNC(aracSurmeTani);   // v8.213: olasi nedenler A-G + 60 m yakin hedef sinamasi
         };
         if (_dtk > 14 && {_kurtN isEqualTo 1}) then {
             _kurtN = 2;

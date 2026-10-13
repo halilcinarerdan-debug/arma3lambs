@@ -1,0 +1,80 @@
+#include "script_component.hpp"
+/*
+ * Author: Cinar (ELITE fork)
+ * TOPCU DESTEK (v8.214; yol haritasi 4) — plan topcusu disinda ek destek ateslari:
+ *  "SIS"   : DUMAN PERDESI — saldiri basinda dusman gozetlemesini kor etmek icin hedefin onune (yaklasma yonune) duman mermisi (dost sinirinda; ates kaydirma/yikici deyil). Duman mermisi yoksa loglanir, atilmaz.
+ *  "KARSI" : KARSI-BATARYA — tarafin BILDIGI (knowsAbout) dusman topcu / havan araci icin tarafin kendi topcusu 3 mermi atar (dost mesafesi >= 200 m; ayni hedefe 90 sn'de bir). Kaynak ilkesi (FM 3-09 karsi atesli destek): dusman atesli desteginin imhasi / bastirilmasi; sayisal esikler tasarim degerleridir.
+ * Log: [PLAN-SIS] / [PLAN-KARSI-BATARYA]
+ *
+ * Arguments:
+ * 0: Taraf <SIDE>
+ * 1: Nokta (SIS icin duman noktasi; KARSI icin yok sayilir) <ARRAY>
+ * 2: Mod "SIS" / "KARSI" <STRING>
+ * 3: Plan kimligi (log) <STRING>
+ *
+ * Return Value: Atan arac sayisi <NUMBER>
+ * Public: No
+*/
+
+params [["_taraf", sideUnknown, [sideUnknown]], ["_poz", [0, 0, 0], [[]]], ["_mod", "SIS", [""]], ["_id", "?", [""]]];
+
+private _topcular = vehicles select {
+    alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {!isPlayer (gunner _x)} && {local _x} && {canFire _x}
+    && {!("TOPCU_YOK" in [_x getVariable ["lambs_danger_gorev", ""], (group (gunner _x)) getVariable ["lambs_danger_gorev", ""]])}
+};
+private _atan = 0;
+
+if (_mod isEqualTo "SIS") then {
+    {
+        private _v = _x;
+        private _siseler = (getArtilleryAmmo [_v]) select {(toLower _x) find "smoke" >= 0};
+        if (_siseler isEqualTo []) then {
+            diag_log format ["[PLAN-SIS] %1 | %2 duman mermisi yok (%3) - perde atilmadi", _id, typeOf _v, getArtilleryAmmo [_v]];
+        } else {
+            if (_poz inRangeOfArtillery [[_v], _siseler select 0]) then {
+                [_v, _poz, _siseler select 0, _forEachIndex] spawn {
+                    params ["_tv", "_tn", "_tm", "_ti"];
+                    sleep (3 * _ti);
+                    if (alive _tv && {canFire _tv}) then { _tv doArtilleryFire [_tn getPos [random 25, random 360], _tm, 2]; };
+                };
+                _atan = _atan + 1;
+                diag_log format ["[PLAN-SIS] %1 | duman perdesi: %2 -> %3 (%4, 2 mermi)", _id, typeOf _v, mapGridPosition _poz, _siseler select 0];
+            };
+        };
+    } forEach _topcular;
+};
+
+if (_mod isEqualTo "KARSI") then {
+    private _hedefler = vehicles select {
+        private _h0 = _x;
+        alive _x && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {(_taraf getFriend (side (group (gunner _x)))) < 0.6} && {(allGroups findIf {(side _x) isEqualTo _taraf && {!isNull (leader _x)} && {(_x knowsAbout _h0) >= 1.0}}) >= 0}
+        && {(time - (_x getVariable ["lambs_danger_karsiBatT", -999])) > 90}
+    };
+    {
+        private _h = _x;
+        private _hp = getPosATL _h;
+        private _dost = false;
+        { if (alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _hp) < 200}) exitWith { _dost = true; }; } forEach allUnits;
+        if (!_dost) then {
+            private _atanBu = 0;
+            {
+                private _v = _x;
+                private _mg = (getArtilleryAmmo [_v]) param [0, ""];
+                if (_mg isNotEqualTo "" && {_v isNotEqualTo _h} && {_hp inRangeOfArtillery [[_v], _mg]}) then {
+                    [_v, _hp, _mg, _atan] spawn {
+                        params ["_tv", "_tn", "_tm", "_ti"];
+                        sleep (3 * _ti);
+                        if (alive _tv && {canFire _tv}) then { _tv doArtilleryFire [_tn getPos [random 20, random 360], _tm, 3]; };
+                    };
+                    _atan = _atan + 1; _atanBu = _atanBu + 1;
+                };
+            } forEach _topcular;
+            if (_atanBu > 0) then {
+                _h setVariable ["lambs_danger_karsiBatT", time];
+                diag_log format ["[PLAN-KARSI-BATARYA] %1 | dusman topcu %2 (%3) bilinen -> %4 top 3'er mermi", _id, typeOf _h, mapGridPosition _hp, _atanBu];
+            };
+        };
+    } forEach _hedefler;
+};
+
+_atan
