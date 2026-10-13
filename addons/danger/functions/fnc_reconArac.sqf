@@ -137,7 +137,7 @@ while {_bitis isEqualTo ""} do {
     // v8.191 KURTARMA (RPT bda5fbde: recon araci OP'ye 454 m kala 45 sn ilerlemeyince hemen "takildi" sayildi, recon 375 m geride indi): 18 sn itme + emir yenile, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi; 75 sn'de pes
     if (_bitis isEqualTo "") then {
         private _dtk = time - _ilerT;
-        if (_dtk > 18 && {_kurtN isEqualTo 0}) then {
+        if (_dtk > 8 && {_kurtN isEqualTo 0}) then {
             _kurtN = 1;
             _d action ["EngineOn", _v]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 9;
             _d doMove _dur; _v setVelocityModelSpace [0, 4, 0];
@@ -148,7 +148,7 @@ while {_bitis isEqualTo ""} do {
                 _v getVariable [QGVAR(ezmeFren), false], _d getVariable [QGVAR(senkT), 0], _d getVariable [QGVAR(forceMove), false],
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
         };
-        if (_dtk > 32 && {_kurtN isEqualTo 1}) then {
+        if (_dtk > 14 && {_kurtN isEqualTo 1}) then {
             _kurtN = 2;
             _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
             private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
@@ -158,7 +158,7 @@ while {_bitis isEqualTo ""} do {
             [_v, _d, _dur, _id] call FUNC(aracKinSurus);
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
-        if (_dtk > 50 && {_kurtN isEqualTo 2}) then {
+        if (_dtk > 40 && {_kurtN isEqualTo 2}) then {
             _kurtN = 3;
             _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _dur], [], 0, "NONE"];
             _d doMove _dur;

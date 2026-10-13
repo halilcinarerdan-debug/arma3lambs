@@ -2146,3 +2146,8 @@ v8.211 KINEMATIK SURUS: TAKILIRSA BOS NOKTAYA TASI (kullanici: "aracı Zeus'ta b
  Bulgu: arac kalabalik / engelli RP alaninda sabit kaliyor, bos yere tasininca hareket ediyor (cevre engeli hipotezi).
  fnc_aracKinSurus: 8 sn'de 3 m'den az ilerleme -> arac 14-44 m yaricapinda ilk bos (su degil, 7 m icinde arac / yaya yok) noktaya setVehiclePosition ile tasinir, [TASIMA-KIN] "bos noktaya tasindi" logu.
  Not: TEST EDILMEDI. Bos nokta bulunamazsa tasinmaz (sonraki 8 sn'de yeniden denenir).
+
+v8.212 RECON ARACI KINEMATIK SURUSE ERKEN GECER (kullanici RPT 30b4e6c1: "APC hareket etmedi")
+ Bulgu: recon Stryker 17:33:15'te bindi; AI ~50 m gidip durdu (komut MOVE, unitReady false); KURTARMA 1 18 sn, KURTARMA 2 (kinematik) 32 sn sonra -> kinematik surus 17:33:49'da basladi (34 sn gecikme), 27 km/s ile dugum 13/159'a ilerledi; oturum 17:34:18'de bitti. Yani kinematik surus CALISTI ama baslamasi cok gec oldugu icin kullanici "hareket etmedi" gordu.
+ fnc_reconArac: KURTARMA esikleri 18 / 32 / 50 -> 8 / 14 / 40 sn (itme 8, kinematik 14, 25 m tasima 40).
+ Not: TEST EDILMEDI. Rota ilk 2.3 km'de 2299 -> 2309 m (yol dolambacli, hedeften uzaklasiyor) - normal.
