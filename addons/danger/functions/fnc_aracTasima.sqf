@@ -488,7 +488,6 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         private _gecisT = -1;
         if (_iptal isEqualTo "") then {
             diag_log format ["[TASIMA] %1 | BINDI %2 asker -> inis noktasina %3 m | %4", groupId _vg, count _binen, round (_v distance2D _drop), _ad];
-            [_v, _vg] call FUNC(aracKomutanDuzelt);   // v8.215: komutan / nisanci koltugundaki yabanci grup yolcusu kargoya (AI arac onun grubunun emrine uyuyordu)
             // v8.148 YOLCU BEKCISI (RPT 16fa2656: Newton / Moore "komut:GET OUT" 80-90 km/s giden Stryker'da, Moore 12:12:39 28 km/s anim:unconscious = disari atlamis):
             // tasima suresince yolcunun PATH'i kapali, "GET OUT" emri alirsa iptal (doStop), araca aitken disarida kalirsa (aractan < 80 m, arac hareketli) geri alinir. Inis (4) bayrak koyunca biter.
             _v setVariable [QGVAR(yolcuBirak), false];

@@ -108,7 +108,6 @@ private _icerde = _birimler select {alive _x && {(vehicle _x) isEqualTo _v}};
 if (_icerde isEqualTo []) exitWith { ["kimse binmedi"] call _basarisiz; };
 { _x disableAI "PATH"; } forEach _icerde;   // sessiz seyir: yolcu kendi basina inmez
 diag_log format ["[RECON-ARAC] %1 | %2 | %3 recon askeri bindi -> OP'ye sessiz surus (%4 m)", _id, _ad, count _icerde, round (_v distance2D _op)];
-[_v, _vg] call FUNC(aracKomutanDuzelt);   // v8.215: komutan / nisanci koltugundaki yabanci grup yolcusu kargoya (AI arac onun grubunun emrine uyuyordu)
 
 // ---- 3) sessiz surus
 private _dur = _op getPos [150, _op getDir (_plan get "rp")];

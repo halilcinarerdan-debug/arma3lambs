@@ -43,9 +43,6 @@ private _komsu = (_v nearEntities ["LandVehicle", 25]) - [_v];
 diag_log format ["[SURME-TANI-CEVRE] %1 | yakin araclar(25 m) %2 | yakin nesne(8 m) %3 | yuzey %4 | egim %5 | su %6 | yol %7 | yere deger %8",
     _et, _komsu apply {format ["%1@%2m", typeOf _x, round (_v distance _x)]}, ((nearestObjects [_v, [], 8]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, surfaceType (getPosATL _v), (surfaceNormal (getPosATL _v)) apply {_x toFixed 2}, surfaceIsWater (getPosATL _v), isOnRoad _v, isTouchingGround _v];
 
-// H) KOMUTAN HIPOTEZI: arac grubundan olmayan bir yolcu komutan / nisanci / turet koltugundaysa (AI arac onun grubunun emrine uyar) kargoya alinir, sinama ondan SONRA yapilir
-private _tasinan = [_v, _vg] call FUNC(aracKomutanDuzelt);
-diag_log format ["[SURME-TANI-KOMUTAN] %1 | efektif komutan %2 (grup %3) | arac grubu %4 | kargoya alinan yabanci: %5", _et, name effectiveCommander _v, groupId (group effectiveCommander _v), groupId _vg, _tasinan];
 // G) SINAMA: 60 m ileri yakin hedef — AI hic mi surmuyor, yoksa yalniz uzak rota mi sorunlu?
 [_v, _d, _et] spawn {
     params ["_v2", "_d2", "_et2"];

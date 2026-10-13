@@ -43,7 +43,7 @@ _v setVariable [QGVAR(kinSurus), true];
     private _yayaT3 = -99;
     private _ilerPoz3 = getPosATL _v3;
     private _ilerT3 = time;
-    while {alive _v3 && {alive _d3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
+    while {alive _v3 && {alive _d3} && {(vehicle _d3) isEqualTo _v3} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
         // v8.208 PURUZSUZ SURUS (kullanici: "arkadaki arabalar titreyerek gitti"): (1) setDir her 0.1 sn egim / yatis sifirliyordu -> yatay donus vektoru, dikey vektor korunur; (2) hiz dunya eksenine degil ARACIN KENDI eksenine verilir (yan kayma yok);
         //   (3) rota 25 m ilerisindeki dugume yonlendirilir (sik dugum zikzagi yok); (AI devralma tespiti denendi ve KALDIRILDI: serbest birakinca yuvarlanan arac yanlis "AI suruyor" sayilip duruyordu)
         while {(_i3 < ((count _yol3) - 1)) && {(_v3 distance2D (_yol3 select _i3)) < 25}} do { _i3 = _i3 + 1; };
