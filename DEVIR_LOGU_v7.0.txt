@@ -2136,3 +2136,8 @@ v8.209 RECON ARACI DA KINEMATIK SURUS (kullanici RPT 91b5ffbd: "recon arabasi yo
  fnc_aracKinSurus (YENI): kinematik surusu ortak fonksiyona cikardim (fnc_aracTasima'daki satir ici betik kaldirildi - cift islev yok). calculatePath rotasi tazeden hesaplanir; puruzsuz surus (v8.208).
  fnc_reconArac: KURTARMA 2 (32 sn ilerleme yok) asamasinda fnc_aracKinSurus cagrilir; inise (OP'ye 150 m kala nokta) 45 m kala "vardi".
  Not: TEST EDILMEDI. AI'nin neden surmedigi hala bilinmiyor.
+
+v8.210 KINEMATIK SURUS ENGEL YONETIMI (kullanici RPT 5c93f6bb: "recon sorunlu")
+ Bulgu: recon Stryker KURTARMA 2 ile kinematik surusa gecti, 27 km/s ile dugum 2'ye kadar gitti, sonra "hiz 0" - sabit kaldi (1463 -> 1469 m). Neden: onde 5 m icinde piyade / arac varken hiz 0 yapiliyordu; kalabalik RP alaninda engel hic kalkmiyordu.
+ fnc_aracKinSurus: onde piyade varsa (yerel, oyuncu olmayan, saglam) 12 m yana cekilme emri (doMove, 3 sn'de bir; yan = getRelDir'e gore); onde arac varsa +40 derece sapma ile 2 m/s. Piyade durumunda hiz yine 0 (ezmemek icin) ama engel kendisi kaciyor.
+ Not: TEST EDILMEDI. Piyade doMove emrine uymazsa (ornegin yolcu / baska sahip) takilma suruyor olabilir.
