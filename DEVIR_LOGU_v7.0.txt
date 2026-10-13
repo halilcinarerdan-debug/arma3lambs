@@ -2097,3 +2097,11 @@ v8.202 ZIPLAMA SONUCU + YOL ONCELIGI (kullanici RPT d1e8872e, yorum yok)
 v8.203 SURUS ROTASI (kullanici: "diger testlerde paletli apcler kullanmistim" -> tekerlekli arac suphesi dogrulandi)
  fnc_aracTasima: takilan araca 18 sn'de calculatePath ile rota hesaplanir, arac hala duruyorsa (< 3 km/s) ve rota >= 3 dugumse setDriveOnPath ile dogrudan surucuye verilir; 40 sn'de ayni (tani + uygulama). Log: [TASIMA-YOL] ... setDriveOnPath uygulandi.
  Not: TEST EDILMEDI; HEMTT setDriveOnPath / calculatePath komutlarini taniyor ama calisma zamani davranisi bilinmiyor.
+
+v8.204 SATRANC TAHTASI 1-2-3 (kullanici: "1 2 3'e basla, sonra 4 5 6")
+ 1) ORTAK RESIM: kumanda cekirdegi (fnc_hq: istihbarat / SPOTREP agi, takviye, kanat, feint, destek, medevac) YALNIZ Zeus "Kumanda" modulu konunca aciliyordu; hicbir testte konmadi -> RPT'lerde [HQ-TAHTA] / [HQ-ISTIHBARAT] satiri YOK, yani bu katman hic calismadi. Artik ELITE plani kurulunca otomatik acilir ([HQ-MODUL] ... OTOMATIK acildi; kapatma lambs_danger_hqPlanOtomatikOff = true). Not: planli gruplar 'mesgul' sayilir (planAktif), kumanda takviyesi/kanat/destek yalniz PLAN DISI musait gruplari kullanir.
+ 2) SAVUNMA KOMUTANI (BEKLE fazi, 10 sn): ortak resim = plan gruplari liderlerinin objektif 400 m cevresinde bildigi dusman (knowsAbout > 0.4). YEDEK grup (yoksa >= 4 kisilik temas disi bir grup), dusman >= 2 ve (savunma kaybi >= %25 ya da dusman objektife <= 150 m) olunca dusmanin agirlik merkezine KARSI SALDIRI (hqEmir SALDIRI; 150 sn'de bir). Toplam kayip >= %60 ve dusman >= 2 ise mevzi kaybedildi: plan BITTI (gruplar serbest). [PLAN-SAVUNMA]
+ 3) FRAGO: SALDIRI fazinda toplam kayip >= %50 (>= 8 asker basladiysa, faz > 30 sn) ise CEKILME ([PLAN-FRAGO]).
+ Dayanak: FM 3-98 3-56 (olcutlu geri cekilme) ve savunmada yedek karsi saldirisi genel ilkesi; yedek karsi saldirisi icin belirli bir madde numarasi DOGRULANMADI; tum esikler (%25 / %50 / %60 / 150 m / 400 m) TASARIM degeri.
+ Siradaki: 4 (ates kaydirma, sis, karsi-batarya), 5 (araçli hareket / pusuya tepki / kurtarma), 6 (hedef zinciri, cephe hatti).
+ Not: TEST EDILMEDI.

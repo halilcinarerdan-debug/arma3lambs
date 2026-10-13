@@ -537,6 +537,11 @@ diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | 
     ["hemen", "30 sn", "60 sn", "120 sn", "300 sn", "ZEUS ONAYI BEKLENIYOR"] select ((_ayar getOrDefault ["basla", 0]) min 5),
     _plan get "sureSn", [_plan get "tehditB", "bilinmiyor"] select ((_plan get "tehditB") < 0), _plan get "sivil", _plan get "agirYasak",
     ["yok", "hazirlik", "cagri", "hazirlik + cagri"] select ((_ayar getOrDefault ["topcu", 0]) min 3)];
+// v8.204 ORTAK RESIM: ELITE plani kurulunca KUMANDA cekirdegi (istihbarat / SPOTREP agi, takviye, kanat, feint, destek, medevac) otomatik acilir - onceki testlerde Zeus 'Kumanda' modulu konmadigi icin bu katman HIC calismiyordu ([HQ-TAHTA] / [HQ-ISTIHBARAT] satiri yok). Kapatma: lambs_danger_hqPlanOtomatikOff = true
+if (!(missionNamespace getVariable ["lambs_danger_hqPlanOtomatikOff", false]) && {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then {
+    missionNamespace setVariable ["lambs_danger_hqAktif", true, true];
+    diag_log format ["[HQ-MODUL] kumanda ELITE plani (%1) ile OTOMATIK acildi (istihbarat paylasimi, takviye, kanat, feint, destek, medevac)", _id];
+};
 if (_zirh && {!_atVar} && {({([_x] call _destekPuan) >= 3} count _gruplar) isEqualTo 0}) then {
     diag_log format ["[PLAN] %1 UYARI: duşmanda zirh / arac var ama katilan gruplarda AT gucu zayif", _id];
 };

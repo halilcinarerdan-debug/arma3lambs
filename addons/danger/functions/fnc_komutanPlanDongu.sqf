@@ -839,6 +839,18 @@ while {true} do {
 
         // ---------------------------------------------------------------- SALDIRI
         if (_faz isEqualTo "SALDIRI") then {
+            // v8.204 FRAGO - SALDIRI BASARISIZ (FM 3-98 3-56: geri cekilme olcutu onceden verilir, dusman / kayip tabanli; sayilar TASARIM): saldiri gruplarinin toplam kaybi >= %50 ve objektif temizlenmediyse CEKILME
+            if ((time - (_plan getOrDefault ["fragoT", -99])) > 10) then {
+                _plan set ["fragoT", time];
+                private _ilkF = _plan getOrDefault ["ilkSayi", createHashMap];
+                private _ilkFT = 0; private _simFT = 0;
+                { _ilkFT = _ilkFT + (_ilkF getOrDefault [groupId _x, 0]); _simFT = _simFT + ({alive _x} count (units _x)); } forEach _gruplar;
+                if (_ilkFT >= 8 && {(1 - (_simFT / _ilkFT)) >= 0.5} && {_fazSure > 30}) then {
+                    diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip %2%% (>= 50%%, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
+                    [_plan, "CEKILME", format ["saldiri kaybi %1%% (>= 50%%): objektif alinamadi", round ((1 - (_simFT / _ilkFT)) * 100)]] call _fazGec;
+                    continue
+                };
+            };
             private _notlar = _plan get "notlar";
             private _maneuv = _gruplar select {(_roller getOrDefault [groupId _x, "MANEVRA"]) isEqualTo "MANEVRA"};
             // kanat noktasina varinca (60 m) / 120 sn sonra SALDIRI emri
@@ -954,6 +966,49 @@ while {true} do {
         };
         if (_faz isEqualTo "BEKLE") then {
             if (_fazSure > (missionNamespace getVariable ["lambs_danger_planSavunmaS", 1200])) then { [_plan, "BITTI", "savunma suresi doldu"] call _fazGec; };
+            // v8.204 SAVUNMA KOMUTANI (kullanici: "savunma sadece bekliyor"; FM 3-98 engagement / disengagement + MCWP 3-11.1 savunmada yedek karsi saldirisi - genel ilke, esikler TASARIM degeri):
+            //   ortak resim = plan gruplari liderlerinin objektif 400 m cevresinde bildigi dusman; YEDEK grup, (dusman >= 2 ve (savunma kaybi >= %25 ya da dusman objektife <= 150 m)) olunca dusmanin agirlik merkezine KARSI SALDIRI emri alir (150 sn'de bir);
+            //   toplam kayip >= %60 ise savunma "mevzi kaybedildi" sayilir ve hayatta kalanlar cekilir (plan BITTI, gruplar serbest).
+            if ((time - (_plan getOrDefault ["savDenT", -99])) > 10) then {
+                _plan set ["savDenT", time];
+                private _tfS = _plan get "taraf";
+                private _dusN = [];
+                {
+                    private _glS = leader _x;
+                    if (!isNull _glS) then {
+                        {
+                            private _hobj = _x select 4;
+                            if (!isNull _hobj && {(_tfS getFriend (_x select 2)) < 0.6} && {((_x select 0) distance2D _obj) < 400} && {(_glS knowsAbout _hobj) > 0.4} && {alive _hobj}) then { _dusN pushBackUnique _hobj; };
+                        } forEach (_glS nearTargets 700);
+                    };
+                } forEach _gruplar;
+                private _ilkS = _plan getOrDefault ["ilkSayi", createHashMap];
+                private _ilkT = 0; private _simdiT = 0;
+                { _ilkT = _ilkT + (_ilkS getOrDefault [groupId _x, 0]); _simdiT = _simdiT + ({alive _x} count (units _x)); } forEach _gruplar;
+                private _kayipS = if (_ilkT > 0) then {1 - (_simdiT / _ilkT)} else {0};
+                private _yakinD = 99999;
+                { _yakinD = _yakinD min ((getPosATL _x) distance2D _obj); } forEach _dusN;
+                _plan set ["savDus", count _dusN];
+                if (_kayipS >= 0.6 && {(count _dusN) >= 2}) then {
+                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2%% >= 60%% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
+                    [_plan, "BITTI", format ["savunma kaybi %1%% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
+                } else {
+                    if ((count _dusN) >= 2 && {(_kayipS >= 0.25) || {_yakinD <= 150}} && {(time - (_plan getOrDefault ["savKarsiT", -999])) > 150}) then {
+                        private _yedekG = _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK" && {({alive _x} count (units _x)) >= 3} && {!([_x] call _temasta)}};
+                        if (_yedekG isEqualTo []) then { _yedekG = _gruplar select {({alive _x} count (units _x)) >= 4 && {!([_x] call _temasta)}}; _yedekG = _yedekG select [0, 1]; };
+                        if (_yedekG isNotEqualTo []) then {
+                            private _ep = [0, 0, 0];
+                            { _ep = _ep vectorAdd (getPosATL _x); } forEach _dusN;
+                            _ep = _ep vectorMultiply (1 / (count _dusN));
+                            _plan set ["savKarsiT", time];
+                            {
+                                [_x, "SALDIRI", [_ep]] call FUNC(hqEmir);
+                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%%, en yakin dusman objektife %7 m)", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD];
+                            } forEach _yedekG;
+                        };
+                    };
+                };
+            };
             continue
         };
     } forEach lambs_danger_planlar;
