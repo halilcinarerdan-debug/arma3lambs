@@ -21,6 +21,33 @@ lambs_danger_topSiperStarted = true;
 lambs_danger_topIzN = 0;
 lambs_danger_topLogN = 0;
 
+// izleyici (hem Fired hem tarama yolu kullanir): dusme noktasini tahmin eder, <= 7 sn kala yayinlar; yukseklik >= 40 m sartı: dogrudan atis mermisi sayilmaz
+lambs_danger_topIzle = {
+    params ["_p", "_a"];
+    if (lambs_danger_topIzN > 40) exitWith {};
+    lambs_danger_topIzN = lambs_danger_topIzN + 1;
+    private _hr = getNumber (configFile >> "CfgAmmo" >> _a >> "indirectHitRange");
+    private _R = ((_hr * 3) max 35) min 120;
+    private _t0 = time;
+    private _duyuru = false;
+    while {!isNull _p && {!_duyuru} && {(time - _t0) < 120}} do {
+        private _pos = getPosASL _p;
+        private _vel = velocity _p;
+        if ((_vel select 2) < -5) then {
+            private _h = ((ASLToATL _pos) select 2) max 0;
+            private _vz = -(_vel select 2);
+            private _t = ((-_vz) + sqrt (_vz * _vz + 19.62 * _h)) / 9.81;
+            if (_t <= 7 && {_h >= 40}) then {
+                _duyuru = true;
+                private _ip = [(_pos select 0) + (_vel select 0) * _t, (_pos select 1) + (_vel select 1) * _t, 0];
+                ["lambs_danger_topGelen", [_ip, _t, _R, _a]] call CBA_fnc_globalEvent;
+            };
+        };
+        sleep 0.2;
+    };
+    lambs_danger_topIzN = (lambs_danger_topIzN - 1) max 0;
+};
+
 // ---- 1) ATESLEYEN MAKINE: mermiyi izle, dusme noktasini tahmin et, yayinla ----
 ["AllVehicles", "Fired", {
     params ["_v", "_wep", "_muz", "_mode", "_ammo", "_mag", "_proj"];
@@ -28,31 +55,8 @@ lambs_danger_topLogN = 0;
     private _v0 = velocity _proj;
     private _tepe = (_v0 select 2) / ((vectorMagnitude _v0) max 1);
     if ((getNumber (configOf _v >> "artilleryScanner")) <= 0 && {_tepe < 0.45}) exitWith {};   // dolayli ates degil (dogrudan tank / top mermisi)
-    if (lambs_danger_topIzN > 30) exitWith {};
-    lambs_danger_topIzN = lambs_danger_topIzN + 1;
-    [_proj, _ammo] spawn {
-        params ["_p", "_a"];
-        private _hr = getNumber (configFile >> "CfgAmmo" >> _a >> "indirectHitRange");
-        private _R = ((_hr * 3) max 35) min 120;
-        private _t0 = time;
-        private _duyuru = false;
-        while {!isNull _p && {!_duyuru} && {(time - _t0) < 120}} do {
-            private _pos = getPosASL _p;
-            private _vel = velocity _p;
-            if ((_vel select 2) < -5) then {
-                private _h = ((ASLToATL _pos) select 2) max 0;
-                private _vz = -(_vel select 2);
-                private _t = ((-_vz) + sqrt (_vz * _vz + 19.62 * _h)) / 9.81;
-                if (_t <= 7) then {
-                    _duyuru = true;
-                    private _ip = [(_pos select 0) + (_vel select 0) * _t, (_pos select 1) + (_vel select 1) * _t, 0];
-                    ["lambs_danger_topGelen", [_ip, _t, _R, _a]] call CBA_fnc_globalEvent;
-                };
-            };
-            sleep 0.2;
-        };
-        lambs_danger_topIzN = (lambs_danger_topIzN - 1) max 0;
-    };
+    _proj setVariable ["lambs_danger_topIz", true, true];
+    [_proj, _ammo] spawn lambs_danger_topIzle;
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
 // ---- 2) HER MAKINE: yerel AI piyadeleri tepki verir ----

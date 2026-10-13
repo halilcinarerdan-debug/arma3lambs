@@ -657,14 +657,27 @@ while {true} do {
                     private _destekG = _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "DESTEK"};
                     private _digerG = _gruplar select {!(_x in _destekG)};
                     private _sirali = (_digerG select [0, floor ((count _digerG) / 2)]) + _destekG + (_digerG select [floor ((count _digerG) / 2), count _digerG]);
+                    private _hendekL = ["LISTE"] call FUNC(hendekAlani);
+                    private _hendekKul = createHashMap;
                     {
                         private _g = _x;
                         private _a = if (_th >= 0) then { _th + (if (_n <= 1) then {0} else {-110 + 220 * (_forEachIndex / (_n - 1))}) } else { _B + (360 / _n) * _forEachIndex };
                         private _poz = [_obj getPos [55, _a]] call _siperNokta;   // v8.181: sektor noktasi 40 m icinde siper yogunlugu en yuksek, kuru, cukur olmayan nokta
-                        // v8.229 HENDEK: sektor noktasinin 150 m icinde (objektife <= 350 m) elle konmus hendek alani varsa grup orayi tutar
-                        private _hdk = ["EN-YAKIN", _poz, 150, _plan get "taraf"] call FUNC(hendekAlani);
+                        // v8.230 HENDEK TERCIHI: objektife <= 300 m olan hendek alanlari arasindan EN AZ kullanilan + sektor noktasina en yakin secilir (gruplar farkli hendeklere dagilir); formasyon aranmaz
                         private _hdkI = -1;
-                        if (_hdk isNotEqualTo [] && {((_hdk select 0) distance2D _obj) <= 350}) then { _poz = _hdk select 0; _hdkI = _hdk select 1; diag_log format ["[PLAN] %1 SAVUN: %2 hendek alanina yerlesecek (alan %3, sektor noktasindan %4 m)", _id, groupId _g, _hdkI, round (_hdk select 2)]; };
+                        private _enSk = 1e9;
+                        {
+                            _x params ["_hc", "_ha", "_hb", "_hd", "_hadi", "_htr"];
+                            if ((_htr isEqualTo sideUnknown || {_htr isEqualTo (_plan get "taraf")}) && {(_hc distance2D _obj) <= 300}) then {
+                                private _sk = (_hendekKul getOrDefault [_forEachIndex, 0]) * 1000 + (_hc distance2D _poz);
+                                if (_sk < _enSk) then { _enSk = _sk; _hdkI = _forEachIndex; };
+                            };
+                        } forEach _hendekL;
+                        if (_hdkI >= 0) then {
+                            _poz = (_hendekL select _hdkI) select 0;
+                            _hendekKul set [_hdkI, (_hendekKul getOrDefault [_hdkI, 0]) + 1];
+                            diag_log format ["[PLAN] %1 SAVUN: %2 hendek alanina yerlesecek (alan %3, objektife %4 m, ayni alanda %5 grup)", _id, groupId _g, _hdkI, round (_poz distance2D _obj), _hendekKul get _hdkI];
+                        };
                         (_plan get "notlar") set [groupId _g, [_poz, _a, _hdkI]];
                         [_g, [[_poz, "MOVE", format ["MEVZI sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
                     } forEach _sirali;
