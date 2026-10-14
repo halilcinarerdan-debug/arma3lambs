@@ -110,6 +110,8 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
 
     // ---- SORTI ----
     private _bitti = false;
+    private _modMotor = _tur in ["FPV-AT", "FPV-AP"] && {!isNil "FPV_AI_Drones_fnc_fpvLogic"} && {missionNamespace getVariable ["lambs_danger_ihaModMotoru", true]};
+    if (_modMotor) then { diag_log "[IHA-SORTI] FPV_AI_Drones modu bulundu: FPV son yaklasma / patlama MOD MOTORUYLA (kapatma: lambs_danger_ihaModMotoru = false)"; };
     while {(call _aktif) && {!_bitti}} do {
         private _h = call _hedefSec;
         if (isNull _h) then { sleep 10; continue };
@@ -131,6 +133,27 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                 if (_birakildi >= 3 && {(time - _sonBirak) > 8}) then { _bitti = true; };
                 sleep 1;
             } else {
+                if (_modMotor) then {
+                    // v8.234 HIBRIT (slavkovsky77/Arma3-AI-FPV-Drones incelemesi): hedefi BIZ secer (bilinen, oncelikli) ve 180 m'ye kadar goturuz; son yaklasma / dalis / patlama modun test edilmis motorunda (Crocus'a ozgu tuhafliklar: bos arac, dalis, patlama yaricapi, takilma)
+                    if (_dist > 180) then {
+                        _d doMove (getPosATL _h);
+                        sleep 2;
+                    } else {
+                        private _kinds = if (_tur isEqualTo "FPV-AT") then {["LandVehicle", "Car", "Tank"]} else {["Man"]};
+                        private _src = ["allUnits", "vehicles"] select (_tur isEqualTo "FPV-AT");
+                        _uav setVariable ["FPV_AI_Drones_managed", true, true];
+                        _uav setVariable ["initialized", false];
+                        diag_log format ["[IHA-SORTI] %1 (%2) | hedef %3 %4 m: son yaklasma MOD MOTORUNA (FPV_AI_Drones_fnc_fpvLogic) devredildi", typeOf _uav, _tur, typeOf _h, round _dist];
+                        [_uav, _kinds, _src,
+                            [30, 10] select (_tur isEqualTo "FPV-AT"), [8, 3] select (_tur isEqualTo "FPV-AT"), [8, 5] select (_tur isEqualTo "FPV-AT"),
+                            _tur isEqualTo "FPV-AT", ["DemoCharge_Remote_Ammo", "SatchelCharge_Remote_Ammo"] select (_tur isEqualTo "FPV-AT"),
+                            250, 0.25, 15, 0.1, 5, 40, false] spawn (missionNamespace getVariable "FPV_AI_Drones_fnc_fpvLogic");
+                        private _modBit = time + 90;
+                        waitUntil { sleep 1; isNull _uav || {!alive _uav} || {!alive _h} || {time > _modBit} || {!(call _aktif)} };
+                        diag_log format ["[IHA-SORTI] %1 | mod motoru bitti: IHA %2, hedef %3 (%4 sn)", _tur, ["YOK / patladi", "hala var"] select (!isNull _uav && {alive _uav}), ["OLDU", "SAG"] select (alive _h), round (time - _t0)];
+                        _bitti = true;
+                    };
+                } else {
                 if (_dist > 220) then {
                     _d doMove (getPosATL _h);
                     sleep 2;
@@ -150,6 +173,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         { deleteVehicle _x; } forEach (crew _uav);
                         deleteVehicle _uav;
                     } else { sleep 0.1; };
+                };
                 };
             };
         };
