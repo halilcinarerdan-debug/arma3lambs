@@ -2281,3 +2281,7 @@ v8.234 FPV_AI_Drones MODU INCELEMESI + HIBRIT (kullanici: github.com/slavkovsky7
  fnc_ihaSorti HIBRIT: FPV_AI_Drones_fnc_fpvLogic mevcutsa (lambs_danger_ihaModMotoru, varsayilan true) hedefi BIZ seceriz (bilinen, oncelikli: zirh / kume), IHA'yi 180 m'ye goturuz; son yaklasma + dalis + patlama modun motoruna devredilir (AT: LandVehicle/Car/Tank, SatchelCharge; AP: Man, DemoCharge; 90 sn tavan). Mod yoksa / kapaliysa kendi dalisimiz kullanilir. Log: [IHA-SORTI] "MOD MOTORUNA devredildi" / "mod motoru bitti".
  Uyari: modun kendi arama dongusu en yakin dusmani (bilinen-bilinmeyen) secer: 180 m'de bizim hedefimizden yakin baska dusman varsa o vurulur. ELITE tarafi IHA grubunu HARIC isaretler; LAMBS gorev sistemi drone'u yonlendirirse sorun [IHA-SORTI] ile gorunur.
  Not: TEST EDILMEDI.
+
+v8.235 IHA ENVANTERI: ANAHTAR KELIME TARAMASI (kullanici: "rpt atsam sinif adlarini gorebilir misin")
+ fnc_ihaEnvanter: isUav / simulation UAV olan siniflara EK olarak, isUav isaretsiz ama ad / sinifta crocus, fpv, mavic, drone, uav, pchela, orlan, darter, falcon, greyhawk, quadcopter gecen scope >= 2 siniflar da [IHA-ENVANTER-AD] ile loglanir (sinif, ad, model, simulasyon, ata zinciri, tahmin turu). Sunucu RPT'sinde acilistan ~8 sn sonra gorunur.
+ Not: TEST EDILMEDI.
