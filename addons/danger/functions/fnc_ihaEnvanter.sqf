@@ -27,7 +27,7 @@ lambs_danger_ihaEnvanterStarted = true;
     private _n = 0;
     {
         private _tip = [_x] call FUNC(ihaTip);
-        diag_log format ["[IHA-ENVANTER] %1 | \"%2\" | taraf %3 | silah %4 | model %5 | tip %6", _x, getText (configFile >> "CfgVehicles" >> _x >> "displayName"), getNumber (configFile >> "CfgVehicles" >> _x >> "side"), count (getArray (configFile >> "CfgVehicles" >> _x >> "weapons")), getText (configFile >> "CfgVehicles" >> _x >> "model"), _tip];
+        diag_log format ["[IHA-ENVANTER] %1 | ""%2"" | taraf %3 | silah %4 | model %5 | tip %6", _x, getText (configFile >> "CfgVehicles" >> _x >> "displayName"), getNumber (configFile >> "CfgVehicles" >> _x >> "side"), count (getArray (configFile >> "CfgVehicles" >> _x >> "weapons")), getText (configFile >> "CfgVehicles" >> _x >> "model"), _tip];
         _n = _n + 1;
     } forEach _liste;
     // 2. gecis: isUav isaretsiz modlar (Crocus / Mavic helikopter simulasyonlu olabilir): ad / sinif anahtar kelimeyle ara
@@ -38,7 +38,7 @@ lambs_danger_ihaEnvanterStarted = true;
             private _cn = configName _c;
             private _a = toLower (_cn + " " + getText (_c >> "displayName"));
             if (!(_cn in _liste) && {["crocus", "fpv", "mavic", "drone", "dron", "uav", "pchela", "orlan", "darter", "falcon", "greyhawk", "quadcopter"] findIf {(_a find _x) >= 0} >= 0}) then {
-                diag_log format ["[IHA-ENVANTER-AD] %1 | \"%2\" | model %3 | simulasyon %4 | ata %5 | tip %6", _cn, getText (_c >> "displayName"), getText (_c >> "model"), getText (_c >> "simulation"), (configHierarchy _c) apply {configName _x} select [1, 4], [_cn] call FUNC(ihaTip)];
+                diag_log format ["[IHA-ENVANTER-AD] %1 | ""%2"" | model %3 | simulasyon %4 | ata %5 | tip %6", _cn, getText (_c >> "displayName"), getText (_c >> "model"), getText (_c >> "simulation"), (configHierarchy _c) apply {configName _x} select [1, 4], [_cn] call FUNC(ihaTip)];
                 _m = _m + 1;
             };
         };

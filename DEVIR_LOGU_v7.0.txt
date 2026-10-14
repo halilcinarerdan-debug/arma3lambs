@@ -2285,3 +2285,6 @@ v8.234 FPV_AI_Drones MODU INCELEMESI + HIBRIT (kullanici: github.com/slavkovsky7
 v8.235 IHA ENVANTERI: ANAHTAR KELIME TARAMASI (kullanici: "rpt atsam sinif adlarini gorebilir misin")
  fnc_ihaEnvanter: isUav / simulation UAV olan siniflara EK olarak, isUav isaretsiz ama ad / sinifta crocus, fpv, mavic, drone, uav, pchela, orlan, darter, falcon, greyhawk, quadcopter gecen scope >= 2 siniflar da [IHA-ENVANTER-AD] ile loglanir (sinif, ad, model, simulasyon, ata zinciri, tahmin turu). Sunucu RPT'sinde acilistan ~8 sn sonra gorunur.
  Not: TEST EDILMEDI.
+
+v8.236 SQF TIRNAK HATASI (kullanici HEMT SPE1: fnc_ihaEnvanter.sqf:30:51 "invalid token")
+ fnc_ihaEnvanter: dize icinde \" kullanilmisti — SQF'te kacis YOK, tirnak ikiye katlanir (""): [IHA-ENVANTER] ve [IHA-ENVANTER-AD] format satirlari duzeltildi. (Ayni hata baska dosyada yok: tum yeni dosyalar tarandi.) PE12 "include not found" (ZeusModules/*.sqf: script_component.hpp) kullanicinin yerel HEMTT agacinda ZeusModules klasoru addons/danger/ altinda oldugu icin ESKI modullerde de var; depoda degil, yerel kopya yapisi.
