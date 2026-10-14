@@ -103,3 +103,45 @@ Her dilim: `lambs_danger_<ajan>Off` anahtarı, doktrin / tasarım değeri etiket
 - Türkçe yanıt, dürüstlük (neyin test edilmediği), kullanıcı kısa test yapar → loglar ilk bakışta okunur olmalı.
 - **Askıdaki:** İHA / FPV / dron (Crocus, Mavic 3, RHS İHA; `FPV_AI_Drones` modu incelendi, hibrit hazır; sınıf adları için sunucu RPT'sindeki `[IHA-ENVANTER]` bekleniyor).
 - **Bekleyen eski işler:** FRAGO küçük düzeltmeleri, HQ güvenlik elemanı rol seçimi, "hangi grup hangi hedefe izinli" kısıtı, mühendis / engel (yol haritası 7), oda temizleme (8), AI sürücü kök nedeni.
+
+---
+
+## 10. EK GEREKSINIMLER (kullanicinin 2. mesaji — 20x20 km, ~1500 asker, sanal / fiziksel)
+
+Kullanici: sistem OPSIYONEL; harita 20x20 km, ~1500 asker civari; **her sey her an fiziksel olarak canli olmak ZORUNDA DEGIL**; Zeus'la ugrasmadan **faction listesinden + / - ile asker sayisi** ve **Personnel Replacement ayarlarinin HEPSI** bir panelden; **cephe gerisi SANAL**, cepheye yaklastikca (ve OPERASYONDA / TEMASTA kesinlikle) **fiziksel spawn**; catisma hattinda fiziksel birimler; gida / su tuketimi gercek.
+
+### 10.1 Sanal / fiziksel (LOD) model — "PROFIL" cekirdegi
+Bu is Dilim A'dan ONCE kayit modeline girmeli: her asker / squad bir **profil** (veri kaydi); fiziksel nesne profilin "cismi"dir.
+- **Seviyeler:** L0 = SANAL (yalniz veri: konum, hedef, saglik, mermi, susuzluk / acllik, rol, kimlik; hareket soyut: yol grafi uzerinde hiz ile ilerler; tuketim FOB stokundan soyut dusulur; catisma soyut cozumlenir) → L1 = FIZIKSEL (spawn; gruplar, tam ELITE katmani) → L0'a geri donus (despawn) kurali.
+- **Spawn tetikleri (hepsi CBA'dan ayarli):** oyuncu yakinligi (varsayilan 1500 m), **operasyon alani** (plan hedefi, OPORD bolgesi, FOB / COP yaricapi), **temas / ates / topcu darbesi** (kesin), cephe hatti seridi (yaklasildikca sikligi artar), gozlem / tespit (IHA vb. sonraki).
+- **Despawn:** tetik yok + minimum bekleme + histerezis (yaptiklari tekrar tekrar acilip kapanmasin); durum KORUNUR (saglik, mermi, ACE tibbi, susuzluk, konum, rol).
+- **Ust sinir:** `maksFizikiBirim` (CBA, varsayilan ornegin 300): tavan asilirsa uzak profiller sanal kalir / en uzak despawn. Kullanici "sistemim kaldirir" dedi; yine de TAVAN sart (20x20 km, 1500 asker).
+- **Zeus'la elle konan birimler** sanal OLMAZ (elle konan fiziksel kalir; "sanallastir" ayri opsiyonel modul).
+- **Kayit / saklama:** sanal profiller sunucu hafizasinda (oturum); kalici kayit (kaydet / yukle) SONRAKI dilim (Bakhmut-lite).
+- **Riskler:** kimlik / yerellik (sunucu / HC), loadout / yaralanma tasima (ACE), grup kimligi, plan gruplarinin gecici sabitlenmesi ("planda olan grup despawn OLMAZ"), formasyon / ELITE durumlarinin sifirlanmasi (yeniden baslat), performans (profil basina maliyet sifira yakin olmali).
+
+### 10.2 Faction paneli (Zeus'suz asker sayisi) + Personnel Replacement
+- **Panel:** faction listesi; her satirda **+ / -** (ya da sayi) ile **baslangic asker sayisi** (taraf / faction / birim turu bazinda).
+- **Personnel Replacement ayarlari (HEPSI):** baslangic toplam / rezerv havuzu, takviye hizi (saat basi), kayiptan takviyeye gecikme, takviye varis noktasi (HQ / FOB), takviye kalitesi (beceri), minimum squad boyu, ayni anda en cok spawn, cepheye yakinlik carpani (sik / seyrek), kayip esikleri (havuz biterse ne olur: bitkin / cekilme).
+- **UI:** mevcut Zeus diyalog yardimcisi (`EFUNC(main,showDialog)`) LIST / SLIDER / BOOLEAN alanlari destekliyor (panel basina ~7 alan). **v1: faction basina sliderli sayfalar; gercek + / - butonlu liste = OZEL GUI (RscDisplay), SONRAKI dilim.** CBA ayarlari ayni degerlerin yedegi (sunucu baslangic).
+- **Taraf / faction ayrimi:** faction listesi CfgFactionClasses'tan (RHS, GM...) otomatik doldurulur; kullanici hangilerinin sayisini ayarlar.
+
+### 10.3 Lojistik: fiziksel tuketim ve sanal tuketim
+- **Fiziksel profil (L1):** ACE Field Rations ogeleri gercekten tuketilir (matara / sise / MRE), FOB'da yenilenir.
+- **Sanal profil (L0):** tuketim FOB / HQ stokundan SOYUT dusulur (6 L / kisi / gun, MRE 1 / gun — `doktrinler.md`); stok biterse sanal birim moral / etkinlik kaybeder, ikmal kamyonu (sanal kamyon da olabilir) gonderilir. Ikmal kamyonu cepheye yaklastikca fiziksel olur.
+- Kullaniciya SORULACAK: sanal tuketimin soyut olmasi kabul mu? (Onerim: evet.)
+
+### 10.4 Guncellenmis dilim plani
+| Dilim | Icerik |
+|---|---|
+| **A0** | **Profil cekirdegi** (sanal / fiziksel gecis, spawn tetikleri, tavan, durum tasima) + faction paneli (v1 sliderli) + Personnel Replacement ayarlari + CBA |
+| **A** | Kayit + FOB / COP + susuzluk / acllik modeli (hem L0 hem L1) |
+| B-F | Onceki plan (Arazi, Lojistik ikmal, OPORD / istihbarat, Muhendis, Rapor); hepsi profil katmanini kullanir |
+Gerekce: sanallastirma ve asker sayisi paneli kayit modelini degistirdigi icin A'dan once; aksi halde A yeniden yazilir.
+
+### 10.5 Ek acik sorular
+1. Faction listesi: hangi factionlar (RHS US / RU, GM, baska)? Taraf basina toplam asker (orn. 750 / 750?)
+2. `maksFizikiBirim` hedefi (ornek 250-300?) ve spawn yaricapi (oyuncu 1500 m?) kabul mu?
+3. Sanal birimler de hendek / mevzi / FOB'a "yerlesmis" sayilsin mi (cephe gerisinde garnizonlar sanal)?
+4. Takviye gercekten KAMYONLA mi gelsin (sanal yol grafi + kamyon fiziksel olunca) yoksa HQ / FOB'da dogsun mu? (Onerim: FOB'da dogsun, sonra ikmal kamyonu ile cepheye.)
+5. Panel: v1 sliderli yeterli mi, gercek + / - GUI sart mi?
