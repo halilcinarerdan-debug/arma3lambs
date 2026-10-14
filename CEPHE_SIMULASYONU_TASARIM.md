@@ -145,3 +145,14 @@ Gerekce: sanallastirma ve asker sayisi paneli kayit modelini degistirdigi icin A
 3. Sanal birimler de hendek / mevzi / FOB'a "yerlesmis" sayilsin mi (cephe gerisinde garnizonlar sanal)?
 4. Takviye gercekten KAMYONLA mi gelsin (sanal yol grafi + kamyon fiziksel olunca) yoksa HQ / FOB'da dogsun mu? (Onerim: FOB'da dogsun, sonra ikmal kamyonu ile cepheye.)
 5. Panel: v1 sliderli yeterli mi, gercek + / - GUI sart mi?
+
+### 10.6 KARARLAR (kullanicinin yaniti, 2026-10-14) — kilitli
+1. **Factionlar otomatik taninir** (CfgFactionClasses; RHS / GM / vb.); asker sayisi panelden ayarlanir. Varsayilan taraf toplami panelde bos (0) baslar: kullanici girer.
+2. **Catisma OYUNCU YOKKEN de fiziksel gerceklesir:** spawn tetikleri oyuncuya bagli DEGIL — operasyon alani, temas, ates / topcu darbesi, cephe seridi. **Cephe gerisinde oyuncu yakinligi spawn'i ARTIRIR** ("orta sekeri ben ayarlayacagim"): varsayilanlar (CBA'dan degisir, TASARIM DEGERI):
+   - temas / operasyon / catisma hatti: HER ZAMAN fiziksel (tavan icinde ise; tavan asilirsa once uzak / temassiz sanallasir, temasli birim ASLA sanallasmaz);
+   - cephe seridi (tanimli FOB / COP'tan ileri hatta dogru ~3000 m derinlik): fiziksel sikligi ARTAR (oyuncu olmasa da), seyrek tazeleme;
+   - cephe gerisi: sanal; **oyuncu 1500 m'ye girerse** fiziksel;
+   - `maksFizikiBirim` = 300 (varsayilan), temasli birimler tavandan once korunur.
+3. (Anlasilmayan soru yeniden ifade edildi, asagiya bak: **FOB / COP'taki sanal garnizonlar** "orada duruyor" sayilir; yaklasildiginda ya da temasta hendek / mevzilerine fiziksel yerlesir. Onerim: EVET.)
+4. **Takviye FOB'da DOGMAZ — ARACLA gider.** Yolda: (a) **suya dusme / arac glitch'i / havaya ucma olmasin**; (b) **dusman atesine maruz kalabilsin, zaiyat dogal olsun.** Tasarim: takviye konvoyu uzak yol boyunca **SANAL** ilerler (yol grafi, fizik YOK -> glitch yok); yolun bir bolumu bilinen dusmana / temasa / topcu hedefine **<= 600 m** ya da oyuncu yakinindaysa konvoy **FIZIKSEL** olur (mevcut su kacinma, ezme korumasi, kinematik surus yedegi devrede) ve gercek atese maruz kalir; SANAL iken de yol boyunca "pusu / topcu / hava" soyut zaiyat zari (yalniz bilinen dusman faaliyeti olan yol kesimlerinde; log `[KONVOY-SANAL]`). Zaiyat sayisi havuzdan dusulur.
+5. **"Slider" = DAW'daki FADER gibi**: kaydirilan cubuk (soldan saga surukle), yaninda gosterilen SAYI ile deger secilir. Arma 3 Zeus diyalog yardimcisinda hazir gelir (asker sayisi icin 10'ar adim). Gercek "+ / -" butonlu liste ayri ozel GUI (sonraki dilim; v1'de fader yeterli).
