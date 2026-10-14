@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.225)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.237)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -139,6 +139,14 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Tanı**: `[SURME-TANI-*]` (AI özellikleri, hasar, grup, çevre, sürücü çıkışı), `[SURME-DENEY]` (varsayılan KAPALI; açmak için `surmeDeneyOff = false`), `[TASIMA-KIN]`, `[TASIMA-FIZIK]`. Sunucu donması ayıklama anahtarları (v8.207).
 - **Bilinen açık sorun**: RHS Stryker/M113 AI sürücüsü duran araçta "MOVE" tutup sürmüyor (hedef `DoNotPlan`); nedeni bilinmiyor, kinematik sürüş geçici çözüm.
 
+## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
+Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
+- **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.
+- **LOD kuralları (T)**: temas / operasyon alanı HER ZAMAN fiziksel (oyuncu olmasa da); cephe şeridi sık; geri hat sanal, **oyuncu yaklaşırsa fiziksel**; tavan (asker) + histerezis; temaslı fiziksel asla sanallanmaz; tavana sığmayan sanal temas **soyut çatışma**. Log `[CEPHE-FIZIKLE/SANALLA/SOYUT/OZET]`, `rpt_ozet.py --cephe`.
+- **Faction paneli (T)**: Zeus "ELITE Cephe Paneli" — faction listesi otomatik (RHS/GM/…), **fader** ile asker sayısı / rezerv / yerleşim yarıçapı; mission maker API `lambs_danger_fnc_cepheFaction`. (Gerçek + / − GUI sonraki dilim.)
+- **Personnel Replacement (T)**: taraf bazlı panel + CBA varsayılanları — takviye hızı, gecikme, min squad, eşzamanlı paket, beceri, cepheye yakınlık çarpanı, havuz bitince (devam / bitkin / çekil), konvoy zayiatı. Takviye FOB'da doğmaz: **soyut konvoy** varış noktasından squad'a yürür, düşmana ≤ 600 m'de zayiat zarı; A0'da fiziksel araç konvoyu yok.
+- **CBA**: "LAMBS Danger > ELITE Cephe Komutani".
+
 ## 11. Geliştirici araçları
 - **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --grup` RPT özetleri, sürüm kontrolü.
 - **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
@@ -147,7 +155,7 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
 
 ## Planlanan / bekleyen
-- **CEPHE SİMÜLASYONU (sonraki büyük iş)**: tasarım `CEPHE_SIMULASYONU_TASARIM.md` — kayıt, arazi ajanı (3 parça), istihbarat / TTP öğrenme, harekât / OPORD, lojistik (susuzluk-açlık, ikmal), ateş destek, mühendis (COP/FOB inisiyatifi), rapor iş akışı, cephe komutanı; 6 dilim. Drone / İHA işleri askıda.
+- **CEPHE SİMÜLASYONU (sonraki büyük iş)**: tasarım `CEPHE_SIMULASYONU_TASARIM.md` — kayıt, arazi ajanı (3 parça), istihbarat / TTP öğrenme, harekât / OPORD, lojistik (susuzluk-açlık, ikmal), ateş destek, mühendis (COP/FOB inisiyatifi), rapor iş akışı, cephe komutanı; 6 dilim. **Dilim A0 (profil çekirdeği + faction paneli + Personnel Replacement) v8.237'de yapıldı (10e); sıradaki: Dilim A (kayıt + FOB/COP + susuzluk/açlık).** Drone / İHA işleri askıda.
 - **Hat saldırısı / siper hattı planı (Ukrayna benzeri, her şey stabil olduktan SONRA)**: iki noktalı hat (başlangıç / bitiş) → 3–6 hedef kesim, kesim başına squad, dost cephe sınırı HQ'dan hatta, geri çekilme sınırın gerisine; topçu/havan hazırlığı + sızma + siper temizleme. Ön koşul: bina/oda temizleme + el bombası yeniden yazımı, siper temizleme kaynakları (ATP 3-21.8 / MCWP 3-11.2).
 - Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
 - Helikopter medevac / hava nakli (şu an yalnız kara aracı).

@@ -156,3 +156,20 @@ Gerekce: sanallastirma ve asker sayisi paneli kayit modelini degistirdigi icin A
 3. (Anlasilmayan soru yeniden ifade edildi, asagiya bak: **FOB / COP'taki sanal garnizonlar** "orada duruyor" sayilir; yaklasildiginda ya da temasta hendek / mevzilerine fiziksel yerlesir. Onerim: EVET. -> ONAYLANDI (kullanici: "3. evet onay veriyorum"; fader UI da onayli).)
 4. **Takviye FOB'da DOGMAZ — ARACLA gider.** Yolda: (a) **suya dusme / arac glitch'i / havaya ucma olmasin**; (b) **dusman atesine maruz kalabilsin, zaiyat dogal olsun.** Tasarim: takviye konvoyu uzak yol boyunca **SANAL** ilerler (yol grafi, fizik YOK -> glitch yok); yolun bir bolumu bilinen dusmana / temasa / topcu hedefine **<= 600 m** ya da oyuncu yakinindaysa konvoy **FIZIKSEL** olur (mevcut su kacinma, ezme korumasi, kinematik surus yedegi devrede) ve gercek atese maruz kalir; SANAL iken de yol boyunca "pusu / topcu / hava" soyut zaiyat zari (yalniz bilinen dusman faaliyeti olan yol kesimlerinde; log `[KONVOY-SANAL]`). Zaiyat sayisi havuzdan dusulur.
 5. **"Slider" = DAW'daki FADER gibi**: kaydirilan cubuk (soldan saga surukle), yaninda gosterilen SAYI ile deger secilir. Arma 3 Zeus diyalog yardimcisinda hazir gelir (asker sayisi icin 10'ar adim). Gercek "+ / -" butonlu liste ayri ozel GUI (sonraki dilim; v1'de fader yeterli).
+
+
+---
+
+## 11. DİLİM A0 DURUMU (v8.237 — kod yazıldı, TEST EDİLMEDİ)
+
+**Yapılan:** §10.1 profil/LOD çekirdeği, §10.2 faction paneli (fader) + Personnel Replacement, CBA ayarları (kategori "ELITE Cephe Komutani"). Dosyalar ve kurallar: `DEVIR_LOGU_v7.0.txt` (v8.237 girdisi), özellikler `OZELLIKLER_LISTESI.md` 10e, test `TEST_SENARYOLARI.md` "T-CEPHE-A0".
+
+**Tasarımdan bilinçli sapmalar (dürüst liste):**
+1. **Faction başına başlangıç sayısı CBA'da değil**, panelde / API'de (CBA'da yüzlerce faction ayarı olmaz). CBA'da yalnız genel ayarlar (LOD, PR varsayılanları) var.
+2. **Takviye konvoyu soyut** (sanal düz çizgi + zayiat zarı); fiziksel araç konvoyu, yol grafı, "≤ 600 m'de fiziksel olur ve gerçek ateşe maruz kalır" kısmı **sonraki dilime** kaldı (araç + arazi ajanı gerektirir). "Suya düşme / glitch yok" şartı bu yüzden sağlanıyor.
+3. **Sanal hareket düz çizgi** (yol grafı arazi ajanı T1/T2 ile gelecek).
+4. **FOB/COP sanal garnizon "yerleşmiş sayılır" (Soru 3, onaylı)** henüz uygulanmadı: kayıt (Dilim A) gerekir. A0'da "operasyon alanı" = aktif plan hedefi + elle alan + olay alanı (CBA yarıçapı).
+5. **Olay alanı (ateş/topçu darbesi)** için `lambs_danger_cepheOlayIstegi` CBA olayı hazır ama hiçbir ELITE betiğine bağlanmadı (temas zaten dost/düşman yakınlığıyla yakalanıyor); topçu darbesi bağlantısı Dilim B/C'de.
+6. **Oyuncu yakınlığı** yalnız oyuncu gövdesi; Zeus kamerası dikkate alınmaz.
+
+**Sıradaki:** testten çıkan düzeltmeler → **Dilim A** (Kayıt + FOB/COP + susuzluk/açlık, hem L0 hem L1).

@@ -217,6 +217,25 @@ class CfgVehicles {
         };
     };
 
+    // ELITE fork (v8.237, Dilim A0): cephe simulasyonu paneli - faction listesinden asker sayisi (sanal profil) + Personnel Replacement ayarlari
+    class GVAR(Cephe) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(Cephe);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Cephe Paneli (faction asker sayisi + takviye)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\run_ca.paa";
+        function = QFUNC(moduleCephe);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(GozetleAta) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(GozetleAta);

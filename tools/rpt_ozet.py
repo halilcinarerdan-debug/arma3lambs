@@ -6,6 +6,7 @@ Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
            --kayip              KAYIP TABLOSU (v8.90): taraf basina OLU + BAYILAN (ACE etkisiz) + oran; gercek hayat hedefiyle karsilastirma icin
+           --cephe              CEPHE SIMULASYONU (v8.237, Dilim A0): [CEPHE-*] zaman cizelgesi ozeti + sanal / fiziksel gecis sayilari + takviye + hatalar
            --zeka               TAKTIK ZEKA katmani (v8.60): olum bolgesi hafizasi, karsi pusu, rota gozcusu, HQ otomatik; otomatik cikarim
            --hava-ied           HAVA + IED TESHISI: zaman cizelgesi + otomatik 'neden tepki yok' cikarimi (v8.52 loglari)
            --anomali            sadece [ANOMALI] listesi (kod ozeti + ilk satirlar)
@@ -21,7 +22,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.236"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.237"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -658,6 +659,57 @@ def kayip_tablosu(path):
     print()
 
 
+def cephe(path):
+    """Dilim A0 cephe simulasyonu: [CEPHE-FACTION] [CEPHE-FIZIKLE] [CEPHE-SANALLA] [CEPHE-TAKVIYE] [CEPHE-KONVOY] [CEPHE-SOYUT] [CEPHE-OZET] [CEPHE-YOK] [CEPHE-HATA] [CEPHE-AYAR]."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    C = [l for l in L if "[CEPHE" in l]
+    print("=" * 78)
+    print(path, "| CEPHE SIMULASYONU (Dilim A0)")
+    if not C:
+        print("  [CEPHE-*] satiri YOK: sistem kapali (CBA 'ELITE Cephe Komutani > Aktif') ya da hic faction eklenmedi; boot satirinda v8.237 var mi?")
+        return
+    def say(etiket): return len([1 for l in C if ("[CEPHE-%s]" % etiket) in l])
+    print("  satirlar: FACTION %d | FIZIKLE %d | SANALLA %d | TAKVIYE %d | KONVOY %d | SOYUT %d | YOK %d | HATA %d | OZET %d"
+          % (say("FACTION"), say("FIZIKLE"), say("SANALLA"), say("TAKVIYE"), say("KONVOY"), say("SOYUT"), say("YOK"), say("HATA"), say("OZET")))
+    tet = collections.Counter()
+    for l in C:
+        if "[CEPHE-FIZIKLE]" in l:
+            m = re.search(r"\| (OPERASYON|TEMAS|OYUNCU-YAKIN|CEPHE-SERIDI) \|", l)
+            tet[m.group(1) if m else "?"] += 1
+    if tet:
+        print("  fizikselleme nedenleri:", ", ".join("%s:%d" % kv for kv in tet.most_common()))
+    ozetler = [l for l in C if "[CEPHE-OZET]" in l]
+    if ozetler:
+        print("  SON OZET:", ozetler[-1].strip()[:400])
+        mx = 0
+        for l in ozetler:
+            m = re.search(r"fiziksel asker (\d+)/(\d+)", l)
+            if m:
+                mx = max(mx, int(m.group(1)))
+                tavan = int(m.group(2))
+        if mx:
+            print("  en yuksek fiziksel asker: %d / tavan %d %s" % (mx, tavan, "(TAVANA DAYANDI)" if mx >= tavan else ""))
+    for et in ("HATA", "YOK", "SOYUT", "KONVOY"):
+        satir = [l for l in C if ("[CEPHE-%s]" % et) in l]
+        if satir:
+            print("  [CEPHE-%s] ilk %d / %d:" % (et, min(len(satir), 6), len(satir)))
+            for l in satir[:6]:
+                print("    ", l.strip()[:230])
+    # sanal <-> fiziksel salinim: ayni profil 120 sn icinde fizikle -> sanalla -> fizikle ise histerezis sorunu
+    ad = {}
+    sal = 0
+    for l in C:
+        m = re.search(r"\[CEPHE-(FIZIKLE|SANALLA)\] t\+(\d+) \| .*?\(([^)]+_\d+)\)", l)
+        if m:
+            tur, t, pid = m.group(1), int(m.group(2)), m.group(3)
+            if tur == "FIZIKLE" and pid in ad and t - ad[pid] < 120:
+                sal += 1
+            if tur == "SANALLA":
+                ad[pid] = t
+    print("  120 sn icinde sanallayip tekrar fiziksellenen profil: %d %s" % (sal, "(histerezis ayari kontrol: cepheDespawnBeklemeS / cepheMinFizikS)" if sal else "(OK)"))
+    print()
+
+
 def zaman_cizelgesi(path, grup, aralik):
     """Bir grubun olaylarini zaman sirasinda, tekrarlari birlestirerek yazdirir."""
     ETIK = ("OLAY", "BND-BASLA", "BND-BITTI", "BND-CIKIS", "GERI-CEKILME", "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "GERI-CEKILME-SIPER",
@@ -705,6 +757,7 @@ if __name__ == "__main__":
     zeka_modu = False
     form_modu = False
     kayip_modu = False
+    cephe_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -724,13 +777,17 @@ if __name__ == "__main__":
             form_modu = True; i += 1
         elif args[i] == "--kayip":
             kayip_modu = True; i += 1
+        elif args[i] == "--cephe":
+            cephe_modu = True; i += 1
         else:
             yollar.append(args[i]); i += 1
     if not yollar:
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if kayip_modu:
+        if cephe_modu:
+            cephe(p)
+        elif kayip_modu:
             kayip_tablosu(p)
         elif form_modu:
             form_teshis(p)
