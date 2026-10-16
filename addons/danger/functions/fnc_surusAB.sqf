@@ -9,6 +9,10 @@
  *   C  ELITE + doMove     : ELITE izleyicileri ACIK (gercek kosul), surucuye doMove
  *   D  ELITE + waypoint   : ELITE acik, grup waypoint'i
  *   E  ELITE + 8 yolcu    : ELITE acik, ayri gruptan 8 piyade kargoda, doMove (gercek nakil kosulu)
+ *   F  RECON profili      : fnc_reconArac'in TAM ayarlari (kullanici: 'operasyon emrinde yalniz recon gitmiyor, digerleri normal'): 4 yolcu (PATH kapali), doStop -> grup SAFE / GREEN / NORMAL, farlar kapali,
+ *                           surucu forceSpeed 9 + AUTOCOMBAT kapali, grup isExecutingTactic + surucu forceMove / senkT bayraklari, doMove + 'ELITE RECON-ARAC' waypoint'i
+ *   G  RECON-HAFIF        : F'nin yalniz SAFE / GREEN / isiksiz / doStop / doMove + waypoint kismi (forceSpeed 9, AUTOCOMBAT kapali, yolcu PATH kapali, ELITE bayraklari YOK)
+ *   Cikarim: F gitmiyor + G gidiyor -> forceSpeed 9 / yolcu PATH / ELITE bayraklari; ikisi de gitmiyor + C gidiyor -> SAFE / GREEN / isiksiz / doStop-doMove sirasi; ikisi de gidiyor -> recon'un sorunu secim / alma (pickup) asamasinda.
  * Cikarim (otomatik, [SURUS-AB-OZET]): A/B gidip C/D/E gitmiyorsa ELITE/LAMBS etkisi; hepsi gitmiyorsa arac sinifi / mod; yalniz doMove gitmiyorsa emir yolu; yalniz yolcuyla gitmiyorsa kargo/yolcu etkisi.
  * Olcum: her saniye mesafe + en yuksek hiz; 5. sn'de expectedDestination + unitReady; 'GITTI' = test suresinde >= 40 m (hedefe giden dogrultuda degil, sadece yer degistirme). Yerellik: arac / surucu sunucuda.
  * BISECT (istege bagli): C gitmiyor ama A/B gidiyorsa, ELITE izleyicilerinin kapatma anahtarlari (mekanizeOff, ezmeOff, murKoruOff, aracSenkronOff, ...) GECICI olarak GLOBAL kapatilip ikili aramayla suclu aranir
@@ -73,11 +77,15 @@ private _yaz = {
 };
 private _tumArac = [];
 
-private _kodlar = [["A", "SAF + waypoint", false, "WP", false], ["B", "SAF + doMove", false, "DOMOVE", false]];
+private _kodlar = [["A", "SAF + waypoint", false, "WP", 0], ["B", "SAF + doMove", false, "DOMOVE", 0]];
 if (_elite) then {
-    _kodlar pushBack ["C", "ELITE + doMove", true, "DOMOVE", false];
-    _kodlar pushBack ["D", "ELITE + waypoint", true, "WP", false];
-    if (_yolcu) then { _kodlar pushBack ["E", "ELITE + 8 yolcu + doMove", true, "DOMOVE", true]; };
+    _kodlar pushBack ["C", "ELITE + doMove", true, "DOMOVE", 0];
+    _kodlar pushBack ["D", "ELITE + waypoint", true, "WP", 0];
+    if (_yolcu) then {
+        _kodlar pushBack ["E", "ELITE + 8 yolcu + doMove", true, "DOMOVE", 8];
+        _kodlar pushBack ["F", "RECON profili (tam)", true, "RECON", 4];
+        _kodlar pushBack ["G", "RECON-HAFIF (SAFE/GREEN/isiksiz)", true, "RECON-HAFIF", 4];
+    };
 };
 
 // ---- tek arac kur: [sinif, eliteAcik, yolcuVar, seritNo] -> kayit (HashMap)
@@ -98,11 +106,11 @@ private _kur = {
         { _x setVariable ["lambs_danger_disableAI", true]; } forEach (units _g);
     };
     private _yolcuSay = 0;
-    if (_yolcuVar) then {
+    if (_yolcuVar > 0) then {
         private _pg = createGroup (side _g);
         _pg setVariable ["lambs_danger_gorev", "HARIC"];
         private _pc = switch (side _g) do { case east: {"O_Soldier_F"}; case independent: {"I_Soldier_F"}; default {"B_Soldier_F"} };
-        for "_i" from 1 to ((_v emptyPositions "cargo") min 8) do {
+        for "_i" from 1 to ((_v emptyPositions "cargo") min _yolcuVar) do {
             private _u = _pg createUnit [_pc, _p, [], 0, "NONE"];
             _u moveInCargo _v;
             _yolcuSay = _yolcuSay + 1;
@@ -121,6 +129,34 @@ private _emir = {
     _r set ["bas", getPosATL _v];
     _r set ["t0", time];
     if (isNull _d) exitWith { _r set ["not", "SURUCU YOK (createVehicleCrew bos)"]; };
+    if (_tur in ["RECON", "RECON-HAFIF"]) then {
+        // fnc_reconArac CALIS ile ayni sira: alma sonrasi doStop; bindirme; yolcu PATH kapali (yalniz TAM profil); sessiz surus ayarlari; doMove + 'ELITE RECON-ARAC' waypoint'i
+        doStop _d;
+        _g setBehaviour "SAFE";
+        _g setCombatMode "GREEN";
+        _g setSpeedMode "NORMAL";
+        _v setPilotLight false;
+        _v setCollisionLight false;
+        if (_tur isEqualTo "RECON") then {
+            _g setVariable ["lambs_danger_isExecutingTactic", true];
+            _d setVariable ["lambs_danger_forceMove", true];
+            _d setVariable ["lambs_danger_senkT", time + 900];
+            _d disableAI "AUTOCOMBAT";
+            { if (_x isNotEqualTo _d && {(group _x) isNotEqualTo _g}) then { _x disableAI "PATH"; }; } forEach (crew _v);
+            _d forceSpeed 9;
+        };
+        _d enableAI "PATH"; _d enableAI "MOVE";
+        _d action ["EngineOn", _v];
+        _v engineOn true;
+        _d doMove _hedef;
+        private _w2 = _g addWaypoint [_hedef, 0];
+        _w2 setWaypointType "MOVE";
+        _w2 setWaypointName "ELITE RECON-ARAC";
+        _w2 setWaypointBehaviour "SAFE";
+        _w2 setWaypointCombatMode "GREEN";
+        _w2 setWaypointSpeed "NORMAL";
+        _g setCurrentWaypoint _w2;
+    } else {
     if (_tur isEqualTo "WP") then {
         private _wp = _g addWaypoint [_hedef, 0];
         _wp setWaypointType "MOVE";
@@ -130,6 +166,7 @@ private _emir = {
     } else {
         _v engineOn true;
         _d doMove _hedef;
+    };
     };
 };
 
@@ -169,7 +206,7 @@ private _temizle = {
 // ---- tek ELITE+doMove denemesi (bisect icin): gitti mi?
 private _tekDene = {
     params ["_cls", "_sn"];
-    private _r = [_cls, true, false, -3] call _kur;   // serit -3: ana test seritlerinin disinda
+    private _r = [_cls, true, 0, -3] call _kur;   // serit -3: ana test seritlerinin disinda
     sleep 3;
     [_r, "DOMOVE"] call _emir;
     [[_r], _sn] call _olc;
@@ -222,6 +259,15 @@ private _hepsi = [];
     // cikarim
     private _g = { _sonuc getOrDefault [_this, false] };
     private _yorum = "";
+    private _reconYorum = "";
+    if (_elite && {_yolcu} && {("F" in _sonuc) || {"G" in _sonuc}}) then {
+        _reconYorum = switch (true) do {
+            case (("C" call _g) && {!("F" call _g)} && {"G" call _g}): { " | RECON: tam profil GITMEDI, hafif GITTI -> forceSpeed 9 / yolcu PATH kapali / ELITE bayraklari (isExecutingTactic, forceMove, senkT) suclu aday." };
+            case (("C" call _g) && {!("F" call _g)} && {!("G" call _g)}): { " | RECON: tam VE hafif GITMEDI, C gitti -> SAFE / GREEN / isiksiz / doStop-sonra-doMove sirasi / 4 yolcu suclu aday." };
+            case (!("F" call _g) && {!("C" call _g)}): { " | RECON: F de gitmedi ama C de gitmedi -> recon'a ozgu degil, genel ELITE-acik sorunu (bisect)." };
+            default { " | RECON: F ve G de GITTI -> recon ayarlari suclu degil; sorun recon'un secim / alma (pickup) asamasinda ya da Zeus'ta yerel yaratma." };
+        };
+    };
     private _safVar = ("A" call _g) || {"B" call _g};
     private _eliteVar = _elite;
     if (!_safVar && {!_elite || {!("C" call _g || {"D" call _g} || {"E" call _g})}}) then {
@@ -245,7 +291,8 @@ private _hepsi = [];
             };
         };
     };
-    private _oz = format ["[SURUS-AB-OZET] %1 | %2 | %3", _cls, ["A", "B", "C", "D", "E"] apply { format ["%1:%2", _x, if (_x in _sonuc) then {["X", "G"] select (_sonuc get _x)} else {"-"}] } joinString " ", _yorum];
+    _yorum = _yorum + _reconYorum;
+    private _oz = format ["[SURUS-AB-OZET] %1 | %2 | %3", _cls, ["A", "B", "C", "D", "E", "F", "G"] apply { format ["%1:%2", _x, if (_x in _sonuc) then {["X", "G"] select (_sonuc get _x)} else {"-"}] } joinString " ", _yorum];
     [_oz] call _yaz;
     if (_bisect && {_elite} && {_safVar} && {!("C" call _g)}) then { _bisL pushBack _cls; };
 } forEach _ozetler;

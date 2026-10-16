@@ -21,7 +21,7 @@ if (_activated && local _logic) then {
             ["Arac sinifi 2 (istege bagli)", "LIST", "Karsilastirma: ornegin tekerlekli ve paletli.", _etiket, 0],
             ["Arac sinifi 3 (istege bagli)", "LIST", "Ucuncu sinif.", _etiket, 0],
             ["ELITE acik varyantlari (C / D / E)", "BOOLEAN", "Kapaliysa yalniz saf varyantlar (A / B) calisir: ELITE hic suclu degil mi?", true, ""],
-            ["Yolculu varyant (E)", "BOOLEAN", "8 piyade kargoda, gercek nakil kosulu.", true, ""],
+            ["Yolculu varyantlar (E / F / G)", "BOOLEAN", "E: 8 piyade kargoda (gercek nakil). F / G: RECON ayarlari (fnc_reconArac: SAFE / GREEN, isiksiz, forceSpeed 9, yolcu PATH kapali) 4 yolcuyla - recon neden gitmiyor?", true, ""],
             ["Test suresi (sn)", "SLIDER", "Her varyantin gidis suresi (olcum her saniye).", [10, 30], [1, 5], 15, 0],
             ["Otomatik bisect (suclu izleyici ara)", "BOOLEAN", "ELITE-acik varyant gitmiyor ama saf gidiyorsa, izleyici kapatma anahtarlari GECICI olarak global kapatilip ikili aramayla suclu aranir (~60 sn ek). Test oturumu icin.", false, ""]
         ],
