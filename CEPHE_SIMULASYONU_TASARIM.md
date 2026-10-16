@@ -1,3 +1,7 @@
+> **DONDURULDU (2026-10-16, kullanici karari).** Cephe simulasyonu katmani (bu belgenin tamami: kayit, arazi/istihbarat/lojistik/muhendis ajanlari, komutan zekasi, sanal/fiziksel LOD) **uzerinde calisilmiyor**.
+> Yeni yon: **senaryo odakli, dar zaman araligi, kucuk bolgede, amaca yonelik operasyonlar**; her sey Zeus'tan kurulur, **karari oyuncu verir**; komutan zekasi en sona (belki hic). Drone/IHA en sona.
+> A0 kodu (v8.237) depoda kalir, `lambs_danger_cepheAktif` varsayilan KAPALI oldugu icin hicbir etkisi yok. Yeniden kullanilabilecek parca: faction paneli + takviye dalgasi (operasyon olayi olarak). Yeni plan: `OPERASYON_SENARYO_PLANI.md`.
+
 # CEPHE SİMÜLASYONU — "Genelkurmay / Cephe Komutanı" Tasarım Özeti (v8.236 sonrası, yeni sohbet için devir)
 
 Yazıldığı tarih: 2026-10-14. Kaynak: kullanıcı isteği (bu sohbetin son mesajları) + `DEVIR_LOGU_v7.0.txt`.
