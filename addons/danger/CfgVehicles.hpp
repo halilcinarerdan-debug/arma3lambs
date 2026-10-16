@@ -236,6 +236,25 @@ class CfgVehicles {
         };
     };
 
+    // ELITE fork (v8.239): AI surucu A/B testi - ayni arac sinifi, temiz murettebat, ELITE kapali / acik, doMove / waypoint, yolcusuz / yolcuyla
+    class GVAR(SurusAB) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(SurusAB);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Arac SURUS A/B Testi (AI surucu tani)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleSurusAB);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     class GVAR(GozetleAta) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(GozetleAta);

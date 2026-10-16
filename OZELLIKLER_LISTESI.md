@@ -139,6 +139,11 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Tanı**: `[SURME-TANI-*]` (AI özellikleri, hasar, grup, çevre, sürücü çıkışı), `[SURME-DENEY]` (varsayılan KAPALI; açmak için `surmeDeneyOff = false`), `[TASIMA-KIN]`, `[TASIMA-FIZIK]`. Sunucu donması ayıklama anahtarları (v8.207).
 - **Bilinen açık sorun**: RHS Stryker/M113 AI sürücüsü duran araçta "MOVE" tutup sürmüyor (hedef `DoNotPlan`); nedeni bilinmiyor, kinematik sürüş geçici çözüm.
 
+## 10f. v8.238 – v8.239 (T = doğrulanmadı)
+- **Hendek önceliği (v8.238, T)**: topçu altında hendek alanı varsa 22 sn erken uyarı + 60 m erişim, hendekteyse kalır; hendek bilinci topçu altındaki grubu temassız da hendeğe sokar (`hendekOncelikOff`).
+- **Çoklu mevzi (v8.239, T)**: Zeus Plan Noktası → "MEVZI ekle" (birden çok); SAVUN planı gruplara halka yerine bu mevzileri dağıtır (tehdit yönüne yakın önce; hendek 40 m içindeyse hendeğe). `[PLAN-MEVZI]`.
+- **Araç sürüş A/B testi (v8.239, T)**: Zeus "ELITE Arac SURUS A/B Testi" — AI sürücü kök neden tanısı (ELITE kapalı/açık, doMove/waypoint, yolcu, otomatik bisect). `[SURUS-AB-*]`.
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.

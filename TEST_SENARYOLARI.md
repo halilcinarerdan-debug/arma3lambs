@@ -153,3 +153,14 @@ RPT yardimcisi: `python tools/rpt_ozet.py --cephe <sunucu.rpt>`. Zaman cizelgesi
 9. **Saglik/yara tasima**: bir fiziksel askeri yarala (ACE), sanalla, tekrar fizikselle: yaralanma/tibbi durum korunmali (ACE yoksa hitpoint). Loadout (silah/mermi) ayni kalmali.
 10. **Kapatma**: CBA > Aktif kapat: `[CEPHE-OZET]` durur, hicbir profil silinmez; Zeus elle yerlestirilmis birimler hic etkilenmez.
 Basari olcutu: gecis nedenleri mantikli (`--cephe`), 120 sn icinde sanal->fiziksel salinim 0, tavan asilmiyor (temasli haric), RPT'de `Error` / `[WATCHDOG-YENIDEN] cephe` yok. Hepsi (T) = dogrulanmadi.
+
+## T-MEVZI (v8.239): coklu mevzi ile SAVUN
+1. Zeus: ELITE Plan Noktasi (manuel) -> taraf, tip "MEVZI ekle", "Mevzi yonu = modul yonu" isaretli; modulu 150-400 m cevreye 3 farkli yere birak (her birinde modulu dusmana dogru dondur). Haritada ucgen "MEVZI 1..3".
+2. Objektif -> SAVUN (en az 3 grup, objektif 3 mevzinin ortasi, tehdit yonu verilirse tehdit yonune en yakin mevzi once dolar). Beklenen log: `[PLAN-MEVZI] ... 3 manuel mevzi plana alindi`, her grup icin `[PLAN-MEVZI] ... -> mevzi N (grid, sira, yon, hendek)`; gruplar 3 ayri mevziye gider, 4. grup varsa 1. mevzide 18 m yaninda.
+3. Bir mevzinin 40 m icine elite_hendek alani koy: o mevzideki grup hendege girer ([HENDEK-YERLES]).
+4. "MEVZI sil (en yakin)" ve "hepsini sil" sonrasi yeni SAVUN eski halka sektoruyle kurulmali (`[PLAN-MEVZI]` satiri gelmez).
+
+## T-SURUS-AB (v8.239): AI surucu A/B testi
+Ortam: acik, DUZ arazi, sunucu + RHS. Zeus > "ELITE Arac SURUS A/B Testi" > sinif 1 = bir RHS tekerlekli APC (Stryker / BTR), sinif 2 = bir paletli (M113 / BMP), "ELITE acik" + "yolcu" isaretli, sure 15, bisect KAPALI ilk kosuda.
+Beklenen: ~25 sn sonra Zeus sohbetinde `[SURUS-AB-OZET]` satirlari (sinif basina A B C D E : G/X + yorum); tum satirlar sunucu RPT'sinde `[SURUS-AB]`. Satirlari `[SURUS-AB]` etiketiyle arayin.
+Sonuca gore: ELITE acikken gitmiyorsa ikinci kosuda "Otomatik bisect" isaretli tekrar edin ([SURUS-AB-BISECT] suclu aday). Hepsi gidiyorsa sorun Zeus'ta yerel yaratma / sunucu devri / plan kosulundadir (bir sonraki adim: o kosulu test).

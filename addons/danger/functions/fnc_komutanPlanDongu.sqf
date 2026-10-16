@@ -659,13 +659,49 @@ while {true} do {
                     private _sirali = (_digerG select [0, floor ((count _digerG) / 2)]) + _destekG + (_digerG select [floor ((count _digerG) / 2), count _digerG]);
                     private _hendekL = ["LISTE"] call FUNC(hendekAlani);
                     private _hendekKul = createHashMap;
+                    // v8.239 COKLU MEVZI: elle konan mevzi noktalari varsa gruplar halka sektoru yerine MEVZILERE dagitilir (once tehdit yonune en yakin mevzi; her mevziye en yakin grup; mevzi sayisi asilirsa turlar halinde ikinci / ucuncu grup yan yana)
+                    private _mevziler = _plan getOrDefault ["mevziler", []];
+                    private _mevziAta = createHashMap;
+                    if (_mevziler isNotEqualTo []) then {
+                        private _mKul = _mevziler apply {0};
+                        private _mOnc = [_mevziler apply {_forEachIndex}, [], {
+                            if (_th >= 0) then { abs ((((_obj getDir ((_mevziler select _x) select 0)) - _th + 540) mod 360) - 180) } else { _x }
+                        }, "ASCEND"] call BIS_fnc_sortBy;
+                        private _kalanG = +_sirali;
+                        while {_kalanG isNotEqualTo []} do {
+                            {
+                                if (_kalanG isEqualTo []) exitWith {};
+                                private _mi = _x;
+                                private _mp = (_mevziler select _mi) select 0;
+                                private _en = _kalanG select 0;
+                                private _enD = 1e9;
+                                { private _dd = (leader _x) distance2D _mp; if (_dd < _enD) then { _enD = _dd; _en = _x; }; } forEach _kalanG;
+                                _mevziAta set [groupId _en, [_mi, _mKul select _mi]];
+                                _mKul set [_mi, (_mKul select _mi) + 1];
+                                _kalanG deleteAt (_kalanG find _en);
+                            } forEach _mOnc;
+                        };
+                    };
                     {
                         private _g = _x;
                         private _a = if (_th >= 0) then { _th + (if (_n <= 1) then {0} else {-110 + 220 * (_forEachIndex / (_n - 1))}) } else { _B + (360 / _n) * _forEachIndex };
                         private _poz = [_obj getPos [55, _a]] call _siperNokta;   // v8.181: sektor noktasi 40 m icinde siper yogunlugu en yuksek, kuru, cukur olmayan nokta
+                        private _ma = _mevziAta getOrDefault [groupId _g, []];
+                        private _mHdk = -1;
+                        if (_ma isNotEqualTo []) then {
+                            private _mv = _mevziler select (_ma select 0);
+                            private _mp = _mv select 0;
+                            _a = if ((_mv select 1) >= 0) then { _mv select 1 } else { _obj getDir _mp };   // yon verilmediyse objektiften DISARI
+                            private _s = _ma select 1;
+                            _poz = if (_s > 0) then { _mp getPos [18 * ceil (_s / 2), _a + 90 + 180 * (_s mod 2)] } else { +_mp };   // ayni mevzide 2. / 3. grup yan yana (18 m)
+                            private _hn = ["EN-YAKIN", _poz, 40, side _g] call FUNC(hendekAlani);
+                            if (_hn isNotEqualTo []) then { _mHdk = _hn select 1; _poz = _hn select 0; };
+                            diag_log format ["[PLAN-MEVZI] %1 | %2 -> mevzi %3 (%4, sira %5, yon %6, hendek %7)", _id, groupId _g, (_ma select 0) + 1, mapGridPosition _mp, _s, round _a, _mHdk];
+                        };
                         // v8.230 HENDEK TERCIHI: objektife <= 300 m olan hendek alanlari arasindan EN AZ kullanilan + sektor noktasina en yakin secilir (gruplar farkli hendeklere dagilir); formasyon aranmaz
-                        private _hdkI = -1;
+                        private _hdkI = _mHdk;
                         private _enSk = 1e9;
+                        if (_ma isNotEqualTo []) then { _enSk = -1; };
                         {
                             _x params ["_hc", "_ha", "_hb", "_hd", "_hadi", "_htr"];
                             if ((_htr isEqualTo sideUnknown || {_htr isEqualTo (_plan get "taraf")}) && {(_hc distance2D _obj) <= 300}) then {
@@ -673,7 +709,7 @@ while {true} do {
                                 if (_sk < _enSk) then { _enSk = _sk; _hdkI = _forEachIndex; };
                             };
                         } forEach _hendekL;
-                        if (_hdkI >= 0) then {
+                        if (_hdkI >= 0 && {_ma isEqualTo []}) then {
                             _poz = (_hendekL select _hdkI) select 0;
                             _hendekKul set [_hdkI, (_hendekKul getOrDefault [_hdkI, 0]) + 1];
                             diag_log format ["[PLAN] %1 SAVUN: %2 hendek alanina yerlesecek (alan %3, objektife %4 m, ayni alanda %5 grup)", _id, groupId _g, _hdkI, round (_poz distance2D _obj), _hendekKul get _hdkI];

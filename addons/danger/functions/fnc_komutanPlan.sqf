@@ -556,13 +556,23 @@ if (_reconG isNotEqualTo []) then {
     diag_log format ["[PLAN-RECON] %1 | recon %2 grup: %3 | gozlem noktasi OP %4 (objektiften %5 m)", _id, count _reconG, _reconG apply {groupId _x}, mapGridPosition _op, round (_op distance2D _obj)];
     { _x setVariable ["lambs_danger_planAktif", true, true]; } forEach _reconG;
 };
+// v8.239 COKLU MEVZI: SAVUN planinda objektife <= lambs_danger_savunmaMevziYaricap (700 m) olan elle mevzi noktalari plana alinir (mevzi kayitlari plan bitince SILINMEZ; Zeus 'Plan Noktasi > MEVZI sil' ile silinir)
+private _mevziler = [];
+if (_tip isEqualTo 1) then {
+    private _mTum = (missionNamespace getVariable ["lambs_danger_savunmaMevzi", createHashMap]) getOrDefault [str _taraf, []];
+    private _mYar = missionNamespace getVariable ["lambs_danger_savunmaMevziYaricap", 700];
+    _mevziler = _mTum select {((_x select 0) distance2D _obj) <= _mYar};
+    if (_mTum isNotEqualTo []) then {
+        diag_log format ["[PLAN-MEVZI] %1 | %2 manuel mevzi plana alindi (objektife <= %3 m; bu tarafta toplam %4 kayit)", _id, count _mevziler, _mYar, count _mTum];
+    };
+};
 private _plan = createHashMapFromArray [
     ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["hqId", _hqId], ["hqPoz", if (_hqKayit isEqualTo []) then {[]} else {+(_hqKayit select 2)}], ["hqYar", if (_hqKayit isEqualTo []) then {100} else {_hqKayit select 4}], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
     ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700] select ((_ayar getOrDefault ["sure", 0]) min 4)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]], ["topcuBasit", _ayar getOrDefault ["topcuBasit", 0]],
-    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["reconEkNoktalar", _reconEkN], ["reconEkSonuc", []], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
+    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["reconEkNoktalar", _reconEkN], ["reconEkSonuc", []], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["mevziler", _mevziler], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {
     _x setVariable ["lambs_danger_planAktif", true, true];

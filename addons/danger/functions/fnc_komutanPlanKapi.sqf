@@ -64,6 +64,41 @@ lambs_danger_planKapiStarted = true;
     diag_log format ["[PLAN-MANUEL] %1 | %2 | %3", _taraf, _ad, ["SILINDI", format ["konuldu: %1 (sonraki Objektif planinda kullanilir)", mapGridPosition _poz]] select (_poz isNotEqualTo [])];
 }] call CBA_fnc_addEventHandler;
 
+// v8.239 COKLU MEVZI: SAVUN plani icin elle konan savunma mevzileri (taraf basina birden cok); plan kurulurken objektife <= 700 m olanlar plana girer ve gruplar mevzilere dagitilir
+["lambs_danger_savunmaMevziIstegi", {
+    params ["_taraf", "_islem", "_poz", "_yon"];
+    if (!isServer) exitWith {};
+    if (isNil "lambs_danger_savunmaMevzi") then { lambs_danger_savunmaMevzi = createHashMap; };
+    if (isNil "lambs_danger_savunmaMevziSay") then { lambs_danger_savunmaMevziSay = 0; };
+    private _k = str _taraf;
+    private _liste = lambs_danger_savunmaMevzi getOrDefault [_k, []];
+    switch (_islem) do {
+        case "EKLE": {
+            lambs_danger_savunmaMevziSay = lambs_danger_savunmaMevziSay + 1;
+            private _mn = format ["ELITE_MEVZI_%1_%2", _k, lambs_danger_savunmaMevziSay];
+            createMarker [_mn, _poz];
+            _mn setMarkerType "mil_triangle";
+            _mn setMarkerColor (switch (_taraf) do { case west: {"ColorBLUFOR"}; case east: {"ColorOPFOR"}; default {"ColorIndependent"} });
+            _mn setMarkerText format ["MEVZI %1", count _liste + 1];
+            if (_yon >= 0) then { _mn setMarkerDir _yon; };
+            _liste pushBack [+_poz, _yon, _mn];
+        };
+        case "SIL-YAKIN": {
+            private _i = -1;
+            private _en = 150;
+            { private _d = (_x select 0) distance2D _poz; if (_d < _en) then { _en = _d; _i = _forEachIndex; }; } forEach _liste;
+            if (_i >= 0) then { deleteMarker ((_liste select _i) select 2); _liste deleteAt _i; };
+        };
+        case "SIL-HEPSI": {
+            { deleteMarker (_x select 2); } forEach _liste;
+            _liste = [];
+        };
+        default {};
+    };
+    lambs_danger_savunmaMevzi set [_k, _liste];
+    diag_log format ["[PLAN-MEVZI] %1 | %2 | %3 | yon %4 | bu taraf icin kayitli mevzi: %5", _taraf, _islem, mapGridPosition _poz, _yon, count _liste];
+}] call CBA_fnc_addEventHandler;
+
 // v8.127: Zeus 'ELITE Gorev Ata' -> sunucu degiskeni yazar (grup + varsa arac)
 ["lambs_danger_gorevAta", {
     params ["_hedef", "_kod"];
