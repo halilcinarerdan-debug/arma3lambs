@@ -21,7 +21,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Bounding Overwatch** (USMC tarzı): 3 ateş timi (Fire Support / Maneuver / Reserve), dönüşümlü sıçrama, mesafeye göre sıçrama boyu.
 - **Kademeli geri çekilme** (Retreat / Peel): iki takım, dönüşümlü sıçramalar, baskı altında önce siper; çekilme sonrası **toparlanma**
   (consolidate & reorganize). Çekilme bilerek acımasızdır (kolay başarılmaz).
-- **Temas kesme**, **son direniş** (kale savunması), **sinsi geri çekilme (T)** (`sinsiGeri`): düşman ezici üstünse ve grup henüz ateş altında değilse
+- **Temas kesme**, **son direniş** (kale savunması), **sinsi geri çekilme** (kullanıcı: çalışıyor görünüyor, loglarla izlenecek) (`sinsiGeri`): düşman ezici üstünse ve grup henüz ateş altında değilse
   ateşi kes, öndekileri (lider dahil) gizli noktaya çek, bekle.
 - **Pusu davranışı + ateş emri (ROE)**, **hücum öncesi bastırma penceresi**, **kanat ateş kaydırma**.
 - **Zırhtan kaçış**, **AT zırha taarruz + AT escort**, **AT atışı** (`atFire`).
@@ -50,7 +50,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Taktik sis**: düşmanın üstüne değil, geçiş / bastırma için doğru yere.
 - **Atış güvenliği** (RPG / UGL öncesi dost ateşi, geri patlama).
 - **El bombası farkındalığı**: atılınca iniş noktası tahmini, 0.2 sn tarama, yaklaşan bombadan uzaklaşma.
-- **Baygına patlayıcı yasağı (T)**: baygın hedefe el bombası / roket / 40 mm / pompalı iptal; hedef yoksa iniş noktasına göre karar.
+- **Baygına patlayıcı yasağı** (kullanıcı doğruladı): baygın hedefe el bombası / roket / 40 mm / pompalı iptal; hedef yoksa iniş noktasına göre karar.
 - **RPG tepkisi**, **roket / duman izleme** (`tehditIzle`, `tehditOlay`): atıcıyı açığa çıkarır, araç mürettebatı da tepki verir.
 - **Ateş merkezi** (`firedHub`): tüm "Fired" olayları tek yerden.
 - **Hava farkındalığı**: dron + helikopter, ateş disiplini + toplu ateş.
@@ -85,7 +85,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Kara aracı nakli + taksi** (T) (`aracTasima`, `taksi`): APC / IFV / kamyon grubu alma noktasından alır, hedefin ≥ 500 m öncesinde (M16 menzili + pay) indirir, geri döner. Plan TASIMA fazı + genel "taksi" (aktif waypoint > 1200 m, araç ≤ 600 m). Zeus "Görev Ata → TASIMA".
 
 ## 10. Lojistik
-- **Cephane + el bombası paslama (T)** (`cephanePaylas`): eşler arası önce; vericinin yere bırakıp alıcının alması; sınıflar mermi simülasyonundan bulunur (RHS).
+- **Cephane + el bombası paslama** (şarjör paslama çalışıyor — kullanıcı; el bombası tarafı henüz görülmedi) (`cephanePaylas`): eşler arası önce; vericinin yere bırakıp alıcının alması; sınıflar mermi simülasyonundan bulunur (RHS).
 
 ## 10b. Komutan planı ve Zeus modülleri (v8.113+)
 - **ELITE Objektif** (Zeus, 3 küçük panel): görev tipi (ele geçir / savun / iptal / onay ver), tempo (dengeli / sessiz-gizli / hızlı), H-saati + Zeus onayı, süre sınırı, tehdit yönü, düşman bilgisi (piyade / zırh / AT / MG / nişancı / bina), kısıtlar (siviller, ağır silah yasağı), topçu / havan (RED + danger close), rally / ORP mesafesi, **Baskın (vur-çek)**.
@@ -94,12 +94,12 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **ELITE Plan Noktası** (manuel RP / ORP / SBF / kanat / CCP, tarihsel canlandırma; komutan hatalı olsa da uygular, `[PLAN-UYARI]`).
 - **ELITE Görev Ata**: grup / araca MANEVRA / DESTEK / YEDEK / HARİÇ / MEDEVAC / TOPÇU / TOPÇU_YOK / TASIMA ata; atananlar plana grup sayısı sınırına bakılmadan girer.
 - **ELITE Karakol / HQ** (haritadan): karakol / mevzi / HQ / gözetleme noktası; savunma planı hemen / alarm (düşman 800 m içinde gerçekten bilinince).
-- **ELITE Karakol Garnizon** (T): nöbetçiler (üst kat + yüksek arazi pozisyonları, görüş skoru), devriye alt grupları (alarmda çevre savunması), araçlar çevre mevzisinde; tekrar tekrar düzenlenebilir, yeni birimler havuza girer.
+- **ELITE Karakol Garnizon** (kullanıcı doğruladı): nöbetçiler (üst kat + yüksek arazi pozisyonları, görüş skoru), devriye alt grupları (alarmda çevre savunması), araçlar çevre mevzisinde; tekrar tekrar düzenlenebilir, yeni birimler havuza girer.
 - **Sunucu devri** (`grupSunucuDevir`): istemcide kalan AI grupları sunucuya devredilir (Zeus PC yükü); plan da uzak grupları devralır.
 - **MP**: Zeus modülleri CBA sunucu olayı gönderir (plan sunucuda kurulur), sonuç `[PLAN-YANIT]` ve Zeus sohbetinde.
 
 ## 10c. v8.131 – v8.168 eklemeleri
-- **Keşif unsuru (RECON)** (T): Gorev Ata → RECON grubu gözlem noktasına (OP) STEALTH + GREEN sızar, ateş gelene kadar ateş etmez, plana rapor verir (gözlenen düşman / sivil sayısı).
+- **Keşif unsuru (RECON)** (yaya gözlemi çalışıyor — kullanıcı): Gorev Ata → RECON grubu gözlem noktasına (OP) STEALTH + GREEN sızar, ateş gelene kadar ateş etmez, plana rapor verir (gözlenen düşman / sivil sayısı).
 - **İstihbarat / PID** (T): "iddia ≠ gerçek" (Irak 2003 örneği). Bilgi güvenilirliği (yetersiz / orta / kesin) + doğrulama disiplini (tam keşif / son doğrulama / yok); topçu yalnız rapor + sivil yoksa atar; sivil gözlenirse atış iptal; atış sonrası sivil / dost zararı `[PLAN-ZARAR]`.
 - **Plan nakli** (T): kara aracı (APC / kamyon) plan toplanmasında erken başlar, takım bazlı bölme, sığmayanlar için sefer (en çok 3), medevac varsa 1 araç rezerv, iniş doktrin mesafesinde (RUS 300 m, diğer 500 m), yol üstü inişe sürme.
 - **Nakil dayanıklılığı**: dinamik alma noktası, pusu (uzak: geç, yakın: in), takılma tanısı + kurtarma (motor zorlaması, sürücü yeniden oturtma, ara nokta), mürettebat toplama / tamamlama, yolcu bekçisi (hareketli araçtan inme emrini iptal), zırh grubu kalma (RUS).
@@ -107,7 +107,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Mürettebat koruma** (T): sürücü / komutan / nişancı araçtan inme emrini iptal eder, dışarıda kalan geri döner; yanan araçta ve temasta devre dışı.
 - **Rus doktrini** (ATP 7-100.1 + nizamname Bölüm 3): keşif atışı hızlı, topçu x2, 300 m iniş, zırh grubu; GM Doğu Almanya (`gm_fc_gc`) RUS, Batı Almanya / Danimarka ABD. NATO / RUS müfreze-manga notları `kaynaklar_doktrin/`.
 - **Oyuncu komutası** (T): oyunculu gruplar ya da Gorev Ata "OYUNCU KOMUTASI" → ELITE taktik katmanı kapalı; TCCC / cephane / IED / ezme / mürettebat açık. "ELITE TAM AÇIK" ile ezilir.
-- **Objektif paneli 4 / 4 + elle squad seçimi** (T): "Grup seçimi: Elle" → squad listesi (en çok 16), yalnız seçilenler plana girer.
+- **Objektif paneli 4 / 4 + elle squad seçimi** (kullanıcı doğruladı): "Grup seçimi: Elle" → squad listesi (en çok 16), yalnız seçilenler plana girer.
 - **Komutan zihni + tavır motoru** (T): karşı taraf hakkında yalnız algılananlardan (ateş, duman, topçu, görüş, temas, kayıp) gözlem defteri; alışkanlık hipotezleri (yön, menzil, duman, arazi, karşılık, zırh, topçu); kişilik (temkinli / dengeli / saldırgan) + doktrin ile tavır puanlama (loglu); şimdilik etki: beklenen yöne gözetleme. Oturum hafızası, SQL yok.
 - **Araç sınıfı + roller** (T, v8.163-164): `aracSinif` TANK / IFV / APC / KAMYON; APC = savaş taksisi (indirir, geride rezerv), IFV indirdikten sonra zırh ateş desteğine katılır (`planZirh`: ateş pozisyonu 380-680 m, tasarım tahmini), tank elle seçimle zırh desteği olur. Elle seçim listesinde TANK / IFV / APC / KAMYON etiketleri.
 - **Nakil iyileştirmeleri** (T, v8.163-168): öğrenilen gerçek koltuk kapasitesi, erken sefer, en boş araca dengeli dağıtım (hiçbir araç boş kalmaz), eşleşen piyade araç gelene kadar BEKLER, piyade 120 m içindeyse araç gitmez piyade biner, alma yolunda takılma kurtarma, araç gelemezse piyade araca yürür, araç grubu sunucuya devri (sürücü yerel değilse hareket etmiyordu), devir bekleme 15 sn.
@@ -131,8 +131,8 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
   - Tank: hull-down puanlaması + hasar sonrası yedek mevzi (ATP 3-20.15), savunmada hedef seçimi, SAFE/FULL yol yürüyüşü, `planZirhMax`.
 - **Gelen topçu tepkisi (v8.228)**: topçu/havan mermisi izlenir, düşme noktası ~7 sn önce tahmin edilir, piyade uzaklaşıp yere yatar, patlamadan 7 sn sonra kalkar (`[TOP-GELEN]`, `topSiperOff`). Hendek alanı varsa (v8.229) oraya koşup yatar.
 - **Hendek alanı (v8.229)**: elle konan dikdörtgen işaret (`elite_hendek*`, Trench Generator'dan bağımsız) — SAVUN planında grup hendek ekseni boyunca dağılıp çömelir (`[HENDEK-YERLES]`), gelen topçuda sığınak olur. Yol bulma/rampa gereksinimi doğrulanmadı.
-- **Hendek bilinci (v8.230)**: plan dışı gruplar temas + baskı/yakın düşman altında ≤ 70 m'deki hendek alanına formasyonsuz girer, temas bitince 45 sn sonra çıkar (`[HENDEK-BILINC]`, `hendekBilincOff`). SAVUN hendekleri gruplar arasında dağıtır. Gelen topçu tespiti Zeus topçu modüllerini de kapsar (ShellBase taraması).
-- **Ağaçlık gizlenme + İHA gözlemi (v8.232)**: duran AWARE/SAFE gruplar açıktaysa 150 m içinde ağaç ortülü noktaya geçer (`[AGAC-GIZLEN]`); AI mürettebatlı keşif İHA'ları gördükleri düşmanı ortak resme verir (`[IHA-GOZLEM]`, topçu doğrulaması dahil). FPV/kamikaze: v8.233.
+- **Hendek bilinci (v8.230; v8.238: öncelik artırıldı — topçu altında temassız da hendeğe girer, 22 sn erken uyarı, hendekteyse kalır; kapatma `hendekOncelikOff`)**: plan dışı gruplar temas + baskı/yakın düşman altında ≤ 70 m'deki hendek alanına formasyonsuz girer, temas bitince 45 sn sonra çıkar (`[HENDEK-BILINC]`, `hendekBilincOff`). SAVUN hendekleri gruplar arasında dağıtır. Gelen topçu tespiti Zeus topçu modüllerini de kapsar (ShellBase taraması).
+- **Ağaçlık gizlenme + İHA gözlemi (v8.232)**: duran AWARE/SAFE gruplar açıktaysa 150 m içinde ağaç ortülü noktaya geçer (`[AGAC-GIZLEN]`, kullanıcı doğruladı); AI mürettebatlı keşif İHA'ları gördükleri düşmanı ortak resme verir (`[IHA-GOZLEM]`, topçu doğrulaması dahil). FPV/kamikaze: v8.233.
 - **İHA görevi (v8.233)**: Zeus "ELITE IHA Görevi" — FPV-AT/AP kamikaze (hedef bilinen zırhlı/personel kümesi, dalış ve patlama), BOMBA (Mavic: 3 el bombası), GÖZLEM devriyesi; `[IHA-ENVANTER]` mod sınıflarını loglar, tür adla tahmin edilir (elle düzeltilebilir). Mod davranışı doğrulanmadı.
 - **Karakol / gözetleme**: Zeus modülü "ELITE Gözetleme Ata": squad (tank dahil) seçilen karakol/mevzi/gözetleme noktasında nöbet tutar (`[GOZETLE]`, `[GOZETLE-ARAC]`). Karakol devriye noktaları sudan kaçınır.
 - **Sağlık/diğer**: TCCC malzeme toplama (`[TCCC-ESYA]`), buddy bağı garnizon gruplarını atlar, EZME yol açma (`[EZME-YOL-AC]`).

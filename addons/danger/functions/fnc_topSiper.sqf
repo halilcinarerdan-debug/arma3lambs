@@ -9,6 +9,9 @@
  *   Ayni birim icin ard arda mermi gelirse yatma suresi UZAR (tek betik). Aracta olanlar, oyuncular, bayilanlar, tedavi animasyonundakiler hariç.
  * Kaynak ilkesi (TC 3-21.76 / ATP 3-21.8 genel: dolayli atesten anindan yere yat / siper al; kitapta SAYISAL esik YOK) — TASARIM DEGERLERI: 7 sn uyari, tehlike yaricapi = 3 x indirectHitRange (35-120 m), 18 m kacis, 7 sn yatik.
  * Tahmin basit balistik (hava direnci yok) — gercek dusme birkac on metre sapabilir; yaricap payi bunu karsilar.
+ * v8.238 HENDEK ONCELIGI (kullanici: "hendek bilinci yarim, topcu gelince oraya cekilmiyorlar ama hendek kullaniyorlar, daha cok hendege oncelik verebilirler"): hendek alani varsa uyari 7 -> 22 sn
+ *   once yayinlanir; erisim 20 -> en cok 60 m ((sure - 1.5) x 3.5); dusme noktasi mesafesi 8 -> 5 m; ZATEN HENDEKTEYSE (<= 2.5 m) hendekten cikip kacmaz, yatar; hendekte barajdan 5 sn sonra kalkar ve formasyona kosmaz;
+ *   grup 'topUyariT' isaretlenir (fnc_hendekBilinc topcu altindaki grubu temassiz da hendege sokar). Hendek yoksa davranis eskisi gibi (son 7 sn). Geri alma: lambs_danger_hendekOncelikOff = true.
  * Kapatma: lambs_danger_topSiperOff = true.  Log: [TOP-GELEN] (ilk 40, sonra 10'da bir).
  *
  * Arguments: None (acilista bir kez)
@@ -30,6 +33,7 @@ lambs_danger_topIzle = {
     private _R = ((_hr * 3) max 35) min 120;
     private _t0 = time;
     private _duyuru = false;
+    private _ufuk = if ((["LISTE"] call FUNC(hendekAlani)) isEqualTo [] || {missionNamespace getVariable ["lambs_danger_hendekOncelikOff", false]}) then {7} else {22};
     while {!isNull _p && {!_duyuru} && {(time - _t0) < 120}} do {
         private _pos = getPosASL _p;
         private _vel = velocity _p;
@@ -37,7 +41,8 @@ lambs_danger_topIzle = {
             private _h = ((ASLToATL _pos) select 2) max 0;
             private _vz = -(_vel select 2);
             private _t = ((-_vz) + sqrt (_vz * _vz + 19.62 * _h)) / 9.81;
-            if (_t <= 7 && {_h >= 40}) then {
+            // v8.238: hendek alani varsa uyari 22 sn once (hendege kosmak icin sure), yoksa eski 7 sn
+            if (_t <= _ufuk && {_h >= 40}) then {
                 _duyuru = true;
                 private _ip = [(_pos select 0) + (_vel select 0) * _t, (_pos select 1) + (_vel select 1) * _t, 0];
                 ["lambs_danger_topGelen", [_ip, _t, _R, _a]] call CBA_fnc_globalEvent;
@@ -76,38 +81,73 @@ lambs_danger_topIzle = {
         [_x, _ip, _eta, _R] spawn {
             params ["_u", "_ip", "_eta", "_R"];
             private _bit = time + _eta + 7;
+            private _tImp = time + _eta;
+            // v8.238 HENDEK ONCELIGI: erisilebilir hendek (sure x 3.5 m/sn, en cok 60 m) varsa oraya; zaten hendekteyse (<= 2.5 m) KALIR (hendekten cikip kacmak yok); dusme noktasi hendek noktasina >= 5 m
+            private _hn = [];
+            private _icinde = false;
+            if (!(missionNamespace getVariable ["lambs_danger_hendekOncelikOff", false]) || {_eta <= 7}) then {
+                _hn = ["EN-YAKIN", getPosATL _u, ((_eta - 1.5) * 3.5) min 60, side (group _u)] call FUNC(hendekAlani);
+                if (_hn isNotEqualTo []) then {
+                    _icinde = (_hn select 2) <= 2.5;
+                    if (!_icinde && {((_hn select 0) distance2D _ip) < 5}) then { _hn = []; };
+                };
+            };
+            if (_hn isNotEqualTo []) then { _bit = _bit + 5; };   // hendekte barajin bitmesini biraz daha bekle
             _u setVariable [QGVAR(topBitis), _bit max (_u getVariable [QGVAR(topBitis), 0])];
+            (group _u) setVariable [QGVAR(topUyariT), (time + _eta + 60) max ((group _u) getVariable [QGVAR(topUyariT), 0])];   // hendekBilinc: topcu altindaki grup hendege girer
             if (_u getVariable [QGVAR(topAktif), false]) exitWith {};   // betik zaten calisiyor; bitis uzatildi
             _u setVariable [QGVAR(topAktif), true];
+            if (_hn isEqualTo [] && {_eta > 7}) then {
+                // hendek yok / erisilemiyor: klasik tepki (uzaklas + yat) son 7 sn'de baslar
+                sleep (_eta - 7);
+                _eta = 7;
+            };
             private _d = _u distance2D _ip;
-            if (_eta >= 2.5 && {_d < _R}) then {
-                private _kos = (((_R - _d) + 6) min (_eta * 3.5) min 18) max 4;
-                private _hdf = (getPosATL _u) getPos [_kos, _ip getDir _u];
-                if (surfaceIsWater _hdf) then { _hdf = (getPosATL _u) getPos [_kos, (_ip getDir _u) + 70]; };
-                // v8.229 HENDEK: elle konmus hendek alani (isaret "elite_hendek*") erisilebilir mesafedeyse (sure x 3.5 m/sn, en cok 40 m) ve dusme noktasindan >= 8 m uzaktaysa SIGINAK olarak orasi secilir
-                private _hn = ["EN-YAKIN", getPosATL _u, ((_eta - 1.2) * 3.5) min 40, side (group _u)] call FUNC(hendekAlani);
-                if (_hn isNotEqualTo [] && {((_hn select 0) distance2D _ip) >= 8}) then {
-                    _hdf = (_hn select 0) getPos [random 1.2, random 360];
-                    _u setVariable [QGVAR(topHendek), true];
-                };
-                if (!surfaceIsWater _hdf) then {
+            if (_hn isNotEqualTo []) then {
+                _u setVariable [QGVAR(topHendek), true];
+                if (!_icinde) then {
+                    private _hdf = (_hn select 0) getPos [random 1.2, random 360];
                     _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1;
                     _u setUnitPos "UP"; _u setSpeedMode "FULL";
                     _u doMove _hdf;
                     private _bitisKos = time + (_eta - 1.2);
                     waitUntil { sleep 0.2; time > _bitisKos || {!alive _u} || {(_u distance2D _hdf) < 2} };
                 };
+            } else {
+                if (_eta >= 2.5 && {_d < _R}) then {
+                    private _kos = (((_R - _d) + 6) min (_eta * 3.5) min 18) max 4;
+                    private _hdf = (getPosATL _u) getPos [_kos, _ip getDir _u];
+                    if (surfaceIsWater _hdf) then { _hdf = (getPosATL _u) getPos [_kos, (_ip getDir _u) + 70]; };
+                    if (!surfaceIsWater _hdf) then {
+                        _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1;
+                        _u setUnitPos "UP"; _u setSpeedMode "FULL";
+                        _u doMove _hdf;
+                        private _bitisKos = time + (_eta - 1.2);
+                        waitUntil { sleep 0.2; time > _bitisKos || {!alive _u} || {(_u distance2D _hdf) < 2} };
+                    };
+                };
+            };
+            if (_hn isNotEqualTo []) then {
+                // hendekte: patlamaya ~4 sn kala yatar (22 sn erken geldiyse boyunca comelir)
+                _u setUnitPos "MIDDLE";
+                waitUntil { sleep 0.3; !alive _u || {time > (_tImp - 4)} };
             };
             while {alive _u && {time < (_u getVariable [QGVAR(topBitis), 0])}} do {
                 _u setUnitPos "DOWN";
                 doStop _u;
                 sleep 0.5;
             };
-            if (alive _u) then { _u setUnitPos "AUTO"; _u doFollow (leader (group _u)); };
+            private _hendekteydi = _u getVariable [QGVAR(topHendek), false];
+            _u setVariable [QGVAR(topHendek), nil];
+            if (alive _u) then {
+                _u setUnitPos "AUTO";
+                // hendekteki birim formasyona geri kosmaz: hendek bilinci / SAVUN gruplari kendi cikis kurallariyla serbest birakir
+                if (!_hendekteydi) then { _u doFollow (leader (group _u)); };
+            };
             _u setVariable [QGVAR(topAktif), nil];
         };
     } forEach _aday;
 }] call CBA_fnc_addEventHandler;
 
-diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228; v8.229 hendek alani): 7 sn uyari, uzaklas / hendege + yat, 7 sn yatik";
+diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228; v8.229 hendek alani; v8.238 hendek onceligi: 22 sn erken uyari, hendekteyse kal): 7 sn uyari, uzaklas / hendege + yat, 7 sn yatik";
 true
