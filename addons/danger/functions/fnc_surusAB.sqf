@@ -18,6 +18,8 @@
  *   set 2 YOLCU AYRISTIRMA: C kontrol, N 4 yolcu, O 8 yolcu ELITE kapali, P 8 yolcu ayni grupta, Q 8 yolcu orderGetIn (gercek nakil yolu), R 1 yolcu,
  *     T 8 yolcu + turret (FFV) koltugundaki yolculari cargo koltuguna alir (RELOKE), U 8 yolcu + turret yolcularini murettebat grubuna katar (JOIN) = KOK NEDEN DUZELTME ADAYLARI (etkin komutan yolcu grubundan oluyordu).
  *   Her sette [SURUS-AB-OZET] sonunda BELIRTEC CIKARIMI: gitmeyen varyantlarin ORTAK belirteci - calisanlarda olmayan (otomatik suclu aday).
+ *   set 3 KOLTUK / KOMUTAN AYRISTIRMA (v8.239e): yolcu SAYISI degil KOLTUK mu (K1 / K2: yolcu yalniz duz cargo koltugunda, FFV bos), KOMUT mu (K3 etkin komutana da doMove), RUTBE mi (K4 / K5), yolcu AI mi (K6); K7 kontrol.
+ *     Sebep: set 2'de 1 yolcu (R), ayni grup (P), JOIN (U), RELOKE (T) HICBIRI duzeltmedi; yolcu hep FFV (turret) koltuguna oturuyor ve etkin komutan oluyor (koltuk alani).
  * Cikarim (otomatik, set 0, [SURUS-AB-OZET]): A/B gidip C/D/E gitmiyorsa ELITE/LAMBS etkisi; hepsi gitmiyorsa arac sinifi / mod; yalniz doMove gitmiyorsa emir yolu; yalniz yolcuyla gitmiyorsa kargo/yolcu etkisi.
  * Olcum: her saniye mesafe + en yuksek hiz; 5. sn'de expectedDestination + unitReady; 'GITTI' = test suresinde >= 40 m (hedefe giden dogrultuda degil, sadece yer degistirme). Yerellik: arac / surucu sunucuda.
  * BISECT (istege bagli): C gitmiyor ama A/B gidiyorsa, ELITE izleyicilerinin kapatma anahtarlari (mekanizeOff, ezmeOff, murKoruOff, aracSenkronOff, ...) GECICI olarak GLOBAL kapatilip ikili aramayla suclu aranir
@@ -111,6 +113,18 @@ switch (_set) do {
             ["U", "8 yolcu + turret yolcularini murettebat grubuna kat (JOIN)", true, "JOIN+DOMOVE", 8, "CARGO"]
         ];
     };
+    case 3: {   // KOLTUK / KOMUTAN AYRISTIRMA (v8.239e): kullanici RPT 5a430538: 1 yolcu bile Stryker'i durduruyor, ayni grup / JOIN / RELOKE duzeltmedi
+        _kodlar = [
+            ["C", "kontrol: yolcusuz", true, "DOMOVE", 0, "CARGO"],
+            ["K1", "1 yolcu DUZ cargo koltugu (FFV bos)", true, "DOMOVE", 1, "ARKA"],
+            ["K2", "4 yolcu DUZ cargo koltuklari (FFV bos)", true, "DOMOVE", 4, "ARKA"],
+            ["K3", "1 yolcu FFV + etkin komutana da doMove", true, "KOMUTANDOMOVE+DOMOVE", 1, "FFV"],
+            ["K4", "1 yolcu FFV + yolcu rank COLONEL", true, "RANKPAX+DOMOVE", 1, "FFV"],
+            ["K5", "1 yolcu FFV + murettebat rank COLONEL", true, "RANKCREW+DOMOVE", 1, "FFV"],
+            ["K6", "1 yolcu FFV + yolcu AI KAPALI (disableAI ALL)", true, "PAXAIOFF+DOMOVE", 1, "FFV"],
+            ["K7", "1 yolcu FFV (kontrol: bozuk bekleniyor)", true, "DOMOVE", 1, "FFV"]
+        ];
+    };
     default {
         _kodlar = [["A", "SAF + waypoint", false, "WP", 0, "CARGO"], ["B", "SAF + doMove", false, "DOMOVE", 0, "CARGO"]];
         if (_elite) then {
@@ -149,7 +163,28 @@ private _kur = {
             _pg setVariable ["lambs_danger_disableGroupAI", true];
         };
         private _pc = switch (side _g) do { case east: {"O_Soldier_F"}; case independent: {"I_Soldier_F"}; default {"B_Soldier_F"} };
-        for "_i" from 1 to ((_v emptyPositions "cargo") min _yolcuVar) do {
+        if (_yMod in ["ARKA", "FFV"]) then {
+            // KOLTUK KONTROLLU yerlestirme: duz cargo koltuklari ARKADAN doldurulur; FFV (personTurret) koltuklari yalniz 'FFV' modunda ilk yolcu icin
+            private _kolt = fullCrew [_v, "", true];
+            private _duz = ((_kolt select {((toLower (_x select 1)) isEqualTo "cargo") && {isNull (_x select 0)}}) apply { _x select 2 });
+            private _ffv = ((_kolt select {((toLower (_x select 1)) isEqualTo "turret") && {isNull (_x select 0)} && {_x param [4, false]}}) apply { _x select 3 });
+            for "_i" from 1 to _yolcuVar do {
+                private _u = _pg createUnit [_pc, _p, [], 0, "NONE"];
+                if (!_eliteAcik) then { _u setVariable ["lambs_danger_disableAI", true]; };
+                if (_i isEqualTo 1 && {_yMod isEqualTo "FFV"} && {_ffv isNotEqualTo []}) then {
+                    _u moveInTurret [_v, _ffv select 0];
+                    _yolcuSay = _yolcuSay + 1;
+                } else {
+                    if (_duz isNotEqualTo []) then {
+                        _u moveInCargo [_v, _duz deleteAt ((count _duz) - 1)];
+                        _yolcuSay = _yolcuSay + 1;
+                    } else {
+                        deleteVehicle _u;
+                    };
+                };
+            };
+        };
+        for "_i" from 1 to ([(_v emptyPositions "cargo") min _yolcuVar, 0] select (_yMod in ["ARKA", "FFV"])) do {
             private _u = if (_yMod isEqualTo "ORDERGETIN") then { _pg createUnit [_pc, _p getPos [8, _yon + 180], [], 0, "NONE"] } else { _pg createUnit [_pc, _p, [], 0, "NONE"] };
             if (!_eliteAcik) then { _u setVariable ["lambs_danger_disableAI", true]; };
             if (_yMod isEqualTo "ORDERGETIN") then {
@@ -227,6 +262,13 @@ private _emir = {
             } forEach ((fullCrew [_v, "", false]) select { ((toLower (_x select 1)) isEqualTo "turret") && {(group (_x select 0)) isNotEqualTo _g} });
             sleep 1;
         };
+        if ("KOMUTANDOMOVE" in _t) then {
+            private _ec = effectiveCommander _v;
+            if (!isNull _ec && {_ec isNotEqualTo _d}) then { _ec doMove _hedef; };
+        };
+        if ("RANKPAX" in _t) then { { if ((group _x) isNotEqualTo _g) then { _x setRank "COLONEL"; }; } forEach (crew _v); sleep 1; };
+        if ("RANKCREW" in _t) then { { if ((group _x) isEqualTo _g) then { _x setRank "COLONEL"; }; } forEach (crew _v); sleep 1; };
+        if ("PAXAIOFF" in _t) then { { if ((group _x) isNotEqualTo _g) then { _x disableAI "ALL"; }; } forEach (crew _v); };
         if ("DOSTOP" in _t) then { doStop _d; };
         if ("SAFE" in _t) then {
             _g setBehaviour "SAFE";
@@ -317,6 +359,13 @@ private _bisL = [];
         _r set ["yolcuN", _yolcuVar];
         _r set ["yMod", _yMod];
         _r set ["eliteAcik", _eliteAcik];
+        if (_forEachIndex isEqualTo 0) then {
+            // KOLTUK DUZENI (bir kez / sinif): kac duz cargo, kac FFV (personTurret), commander koltugu var mi
+            private _fc = fullCrew [_r get "arac", "", true];
+            private _say = { params ["_rol", "_ffvMi"]; count (_fc select {((toLower (_x select 1)) isEqualTo _rol) && {(_x param [4, false]) isEqualTo _ffvMi}}) };
+            [format ["[SURUS-AB] %1 | KOLTUK DUZENI | surucu %2 | komutan %3 | nisanci %4 | turret(FFV disi) %5 | turret(FFV) %6 | duz cargo %7 | yolcu kapasitesi (emptyPositions cargo) %8",
+                _cls, ["driver", false] call _say, ["commander", false] call _say, ["gunner", false] call _say, ["turret", false] call _say, ["turret", true] call _say, ["cargo", false] call _say, (_r get "arac") emptyPositions "cargo"]] call _yaz;
+        };
         _kay pushBack _r;
         _serit = _serit + 1;
     } forEach _kodlar;
