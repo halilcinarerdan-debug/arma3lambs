@@ -456,6 +456,11 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             };
             // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
             private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};
+            // v8.242 TANI (kullanici: "bir apc'yi manuel bindirmek zorunda kaldim"): binmeyen askerlerin mesafe / komut / atama / yasam durumu
+            if (_disarida isNotEqualTo []) then {
+                diag_log format ["[TASIMA] %1 | BINMEYEN %2 / %3 asker (arac %4, duz bos koltuk %5): %6", groupId _vg, count _disarida, count _hepsi, getText (configOf _v >> "displayName"), [_v] call FUNC(aracDuzBos),
+                    (_disarida apply { format ["%1 (%2 m, komut %3, atama %4, %5, bina/aracta %6)", name _x, round (_x distance2D _v), currentCommand _x, typeOf (assignedVehicle _x), lifeState _x, !isNull objectParent _x] }) joinString " ; "];
+            };
             private _icerde = count (_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}});
             if (_disarida isNotEqualTo [] && {_icerde > 0} && {(([_v] call FUNC(aracDuzBos))) isEqualTo 0}) then {
                 missionNamespace setVariable [format ["lambs_danger_tasimaKap_%1", typeOf _v], _icerde];
@@ -716,14 +721,16 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 groupId _vg, round _dg, round _dm, isEngineOn _v, (fuel _v) toFixed 2, (damage _v) toFixed 2, canMove _v, name _d, lifeState _d, currentCommand _d,
                                 _d checkAIFeature "PATH", _d checkAIFeature "MOVE", _yakin apply {typeOf _x}];
                             // v8.180 DERIN TANI: kalkamayan arac icin tum kosullar (komsu araclar, koltuklar, grup lideri, waypoint, AI ozellikleri, egim, bayraklar)
-                            diag_log format ["[TASIMA-TAKILMA] %1 | %2 | koltuklar: surucu %3 / komutan %4 / nisanci %5 | grup lideri %6 (aracta %7) | grup beh %8 mod %9 hiz modu %10 formasyon %11 | waypoint %12 (aktif %13) | AI: AUTOTARGET %14 TARGET %15 FSM %16 AUTOCOMBAT %17 | unitReady %18 | forceSpeed %19 | egim %20 | komsu araclar (<= 20 m): %21 | bayraklar: forceMove %22 yolcuBirak %23 tasimaMesgul %24 isExecutingTactic %25 | hiz vektoru %26",
+                            diag_log format ["[TASIMA-TAKILMA] %1 | %2 | koltuklar: surucu %3 / komutan %4 / nisanci %5 | grup lideri %6 (aracta %7) | grup beh %8 mod %9 hiz modu %10 formasyon %11 | waypoint %12 (aktif %13) | AI: AUTOTARGET %14 TARGET %15 FSM %16 AUTOCOMBAT %17 | unitReady %18 | forceSpeed %19 | egim %20 | komsu araclar (<= 20 m): %21 | bayraklar: forceMove %22 yolcuBirak %23 tasimaMesgul %24 isExecutingTactic %25 | hiz vektoru %26 | etkin komutan %27 (grup %28, murettebat disi %29) | dolu koltuklar %30",
                                 groupId _vg, getText (configOf _v >> "displayName"), name (driver _v), name (commander _v), name (gunner _v), name (leader _vg), (vehicle (leader _vg)) isEqualTo _v,
                                 behaviour _d, combatMode _vg, speedMode _vg, formation _vg, count (waypoints _vg), currentWaypoint _vg,
                                 _d checkAIFeature "AUTOTARGET", _d checkAIFeature "TARGET", _d checkAIFeature "FSM", _d checkAIFeature "AUTOCOMBAT", unitReady _d, "?",
                                 (surfaceNormal (getPosATL _v)) select 2,
                                 ((_v nearEntities [["LandVehicle"], 20]) select {_x isNotEqualTo _v}) apply {[typeOf _x, round (_v distance2D _x), round (speed _x)]},
                                 _d getVariable [QGVAR(forceMove), false], _v getVariable [QGVAR(yolcuBirak), false], _v getVariable [QGVAR(tasimaMesgul), false], _vg getVariable [QGVAR(isExecutingTactic), false],
-                                (velocity _v) apply {round _x}];
+                                (velocity _v) apply {round _x},
+                                if (isNull (effectiveCommander _v)) then {"yok"} else {typeOf (effectiveCommander _v)}, if (isNull (effectiveCommander _v)) then {"-"} else {groupId (group (effectiveCommander _v))}, !isNull (effectiveCommander _v) && {(group (effectiveCommander _v)) isNotEqualTo _vg},
+                                ((fullCrew [_v, "", false]) apply { format ["%1%2", toLower (_x select 1), ["", "(FFV)"] select (_x param [4, false])] }) joinString "/"];
                             // v8.189: baslangicta hic kalkmayan Milan APC'ler (RPT aee29fdd: itme hizi 0, motor acik, canMove true): simulasyon / dinamik simulasyon / baglanma tanisi + uyandirma
                             diag_log format ["[TASIMA-SIM] %1 | simulasyon %2 | dinamik sim arac %3 grup %4 | baglanti %5 | kilit %6 | gizli %7 | takim yolcu %8",
                                 groupId _vg, simulationEnabled _v, dynamicSimulationEnabled _v, dynamicSimulationEnabled _vg, attachedTo _v, locked _v, isObjectHidden _v, count (crew _v)];
