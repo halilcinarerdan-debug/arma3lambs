@@ -185,3 +185,11 @@ Ortam: SAVUN plani (Zeus elle secimde TANK grubu da secili; tehdit yonu verilirs
 5. Gozetleme tanki (Zeus gozetleme gorevi): vardiginda `[GOZETLE-ARAC] ... derece gozetliyor` yonu dusmana / tehdit yonune bakmali.
 Kapatma: tankMevziOff, surucuYenileOff. Hepsi (T) = dogrulanmadi.
 
+## T-NAKIL-ZINCIR (v8.245): uzak nakil (BTR-80 hareket sorunu)
+Ortam: ELITE Objektif / OPORD, inis noktasi 3-5 km uzakta, 3-4 BTR-80 (yt_btr80 / old_btr80 karisik), her biri 6-8 yolcu, araclari birbirine YAKIN (10-15 m) park et (onceki sorunlu kosuda 10-13 m komsu vardi).
+1. `[TASIMA] ... YOL ZINCIRI: N ara nokta (inise X m)` her arac icin; sonra araclar `yolda: inise ..` ile ILERLEMELI; `TAKILMA TANISI (8 sn hareketsiz ...)` gelmemeli ya da gelirse `[TASIMA-TAKILMA]` satiri kopyala.
+2. Ara nokta gecisi sirasinda hiz dususu / durma olmamali (60 m kala sonraki bacak). `kinematik surus` (TASIMA-KIN) gerekmemeli.
+3. Kapat: lambs_danger_nakilZincirOff = true ile ayni sahneyi tekrarla (eski davranis karsilastirmasi).
+4. A/B ile dogrulama (300 m mesafe, 3 BTR-80 sinifi): DEGISMEDI, hepsi gitti (RPT b5530abe).
+Hepsi (T) = dogrulanmadi.
+

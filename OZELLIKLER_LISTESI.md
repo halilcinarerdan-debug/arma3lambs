@@ -158,6 +158,9 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Sürücü yenileme (v8.244, T)**: sürücü ölürse yaşayan AI yolcu (en düşük rütbe) sürücü koltuğuna geçer; yolcusuz araç (tank) yedek bulamaz, log yazar. `[SURUCU-YENILE]` (`surucuYenileOff`).
 - **Gözetleme aracı yönü (v8.244, T)**: karakol gözetleme tankı noktaya vardığında bilinen düşmana, yoksa plan tehdit yönüne bakar (eskiden noktadan dışarı sabit yön).
 
+- **Nakil yol zinciri (v8.245, T)**: inise > 1200 m olan nakilde araç tek uzak `doMove` yerine ~300 m'lik `calculatePath` ara noktalarını izler (60 m kala sıradaki bacak, grup waypoint'i de her bacakta yenilenir). Kök neden hipotezi: uzun tek hedefte AI sürücü 8 sn hareketsiz kalıyordu (5,3 km'de 3/3 BTR-80). `[TASIMA] YOL ZINCIRI` (`nakilZincirOff`).
+- **BTR-80 FFV muafiyeti (v8.245, T)**: A/B'de FFV düzeltmesiz bile gittiği için `fnc_aracFfvDuzelt` BTR-80'lerde fazla yolcuyu indirmez (`ffvBtr80MuafOff`).
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.

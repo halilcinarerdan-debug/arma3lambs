@@ -562,10 +562,18 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             // v8.136: RPT 013ca3b7: Stryker nakilde 11-20 km/s ile gitti (890 m = 5 dk, 240 sn sinirina takildi). Arkada (dusman uzak) SAFE + FULL; inise 220 m kala AWARE + NORMAL
             _vg setBehaviour "SAFE";
             _vg setSpeedMode "FULL";
-            _d doMove _drop;
+            // v8.245 YOL ZINCIRI (RPT 332d59ba: 5.3 km tek doMove'da 3 BTR-80 8 sn hareketsiz; A/B 300 m'de hepsi gitti): 1200 m'den uzak inislerde ~300 m'lik ara noktalar; arac 60 m kalinca siradakine gecer. Kapatma: lambs_danger_nakilZincirOff = true
+            private _zincirN = [_drop];
+            private _zi = 0;
+            if (!(missionNamespace getVariable ["lambs_danger_nakilZincirOff", false]) && {(_v distance2D _drop) > 1200}) then {
+                _zincirN = [_v, _drop, 300] call FUNC(yolZinciri);
+                diag_log format ["[TASIMA] %1 | YOL ZINCIRI: %2 ara nokta (inise %3 m)", groupId _vg, count _zincirN, round (_v distance2D _drop)];
+            };
+            private _hedefA = _zincirN select 0;
+            _d doMove _hedefA;
             // v8.181: doMove'a EK olarak grup WAYPOINT'i (v8.180 kaydinda tek calisan yol); inis / is sonunda "ELITE NAKIL" adli waypoint'ler silinir
             { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
-            private _wpS = _vg addWaypoint [_drop, 0];
+            private _wpS = _vg addWaypoint [_hedefA, 0];
             _wpS setWaypointType "MOVE";
             _wpS setWaypointName "ELITE NAKIL";
             _wpS setWaypointSpeed "FULL";
@@ -594,6 +602,19 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 sleep 1;
                 private _dm = _v distance2D _drop;
                 private _hz = (speed _v) / 3.6;
+                // v8.245 zincir: ara noktaya 60 m kala siradaki bacak (doMove + grup waypoint'i)
+                if (_zi < ((count _zincirN) - 1) && {alive _v} && {alive _d} && {(_v distance2D _hedefA) < 60}) then {
+                    _zi = _zi + 1;
+                    _hedefA = _zincirN select _zi;
+                    _d doMove _hedefA;
+                    { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+                    _wpS = _vg addWaypoint [_hedefA, 0];
+                    _wpS setWaypointType "MOVE";
+                    _wpS setWaypointName "ELITE NAKIL";
+                    _wpS setWaypointSpeed "FULL";
+                    _wpS setWaypointBehaviour (behaviour leader _vg);
+                    _vg setCurrentWaypoint _wpS;
+                };
                 // v8.198 SU KACINMA (kullanici: "bazi apcler suyu boylamis"; RPT 9f47fa43: Alpha 2-2 inise 423 m kala suya girdi, murettebat araci terk etti, 8 asker suda): yuzemeyen arac suya girerse son kuru konuma doner,
                 //   inise dogru kuru bir cizgi (15 m adimla su yok) veren +-0..70 derece yonde 200 m'lik ara noktadan gecer (en fazla 3 deneme, 25 sn aralik)
                 if (_bitis isEqualTo "" && {alive _v} && {alive _d}) then {
@@ -646,7 +667,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             diag_log format ["[TASIMA] %1 | CARPISMA GUVENLIGI: onde %2 %3 m | hiz %4 km/s -> frenleniyor", groupId _vg, getText (configOf _en >> "displayName"), round _enD, round (speed _v)];
                         };
                     } else {
-                        if (_frenli) then { _frenli = false; _d forceSpeed -1; _d doMove _drop; };
+                        if (_frenli) then { _frenli = false; _d forceSpeed -1; _d doMove _hedefA; };
                         if (isNull _en && {_frenBas >= 0}) then { _frenBas = -1; };
                     };
                 };
@@ -684,7 +705,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         _vg setBehaviour "CARELESS";
                         _vg setSpeedMode "FULL";
                         _d forceSpeed -1;
-                        _d doMove _drop;
+                        _d doMove _hedefA;
                         diag_log format ["[TASIMA] %1 | PUSU / TEMAS: dusman %2 m -> durmadan HIZLI GECIS (en fazla 40 sn), inise %3 m", groupId _vg, [round _edm, "bilinmiyor"] select (_edm >= 9999), round _dm];
                     } else {
                         _yakinPusu = _edm < 150;
@@ -741,14 +762,14 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                             _d enableAI "PATH"; _d enableAI "MOVE"; _d enableAI "ANIM";
                             _d setVariable [QGVAR(forceMove), true];
                             _v engineOn true;
-                            _d forceSpeed -1; doStop _d; _d doMove _drop;
+                            _d forceSpeed -1; doStop _d; _d doMove _hedefA;
                             _v setVelocityModelSpace [0, 5, 0];
                         };
                         // v8.180: 12 sn - doMove sonuc vermediyse WAYPOINT ile yurut (grup waypoint'i: bazi AI suruculer tekil doMove'u yok sayiyor)
                         if (_denemeN isEqualTo 1 && {_dg > 12} && {!(_v getVariable [QGVAR(wpDenendi), false])}) then {
                             _v setVariable [QGVAR(wpDenendi), true];
                             { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
-                            private _wpD = _vg addWaypoint [_drop, 0];
+                            private _wpD = _vg addWaypoint [_hedefA, 0];
                             _wpD setWaypointName "ELITE NAKIL";
                             _wpD setWaypointType "MOVE";
                             _wpD setWaypointSpeed "FULL";
@@ -797,7 +818,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 _v setVehiclePosition [_sp, [], 0, "NONE"];
                                 _v setDir ((getPosATL _v) getDir _drop);
                                 _v engineOn true;
-                                _d doMove _drop;
+                                _d doMove _hedefA;
                                 diag_log format ["[TASIMA] %1 | TAKILMA SON CARE: arac %2 m uzaktaki bos konuma tasindi (komsulara >= 9 m) (inise %3 m)", groupId _vg, round (_eskiSp distance2D _sp), round _dm];
                             };
                         };
@@ -838,13 +859,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             [_v, _d, _drop, groupId _vg] call FUNC(aracKinSurus);
                             _v setVectorUp [0, 0, 1];
                             _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
-                            _d doMove _drop;
+                            _d doMove _hedefA;
                         };
                         if (_denemeN isEqualTo 4 && {_dg > 45} && {_dm > 150}) then {
                             _denemeN = 5;
                             _v setVehiclePosition [(getPosATL _v) getPos [30, (getPosATL _v) getDir _drop], [], 0, "NONE"];
                             _v engineOn true;
-                            _d doMove _drop;
+                            _d doMove _hedefA;
                             diag_log format ["[TASIMA] %1 | TAKILMA KALDIR-TASI: arac 30 m inise dogru tasindi (inise %2 m)", groupId _vg, round _dm];
                         };
                         // v8.185 SABIR: inise > 800 m kala hala kalkamadiysa askerleri yolun ortasinda indirmek yerine 120 sn'ye kadar dener (itme + waypoint yenileme, 6 sn'de bir); 35 sn'lik eski sinir yalniz inise < 800 m icin
@@ -854,7 +875,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             _v engineOn true;
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
                             _v setVelocityModelSpace [0, 4, 0];
-                            private _wpI = _vg addWaypoint [_drop, 0];
+                            private _wpI = _vg addWaypoint [_hedefA, 0];
                             _wpI setWaypointType "MOVE"; _wpI setWaypointName "ELITE NAKIL"; _wpI setWaypointSpeed "FULL";
                             _vg setCurrentWaypoint _wpI;
                             if (_dg < 40 || {(round _dg) mod 30 < 7}) then {

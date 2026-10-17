@@ -29,6 +29,8 @@ private _calis = {
             private _v = _x;
             if (!local _v || {!alive _v}) then { continue };
             if !(_hepsi || {_v getVariable [QGVAR(tasimaMesgul), false]} || {_v getVariable [QGVAR(reconArac), false]} || {_v getVariable [QGVAR(ffvDuzelt), false]}) then { continue };
+            // v8.245 BTR-80 MUAF (A/B RPT b5530abe: b_afougf_btr80_common / old_btr80 / yt_btr80 icin V1 'duzeltmesiz, 4 yolcu FFV'de' dahil HEPSI GITTI): fazla (9.) yolcuyu bos yere indirmesin. Kapatma: lambs_danger_ffvBtr80MuafOff = true
+            if (((toLower (typeOf _v)) find "btr80") >= 0 && {!(missionNamespace getVariable ["lambs_danger_ffvBtr80MuafOff", false])}) then { continue };
             private _d = driver _v;
             if (isNull _d || {isPlayer _d} || {(crew _v) findIf {isPlayer _x} >= 0}) then { continue };
             // ELITE nakil inis surecinde (yolcuBirak) dokunma
