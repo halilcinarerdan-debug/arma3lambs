@@ -123,15 +123,82 @@ _vg setBehaviour "SAFE"; _vg setCombatMode "GREEN"; _vg setSpeedMode "NORMAL";
 _d setVariable [QGVAR(senkT), time + 900];
 _d forceSpeed 9;
 _v setPilotLight false; _v setCollisionLight false;
-_d doMove _dur;
-{ if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
-private _w2 = _vg addWaypoint [_dur, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
+// v8.241 YOL ZINCIRI (kullanici RPT af42e889: recon APC alma noktasindan (yol disi) tek uzak hedefe giderken agaclarin icine girip takildi, kinematik surus orada titredi):
+//   (1) ilk bacak: arac yoldan > 25 m uzaktaysa en yakin yol dugumune (<= 250 m, hedefi uzaklastirmayan) gider; (2) rota calculatePath ('safe') dugumlerinden ~250 m aralikli ara noktalar, her biri 40 m icindeki YOLA oturtulur;
+//   (3) arac ara noktaya 45 m kalinca siradakine gecer (tek uzak doMove yerine zincir). Zincir kurulamazsa eski davranis (tek hedef). Geri alma: lambs_danger_reconYolZinciriOff = true.
+private _zincir = [_dur];
+if !(missionNamespace getVariable ["lambs_danger_reconYolZinciriOff", false]) then {
+    private _kaynak = getPosATL _v;
+    _v setVariable ["lambs_danger_reconYol", []];
+    private _ajan = calculatePath [["wheeled_APC", "tank"] select (((toLower (getText (configOf _v >> "simulation"))) find "tank") >= 0), "safe", _kaynak, _dur];
+    _ajan setVariable ["arac", _v];
+    _ajan addEventHandler ["PathCalculated", {
+        params ["_a", "_yolH"];
+        private _av = _a getVariable ["arac", objNull];
+        if (!isNull _av && {count _yolH > 1}) then { _av setVariable ["lambs_danger_reconYol", _yolH]; };
+        deleteVehicle _a;
+    }];
+    private _bekleY = time + 4;
+    waitUntil { sleep 0.3; (count (_v getVariable ["lambs_danger_reconYol", []])) > 1 || {time > _bekleY} };
+    private _dugum = _v getVariable ["lambs_danger_reconYol", []];
+    private _yolaOturt = {
+        params ["_pp"];
+        private _yy = (_pp nearRoads 40) select {!surfaceIsWater (getPosATL _x)};
+        if (_yy isEqualTo []) then {_pp} else { getPosATL (([_yy, [], {_x distance2D _pp}, "ASCEND"] call BIS_fnc_sortBy) select 0) }
+    };
+    if ((count _dugum) > 1) then {
+        _zincir = [];
+        private _son = _kaynak;
+        { if ((_x distance2D _son) >= 250) then { private _nk = [_x] call _yolaOturt; if ((_nk distance2D _son) >= 120) then { _zincir pushBack _nk; _son = _nk; }; }; } forEach _dugum;
+        // son ara nokta hedefe cok yakinsa at
+        if (_zincir isNotEqualTo [] && {((_zincir select ((count _zincir) - 1)) distance2D _dur) < 150}) then { _zincir deleteAt ((count _zincir) - 1); };
+        _zincir pushBack _dur;
+        if ((count _zincir) > 40) then { _zincir = (_zincir select [0, 39]) + [_dur]; };
+    };
+    // ilk bacak: yol disindaysa en yakin yola
+    private _ilkYolM = 0;
+    private _yolYakin = (_kaynak nearRoads 25);
+    if (_yolYakin isEqualTo []) then {
+        private _adayY = (_kaynak nearRoads 250) select {!surfaceIsWater (getPosATL _x)};
+        if (_adayY isNotEqualTo []) then {
+            _adayY = [_adayY, [], {(_x distance2D _kaynak) + 0.5 * (_x distance2D _dur)}, "ASCEND"] call BIS_fnc_sortBy;
+            private _y0 = getPosATL (_adayY select 0);
+            if ((_y0 distance2D _dur) <= ((_kaynak distance2D _dur) + 250)) then { _zincir = [_y0] + _zincir; _ilkYolM = round (_y0 distance2D _kaynak); };
+        };
+    };
+    diag_log format ["[RECON-ARAC] %1 | %2 | YOL ZINCIRI: %3 ara nokta (rota dugumu %4) | ilk bacak %5 | hedefe %6 m", _id, _ad, count _zincir, count _dugum, ["dogrudan (zaten yolda ya da yakinda yol yok)", format ["yola %1 m", _ilkYolM]] select (_ilkYolM > 0), round (_kaynak distance2D _dur)];
+};
+private _zi = 0;
+private _zGit = {
+    params ["_pz"];
+    _d doMove _pz;
+    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+    private _w2 = _vg addWaypoint [_pz, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
+};
+[_zincir select 0] call _zGit;
+private _iz = [];          // v8.241 izi: hareketliyken 3 sn'de bir [zaman, konum] (agaclikta takilinca temiz konuma geri donmek icin)
+private _izT = time;
+private _geriSay = 0;
+private _sonTekrar = time;
+private _basT = time;
+private _basD = _v distance2D _dur;
 private _ts = time + 600;
 private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20; private _pozEski = getPosATL _v;
 private _bitis = "";
 while {_bitis isEqualTo ""} do {
     sleep 1;
     private _dm = _v distance2D _dur;
+    // v8.241: iz kaydi (hareket halindeyken), zincir ilerletme, periyodik emir tazeleme, ilerleme tavani
+    if ((speed _v) > 10 && {time > _izT}) then { _izT = time + 3; _iz pushBack [time, getPosATL _v]; if ((count _iz) > 40) then { _iz deleteAt 0; }; };
+    if (_zi < ((count _zincir) - 1) && {(_v distance2D (_zincir select _zi)) < 45}) then {
+        _zi = _zi + 1;
+        [_zincir select _zi] call _zGit;
+    } else {
+        // AI duruyor ama takilma esigine girmedi: 20 sn'de bir mevcut ara noktaya emri tazele
+        if ((time - _sonTekrar) > 20 && {(speed _v) < 4} && {_kurtN isEqualTo 0}) then { _sonTekrar = time; _d doMove (_zincir select _zi); };
+    };
+    // ilerleme tavani: 240 sn'de baslangic mesafesinin %15'ini bile kapatmadiysa (agaclik / dolambac) vazgec, recon yaya devam eder
+    if (_bitis isEqualTo "" && {(time - _basT) > 240} && {_dm > (_basD * 0.85)}) then { _bitis = "ilerlemedi"; };
     if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
     else { if ((_rg findIf {(time - ((_x) getVariable [QGVAR(contact), -999])) < 5}) >= 0) then { _bitis = "temas"; }
     else { if (_dm < 45) then { _bitis = "vardi"; }
@@ -176,22 +243,62 @@ while {_bitis isEqualTo ""} do {
                 _v getVariable [QGVAR(ezmeFren), false], _d getVariable [QGVAR(senkT), 0], _d getVariable [QGVAR(forceMove), false],
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
         };
+        // v8.241 KURTARMA 2 (YENI): agaclik / dar yerde takildiysa son TEMIZ konuma geri don (iz; yoksa en yakin yol dugumu), zincirin sonraki ara noktasina yeniden gonder. En cok 3 kez.
         if (_dtk > 10 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
-            _kurtN = 2;
+            private _temiz = [];
+            if (_geriSay < 3) then {
+                private _izAday = _iz select {(time - (_x select 0)) >= 15};
+                reverse _izAday;
+                {
+                    private _pp = _x select 1;
+                    if (_temiz isEqualTo [] && {!surfaceIsWater _pp} && {(count (nearestTerrainObjects [_pp, ["TREE", "ROCK"], 12, false, true])) < 3} && {(_pp distance2D (getPosATL _v)) > 8}) then { _temiz = _pp; };
+                } forEach _izAday;
+                if (_temiz isEqualTo []) then {
+                    private _yy2 = ((getPosATL _v) nearRoads 200) select {!surfaceIsWater (getPosATL _x) && {(count (nearestTerrainObjects [getPosATL _x, ["TREE", "ROCK"], 8, false, true])) < 2}};
+                    if (_yy2 isNotEqualTo []) then { _temiz = getPosATL (([_yy2, [], {(_x distance2D _v) + 0.5 * (_x distance2D _dur)}, "ASCEND"] call BIS_fnc_sortBy) select 0); };
+                };
+            };
+            if (_temiz isNotEqualTo []) then {
+                _geriSay = _geriSay + 1;
+                private _hedefZ = _zincir select _zi;
+                _v setVehiclePosition [_temiz, [], 0, "NONE"];
+                _v setDir (_temiz getDir _hedefZ);
+                _v setVelocity [0, 0, 0];
+                [_hedefZ] call _zGit;
+                _pozEski = getPosATL _v;
+                _ilerD = (_v distance2D _dur) max _ilerD;
+                _ilerT = time;
+                _kurtN = 2;
+                diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: AGACLIKTA / DARDA TAKILDI -> son temiz konuma geri donuldu (%3, iz %4 nokta, %5. kez) ve sonraki ara noktaya yeniden yonlendirildi", _id, _ad, mapGridPosition _temiz, count _iz, _geriSay];
+                ["RECON-GERI-IZ", format ["temiz konuma geri | %1 | %2. kez | OP'ye %3 m", mapGridPosition _temiz, _geriSay, round _dm]] call FUNC(planZaman);
+            } else {
+                _kurtN = 3;
+                _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
+                private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
+                if (surfaceIsWater _alt) then { _alt = _dur; };
+                _d doMove _alt;
+                // v8.209: recon araci da AI surmuyorsa (RPT 91b5ffbd: Stryker 2.4 km'de hic kalkmadi, recon yola cikmadi) ortak kinematik surus (fnc_aracKinSurus) devreye girer
+                [_v, _d, _dur, _id] call FUNC(aracKinSurus);
+                ["RECON-KIN-BASLADI", format ["AI surmedi (bindikten sonra) | arac %1 | OP'ye %2 m", _ad, round _dm]] call FUNC(planZaman);
+                diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: temiz konum bulunamadi -> kaldirildi + yan ara nokta + kinematik surus (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
+            };
+        };
+        // KURTARMA 3: geri donus da ise yaramadiysa (8 sn) eski adim: kaldir + yan ara nokta + kinematik surus
+        if (_dtk > 8 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+            _kurtN = 3;
             _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
             private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
             if (surfaceIsWater _alt) then { _alt = _dur; };
             _d doMove _alt;
-            // v8.209: recon araci da AI surmuyorsa (RPT 91b5ffbd: Stryker 2.4 km'de hic kalkmadi, recon yola cikmadi) ortak kinematik surus (fnc_aracKinSurus) devreye girer
             [_v, _d, _dur, _id] call FUNC(aracKinSurus);
             ["RECON-KIN-BASLADI", format ["AI surmedi (bindikten sonra) | arac %1 | OP'ye %2 m", _ad, round _dm]] call FUNC(planZaman);
-            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 2: kaldirildi + yan ara nokta (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
+            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 3: kaldirildi + yan ara nokta + kinematik surus (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
-        if (_dtk > 30 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
-            _kurtN = 3;
+        if (_dtk > 30 && {_kurtN isEqualTo 3} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+            _kurtN = 4;
             _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _dur], [], 0, "NONE"];
             _d doMove _dur;
-            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 3: arac 25 m ileri tasindi", _id, _ad];
+            diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 4: arac 25 m ileri tasindi", _id, _ad];
         };
         if (time > _logT) then {
             _logT = time + 20;
