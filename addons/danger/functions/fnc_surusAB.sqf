@@ -241,6 +241,10 @@ private _olc = {
                     _r set ["d5", _r get "mesafe"];
                     private _d = driver _v;
                     _r set ["tani5", if (isNull _d) then {"surucu yok"} else {format ["bekl.hedef %1 | unitReady %2", (expectedDestination _d) select 1, unitReady _d]}];
+                    // KOLTUK TANISI (hipotez: yolcu varken aracin etkin komutani yolcu grubundan olabilir): dolu murettebat koltuklari, etkin komutan + grubu, surucu aracta mi
+                    private _ec = effectiveCommander _v;
+                    private _roller = ((fullCrew [_v, "", false]) select {(toLower (_x select 1)) isNotEqualTo "cargo"}) apply { toLower (_x select 1) };
+                    _r set ["koltuk", format ["koltuklar %1 | etkin komutan %2 (%3%4) | surucu aracta %5 | murettebat grubu %6", _roller joinString "/", if (isNull _ec) then {"yok"} else {typeOf _ec}, if (isNull _ec) then {"-"} else {groupId (group _ec)}, if (!isNull _ec && {(group _ec) isNotEqualTo (_r get "grup")}) then {" = YOLCU / BASKA GRUP"} else {""}, !isNull _d && {(vehicle _d) isEqualTo _v}, groupId (_r get "grup")]];
                 };
             };
         } forEach _kayitlar;
@@ -333,9 +337,9 @@ waitUntil {
         private _gitti = (_r get "mesafe") >= 40;
         _sonuc set [_r get "kod", _gitti];
         private _d = driver _v;
-        [format ["[SURUS-AB] %1 | %2 %3 | %4 | %5 sn: %6 m (5. sn %7 m) maks %8 km/s | %9 | yerel arac:%10 surucu:%11 | motor:%12 yakit:%13 canMove:%14 yolcu:%15%16",
+        [format ["[SURUS-AB] %1 | %2 %3 | %4 | %5 sn: %6 m (5. sn %7 m) maks %8 km/s | %9 | yerel arac:%10 surucu:%11 | motor:%12 yakit:%13 canMove:%14 yolcu:%15%16 | %17",
             _cls, _r get "kod", _r get "ad", ["GITMEDI", "GITTI"] select _gitti, _sure, round (_r get "mesafe"), round (_r get "d5"), round (_r get "maks"), _r get "tani5",
-            local _v, if (isNull _d) then {"yok"} else {local _d}, isEngineOn _v, (fuel _v) toFixed 2, canMove _v, _r get "yolcu", [format [" | NOT: %1", _r getOrDefault ["not", ""]], ""] select ((_r getOrDefault ["not", ""]) isEqualTo "")]] call _yaz;
+            local _v, if (isNull _d) then {"yok"} else {local _d}, isEngineOn _v, (fuel _v) toFixed 2, canMove _v, _r get "yolcu", [format [" | NOT: %1", _r getOrDefault ["not", ""]], ""] select ((_r getOrDefault ["not", ""]) isEqualTo ""), _r getOrDefault ["koltuk", "-"]]] call _yaz;
     } forEach _kay;
     // cikarim
     private _g = { _sonuc getOrDefault [_this, false] };
