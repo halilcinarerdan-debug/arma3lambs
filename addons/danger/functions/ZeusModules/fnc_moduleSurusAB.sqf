@@ -20,7 +20,7 @@ if (_activated && local _logic) then {
             ["Arac sinifi 1", "LIST", "Test edilecek arac sinifi (RHS APC / IFV / kamyon dahil, >= 6 yolcu). '(30 m icindeki araclar)' = modulun yanina koydugunuz araclarin siniflari.", _etiket, 0],
             ["Arac sinifi 2 (istege bagli)", "LIST", "Karsilastirma: ornegin tekerlekli ve paletli.", _etiket, 0],
             ["Arac sinifi 3 (istege bagli)", "LIST", "Ucuncu sinif.", _etiket, 0],
-            ["Test seti", "LIST", "Temel (A-G): ELITE kapali/acik, doMove/waypoint, yolcu, RECON profili. Recon ayristirma (C,H-M): yolcusuz; hangi komut recon'u bozuyor (doStop / waypoint+doMove / SAFE-GREEN-isiksiz / forceSpeed 9). Yolcu ayristirma (C,N-S): kargo yolcusu (sayi, ayni grup, orderGetIn, ELITE kapali, bekleme).", ["Temel (A-G)", "Recon ayristirma (H-M)", "Yolcu ayristirma (N-S)"], 0],
+            ["Test seti", "LIST", "Temel (A-G): ELITE kapali/acik, doMove/waypoint, yolcu, RECON profili. Recon ayristirma (C,H-M): yolcusuz; hangi komut recon'u bozuyor (doStop / waypoint+doMove / SAFE-GREEN-isiksiz / forceSpeed 9). Yolcu ayristirma (C,N-R,T,U): kargo yolcusu (sayi, ayni grup, orderGetIn, ELITE kapali, bekleme).", ["Temel (A-G)", "Recon ayristirma (H-M)", "Yolcu ayristirma (N-U)"], 0],
             ["ELITE acik varyantlari (yalniz Temel set)", "BOOLEAN", "Temel sette kapaliysa yalniz A / B calisir. Diger setlerde etkisiz.", true, ""],
             ["Test suresi (sn)", "SLIDER", "Her varyantin gidis suresi (olcum her saniye).", [10, 30], [1, 5], 15, 0],
             ["Otomatik bisect (suclu izleyici ara)", "BOOLEAN", "ELITE-acik varyant gitmiyor ama saf gidiyorsa, izleyici kapatma anahtarlari GECICI olarak global kapatilip ikili aramayla suclu aranir (~60 sn ek). Test oturumu icin.", false, ""]

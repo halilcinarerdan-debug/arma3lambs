@@ -15,7 +15,8 @@
  *   Cikarim: F gitmiyor + G gidiyor -> forceSpeed 9 / yolcu PATH / ELITE bayraklari; ikisi de gitmiyor + C gidiyor -> SAFE / GREEN / isiksiz / doStop-doMove sirasi; ikisi de gidiyor -> recon'un sorunu secim / alma (pickup) asamasinda.
  * TEST SETLERI (v8.239c; kullanici sonucu: Stryker YOLCUSUZ hepsi gitti, YOLCULU (E / F / G) gitmedi; BTR-70 E gitti ama RECON profili F / G gitmedi):
  *   set 0 Temel (A-G, yukarisi); set 1 RECON AYRISTIRMA (yolcusuz): C kontrol, H doMove+waypoint, I doStop+doMove, J SAFE/GREEN/isiksiz+doMove, K doStop+waypoint, L forceSpeed 9+doMove, M RECON tam;
- *   set 2 YOLCU AYRISTIRMA: C kontrol, N 4 yolcu, O 8 yolcu ELITE kapali, P 8 yolcu ayni grupta, Q 8 yolcu orderGetIn (gercek nakil yolu), R 1 yolcu, S 8 yolcu + 6 sn bekle.
+ *   set 2 YOLCU AYRISTIRMA: C kontrol, N 4 yolcu, O 8 yolcu ELITE kapali, P 8 yolcu ayni grupta, Q 8 yolcu orderGetIn (gercek nakil yolu), R 1 yolcu,
+ *     T 8 yolcu + turret (FFV) koltugundaki yolculari cargo koltuguna alir (RELOKE), U 8 yolcu + turret yolcularini murettebat grubuna katar (JOIN) = KOK NEDEN DUZELTME ADAYLARI (etkin komutan yolcu grubundan oluyordu).
  *   Her sette [SURUS-AB-OZET] sonunda BELIRTEC CIKARIMI: gitmeyen varyantlarin ORTAK belirteci - calisanlarda olmayan (otomatik suclu aday).
  * Cikarim (otomatik, set 0, [SURUS-AB-OZET]): A/B gidip C/D/E gitmiyorsa ELITE/LAMBS etkisi; hepsi gitmiyorsa arac sinifi / mod; yalniz doMove gitmiyorsa emir yolu; yalniz yolcuyla gitmiyorsa kargo/yolcu etkisi.
  * Olcum: her saniye mesafe + en yuksek hiz; 5. sn'de expectedDestination + unitReady; 'GITTI' = test suresinde >= 40 m (hedefe giden dogrultuda degil, sadece yer degistirme). Yerellik: arac / surucu sunucuda.
@@ -106,7 +107,8 @@ switch (_set) do {
             ["P", "8 yolcu AYNI grupta (murettebat grubu)", true, "DOMOVE", 8, "AYNI-GRUP"],
             ["Q", "8 yolcu orderGetIn (gercek nakil yolu)", true, "DOMOVE", 8, "ORDERGETIN"],
             ["R", "1 yolcu", true, "DOMOVE", 1, "CARGO"],
-            ["S", "8 yolcu + 6 sn bekle sonra doMove", true, "BEKLE6+DOMOVE", 8, "CARGO"]
+            ["T", "8 yolcu + turret (FFV) yolcularini cargo koltuguna al (RELOKE)", true, "RELOKE+DOMOVE", 8, "CARGO"],
+            ["U", "8 yolcu + turret yolcularini murettebat grubuna kat (JOIN)", true, "JOIN+DOMOVE", 8, "CARGO"]
         ];
     };
     default {
@@ -203,6 +205,28 @@ private _emir = {
     } else {
         private _t = _tur splitString "+";
         if ("BEKLE6" in _t) then { sleep 6; };
+        // KOK NEDEN ADAYI DUZELTMELERI (v8.239d; kullanici RPT e3dcbf88: yolculu Stryker'da ETKIN KOMUTAN yolcu grubundan = 'Alpha 2-2 = YOLCU / BASKA GRUP', yolcusuz = murettebatin kendi gunner'i)
+        if ("RELOKE" in _t) then {
+            private _bosCargo = ((fullCrew [_v, "cargo", true]) select {isNull (_x select 0)}) apply { _x select 2 };
+            {
+                private _u = _x select 0;
+                if (_bosCargo isEqualTo []) exitWith {};
+                private _ci = _bosCargo deleteAt 0;
+                moveOut _u;
+                _u moveInCargo [_v, _ci];
+            } forEach ((fullCrew [_v, "", false]) select { ((toLower (_x select 1)) isEqualTo "turret") && {(group (_x select 0)) isNotEqualTo _g} });
+            sleep 1;
+        };
+        if ("JOIN" in _t) then {
+            {
+                private _u = _x select 0;
+                if (alive _u) then {
+                    _u setVariable ["lambs_danger_eskiGrup", group _u];
+                    [_u] joinSilent _g;
+                };
+            } forEach ((fullCrew [_v, "", false]) select { ((toLower (_x select 1)) isEqualTo "turret") && {(group (_x select 0)) isNotEqualTo _g} });
+            sleep 1;
+        };
         if ("DOSTOP" in _t) then { doStop _d; };
         if ("SAFE" in _t) then {
             _g setBehaviour "SAFE";
