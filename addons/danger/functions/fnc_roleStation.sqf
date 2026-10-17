@@ -84,6 +84,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
             if (isNull _g) then { continue };
             if ((count (units _g)) < 3) then { continue };
             if (_g getVariable [QGVAR(roleStationOff), false]) then { continue };
+            if ([_g] call FUNC(mevziDeMi)) then { continue };   // v8.243: hendekteki askerler rol istasyonuna (formasyon) cekilmez
 
             private _leader = leader _g;
             if (isNull _leader || {!alive _leader} || {!(local _leader)} || {isPlayer _leader}) then { continue };

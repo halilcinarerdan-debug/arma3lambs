@@ -23,6 +23,7 @@ if (!isNil "lambs_danger_topSiperStarted") exitWith {false};
 lambs_danger_topSiperStarted = true;
 lambs_danger_topIzN = 0;
 lambs_danger_topLogN = 0;
+lambs_danger_topTepkiN = 0;
 
 // izleyici (hem Fired hem tarama yolu kullanir): dusme noktasini tahmin eder, <= 7 sn kala yayinlar; yukseklik >= 40 m sartı: dogrudan atis mermisi sayilmaz
 lambs_danger_topIzle = {
@@ -97,10 +98,20 @@ lambs_danger_topIzle = {
             (group _u) setVariable [QGVAR(topUyariT), (time + _eta + 60) max ((group _u) getVariable [QGVAR(topUyariT), 0])];   // hendekBilinc: topcu altindaki grup hendege girer
             if (_u getVariable [QGVAR(topAktif), false]) exitWith {};   // betik zaten calisiyor; bitis uzatildi
             _u setVariable [QGVAR(topAktif), true];
-            if (_hn isEqualTo [] && {_eta > 7}) then {
+            private _etaIlk = _eta;
+            private _tehlikede = (_u distance2D _ip) < _R;
+            // v8.243 (RPT c7592408: Alpha 1-2 acikta, hendek erisimi yok, 16.6 sn uyari -> 9.6 sn bekleyip son 7 sn'de en cok 18 m kostu; 7 kisi bir salvoda oldu): tehlike yaricapi ICINDEKI birim hendek yoksa
+            //   bekleme yapmadan hemen uzaklasir (kosu tavani 18 -> 45 m, uyari >= 10 sn ise). Disindakiler eski sirayla (son 7 sn). Kapatma: lambs_danger_topErkenKacisOff = true.
+            private _erkenKac = _tehlikede && {_etaIlk > 10} && {!(missionNamespace getVariable ["lambs_danger_topErkenKacisOff", false])};
+            if (_hn isEqualTo [] && {_eta > 7} && {!_erkenKac}) then {
                 // hendek yok / erisilemiyor: klasik tepki (uzaklas + yat) son 7 sn'de baslar
                 sleep (_eta - 7);
                 _eta = 7;
+            };
+            if (lambs_danger_topTepkiN < 30) then {
+                lambs_danger_topTepkiN = lambs_danger_topTepkiN + 1;
+                diag_log format ["[TOP-TEPKI] %1 | %2 | dusme noktasina %3 m (tehlike %4 m) | uyari %5 sn | karar: %6", groupId (group _u), name _u, round (_u distance2D _ip), round _R, _etaIlk toFixed 1,
+                    if (_hn isNotEqualTo []) then { if (_icinde) then {"ZATEN HENDEKTE (kalir, yatar)"} else {format ["HENDEGE kosuyor (%1 m)", round (_hn select 2)]} } else { if (_erkenKac) then {"HENDEK YOK: hemen uzaklasiyor"} else { if (_tehlikede) then {"HENDEK YOK: son 7 sn'de uzaklasir"} else {"tehlike disinda: kalir, yatar"} } }];
             };
             private _d = _u distance2D _ip;
             if (_hn isNotEqualTo []) then {
@@ -115,7 +126,7 @@ lambs_danger_topIzle = {
                 };
             } else {
                 if (_eta >= 2.5 && {_d < _R}) then {
-                    private _kos = (((_R - _d) + 6) min (_eta * 3.5) min 18) max 4;
+                    private _kos = (((_R - _d) + 6) min (_eta * 3.5) min ([18, 45] select _erkenKac)) max 4;
                     private _hdf = (getPosATL _u) getPos [_kos, _ip getDir _u];
                     if (surfaceIsWater _hdf) then { _hdf = (getPosATL _u) getPos [_kos, (_ip getDir _u) + 70]; };
                     if (!surfaceIsWater _hdf) then {
@@ -149,5 +160,5 @@ lambs_danger_topIzle = {
     } forEach _aday;
 }] call CBA_fnc_addEventHandler;
 
-diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228; v8.229 hendek alani; v8.238 hendek onceligi: 22 sn erken uyari, hendekteyse kal): 7 sn uyari, uzaklas / hendege + yat, 7 sn yatik";
+diag_log "[TOP-SIPER] gelen topcu / havan tepkisi baslatildi (v8.228; v8.229 hendek alani; v8.238 hendek onceligi: 22 sn erken uyari, hendekteyse kal; v8.243 hendek yoksa erken kacis + [TOP-TEPKI] logu): 7 sn uyari, uzaklas / hendege + yat, 7 sn yatik";
 true

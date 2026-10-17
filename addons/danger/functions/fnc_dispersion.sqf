@@ -54,6 +54,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
                 || {_g getVariable [QGVAR(isExecutingTactic), false]}
+                || {[_g] call FUNC(mevziDeMi)}   // v8.243: hendekte dagilma yok (hendek zaten ayri noktalara yayar)
                 || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };
 

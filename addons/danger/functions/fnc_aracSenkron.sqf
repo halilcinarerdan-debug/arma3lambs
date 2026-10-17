@@ -73,6 +73,7 @@ private _calis = {
                 (side _x) isEqualTo (side _g) && {_x isNotEqualTo _g} && {!isNull (leader _x)} && {isNull objectParent (leader _x)} && {alive (leader _x)}
                 && {((units _x) findIf {alive _x && {isNull objectParent _x}}) >= 0} && {((leader _x) distance2D _vp) < 300}
                 && {({alive _x && {isNull objectParent _x}} count (units _x)) >= 3}
+                && {!([_x] call FUNC(mevziDeMi))}   // v8.243: hendekteki (duran) savunma piyadesi eskort sayilmaz: arac onu beklerken hic ilerleyemiyordu
             };
             if (_adaylar isEqualTo []) then { ["eskort piyade yok"] call _serbest; continue };
             _adaylar = [_adaylar, [], {(leader _x) distance2D _vp}, "ASCEND"] call BIS_fnc_sortBy;
@@ -93,9 +94,26 @@ private _calis = {
             else { if (_onde > -40) then { _durum = "SENKRON"; _hiz = ((_pHiz * 1.1) max 1.4) min 8; }
             else { _durum = "SERBEST-GERIDE"; _hiz = -1; }; }; };
 
+            // v8.243 BEKLE TAVANI (RPT c7592408: EAST T-90 gozetleme noktasina 484 m gidecekti, duran piyadenin 60 m onunde BEKLE'de takildi, 19 dk'da vardi): eskort piyade durmussa (< 0.5 m/sn)
+            //   BEKLE 45 sn'den uzun surerse arac 90 sn serbest birakilir (TASARIM degeri). Kapatma: lambs_danger_senkTavanOff = true.
+            private _tavan = false;
+            if (!(missionNamespace getVariable ["lambs_danger_senkTavanOff", false])) then {
+                if (time < (_d getVariable [QGVAR(senkSerbestT), 0])) then { _tavan = true; } else {
+                    if (_durum isEqualTo "BEKLE" && {_pHiz < 0.5}) then {
+                        if ((_d getVariable [QGVAR(senkBekleT), -1]) < 0) then { _d setVariable [QGVAR(senkBekleT), time]; };
+                        if ((time - (_d getVariable [QGVAR(senkBekleT), time])) > 45) then {
+                            _d setVariable [QGVAR(senkSerbestT), time + 90];
+                            _d setVariable [QGVAR(senkBekleT), -1];
+                            _tavan = true;
+                        };
+                    } else { _d setVariable [QGVAR(senkBekleT), -1]; };
+                };
+            };
+            if (_tavan) then { _durum = "SERBEST-TAVAN"; };
+
             private _eski = _d getVariable [QGVAR(senkDurum), ""];
-            if (_durum isEqualTo "SERBEST-GERIDE") then {
-                ["piyadenin gerisinde (yetis)"] call _serbest;
+            if (_durum in ["SERBEST-GERIDE", "SERBEST-TAVAN"]) then {
+                [["piyadenin gerisinde (yetis)", "eskort piyade durdu: BEKLE tavani (45 sn), 90 sn serbest"] select (_durum isEqualTo "SERBEST-TAVAN")] call _serbest;
             } else {
                 _d forceSpeed _hiz;
                 _d setVariable [QGVAR(senkT), time + 5];

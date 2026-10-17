@@ -164,3 +164,14 @@ Basari olcutu: gecis nedenleri mantikli (`--cephe`), 120 sn icinde sanal->fiziks
 Ortam: acik, DUZ arazi, sunucu + RHS. Zeus > "ELITE Arac SURUS A/B Testi" > sinif 1 = bir RHS tekerlekli APC (Stryker / BTR), sinif 2 = bir paletli (M113 / BMP), "ELITE acik" + "yolcu" isaretli, sure 15, bisect KAPALI ilk kosuda.
 Beklenen: ~25 sn sonra Zeus sohbetinde `[SURUS-AB-OZET]` satirlari (sinif basina A B C D E : G/X + yorum); tum satirlar sunucu RPT'sinde `[SURUS-AB]`. Satirlari `[SURUS-AB]` etiketiyle arayin.
 Sonuca gore: ELITE acikken gitmiyorsa ikinci kosuda "Otomatik bisect" isaretli tekrar edin ([SURUS-AB-BISECT] suclu aday). Hepsi gidiyorsa sorun Zeus'ta yerel yaratma / sunucu devri / plan kosulundadir (bir sonraki adim: o kosulu test).
+
+## T-MEVZI-TUT (v8.243): savunmada hendekten ayrilmama
+Ortam: P1 gibi EAST SAVUN (4 grup, hendek alani var), karsi taraf WEST ELE GECIR; topcu destegi 'cagri'.
+1. Temas ve topcu olsun; savunma gruplarinin hendekte KALMASI beklenir. Loglar: `[MEVZI-TUT] ... hendekte: komutan beyni / taktik atlandi` (grup basina 60 sn'de bir), `[TASIMA]` vb. degil. LAMBS `TACTICS HIDE/HOLD/FLANK` satiri hendekteki gruplar icin ARTIK gelmemeli (kayip >= %60 sonrasi gelebilir).
+2. YEDEK karsi saldiri: `[PLAN-SAVUNMA] KARSI SALDIRI: ... dusmanlar: <tip/taraf listesi>` — listede GERCEK dusman tipleri olmali; sonrasinda `KARSI SALDIRI BITTI: ... mevziye donuyor` ve `[HENDEK-YERLES]` tekrar gelmeli. Acikta 5 dk+ kalan grup olmamali.
+3. Savunma suresi: `lambs_danger_planSavunmaS` kisa verip (ornegin 120) temasta `SURE DOLDU ... temas kesilene kadar surer` satiri gelmeli; temas kesilince BITTI.
+4. Savunma atesi: topcu aracina menzil icinde ol; dusman >= 3 ve dostundan >= 480 m: `[PLAN-TOPCU] ... SAVUNMA ATESI` (RED / izin kurallari ayni). Atmazsa `ATIS YAPILMADI` nedeni yazar.
+5. Topcu tepkisi: `[TOP-TEPKI]` satirlari (ilk 30): her asker icin karar (HENDEGE kosuyor / ZATEN HENDEKTE / HENDEK YOK: hemen uzaklasiyor ...). Acikta olup 'tehlike disinda' diyenleri not al.
+6. Senkron tavani: hendekte duran piyadenin onunde GOZETLEME gorevli tank: `[ARAC-SENKRON] ... SERBEST (eskort piyade durdu: BEKLE tavani ...)`.
+7. IFV 'bekliyor' vakasi: `[PLAN-ZIRH] ... SURUCU EMRI ONARILDI` (ilk 3) ve `TAKILDI` satirinda surucu komut / motor / canMove bilgisi.
+Hepsi (T) = dogrulanmadi; kapatma anahtarlari: mevziTutOff, savunmaUzatmaOff, savunmaTopcuOff, senkTavanOff, topErkenKacisOff, zirhSurucuOnarOff.

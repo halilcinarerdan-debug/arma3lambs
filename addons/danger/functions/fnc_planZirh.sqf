@@ -149,6 +149,17 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         // yoldayken yeniden yonlendirme (takilmasin)
         if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhMoveT", time];
+            // v8.243 SURUCU EMRI ONARIMI (RPT c7592408: planZirh BTR'leri 'komut GET OUT' ile 2+ dk 0 km/s bekledi; nakil iptali / inis sirasinda surucunun arac atamasi kalkmis olabilir - NEDEN KESIN DEGIL):
+            //   surucu emri GET OUT ya da arac atamasi yoksa once arac surucu olarak yeniden atanir, yoksa (aracin disindaysa, 30 m icinde) bindirilir. Log [PLAN-ZIRH] ... SURUCU EMRI ONARILDI (ilk 3). Kapatma: lambs_danger_zirhSurucuOnarOff = true.
+            if (!(missionNamespace getVariable ["lambs_danger_zirhSurucuOnarOff", false]) && {alive _d} && {((currentCommand _d) isEqualTo "GET OUT") || {isNull (assignedVehicle _d)} || {(vehicle _d) isNotEqualTo _v}}) then {
+                private _onN = _g getVariable ["lambs_danger_zirhOnarN", 0];
+                if (_onN < 3) then {
+                    _g setVariable ["lambs_danger_zirhOnarN", _onN + 1];
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 SURUCU EMRI ONARILDI: komut '%3' atama %4 aracta %5 motor %6 canMove %7 hiz %8 km/s", _id, groupId _g, currentCommand _d, typeOf (assignedVehicle _d), (vehicle _d) isEqualTo _v, isEngineOn _v, canMove _v, round (speed _v)];
+                };
+                if ((vehicle _d) isEqualTo _v) then { _d assignAsDriver _v; } else { if ((_d distance2D _v) < 30) then { _d assignAsDriver _v; [_d] orderGetIn true; }; };
+                _d enableAI "PATH"; _d enableAI "MOVE";
+            };
             _d doMove _poz;
         };
         // v8.189 YOL YURUYUSU: temas yokken ve pozisyona > 700 m varken SAFE + FULL (COMBAT / NORMAL tanki 15 km/s'te yuruyordu: RPT aee29fdd tank 4 dk'da 700 m); yaklasinca COMBAT
@@ -180,7 +191,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     _d action ["EngineOn", _v];
                     _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
                     _d doMove _ara;
-                    diag_log format ["[PLAN-ZIRH] %1 | %2 TAKILDI (<1.5 km/s, 25 sn): ara noktaya yonlendirildi (%3 m) | pozisyona %4 m", _id, groupId _g, round (_v distance2D _ara), round (_v distance2D _poz)];
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 TAKILDI (<1.5 km/s, 25 sn): ara noktaya yonlendirildi (%3 m) | pozisyona %4 m | surucu komut '%5' atama %6 motor %7 canMove %8 yakit %9", _id, groupId _g, round (_v distance2D _ara), round (_v distance2D _poz), currentCommand _d, typeOf (assignedVehicle _d), isEngineOn _v, canMove _v, (fuel _v) toFixed 2];
                 };
             } else { _g setVariable ["lambs_danger_planZirhDurT", -1]; };
         };

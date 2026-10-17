@@ -4,6 +4,7 @@
  * HENDEKTE YERLESME (v8.229) — SAVUN planinda bir grubun askerleri secilen hendek alaninin UZUN ekseni boyunca dagilir (her asker ayri nokta), vardiginda comelir (MIDDLE: 1.4 m hendekte siperde)
  * ve dis cevreye (tehdit yonu / objektife ters degil, objektife DOGRU degil: merkezden disa) bakar. doStop + comelme; plan bitince fnc_komutanPlanDongu cleanup'i birakir.
  * Kaynak ilkesi: ATP 3-21.8 / FM 3-21.10 mevzi: askerler hendege aralikli yerlesir, ates sektorlerine bakar (kitapta mesafe / sayi YOK; aralik = hendek uzunlugu / asker sayisi).
+ * v8.243: grup 'mevziIlk' sayisini yazar; hendekteki grup LAMBS komutan beyni / buddy / dagilma / rol istasyonundan muaf (fnc_mevziDeMi); plan sonunda fnc_komutanPlanDongu 'hendekte' bayragini siler.
  * Log: [HENDEK-YERLES]
  *
  * Arguments:
@@ -39,4 +40,5 @@ diag_log format ["[HENDEK-YERLES] %1 | %2 asker hendege (alan %3, %4 nokta) | ba
     };
 } forEach _us;
 _g setVariable [QGVAR(hendekte), true];
+_g setVariable [QGVAR(mevziIlk), (_g getVariable [QGVAR(mevziIlk), 0]) max (count _us)];   // v8.243: fnc_tactics mevzi tutma kayip esigi (>= %60 kayipta serbest) bu sayiya gore
 count _us

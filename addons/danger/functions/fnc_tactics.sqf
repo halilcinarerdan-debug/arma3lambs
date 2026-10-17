@@ -123,6 +123,25 @@ if (_group getVariable [QGVAR(isBounding), false] && {time - _bndTime > 200}) th
 // isExecutingTactic kontrolu KALDIRILDI (bounding oncelikli)
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
+// v8.243 MEVZI TUT (RPT c7592408, kullanici: "trenchden cok ayriliyorlar bu gercekci mi"): HENDEKTE / mevzideki grup LAMBS komutan beynine (DELAY -> hide, HOLD -> 'Hide (holding)',
+//   FLANK, ASSAULT, bounding) gore hendekten CIKARILMAZ: hazirlanmis mevzideki piyade yerinde durup ates eder (FM 3-90 / ATP 3-21.8 savunma: mevzi tutulur, karsi saldiri YEDEKTIR, cekilme emirle).
+//   Istisna: grup kaybi >= %60 (mevziIlk'e gore; TASARIM degeri) ise normal komutan beynine duser (cekilme / siper degistirme serbest). Kapatma: lambs_danger_mevziTutOff = true.
+// ---------------------------------------------------------------------------
+private _mevziTut = false;
+if (_tehditGecerli && {[_group] call FUNC(mevziDeMi)}) then {
+    private _ilkM = _group getVariable [QGVAR(mevziIlk), 0];
+    private _canM = {alive _x} count (units _group);
+    if (_ilkM <= 0 || {_canM > (_ilkM * 0.4)}) then {
+        _mevziTut = true;
+        if ((time - (_group getVariable [QGVAR(mevziTutLogT), -999])) > 60) then {
+            _group setVariable [QGVAR(mevziTutLogT), time];
+            diag_log format ["[MEVZI-TUT] %1 | hendekte: komutan beyni / taktik atlandi, mevzi tutuluyor | asker %2 / %3 | dusman %4 m", groupId _group, _canM, _ilkM, round ((leader _group) distance2D _target)];
+        };
+    };
+};
+if (_mevziTut) exitWith {true};
+
+// ---------------------------------------------------------------------------
 // ELITE: KOMUTAN BEYNI — 5 faktor tehdit analizi + NATO karar tablosu
 // Eski "random 1 < 0.85" zar atma KALDIRILDI.
 // Karar fnc_commanderAssess.sqf'te verilir, burada sadece dispatch.

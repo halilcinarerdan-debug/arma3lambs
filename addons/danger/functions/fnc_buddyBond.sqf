@@ -57,6 +57,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
                 || {_g getVariable [QGVAR(isExecutingTactic), false]}
+                || {[_g] call FUNC(mevziDeMi)}   // v8.243: hendekteki grup lidere cekilmez
                 || {((units _g) findIf {(_x getVariable [QEGVAR(main,currentTask), ""]) isEqualTo "Group Garrison"}) >= 0}   // v8.195: garrison'daki grup binalara dagilir; buddy bagi onlari izole sayip disari cekiyordu (RPT f82d65d0: Jung / Klein 126 m "izole" 90+ sn)
                 || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}}
             ) then { continue };

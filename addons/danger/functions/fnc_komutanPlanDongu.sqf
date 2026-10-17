@@ -465,7 +465,7 @@ while {true} do {
 
         // plan bitti / iptal / grup yok
         if (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []} || {_faz isEqualTo "BITTI"}) then {
-            { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; } forEach (_plan get "gruplar");
+            { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; if (_x getVariable [QGVAR(hendekte), false]) then { { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doFollow (leader (group _x)); }; } forEach (units _x); }; _x setVariable [QGVAR(hendekte), nil]; _x setVariable [QGVAR(mevziIlk), nil]; } forEach (_plan get "gruplar");   // v8.243: hendekte bayragi plan sonunda silinir (agacGizlen / mevzi tutma sonsuza kadar kilitli kalmasin)
             { if (!isNull _x) then { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setCombatMode "YELLOW"; _x setBehaviour "AWARE"; _x setSpeedMode "NORMAL"; { _x setUnitPos "AUTO"; _x doWatch objNull; } forEach (units _x); }; } forEach (_plan getOrDefault ["reconG", []]);
             (_plan getOrDefault ["tasimaCtl", [false, true]]) set [0, true];   // bekleyen / yoldaki nakil isi iptal (v8.132)
             { deleteMarker _x; } forEach (_plan get "isaretler");
@@ -1114,7 +1114,20 @@ while {true} do {
             continue
         };
         if (_faz isEqualTo "BEKLE") then {
-            if (_fazSure > (missionNamespace getVariable ["lambs_danger_planSavunmaS", 1200])) then { [_plan, "BITTI", "savunma suresi doldu"] call _fazGec; };
+            // v8.243 SAVUNMA SURESI UZATMA (RPT c7592408: 1200 sn dolunca savunma plani saldiri baslamadan 12 sn once BITTI, hendekteki gruplar serbest kaldi): sure dolunca temas / bilinen dusman varsa
+            //   savunma 2 katina kadar (TASARIM degeri) surer; temas kesilince biter. Kapatma: lambs_danger_savunmaUzatmaOff = true.
+            private _savS = missionNamespace getVariable ["lambs_danger_planSavunmaS", 1200];
+            if (_fazSure > _savS) then {
+                private _temasVarS = (({[_x] call _temasta} count _gruplar) > 0) || {(_plan getOrDefault ["savDus", 0]) > 0};
+                if (_temasVarS && {_fazSure < (_savS * 2)} && {!(missionNamespace getVariable ["lambs_danger_savunmaUzatmaOff", false])}) then {
+                    if !(_plan getOrDefault ["savUzatildi", false]) then {
+                        _plan set ["savUzatildi", true];
+                        diag_log format ["[PLAN-SAVUNMA] %1 | SURE DOLDU (%2 sn) ama temas / bilinen dusman var (dusman %3) -> savunma temas kesilene kadar surer (en cok %4 sn)", _id, round _savS, _plan getOrDefault ["savDus", 0], round (_savS * 2)];
+                    };
+                } else {
+                    [_plan, "BITTI", "savunma suresi doldu"] call _fazGec;
+                };
+            };
             // v8.204 SAVUNMA KOMUTANI (kullanici: "savunma sadece bekliyor"; FM 3-98 engagement / disengagement + MCWP 3-11.1 savunmada yedek karsi saldirisi - genel ilke, esikler TASARIM degeri):
             //   ortak resim = plan gruplari liderlerinin objektif 400 m cevresinde bildigi dusman; YEDEK grup, (dusman >= 2 ve (savunma kaybi >= %25 ya da dusman objektife <= 150 m)) olunca dusmanin agirlik merkezine KARSI SALDIRI emri alir (150 sn'de bir);
             //   toplam kayip >= %60 ise savunma "mevzi kaybedildi" sayilir ve hayatta kalanlar cekilir (plan BITTI, gruplar serbest).
@@ -1122,13 +1135,20 @@ while {true} do {
                 _plan set ["savDenT", time];
                 private _tfS = _plan get "taraf";
                 private _dusN = [];
+                private _dusA = [];   // v8.243: topcu (savunma atesi) icin genis liste: objektife <= 900 m
                 {
                     private _glS = leader _x;
                     if (!isNull _glS) then {
                         {
                             private _hobj = _x select 4;
-                            if (!isNull _hobj && {(_tfS getFriend (_x select 2)) < 0.6} && {((_x select 0) distance2D _obj) < 400} && {(_glS knowsAbout _hobj) > 0.4} && {alive _hobj}) then { _dusN pushBackUnique _hobj; };
-                        } forEach (_glS nearTargets 700);
+                            // v8.243: yalniz GERCEK dusman (yaya ya da murettebatli arac); bos arac / statik / nesne dusman sayilmaz (RPT c7592408: hic dusman yokken '6 dusman, objektife 19 m' sayildi ve YEDEK acikta kaldi)
+                            if (!isNull _hobj && {(_tfS getFriend (_x select 2)) < 0.6} && {alive _hobj} && {(_glS knowsAbout _hobj) > 0.4}
+                                && {(_hobj isKindOf "CAManBase") || {(({alive _x} count (crew _hobj)) > 0) && {_hobj isKindOf "AllVehicles"}}}) then {
+                                private _dOb = (getPosATL _hobj) distance2D _obj;
+                                if (_dOb < 400) then { _dusN pushBackUnique _hobj; };
+                                if (_dOb < 900) then { _dusA pushBackUnique _hobj; };
+                            };
+                        } forEach (_glS nearTargets 900);
                     };
                 } forEach _gruplar;
                 private _ilkS = _plan getOrDefault ["ilkSayi", createHashMap];
@@ -1138,6 +1158,35 @@ while {true} do {
                 private _yakinD = 99999;
                 { _yakinD = _yakinD min ((getPosATL _x) distance2D _obj); } forEach _dusN;
                 _plan set ["savDus", count _dusN];
+                // v8.243 KARSI SALDIRI DONUSU (RPT c7592408: YEDEK grup 'dusman merkezine' gitti, orada acikta LINE halinde 10 dk durdu; 4 mermilik bir salvoda 7 kisi birden oldu): karsi saldiri grubu hedefe varip
+                //   temas yoksa (varis + 40 sn) ya da 200 sn sonra / dusman kalmayinca MEVZIsine DONER (hendekYerles / mevziKur, plan notu). Temas suruyorsa savasmaya devam eder.
+                private _notlar = _plan get "notlar";
+                private _ks = _plan getOrDefault ["karsiGrup", createHashMap];
+                _plan set ["karsiGrup", _ks];
+                private _ksBit = [];
+                {
+                    private _kg = objNull;
+                    private _kid = _x;
+                    { if ((groupId _x) isEqualTo _kid) exitWith { _kg = _x; }; } forEach _gruplar;
+                    if (isNull _kg || {({alive _x} count (units _kg)) isEqualTo 0}) then { _ksBit pushBack _kid; } else {
+                        private _kv = _ks get _kid;
+                        private _kt0 = _kv select 0;
+                        private _kep = _kv select 1;
+                        private _kGecen = time - _kt0;
+                        private _kVardi = ((leader _kg) distance2D _kep) < 45;
+                        private _kTemas = [_kg] call _temasta;
+                        if (!_kTemas && {(_kGecen > 200) || {_kVardi && {_kGecen > 40}} || {(_dusN isEqualTo []) && {_kGecen > 40}}}) then {
+                            _ksBit pushBack _kid;
+                            [_kg] call _wpTemizle;
+                            _kg setVariable ["lambs_danger_isExecutingTactic", nil];
+                            _kg setVariable [QGVAR(isBounding), nil];
+                            private _kn = _notlar getOrDefault [groupId _kg, [_obj, _B]];
+                            if ((_kn param [2, -1]) >= 0) then { [_kg, _kn select 2, _kn select 1] call FUNC(hendekYerles); } else { [_kg, _kn select 0, _kn select 1] call FUNC(mevziKur); };
+                            diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI BITTI: %2 mevziye donuyor (%3 sn, %4)", _id, groupId _kg, round _kGecen, ["sure/temas yok", "hedefe vardi"] select _kVardi];
+                        };
+                    };
+                } forEach (keys _ks);
+                { _ks deleteAt _x; } forEach _ksBit;
                 if (_kayipS >= 0.6 && {(count _dusN) >= 2}) then {
                     diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2%% >= 60%% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
                     [_plan, "BITTI", format ["savunma kaybi %1%% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
@@ -1145,8 +1194,8 @@ while {true} do {
                     if ((count _dusN) >= 2 && {(_kayipS >= 0.25) || {_yakinD <= 150}} && {(time - (_plan getOrDefault ["savKarsiT", -999])) > 150}) then {
                         // v8.231 TEK GRUP KARSI SALDIRI YAPMAZ (RPT 92fcbcbb: tek savunma grubu hendege yerlesti, 3 sn sonra "KARSI SALDIRI" ile hendekten cikip dusmana saldirdi — "mevzilenmiyorlar"): karsi saldiri YEDEKTIR; savunmada en az bir grup mevzide KALIR
                         //   (YEDEK rolu en az 2 grup, rolsuz yedek yalniz >= 3 grup varken; mevziyi tutan gruplar karsi saldiriya alinmaz)
-                        private _yedekG = if ((count _gruplar) >= 2) then { _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK" && {({alive _x} count (units _x)) >= 3} && {!([_x] call _temasta)}} } else {[]};
-                        if (_yedekG isEqualTo [] && {(count _gruplar) >= 3}) then { _yedekG = _gruplar select {({alive _x} count (units _x)) >= 4 && {!([_x] call _temasta)} && {!(_x getVariable [QGVAR(hendekte), false])}}; _yedekG = _yedekG select [0, 1]; };
+                        private _yedekG = if ((count _gruplar) >= 2) then { _gruplar select {(_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK" && {({alive _x} count (units _x)) >= 3} && {!([_x] call _temasta)} && {!((groupId _x) in (keys _ks))}} } else {[]};
+                        if (_yedekG isEqualTo [] && {(count _gruplar) >= 3}) then { _yedekG = _gruplar select {({alive _x} count (units _x)) >= 4 && {!([_x] call _temasta)} && {!(_x getVariable [QGVAR(hendekte), false])} && {!((groupId _x) in (keys _ks))}}; _yedekG = _yedekG select [0, 1]; };
                         if (_yedekG isNotEqualTo []) then {
                             private _ep = [0, 0, 0];
                             { _ep = _ep vectorAdd (getPosATL _x); } forEach _dusN;
@@ -1154,9 +1203,29 @@ while {true} do {
                             _plan set ["savKarsiT", time];
                             {
                                 [_x, "SALDIRI", [_ep]] call FUNC(hqEmir);
-                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%%, en yakin dusman objektife %7 m)", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD];
+                                _ks set [groupId _x, [time, _ep]];
+                                _x setVariable [QGVAR(hendekte), nil];   // v8.243: karsi saldiri sirasinda mevzi tutma devre disi; donuste hendekYerles tekrar yazar
+                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%%, en yakin dusman objektife %7 m) | dusmanlar: %8", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD,
+                                    ((_dusN select [0, 6]) apply { format ["%1/%2", typeOf _x, side (group (effectiveCommander _x))] }) joinString ", "];
                             } forEach _yedekG;
                         };
+                    };
+                };
+                // v8.243 SAVUNMA ATESI (RPT c7592408, kullanici: "savunan takim artillery cagirdi mi"): topcu destegi 'cagri' (2 / 3) olan savunma plani, bilinen dusman >= 3 (objektife <= 900 m) ve dusman
+                //   en yakin dostuna >= RED + 25 m iken (kalani _topcuAt kendi RED kurallariyla eler / kaydirir) dusman agirlik merkezine 120 sn'de bir atis ister (FM 3-09 savunma atesi / yaklasma yolu).
+                //   Eski durum: savunmada yalniz KARSI-BATARYA vardi (dusman topcusu bilinirse); yaklasan piyade / araca atis YOKTU. Kapatma: lambs_danger_savunmaTopcuOff = true.
+                if ((_plan getOrDefault ["topcu", 0]) in [2, 3] && {!(missionNamespace getVariable ["lambs_danger_savunmaTopcuOff", false])} && {(count _dusA) >= 3} && {(time - (_plan getOrDefault ["savTopT", -999])) > 120}) then {
+                    private _dostlarS = (allUnits select {alive _x && {(side (group _x)) isEqualTo _tfS}}) apply {getPosATL _x};
+                    private _uzakS = _dusA select {
+                        private _ph = getPosATL _x;
+                        (_dostlarS findIf {(_x distance2D _ph) < 480}) < 0
+                    };
+                    if ((count _uzakS) >= 2) then {
+                        private _tc = [0, 0, 0];
+                        { _tc = _tc vectorAdd (getPosATL _x); } forEach _uzakS;
+                        _tc = _tc vectorMultiply (1 / (count _uzakS));
+                        private _atildi = [_plan, _tc, format ["SAVUNMA ATESI (dusman %1, dosta >= 480 m olan %2)", count _dusA, count _uzakS]] call _topcuAt;
+                        _plan set ["savTopT", [time - 90, time] select _atildi];   // atilmadiysa (izin / menzil / RED) 30 sn sonra tekrar dener
                     };
                 };
             };

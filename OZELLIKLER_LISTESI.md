@@ -146,6 +146,14 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 
 - **Stryker FFV kök neden düzeltmesi (v8.240, T)**: yolcu FFV koltuğundayken RHS Stryker sürücü emrini yapmıyordu (A/B testiyle bulundu). Düz koltuk sayımı (`aracDuzBos`), düz koltuğa oturtma (`aracYolcuKoy`) ve FFV yolcusunu düz koltuğa taşıyan/indiren watchdog (`aracFfvDuzelt`, `ffvDuzeltOff`). Stryker nakil kapasitesi 6.
 
+- **Mevzi tutma (v8.243, T)**: hendekteki grup (SAVUN planı ya da hendek bilinci) LAMBS komutan beynine (DELAY→hide, HOLD→`Hide (holding)`, FLANK/ASSAULT), buddy bağına, dağılmaya ve rol istasyonuna tabi değildir; yerinde durup ateş eder. İstisna: grup kaybı ≥ %60 (TASARIM). `[MEVZI-TUT]` (`mevziTutOff`).
+- **Karşı saldırı dönüşü (v8.243, T)**: YEDEK grup karşı saldırıdan temas yoksa (varış + 40 sn / 200 sn) mevzisine döner; düşman listesi yalnız gerçek (yaya / mürettebatlı) hedefler. `[PLAN-SAVUNMA] KARSI SALDIRI BITTI`.
+- **Savunma süresi uzatma (v8.243, T)**: süre dolunca temas / bilinen düşman varsa savunma planı en çok 2 katına kadar sürer (`savunmaUzatmaOff`).
+- **Savunma ateşi (v8.243, T)**: topçu desteği "çağrı" olan SAVUN planı, bilinen düşman ≥ 3 ve düşman dostuna ≥ 480 m iken 120 sn'de bir düşman ağırlık merkezine atış ister (RED kuralları `_topcuAt`'te). `[PLAN-TOPCU] ... SAVUNMA ATESI` (`savunmaTopcuOff`).
+- **Araç-piyade senkronu BEKLE tavanı (v8.243, T)**: duran (hendekteki) piyadeyi bekleyen araç 45 sn sonra 90 sn serbest kalır (`senkTavanOff`).
+- **Topçu erken kaçış + `[TOP-TEPKI]` (v8.243, T)**: hendek erişimi yoksa ve tehlike yarıçapı içindeyse (uyarı ≥ 10 sn) hemen uzaklaşır (45 m'ye kadar) (`topErkenKacisOff`).
+- **IFV sürücü emri onarımı (v8.243, T — kök neden kesin değil)**: planZirh BTR'sinin sürücüsü `GET OUT` / atamasız ise yeniden atanır (`zirhSurucuOnarOff`).
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.
