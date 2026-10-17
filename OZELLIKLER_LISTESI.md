@@ -144,6 +144,8 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Çoklu mevzi (v8.239, T)**: Zeus Plan Noktası → "MEVZI ekle" (birden çok); SAVUN planı gruplara halka yerine bu mevzileri dağıtır (tehdit yönüne yakın önce; hendek 40 m içindeyse hendeğe). `[PLAN-MEVZI]`.
 - **Araç sürüş A/B testi (v8.239, T)**: Zeus "ELITE Arac SURUS A/B Testi" — AI sürücü kök neden tanısı (ELITE kapalı/açık, doMove/waypoint, yolcu, otomatik bisect). `[SURUS-AB-*]`.
 
+- **Stryker FFV kök neden düzeltmesi (v8.240, T)**: yolcu FFV koltuğundayken RHS Stryker sürücü emrini yapmıyordu (A/B testiyle bulundu). Düz koltuk sayımı (`aracDuzBos`), düz koltuğa oturtma (`aracYolcuKoy`) ve FFV yolcusunu düz koltuğa taşıyan/indiren watchdog (`aracFfvDuzelt`, `ffvDuzeltOff`). Stryker nakil kapasitesi 6.
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.

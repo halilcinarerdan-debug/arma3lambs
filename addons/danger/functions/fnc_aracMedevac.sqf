@@ -65,10 +65,10 @@ private _gorev = {
         diag_log format ["[ARAC-MEDEVAC] %1 | VARDI (%2 m) | yukleme basliyor", groupId _vg, round (_v distance2D _yPos)];
         private _adaylar = (_yaralilar select {alive _x && {(_x distance2D _v) < 25}});
         {
-            if (!alive _v || {(_v emptyPositions "cargo") < 1}) exitWith {};
+            if (!alive _v || {(([_v] call FUNC(aracDuzBos))) < 1}) exitWith {};
             sleep 6;
             if (alive _x && {isNull objectParent _x}) then {
-                _x moveInCargo _v;
+                [_x, _v] call FUNC(aracYolcuKoy);
                 if (!isNull objectParent _x) then { _yuklenen pushBack _x; };
             };
         } forEach (_adaylar select [0, 3]);
@@ -179,7 +179,7 @@ private _calis = {
                 if (isNull _l || {!local _vg} || {isPlayer _l} || {(side _vg) isNotEqualTo _taraf}) then { continue };
                 private _v = vehicle _l;
                 if (_v isEqualTo _l || {!(_v isKindOf "LandVehicle")} || {!alive _v} || {!canMove _v} || {(fuel _v) < 0.1}) then { continue };
-                if ((_v emptyPositions "cargo") < 1) then { continue };
+                if ((([_v] call FUNC(aracDuzBos))) < 1) then { continue };
                 if (_v getVariable [QGVAR(tasimaMesgul), false]) then { continue };
                 if ("KARAKOL_ARAC" in [_v getVariable ["lambs_danger_gorev", ""], _vg getVariable ["lambs_danger_gorev", ""]] || {"RECON_ARAC" in [_v getVariable ["lambs_danger_gorev", ""], _vg getVariable ["lambs_danger_gorev", ""]]} || {_v getVariable [QGVAR(reconArac), false]}) then { continue };
                 // v8.129 DOKTRIN: tahliye araci cepheye girmez. Standoff (duşmana en az): zirhli 300 m, yumusak arac 600 m

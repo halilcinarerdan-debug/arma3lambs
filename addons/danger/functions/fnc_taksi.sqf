@@ -48,7 +48,7 @@ private _calis = {
                                 private _yakin = (_u distance2D _v) < 30;
                                 if (isNull (commander _v)) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
                                     if (isNull (gunner _v)) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
-                                        _u assignAsCargo _v; if (_yakin) then { _u moveInCargo _v; } else { [_u] orderGetIn true; };
+                                        _u assignAsCargo _v; if (_yakin) then { [_u, _v] call FUNC(aracYolcuKoy); } else { [_u] orderGetIn true; };
                                     };
                                 };
                             } forEach _dis;

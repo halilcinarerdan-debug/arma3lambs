@@ -113,6 +113,17 @@ switch (_set) do {
             ["U", "8 yolcu + turret yolcularini murettebat grubuna kat (JOIN)", true, "JOIN+DOMOVE", 8, "CARGO"]
         ];
     };
+    case 4: {   // DUZELTME DOGRULAMA (v8.240): fnc_aracFfvDuzelt + duz koltuk; 'BAYRAK' = tasimaMesgul / reconArac bayragi (gercek nakil / recon akislari bunu koyar)
+        _kodlar = [
+            ["C", "kontrol: yolcusuz", true, "DOMOVE", 0, "CARGO"],
+            ["V1", "4 yolcu moveInCargo (FFV'ye oturur), BAYRAKSIZ (duzeltme devrede DEGIL, bozuk beklenir)", true, "DOMOVE", 4, "CARGO"],
+            ["V2", "4 yolcu moveInCargo + nakil bayragi (FFV-DUZELT)", true, "BAYRAK+DOMOVE", 4, "CARGO"],
+            ["V3", "8 yolcu + nakil bayragi (6 duz koltuga sigar, fazlasi iner)", true, "BAYRAK+DOMOVE", 8, "CARGO"],
+            ["V4", "9 yolcu (tam doluluk) + nakil bayragi", true, "BAYRAK+DOMOVE", 9, "CARGO"],
+            ["V5", "4 yolcu orderGetIn (gercek binme) + nakil bayragi", true, "BAYRAK+DOMOVE", 4, "ORDERGETIN"],
+            ["V6", "4 yolcu + RECON bayragi + RECON profili", true, "RECONBAYRAK+RECON", 4, "CARGO"]
+        ];
+    };
     case 3: {   // KOLTUK / KOMUTAN AYRISTIRMA (v8.239e): kullanici RPT 5a430538: 1 yolcu bile Stryker'i durduruyor, ayni grup / JOIN / RELOKE duzeltmedi
         _kodlar = [
             ["C", "kontrol: yolcusuz", true, "DOMOVE", 0, "CARGO"],
@@ -210,7 +221,9 @@ private _emir = {
     _r set ["bas", getPosATL _v];
     _r set ["t0", time];
     if (isNull _d) exitWith { _r set ["not", "SURUCU YOK (createVehicleCrew bos)"]; };
-    if (_tur in ["RECON", "RECON-HAFIF"]) then {
+    private _tt = _tur splitString "+";
+    if (("RECON" in _tt) || {"RECON-HAFIF" in _tt}) then {
+        if ("RECONBAYRAK" in _tt) then { _v setVariable ["lambs_danger_reconArac", true]; sleep 2.5; };
         // fnc_reconArac CALIS ile ayni sira: alma sonrasi doStop; bindirme; yolcu PATH kapali (yalniz TAM profil); sessiz surus ayarlari; doMove + 'ELITE RECON-ARAC' waypoint'i
         doStop _d;
         _g setBehaviour "SAFE";
@@ -218,7 +231,7 @@ private _emir = {
         _g setSpeedMode "NORMAL";
         _v setPilotLight false;
         _v setCollisionLight false;
-        if (_tur isEqualTo "RECON") then {
+        if ("RECON" in _tt) then {
             _g setVariable ["lambs_danger_isExecutingTactic", true];
             _d setVariable ["lambs_danger_forceMove", true];
             _d setVariable ["lambs_danger_senkT", time + 900];
@@ -238,7 +251,7 @@ private _emir = {
         _w2 setWaypointSpeed "NORMAL";
         _g setCurrentWaypoint _w2;
     } else {
-        private _t = _tur splitString "+";
+        private _t = _tt;
         if ("BEKLE6" in _t) then { sleep 6; };
         // KOK NEDEN ADAYI DUZELTMELERI (v8.239d; kullanici RPT e3dcbf88: yolculu Stryker'da ETKIN KOMUTAN yolcu grubundan = 'Alpha 2-2 = YOLCU / BASKA GRUP', yolcusuz = murettebatin kendi gunner'i)
         if ("RELOKE" in _t) then {
@@ -269,6 +282,7 @@ private _emir = {
         if ("RANKPAX" in _t) then { { if ((group _x) isNotEqualTo _g) then { _x setRank "COLONEL"; }; } forEach (crew _v); sleep 1; };
         if ("RANKCREW" in _t) then { { if ((group _x) isEqualTo _g) then { _x setRank "COLONEL"; }; } forEach (crew _v); sleep 1; };
         if ("PAXAIOFF" in _t) then { { if ((group _x) isNotEqualTo _g) then { _x disableAI "ALL"; }; } forEach (crew _v); };
+        if ("BAYRAK" in _t) then { _v setVariable ["lambs_danger_tasimaMesgul", true]; sleep 2.5; };
         if ("DOSTOP" in _t) then { doStop _d; };
         if ("SAFE" in _t) then {
             _g setBehaviour "SAFE";

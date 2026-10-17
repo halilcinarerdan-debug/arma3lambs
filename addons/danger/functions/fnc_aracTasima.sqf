@@ -73,7 +73,7 @@ private _tamamlandi = 0;
         private _yakin = (_u distance2D _v) < 30;
         if (isNull (commander _v)) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
             if (isNull (gunner _v)) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
-                _u assignAsCargo _v; if (_yakin) then { _u moveInCargo _v; } else { [_u] orderGetIn true; };
+                _u assignAsCargo _v; if (_yakin) then { [_u, _v] call FUNC(aracYolcuKoy); } else { [_u] orderGetIn true; };
             };
         };
     } forEach _dis;
@@ -96,7 +96,7 @@ private _pickRef = call _merkezPiy;
 private _tumAraclar = (vehicles select {
     alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(fuel _x) > 0.1}
     && {!(_x getVariable ["lambs_danger_reconArac", false])}
-    && {(_x emptyPositions "cargo") >= 3}
+    && {(([_x] call FUNC(aracDuzBos))) >= 3}
     && {(_x distance2D _pickRef) <= _menzil}
 });
 // v8.166: TASIMA atanmis ama surucu grubu baska makinede (Zeus istemcisi) ise sunucuya devret (yerel degilse arac hic hareket etmiyordu)
@@ -133,7 +133,7 @@ private _uygun = _tumAraclar select {
         private _neden = if (!alive _v) then {"arac yikildi"} else {
             if (!canMove _v) then {"hareket edemiyor (canMove false)"} else {
             if ((fuel _v) <= 0.1) then {"yakit <= %10"} else {
-            if ((_v emptyPositions "cargo") < 3) then {format ["bos kargo yeri %1 (< 3)", _v emptyPositions "cargo"]} else {
+            if ((([_v] call FUNC(aracDuzBos))) < 3) then {format ["bos kargo yeri %1 (< 3)", ([_v] call FUNC(aracDuzBos))]} else {
             if ((_v distance2D _pickRef) > _menzil) then {format ["piyadeye %1 m (> %2)", round (_v distance2D _pickRef), round _menzil]} else {
             if (isNull _d) then {"surucu YOK"} else {
             if (isPlayer _d) then {"surucu oyuncu"} else {
@@ -155,7 +155,7 @@ private _araclar = if (_atanan isNotEqualTo []) then {_atanan} else {
 };
 if (_araclar isEqualTo []) exitWith {
     diag_log format ["[TASIMA] %1 | arac YOK: kara araci(kargo>=3) %2 | menzilde %3 (<= %4 m) | uygun (AI surucu, grup ici, gorev disi) %5 | atanmis TASIMA %6", _taraf,
-        count (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {(_x emptyPositions "cargo") >= 3}}), count _tumAraclar, round _menzil, count _uygun, count _atanan];
+        count (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {(([_x] call FUNC(aracDuzBos))) >= 3}}), count _tumAraclar, round _menzil, count _uygun, count _atanan];
     0
 };
 _araclar = [_araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
@@ -178,7 +178,7 @@ private _inisM = [_dg0, "tasimaInisM", 500] call FUNC(dk);
 private _dropM = if ([_dg0, "tasimaOrpEk", true] call FUNC(dk)) then { _inisM max (_orpM + 150) } else { _inisM };
 private _destekKal = [_dg0, "aracDestekKal", false] call FUNC(dk);
 // v8.163: gercek koltuk sayisi emptyPositions'tan az olabilir (RPT 69d7f8f5: Fuchs 8 gosterdi, 7 bindi, 3 asker acikta kaldi) -> tip basina OGRENILEN kapasite kullanilir
-private _kapGercek = _araclar apply {[_x, (_x emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _x], 99])]};
+private _kapGercek = _araclar apply {[_x, (([_x] call FUNC(aracDuzBos))) min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _x], 99])]};
 private _kalan = [];
 private _eslesme = [];   // [arac, [birim dizileri]]
 private _yaya = [];
@@ -451,13 +451,13 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 if (_n isNotEqualTo _bn) then { _bn = _n; _bTT = time; };
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {[_hepsi, _d] call _temasVar}
-                || {_n > 0 && {(_v emptyPositions "cargo") isEqualTo 0}}
+                || {_n > 0 && {(([_v] call FUNC(aracDuzBos))) isEqualTo 0}}
                 || {_n > 0 && {(time - _bTT) > 15}}
             };
             // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
             private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};
             private _icerde = count (_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}});
-            if (_disarida isNotEqualTo [] && {_icerde > 0} && {(_v emptyPositions "cargo") isEqualTo 0}) then {
+            if (_disarida isNotEqualTo [] && {_icerde > 0} && {(([_v] call FUNC(aracDuzBos))) isEqualTo 0}) then {
                 missionNamespace setVariable [format ["lambs_danger_tasimaKap_%1", typeOf _v], _icerde];
                 diag_log format ["[TASIMA] %1 | KAPASITE OGRENILDI: %2 gercek %3 koltuk (emptyPositions fazla gosteriyordu); %4 asker disarida kaldi (sefer ile alinacak)", groupId _vg, typeOf _v, _icerde, count _disarida];
             };
@@ -469,7 +469,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 _iptal = "binerken temas / baski: bindirme iptal";
             };
             // gecikenler: 40 m icindeyse arac icine al
-            { if (_iptal isEqualTo "" && {alive _x} && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _hepsi;
+            { if (_iptal isEqualTo "" && {alive _x} && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(([_v] call FUNC(aracDuzBos))) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); }; } forEach _hepsi;
             _binen = if (_iptal isEqualTo "") then {_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}} else {[]};
             if (_iptal isEqualTo "" && {_binen isEqualTo []}) then { _iptal = "kimse binmedi"; };
         };
@@ -526,8 +526,8 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                                 };
                             };
                         } else {
-                            if ((_u distance2D _v) < 80 && {(speed _v) > 3 || {call _uzakTut}} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(_v emptyPositions "cargo") > 0}) then {
-                                _u moveInCargo _v;
+                            if ((_u distance2D _v) < 80 && {(speed _v) > 3 || {call _uzakTut}} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(([_v] call FUNC(aracDuzBos))) > 0}) then {
+                                [_u, _v] call FUNC(aracYolcuKoy);
                                 diag_log format ["[TASIMA] %1 | YOLCU GERI ALINDI: %2 | arac hizi %3 km/s", _gid, name _u, round speed _v];
                             };
                         };

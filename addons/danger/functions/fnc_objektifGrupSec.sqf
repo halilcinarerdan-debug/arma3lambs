@@ -94,7 +94,7 @@ if (_parca isEqualTo []) exitWith {
             private _sn = ([_sv] call (missionNamespace getVariable ["lambs_danger_fnc_aracSinif", {["DIGER"]}])) select 0;
             if (_sn in ["IFV", "APC", "KAMYON"]) then {
                 _aracSay = _aracSay + 1;
-                _koltuk = _koltuk + ((_sv emptyPositions "cargo") min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _sv], 99]));
+                _koltuk = _koltuk + ((([_sv] call FUNC(aracDuzBos))) min (missionNamespace getVariable [format ["lambs_danger_tasimaKap_%1", typeOf _sv], 99]));
             };
         } else {
             _asker = _asker + ({alive _x && {isNull objectParent _x}} count (units _sg));

@@ -29,7 +29,7 @@ if (_mod isEqualTo "SEC") exitWith {
     private _aday = vehicles select {
         private _v = _x;
         private _d = driver _v;
-        alive _v && {_v isKindOf "LandVehicle"} && {canMove _v} && {(fuel _v) > 0.1} && {(_v emptyPositions "cargo") >= (count _birimler)}
+        alive _v && {_v isKindOf "LandVehicle"} && {canMove _v} && {(fuel _v) > 0.1} && {(([_v] call FUNC(aracDuzBos))) >= (count _birimler)}
         && {!isNull _d} && {!isPlayer _d} && {local _d} && {(side (group _d)) isEqualTo _taraf}
         && {(_v distance2D _mrk) <= 4000}
         && {!(_v getVariable [QGVAR(tasimaMesgul), false])} && {!(_v getVariable [QGVAR(reconArac), false])}
@@ -54,7 +54,7 @@ if (_mod isEqualTo "SEC") exitWith {
     _aday = [_aday, [], {-(_x call _puan)}, "ASCEND"] call BIS_fnc_sortBy;
     private _v = _aday select 0;
     _v setVariable [QGVAR(reconArac), true];
-    diag_log format ["[RECON-ARAC] %1 | recon araci secildi: %2 [%3] (%4 koltuk, %5 m) | recon %6 asker | gorev etiketi %7", _plan get "id", getText (configOf _v >> "displayName"), ([_v] call FUNC(aracSinif)) select 0, _v emptyPositions "cargo", round (_v distance2D _mrk), count _birimler, [_v getVariable ["lambs_danger_gorev", ""], (group (driver _v)) getVariable ["lambs_danger_gorev", ""]]];
+    diag_log format ["[RECON-ARAC] %1 | recon araci secildi: %2 [%3] (%4 koltuk, %5 m) | recon %6 asker | gorev etiketi %7", _plan get "id", getText (configOf _v >> "displayName"), ([_v] call FUNC(aracSinif)) select 0, ([_v] call FUNC(aracDuzBos)), round (_v distance2D _mrk), count _birimler, [_v getVariable ["lambs_danger_gorev", ""], (group (driver _v)) getVariable ["lambs_danger_gorev", ""]]];
     _v
 };
 
@@ -107,7 +107,7 @@ doStop _d;
 _birimler orderGetIn true;
 private _tb = time + 60;
 waitUntil { sleep 1; !alive _v || {time > _tb} || {(_birimler findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} };
-{ if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 60} && {(_v emptyPositions "cargo") > 0}) then { _x moveInCargo _v; }; } forEach _birimler;
+{ if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 60} && {(([_v] call FUNC(aracDuzBos))) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); }; } forEach _birimler;
 private _icerde = _birimler select {alive _x && {(vehicle _x) isEqualTo _v}};
 if (_icerde isEqualTo []) exitWith { ["kimse binmedi"] call _basarisiz; };
 { _x disableAI "PATH"; } forEach _icerde;   // sessiz seyir: yolcu kendi basina inmez
