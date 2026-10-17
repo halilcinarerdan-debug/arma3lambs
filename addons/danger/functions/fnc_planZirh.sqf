@@ -33,6 +33,7 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
             _g setVariable ["lambs_danger_planZirh", nil];
             _g setVariable ["lambs_danger_planZirhPoz", nil];
             _g setVariable ["lambs_danger_planZirhVardi", nil];
+            _g setVariable ["lambs_danger_planZirhHide", nil];
             _g setVariable ["lambs_danger_planAktif", nil, true];
             _g setBehaviour "AWARE";
             _g setCombatMode "YELLOW";
@@ -60,6 +61,10 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     if (isNull _d || {isPlayer _d}) then { continue };
     // v8.175 TANK ROLU: kargosuz tank uzaktan agir ates destegi (650 m, SALDIRI'da 450 m'ye sicrar), hedef onceligi zirh > AT > MG; ates acik alana gelince objektif alanina bastirma atesi (dost 70 m disinda)
     private _tankMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "TANK";
+    // v8.244 SAVUNMA MEVZISI (ATP 3-20.15 4-46..4-49, 4-69..4-78; kullanici: 'tank savunma mevzisi'): savunma planinda (tip 1) tank/IFV objektifin ONUNDE 650 m degil, piyade hattinin icinde / arkasinda
+    //   (objektife 70-260 m) tehdit yonune bakan, gövde-asagi (hull-down) birincil mevziye yerlesir; tehdit yaklasana kadar birincil mevzinin 55 m ARKASINDAKI gizleme noktasinda bekler (4-76/4-77).
+    //   Mesafeler TASARIM degeri (kitapta sayi YOK). Kapatma: lambs_danger_tankMevziOff = true (eski ileri ates pozisyonu).
+    private _savunma = ((_plan getOrDefault ["tip", 0]) isEqualTo 1) && {!(missionNamespace getVariable ["lambs_danger_tankMevziOff", false])};
     _g setVariable ["lambs_danger_planZirh", true];
     _g setVariable ["lambs_danger_planAktif", true, true];
 
@@ -85,11 +90,23 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         };
     };
     private _yk = _g getVariable ["lambs_danger_planZirhYakin", false];
-    private _merkezD = if (_tankMi) then {[650, 450] select _yk} else {[500, 350] select _yk};
+    private _merkezD = if (_savunma) then {[150, 110] select _tankMi} else { if (_tankMi) then {[650, 450] select _yk} else {[500, 350] select _yk} };
     // ---- ates pozisyonu (bir kez) ----
     private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
     if (_poz isEqualTo []) then {
         private _yon = _obj getDir _sbf;
+        if (_savunma) then {
+            // tehdit yonu: bilinen dusmanlarin agirlik merkezi > Zeus 'tehdit yonu' > SBF yonu
+            private _tb = _plan getOrDefault ["tehditB", -1];
+            if (_tb >= 0) then { _yon = _tb; };
+            private _bil = (_l nearTargets 2000) select {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)}};
+            if (_bil isNotEqualTo []) then {
+                private _bx = 0; private _by = 0;
+                { _bx = _bx + ((_x select 0) select 0); _by = _by + ((_x select 0) select 1); } forEach _bil;
+                _yon = _obj getDir [_bx / (count _bil), _by / (count _bil)];
+            };
+        };
+        private _bakNokta = _obj getPos [700, _yon];
         private _en = [];
         private _enS = -1e9;
         private _adaylar = [];
@@ -100,7 +117,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                 private _p = _obj getPos [_dist, _yon + _a];
                 if (!surfaceIsWater _p && {(nearestObjects [_p, ["House"], 10]) isEqualTo []} && {(count (nearestTerrainObjects [_p, ["TREE"], 12])) < 4} && {((_plan getOrDefault ["zirhPozlar", []]) findIf {(_x distance2D _p) < 70}) < 0}) then {
                     private _e1 = (AGLToASL [_p select 0, _p select 1, 0]) vectorAdd [0, 0, 2.4];
-                    private _e2 = (AGLToASL [_obj select 0, _obj select 1, 0]) vectorAdd [0, 0, 1.5];
+                    private _e2 = (AGLToASL [([_obj, _bakNokta] select _savunma) select 0, ([_obj, _bakNokta] select _savunma) select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];
                     private _s = [0, 100] select _gor;
                     // v8.194 HULL-DOWN (ATP 3-20.15 3-76: koruma / gizlenme + engelsiz gozlem + acik ates alani): taret yuksekliginden hedef gorunur AMA govde yuksekliginden (1.0 m) gorunmez = hull-down
@@ -114,7 +131,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30, 45, -45, 60, -60];
-        } forEach (if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk});
+        } forEach (if (_savunma) then {[150, 110, 190, 70, 230, 260]} else { if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk} });
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         // v8.194 YEDEK MEVZI (ATP 3-20.15 3-76: birincil ve yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinir): en iyi mevziden >= 60 m uzakta en yuksek puanli aday
         private _alt = [];
@@ -122,7 +139,20 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         { if ((_x select 1) distance2D _en >= 60 && {(_x select 0) > _altS}) then { _altS = _x select 0; _alt = _x select 1; }; } forEach _adaylar;
         _g setVariable ["lambs_danger_planZirhAlt", _alt];
         _poz = _en;
-        (_plan getOrDefault ["zirhPozlar", []]) pushBack _poz;   // v8.180: zirh araclari ayni noktaya yigilmaz (>= 70 m aralik)
+        _g setVariable ["lambs_danger_planZirhBak", [_obj, _bakNokta] select _savunma];
+        if (_savunma) then {
+            // birincil mevzi = _en; arac once 55 m GERIDEKI gizleme noktasina gider, tetikte (dusman <= 1500 m bilinen / piyade temasi) birincile cikar
+            _g setVariable ["lambs_danger_planZirhAsil", _en];
+            _g setVariable ["lambs_danger_planZirhHide", true];
+            private _hidePt = _en getPos [55, _yon + 180];
+            if (surfaceIsWater _hidePt) then { _hidePt = _en; };
+            (_plan getOrDefault ["zirhPozlar", []]) pushBack _en;
+            _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
+            _poz = _hidePt;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 SAVUNMA MEVZISI: birincil %3 (objektife %4 m, tehdit yonu %5), gizleme noktasi %6 (55 m geride), alternatif %7", _id, groupId _g, mapGridPosition _en, round (_en distance2D _obj), round _yon, mapGridPosition _hidePt, if (_alt isEqualTo []) then {"yok"} else {mapGridPosition _alt}];
+        } else {
+            (_plan getOrDefault ["zirhPozlar", []]) pushBack _poz;
+        };   // v8.180: zirh araclari ayni noktaya yigilmaz (>= 70 m aralik)
         _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
         _g setVariable ["lambs_danger_planZirhPoz", _poz];
         _g setVariable ["lambs_danger_planZirhT", time];
@@ -137,14 +167,33 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             _id, groupId _g, getText (configOf _v >> "displayName"), mapGridPosition _poz, round (_poz distance2D _obj), _enS >= 50, round (_poz distance2D _sbf), _faz];
     };
 
+    // ---- v8.244 SAVUNMA: gizleme noktasindan birincil mevziye cikis (tetik: dusman <= 1500 m bilinen ya da plan piyadesi temasta ya da savas fazi) ----
+    if (_savunma && {_g getVariable ["lambs_danger_planZirhHide", false]} && {(time - (_g getVariable ["lambs_danger_planZirhTetikT", -999])) > 3}) then {
+        _g setVariable ["lambs_danger_planZirhTetikT", time];
+        private _tetik = _savas || {((_l nearTargets 1500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)}}) >= 0};
+        if (_tetik) then {
+            private _asil = _g getVariable ["lambs_danger_planZirhAsil", _poz];
+            _g setVariable ["lambs_danger_planZirhHide", false];
+            _g setVariable ["lambs_danger_planZirhPoz", _asil];
+            _g setVariable ["lambs_danger_planZirhVardi", nil];
+            _g setVariable ["lambs_danger_planZirhT", time];
+            _g setVariable ["lambs_danger_planZirhMax", 120];
+            _poz = _asil;
+            _g setBehaviour "COMBAT";
+            _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
+            _d doMove _poz;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 TETIK: gizleme noktasindan birincil mevziye cikiyor (%3 m) | piyade temasi %4 | faz %5", _id, groupId _g, round (_v distance2D _poz), _piyadeTemas, _faz];
+        };
+    };
+
     // ---- varis ----
     private _vardi = _g getVariable ["lambs_danger_planZirhVardi", false];
     if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
         _vardi = true;
         _g setVariable ["lambs_danger_planZirhVardi", true];
         doStop _d;
-        { _x doWatch _obj; } forEach (crew _v);
-        diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide (%3 m kalan) | objektife %4 m", _id, groupId _g, round (_v distance2D _poz), round (_v distance2D _obj)];
+        { _x doWatch (_g getVariable ["lambs_danger_planZirhBak", _obj]); } forEach (crew _v);
+        diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide%3 (%4 m kalan) | objektife %5 m", _id, groupId _g, [""," (GIZLEME NOKTASI)"] select (_g getVariable ["lambs_danger_planZirhHide", false]), round (_v distance2D _poz), round (_v distance2D _obj)];
     } else {
         // yoldayken yeniden yonlendirme (takilmasin)
         if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20}) then {

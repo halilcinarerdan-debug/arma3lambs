@@ -175,3 +175,13 @@ Ortam: P1 gibi EAST SAVUN (4 grup, hendek alani var), karsi taraf WEST ELE GECIR
 6. Senkron tavani: hendekte duran piyadenin onunde GOZETLEME gorevli tank: `[ARAC-SENKRON] ... SERBEST (eskort piyade durdu: BEKLE tavani ...)`.
 7. IFV 'bekliyor' vakasi: `[PLAN-ZIRH] ... SURUCU EMRI ONARILDI` (ilk 3) ve `TAKILDI` satirinda surucu komut / motor / canMove bilgisi.
 Hepsi (T) = dogrulanmadi; kapatma anahtarlari: mevziTutOff, savunmaUzatmaOff, savunmaTopcuOff, senkTavanOff, topErkenKacisOff, zirhSurucuOnarOff.
+
+## T-TANK-MEVZI (v8.244): savunmada tank / IFV mevzisi + surucu yenileme
+Ortam: SAVUN plani (Zeus elle secimde TANK grubu da secili; tehdit yonu verilirse daha iyi), RHS tank (T-72/T-80/T-90 veya M1A1) + BTR/BMP/Bradley.
+1. `[PLAN-ZIRH] ... SAVUNMA MEVZISI: birincil .. (objektife 70-260 m, tehdit yonu ..), gizleme noktasi .. (55 m geride), alternatif ..` satiri; tank objektifin onunde 650 m'de OLMAMALI.
+2. Dusman >1500 m iken tank gizleme noktasinda durur (`mevzide (GIZLEME NOKTASI)`); dusman <=1500 m bilinince `TETIK: gizleme noktasindan birincil mevziye cikiyor` ve tank tehdit yonune bakar.
+3. Hasar >= 0.08: `YER DEGISTIRIYOR` (alternatif). Gorus hatti yoksa (hull-down aday yok) mevzi yine secilir; log 'gorus hatti false'.
+4. Surucu yenileme: dolu BTR/IFV'nin suruculusunu Zeus'ta oldur: 3-6 sn icinde `[SURUCU-YENILE] ... yolcu .. surucu koltuguna gecti`; arac devam etmeli (planZirh yeni surucuye doMove verir). Tankta yolcu yoksa `yedek surucu YOK` bir kez yazar.
+5. Gozetleme tanki (Zeus gozetleme gorevi): vardiginda `[GOZETLE-ARAC] ... derece gozetliyor` yonu dusmana / tehdit yonune bakmali.
+Kapatma: tankMevziOff, surucuYenileOff. Hepsi (T) = dogrulanmadi.
+

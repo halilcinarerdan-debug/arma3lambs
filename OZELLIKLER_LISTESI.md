@@ -154,6 +154,10 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Topçu erken kaçış + `[TOP-TEPKI]` (v8.243, T)**: hendek erişimi yoksa ve tehlike yarıçapı içindeyse (uyarı ≥ 10 sn) hemen uzaklaşır (45 m'ye kadar) (`topErkenKacisOff`).
 - **IFV sürücü emri onarımı (v8.243, T — kök neden kesin değil)**: planZirh BTR'sinin sürücüsü `GET OUT` / atamasız ise yeniden atanır (`zirhSurucuOnarOff`).
 
+- **Tank / IFV savunma mevzisi (v8.244, T)**: SAVUN planındaki tank/IFV (planZirh) objektifin önünde 650 m değil, piyade hattının içinde/arkasında (objektife 70-260 m) tehdit yönüne bakan hull-down birincil mevziye yerleşir; tehdit gelene kadar 55 m gerideki gizleme noktasında bekler, tetikte (≤1500 m bilinen düşman / piyade teması) birincile çıkar; hasarda alternatif mevziye geçiş (v8.194) korunur. `[PLAN-ZIRH] SAVUNMA MEVZISI / TETIK` (`tankMevziOff`). Kaynak: ATP 3-20.15 4-46..4-49, 4-69..4-78 (mesafeler TASARIM).
+- **Sürücü yenileme (v8.244, T)**: sürücü ölürse yaşayan AI yolcu (en düşük rütbe) sürücü koltuğuna geçer; yolcusuz araç (tank) yedek bulamaz, log yazar. `[SURUCU-YENILE]` (`surucuYenileOff`).
+- **Gözetleme aracı yönü (v8.244, T)**: karakol gözetleme tankı noktaya vardığında bilinen düşmana, yoksa plan tehdit yönüne bakar (eskiden noktadan dışarı sabit yön).
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.

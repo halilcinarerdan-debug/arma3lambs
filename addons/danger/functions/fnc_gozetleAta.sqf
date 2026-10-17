@@ -102,6 +102,12 @@ _g setVariable ["lambs_danger_gozetleDongu", true];
                             _av setVariable ["lambs_danger_gozetleVardi", true];
                             doStop _sr;
                             private _dir = (_merkez getDir _hp) + 180;
+                            // v8.244 (RPT c7592408: EAST T-90 gozetleme noktasina vardi ve dusmanin geldigi yonun TERSINE, 259 derece gozetledi): bilinen dusman varsa ona, yoksa ayni taraftaki planin tehdit yonune bak
+                            private _enG = _sr findNearestEnemy _sr;
+                            if (!isNull _enG) then { _dir = _av getDir _enG; } else {
+                                private _pl = (values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) select {(_x getOrDefault ["taraf", sideUnknown]) isEqualTo (side _g2) && {(_x getOrDefault ["tehditB", -1]) >= 0}};
+                                if (_pl isNotEqualTo []) then { _dir = (_pl select 0) get "tehditB"; };
+                            };
                             { if (alive _x) then { _x doWatch (_av getPos [300, _dir]); }; } forEach ((crew _av) select {_x isNotEqualTo _sr});
                             diag_log format ["[GOZETLE-ARAC] %1 | %2 noktaya VARDI (%3 m), %4 derece gozetliyor", groupId _g2, getText (configOf _av >> "displayName"), round (_av distance2D _merkez), round _dir];
                         };
