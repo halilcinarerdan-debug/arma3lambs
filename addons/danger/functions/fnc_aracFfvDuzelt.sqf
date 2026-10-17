@@ -7,7 +7,7 @@
  * her AI suruculu arac) araclarda, oyuncusuz, AI surucu varken FFV koltugundaki AI YOLCU (oyuncu degil) bulunursa:
  *   - bos DUZ cargo koltuk varsa: oraya tasinir (moveOut + moveInCargo [arac, indeks]),
  *   - yoksa: aractan cikarilir ve atamasi kaldirilir (unassignVehicle; arac dolu = gercek kapasite duz koltuk sayisi). Cikan birim 'lambs_danger_ffvAtilanT' ile isaretlenir.
- * Murettebat (surucu / nisanci vb. personTurret OLMAYAN koltuklar) dokunulmaz. Statik / park halindeki garnizon araclarina dokunulmaz (bayraksiz arac).
+ * Murettebat (surucu / nisanci / komutan koltuklari: rol gunner / commander, personTurret isaretli olsa da) ve surucu grubunun uyeleri dokunulmaz (v8.240b). Statik / park halindeki garnizon araclarina dokunulmaz (bayraksiz arac).
  * Kapatma: lambs_danger_ffvDuzeltOff = true.  Log: [FFV-DUZELT] (arac basina 20 sn'de en fazla bir).
  *
  * Arguments: None
@@ -34,7 +34,9 @@ private _calis = {
             // ELITE nakil inis surecinde (yolcuBirak) dokunma
             if (_v getVariable [QGVAR(yolcuBirak), false]) then { continue };
             private _kolt = fullCrew [_v, "", true];
-            private _ffv = _kolt select { (_x param [4, false]) && {!isNull (_x select 0)} && {!isPlayer (_x select 0)} && {alive (_x select 0)} };
+            // YALNIZ rol 'turret' (FFV yolcu koltugu): nisanci / komutan koltuklari (rol gunner / commander) personTurret isaretli olsa da MURETTEBATTIR, dokunulmaz
+            // (v8.240 ilk testinde nisanci da FFV sanilip kargoya tasindi / indirildi: koltuklar 'driver' kaldi)
+            private _ffv = _kolt select { ((toLower (_x select 1)) isEqualTo "turret") && {_x param [4, false]} && {!isNull (_x select 0)} && {!isPlayer (_x select 0)} && {alive (_x select 0)} && {(group (_x select 0)) isNotEqualTo (group _d)} };
             if (_ffv isEqualTo []) then { continue };
             private _bos = (_kolt select { ((toLower (_x select 1)) isEqualTo "cargo") && {isNull (_x select 0)} }) apply { _x select 2 };
             private _tasinan = 0;
