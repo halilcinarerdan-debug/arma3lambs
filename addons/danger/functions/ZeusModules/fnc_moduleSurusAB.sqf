@@ -20,15 +20,15 @@ if (_activated && local _logic) then {
             ["Arac sinifi 1", "LIST", "Test edilecek arac sinifi (RHS APC / IFV / kamyon dahil, >= 6 yolcu). '(30 m icindeki araclar)' = modulun yanina koydugunuz araclarin siniflari.", _etiket, 0],
             ["Arac sinifi 2 (istege bagli)", "LIST", "Karsilastirma: ornegin tekerlekli ve paletli.", _etiket, 0],
             ["Arac sinifi 3 (istege bagli)", "LIST", "Ucuncu sinif.", _etiket, 0],
-            ["ELITE acik varyantlari (C / D / E)", "BOOLEAN", "Kapaliysa yalniz saf varyantlar (A / B) calisir: ELITE hic suclu degil mi?", true, ""],
-            ["Yolculu varyantlar (E / F / G)", "BOOLEAN", "E: 8 piyade kargoda (gercek nakil). F / G: RECON ayarlari (fnc_reconArac: SAFE / GREEN, isiksiz, forceSpeed 9, yolcu PATH kapali) 4 yolcuyla - recon neden gitmiyor?", true, ""],
+            ["Test seti", "LIST", "Temel (A-G): ELITE kapali/acik, doMove/waypoint, yolcu, RECON profili. Recon ayristirma (C,H-M): yolcusuz; hangi komut recon'u bozuyor (doStop / waypoint+doMove / SAFE-GREEN-isiksiz / forceSpeed 9). Yolcu ayristirma (C,N-S): kargo yolcusu (sayi, ayni grup, orderGetIn, ELITE kapali, bekleme).", ["Temel (A-G)", "Recon ayristirma (H-M)", "Yolcu ayristirma (N-S)"], 0],
+            ["ELITE acik varyantlari (yalniz Temel set)", "BOOLEAN", "Temel sette kapaliysa yalniz A / B calisir. Diger setlerde etkisiz.", true, ""],
             ["Test suresi (sn)", "SLIDER", "Her varyantin gidis suresi (olcum her saniye).", [10, 30], [1, 5], 15, 0],
             ["Otomatik bisect (suclu izleyici ara)", "BOOLEAN", "ELITE-acik varyant gitmiyor ama saf gidiyorsa, izleyici kapatma anahtarlari GECICI olarak global kapatilip ikili aramayla suclu aranir (~60 sn ek). Test oturumu icin.", false, ""]
         ],
         {
             params ["_d", "_args"];
             _args params ["_poz", "_yon", "_liste", "_yakin"];
-            _d params ["_i1", "_i2", "_i3", "_elite", "_yolcu", "_sure", "_bisect"];
+            _d params ["_i1", "_i2", "_i3", "_set", "_elite", "_sure", "_bisect"];
             private _siniflar = [];
             {
                 private _i = round _x;
@@ -37,8 +37,8 @@ if (_activated && local _logic) then {
             } forEach [_i1, _i2, _i3];
             _siniflar = _siniflar select [0, 3];
             if (_siniflar isEqualTo []) exitWith { systemChat "[ELITE] Arac sinifi secilmedi - test baslatilmadi"; };
-            ["lambs_danger_surusABIstegi", [_siniflar, _poz, _yon, _elite, _yolcu, round _sure, _bisect, clientOwner]] call CBA_fnc_serverEvent;
-            diag_log format ["[SURUS-AB-ISTEK] sunucuya gonderildi: %1 | elite %2 yolcu %3 sure %4 bisect %5", _siniflar, _elite, _yolcu, round _sure, _bisect];
+            ["lambs_danger_surusABIstegi", [_siniflar, _poz, _yon, _elite, round _set, round _sure, _bisect, clientOwner]] call CBA_fnc_serverEvent;
+            diag_log format ["[SURUS-AB-ISTEK] sunucuya gonderildi: %1 | elite %2 set %3 sure %4 bisect %5", _siniflar, _elite, round _set, round _sure, _bisect];
             systemChat format ["[ELITE] Surus A/B testi baslatildi (%1 sinif); sonuc ~%2 sn icinde Zeus sohbetine", count _siniflar, 30 + round _sure];
         }, {}, {}, [_poz, _yon, _liste, _yakin]
     ] call EFUNC(main,showDialog);
