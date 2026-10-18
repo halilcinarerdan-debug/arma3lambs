@@ -198,6 +198,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         { _x doWatch (_g getVariable ["lambs_danger_planZirhBak", _obj]); } forEach (crew _v);
         diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide%3 (%4 m kalan) | objektife %5 m", _id, groupId _g, [""," (GIZLEME NOKTASI)"] select (_g getVariable ["lambs_danger_planZirhHide", false]), round (_v distance2D _poz), round (_v distance2D _obj)];
     } else {
+      // v8.251: AT atesi drilinde (fnc_aracAtTepki) yer degistiren arac 20 sn planZirh'in yeniden yonlendirme / takilma emirlerinden muaf
+      if ((time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20) then {
         // yoldayken yeniden yonlendirme (takilmasin)
         if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhMoveT", time];
@@ -247,6 +249,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                 };
             } else { _g setVariable ["lambs_danger_planZirhDurT", -1]; };
         };
+      };
     };
 
     // ---- v8.194 YER DEGISTIR: mevzideki tank hasar aldiysa (>= 0.08) yedek mevziye gecer (60 sn'de en fazla bir kez; eski mevzi yeni yedek olur)
@@ -254,7 +257,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         private _hs0 = _g getVariable ["lambs_danger_planZirhHasar", -1];
         if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", damage _v]; _hs0 = damage _v; };
         private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];
-        if ((damage _v) >= (_hs0 + 0.08) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60}) then {
+        if ((damage _v) >= (_hs0 + 0.08) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
             _g setVariable ["lambs_danger_planZirhAlt", _poz];
             _g setVariable ["lambs_danger_planZirhPoz", _alt2];
@@ -308,15 +311,25 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)} && {[_x select 4] call FUNC(gercekHedef)} && {_atYeterli || {!((_x select 4) isKindOf "Tank" && {(getNumber (configOf (_x select 4) >> "armor")) >= 300})}}};
         if (_hedefler isNotEqualTo []) then {
             _hedefler = [_hedefler, [], {(_x select 3)}, "DESCEND"] call BIS_fnc_sortBy;
-            private _hd = (_hedefler select 0) select 4;
+            // v8.251 TANK HEDEF DAGITIMI (ATP 3-20.15 A-4 / A-5 ates kontrolu): tank icin tehdit onceligi + ates dagitimi (fnc_tankHedefSec); kapatma lambs_danger_tankHedefDagitOff
+            private _dagit = _tankMi && {!(missionNamespace getVariable ["lambs_danger_tankHedefDagitOff", false])};
+            private _hdE = if (_dagit) then { [_v, _hedefler] call FUNC(tankHedefSec) } else { [] };
+            private _hd = if (_hdE isEqualTo []) then { (_hedefler select 0) select 4 } else { _hdE select 0 };
             if (!isNull _hd) then {
                 if ((time - (_g getVariable ["lambs_danger_planZirhHedefLogT", -999])) > 20) then {
                     _g setVariable ["lambs_danger_planZirhHedefLogT", time];
-                    diag_log format ["[PLAN-ZIRH] %1 | %2 HEDEF: %3 (%4 m, tank -> hedef) | savunma %5", _id, groupId _g, typeOf _hd, round (_v distance2D _hd), _sav];
+                    diag_log format ["[PLAN-ZIRH] %1 | %2 HEDEF: %3 (%4 m, tank -> hedef) | savunma %5 | dagitim puani %6", _id, groupId _g, typeOf _hd, round (_v distance2D _hd), _sav, if (_hdE isEqualTo []) then {"-"} else {round (_hdE select 1)}];
                 };
                 private _gn = gunner _v;
                 if (!isNull _gn) then { _gn doTarget _hd; _gn doFire _hd; };
-                { private _g2 = gunner _x; if (!isNull _g2) then { _g2 doTarget _hd; _g2 doFire _hd; }; } forEach _digerAr;
+                {
+                    private _g2 = gunner _x;
+                    if (!isNull _g2) then {
+                        private _ho = _hd;
+                        if (_dagit) then { private _hx = [_x, _hedefler] call FUNC(tankHedefSec); if (_hx isNotEqualTo []) then { _ho = _hx select 0; }; };
+                        _g2 doTarget _ho; _g2 doFire _ho;
+                    };
+                } forEach _digerAr;
             };
         };
     };

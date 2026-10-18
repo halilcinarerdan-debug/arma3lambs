@@ -232,3 +232,14 @@ Ortam: WEST BTR-80 (veya APC/IFV, ATGM'siz) yolcusuz / yolcuyla ELE GECIR planin
 Sinirlar: duman yok; AT'li piyade (RPG / NLAW) kendi mantigiyla (AT_ENGAGE) calisir; kayip orani karsilastirmasi icin plan sonu [PLAN-OZET].
 Hepsi (T) = dogrulanmadi.
 
+## T-TANK-ATES (v8.251)
+Ortam A (AT tepkisi): WEST tank (veya BTR/IFV) acik arazide; EAST'ten 300-800 m'de roketatarli piyade (RPG-7 / PCML) ya da ATGM'li arac, tanka dogru ates etsin.
+1. Ates aninda: `[ARAC-AT-TEPKI] <arac> (<grup>, sinif TANK) | sebep ROKET | atici ... | duman true | yer degistirme NN m -> grid (engelli true) | ... koruyan piyade grubu N`. Arac korunakli konuma gider.
+2. `[ARAC-DUMAN] ... fireAtTarget <silah> -> true | kalan N` ve oyunda tankin onunde duman gorunmeli. (`false` / silah YOK ise duman atici bulunamadi: silah adini rapor et.)
+3. Isabet (hasar >= 0.05): `sebep ISABET` satiri.
+4. 25 sn icinde ikinci roket ayni araca tepki tetiklemez (bekleme).
+Ortam B (hedef dagitimi): 2 tank (ayni grup ya da yan yana) + karsida dusman tank + AT'li piyade + MG'li piyade + BTR: `[PLAN-ZIRH] ... HEDEF ... dagitim puani N` / `[TANK-ATES] ... HEDEF ... dagitim: yakinda dost tank true`; iki tank ayni anda ayni hedefe KILITLENMEMELI (tank hedefi haric: ortak ates serbest).
+Ortam C (koru): tank + yakin dost piyade grubu (<= 400 m) + 450 m'de dusman roketatarci: `[TANK-KORU] ... N piyade grubu / M asker tehdide ates / bakis`. Piyade roketatarciya ates etmeli. Tank temasta ve piyade yoksa `[TANK-YALNIZ]` (teshis).
+Karsilastirma: `tankAtesOff = true` ya da `aracAtTepkiOff = true` / `aracDumanOff = true` / `tankKoruOff = true` ile ayni sahneyi tekrarla.
+Sinirlar: piyade tank yanina KONUMLANDIRILMAZ (yalniz ates / bakis); duman atici API'si (fireAtTarget) ve esikler (25 m + %3 sapma, 45/75/110 m, 0.05 hasar) TASARIM; yer degistirme sonrasi planli grup davranisi izlenmeli.
+Hepsi (T) = dogrulanmadi.

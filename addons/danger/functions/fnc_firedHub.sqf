@@ -122,6 +122,8 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             && {_ammo isKindOf ["RocketBase", configFile >> "CfgAmmo"] || {_ammo isKindOf ["MissileBase", configFile >> "CfgAmmo"]}}
         ) then {
             [_unit] call (missionNamespace getVariable ["lambs_danger_fnc_rpgReaction", {0}]);
+            // v8.251: roketin yolu bir dusman ARACA dogru gidiyorsa arac AT ates drili (duman + yer degistirme + yakin piyade korumasi)
+            if (!isNull _proj) then { [_unit, _proj] call (missionNamespace getVariable ["lambs_danger_fnc_atAtisIzle", {0}]); };
             // v8.83: dustugu yerde arac murettebati dahil herkese tepki (rpgReaction yalniz piyade)
             if (!isNull _proj) then { ["ROKET", _proj, _unit] call (missionNamespace getVariable ["lambs_danger_fnc_tehditIzle", {false}]); };
             if (isMultiplayer) then {
@@ -146,6 +148,28 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
                 [_unit, _weapon, _muzzle, _ammo, _agir] remoteExecCall ["lambs_danger_fnc_soundAwareness", -clientOwner];
             };
         };
+    },
+    true,
+    [],
+    true
+] call CBA_fnc_addClassEventHandler;
+
+// 1b3) v8.251 ARAC ATISI: AT sinifi mermi (fuze / roket ya da hit >= 150 tank topu) atan kara araci icin de ayni yol testi (hedef arac AT ates drili); mermi sinifi onbellekli
+[
+    "LandVehicle",
+    "Fired",
+    {
+        params ["_veh", "_weapon", "_muzzle", "_mode", "_ammo", "_mag", "_proj"];
+        if (isNull _proj) exitWith {};
+        if (isNil "lambs_danger_atMermiCache") then { lambs_danger_atMermiCache = createHashMap; };
+        private _at = lambs_danger_atMermiCache getOrDefault [_ammo, -1];
+        if (_at isEqualTo -1) then {
+            private _sim = toLower (getText (configFile >> "CfgAmmo" >> _ammo >> "simulation"));
+            private _hit = getNumber (configFile >> "CfgAmmo" >> _ammo >> "hit");
+            _at = [0, 1] select ((_sim in ["shotmissile", "shotrocket"]) || {_hit >= 150 && {_sim in ["shotbullet", "shotshell"]}});
+            lambs_danger_atMermiCache set [_ammo, _at];
+        };
+        if (_at isEqualTo 1) then { [_veh, _proj] call (missionNamespace getVariable ["lambs_danger_fnc_atAtisIzle", {0}]); };
     },
     true,
     [],
