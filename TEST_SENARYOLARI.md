@@ -193,3 +193,8 @@ Ortam: ELITE Objektif / OPORD, inis noktasi 3-5 km uzakta, 3-4 BTR-80 (yt_btr80 
 4. A/B ile dogrulama (300 m mesafe, 3 BTR-80 sinifi): DEGISMEDI, hepsi gitti (RPT b5530abe).
 Hepsi (T) = dogrulanmadi.
 
+## T-NAKIL-TEMAS + T-OTO-TANK (v8.246)
+1. Nakil sirasinda yolda dusman cikar (yol kenarina 60-150 m'de EAST piyade yerlestir). Beklenen: `[TASIMA] ... YAKIN PUSU: dusman X m -> HEMEN IN` (X <= 150) ya da dusman >= 150 m ise `PUSU / TEMAS: dusman X m -> HIZLI GECIS` (X artik bilinen mesafe, 'bilinmiyor' degil); `YOLCU GERI ALINDI` ardi ardina (>5) satir OLMAMALI.
+2. Otomatik tank: Objektif modulu ELLE SECIM YAPMADAN kur; haritada senin tarafindan tank grubu (Zeus gozetleme atamasi YOK) objektife <= 4000 m. Beklenen: `[PLAN-ARAC] ... [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi`, sonra `[PLAN-ZIRH] ... ates pozisyonu` (SAVUN ise `SAVUNMA MEVZISI`). Tank Zeus gozetleme atamasiyla HARIC ise alinmaz (beklenen).
+Kapatma: nakilTehditGenisOff, planOtoTankOff. Hepsi (T) = dogrulanmadi.
+

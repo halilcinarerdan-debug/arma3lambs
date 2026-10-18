@@ -182,6 +182,24 @@ if (_secili isNotEqualTo []) then {
     _grupN = count _secili;
     if (_secili isEqualTo []) then { _secili = ["-"]; };   // yalniz arac secildiyse piyade adayi yok (mesafe sinirina dusmesin)
 };
+// v8.246 OTOMATIK TANK (kullanici RPT b8f696ff: savunma/saldiri planinda 'tank objektife gitmedi'; otomatik secimde yalniz piyade aday oluyordu (lider aracta degil sarti), tank yalniz Zeus elle secimle plana girerdi):
+//   elle secim YOKSA, taraftaki TANK sinifi (aracSinif) AI gruplari (lider tankta, oyuncusuz, gorev HARIC / TOPCU / TASIMA / RECON ... degil, baska planda degil, objektife <= grupMesafe) ZIRH DESTEK unsuru olur.
+//   Zeus 'Gozetleme' atamasi gorevi HARIC yapar -> o tank plana ALINMAZ. IFV / APC ve topcu otomatik alinmaz (tasima / atis destegi ayri). Kapatma: lambs_danger_planOtoTankOff = true
+if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planOtoTankOff", false])}) then {
+    {
+        private _tl = leader _x;
+        private _tv = if (isNull _tl) then {objNull} else {objectParent _tl};
+        if (!isNull _tv && {alive _tl} && {!isPlayer _tl} && {(side _x) isEqualTo _taraf} && {_tv isKindOf "LandVehicle"} && {alive _tv} && {(crew _tv) findIf {isPlayer _x} < 0}
+            && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+            && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
+            && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
+            && {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}
+            && {(([_tv] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then {
+            _zirhG pushBack _x;
+            diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi (objektife %3 m)", groupId _x, getText (configOf _tv >> "displayName"), round (_tl distance2D _obj)];
+        };
+    } forEach allGroups;
+};
 private _aday = allGroups select {
     private _l = leader _x;
     !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}

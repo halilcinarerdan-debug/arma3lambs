@@ -514,6 +514,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 // v8.189: inis noktasindan > 600 m uzaktaki arac (takilsa bile) yolcusunu birakmaz: lider onden inince takipciler "GET OUT" alir (RPT aee29fdd: lideri onde inen 5 asker 1.8 km geride indi)
                 private _uzakTut = {
                     (alive _v) && {(_v distance2D _drop) > 600} && {(damage _v) < 0.6}
+                    && {(_ps findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 10}}) < 0}   // v8.246: yolcu grubu son 10 sn temasta ise uzakTut degil (inme istegi gercek tehdit: geri almaya calisma)
                     && {((_v nearEntities [["CAManBase", "LandVehicle"], 300]) findIf {alive _x && {((side _x) getFriend (side (group (driver _v)))) < 0.6}}) < 0}
                 };
                 { if (alive _x) then { _x disableAI "PATH"; }; } forEach _ps;
@@ -698,8 +699,30 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 else { if ((!canMove _v) || {(damage _v) > 0.5}) then { _bitis = "hasar"; }
                 else { if ([_binen, _d] call _temasVar && {_gecisT < 0 || {(time - _gecisT) > 40}}) then {
                     // PUSU (v8.138): dusman >= 150 m ve arac hareketli -> ates altinda DURMA, tam gazla gec (en fazla 40 sn); yakin pusu (< 150 m) / hasar -> hemen in
+                    // v8.246 DUSMAN MESAFESI (RPT b8f696ff: LAMBS 'Enemy Near @60m' + 'BTR-80 unloading 4 carried troops' iken surucunun kendi findNearestEnemy'si bos dondu -> 'dusman bilinmiyor, HIZLI GECIS' secildi ve
+                    //   yolcular inmeye calisip tekrar araca alindi, arac 0 km/s): TUM yolcu / murettebatin bildigi en yakin dusman (findNearestEnemy + komutanin / yolcu liderlerinin nearTargets 400 m) kullanilir;
+                    //   hala bilinmiyor ama bir yolcu 'GET OUT' aliyorsa (LAMBS inme istedi) 100 m'de yakin tehdit sayilir -> kontrollu inis. Kapatma: lambs_danger_nakilTehditGenisOff = true
                     private _en = _d findNearestEnemy (getPosATL _d);
                     private _edm = if (isNull _en) then {9999} else {_v distance2D _en};
+                    if !(missionNamespace getVariable ["lambs_danger_nakilTehditGenisOff", false]) then {
+                        {
+                            private _bu = _x;
+                            if (alive _bu) then {
+                                private _e2 = _bu findNearestEnemy _bu;
+                                if (!isNull _e2 && {(_v distance2D _e2) < _edm}) then { _en = _e2; _edm = _v distance2D _e2; };
+                            };
+                        } forEach ([_d] + _binen + ((crew _v) select {alive _x}));
+                        {
+                            private _gl = _x;
+                            if (!isNull _gl && {alive _gl}) then {
+                                {
+                                    private _eo = _x select 4;
+                                    if (!isNull _eo && {alive _eo} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_gl knowsAbout _eo) > 0.2} && {(_v distance2D _eo) < _edm}) then { _en = _eo; _edm = _v distance2D _eo; };
+                                } forEach (_gl nearTargets 400);
+                            };
+                        } forEach ([effectiveCommander _v] + (_binen apply { leader (group _x) }));
+                        if (_edm >= 9999 && {(_binen findIf {alive _x && {(currentCommand _x) isEqualTo "GET OUT"}}) >= 0}) then { _edm = 100; };
+                    };
                     if (_gecisT < 0 && {_edm >= 150}) then {
                         _gecisT = time;
                         _vg setBehaviour "CARELESS";
