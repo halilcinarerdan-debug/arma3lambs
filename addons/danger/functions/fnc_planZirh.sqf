@@ -61,6 +61,9 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     if (isNull _d || {isPlayer _d}) then { continue };
     // v8.175 TANK ROLU: kargosuz tank uzaktan agir ates destegi (650 m, SALDIRI'da 450 m'ye sicrar), hedef onceligi zirh > AT > MG; ates acik alana gelince objektif alanina bastirma atesi (dost 70 m disinda)
     private _tankMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "TANK";
+    // v8.250: AT yetenegi olmayan arac (tank degil, ATGM yok) bilinen dusman tankindan kacarken (fnc_aracZirhKac) planZirh ona hedef / hareket emri vermez
+    if (!_tankMi && {(time - (_v getVariable ["lambs_danger_zirhKacT", -999])) < 10}) then { continue };
+    private _atYeterli = _tankMi || {([_v] call FUNC(aracSinif)) select 3};
     // v8.244 SAVUNMA MEVZISI (ATP 3-20.15 4-46..4-49, 4-69..4-78; kullanici: 'tank savunma mevzisi'): savunma planinda (tip 1) tank/IFV objektifin ONUNDE 650 m degil, piyade hattinin icinde / arkasinda
     //   (objektife 70-260 m) tehdit yonune bakan, gövde-asagi (hull-down) birincil mevziye yerlesir; tehdit yaklasana kadar birincil mevzinin 55 m ARKASINDAKI gizleme noktasinda bekler (4-76/4-77).
     //   Mesafeler TASARIM degeri (kitapta sayi YOK). Kapatma: lambs_danger_tankMevziOff = true (eski ileri ates pozisyonu).
@@ -302,7 +305,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         _g setVariable ["lambs_danger_planZirhHedefT", time];
         // v8.198 SAVUNMA TANKI (kullanici: "dusman tanki karsilik vermedi"; RPT 9f47fa43: savunan T-55 635 m'de mevzide COMBAT / RED, hic atis yok - saldiranlar objektife 550 m'de indi, 450 m filtresinin disinda): savunma planinda tankin KENDI menzilindeki (1100 m) bilinen dusman da hedeftir (esik 0.3)
         private _sav = (_plan getOrDefault ["tip", 0]) isEqualTo 1;
-        private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)} && {[_x select 4] call FUNC(gercekHedef)}};
+        private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)} && {[_x select 4] call FUNC(gercekHedef)} && {_atYeterli || {!((_x select 4) isKindOf "Tank" && {(getNumber (configOf (_x select 4) >> "armor")) >= 300})}}};
         if (_hedefler isNotEqualTo []) then {
             _hedefler = [_hedefler, [], {(_x select 3)}, "DESCEND"] call BIS_fnc_sortBy;
             private _hd = (_hedefler select 0) select 4;

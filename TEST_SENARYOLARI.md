@@ -223,3 +223,12 @@ Kapatma: arkaDestekOff. Hepsi (T) = dogrulanmadi.
 2. Dron yarat: Zeus > ELITE IHA Gorevi > bos bir yere birak (40 m icinde dron yok), "Dron yarat" = Crocus AT; beklenen: sohbette `... yaratildi (B_Crocus_AT)` ve `IHA gorevi gonderildi`; sunucuda `[IHA-SORTI]`. Yakinda dron varsa yaratilmaz.
 Hepsi (T) = dogrulanmadi.
 
+## T-ARAC-ZIRH-KAC (v8.250)
+Ortam: WEST BTR-80 (veya APC/IFV, ATGM'siz) yolcusuz / yolcuyla ELE GECIR planinda; EAST tarafinda ATGM'siz piyade degil bir TANK (T-72/T-14) acik arazide.
+1. Tank BTR'yi gorunce (bilinen, <= 1200 m): `[ARAC-ZIRH-KAC] BTR-80 (<grup>, sinif IFV) | bilinen dusman tanki T-14 (zirh 500) X m -> gorus hattini kiran konuma cekiliyor <grid> (N m, engel true) | savas modu GREEN`. BTR planZirh ates pozisyonuna gitmeye CALISMAMALI, tankla duello yapmamali.
+2. `[PLAN-ZIRH] ... HEDEF: rhs_t14_tv` satiri ATGM'siz IFV icin ARTIK gelmemeli (tank / ATGM'li araclar icin gelir).
+3. Tank gorus disina cikinca 25 sn sonra `tehdit gecti ... savas modu ...'e geri`.
+4. Ayni sahneyi `aracZirhKacOff = true` ile tekrarla (karsilastirma).
+Sinirlar: duman yok; AT'li piyade (RPG / NLAW) kendi mantigiyla (AT_ENGAGE) calisir; kayip orani karsilastirmasi icin plan sonu [PLAN-OZET].
+Hepsi (T) = dogrulanmadi.
+
