@@ -169,6 +169,9 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 
 - **ORP gerisi temas desteği (v8.248, T)**: ELE GEÇİR planında TOPLAN/ORP/KEŞİF fazında bir plan grubu ORP'den >350 m geride ≥6 sn temastaysa, temasta olmayan en çok 2 grup (önce YEDEK, sonra MANEVRA; ≤1200 m) desteğe gider (bilinen düşmana saldırı, yoksa temaslı gruba hareket) → temaslı grupla buluşma (≤80 m). Görevden alma: temaslı grup ≥45 sn (ORMANLIK: 90 sn) temassız VE buluşma sağlandı ya da 300 sn. "Temas bitti" tek başına yetmez (orman: doğrulanamayan "temiz"). Destek grupları ORP yeniden yönlendirmesinden muaf. `[PLAN-ARKA-DESTEK]` (`arkaDestekOff`). Kaynak: TC 3-21.76 13-7/13-8, MCWP 3-11.1 (QRF); sayılar TASARIM.
 
+- **Savunma temassız süre sınırı (v8.249, T)**: Zeus Objektif "Süre sınırı" listesi 10 dk … 10 saat'e genişledi (Sınırsız / 10 / 20 / 30 / 45 dk / 1 / 2 / 4 / 10 saat). SAVUNMA planında bu TEMASSIZ süredir: son temas (grup teması ya da objektif 400 m çevresinde bilinen düşman) üzerinden bu kadar süre geçerse savunma biter; temas sürerken bitmez; Sınırsız = Zeus iptal edene kadar. Eski gizli 1200 sn tavan kaldırıldı (`lambs_danger_planSavunmaS` varsayılan 0 = yok). ELE GEÇİR'de toplam süre olarak kalır. `[PLAN-SAVUNMA] ... TEMASSIZ gecti`.
+- **Zeus "IHA Görevi": dron yarat (v8.249, T)**: yakında dron yoksa listeden Crocus (B_/O_/I_ AT/AP) seçilince modül dronu doğrudan yaratıp görevi verir (sırt çantası kurma adımı yok). Doğrulanmadı: yaratılan dronun mürettebat/kontrol davranışı.
+
 ## 10e. v8.237 — Cephe simülasyonu, Dilim A0 (T = doğrulanmadı)
 Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kapalıyken eski davranış aynen kalır. Sayısal eşikler **tasarım değeri**.
 - **Profil çekirdeği (T)**: squad = veri kaydı (sınıf, canlı, loadout, yara, ACE tıbbi, konum, hedef); fiziksel nesne profilin "cismi". **L0 sanal ↔ L1 fiziksel** geçiş durum taşır (olu beden yerinde kalır). Zeus'la elle konanlar profile girmez.

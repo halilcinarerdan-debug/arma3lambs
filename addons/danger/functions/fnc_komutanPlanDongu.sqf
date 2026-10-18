@@ -379,7 +379,8 @@ while {true} do {
         };
         private _sureSn = _plan getOrDefault ["sureSn", 0];
         // SURE SINIRI: ele gecirde hedef alinmadiysa CEKILME; savunmada plan biter
-        if (_sureSn > 0 && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "DONUS", "BITTI", "IPTAL"])}) then {
+        // v8.249: SAVUNMADA (tip 1) sure siniri TEMASSIZ sure olarak BEKLE fazinda islenir (asagida); toplam sure yalniz ele gecirde
+        if (_sureSn > 0 && {_tip isEqualTo 0} && {(time - (_plan get "t0")) > _sureSn} && {!(_faz in ["KUR", "CEKILME", "TOPLANMA", "DONUS", "BITTI", "IPTAL"])}) then {
             if (_tip isEqualTo 0) then {
                 [_plan, "CEKILME", format ["SURE SINIRI (%1 sn) doldu, objektif alinamadi", _sureSn]] call _fazGec;
                 { [_x] call _wpTemizle; [_x, _obj] call FUNC(tacticsRetreat); } forEach _gruplar;
@@ -1214,8 +1215,21 @@ while {true} do {
         if (_faz isEqualTo "BEKLE") then {
             // v8.243 SAVUNMA SURESI UZATMA (RPT c7592408: 1200 sn dolunca savunma plani saldiri baslamadan 12 sn once BITTI, hendekteki gruplar serbest kaldi): sure dolunca temas / bilinen dusman varsa
             //   savunma 2 katina kadar (TASARIM degeri) surer; temas kesilince biter. Kapatma: lambs_danger_savunmaUzatmaOff = true.
-            private _savS = missionNamespace getVariable ["lambs_danger_planSavunmaS", 1200];
-            if (_fazSure > _savS) then {
+            // v8.249 SAVUNMA TEMASSIZ SURE (kullanici: "savunan takim icin zaman limiti koy: 30 dk temas olmadiysa biraksinlar ya da 10 saat beklesinler; catisma ortasinda adamlar temas olmadan savunmayi biraktilar"):
+            //   eski gizli 1200 sn tavan (Zeus 'Sinirsiz' secili olsa bile P1 1266 sn'de bitti) KALDIRILDI. Zeus 'Sure siniri' savunmada TEMASSIZ sure: son temas (grup temasi ya da objektif 400 m cevresinde bilinen dusman)
+            //   ile simdi arasi bu kadar olursa BITTI; 'Sinirsiz' = hic bitmez. Global toplam tavan istenirse lambs_danger_planSavunmaS > 0 (varsayilan 0 = yok).
+            private _bosS = _plan getOrDefault ["sureSn", 0];
+            if (_bosS > 0) then {
+                private _temasSimdi = (({[_x] call _temasta} count _gruplar) > 0) || {(_plan getOrDefault ["savDus", 0]) > 0};
+                if (_temasSimdi || {(_plan getOrDefault ["sonTemasT", -1]) < 0}) then { _plan set ["sonTemasT", time]; };
+                if ((time - (_plan get "sonTemasT")) > _bosS) then {
+                    diag_log format ["[PLAN-SAVUNMA] %1 | %2 sn TEMASSIZ gecti (Zeus sure siniri) -> savunma biter", _id, round (time - (_plan get "sonTemasT"))];
+                    [_plan, "BITTI", format ["savunma: %1 sn temassiz", round _bosS]] call _fazGec;
+                    continue
+                };
+            };
+            private _savS = missionNamespace getVariable ["lambs_danger_planSavunmaS", 0];
+            if (_savS > 0 && {_fazSure > _savS}) then {
                 private _temasVarS = (({[_x] call _temasta} count _gruplar) > 0) || {(_plan getOrDefault ["savDus", 0]) > 0};
                 if (_temasVarS && {_fazSure < (_savS * 2)} && {!(missionNamespace getVariable ["lambs_danger_savunmaUzatmaOff", false])}) then {
                     if !(_plan getOrDefault ["savUzatildi", false]) then {

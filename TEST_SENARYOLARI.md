@@ -218,3 +218,8 @@ Ortam: WEST ELE GECIR (6+ grup, BTR nakil), ORP'nin 400-800 m gerisinde, yol ken
 4. Destek grubu tehlike altindaysa (kayip >= %60) mevzi mantigi / FRAGO ayri calisir.
 Kapatma: arkaDestekOff. Hepsi (T) = dogrulanmadi.
 
+## T-SAVUNMA-SURE + T-DRON-YARAT (v8.249)
+1. Savunma suresi: Objektif > SAVUN, "Sure siniri" = 10 dk. Temas OLMADAN 10 dk sonra `[PLAN-SAVUNMA] ... 600 sn TEMASSIZ gecti` + `BITTI (savunma: 600 sn temassiz)`. Temas surerken (ya da objektif 400 m cevresinde bilinen dusman varken) sayac sifirlanir, plan BITMEZ. "Sinirsiz" secilirse 30+ dk temassiz beklese bile bitmemeli (eski surum 1200 sn'de bitiyordu).
+2. Dron yarat: Zeus > ELITE IHA Gorevi > bos bir yere birak (40 m icinde dron yok), "Dron yarat" = Crocus AT; beklenen: sohbette `... yaratildi (B_Crocus_AT)` ve `IHA gorevi gonderildi`; sunucuda `[IHA-SORTI]`. Yakinda dron varsa yaratilmaz.
+Hepsi (T) = dogrulanmadi.
+
