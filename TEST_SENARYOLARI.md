@@ -201,7 +201,7 @@ Kapatma: nakilTehditGenisOff, planOtoTankOff. Hepsi (T) = dogrulanmadi.
 ## T-MOTOR-SES (v8.247): arac / heli / ucak motorunu duyma
 Ortam: sakin gunduz, duz arazi, EAST piyade grubu (4-6 kisi, SAFE/AWARE, mevzide) ve karsi tarafta (WEST) yaklasan araclar (hepsi motoru calisir halde).
 1. Tank 900 m'den yaklasirken: `[MOTOR-SES] TANK (...) duyuldu -> <grup> | X m (menzil ~900 m ...) | yon ...`; grup AWARE'e gecer, 3 asker yone bakar. AT'li grupta AT askerleri de bakar. Ayni grup icin 20 sn'de bir.
-2. Kamyon ~500 m, rolantide (hiz < 3 km/s) arac ~200 m'de duyulmali. Gece menzil x1.3, yagmur x0.7, rüzgar > 6 m/sn x0.75 (Zeus'ta hava ayarla).
+2. Kamyon ~500 m, rolantide (hiz < 3 km/s) arac ~200 m'de duyulmali. Gece menzil x1.3, yagmur x0.7, ruzgar > 6 m/sn x0.75 (Zeus'ta hava ayarla).
 3. Dinleyici temastayken (son 15 sn) menzil x0.4; tepe arkasinda (arazi engeli) x0.6.
 4. Helikopter alcak ucus ~2.5 km, jet ~4 km, kucuk IHA ~400 m: `HELI` / `UCAK` / `IHA` satirlari. NOT: bu surumde hava araci icin hide / AA ateşi karari [HAVA-FARK]'ta kalir (ses yalniz uyari + bakis).
 5. Grup araci zaten biliyorsa (gorduyse) [MOTOR-SES] satiri gelmez.
