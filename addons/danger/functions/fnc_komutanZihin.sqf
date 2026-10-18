@@ -142,7 +142,7 @@ private _calis = {
             private _l = leader _g;
             if (!local _g || {isNull _l} || {isPlayer _l} || {!alive _l} || {(time - (_g getVariable [QGVAR(zihinGorusT), -999])) < 25}) then { continue };
             // nearTargets: [konum, tur, taraf, maliyet, nesne, konum dogrulugu]; yalniz GERCEKTEN bilinen (knowsAbout > 0.5) ve konum hatasi < 80 m hedefler
-            private _hedef = (_l nearTargets 800) select {((_T getFriend (_x select 2)) < 0.6) && {(_x select 5) < 80} && {(_l knowsAbout (_x select 4)) > 0.5}};
+            private _hedef = (_l nearTargets 800) select {((_T getFriend (_x select 2)) < 0.6) && {(_x select 5) < 80} && {(_l knowsAbout (_x select 4)) > 0.5} && {[_x select 4] call FUNC(gercekHedef)}};
             if (_hedef isEqualTo []) then { continue };
             _g setVariable [QGVAR(zihinGorusT), time];
             _ornek = _ornek + 1;

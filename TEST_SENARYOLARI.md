@@ -198,3 +198,15 @@ Hepsi (T) = dogrulanmadi.
 2. Otomatik tank: Objektif modulu ELLE SECIM YAPMADAN kur; haritada senin tarafindan tank grubu (Zeus gozetleme atamasi YOK) objektife <= 4000 m. Beklenen: `[PLAN-ARAC] ... [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi`, sonra `[PLAN-ZIRH] ... ates pozisyonu` (SAVUN ise `SAVUNMA MEVZISI`). Tank Zeus gozetleme atamasiyla HARIC ise alinmaz (beklenen).
 Kapatma: nakilTehditGenisOff, planOtoTankOff. Hepsi (T) = dogrulanmadi.
 
+## T-MOTOR-SES (v8.247): arac / heli / ucak motorunu duyma
+Ortam: sakin gunduz, duz arazi, EAST piyade grubu (4-6 kisi, SAFE/AWARE, mevzide) ve karsi tarafta (WEST) yaklasan araclar (hepsi motoru calisir halde).
+1. Tank 900 m'den yaklasirken: `[MOTOR-SES] TANK (...) duyuldu -> <grup> | X m (menzil ~900 m ...) | yon ...`; grup AWARE'e gecer, 3 asker yone bakar. AT'li grupta AT askerleri de bakar. Ayni grup icin 20 sn'de bir.
+2. Kamyon ~500 m, rolantide (hiz < 3 km/s) arac ~200 m'de duyulmali. Gece menzil x1.3, yagmur x0.7, rüzgar > 6 m/sn x0.75 (Zeus'ta hava ayarla).
+3. Dinleyici temastayken (son 15 sn) menzil x0.4; tepe arkasinda (arazi engeli) x0.6.
+4. Helikopter alcak ucus ~2.5 km, jet ~4 km, kucuk IHA ~400 m: `HELI` / `UCAK` / `IHA` satirlari. NOT: bu surumde hava araci icin hide / AA ateşi karari [HAVA-FARK]'ta kalir (ses yalniz uyari + bakis).
+5. Grup araci zaten biliyorsa (gorduyse) [MOTOR-SES] satiri gelmez.
+Kapatma: motorSesOff. Hepsi (T) = dogrulanmadi.
+
+## T-GERCEK-HEDEF (v8.247)
+Trencher modulu (ya da herhangi bir Logic) dusman tarafli olsa bile tank `HEDEF: trencher_main_Module_TrenchController` secmemeli; savunma planinda 'dusman 6, objektife 19 m' hayalet sayilmamali. gercekHedefOff = true ile eski davranis (karsilastirma).
+

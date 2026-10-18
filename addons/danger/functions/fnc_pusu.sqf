@@ -207,7 +207,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                         if (alive _gz && {_gz in _canli}) then {
                             {
                                 private _ob = _x select 4;
-                                if (!isNull _ob && {alive _ob} && {(side _ob) getFriend (side _g) < 0.6} && {!(_ob in _bilinen)} && {_gz knowsAbout _ob >= 0.4}) then { _bilinen pushBack _ob; };
+                                if (!isNull _ob && {alive _ob} && {[_ob] call FUNC(gercekHedef)} && {(side _ob) getFriend (side _g) < 0.6} && {!(_ob in _bilinen)} && {_gz knowsAbout _ob >= 0.4}) then { _bilinen pushBack _ob; };
                             } forEach (_gz nearTargets 400);
                         };
                     } forEach ([_ld] + _guvenlikler);

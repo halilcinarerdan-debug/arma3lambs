@@ -109,7 +109,7 @@ private _atisIzni = {
     {
         private _gl = leader _x;
         if (!isNull _gl && {alive _gl} && {(side _x) isEqualTo _tfC}) then {
-            { if (((_tfC getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objC) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5}) then { _canli = _canli + 1; }; } forEach (_gl nearTargets 900);
+            { if (((_tfC getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objC) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5} && {[_x select 4] call FUNC(gercekHedef)}) then { _canli = _canli + 1; }; } forEach (_gl nearTargets 900);
         };
     } forEach allGroups;
     if !(_plan getOrDefault ["raporHazir", false]) then {

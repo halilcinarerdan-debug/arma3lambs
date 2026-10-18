@@ -99,7 +99,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             // tehdit yonu: bilinen dusmanlarin agirlik merkezi > Zeus 'tehdit yonu' > SBF yonu
             private _tb = _plan getOrDefault ["tehditB", -1];
             if (_tb >= 0) then { _yon = _tb; };
-            private _bil = (_l nearTargets 2000) select {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)}};
+            private _bil = (_l nearTargets 2000) select {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)} && {[_x select 4] call FUNC(gercekHedef)}};
             if (_bil isNotEqualTo []) then {
                 private _bx = 0; private _by = 0;
                 { _bx = _bx + ((_x select 0) select 0); _by = _by + ((_x select 0) select 1); } forEach _bil;
@@ -170,7 +170,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     // ---- v8.244 SAVUNMA: gizleme noktasindan birincil mevziye cikis (tetik: dusman <= 1500 m bilinen ya da plan piyadesi temasta ya da savas fazi) ----
     if (_savunma && {_g getVariable ["lambs_danger_planZirhHide", false]} && {(time - (_g getVariable ["lambs_danger_planZirhTetikT", -999])) > 3}) then {
         _g setVariable ["lambs_danger_planZirhTetikT", time];
-        private _tetik = _savas || {((_l nearTargets 1500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)}}) >= 0};
+        private _tetik = _savas || {((_l nearTargets 1500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)} && {[_x select 4] call FUNC(gercekHedef)}}) >= 0};
         if (_tetik) then {
             private _asil = _g getVariable ["lambs_danger_planZirhAsil", _poz];
             _g setVariable ["lambs_danger_planZirhHide", false];
@@ -302,7 +302,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         _g setVariable ["lambs_danger_planZirhHedefT", time];
         // v8.198 SAVUNMA TANKI (kullanici: "dusman tanki karsilik vermedi"; RPT 9f47fa43: savunan T-55 635 m'de mevzide COMBAT / RED, hic atis yok - saldiranlar objektife 550 m'de indi, 450 m filtresinin disinda): savunma planinda tankin KENDI menzilindeki (1100 m) bilinen dusman da hedeftir (esik 0.3)
         private _sav = (_plan getOrDefault ["tip", 0]) isEqualTo 1;
-        private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)}};
+        private _hedefler = (_l nearTargets 1300) select {((side _g) getFriend (_x select 2)) < 0.6 && {(((_x select 0) distance2D _obj) < 450) || {_sav && {((_x select 0) distance2D _v) < 1100}}} && {(_l knowsAbout (_x select 4)) > ([0.5, 0.3] select _sav)} && {[_x select 4] call FUNC(gercekHedef)}};
         if (_hedefler isNotEqualTo []) then {
             _hedefler = [_hedefler, [], {(_x select 3)}, "DESCEND"] call BIS_fnc_sortBy;
             private _hd = (_hedefler select 0) select 4;
