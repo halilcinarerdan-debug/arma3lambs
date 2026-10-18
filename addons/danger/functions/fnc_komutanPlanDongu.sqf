@@ -278,6 +278,33 @@ private _ofset = {
     _poz getPos [30 * (ceil (_i / 2)) * ([1, -1] select (_i mod 2 isEqualTo 1)), _B + 90]
 };
 
+// v8.254 KAYIP -> HQ'YA DONUS (kullanici: 'bir taraf kaybedince HQ ya geri donsun, sonuna kadar savasmasin'; FM 3-98 3-56: geri cekilme olcutu onceden verilir, kayip tabanli; esikler TASARIM):
+//   plan gruplari bounding geri cekilmeyle (tacticsRetreat, tehdit yonunun TERSINE) cekilir -> CEKILME fazi -> HQ / US'ye DONUS (HQ yoksa rally point'e); mevzi tutma kilidi (hendekte) birakilir.
+//   Tetikler: ele gecir ORP / KESIF / SALDIRI'da toplam kayip >= %50 (ilk >= 8 asker); savunma BEKLE'de kayip >= %50 ve bilinen dusman >= 2 (ilk >= 6). Kapatma: lambs_danger_kayipDonusOff = true.
+private _kayipCekil = {
+    params ["_plan", "_neden", ["_tehdit", []]];
+    private _gl = (_plan get "gruplar") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
+    private _thP = if (_tehdit isEqualTo []) then {_plan get "obj"} else {_tehdit};
+    _plan set ["donusNeden", _neden];
+    _plan set ["kayipCekildi", true];
+    if ((_plan getOrDefault ["hqPoz", []]) isEqualTo []) then {
+        _plan set ["hqPoz", _plan get "rp"];
+        _plan set ["hqYar", 60];
+        _plan set ["hqId", "rally point"];
+    };
+    {
+        private _g = _x;
+        [_g] call _wpTemizle;
+        _g setVariable [QGVAR(hendekte), nil];
+        _g setVariable [QGVAR(mevziIlk), nil];
+        _g setVariable [QGVAR(hendekEk), nil];
+        { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doWatch objNull; }; } forEach (units _g);
+        [_g, _thP] call FUNC(tacticsRetreat);
+    } forEach _gl;
+    diag_log format ["[PLAN-KAYIP-DONUS] %1 | %2 | %3 grup cekiliyor -> %4 (%5)", _plan get "id", _neden, count _gl, _plan getOrDefault ["hqId", "HQ"], mapGridPosition (_plan get "hqPoz")];
+    [_plan, "CEKILME", _neden] call _fazGec;
+};
+
 while {true} do {
     sleep 3;
     if (missionNamespace getVariable ["lambs_danger_komutanPlanOff", false]) then { continue };
@@ -388,6 +415,17 @@ while {true} do {
                 [_plan, "BITTI", format ["SURE SINIRI (%1 sn) doldu", _sureSn]] call _fazGec;
             };
             continue
+        };
+        // v8.254: ele gecirde ORP / KESIF'te de (pusu / topcu / temas) toplam kayip >= %50 -> HQ'ya donus (SALDIRI icin FRAGO ayni helper'i kullanir)
+        if (_tip isEqualTo 0 && {_faz in ["ORP", "KESIF"]} && {!(missionNamespace getVariable ["lambs_danger_kayipDonusOff", false])} && {(time - (_plan getOrDefault ["kayipDonT", -99])) > 10}) then {
+            _plan set ["kayipDonT", time];
+            private _ilkK = _plan getOrDefault ["ilkSayi", createHashMap];
+            private _ilkKT = 0; private _simKT = 0;
+            { _ilkKT = _ilkKT + (_ilkK getOrDefault [groupId _x, 0]); _simKT = _simKT + ({alive _x} count (units _x)); } forEach _gruplar;
+            if (_ilkKT >= 8 && {(1 - (_simKT / _ilkKT)) >= 0.5}) then {
+                [_plan, format ["%1 fazinda kayip yuzde %2 (esik 50): HQ'ya donus", _faz, round ((1 - (_simKT / _ilkKT)) * 100)]] call _kayipCekil;
+                continue
+            };
         };
         if (_faz isEqualTo "CEKILME") then {
             // v8.174 BASARISIZLIKTA BULUSMA: geride REZERV bekleyen tasima araclari (APC / kamyon) rally point'e gelir; piyade ile bulusur (kullanici: "mission fail olunca rally pointte bulusmadilar")
@@ -1157,7 +1195,7 @@ while {true} do {
                 { _ilkFT = _ilkFT + (_ilkF getOrDefault [groupId _x, 0]); _simFT = _simFT + ({alive _x} count (units _x)); } forEach _gruplar;
                 if (_ilkFT >= 8 && {(1 - (_simFT / _ilkFT)) >= 0.5} && {_fazSure > 30}) then {
                     diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip %2%% (>= 50%%, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
-                    [_plan, "CEKILME", format ["saldiri kaybi %1%% (>= 50%%): objektif alinamadi", round ((1 - (_simFT / _ilkFT)) * 100)]] call _fazGec;
+                    [_plan, format ["saldiri kaybi yuzde %1 (esik 50): objektif alinamadi", round ((1 - (_simFT / _ilkFT)) * 100)]] call _kayipCekil;
                     continue
                 };
             };
@@ -1366,6 +1404,15 @@ while {true} do {
                     };
                 } forEach (keys _ks);
                 { _ks deleteAt _x; } forEach _ksBit;
+                if (_kayipS >= 0.5 && {(count _dusN) >= 2} && {_ilkT >= 6} && {!(missionNamespace getVariable ["lambs_danger_kayipDonusOff", false])}) then {
+                    // v8.254: eskiden %60'ta plan BITTI (gruplar mevzide serbest, sonuna kadar savasiyordu); simdi %50'de HQ'ya (yoksa rally point'e) geri cekilme
+                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP yuzde %2 (esik 50) ve dusman %3: mevzi tutulamiyor, HQ'ya donus", _id, round (_kayipS * 100), count _dusN];
+                    private _epK = [0, 0, 0];
+                    { _epK = _epK vectorAdd (getPosATL _x); } forEach _dusN;
+                    _epK = _epK vectorMultiply (1 / (count _dusN));
+                    [_plan, format ["savunma kaybi yuzde %1 (esik 50, mevzi tutulamiyor)", round (_kayipS * 100)], _epK] call _kayipCekil;
+                    continue
+                };
                 if (_kayipS >= 0.6 && {(count _dusN) >= 2}) then {
                     diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2%% >= 60%% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
                     [_plan, "BITTI", format ["savunma kaybi %1%% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;

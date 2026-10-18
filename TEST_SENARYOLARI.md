@@ -267,3 +267,11 @@ Ortam: grubun lideri tank murettebatindan; tank vurulup (surucusuz / canMove fal
 3. Lider yayaysa `[PLAN-ZIRH]` satirlari tank icin devam eder (eskiden sessizdi).
 Karsilastirma: `aracUzakMurOff = true`, `tankMurettebatOff = true`. Hepsi (T) = dogrulanmadi.
 
+## T-KAYIP-HQ-DONUS (v8.254)
+A) Savunma: HQ'ya bagli SAVUN plani (ya da HQ'suz), 8+ askerli gruplar; karsi tarafi guclu yap (topcu / tank). Kayip %50'ye varinca:
+ 1. `[PLAN-SAVUNMA] ... KAYIP yuzde N (esik 50) ve dusman M: mevzi tutulamiyor, HQ'ya donus`, `[PLAN-KAYIP-DONUS] ... N grup cekiliyor -> <HQ id | rally point> (grid)`.
+ 2. `[PLAN] ... FAZ BEKLE -> CEKILME`, 150 sn sonra `FAZ CEKILME -> DONUS`, gruplar HQ/RP'ye yurur (hendekten cikarlar, `[TACTICS-CAGRI]`/retreat satirlari), sonunda `HQ'ya donuldu`.
+B) Ele gecir: ORP/KESIF/SALDIRI sirasinda pusu/topcuyla %50 kayip: `[PLAN-KAYIP-DONUS] ... fazinda kayip yuzde N` -> CEKILME -> DONUS. (SALDIRI'da eski FRAGO satiri `saldiri kaybi yuzde N` + simdi cekilme emri de verir.)
+Karsilastirma: `kayipDonusOff = true` (savunma eski %60/BITTI davranisi), `fragoOff = true`.
+Sinirlar: yalniz PLAN gruplari; plansiz gruplar ve tek tek moral/teslimiyet mantigi degismedi; esikler TASARIM; geri cekilirken topcu/tank atesi altinda kayip surebilir. Hepsi (T) = dogrulanmadi.
+

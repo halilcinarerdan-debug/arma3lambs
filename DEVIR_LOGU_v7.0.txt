@@ -2488,3 +2488,10 @@ v8.253 TANK MURETTEBAT 2 (kullanici: "hayir, yayan kaldi, tank ilerledi, yayan s
  YAPILMADI: LIDER-DEVRI arac gruplarinda aracta olani tercih etmiyor; murettebatin neden indigi (tank surucusuz / canMove false) kok nedeni degismedi; yayada baygin kalan murettebati toplama (medevac) ayri is.
  Not: TEST EDILMEDI (v8.253). Test: TEST_SENARYOLARI.md T-TANK-MURETTEBAT-2.
 
+v8.254 KAYIP ESIGINDE HQ'YA DONUS (kullanici: "bir taraf kaybedince HQ ya geri donsun, sonuna kadar savasmasin")
+ MEVCUT DURUM (kod okumasi): ele gecirde SALDIRI'da kayip >= %50 FRAGO'su yalniz faza CEKILME yaziyordu, gruplara cekilme emri vermiyordu (CEKILME fazinda 150 sn gruplar yerinde); ORP / KESIF'te kayip esigi yoktu; savunmada kayip >= %60 ve dusman >= 2 olunca plan BITTI (gruplar mevzide serbest, savasa devam).
+ YAPILAN: komutanPlanDongu yeni _kayipCekil yardimcisi: gruplarin waypoint'leri temizlenir, hendekte / mevziIlk / hendekEk bayraklari birakilir (mevzi tutma kilidi), tacticsRetreat (tehdit yonunun tersine; savunmada bilinen dusman agirlik merkezi, ele gecirde objektif), plan HQ'suzsa hqPoz = rally point (hqYar 60), faz CEKILME (mevcut CEKILME -> 150 sn -> DONUS -> BITTI zinciri).
+  Tetikler: ele gecir ORP / KESIF kayip >= %50 (ilk >= 8; yeni), SALDIRI FRAGO (ayni yardimci), savunma BEKLE kayip >= %50 + bilinen dusman >= 2 + ilk >= 6 (eski %60 / BITTI dali yedek). [PLAN-KAYIP-DONUS] log; kayipDonusOff (savunma + ORP/KESIF), fragoOff (SALDIRI).
+ YAPILMADI: plan disi gruplar / tarafin tamami (HQ kayit bazli) donus; geri cekilirken topcu / tank atesini onleme; HQ'suz planda donus noktasi olarak rally point secimi dogrulanmadi.
+ Not: TEST EDILMEDI (v8.254). Test: TEST_SENARYOLARI.md T-KAYIP-HQ-DONUS.
+
