@@ -243,3 +243,20 @@ Ortam C (koru): tank + yakin dost piyade grubu (<= 400 m) + 450 m'de dusman roke
 Karsilastirma: `tankAtesOff = true` ya da `aracAtTepkiOff = true` / `aracDumanOff = true` / `tankKoruOff = true` ile ayni sahneyi tekrarla.
 Sinirlar: piyade tank yanina KONUMLANDIRILMAZ (yalniz ates / bakis); duman atici API'si (fireAtTarget) ve esikler (25 m + %3 sapma, 45/75/110 m, 0.05 hasar) TASARIM; yer degistirme sonrasi planli grup davranisi izlenmeli.
 Hepsi (T) = dogrulanmadi.
+
+## T-SAVUNMA-YARICAP (v8.252)
+Ortam: SAVUN objektifi (OPFOR); haritada 6+ `elite_hendek*` alani (bazilari 14-30 m), 1-2 ELITE Karakol/Mevzi/Gozetleme kaydi (ayni taraf), 4 savunma grubu (8-9 kisilik). Objektif 3/4 panelinde "Mevzi arama yaricapi" = 500.
+1. `[PLAN-MEVZI] ... N karakol / mevzi / gozetleme kaydi mevzi olarak plana alindi (objektife <= 500 m)`; `[PLAN] ... SAVUN: <grup> N asker, alan X kapasitesi K -> ek alanlar [[idx,say],...]`; bos alan kaldiysa `bos hendek alani ... -> <grup> grubundan N kisilik ekip`.
+2. `[HENDEK-YERLES] <grup> | N asker hendege (alan X, N nokta, kapasite K)` birden cok satir (grup bolundu); `KAPASITE ASILDI` yalniz ek alan yoksa.
+3. 92 sn sonra `[HENDEK-VARIS] <grup> | N asker: V noktada, Z zaman asimi (en uzak kalan M m)`. Zaman asimi > 0 ise hendegin yaninda bekleyenler var: o gruptan DURUM satirlari + hendek isareti boyutu/yonu rapor edilsin.
+4. Karakol/gozetleme noktasina giden grup: `[PLAN-MEVZI] ... mevzi N` ve `[MEVZI] ... mevzi kuruldu: bina ...`.
+5. Slider'i 100 yap: yalnizca 100 m icindeki alanlar kullanilir. `hendekEkOff = true` / `karakolMevziOff = true` ile karsilastir.
+Sinirlar: hendek isareti kutu (dikdortgen); Trencher modunun gercek siperine uyum gorulmedi; AI'nin siperin icine girmesi motorun yol bulmasina bagli. Hepsi (T) = dogrulanmadi.
+
+## T-TANK-MURETTEBAT (v8.252)
+Ortam: tek tank (T-14/T-72), karsida AT atesi; tank murettebatindan nisanci/surucuyu oldur ya da Zeus'tan tankin disina cikar.
+1. Nisanci olurse: `[TANK-MURETTEBAT] ... koltuk degistirdi: komutan -> gunner` ve tank yine ates eder.
+2. Disari inen murettebat (150 m icinde, saglikli): `... yayaydi (N m) -> <rol> koltuguna donuyor`.
+3. Duman: `[ARAC-DUMAN] <arac> duman silahlari: [...]` ve `... fireAtTarget true | cephane A -> B | ATILDI`. `ATILMADI -> YEDEK forceWeaponFire` satiri gelirse yedek yol calisiyor mu oyunda bak.
+Karsilastirma: `tankMurettebatOff = true`, `aracDumanOff = true`. Hepsi (T) = dogrulanmadi.
+

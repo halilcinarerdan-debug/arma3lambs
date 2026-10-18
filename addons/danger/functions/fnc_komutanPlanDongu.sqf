@@ -466,7 +466,7 @@ while {true} do {
 
         // plan bitti / iptal / grup yok
         if (_faz isEqualTo "IPTAL" || {_gruplar isEqualTo []} || {_faz isEqualTo "BITTI"}) then {
-            { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; if (_x getVariable [QGVAR(hendekte), false]) then { { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doFollow (leader (group _x)); }; } forEach (units _x); }; _x setVariable [QGVAR(hendekte), nil]; _x setVariable [QGVAR(mevziIlk), nil]; } forEach (_plan get "gruplar");   // v8.243: hendekte bayragi plan sonunda silinir (agacGizlen / mevzi tutma sonsuza kadar kilitli kalmasin)
+            { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setVariable ["lambs_danger_planId", nil]; if (_x getVariable [QGVAR(hendekte), false]) then { { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doFollow (leader (group _x)); }; } forEach (units _x); }; _x setVariable [QGVAR(hendekte), nil]; _x setVariable [QGVAR(mevziIlk), nil]; _x setVariable [QGVAR(hendekEk), nil]; } forEach (_plan get "gruplar");   // v8.243: hendekte bayragi plan sonunda silinir (agacGizlen / mevzi tutma sonsuza kadar kilitli kalmasin)
             { if (!isNull _x) then { [_x] call _wpTemizle; _x setVariable ["lambs_danger_planAktif", nil, true]; _x setCombatMode "YELLOW"; _x setBehaviour "AWARE"; _x setSpeedMode "NORMAL"; { _x setUnitPos "AUTO"; _x doWatch objNull; } forEach (units _x); }; } forEach (_plan getOrDefault ["reconG", []]);
             (_plan getOrDefault ["tasimaCtl", [false, true]]) set [0, true];   // bekleyen / yoldaki nakil isi iptal (v8.132)
             { deleteMarker _x; } forEach (_plan get "isaretler");
@@ -758,6 +758,12 @@ while {true} do {
                     private _sirali = (_digerG select [0, floor ((count _digerG) / 2)]) + _destekG + (_digerG select [floor ((count _digerG) / 2), count _digerG]);
                     private _hendekL = ["LISTE"] call FUNC(hendekAlani);
                     private _hendekKul = createHashMap;
+                    // v8.252 MEVZI ARAMA YARICAPI (kullanici: 'savun objektifi yakindaki tum mevzilere etki etmeli, mesafeyi slider ile ayarlayabilelim'): Zeus Objektif 'Mevzi arama yaricapi' (plan mevziYar; 0 = eski: hendek 300 m)
+                    //   hendek alanlari + elle mevzi noktalari + karakol / mevzi / gozetleme kayitlari (komutanPlan) bu yaricap icinde kullanilir.
+                    private _hR = (_plan getOrDefault ["mevziYar", 0]);
+                    if (_hR <= 0) then { _hR = 300; };
+                    private _hendekVar = (_hendekL findIf {((_x select 0) distance2D _obj) <= _hR && {(_x select 5) in [sideUnknown, _plan get "taraf"]}}) >= 0;
+                    private _priSay = createHashMap;
                     // v8.239 COKLU MEVZI: elle konan mevzi noktalari varsa gruplar halka sektoru yerine MEVZILERE dagitilir (once tehdit yonune en yakin mevzi; her mevziye en yakin grup; mevzi sayisi asilirsa turlar halinde ikinci / ucuncu grup yan yana)
                     private _mevziler = _plan getOrDefault ["mevziler", []];
                     private _mevziAta = createHashMap;
@@ -767,7 +773,10 @@ while {true} do {
                             if (_th >= 0) then { abs ((((_obj getDir ((_mevziler select _x) select 0)) - _th + 540) mod 360) - 180) } else { _x }
                         }, "ASCEND"] call BIS_fnc_sortBy;
                         private _kalanG = +_sirali;
-                        while {_kalanG isNotEqualTo []} do {
+                        private _mTur = 0;
+                        // v8.252: hendek alani da varsa her mevziye bir grup (tek tur); artan gruplar hendek alanlarina gider (eskiden ust uste mevziye yigiliyor, hendek alanlari bos kaliyordu)
+                        while {_kalanG isNotEqualTo [] && {_mTur < 1 || {!_hendekVar}}} do {
+                            _mTur = _mTur + 1;
                             {
                                 if (_kalanG isEqualTo []) exitWith {};
                                 private _mi = _x;
@@ -803,7 +812,7 @@ while {true} do {
                         if (_ma isNotEqualTo []) then { _enSk = -1; };
                         {
                             _x params ["_hc", "_ha", "_hb", "_hd", "_hadi", "_htr"];
-                            if ((_htr isEqualTo sideUnknown || {_htr isEqualTo (_plan get "taraf")}) && {(_hc distance2D _obj) <= 300}) then {
+                            if ((_htr isEqualTo sideUnknown || {_htr isEqualTo (_plan get "taraf")}) && {(_hc distance2D _obj) <= _hR}) then {
                                 private _sk = (_hendekKul getOrDefault [_forEachIndex, 0]) * 1000 + (_hc distance2D _poz);
                                 if (_sk < _enSk) then { _enSk = _sk; _hdkI = _forEachIndex; };
                             };
@@ -813,9 +822,67 @@ while {true} do {
                             _hendekKul set [_hdkI, (_hendekKul getOrDefault [_hdkI, 0]) + 1];
                             diag_log format ["[PLAN] %1 SAVUN: %2 hendek alanina yerlesecek (alan %3, objektife %4 m, ayni alanda %5 grup)", _id, groupId _g, _hdkI, round (_poz distance2D _obj), _hendekKul get _hdkI];
                         };
+                        // v8.252 KAPASITE: grup birincil hendege sigmiyorsa en yakin KULLANILMAYAN hendek alanlari (<= 250 m, en cok 3) ek alan olur; askerler orada kapasite kadar yerlesir
+                        _g setVariable [QGVAR(hendekEk), []];
+                        if (_hdkI >= 0 && {_ma isEqualTo []}) then {
+                            private _nG = {alive _x} count (units _g);
+                            private _kap = ["KAPASITE", _hdkI] call FUNC(hendekAlani);
+                            private _ek = [];
+                            if (_nG > _kap && {!(missionNamespace getVariable ["lambs_danger_hendekEkOff", false])}) then {
+                                private _kalanS = _nG - _kap;
+                                private _pC = (_hendekL select _hdkI) select 0;
+                                private _adayA = [];
+                                {
+                                    _x params ["_hc2", "_ha2", "_hb2", "_hd2", "_hadi2", "_htr2"];
+                                    if ((_htr2 isEqualTo sideUnknown || {_htr2 isEqualTo (_plan get "taraf")}) && {(_hc2 distance2D _obj) <= _hR} && {(_hc2 distance2D _pC) <= 250} && {_forEachIndex isNotEqualTo _hdkI} && {(_hendekKul getOrDefault [_forEachIndex, 0]) isEqualTo 0}) then {
+                                        _adayA pushBack [_hc2 distance2D _pC, _forEachIndex];
+                                    };
+                                } forEach _hendekL;
+                                _adayA sort true;
+                                {
+                                    if (_kalanS <= 0 || {(count _ek) >= 3}) exitWith {};
+                                    private _ai = _x select 1;
+                                    private _al = (["KAPASITE", _ai] call FUNC(hendekAlani)) min _kalanS;
+                                    _ek pushBack [_ai, _al];
+                                    _hendekKul set [_ai, 1];
+                                    _kalanS = _kalanS - _al;
+                                } forEach _adayA;
+                                diag_log format ["[PLAN] %1 SAVUN: %2 %3 asker, alan %4 kapasitesi %5 -> ek alanlar %6%7", _id, groupId _g, _nG, _hdkI, _kap, _ek, if (_kalanS > 0) then {format [" (%1 asker icin yer yok: sikisik)", _kalanS]} else {""}];
+                            };
+                            _g setVariable [QGVAR(hendekEk), _ek];
+                            private _ekT = 0;
+                            { _ekT = _ekT + (_x select 1); } forEach _ek;
+                            _priSay set [groupId _g, [_hdkI, (_nG - _ekT) max 1]];
+                        };
                         (_plan get "notlar") set [groupId _g, [_poz, _a, _hdkI]];
                         [_g, [[_poz, "MOVE", format ["MEVZI sektor %1", round _a], "AWARE", "NORMAL", 30]]] call _wpYaz;
                     } forEach _sirali;
+                    // v8.252 TUM MEVZILER: yaricap icinde hala bos hendek alani varsa, o alana yakin (<= 250 m) en kalabalik gruptan (birincilde >= 6 asker kalmis) 2+ kisilik ekip ayrilir (birincilde en az 3 kalir)
+                    if !(missionNamespace getVariable ["lambs_danger_hendekEkOff", false]) then {
+                        {
+                            _x params ["_hc3", "_ha3", "_hb3", "_hd3", "_hadi3", "_htr3"];
+                            private _bi = _forEachIndex;
+                            if ((_htr3 isEqualTo sideUnknown || {_htr3 isEqualTo (_plan get "taraf")}) && {(_hc3 distance2D _obj) <= _hR} && {(_hendekKul getOrDefault [_bi, 0]) isEqualTo 0}) then {
+                                private _enG = grpNull;
+                                private _enK = 0;
+                                {
+                                    private _pg = _priSay getOrDefault [groupId _x, []];
+                                    if (_pg isNotEqualTo [] && {(_pg select 1) >= 6} && {(((_hendekL select (_pg select 0)) select 0) distance2D _hc3) <= 250} && {(_pg select 1) > _enK}) then { _enK = _pg select 1; _enG = _x; };
+                                } forEach _gruplar;
+                                if (!isNull _enG) then {
+                                    private _pg2 = _priSay get (groupId _enG);
+                                    private _al3 = ((["KAPASITE", _bi] call FUNC(hendekAlani)) min ((floor ((_pg2 select 1) / 3)) max 2)) min ((_pg2 select 1) - 3);
+                                    if (_al3 >= 2) then {
+                                        private _ek3 = (_enG getVariable [QGVAR(hendekEk), []]) + [[_bi, _al3]];
+                                        _enG setVariable [QGVAR(hendekEk), _ek3];
+                                        _priSay set [groupId _enG, [_pg2 select 0, (_pg2 select 1) - _al3]];
+                                        _hendekKul set [_bi, 1];
+                                        diag_log format ["[PLAN] %1 SAVUN: bos hendek alani %2 (objektife %3 m) -> %4 grubundan %5 kisilik ekip", _id, _bi, round (_hc3 distance2D _obj), groupId _enG, _al3];
+                                    };
+                                };
+                            };
+                        } forEach _hendekL;
+                    };
                     [_plan, "MEVZI", format ["%1 sektor", _n]] call _fazGec;
                 } else {
                     private _i = 0;

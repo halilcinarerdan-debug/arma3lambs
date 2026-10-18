@@ -579,9 +579,27 @@ private _mevziler = [];
 if (_tip isEqualTo 1) then {
     private _mTum = (missionNamespace getVariable ["lambs_danger_savunmaMevzi", createHashMap]) getOrDefault [str _taraf, []];
     private _mYar = missionNamespace getVariable ["lambs_danger_savunmaMevziYaricap", 700];
+    // v8.252: Zeus Objektif 'Mevzi arama yaricapi' slider'i (ayar mevziYar > 0) elle mevzi + karakol / mevzi / gozetleme kayitlarini ve hendek alanlarini ayni yaricapla sinirlar
+    private _sliderYar = _ayar getOrDefault ["mevziYar", 0];
+    if (_sliderYar > 0) then { _mYar = _sliderYar; };
     _mevziler = _mTum select {((_x select 0) distance2D _obj) <= _mYar};
     if (_mTum isNotEqualTo []) then {
         diag_log format ["[PLAN-MEVZI] %1 | %2 manuel mevzi plana alindi (objektife <= %3 m; bu tarafta toplam %4 kayit)", _id, count _mevziler, _mYar, count _mTum];
+    };
+    // v8.252 KARAKOL / MEVZI / GOZETLEME KAYITLARI (kullanici: 'gozetleme noktasi, garnizon, karakol, haritaya yerlestirilen yerleri iyi kullansinlar'): ayni tarafin Zeus 'ELITE Karakol / Mevzi' kayitlari yaricap icindeyse
+    //   (objektifin kendisi olan karakol haric, > 40 m) savunma mevzisi olur: grup kayit noktasina gider, en yakin binada garrison + bos statik silah (mevziKur); yon objektiften disari. Kapatma: lambs_danger_karakolMevziOff = true
+    if (_sliderYar > 0 && {!(missionNamespace getVariable ["lambs_danger_karakolMevziOff", false])}) then {
+        private _kMev = [];
+        {
+            private _k = _x;
+            if ((_k select 0) isEqualTo _taraf && {((_k select 1) distance2D _obj) > 40} && {((_k select 1) distance2D _obj) <= _mYar} && {(_mevziler findIf {((_x select 0) distance2D (_k select 1)) < 25}) < 0}) then {
+                _mevziler pushBack [_k select 1, -1, _k select 3];
+                _kMev pushBack _k;
+            };
+        } forEach (missionNamespace getVariable ["lambs_danger_karakollar", []]);
+        if (_kMev isNotEqualTo []) then {
+            diag_log format ["[PLAN-MEVZI] %1 | %2 karakol / mevzi / gozetleme kaydi mevzi olarak plana alindi (objektife <= %3 m): %4", _id, count _kMev, _mYar, _kMev apply {format ["%1 %2", _x select 3, mapGridPosition (_x select 1)]}];
+        };
     };
 };
 private _plan = createHashMapFromArray [
@@ -590,7 +608,7 @@ private _plan = createHashMapFromArray [
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700, 3600, 7200, 14400, 36000] select ((_ayar getOrDefault ["sure", 0]) min 8)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]], ["topcuBasit", _ayar getOrDefault ["topcuBasit", 0]],
-    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["reconEkNoktalar", _reconEkN], ["reconEkSonuc", []], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["mevziler", _mevziler], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
+    ["guven", _ayar getOrDefault ["guven", 1]], ["dogrulama", _ayar getOrDefault ["dogrulama", 0]], ["iddiaSayi", _ayar getOrDefault ["sayi", 0]], ["atislar", []], ["reconG", _reconG], ["zirhG", _zirhG], ["op", _op], ["reconEkNoktalar", _reconEkN], ["reconEkSonuc", []], ["faz", "KUR"], ["fazT", time], ["t0", time], ["isaretler", _isaretler], ["notlar", createHashMap], ["mevziler", _mevziler], ["mevziYar", _ayar getOrDefault ["mevziYar", 0]], ["uyarilar", _uyarilar], ["manuelNoktalar", _manuelAd]
 ];
 {
     _x setVariable ["lambs_danger_planAktif", true, true];

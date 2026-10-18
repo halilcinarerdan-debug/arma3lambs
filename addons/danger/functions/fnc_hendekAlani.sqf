@@ -9,6 +9,7 @@
  *   "LISTE"                      -> [[merkez, a, b, yon, isaretAdi, taraf], ...]  (20 sn onbellek)
  *   "EN-YAKIN", konum, enCokM, taraf -> [nokta, indeks, mesafe] ya da []   (nokta = dikdortgenin konuma EN YAKIN ic noktasi; kenardan 0.8 m iceride)
  *   "NOKTALAR", indeks, n        -> n nokta, hendegin UZUN ekseni boyunca esit aralikli (kenardan 1 m iceride)
+ *   "KAPASITE", indeks           -> hendege sigan asker sayisi (v8.252: uzun eksen / 2.5 m aralik + 1, en az 1, en cok 12; RPT f39a5919: 8-9 kisilik grup kisa hendege sigmadi, bir kismi yaninda bekledi)
  * Log: yok (cagiranlar yazar).
  *
  * Return Value: moda gore
@@ -52,6 +53,14 @@ if (_mod isEqualTo "EN-YAKIN") exitWith {
         };
     } forEach _l;
     if (_en isNotEqualTo [] && {_enD <= _maxD}) then {_en} else {[]}
+};
+
+if (_mod isEqualTo "KAPASITE") exitWith {
+    private _kIdx = _p;
+    if (!(_kIdx isEqualType 0) || {_kIdx < 0} || {_kIdx >= count _l}) exitWith {0};
+    (_l select _kIdx) params ["_kc", "_ka", "_kb"];
+    private _kL = ((_ka max _kb) - 1) max 0;
+    ((floor ((2 * _kL) / 2.5)) + 1) max 1 min 12
 };
 
 if (_mod isEqualTo "NOKTALAR") exitWith {
