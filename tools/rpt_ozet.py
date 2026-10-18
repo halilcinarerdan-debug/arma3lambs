@@ -5,6 +5,7 @@ RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
+           --tani               NET TANI (v8.255): [OLUM-TANI] [HENDEK-DURUM] [ARAC-TERK] [ARAC-HAREKET] [TANI-TOPCU] [KAYIP-DEGERLENDIRME] [ARAC-DUMAN] ozeti + otomatik cikarim
            --kayip              KAYIP TABLOSU (v8.90): taraf basina OLU + BAYILAN (ACE etkisiz) + oran; gercek hayat hedefiyle karsilastirma icin
            --cephe              CEPHE SIMULASYONU (v8.237, Dilim A0): [CEPHE-*] zaman cizelgesi ozeti + sanal / fiziksel gecis sayilari + takviye + hatalar
            --zeka               TAKTIK ZEKA katmani (v8.60): olum bolgesi hafizasi, karsi pusu, rota gozcusu, HQ otomatik; otomatik cikarim
@@ -22,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.254"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.255"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -659,6 +660,109 @@ def kayip_tablosu(path):
     print()
 
 
+def _kv(satir):
+    """'[ETIKET] k=v | k=v ...' satirini sozluge cevirir."""
+    govde = satir.split("] ", 1)[1] if "] " in satir else satir
+    d = {}
+    for parca in govde.split(" | "):
+        if "=" in parca:
+            k, v = parca.split("=", 1)
+            d[k.strip()] = v.strip().strip('"')
+    return d
+
+def tani(path):
+    """v8.255 TANI PAKETI ozeti: olum nedenleri, hendek kullanimi, arac terk, tank hareket, kayip esigi, duman. Otomatik cikarim 'CIKARIM:' satirlari."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    def al(etiket): return [l for l in L if ("[%s]" % etiket) in l]
+    print("=" * 78)
+    b = re.search(r"build (v[0-9.]+[A-Za-z-]*)", "\n".join(L))
+    print(path, "| TANI |", b.group(1) if b else "boot satiri yok")
+    # ---- olum
+    ol = [_kv(l) for l in al("OLUM-TANI")]
+    print("\n-- OLUM TANISI (%d olum) --" % len(ol))
+    if ol:
+        by = collections.defaultdict(list)
+        for d in ol: by[d.get("taraf", "?")].append(d)
+        for t, ds in sorted(by.items()):
+            hg = [d for d in ds if d.get("hendek_grubu") == "true"]
+            hi = [d for d in hg if d.get("hendek_icinde") == "true"]
+            hd = [d for d in hg if d.get("hendek_icinde") != "true"]
+            tp = [d for d in ds if d.get("topcu_olasi") == "true"]
+            tp_hi = [d for d in tp if d.get("hendek_icinde") == "true"]
+            ar = [d for d in ds if d.get("aracta", "-") != "-"]
+            dr = collections.Counter(d.get("durus", "?") for d in ds)
+            print("  %-6s toplam:%-3d hendek_grubundan:%-3d (icinde:%d, DISINDA:%d) topcu_olasi:%-3d (icinde:%d, disinda:%d) aracta:%d durus:%s" % (t, len(ds), len(hg), len(hi), len(hd), len(tp), len(tp_hi), len(tp) - len(tp_hi), len(ar), dict(dr)))
+            if hg and len(hd) >= 0.5 * len(hg):
+                print("  CIKARIM: %s hendek grubunun olenlerinin %d/%d'si hendek ALANI DISINDA oldu -> hendege girmeme olum nedenlerinden biri." % (t, len(hd), len(hg)))
+            if ds and len(tp) >= 0.5 * len(ds):
+                print("  CIKARIM: %s olumlerinin %d/%d'si topcu dususune denk geliyor (<=35 m, <=3 sn)." % (t, len(tp), len(ds)))
+            if tp and tp_hi and len(tp_hi) >= 0.5 * len(tp):
+                print("  CIKARIM: %s topcu olumlerinin yarisindan fazlasi hendek ICINDE -> hendek yetersiz (topcu dogrudan isabet); girmeme tek neden degil." % t)
+        for o in al("OLUM-OZET")[-3:]: print("  ", o.split('" ', 1)[-1][:160])
+    else:
+        print("  kayit yok (v8.255 yuklu mu? ELITE-BOOT satirina bak)")
+    # ---- hendek
+    hd = [_kv(l) for l in al("HENDEK-DURUM")]
+    print("\n-- HENDEK DURUMU (%d satir) --" % len(hd))
+    for d in hd[:24]:
+        print("  %s t=%s alan=%s boyut=%s kapasite=%s atanan=%s icinde=%s yolda=%s disinda=%s %s" % (d.get("grup"), d.get("t"), d.get("alan"), d.get("boyut"), d.get("kapasite"), d.get("atanan"), d.get("icinde"), d.get("yolda"), d.get("disinda", "").split(" ")[0], " ".join(d.get("disinda", "").split(" ")[1:])[:90]))
+    t90 = [d for d in hd if d.get("t") == "90sn"]
+    if t90:
+        a_ = sum(int(d.get("atanan", 0)) for d in t90); i_ = sum(int(d.get("icinde", 0)) for d in t90)
+        print("  90 sn toplam: atanan %d, icinde %d (%.0f%%)" % (a_, i_, 100.0 * i_ / max(a_, 1)))
+        for d in t90:
+            if int(d.get("atanan", 0)) > int(d.get("kapasite", 99)):
+                print("  CIKARIM: %s alan %s: atanan %s > kapasite %s -> alan kucuk, askerler sigmiyor." % (d.get("grup"), d.get("alan"), d.get("atanan"), d.get("kapasite")))
+        seen = set()
+        for d in t90:
+            if d.get("alan") not in seen:
+                seen.add(d.get("alan")); print("  alan %s nesneler: %s" % (d.get("alan"), d.get("nesneler", "")[:140]))
+    for v in al("HENDEK-VARIS")[:12]: print("  ", v.split('" ', 1)[-1][:150])
+    # ---- arac terk
+    at = [_kv(l) for l in al("ARAC-TERK")]
+    print("\n-- ARAC TERK (%d) --" % len(at))
+    for d in at[:20]:
+        neden = "belirsiz"
+        try: sy = int(d.get("son_hasar_yasi", 999))
+        except ValueError: sy = 999
+        if d.get("canMove") == "false" and sy <= 15: neden = "hasar sonrasi hareketsiz (parca: %s)" % d.get("hasarli_parca", "")[:50]
+        elif d.get("birim_komutu") == "GET OUT" and d.get("arac_hasar", "0") in ("0.00", "0.01", "0.02"): neden = "hasarsiz arac: emirle/AI karariyla indi (komut GET OUT)"
+        elif d.get("surucu") in ("-", "") : neden = "surucu yok"
+        print("  %s %s inen=%s rol=%s hasar=%s canMove=%s son_hasar=%ss komut=%s -> %s" % (d.get("arac"), d.get("grup"), d.get("inen"), d.get("rol"), d.get("arac_hasar"), d.get("canMove"), d.get("son_hasar_yasi"), d.get("birim_komutu"), neden))
+    print("  ARAC-BINDI (tank mürettebat geri biniş): %d" % len(al("ARAC-BINDI")))
+    # ---- hareket
+    hr = [_kv(l) for l in al("ARAC-HAREKET")]
+    print("\n-- TANK HAREKETE GECIS (%d) --" % len(hr))
+    for d in hr[:14]:
+        print("  %s %s durdu=%ss hiz=%s komut=%s hedef=%s planZirh=%s hide=%s vardi=%s tankManevra=%ss atTepki=%ss zirhKac=%ss dusman=%s" % (d.get("arac"), d.get("grup"), d.get("durdu", "").replace("sn", ""), d.get("hiz"), d.get("surucu_komut"), d.get("beklenen_hedef"), d.get("planZirh"), d.get("hide"), d.get("vardi"), d.get("tankManevra_yasi"), d.get("atTepki_yasi"), d.get("zirhKac_yasi"), d.get("en_yakin_dusman")))
+    # ---- kayip esigi
+    kd = [_kv(l) for l in al("KAYIP-DEGERLENDIRME")]
+    print("\n-- KAYIP DEGERLENDIRME (%d satir) --" % len(kd))
+    pl = collections.defaultdict(list)
+    for d in kd: pl[d.get("taraf", "?") + " " + (L[0] if False else "")].append(d)
+    for k, ds in pl.items():
+        ky = [int(x.get("kayip_yuzde", 0)) for x in ds]
+        print("  %s tip=%s: ilk %%%d, son %%%d, en yuksek %%%d, son faz %s, kalan %s" % (k.strip(), ds[-1].get("tip"), ky[0], ky[-1], max(ky), ds[-1].get("faz"), ds[-1].get("kalan")))
+    for v in al("PLAN-KAYIP-DONUS"): print("  ", v.split('" ', 1)[-1][:170])
+    if kd and not al("PLAN-KAYIP-DONUS"):
+        mx = max(int(x.get("kayip_yuzde", 0)) for x in kd)
+        print("  CIKARIM: geri cekilme tetiklenmedi; en yuksek kayip %%%d (esik 50)" % mx + (" -> esik asilmadi" if mx < 50 else " -> esik asildi ama tetiklenmedi (ilk<8 / bilinen dusman<2 / faz uygun degil?)"))
+    # ---- topcu
+    tt = [_kv(l) for l in al("TANI-TOPCU")]
+    print("\n-- TOPCU DUSUSLERI (%d kayit) --" % len(tt))
+    hdm = [d for d in tt if d.get("hendek_alani_mesafe", "").lstrip("-").isdigit() and int(d.get("hendek_alani_mesafe")) <= 3]
+    if tt: print("  dususlerin %d'i hendek alaninin <=3 m'sinde; ornek: %s" % (len(hdm), "; ".join("%s %s" % (d.get("dusme"), d.get("40m_icinde")) for d in tt[:3])))
+    # ---- duman / mürettebat
+    dm = al("ARAC-DUMAN")
+    ok = len([1 for l in dm if "| ATILDI" in l]); no = len([1 for l in dm if "ATILMADI" in l])
+    print("\n-- DUMAN: ATILDI %d, ATILMADI %d --" % (ok, no))
+    for l in dm[:6]: print("  ", l.split('" ', 1)[-1][:170])
+    print("-- TANK-MURETTEBAT: %d satir (koltuk degistirme/ geri donus/ BEKLIYOR) --" % len(al("TANK-MURETTEBAT")))
+    hata = len([1 for l in L if "Error in expression" in l or "Error Undefined" in l or "Error Type" in l])
+    print("\nSCRIPT HATASI satiri: %d (modsuz gurultu haric degil; --karne ile ayrinti)" % hata)
+    print()
+
+
 def cephe(path):
     """Dilim A0 cephe simulasyonu: [CEPHE-FACTION] [CEPHE-FIZIKLE] [CEPHE-SANALLA] [CEPHE-TAKVIYE] [CEPHE-KONVOY] [CEPHE-SOYUT] [CEPHE-OZET] [CEPHE-YOK] [CEPHE-HATA] [CEPHE-AYAR]."""
     L = open(path, encoding="utf-8", errors="replace").read().splitlines()
@@ -758,6 +862,7 @@ if __name__ == "__main__":
     form_modu = False
     kayip_modu = False
     cephe_modu = False
+    tani_modu = False
     yollar = []
     i = 0
     while i < len(args):
@@ -779,13 +884,17 @@ if __name__ == "__main__":
             kayip_modu = True; i += 1
         elif args[i] == "--cephe":
             cephe_modu = True; i += 1
+        elif args[i] == "--tani":
+            tani_modu = True; i += 1
         else:
             yollar.append(args[i]); i += 1
     if not yollar:
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if cephe_modu:
+        if tani_modu:
+            tani(p)
+        elif cephe_modu:
             cephe(p)
         elif kayip_modu:
             kayip_tablosu(p)

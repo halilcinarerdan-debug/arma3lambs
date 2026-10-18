@@ -6,6 +6,8 @@
  *   B) KORU: <= 450 m'de BILINEN gercek dusman AT unsuru (roketatarli piyade / ATGM'li arac / statik) -> fnc_tankKoru (tank basina 10 sn; dost piyade gruplari ates/bakis).
  *   C) HEDEF DAGITIMI (plan zirh destek GRUBU OLMAYAN tanklar; planZirh kendi tanklarini fnc_tankHedefSec ile zaten dagitir): 5 sn'de bir bilinen gercek dusman <= 1300 m adaylarindan fnc_tankHedefSec secimi;
  *      YALNIZ (<= 800 m'de baska dost tank var) ya da (secim puani >= 85: tank / ATGM / AT'li piyade / diger tank) ise nisanciya doTarget + doFire; aksi halde motorun kendi hedef secimi.
+ *   E) HAREKET TESHISI (v8.255; "T-14 neden ileri cikti?" sorusu): tank >= 20 sn durduktan (< 2 km/s) sonra > 8 km/s hizlanirsa [ARAC-HAREKET] yazar: konum, surucu komutu + beklenen hedef (expectedDestination), grup davranis / savas / hiz modu, aktif waypoint, planZirh bayraklari (hide / vardi / poz mesafesi),
+ *      tankManevra / atTepki / zirhKac / murBekle yaslari, lider yayada mi, en yakin bilinen dusman. Davranis degistirmez (ilk 80). Kapatma: lambs_danger_taniOff.
  *   D) YALNIZ TANK TESHISI: tank temasta (grup temas isareti) ve 250 m'de dost piyade yok -> [TANK-YALNIZ] (60 sn, ilk 20; davranis degistirmez).
  * Kapatma: lambs_danger_tankAtesOff = true (hepsi), lambs_danger_tankHedefDagitOff = true (yalniz C).  Log: [TANK-ATES].
  *
@@ -22,6 +24,7 @@ diag_log "[TANK-ATES] tank ates kontrolu baslatildi (v8.251): hedef dagitimi + A
 private _calis = {
     private _logN = 0;
     private _yalnizN = 0;
+    private _harekN = 0;
     while {true} do {
         sleep 2;
         if (missionNamespace getVariable ["lambs_danger_tankAtesOff", false]) then { continue };
@@ -88,6 +91,31 @@ private _calis = {
                             _v setVariable [QGVAR(tankHedefSon), _hd];
                         };
                     };
+                };
+            };
+
+            // E) hareket teshisi (v8.255)
+            if !(missionNamespace getVariable ["lambs_danger_taniOff", false]) then {
+                private _hizK = abs (speed _v);
+                private _dur0 = _v getVariable [QGVAR(taniDurT), -1];
+                if (_hizK < 2) then {
+                    if (_dur0 < 0) then { _v setVariable [QGVAR(taniDurT), time]; };
+                    _v setVariable [QGVAR(taniDurSon), time];
+                } else {
+                    private _durSon = _v getVariable [QGVAR(taniDurSon), -999];
+                    if (_hizK > 8 && {_dur0 >= 0} && {(_durSon - _dur0) >= 20} && {(time - _durSon) <= 10} && {_harekN < 80}) then {
+                        _harekN = _harekN + 1;
+                        private _wpI = currentWaypoint _g;
+                        private _wpP = if (_wpI > 0 && {_wpI < count (waypoints _g)}) then { mapGridPosition (waypointPosition [_g, _wpI]) } else { "-" };
+                        private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
+                        private _en = _l findNearestEnemy _v;
+                        diag_log format ["[ARAC-HAREKET] arac=%1 | grup=%2 | durdu=%3sn | hiz=%4 | nokta=%5 | surucu_komut=%6 | beklenen_hedef=%7 | beh=%8 | savas=%9 | hizmodu=%10 | aktif_wp=%11 | wp_sayisi=%12 | planZirh=%13 | hide=%14 | vardi=%15 | poz_mesafe=%16 | tankManevra_yasi=%17 | atTepki_yasi=%18 | zirhKac_yasi=%19 | murBekle_yasi=%20 | lider_yayada=%21 | en_yakin_dusman=%22",
+                            getText (configOf _v >> "displayName"), groupId _g, round (_durSon - _dur0), round _hizK, mapGridPosition _v, currentCommand _d, mapGridPosition ((expectedDestination _d) select 0), behaviour _l, combatMode _g, speedMode _g, _wpP, count (waypoints _g),
+                            _g getVariable ["lambs_danger_planZirh", false], _g getVariable ["lambs_danger_planZirhHide", false], _g getVariable ["lambs_danger_planZirhVardi", false], if (_poz isEqualTo []) then {"-"} else {round (_v distance2D _poz)},
+                            round (time - (_v getVariable [QGVAR(tankManevraT), -999])), round (time - (_v getVariable [QGVAR(atTepkiT), -999])), round (time - (_v getVariable [QGVAR(zirhKacT), -999])), round (time - (_v getVariable [QGVAR(murBekleT0), -999])),
+                            isNull objectParent _l, if (isNull _en) then {"-"} else {round (_v distance2D _en)}];
+                    };
+                    if (_hizK > 8 || {(time - _durSon) > 10}) then { _v setVariable [QGVAR(taniDurT), -1]; };
                 };
             };
 

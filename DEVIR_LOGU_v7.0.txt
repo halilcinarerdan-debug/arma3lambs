@@ -2495,3 +2495,11 @@ v8.254 KAYIP ESIGINDE HQ'YA DONUS (kullanici: "bir taraf kaybedince HQ ya geri d
  YAPILMADI: plan disi gruplar / tarafin tamami (HQ kayit bazli) donus; geri cekilirken topcu / tank atesini onleme; HQ'suz planda donus noktasi olarak rally point secimi dogrulanmadi.
  Not: TEST EDILMEDI (v8.254). Test: TEST_SENARYOLARI.md T-KAYIP-HQ-DONUS.
 
+v8.255 TANI PAKETI (kullanici: "net bir tani icin loglamayi genislet, aklimizda soru isareti kalmasin")
+ NEDEN: v8.251-254 incelemelerinde belirsiz kalan sorular: duman neden atilmadi (cephane mi komut mu), murettebat neden indi (hangi parca hasar), askerler hendegin icinde mi disinda mi, olumler topcudan mi, T-14 neden ileri cikti, geri cekilme esigi neden tetiklenmedi. Log hacmi degil olay-ani durumu eksikti.
+ YAPILAN (davranis degismez): YENI fnc_tani (her makinede bir kez; CBA sinif olaylari): LandVehicle Fired -> topcu mermisi dusme izleyici [TANI-TOPCU]; CAManBase Killed -> [OLUM-TANI] (1.5 sn gecikmeli topcu eslesmesi: |dt| <= 3 s ve <= 35 m) + [OLUM-OZET]; LandVehicle Dammaged (parca hasar halkasi), GetOut -> [ARAC-TERK], GetIn (tank) -> [ARAC-BINDI].
+  YENI fnc_hendekDurum + hendekAlani 'ICERDE' modu (alan dikdortgenine mesafe): hendekYerles her askere hendekNokta yazar, 30 / 90 sn sonra [HENDEK-DURUM] (atanan / icinde / yolda / disinda, komut + durus dagilimi, alan boyutu / kapasite, alandaki nesne turleri).
+  tankAtesKontrol blok E: [ARAC-HAREKET] (>= 20 sn duran tank > 8 km/s). komutanPlanDongu: [KAYIP-DEGERLENDIRME] (30 sn). tools/rpt_ozet.py --tani: otomatik ozet + CIKARIM satirlari (sahte RPT ile sozdizimi dogrulandi, gercek RPT'de calismadi).
+ BILINEN SINIR: olay yalniz birim / arac o makinede yerelse yazilir (HC varsa HC RPT'si); topcu eslesmesi estirim; Trencher nesne siniflari bilinmiyor (HENDEK-DURUM 'nesneler' bunu gosterecek).
+ Not: TEST EDILMEDI (v8.255). Test: TEST_SENARYOLARI.md T-TANI.
+

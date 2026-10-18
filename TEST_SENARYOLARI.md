@@ -275,3 +275,13 @@ B) Ele gecir: ORP/KESIF/SALDIRI sirasinda pusu/topcuyla %50 kayip: `[PLAN-KAYIP-
 Karsilastirma: `kayipDonusOff = true` (savunma eski %60/BITTI davranisi), `fragoOff = true`.
 Sinirlar: yalniz PLAN gruplari; plansiz gruplar ve tek tek moral/teslimiyet mantigi degismedi; esikler TASARIM; geri cekilirken topcu/tank atesi altinda kayip surebilir. Hepsi (T) = dogrulanmadi.
 
+## T-TANI (v8.255)
+Ortam: onceki testlerdeki gibi (savunma hendekleri + topcu + tank + piyade). Test sonrasi `python tools/rpt_ozet.py --tani <server.rpt>` (ve istemci RPT'si) calistir.
+1. ELITE-BOOT satiri `v8.255-TANI`, `[TANI] tani paketi kuruldu` gorunmeli.
+2. `[OLUM-TANI]` her olumde; `--tani` ozeti: hendek grubundan kac olu hendek DISINDA, kaci topcu dususune denk (<=35 m, <=3 sn).
+3. `[HENDEK-DURUM] ... t=30sn / t=90sn`: atanan / icinde / yolda / disinda. `atanan > kapasite` CIKARIM satiri hendek kapasitesi sorununu gosterir; `nesneler=` alanda Trencher / hendek nesnesi var mi.
+4. `[ARAC-TERK]`: murettebat inince neden (hasarli parca, canMove, birim komutu, son hasar yasi).
+5. `[ARAC-HAREKET]`: tank durduktan sonra neden kalkti (surucu komutu, beklenen hedef, planZirh / hide / vardi bayraklari).
+6. `[KAYIP-DEGERLENDIRME]` 30 sn'de bir; esik %50.
+Sinirlar: HC varsa HC'nin RPT'si de gerekir; 'topcu_olasi' bir ESTIRIM (zaman + mesafe eslesmesi), kesin neden degil. Hepsi (T) = dogrulanmadi.
+

@@ -9,6 +9,7 @@
  *   "LISTE"                      -> [[merkez, a, b, yon, isaretAdi, taraf], ...]  (20 sn onbellek)
  *   "EN-YAKIN", konum, enCokM, taraf -> [nokta, indeks, mesafe] ya da []   (nokta = dikdortgenin konuma EN YAKIN ic noktasi; kenardan 0.8 m iceride)
  *   "NOKTALAR", indeks, n        -> n nokta, hendegin UZUN ekseni boyunca esit aralikli (kenardan 1 m iceride)
+ *   "ICERDE", indeks, _, _, konum -> konumun o hendek alani dikdortgenine mesafesi (0 = icinde; v8.255 tani)
  *   "KAPASITE", indeks           -> hendege sigan asker sayisi (v8.252: uzun eksen / 2.5 m aralik + 1, en az 1, en cok 12; RPT f39a5919: 8-9 kisilik grup kisa hendege sigmadi, bir kismi yaninda bekledi)
  * Log: yok (cagiranlar yazar).
  *
@@ -16,7 +17,7 @@
  * Public: No
 */
 
-params [["_mod", "LISTE", [""]], ["_p", [0, 0, 0], [[], 0]], ["_maxD", 60, [0]], ["_taraf", sideUnknown, [sideUnknown]]];
+params [["_mod", "LISTE", [""]], ["_p", [0, 0, 0], [[], 0]], ["_maxD", 60, [0]], ["_taraf", sideUnknown, [sideUnknown]], ["_ekPoz", [0, 0, 0], [[]]]];
 
 if (time > ((missionNamespace getVariable ["lambs_danger_hendekT", -99]) + 20)) then {
     lambs_danger_hendekT = time;
@@ -53,6 +54,18 @@ if (_mod isEqualTo "EN-YAKIN") exitWith {
         };
     } forEach _l;
     if (_en isNotEqualTo [] && {_enD <= _maxD}) then {_en} else {[]}
+};
+
+if (_mod isEqualTo "ICERDE") exitWith {
+    private _iIdx = _p;
+    if (!(_iIdx isEqualType 0) || {_iIdx < 0} || {_iIdx >= count _l}) exitWith {-1};
+    (_l select _iIdx) params ["_ic", "_ia", "_ib", "_idir"];
+    private _id = [(_ekPoz select 0) - (_ic select 0), (_ekPoz select 1) - (_ic select 1)];
+    private _ilx = (_id select 0) * (sin (90 + _idir)) + (_id select 1) * (cos (90 + _idir));
+    private _ily = (_id select 0) * (sin _idir) + (_id select 1) * (cos _idir);
+    private _idx2 = ((abs _ilx) - _ia) max 0;
+    private _idy2 = ((abs _ily) - _ib) max 0;
+    sqrt ((_idx2 * _idx2) + (_idy2 * _idy2))
 };
 
 if (_mod isEqualTo "KAPASITE") exitWith {

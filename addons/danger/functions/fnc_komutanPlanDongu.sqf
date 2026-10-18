@@ -324,6 +324,19 @@ while {true} do {
         private _gruplar = (_plan get "gruplar") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
         _plan set ["gruplar", _gruplar];
         private _fazSure = time - (_plan get "fazT");
+        // v8.255 TANI: kayip degerlendirmesi (30 sn'de bir) - geri cekilme esigine (%50) ne kadar kaldigi; 'neden tetiklenmedi / neden tetiklendi' sorusu
+        if ((time - (_plan getOrDefault ["kayipLogT", -99])) >= 30 && {!(_faz in ["KUR", "BITTI", "IPTAL"])} && {!(missionNamespace getVariable ["lambs_danger_taniOff", false])}) then {
+            _plan set ["kayipLogT", time];
+            private _ilkL = _plan getOrDefault ["ilkSayi", createHashMap];
+            if ((count _ilkL) > 0) then {
+                private _ilkLT = 0; private _simLT = 0; private _ayrL = [];
+                { private _ik = _ilkL getOrDefault [groupId _x, 0]; private _sk = {alive _x} count (units _x); _ilkLT = _ilkLT + _ik; _simLT = _simLT + _sk; _ayrL pushBack format ["%1=%2/%3", groupId _x, _sk, _ik]; } forEach _gruplar;
+                if (_ilkLT > 0) then {
+                    diag_log format ["[KAYIP-DEGERLENDIRME] %1 | taraf=%2 | tip=%3 | faz=%4 | kayip_yuzde=%5 | kalan=%6/%7 | esik_yuzde=50 | esige_kalan_asker=%8 | bilinen_dusman=%9 | hq=%10 | gruplar=%11",
+                        _id, _plan get "taraf", _tip, _faz, round ((1 - (_simLT / _ilkLT)) * 100), _simLT, _ilkLT, (_simLT - (ceil (_ilkLT * 0.5))) max 0, _plan getOrDefault ["savDus", "-"], _plan getOrDefault ["hqId", "-"], _ayrL];
+                };
+            };
+        };
 
         // v8.187 SENKRON KALKIS KAPISI: hazir bayragi (tasimaCtl[1]) gozlem tamam VE tanklar mevzilerine yaklasmis (< 450 m) / 420 sn dolmus iken acilir
         if (_plan getOrDefault ["hazirBekle", false] && {_faz in ["TOPLAN", "RECON", "TASIMA", "KUR"]}) then {

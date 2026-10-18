@@ -68,6 +68,7 @@ private _asim = (count (_plan0 select 1)) > _kap0;
         private _u = _x;
         private _pt = _pts select (_forEachIndex min ((count _pts) - 1));
         _u setVariable [QGVAR(hendekSonuc), nil];
+        _u setVariable [QGVAR(hendekNokta), [_pt, _aIdx]];   // v8.255 tani (fnc_hendekDurum)
         _u enableAI "PATH"; _u enableAI "MOVE";
         _u doMove _pt;
         [_u, _pt, _dirB] spawn {
@@ -89,6 +90,11 @@ private _asim = (count (_plan0 select 1)) > _kap0;
         };
     } forEach _aU;
 } forEach _dagit;
+
+// v8.255 TANI: 30 ve 90 sn sonra icinde / yolda / disinda dagilimi ([HENDEK-DURUM])
+{
+    [{ params ["_gr", "_sn"]; [_gr, _sn] call FUNC(hendekDurum); }, [_g, _x], _x] call CBA_fnc_waitAndExecute;
+} forEach [30, 90];
 
 // varis ozeti (92 sn sonra)
 [{
