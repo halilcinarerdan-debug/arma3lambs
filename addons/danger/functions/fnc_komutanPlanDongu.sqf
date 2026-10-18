@@ -569,6 +569,104 @@ while {true} do {
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
             continue
         };
+        // ---------------------------------------------------------------- v8.248 ARKA TEMAS DESTEGI (kullanici RPT e88d7e9f: ORP gerisinde pusuya dusen BTR ekibine destege giden gruplar, plan ORP fazinda 'temastaki degil' diye 25 sn'de ORP'ye geri yonlendirildi;
+        //   kullanici: 'ormanlik oldugu icin tam temiz oldugunu dogrulayamamis olabilirler'). Doktrin: TC 3-21.76 13-7 / 13-8 (temasta olmayan unsurlar yer degistirip destek ates eder; tehdit eliminated denince kurtarma / CASEVAC),
+        //   MCWP 3-11.1 (quick reaction force); sayilar TASARIM. Kural: ELE GECIR planinda TOPLAN / ORP / KESIF fazinda bir plan grubu ORP'den > 350 m GERIDE >= 6 sn temastaysa, temasta olmayan en fazla 2 grup (once YEDEK, sonra MANEVRA;
+        //   <= 1200 m, >= 3 asker) destege gider: 1) bilinen dusman agirligina saldiri (yoksa temasli gruba hareket), 2) temasli grupla BULUSMA (80 m) + 'sup' (ormanlikta daha uzun); 3) GOREVDEN ALMA: temasli grup >= 45 sn temassiz (ormanlik: 90 sn)
+        //   VE destek grubu onunla bulustu (<= 80 m) ya da 300 sn dolmus. Sadece 'temas bitti' ile gorevden alinmaz (orman: dogrulanamayan 'temiz'). Kapatma: lambs_danger_arkaDestekOff = true.
+        if (_tip isEqualTo 0 && {_faz in ["TOPLAN", "ORP", "KESIF"]} && {!(missionNamespace getVariable ["lambs_danger_arkaDestekOff", false])} && {(time - (_plan getOrDefault ["arkaDT", -99])) > 6}) then {
+            _plan set ["arkaDT", time];
+            private _am = _plan getOrDefault ["arkaDestek", createHashMap];
+            _plan set ["arkaDestek", _am];
+            private _ambGrup = {
+                params ["_gid"];
+                private _r = grpNull;
+                { if ((groupId _x) isEqualTo _gid) exitWith { _r = _x; }; } forEach _gruplar;
+                _r
+            };
+            // 1) gorevden alma / asama gecisi
+            private _arkaBit = [];
+            {
+                private _hid = _x;
+                private _hv = _am get _hid;   // [t0, ambushedId, ep, asama, asamaT, ormanlik]
+                private _hg = [_hid] call _ambGrup;
+                private _ag = [_hv select 1] call _ambGrup;
+                if (isNull _hg || {isNull _ag}) then { _arkaBit pushBack [_hid, "grup yok / olu"]; } else {
+                    private _ap = getPosATL (leader _ag);
+                    private _hm = (leader _hg) distance2D _ap;
+                    private _agTemas = [_ag] call _temasta;
+                    if (_agTemas) then { _ag setVariable ["lambs_danger_arkaTemasSonT", time]; };
+                    private _sessizS = time - (_ag getVariable ["lambs_danger_arkaTemasSonT", _hv select 0]);
+                    if ((_hv select 3) isEqualTo 1 && {_hm < 80 || {(time - (_hv select 4)) > 120} || {((leader _hg) distance2D (_hv select 2)) < 60}}) then {
+                        // asama 2: temasli gruba BULUSMA
+                        _hv set [3, 2]; _hv set [4, time];
+                        [_hg, [[_ap, "MOVE", "ARKA DESTEK (bulusma)", "AWARE", "NORMAL", 40]]] call _wpYaz;
+                        _hg setVariable ["lambs_danger_isExecutingTactic", nil];
+                        _hg setVariable [QGVAR(isBounding), nil];
+                    };
+                    private _gerekliSessiz = [45, 90] select (_hv select 5);
+                    if ((_hv select 3) isEqualTo 2 && {_sessizS >= _gerekliSessiz} && {_hm <= 80}) then { _arkaBit pushBack [_hid, format ["bulustu (%1 m), %2 sn temassiz%3", round _hm, round _sessizS, ["", " (ORMANLIK: uzun dogrulama)"] select (_hv select 5)]]; }
+                    else { if ((time - (_hv select 0)) > 300) then { _arkaBit pushBack [_hid, "300 sn doldu"]; }; };
+                };
+            } forEach (keys _am);
+            {
+                _x params ["_hid", "_neden"];
+                private _hg = [_hid] call _ambGrup;
+                if (!isNull _hg) then {
+                    [_hg] call _wpTemizle;
+                    _hg setVariable ["lambs_danger_isExecutingTactic", nil];
+                    _hg setVariable [QGVAR(isBounding), nil];
+                    _hg setVariable ["lambs_danger_planYenileT", -999];
+                };
+                _am deleteAt _hid;
+                diag_log format ["[PLAN-ARKA-DESTEK] %1 | %2 destekten ALINDI (%3) -> ORP yoluna doner", _id, _hid, _neden];
+            } forEach _arkaBit;
+            // 2) yeni destek (en fazla 2 destek grubu; yeni istek 30 sn'de bir)
+            if ((count _am) < 2 && {(time - (_plan getOrDefault ["arkaYeniT", -99])) > 30}) then {
+                private _amIds = (keys _am) apply { (_am get _x) select 1 };
+                private _gerideTemas = _gruplar select {
+                    ([_x] call _temasta) && {isNull objectParent (leader _x)} && {(leader _x) distance2D _orp > 350} && {!((groupId _x) in _amIds)}
+                };
+                // temas baslangic zamani (>= 6 sn kosulu): temaslilarda ilk gorulme zamani, temassizlarda sifirlanir
+                { if ((_x getVariable ["lambs_danger_arkaTemasBasT", -1]) < 0) then { _x setVariable ["lambs_danger_arkaTemasBasT", time]; }; } forEach _gerideTemas;
+                { _x setVariable ["lambs_danger_arkaTemasBasT", -1]; } forEach (_gruplar - _gerideTemas);
+                private _hedefAm = _gerideTemas select {(time - (_x getVariable ["lambs_danger_arkaTemasBasT", time])) >= 6};
+                if (_hedefAm isNotEqualTo []) then {
+                    private _ag = _hedefAm select 0;
+                    private _apos = getPosATL (leader _ag);
+                    private _yard = _gruplar select {
+                        _x isNotEqualTo _ag && {!([_x] call _temasta)} && {isNull objectParent (leader _x)} && {({alive _x} count (units _x)) >= 3}
+                        && {(_roller getOrDefault [groupId _x, "MANEVRA"]) in ["YEDEK", "MANEVRA"]} && {!((groupId _x) in (keys _am))}
+                        && {(leader _x) distance2D _apos <= 1200}
+                    };
+                    _yard = [_yard, [], { ([0, 100000] select ((_roller getOrDefault [groupId _x, ""]) isEqualTo "YEDEK")) - ((leader _x) distance2D _apos) }, "DESCEND"] call BIS_fnc_sortBy;
+                    _yard = _yard select [0, (2 - (count _am)) max 0];
+                    if (_yard isNotEqualTo []) then {
+                        _plan set ["arkaYeniT", time];
+                        // bilinen dusman agirlik merkezi (yalniz gercek dusman)
+                        private _ep = [];
+                        private _bil = ((leader _ag) nearTargets 600) select {((_plan get "taraf") getFriend (_x select 2)) < 0.6 && {((leader _ag) knowsAbout (_x select 4)) > 0.3} && {[_x select 4] call FUNC(gercekHedef)}};
+                        if (_bil isNotEqualTo []) then {
+                            private _bx = 0; private _by = 0;
+                            { _bx = _bx + ((_x select 0) select 0); _by = _by + ((_x select 0) select 1); } forEach _bil;
+                            _ep = [_bx / (count _bil), _by / (count _bil), 0];
+                        };
+                        // ormanlik: ambushed grubun 50 m'sinde >= 15 agac (gorus kisitli: 'temiz' dogrulamasi uzun surer)
+                        private _orman = (count (nearestTerrainObjects [_apos, ["TREE", "BUSH"], 50])) >= 15;
+                        {
+                            private _hg = _x;
+                            private _hedefP = if (_ep isEqualTo []) then {_apos} else {_ep};
+                            _am set [groupId _hg, [time, groupId _ag, _hedefP, 1, time, _orman]];
+                            _hg setVariable ["lambs_danger_planYenileT", time + 3600];
+                            [_hg, [[_hedefP, "MOVE", "ARKA DESTEK", "AWARE", "NORMAL", 40]]] call _wpYaz;
+                            if (_ep isNotEqualTo []) then { [_hg, "SALDIRI", [_ep]] call FUNC(hqEmir); };
+                            diag_log format ["[PLAN-ARKA-DESTEK] %1 | %2 temasta (ORP'den %3 m geride, %4) -> %5 (%6) DESTEGE gidiyor | dusman %7 | hedef %8 m | %9", _id, groupId _ag, round ((leader _ag) distance2D _orp), mapGridPosition _apos, groupId _hg, _roller getOrDefault [groupId _hg, "?"],
+                                if (_ep isEqualTo []) then {"bilinmiyor (temasli gruba hareket)"} else {format ["%1 bilinen", count _bil]}, round ((leader _hg) distance2D _hedefP), ["acik arazi", "ORMANLIK: 'temiz' icin 90 sn + bulusma sarti"] select _orman];
+                        } forEach _yard;
+                    };
+                };
+            };
+        };
         if (_faz isEqualTo "TOPLAN") then {
             // v8.192 GEC KATILAN RECON (RPT 038c2564: Zeus 'RECON' gorevi plan kurulduktan 70 sn SONRA atandi -> "recon yola cikmadi"): TOPLAN suresince atanan recon plana alinir
             if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["reconG", []]) isEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2}) then {
@@ -915,13 +1013,13 @@ while {true} do {
             private _notlar = _plan get "notlar";
             private _vardi = {
                 private _h = _notlar getOrDefault [groupId _x, _orp];
-                ((leader _x) distance2D _h) < 70 || {[_x] call _temasta}
+                ((leader _x) distance2D _h) < 70 || {[_x] call _temasta} || {(groupId _x) in (keys (_plan getOrDefault ["arkaDestek", createHashMap]))}
             } count _gruplar;
             // temastaki grubu zorlamama; temas kesilince hedefe yeniden yonlendir
             {
                 private _g = _x;
                 private _h = _notlar getOrDefault [groupId _g, _orp];
-                if (!([_g] call _temasta) && {((leader _g) distance2D _h) > 90} && {(time - (_g getVariable ["lambs_danger_planYenileT", -999])) > 25}) then {
+                if (!([_g] call _temasta) && {((leader _g) distance2D _h) > 90} && {(time - (_g getVariable ["lambs_danger_planYenileT", -999])) > 25} && {!((groupId _g) in (keys (_plan getOrDefault ["arkaDestek", createHashMap])))}) then {
                     _g setVariable ["lambs_danger_planYenileT", time];
                     [_g, [[_h, "MOVE", format ["%1 -> %2", _roller getOrDefault [groupId _g, "?"], "hedef"], "AWARE", "NORMAL", 40]]] call _wpYaz;
                 };

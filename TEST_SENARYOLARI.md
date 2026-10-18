@@ -210,3 +210,11 @@ Kapatma: motorSesOff. Hepsi (T) = dogrulanmadi.
 ## T-GERCEK-HEDEF (v8.247)
 Trencher modulu (ya da herhangi bir Logic) dusman tarafli olsa bile tank `HEDEF: trencher_main_Module_TrenchController` secmemeli; savunma planinda 'dusman 6, objektife 19 m' hayalet sayilmamali. gercekHedefOff = true ile eski davranis (karsilastirma).
 
+## T-ARKA-DESTEK (v8.248): ORP gerisinde pusuya dusen ekibe destek
+Ortam: WEST ELE GECIR (6+ grup, BTR nakil), ORP'nin 400-800 m gerisinde, yol kenarinda (tercihen ORMANLIK) EAST pusu (3-6 asker). 
+1. Pusu atesi acilinca ve ekip >= 6 sn temastayken: `[PLAN-ARKA-DESTEK] P.. | <ekip> temasta (ORP'den X m geride, ..) -> <grup> (YEDEK/MANEVRA) DESTEGE gidiyor | dusman N bilinen | ORMANLIK: ...`. En fazla 2 destek grubu.
+2. Destek gruplari 25 sn sonra ORP'ye DONMEMELI (eski hata); ORP fazi destek gruplarini beklemeden ilerler.
+3. Gorevden alma: `destekten ALINDI (bulustu (X m), Y sn temassiz ...)`; ormanlikta Y >= 90 sn, acikta >= 45 sn; 300 sn tavan.
+4. Destek grubu tehlike altindaysa (kayip >= %60) mevzi mantigi / FRAGO ayri calisir.
+Kapatma: arkaDestekOff. Hepsi (T) = dogrulanmadi.
+
