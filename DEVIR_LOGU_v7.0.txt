@@ -2482,3 +2482,9 @@ v8.252 DUMAN DUZELTMESI + TANK MURETTEBAT + SAVUNMA MEVZI YARICAPI (kullanici RP
  YAPILMADI / BILINEN: hendek isareti dikdortgen; Trencher modu gercek siperine uyum / AI'nin siper icine girmesi dogrulanmadi; gozetleme noktasina kucuk ekip ayirma yok (grup butun gider); topcu atesinde hendekteki askerin yatma / sinmasi degismedi; T-14'un mevziden ileri cikma nedeni belirsiz; duman yer degistirme sonrasi planli grup davranisi.
  Not: TEST EDILMEDI (v8.252). Test: TEST_SENARYOLARI.md T-SAVUNMA-YARICAP, T-TANK-MURETTEBAT.
 
+v8.253 TANK MURETTEBAT 2 (kullanici: "hayir, yayan kaldi, tank ilerledi, yayan squad leader olarak onu kovaladi")
+ LOG: 20:06:01 Egor Baranov (K, grup lideri) yayada 18 km/s kosuyor; [ARAC-UZAK] tank | Egor Baranov / Vasil Makarov | T-14 (dost arac (temas)) 8-11 m -> 40 m uzaga (20:06:30, :42; Yuri Ivanov 20:07:18 5 m -> 41 m); 20:06:46 [EZME-BAYGIN] Egor'u dost T-14 ezdi; [ANOMALI] LIDER-YALNIZ lider tankta, asttan 162-216 m; planZirh lider yayaysa grubu komple atliyordu.
+ YAPILAN: aracUzak: aracin kayitli murettebati (murKayit) / atanmis surucusu-nisancisi kendi aracindan uzaklastirilmaz (arac yanmiyor, hasar <= 0.85; aracUzakMurOff). tankMurettebat: bos nisanci / surucu koltugu + 150 m icinde yayaya murettebat varsa surucu doStop (en cok 25 sn, dusman >= 150 m; tankManevraT ile planZirh dokunmaz), temasli grupta donus 40 -> 80 m. planZirh: lider yayaysa grubun aracli bir uyesinin araci kullanilir.
+ YAPILMADI: LIDER-DEVRI arac gruplarinda aracta olani tercih etmiyor; murettebatin neden indigi (tank surucusuz / canMove false) kok nedeni degismedi; yayada baygin kalan murettebati toplama (medevac) ayri is.
+ Not: TEST EDILMEDI (v8.253). Test: TEST_SENARYOLARI.md T-TANK-MURETTEBAT-2.
+

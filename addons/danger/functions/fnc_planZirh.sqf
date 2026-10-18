@@ -56,6 +56,11 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     if (!local _g || {({alive _x} count (units _g)) isEqualTo 0}) then { continue };
     private _l = leader _g;
     private _v = vehicle _l;
+    // v8.252: lider YAYAYSA (murettebat indi, lider disarida kaldi; RPT f39a5919 'yayan kaldi, tank ilerledi') grubun aracli bir uyesinin araci kullanilir (eskiden grup komple atlaniyor, arac plan emri almiyordu)
+    if (_v isEqualTo _l) then {
+        private _au = (units _g) findIf {alive _x && {!isNull objectParent _x} && {(vehicle _x) isKindOf "LandVehicle"}};
+        if (_au >= 0) then { _v = vehicle ((units _g) select _au); };
+    };
     if (_v isEqualTo _l || {!alive _v}) then { continue };
     private _d = driver _v;
     if (isNull _d || {isPlayer _d}) then { continue };

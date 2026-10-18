@@ -8,7 +8,9 @@
  *   1) KOLTUK DEGISTIRME: nisanci (oncelik 1) ya da surucu (2) koltugu bos / olu ise ve aracin icinde SAGLIKLI baska bir murettebat (komutan) varsa komutan o koltuga gecer (moveOut + 0.4 sn sonra moveIn; arac hizi < 6 km/s).
  *      Olu murettebat cesedi koltuktan cikarilir (moveOut) ki koltuk bos sayilsin. Baygin (ACE) murettebata dokunulmaz.
  *   2) GERI DONUS: kayitli murettebat (murettebatKoru kaydi) 150 m icinde yaya, saglikli / yarali ise ve bos koltugu varsa koltuguna doner (assignAs + moveIn <= 12 m, yoksa orderGetIn); inme atamasi silinmis olsa da.
- *      Grup son 8 sn temasliysa yalniz 40 m icindekiler doner (ates altinda uzaga kosturulmaz). 6 sn / birim bekleme (murDonT, murettebatKoru ile ortak).
+ *      Grup son 8 sn temasliysa yalniz 80 m icindekiler doner (ates altinda uzaga kosturulmaz). 6 sn / birim bekleme (murDonT, murettebatKoru ile ortak).
+ *   3) ARAC BEKLER (kullanici: 'yayan kaldi, tank ilerledi, squad leader olarak o kovaladi'): nisanci / surucu koltugu bos ve kayitli murettebat 150 m icinde yayaysa, en yakin dusman >= 150 m ise arac surucusu doStop alir
+ *      (en cok 25 sn; planZirh 20 sn dokunmaz - tankManevraT yenilenir), murettebat binince / sure dolunca birakilir. [TANK-MURETTEBAT] ... BEKLIYOR.
  * Kapatma: lambs_danger_tankMurettebatOff = true.  Log: [TANK-MURETTEBAT] (ilk 60).
  *
  * Arguments: None
@@ -81,17 +83,36 @@ private _calis = {
             private _eksik = [];
             if (isNull _gnU && {(_v emptyPositions "gunner") > 0}) then { _eksik pushBack "gunner"; };
             if (isNull _drU && {(_v emptyPositions "driver") > 0}) then { _eksik pushBack "driver"; };
-            if (_eksik isEqualTo []) then { continue };
+            if (_eksik isEqualTo []) then { _v setVariable [QGVAR(murBekleT0), -1]; continue };
 
             // kayitli murettebat yayada mi? (geri donus)
             private _kayit = (_v getVariable [QGVAR(murKayit), []]) select {alive (_x select 0) && {isNull objectParent (_x select 0)}};
+            // ARAC BEKLER: yayadaki saglikli murettebat 150 m icinde, dusman yakin degil -> surucu durur (en cok 25 sn)
+            private _yayaMur = _kayit select {([_x select 0] call _saglikli) && {((_x select 0) distance2D _v) <= 150}};
+            private _surucu = driver _v;
+            if (_yayaMur isNotEqualTo [] && {!isNull _surucu} && {alive _surucu} && {!isPlayer _surucu}) then {
+                private _bT0 = _v getVariable [QGVAR(murBekleT0), -1];
+                if (_bT0 < 0) then { _bT0 = time; _v setVariable [QGVAR(murBekleT0), time]; };
+                private _dusman = (driver _v) findNearestEnemy _v;
+                if ((time - _bT0) <= 25 && {isNull _dusman || {(_v distance2D _dusman) >= 150}}) then {
+                    doStop _surucu;
+                    _v setVariable [QGVAR(tankManevraT), time];
+                    if ((time - (_v getVariable [QGVAR(murBekleLogT), -999])) > 20 && {_logN < 60}) then {
+                        _v setVariable [QGVAR(murBekleLogT), time];
+                        _logN = _logN + 1;
+                        diag_log format ["[TANK-MURETTEBAT] %1 | BEKLIYOR: %2 murettebat yayada (en yakin %3 m), koltuk bos: %4 | en cok 25 sn", getText (configOf _v >> "displayName"), count _yayaMur, round (selectMin (_yayaMur apply {(_x select 0) distance2D _v})), _eksik];
+                    };
+                };
+            } else {
+                _v setVariable [QGVAR(murBekleT0), -1];
+            };
             private _gr = group (driver _v);
             private _grTemas = if (isNull _gr) then {false} else {(time - (_gr getVariable [QGVAR(contact), -999])) < 8};
             {
                 private _rol = _x;
                 private _donen = objNull;
                 // once ayni rolun sahibi, sonra herhangi bir kayitli murettebat
-                private _adaylar = _kayit select {([_x select 0] call _saglikli) && {(time - ((_x select 0) getVariable [QGVAR(murDonT), -999])) >= 6} && {((_x select 0) distance2D _v) <= 150} && {!_grTemas || {((_x select 0) distance2D _v) < 40}}};
+                private _adaylar = _kayit select {([_x select 0] call _saglikli) && {(time - ((_x select 0) getVariable [QGVAR(murDonT), -999])) >= 6} && {((_x select 0) distance2D _v) <= 150} && {!_grTemas || {((_x select 0) distance2D _v) < 80}}};
                 _adaylar = [_adaylar, [], {([0, -1000] select ((toLower (_x select 1)) isEqualTo _rol)) + ((_x select 0) distance2D _v)}, "ASCEND"] call BIS_fnc_sortBy;
                 if (_adaylar isNotEqualTo []) then { _donen = (_adaylar select 0) select 0; };
                 if (!isNull _donen) then {

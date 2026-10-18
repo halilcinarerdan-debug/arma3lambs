@@ -5,6 +5,8 @@
  * Her makinede 3 sn'de bir, yerel AI yaya askerler (asker basina en az 8 sn aralikla) icin:
  *   TEHLIKE: 35 m icinde YANAN (isBurning), yeni imha olmus (son 150 sn) ya da etkisiz (hareket edemez + hasar > 0.7, patlayabilir) kara / hava araci -> asker tehlikeden >= 40 m uzaga, tercihen arada siper veren objenin arkasina gider.
  *   KALABALIK: grup son 12 sn'de temasta ve asker 12 m icinde DOST murettebatli zirhli / kara aracinin yaninda (arac ates ceker, hedef olur, ilerleyemez / ezer) -> aractan >= 26 m uzaga gider.
+ * v8.252 KENDI MURETTEBATI ISTISNASI (RPT f39a5919, 20:06: tankindan inen murettebat 'dost arac (temas)' kuraliyla 9-11 m'den 40 m uzaga gonderildi, tank onlari birakip ilerledi, lider yaya kovaladi, bir murettebat dost T-14'e ezildi):
+ *   asker, aracin kayitli murettebati ya da atanmis surucusu / nisancisi ise (murKayit / assignedVehicle) ve arac yanmiyor + hasar <= 0.85 ise o aractan UZAKLASTIRILMAZ (geri binmesi fnc_tankMurettebat / murettebatKoru'nun isi). Kapatma: lambs_danger_aracUzakMurOff = true.
  * Atlanir: oyuncu, aracta olan, TCCC mesgul, ELITE nakil bekleme / iniş toplanma bayragi, ELITE zirh destek, kapali: lambs_danger_aracUzakOff. Log: [ARAC-UZAK] (ilk 80 olay).
  *
  * Arguments: None
@@ -31,6 +33,11 @@ private _calis = {
                 if (!((lifeState _u) in ["HEALTHY", "INJURED"]) || {time < (_u getVariable [QGVAR(tcccBusy), 0])} || {_u getVariable [QGVAR(tasimaBekle), false]}) then { continue };
                 private _pu = getPosATL _u;
                 private _kaynak = objNull;
+                private _kendiMur = {
+                    params ["_unit", "_arac"];
+                    !(missionNamespace getVariable ["lambs_danger_aracUzakMurOff", false]) && {alive _arac} && {!isBurning _arac} && {(damage _arac) <= 0.85}
+                    && {((assignedVehicle _unit) isEqualTo _arac) || {((_arac getVariable [QGVAR(murKayit), []]) findIf {(_x select 0) isEqualTo _unit}) >= 0}}
+                };
                 private _gerek = 0;
                 // 1) tehlike: yanan / yeni imha / etkisiz arac
                 private _yakin = nearestObjects [_pu, ["LandVehicle", "Air"], 35];
@@ -43,11 +50,12 @@ private _calis = {
                     } else {
                         _tehlike = (isBurning _v) || {(!canMove _v) && {(damage _v) > 0.05} && {!(_v isKindOf "StaticWeapon")}};   // v8.187: etkisiz = hareket edemez + hasar > 0.05 (palet isabeti dusuk hasarla da araci durdurur; RPT 95be8b53: 3 APC "HASARLI" ama tehlike sayilmadi)
                     };
+                    if (_tehlike && {[_u, _v] call _kendiMur}) then { _tehlike = false; };
                     if (_tehlike) exitWith { _kaynak = _v; _gerek = 40; };
                 } forEach _yakin;
                 // 2) kalabalik: temasta iken dost murettebatli arac yaninda
                 if (isNull _kaynak && {_temas}) then {
-                    private _av = _yakin findIf {alive _x && {(_x distance2D _u) < 12} && {(side (group (driver _x))) isEqualTo (side _g)} && {(count (crew _x)) > 0} && {!(_x isKindOf "StaticWeapon")} && {!(_x isKindOf "Air")}};
+                    private _av = _yakin findIf {alive _x && {(_x distance2D _u) < 12} && {(side (group (driver _x))) isEqualTo (side _g)} && {(count (crew _x)) > 0} && {!(_x isKindOf "StaticWeapon")} && {!(_x isKindOf "Air")} && {!([_u, _x] call _kendiMur)}};
                     if (_av >= 0) then { _kaynak = _yakin select _av; _gerek = 26; };
                 };
                 if (isNull _kaynak) then { continue };

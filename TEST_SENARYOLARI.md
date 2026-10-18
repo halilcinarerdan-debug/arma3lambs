@@ -260,3 +260,10 @@ Ortam: tek tank (T-14/T-72), karsida AT atesi; tank murettebatindan nisanci/suru
 3. Duman: `[ARAC-DUMAN] <arac> duman silahlari: [...]` ve `... fireAtTarget true | cephane A -> B | ATILDI`. `ATILMADI -> YEDEK forceWeaponFire` satiri gelirse yedek yol calisiyor mu oyunda bak.
 Karsilastirma: `tankMurettebatOff = true`, `aracDumanOff = true`. Hepsi (T) = dogrulanmadi.
 
+## T-TANK-MURETTEBAT-2 (v8.253)
+Ortam: grubun lideri tank murettebatindan; tank vurulup (surucusuz / canMove false) murettebat insin, temas surerken.
+1. `[ARAC-UZAK] ... dost arac (temas)` satiri murettebat icin ARTIK gelmemeli (baska piyade icin gelir).
+2. Nisanci/surucu yayaysa tank `[TANK-MURETTEBAT] ... BEKLIYOR: N murettebat yayada` ile en cok 25 sn durur; murettebat binince `... koltuguna donuyor`.
+3. Lider yayaysa `[PLAN-ZIRH]` satirlari tank icin devam eder (eskiden sessizdi).
+Karsilastirma: `aracUzakMurOff = true`, `tankMurettebatOff = true`. Hepsi (T) = dogrulanmadi.
+
