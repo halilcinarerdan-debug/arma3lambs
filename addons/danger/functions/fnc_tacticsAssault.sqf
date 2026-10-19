@@ -25,6 +25,8 @@ if (isNull _group) exitWith {false};
 
 // get leader
 if (_group isEqualType objNull) then {_group = group _group;};
+// v8.257: hendekte / mevzideki grup bu taktigi uygulamaz (fnc_mevziTutMu)
+if ([_group] call FUNC(mevziTutMu)) exitWith {false};
 if ((units _group) isEqualTo []) exitWith {false};
 private _unit = leader _group;
 

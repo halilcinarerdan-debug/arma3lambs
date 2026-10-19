@@ -37,6 +37,8 @@ diag_log "[MEDIC-TASMA] saglikci tasmasi baslatildi (temasta lidere gore arkada 
             if (isNull _g || {!local _g} || {(side _g) isEqualTo civilian}) then { continue };
             if ((units _g) findIf {isPlayer _x} > -1) then { continue };
             if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}) then { continue };
+            // v8.257: hendekteki / mevzideki grubun saglikcisi lidere dogru geri cekilmez (RPT e31bd8bd: ek hendek alanindaki ekiplerin saglikcilari 'uzak' diye 200+ m lidere yurudu)
+            if ([_g] call FUNC(mevziTutMu)) then { continue };
             private _l = leader _g;
             if (isNull _l || {!alive _l}) then { continue };
             private _en = _l findNearestEnemy _l;

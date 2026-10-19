@@ -61,11 +61,17 @@ if (_poz isNotEqualTo [] && {!(_v getVariable [QGVAR(tasimaMesgul), false])}) th
     private _uzak = _poz getDir _vp;
     private _aEye = if (!isNull _atici) then { eyePos _atici } else { (AGLToASL _poz) vectorAdd [0, 0, 1.8] };
     private _enS = -1e9;
+    // v8.257 CAPA (RPT e31bd8bd: her AT tepkisi planZirhPoz'u yeni yer yapinca tank zincirleme 45-110 m kayip mevziden ~200 m uzaklasti): plan tankinin ilk yer degistirmedeki mevzisi capa olur, yeni yer capaya <= 150 m olmali
+    private _capa = _g getVariable ["lambs_danger_planZirhCapa", []];
+    if (_capa isEqualTo [] && {_g getVariable ["lambs_danger_planZirh", false]}) then {
+        _capa = _g getVariable ["lambs_danger_planZirhPoz", []];
+        if (_capa isNotEqualTo []) then { _g setVariable ["lambs_danger_planZirhCapa", _capa]; };
+    };
     {
         private _b = _uzak + _x;
         {
             private _cand = _vp getPos [_x, _b];
-            if (!surfaceIsWater _cand && {(nearestObjects [_cand, ["House"], 8]) isEqualTo []}) then {
+            if (!surfaceIsWater _cand && {(nearestObjects [_cand, ["House"], 8]) isEqualTo []} && {_capa isEqualTo [] || {(_cand distance2D _capa) <= 150}}) then {
                 private _engel = (lineIntersectsSurfaces [_aEye, (AGLToASL _cand) vectorAdd [0, 0, 1.8], _atici, _v, true, 1, "VIEW", "FIRE"]) isNotEqualTo [];
                 private _s = (if (_engel) then {100} else {0}) - (_x / 6) - ((abs (_b - _uzak)) / 4) + (((_cand distance2D _poz) - (_vp distance2D _poz)) / 8);
                 if (_s > _enS) then { _enS = _s; _yer = _cand; _engelli = _engel; };

@@ -38,6 +38,10 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
             _g setBehaviour "AWARE";
             _g setCombatMode "YELLOW";
             { _x doWatch objNull; } forEach (units _g);
+            // v8.257: mevzi kilidi (surucu MOVE kapali) plan bitince acilir
+            { private _dv = driver (vehicle _x); if (!isNull _dv && {_dv isNotEqualTo _x || {!isNull objectParent _x}}) then { _dv enableAI "MOVE"; _dv enableAI "PATH"; }; } forEach (units _g);
+            _g setVariable ["lambs_danger_planZirhKilit", nil];
+            _g setVariable ["lambs_danger_planZirhCapa", nil];
             diag_log format ["[PLAN-ZIRH] %1 | %2 serbest birakildi (plan %3)", _id, groupId _g, _faz];
         };
     } forEach _zg;
@@ -201,6 +205,13 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         _vardi = true;
         _g setVariable ["lambs_danger_planZirhVardi", true];
         doStop _d;
+        // v8.257 MEVZI KILIDI (RPT e31bd8bd + 10-18: tankin nisancisine planZirh 'doTarget / doFire' verince MOTOR 'ATTACK' komutuyla hedefe SURDU: durdu=48 sn hiz=21 surucu_komut=ATTACK beklenen_hedef=dusman konumu; 'vardi' bayragi kalinca
+        //   tank mevziden 100-300 m ilerledi): ates pozisyonuna varinca surucunun MOVE'u kapanir; yeni hareket emri (TETIK / YER DEGISTIR / AT tepkisi / CEKILME / TAKILDI) 'enableAI MOVE' ile acar. Kapatma: lambs_danger_tankKilitOff = true.
+        if (!(missionNamespace getVariable ["lambs_danger_tankKilitOff", false])) then {
+            _d disableAI "MOVE";
+            _g setVariable ["lambs_danger_planZirhKilit", true];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide: surucu MOVE KAPALI (nisancinin doFire'i araci ileri surmesin; hareket emri gelince acilir)", _id, groupId _g];
+        };
         { _x doWatch (_g getVariable ["lambs_danger_planZirhBak", _obj]); } forEach (crew _v);
         diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide%3 (%4 m kalan) | objektife %5 m", _id, groupId _g, [""," (GIZLEME NOKTASI)"] select (_g getVariable ["lambs_danger_planZirhHide", false]), round (_v distance2D _poz), round (_v distance2D _obj)];
     } else {
@@ -234,9 +245,10 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             // takilma: 25 sn'den uzun < 1.5 km/s ise 220 m'lik (yola oturtulmus, +-50 derece) ara noktaya yonlendirilir
             if ((speed _v) < 1.5) then {
                 if ((_g getVariable ["lambs_danger_planZirhDurT", -1]) < 0) then { _g setVariable ["lambs_danger_planZirhDurT", time]; };
-                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > 25 && {(_v distance2D _poz) > 80}) then {
+                // v8.257: hareket edemeyen (canMove false) ya da murettebat bekleyen tank 'takildi' sayilmaz; ara nokta mesafesi hedefe kalan mesafenin %60'ini asmaz (RPT e31bd8bd: pozisyona 84 m kalmisken 240 m'lik ara nokta)
+                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > 25 && {(_v distance2D _poz) > 80} && {canMove _v} && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0}) then {
                     _g setVariable ["lambs_danger_planZirhDurT", time];
-                    private _ara = (getPosATL _v) getPos [220, ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
+                    private _ara = (getPosATL _v) getPos [(220 min (0.6 * (_v distance2D _poz))), ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
                     private _yl = _ara nearRoads 120;
                     if (_yl isNotEqualTo []) then { _ara = getPosATL (_yl select 0); };
                     if (surfaceIsWater _ara) then { _ara = _poz; };
@@ -294,6 +306,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
                 _od doMove _op;
             } else {
                 doStop _od;
+                if (!(missionNamespace getVariable ["lambs_danger_tankKilitOff", false])) then { _od disableAI "MOVE"; };
                 { _x doWatch _obj; } forEach (crew _ov);
             };
         };

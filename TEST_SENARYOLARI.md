@@ -294,3 +294,11 @@ Ortam: v8.255 sahnesi (savunma hendekleri + hendek yaninda dost tank + yaklasan 
 5. Duman: `[ARAC-DUMAN] ... | ATILDI (FAT|FWF|ACT)` ya da `HICBIRI CALISMADI` (taret_birimi ve yol bilgisiyle). Calisan yontem sonraki atislarda once denenir.
 6. `python tools/rpt_ozet.py --tani <rpt>`: OLUM TANISI artik tum olumleri sayar (OLUM-TANI hata duzeltmesi).
 Karsilastirma: `mevziKilitOff`, `mevziStatikOff`, `crewImmobileOff`, `aracUzakMurOff`. Hepsi (T) = dogrulanmadi.
+
+## T-TANK-KILIT (v8.257)
+Ortam: savunma planinda dost T-14 (hendek yakininda) + yaklasan dusman tanklari / AT'li piyade.
+1. Tank mevziye varinca `[PLAN-ZIRH] ... mevzide: surucu MOVE KAPALI`; ardindan `[ARAC-HAREKET]` ile `surucu_komut=ATTACK` + hizlanma GELMEMELI (gelirse: tankKilitOff acik mi, hangi kod doMove vermis?).
+2. AT tepkisi sonrasi yeni yer ilk mevziye <= 150 m: `[ARAC-AT-TEPKI] ... yer degistirme N m -> grid` gridleri zincirleme uzaklasmamali.
+3. `[PLAN-ZIRH] ... TAKILDI` hareket edemeyen tankta ve murettebat beklerken GELMEMELI; gelirse ara nokta <= kalan mesafenin %60'i.
+4. Hendek: ek alan ekiplerinin sagliklari `[MEDIC-TASMA]` ile geri yurumemeli; `[KOMUT] ... Group Suppress (Move)` / `Hide (holding)` hendek gruplari icin GELMEMELI; gelirse `[MEVZI-KILIT]` geri gonderir.
+Karsilastirma: `tankKilitOff = true`, `mevziTutOff = true`. Hepsi (T) = dogrulanmadi.
