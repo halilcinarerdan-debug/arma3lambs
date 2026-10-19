@@ -335,3 +335,9 @@ Ortam: ELE GECIR plani, objektifte ~30 dusman (hendek / bina), plan 8 grup (~32 
 4. Dost sayisini artir (ya da esigi 1'e indir): `... SALDIRI IZINLI`, tank ilerler, nakil kalkar.
 5. Eski (KESIF sonu) kapi ayni `_oranKontrol` ile calismaya devam eder (`KESIF` etiketi).
 `python3 tools/rpt_ozet.py --tani <rpt>` KUVVET ORANI KAPISI bolumu. Hepsi (T) = dogrulanmadi.
+
+## T-TASIMA-EK-ARAC (v8.262)
+1. ~28 asker (7 grup), Zeus TASIMA: 2-3 BTR-80 + 3 Ural (Flat), ayrica bir medevac grubu (MEDEVAC atamasi) ve atanmamis bir APC (or. Namer, AI suruculu) 600 m icinde.
+2. Beklenen RPT: `[TASIMA] ATANMIS ARAC UYGUN DEGIL: Ural-4320 (Flat) | bos kargo yeri 2`; koltuk yetmiyorsa `[TASIMA] ... EK ARAC: <apc> atanmamis ama uygun`; `MEDEVAC REZERVI ATLANDI` (rezerv ayrilirsa kalan koltuk yetmiyor demektir). `yaya kalan birim` sayisi 0'a yakin.
+3. Ural (Open / Covered) ata: 16+ koltuk, nakilde kullanilir.
+Hepsi (T) = dogrulanmadi.

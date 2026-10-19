@@ -158,6 +158,22 @@ if (_araclar isEqualTo []) exitWith {
         count (vehicles select {alive _x && {_x isKindOf "LandVehicle"} && {(([_x] call FUNC(aracDuzBos))) >= 3}}), count _tumAraclar, round _menzil, count _uygun, count _atanan];
     0
 };
+// v8.262 EK ARAC (kullanici RPT d9d46ee1: Zeus 3 Ural (Flat; 2 koltuk, tasiyamaz) + 3 BTR-80 atadi; atanmis arac varken digerleri hic kullanilmadi, 3. BTR medevac rezervine ayrildi, ~13 asker yayan gitti):
+//   atanmis araclarin duz koltuk toplami yayadaki asker sayisindan azsa, atanmamis UYGUN araclar (kargo >= 3, AI surucu, gorev disi, menzilde) en yakindan baslayarak EKLENIR. Kapatma: lambs_danger_tasimaEkArac = false.
+private _ihtiyac = 0;
+{ _ihtiyac = _ihtiyac + count ((units _x) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > 500}}); } forEach _gruplar;
+private _kapT = 0;
+{ _kapT = _kapT + ([_x] call FUNC(aracDuzBos)); } forEach _araclar;
+if (_atanan isNotEqualTo [] && {_kapT < _ihtiyac} && {missionNamespace getVariable ["lambs_danger_tasimaEkArac", true]}) then {
+    _araclar = +_araclar;
+    private _ekA = [_uygun - _araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
+    {
+        if (_kapT >= _ihtiyac) exitWith {};
+        _araclar pushBack _x;
+        _kapT = _kapT + ([_x] call FUNC(aracDuzBos));
+        diag_log format ["[TASIMA] %1 | EK ARAC: %2 atanmamis ama uygun (atanmis arac koltugu yetmiyor: %3 koltuk < %4 yaya asker) | kargo %5", _taraf, getText (configOf _x >> "displayName"), _kapT - ([_x] call FUNC(aracDuzBos)), _ihtiyac, [_x] call FUNC(aracDuzBos)];
+    } forEach _ekA;
+};
 _araclar = [_araclar, [], {_x distance2D _rp}, "ASCEND"] call BIS_fnc_sortBy;
 
 // ---- v8.131 MEDEVAC REZERVI: Zeus MEDEVAC atamasi yoksa ve >= 2 arac varsa objektiften en uzak (geride) arac medevac icin ayrilir (nakilde kullanilmaz) ----
@@ -167,9 +183,14 @@ private _mdGrupVar = (allGroups select {(side _x) isEqualTo _taraf && {(_x getVa
 if (count _araclar > 1 && {_mdGrupVar} && {!_mdVarMi} && {missionNamespace getVariable ["lambs_danger_tasimaMedevacRezerv", true]}) then {
     private _uz = [_araclar, [], {_x distance2D _obj}, "DESCEND"] call BIS_fnc_sortBy;
     private _rez = _uz select 0;
+    // v8.262: kalan araclarin koltugu yayadaki askere yetmiyorsa rezerv AYRILMAZ (RPT d9d46ee1: 3. BTR rezervde bos beklerken 13 asker yurudu)
+    if ((_kapT - ([_rez] call FUNC(aracDuzBos))) < _ihtiyac) then {
+        diag_log format ["[TASIMA] %1 | MEDEVAC REZERVI ATLANDI: %2 nakilde kullanilacak (kalan koltuk %3 < yaya asker %4)", _taraf, getText (configOf _rez >> "displayName"), _kapT - ([_rez] call FUNC(aracDuzBos)), _ihtiyac];
+    } else {
     _rez setVariable ["lambs_danger_medevacRezerv", true, true];
     _araclar = _araclar - [_rez];
     diag_log format ["[TASIMA] %1 | MEDEVAC REZERVI: %2 (%3 m geride) nakilde kullanilmayacak", _taraf, getText (configOf _rez >> "displayName"), round (_rez distance2D _obj)];
+    };
 };
 
 // ---- birim -> arac eslesmesi: once grup TAMAMI, sigmazsa TAKIM BAZLI (FSE / Maneuver / Reserve; ayni takim ayni araca) ----
