@@ -2547,3 +2547,8 @@ v8.262 NAKIL EK ARAC + MEDEVAC REZERVI (kullanici: "kamyon varken sanirim diger 
  NEDEN: RPT d9d46ee1 (14:04:13): Zeus TASIMA = 3 Ural Flat (kargo 2: UYGUN DEGIL) + 3 BTR-80; 'MEDEVAC REZERVI: BTR-80' 1 BTR ayirdi; '2 arac / 15 asker eslesti | yaya kalan birim: 8'. Atanmis arac varsa YALNIZ atanmislar kullaniliyordu (atanmamis uygun arac, or. Namer, kullanilmiyordu).
  YAPILAN: fnc_aracTasima: _ihtiyac (yayadaki asker) / _kapT (atanmis duz koltuk); eksikse EK ARAC; rezerv yalniz kalan koltuk yetiyorsa.
  YAPILMADI / BILINEN: recon UAZ-469 ayni logda hic ilerlemedi (AI surmedi, 3 kurtarma, tekerler 1.0 -> recon yaya 2.3 km; BTR'ler 'kesif once gider' kapisinda 81+ sn bekledi, log 14:06'da bitti); Ural Flat tasimaz (config); Zeus uyarisi yok. Hepsi (T).
+
+v8.263 KINEMATIK SURUS CARPISMA KORUMASI (kullanici: "recon araci parcalandi :D")
+ NEDEN: RPT d9d46ee1 14:05:01 SURME-TANI-HASAR canMove true / parca hasari yok; 14:05:03 TASIMA-KIN basladi; 14:05:12 'sessiz surus bitti (hasar)'; 14:05:15 ARAC-TERK tekerler / camlar 1.0, canMove false. Kinematik surus sabit nesne kontrolu yapmiyordu (yalniz LandVehicle / CAManBase 9 m).
+ YAPILAN: fnc_aracKinSurus: lineIntersectsSurfaces ile 7 m on kontrol (GEOM, nesne), engelde hiz 0 + 55 derece sapma; surus bayragi acikken HandleDamage: kaynaksiz + mermisiz hasar yok sayilir.
+ YAPILMADI / BILINEN: neden AI surucu baslangicta hic kalkmadi (UAZ park alani sikisik / 'AI surmedi') hala bilinmiyor; engel kontrolu tek isin; kaynaksiz hasar yok sayma asiri / dusme hasarini da keser (tasarim karari: yalniz bu surus boyunca). (T).

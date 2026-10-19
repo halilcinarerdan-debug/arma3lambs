@@ -19,6 +19,17 @@
 params [["_v", objNull, [objNull]], ["_d", objNull, [objNull]], ["_drop", [0, 0, 0], [[]]], ["_gid", "?", [""]]];
 if (isNull _v || {isNull _d} || {!alive _v} || {_v getVariable [QGVAR(kinSurus), false]}) exitWith {false};
 _v setVariable [QGVAR(kinSurus), true];
+// v8.263 CARPISMA KORUMASI (kullanici RPT d9d46ee1: recon UAZ-469 kinematik surusun ilk 9 sn'sinde parcalandi - tekerler / camlar / farlar 1.0, canMove false, 'recon araci parcalandi'): surus sirasinda, kaynagi OLMAYAN (carpisma / dusme)
+// hasar sayilmaz (yalniz bu surus bayragi acikken; mermi / patlama hasari normal islenir). Sabit nesne (agac / duvar / bina) onde ise betik artik ITMEZ (asagida).
+if !(_v getVariable [QGVAR(kinHasarEH), false]) then {
+    _v setVariable [QGVAR(kinHasarEH), true];
+    _v addEventHandler ["HandleDamage", {
+        params ["_u", "_sel", "_dmg", "_src", "_prj", "_idx"];
+        if ((_u getVariable [QGVAR(kinSurus), false]) && {_prj isEqualTo ""} && {isNull _src || {_src isEqualTo _u}}) then {
+            if (_idx < 0) then { damage _u } else { _u getHitIndex _idx }
+        } else { _dmg }
+    }];
+};
 
 [_v, _d, _drop, _gid] spawn {
     params ["_v3", "_d3", "_drop3", "_gid3"];
@@ -42,6 +53,7 @@ _v setVariable [QGVAR(kinSurus), true];
     private _sonLog = time;
     private _yayaT3 = -99;
     private _disN3 = 0;
+    private _sabitN3 = 0;
     private _ilerPoz3 = getPosATL _v3;
     private _ilerT3 = time;
     while {alive _v3 && {alive _d3} && {_disN3 < 80} && {_v3 getVariable [QGVAR(tasimaMesgul), false]} && {!(_v3 getVariable [QGVAR(yolcuBirak), false])} && {(_v3 distance2D _drop3) > 45} && {(time - _t3) < 700} } do {
@@ -67,6 +79,12 @@ _v setVariable [QGVAR(kinSurus), true];
             } forEach _engelYaya3;
         };
         if (_engelArac3 isNotEqualTo []) then { _yon3 = _yon3 + 40; };
+        // v8.263 SABIT ENGEL: araci ~7 m onunde nesne (agac / duvar / bina / cit; arazi degil) varsa ITME (hiz 0) ve engel yonunden 55 derece sapip doner; 8 sn'lik ilerleme kontrolu araci bos noktaya tasir
+        private _a3 = AGLToASL (_v3 modelToWorld [0, 0.5, 0.8]);
+        private _b3 = AGLToASL (_v3 modelToWorld [0, 7, 0.8]);
+        private _sabit3 = (lineIntersectsSurfaces [_a3, _b3, _v3, objNull, true, 3, "GEOM", "NONE"]) select {!isNull (_x select 2) && {!((_x select 2) isKindOf "CAManBase")} && {(_x select 2) isNotEqualTo _v3}};
+        private _engelSabit3 = _sabit3 isNotEqualTo [];
+        if (_engelSabit3) then { _sabitN3 = _sabitN3 + 1; _yon3 = _yon3 + ([55, -55] select (((floor (_sabitN3 / 30)) mod 2) isEqualTo 1)); } else { _sabitN3 = 0 max (_sabitN3 - 2); };
         // v8.219 SURUCU DISARIDA (RPT fecd8147: surucu KURTARMA 1'den ~3 sn sonra aractan cikiyor [MURETTEBAT-KORU]; kinematik surus 2 sn'de bitiyordu; v8.217 surucusuz arac surulmesin diye durduruyordu): surucu araca ISINLANIR (moveInDriver), disaridayken arac 0 hizda bekler; 8 sn toplam disarida kalirsa biter
         private _icerde3 = (vehicle _d3) isEqualTo _v3;
         if (!_icerde3) then {
@@ -79,7 +97,7 @@ _v setVariable [QGVAR(kinSurus), true];
         private _dlt3 = (_fark3 max -2.5) min 2.5;
         private _vd3 = vectorDir _v3;
         private _yeniDir3 = [(_vd3 select 0) * (cos _dlt3) + (_vd3 select 1) * (sin _dlt3), (_vd3 select 1) * (cos _dlt3) - (_vd3 select 0) * (sin _dlt3), _vd3 select 2];
-        private _hiz3 = if (!_icerde3 || {_engelYaya3 isNotEqualTo []}) then {0} else { if (_engelArac3 isNotEqualTo []) then {2} else { if ((abs _fark3) > 35) then {3} else {7.5} } };
+        private _hiz3 = if (!_icerde3 || {_engelYaya3 isNotEqualTo []} || {_engelSabit3}) then {0} else { if (_engelArac3 isNotEqualTo []) then {2} else { if ((abs _fark3) > 35) then {3} else {7.5} } };
         _v3 setVectorDirAndUp [_yeniDir3, vectorUp _v3];
         _v3 setVelocityModelSpace [0, _hiz3, (velocityModelSpace _v3) select 2];
         // v8.211 SERBEST BIRAK (kullanici: aracı Zeus'ta bos yere surukleyince gitti): 8 sn'de 3 m'den az ilerlediyse arac Zeus'un yaptigi gibi en yakin BOS noktaya tasinir (suya / yaya uzerine degil)

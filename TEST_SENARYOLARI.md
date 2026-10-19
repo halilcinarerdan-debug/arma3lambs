@@ -341,3 +341,9 @@ Ortam: ELE GECIR plani, objektifte ~30 dusman (hendek / bina), plan 8 grup (~32 
 2. Beklenen RPT: `[TASIMA] ATANMIS ARAC UYGUN DEGIL: Ural-4320 (Flat) | bos kargo yeri 2`; koltuk yetmiyorsa `[TASIMA] ... EK ARAC: <apc> atanmamis ama uygun`; `MEDEVAC REZERVI ATLANDI` (rezerv ayrilirsa kalan koltuk yetmiyor demektir). `yaya kalan birim` sayisi 0'a yakin.
 3. Ural (Open / Covered) ata: 16+ koltuk, nakilde kullanilir.
 Hepsi (T) = dogrulanmadi.
+
+## T-KIN-KORUMA (v8.263)
+1. Recon aracini agaclik / duvar yanina park et (AI surmesin diye yola cikis yolunu kapat) ya da AI'yi surmeyecek bicimde engelle; KURTARMA 3 -> `[TASIMA-KIN] kinematik surus basladi`.
+2. Beklenen: arac nesneye itilmez (dur / sap), `canMove` true kalir, 8 sn ilerleme yoksa `arac bos noktaya tasindi`; araci Hit ile elle vurursan (mermi) hasar normal islenir.
+3. `[ARAC-TERK]` satirinda tekerler / camlar 1.0 gorulmemeli.
+Hepsi (T) = dogrulanmadi.
