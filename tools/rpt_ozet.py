@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.263"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.264"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -738,6 +738,10 @@ def tani(path):
     print("\n-- TANK HAREKETE GECIS (%d) --" % len(hr))
     for d in hr[:14]:
         print("  %s %s durdu=%ss hiz=%s komut=%s hedef=%s planZirh=%s hide=%s vardi=%s tankManevra=%ss atTepki=%ss zirhKac=%ss dusman=%s" % (d.get("arac"), d.get("grup"), d.get("durdu", "").replace("sn", ""), d.get("hiz"), d.get("surucu_komut"), d.get("beklenen_hedef"), d.get("planZirh"), d.get("hide"), d.get("vardi"), d.get("tankManevra_yasi"), d.get("atTepki_yasi"), d.get("zirhKac_yasi"), d.get("en_yakin_dusman")))
+    # ---- recon araci AI surusu (v8.264)
+    rh = al("RECON-ARAC-HAREKET")
+    print("\n-- RECON ARACI AI SURUSU (%d kayit, ilk 60 sn) --" % len(rh))
+    for v in rh[:14]: print("  ", v.split('" ', 1)[-1][:220])
     # ---- kayip esigi
     kd = [_kv(l) for l in al("KAYIP-DEGERLENDIRME")]
     print("\n-- KAYIP DEGERLENDIRME (%d satir) --" % len(kd))

@@ -2552,3 +2552,8 @@ v8.263 KINEMATIK SURUS CARPISMA KORUMASI (kullanici: "recon araci parcalandi :D"
  NEDEN: RPT d9d46ee1 14:05:01 SURME-TANI-HASAR canMove true / parca hasari yok; 14:05:03 TASIMA-KIN basladi; 14:05:12 'sessiz surus bitti (hasar)'; 14:05:15 ARAC-TERK tekerler / camlar 1.0, canMove false. Kinematik surus sabit nesne kontrolu yapmiyordu (yalniz LandVehicle / CAManBase 9 m).
  YAPILAN: fnc_aracKinSurus: lineIntersectsSurfaces ile 7 m on kontrol (GEOM, nesne), engelde hiz 0 + 55 derece sapma; surus bayragi acikken HandleDamage: kaynaksiz + mermisiz hasar yok sayilir.
  YAPILMADI / BILINEN: neden AI surucu baslangicta hic kalkmadi (UAZ park alani sikisik / 'AI surmedi') hala bilinmiyor; engel kontrolu tek isin; kaynaksiz hasar yok sayma asiri / dusme hasarini da keser (tasarim karari: yalniz bu surus boyunca). (T).
+
+v8.264 RECON ARACI AI SURUSUNE SABIR (kullanici: "recon hala kinematik mi suruyor, artik ai surse olmaz mi?")
+ NEDEN: UAZ-469 recon aracinda (c48e02ec 13:29:17 ve d9d46ee1 14:04:52, ikisi de 084015): bindirme + 8 sn 'ilerleme yok' -> KURTARMA 1 -> 2 sn sonra KURTARMA 2 + 3 (kinematik, 7.5 m/s) -> ~10 sn'de hasar (tekerler / camlar 1.0). AI hiz -1 / -5 km/s (geri vites / donus). BTR-80 recon 7 / 7 AI ile vardi. SURME-TANI: canMove true, hasar 0, yolcular duz cargo, etkin komutan surucu, FFV yok, senkT = reconArac'in kendi +900 sn bayragi (ARAC-SENKRON dahil degil).
+ YAPILAN: fnc_reconArac esikleri 12 / 24 / 38 / 55 / 80 sn; [RECON-ARAC-HAREKET] ilk 60 sn tanisi; rpt_ozet --tani bolumu.
+ YAPILMADI / BILINEN: AI'nin UAZ'da neden kalkmadigi (kok neden) hala bilinmiyor - yeni log gosterecek; kinematik surus kalirsa (son care) v8.263 engel korumasi var; aracTasima'nin kendi 40 sn kinematik esigi degismedi. (T).

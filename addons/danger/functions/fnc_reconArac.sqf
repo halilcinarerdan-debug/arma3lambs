@@ -184,10 +184,16 @@ private _basT = time;
 private _basD = _v distance2D _dur;
 private _ts = time + 600;
 private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20; private _pozEski = getPosATL _v;
+private _hrT = time;   // v8.264: ilk 60 sn AI surusunun kaydi ([RECON-ARAC-HAREKET])
 private _bitis = "";
 while {_bitis isEqualTo ""} do {
     sleep 1;
     private _dm = _v distance2D _dur;
+    // v8.264 TANI: AI gercekten ne yapiyor (geri mi vitese takiyor, donuyor mu): ilk 60 sn, 3 sn'de bir
+    if ((time - _basT) < 60 && {time >= _hrT}) then {
+        _hrT = time + 3;
+        diag_log format ["[RECON-ARAC-HAREKET] %1 | %2 | t+%3 | hiz %4 km/s | hedef ara noktaya yon farki %5 derece | emir %6 | AI hedefi ara noktaya %7 m | yer degistirme %8 m", _id, _ad, round (time - _basT), round (speed _v), round (_v getRelDir (_zincir select _zi)), currentCommand _d, round ((((expectedDestination _d) select 0) distance2D (_zincir select _zi)) min 9999), round ((getPosATL _v) distance2D _pozEski)];
+    };
     // v8.241: iz kaydi (hareket halindeyken), zincir ilerletme, periyodik emir tazeleme, ilerleme tavani
     if ((speed _v) > 10 && {time > _izT}) then { _izT = time + 3; _iz pushBack [time, getPosATL _v]; if ((count _iz) > 40) then { _iz deleteAt 0; }; };
     if (_zi < ((count _zincir) - 1) && {(_v distance2D (_zincir select _zi)) < 45}) then {
@@ -209,7 +215,7 @@ while {_bitis isEqualTo ""} do {
     // v8.191 KURTARMA (RPT bda5fbde: recon araci OP'ye 454 m kala 45 sn ilerlemeyince hemen "takildi" sayildi, recon 375 m geride indi): 18 sn itme + emir yenile, 32 sn kaldir + yan ara nokta, 50 sn 25 m tasi; 75 sn'de pes
     if (_bitis isEqualTo "") then {
         private _dtk = time - _ilerT;
-        if (_dtk > 8 && {_kurtN isEqualTo 0}) then {
+        if (_dtk > 12 && {_kurtN isEqualTo 0}) then {
             _kurtN = 1;
             // v8.227: surucu izleme + teshis EYLEMLERDEN ONCE baslar (surucu KURTARMA 1'den hemen sonra araçtan cikiyor; hangi eylemden sonra oldugu [SURME-TANI-CIKTI] "SON DENEY ADIMI" ile gorunur)
             [_v, _d, _id, false] call FUNC(aracSurmeTani);
@@ -244,7 +250,7 @@ while {_bitis isEqualTo ""} do {
                 ((nearestObjects [_v, [], 12]) select {_x isNotEqualTo _v && {!(_x isKindOf "CAManBase")}}) apply {typeOf _x}, count ((_v nearEntities ["LandVehicle", 15]) - [_v]), surfaceType (getPosATL _v)];
         };
         // v8.241 KURTARMA 2 (YENI): agaclik / dar yerde takildiysa son TEMIZ konuma geri don (iz; yoksa en yakin yol dugumu), zincirin sonraki ara noktasina yeniden gonder. En cok 3 kez.
-        if (_dtk > 10 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+        if (_dtk > 24 && {_kurtN isEqualTo 1} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             private _temiz = [];
             if (_geriSay < 3) then {
                 private _izAday = _iz select {(time - (_x select 0)) >= 15};
@@ -284,7 +290,7 @@ while {_bitis isEqualTo ""} do {
             };
         };
         // KURTARMA 3: geri donus da ise yaramadiysa (8 sn) eski adim: kaldir + yan ara nokta + kinematik surus
-        if (_dtk > 8 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+        if (_dtk > 38 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 3;
             _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
             private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
@@ -294,7 +300,7 @@ while {_bitis isEqualTo ""} do {
             ["RECON-KIN-BASLADI", format ["AI surmedi (bindikten sonra) | arac %1 | OP'ye %2 m", _ad, round _dm]] call FUNC(planZaman);
             diag_log format ["[RECON-ARAC] %1 | %2 | KURTARMA 3: kaldirildi + yan ara nokta + kinematik surus (z %3, egim %4)", _id, _ad, ((getPosATL _v) select 2) toFixed 2, (vectorUp _v) apply {_x toFixed 2}];
         };
-        if (_dtk > 30 && {_kurtN isEqualTo 3} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
+        if (_dtk > 55 && {_kurtN isEqualTo 3} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 4;
             _v setVehiclePosition [(getPosATL _v) getPos [25, (getPosATL _v) getDir _dur], [], 0, "NONE"];
             _d doMove _dur;
@@ -305,7 +311,7 @@ while {_bitis isEqualTo ""} do {
             diag_log format ["[RECON-ARAC] %1 | %2 | yolda: kalan %3 m (yolun yuzde %7 kadari) | hiz %4 km/s | motor %5 | komut %6 | surucu aracta %8", _id, _ad, round _dm, round (speed _v), isEngineOn _v, currentCommand _d, round (100 * (1 - _dm / ((_plan getOrDefault ["reconAracD0", _dm]) max 1))), (vehicle _d) isEqualTo _v];
         };
     };
-    if (_bitis isEqualTo "" && {(time - _ilerT) > 60}) then { _bitis = "takildi"; };
+    if (_bitis isEqualTo "" && {(time - _ilerT) > 80}) then { _bitis = "takildi"; };
     if (_bitis isEqualTo "" && {alive _v} && {!(isEngineOn _v)}) then { _d action ["EngineOn", _v]; _v engineOn true; };
 };
 

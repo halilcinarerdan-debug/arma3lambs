@@ -347,3 +347,9 @@ Hepsi (T) = dogrulanmadi.
 2. Beklenen: arac nesneye itilmez (dur / sap), `canMove` true kalir, 8 sn ilerleme yoksa `arac bos noktaya tasindi`; araci Hit ile elle vurursan (mermi) hasar normal islenir.
 3. `[ARAC-TERK]` satirinda tekerler / camlar 1.0 gorulmemeli.
 Hepsi (T) = dogrulanmadi.
+
+## T-RECON-SABIR (v8.264)
+1. Zeus RECON ARACI = UAZ-469 (ya da onceki sorunlu arac), recon 3 asker, hedef 2 km+.
+2. RPT: `[RECON-ARAC-HAREKET] ... t+3 ... hiz ... yon farki ...` satirlari AI'nin ne yaptigini gosterir (geri vites mi, donuyor mu). `KURTARMA 3 ... kinematik` ilk ~38 sn'den once GORULMEMELI; AI 38 sn icinde gittiyse kinematik hic baslamaz.
+3. `python3 tools/rpt_ozet.py --tani <rpt>`: RECON ARACI AI SURUSU bolumu.
+Hepsi (T) = dogrulanmadi.
