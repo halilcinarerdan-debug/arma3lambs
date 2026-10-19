@@ -2567,3 +2567,8 @@ v8.266 OYUNCU GRUBU ARAC MURETTEBATI (kullanici: "benim komutumdaki botlar catis
  NEDEN (kod analizi, RPT YOK): fnc_murettebatKoru kayitli murettebatin 'GET OUT' emrini temas bitince >= 20 sn sonra IPTAL eder ve disarida kalani geri sokar; yalniz aracta oyuncu varsa atlaniyordu -> oyuncu inip botlara in dediginde de kayitli roller reddedilebiliyordu.
  YAPILAN: murettebatKoru kayit / iptal / geri cagirma ve tankMurettebat: grubunda oyuncu olan botlar muaf.
  YAPILMADI / BILINEN: kok neden dogrulanmadi (baska ELITE / LAMBS yolu olabilir); cargo yolcular zaten kayitsiz; RPT gelirse dogrulanacak. (T).
+
+v8.267 IHA BILINCLI FIRLATMA (kullanici: "dron sadece dusmana yakinken bilincli bir sekilde spawnlansin")
+ NEDEN: 'Dron yarat' dronu modul konumunda hemen yaratiyordu (RPT c48e02ec: atandigi gibi bozuldu / sorti dusmansiz basliyordu).
+ YAPILAN: fnc_ihaBekle (firlatma emri + tetik mesafesinde bilinen gercek dusman bekleme + 40 m FLY yaratma + ihaSorti), Zeus modulu slider + KALDIR ile emir iptali, komutanPlanKapi olay isleyicisi, PREP.
+ YAPILMADI / BILINEN: tetik firlatma noktasina gore (operatore degil; operator asker modeli yok); hedef turu uyumsuzsa (or. FPV-AT icin yalniz piyade) dron hic yaratilmaz; emirler sunucu yeniden baslayinca kaybolur; hepsi (T).

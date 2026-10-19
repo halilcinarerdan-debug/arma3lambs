@@ -369,3 +369,10 @@ Hepsi (T) = dogrulanmadi.
 2. Oyuncu aractan inip (ya da arac icinde 'Get Out' emriyle) botlari indirir: botlar INMELI, ELITE koltuga geri sokmamali. RPT'de bu botlar icin `[MURETTEBAT-KORU] ... INME EMRI IPTAL` / `koltuguna dondu` satiri OLMAMALI.
 3. Oyuncu olmayan (AI) arac grubunda eski davranis (murettebat korunur) degismez.
 Hepsi (T) = dogrulanmadi.
+
+## T-IHA-BILINCLI (v8.267)
+1. Zeus > ELITE IHA Gorevi > Dron yarat = O_Crocus_AT, Gorev = Sorti, Tetik = 1200: sahnede dron GORUNMEZ; RPT `[IHA-BEKLEME] ... firlatma emri kaydedildi ... tetik 1200 m`; 60 sn'de bir `bekliyor ... bilinen dusman yok`.
+2. Firlatma noktasinin 1200 m icine, IHA tarafinin gorebildigi bir dusman TANKI getir (FPV-AT icin zirhli sart): `[IHA-BEKLEME] ... FIRLATMA: <grid> | tetik hedefi <sinif> (<m>)` ardindan `[IHA-SORTI] ... hedef ...` satirlari; dron o anda 40 m'de yaratilir.
+3. Tetik 0: dron hemen yaratilir. Gorev = KALDIR + modulu firlatma noktasina birak: `Zeus KALDIR: 1 bekleyen firlatma emri iptal edildi`.
+4. Dusman hic gelmezse 30 dk sonra `emir bitti: omur doldu (dron yaratilmadi)`.
+Hepsi (T) = dogrulanmadi.

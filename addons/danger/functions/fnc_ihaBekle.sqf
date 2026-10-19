@@ -1,0 +1,78 @@
+#include "script_component.hpp"
+/*
+ * Author: Cinar (ELITE fork)
+ * IHA BILINCLI FIRLATMA (v8.267) — kullanici: "dron sadece dusmana yakinken bilincli bir sekilde spawnlansin". Zeus 'Dron yarat' artik dronu hemen yaratmaz: fnc_ihaBekle bir FIRLATMA EMRI kaydeder ve
+ * 5 sn'de bir firlatma noktasinin (modul konumu) tetik mesafesi (varsayilan 1200 m) icinde, IHA'nin tarafinin BILDIGI (taraf gruplarindan biri knowsAbout >= 0.4; hile yok) GERCEK dusman olup olmadigina bakar:
+ *   FPV-AT : zirhli (zirh >= 100 / Tank / APC) ya da murettebatli arac; FPV-AP / BOMBA / GOZLEM: yaya dusman (sivil degil).
+ * Dusman gorulunce dron firlatma noktasinda 40 m irtifada (FLY, sunucu-yerel) YARATILIR ve fnc_ihaSorti ile gorev baslar. Tetik 0 = hemen yarat (eski davranis). Emir omru 1800 sn (sonra iptal).
+ * Emri iptal: Zeus 'ELITE IHA Gorevi' > Gorevi KALDIR (modulu firlatma noktasinin 60 m icine birak). Kapatma: lambs_danger_ihaBekleOff = true (hemen yaratir).  Log: [IHA-BEKLEME]
+ *
+ * Arguments:
+ * 0: Arac sinifi <STRING>
+ * 1: Taraf <SIDE>
+ * 2: Firlatma noktasi <ARRAY>
+ * 3: Tur ("" = otomatik) <STRING>
+ * 4: Gozlem yaricapi <NUMBER>
+ * 5: Menzil <NUMBER>
+ * 6: Tetik mesafesi (m, 0 = hemen) <NUMBER>
+ *
+ * Return Value: Emir kaydedildi mi <BOOL>
+ * Public: No
+*/
+
+if (!isServer) exitWith {false};
+if (!canSuspend) exitWith { _this spawn FUNC(ihaBekle); true };
+
+params [["_sn", "", [""]], ["_taraf", west, [west]], ["_poz", [0, 0, 0], [[]]], ["_turE", "", [""]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_tetik", 1200, [0]]];
+if (_sn isEqualTo "" || {!isClass (configFile >> "CfgVehicles" >> _sn)}) exitWith {false};
+
+private _tur = if (_turE isNotEqualTo "") then {_turE} else { [_sn] call FUNC(ihaTip) };
+private _hemen = _tetik <= 0 || {missionNamespace getVariable ["lambs_danger_ihaBekleOff", false]};
+
+private _emirler = missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []];
+private _emir = [_poz, false];   // [firlatma noktasi, iptal]
+if (!_hemen) then {
+    _emirler pushBack _emir;
+    missionNamespace setVariable ["lambs_danger_ihaBekleEmirleri", _emirler];
+    diag_log format ["[IHA-BEKLEME] %1 (%2) | firlatma emri kaydedildi: %3 | tetik %4 m (dusman bu mesafeye girince yaratilir) | omur 1800 sn", _sn, _tur, mapGridPosition _poz, round _tetik];
+};
+
+private _t0 = time;
+private _logT = time + 60;
+private _hedef = objNull;
+while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef}} do {
+    sleep 5;
+    private _bilen = allGroups select {(side _x) isEqualTo _taraf && {!isNull (leader _x)}};
+    private _bilinen = {
+        params ["_t"];
+        (_bilen findIf {_x knowsAbout _t >= 0.4}) >= 0
+    };
+    private _adaylar = if (_tur isEqualTo "FPV-AT") then {
+        (_poz nearEntities [["LandVehicle"], _tetik]) select {alive _x && {(crew _x) findIf {alive _x} >= 0} && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}}}
+    } else {
+        (_poz nearEntities [["CAManBase"], _tetik]) select {alive _x && {isNull objectParent _x} && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}}
+    };
+    _adaylar = _adaylar select {([_x] call FUNC(gercekHedef)) && {[_x] call _bilinen}};
+    if (_adaylar isNotEqualTo []) then {
+        _adaylar = [_adaylar, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
+        _hedef = _adaylar select 0;
+    } else {
+        if (time > _logT) then {
+            _logT = time + 60;
+            diag_log format ["[IHA-BEKLEME] %1 (%2) | bekliyor (%3 sn): tetik mesafesinde (%4 m) bilinen dusman yok", _sn, _tur, round (time - _t0), round _tetik];
+        };
+    };
+};
+// emir listesinden cik
+_emirler = (missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []]) - [_emir];
+missionNamespace setVariable ["lambs_danger_ihaBekleEmirleri", _emirler];
+if (!_hemen && {isNull _hedef}) exitWith {
+    diag_log format ["[IHA-BEKLEME] %1 (%2) | emir bitti: %3 (dron yaratilmadi)", _sn, _tur, ["omur doldu (1800 sn)", "Zeus iptal etti"] select (_emir select 1)];
+    false
+};
+
+private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
+_iha setPosATL [_poz select 0, _poz select 1, 40];
+diag_log format ["[IHA-BEKLEME] %1 (%2) | FIRLATMA: %3 | tetik hedefi %4 (%5 m) | %6 sn bekledi", _sn, _tur, mapGridPosition _iha, if (isNull _hedef) then {"-"} else {typeOf _hedef}, if (isNull _hedef) then {0} else {round (_hedef distance2D _poz)}, round (time - _t0)];
+[_iha, "SORTI", _turE, _taraf, _poz, _yar, _men] call FUNC(ihaSorti);
+true

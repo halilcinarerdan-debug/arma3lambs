@@ -122,16 +122,23 @@ lambs_danger_planKapiStarted = true;
 
 // v8.233: Zeus 'ELITE IHA Gorevi' -> fnc_ihaSorti (sunucu)
 ["lambs_danger_ihaGorev", {
-    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""]];
+    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""], ["_tetik", 0]];
     if (!isServer) exitWith {};
     private _iha = objectFromNetId _nid;
-    // v8.260: Zeus 'Dron yarat' -> sunucuda 40 m irtifada ucarak yaratilir (sunucu-yerel; setOwner gerekmez)
-    if (isNull _iha && {_yaratSn isNotEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> _yaratSn)}) then {
-        _iha = createVehicle [_yaratSn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
-        _iha setPosATL [_poz select 0, _poz select 1, 40];
-        diag_log format ["[IHA-SORTI] %1 sunucuda yaratildi (40 m, FLY) | %2", _yaratSn, mapGridPosition _iha];
+    private _tf = [west, east, independent] select (_tarafI max 0 min 2);
+    // v8.267: KALDIR + dron yok -> firlatma noktasinin 60 m icindeki bekleyen firlatma emirleri iptal edilir
+    if (isNull _iha && {_mod isEqualTo "KALDIR"}) exitWith {
+        private _n = 0;
+        { if (((_x select 0) distance2D _poz) <= 60 && {!(_x select 1)}) then { _x set [1, true]; _n = _n + 1; }; } forEach (missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []]);
+        diag_log format ["[IHA-BEKLEME] Zeus KALDIR: %1 bekleyen firlatma emri iptal edildi (%2)", _n, mapGridPosition _poz];
+        private _cu = (allCurators apply {getAssignedCuratorUnit _x}) select {!isNull _x};
+        if (_cu isNotEqualTo []) then { [format ["[ELITE] IHA firlatma emri iptal: %1", _n]] remoteExec ["systemChat", _cu]; };
     };
-    [_iha, _mod, _tur, [west, east, independent] select (_tarafI max 0 min 2), _poz, _yar, _men] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
+    // v8.267 BILINCLI FIRLATMA: 'Dron yarat' dronu hemen degil, firlatma noktasinin tetik mesafesinde BILINEN dusman gorulunce yaratir (fnc_ihaBekle); tetik 0 = hemen (eski)
+    if (isNull _iha && {_yaratSn isNotEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> _yaratSn)}) exitWith {
+        [_yaratSn, _tf, _poz, _tur, _yar, _men, _tetik] call (missionNamespace getVariable ["lambs_danger_fnc_ihaBekle", {false}]);
+    };
+    [_iha, _mod, _tur, _tf, _poz, _yar, _men] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
 }] call CBA_fnc_addEventHandler;
 
 // v8.214: Zeus 'ELITE Gozetleme Ata' -> grup secilen karakol / mevzi isaretinde nobet tutar (fnc_gozetleAta)
