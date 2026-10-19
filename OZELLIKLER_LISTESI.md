@@ -210,3 +210,5 @@ Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kap
 - Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
 - Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
 - Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.
+
+- **v8.260 IHA gorevi duzeltmesi (Zeus 'ELITE IHA Gorevi')**: RPT c48e02ec: gorev hic baslamiyordu - CBA sunucu olayi fonksiyonu zamanlanmamis ortamda cagiriyor, `waitUntil { sleep ... }` 'Suspending not allowed' hatasi veriyordu (`[IHA-SORTI] ... setOwner basarisiz`). Artik `canSuspend` degilse kendini `spawn` eder. 'Dron yarat' secenegi dronu Zeus istemcisinde degil SUNUCUDA 40 m irtifada ucarak (`FLY`) yaratir (setOwner gerekmez; yerde 2 m'den dusen dronun mod tarafindan patlamasi olasiligi ortadan kalkar). IHA icin `Killed` / `Explosion` olay logu eklendi (`[IHA-SORTI] ... YOK OLDU | yukseklik | hiz | konum | olduren`). Anlik patlamanin kesin nedeni (T) dogrulanmadi: mod davranisi ya da istemcide yaratim; yeni log gosterecek.

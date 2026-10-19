@@ -24,6 +24,9 @@
  * Public: No
 */
 
+// v8.260: CBA sunucu olayi 'call' ile (zamanlanmamis ortam) cagirir -> waitUntil / sleep 'Suspending not allowed' veriyordu, gorev hic baslamiyordu
+if (!canSuspend) exitWith { _this spawn FUNC(ihaSorti); true };
+
 params [["_uav", objNull, [objNull]], ["_mod", "SORTI", [""]], ["_turE", "", [""]], ["_tarafP", west, [west]], ["_merkez", [0, 0, 0], [[]]], ["_yar", 300, [0]], ["_men", 3000, [0]]];
 if (isNull _uav || {!alive _uav} || {missionNamespace getVariable ["lambs_danger_ihaSortiOff", false]}) exitWith {false};
 
@@ -41,6 +44,19 @@ if (!local _uav) then {
     waitUntil { sleep 0.2; local _uav || {time > _tw} };
 };
 if (!local _uav) exitWith { diag_log format ["[IHA-SORTI] %1 | sunucuda yerel degil (setOwner basarisiz)", typeOf _uav]; false };
+
+// v8.260: IHA'nin neden / nerede yok oldugunu kesin gormek icin (kullanici: 'atadigim gibi patladi')
+if !(_uav getVariable [QGVAR(ihaKilledEH), false]) then {
+    _uav setVariable [QGVAR(ihaKilledEH), true];
+    _uav addEventHandler ["Killed", {
+        params ["_u", "_k", "_i"];
+        diag_log format ["[IHA-SORTI] %1 | YOK OLDU | yukseklik %2 m | hiz %3 m/s | konum %4 | olduren %5 | hasar %6", typeOf _u, round ((getPosATL _u) select 2), round (speed _u / 3.6), mapGridPosition _u, [typeOf _k, "yok / kendi"] select (isNull _k), damage _u toFixed 2];
+    }];
+    _uav addEventHandler ["Explosion", {
+        params ["_u", "_d"];
+        diag_log format ["[IHA-SORTI] %1 | PATLAMA ETKISI (explosion EH) | hasar %2 | yukseklik %3 m", typeOf _u, _d toFixed 2, round ((getPosATL _u) select 2)];
+    }];
+};
 
 private _tur = if (_turE isNotEqualTo "") then {_turE} else { [_uav] call FUNC(ihaTip) };
 if (_mod isEqualTo "GOZLEM") then { _tur = "GOZLEM"; };

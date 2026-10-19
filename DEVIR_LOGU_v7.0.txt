@@ -2532,3 +2532,8 @@ v8.259 TESLIM ESIKLERI + CBA + FRAKSIYON BAZLI (kullanici: "esigi gozden gecir, 
  YAPILAN: fnc_moral: esikler CBA degiskeni (varsayilan moral < 0.30, kayip >= %60, kalan <= 4, baski >= 0.40, dusman <= 120 m); izin = ana anahtar teslimV1 + fraksiyon 'Kapali' listesi > 'Acik' listesi > taraf anahtari (teslimWest / East / Ind) + doktrin teslim; fraksiyon = faction (leader), parca eslesme; [TESLIM-ADAY] neden logu. XEH_PREP.hpp: CBA 'ELITE moral / teslim' ayarlari (checkbox / editbox / slider; sunucu ayari).
  YAPILMADI / BILINEN: faction listesi CBA'da secim kutusu degil elle yazilan metin (faction adlari config'ten; RPT'de TESLIM-ADAY fraksiyon=... satirindan okunur); teslim olanlarin esir muamelesi / ACE esir entegrasyonu degismedi; eski doktrin 'teslimEsik' degeri artik kullanilmiyor (CBA slider onun yerine). Not: TEST EDILMEDI (v8.259). Test: TEST_SENARYOLARI.md T-TESLIM.
 
+
+v8.260 IHA GOREVI DUZELTMESI (kullanici: "iha atadigim gibi patladi")
+ NEDEN: RPT c48e02ec (sunucu): 13:27:19 ve 13:27:39 fnc_ihaSorti.sqf satir 41 'Suspending not allowed in this context' + '[IHA-SORTI] O_Crocus_AT | sunucuda yerel degil (setOwner basarisiz)'. CBA_fnc_addEventHandler callback'i zamanlanmamis ortamda; waitUntil/sleep calismadi, gorev hic baslamadi.
+ YAPILAN: ihaSorti canSuspend degilse spawn; Zeus modulu 'Dron yarat' dronu sunucuda 40 m, FLY yaratir (olay ek parametre _yaratSn); IHA Killed / Explosion EH logu.
+ YAPILMADI / BILINEN: 'patladi' nedeni kesin degil (istemcide 2 m'den yaratim + modun kendi hasar mantigi suphelisi); sunucu logunda dronun yok oluslari yok (olay sunucuya gitmeden once istemcide olmus olabilir). Hepsi (T).

@@ -122,9 +122,16 @@ lambs_danger_planKapiStarted = true;
 
 // v8.233: Zeus 'ELITE IHA Gorevi' -> fnc_ihaSorti (sunucu)
 ["lambs_danger_ihaGorev", {
-    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men"];
+    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""]];
     if (!isServer) exitWith {};
-    [objectFromNetId _nid, _mod, _tur, [west, east, independent] select (_tarafI max 0 min 2), _poz, _yar, _men] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
+    private _iha = objectFromNetId _nid;
+    // v8.260: Zeus 'Dron yarat' -> sunucuda 40 m irtifada ucarak yaratilir (sunucu-yerel; setOwner gerekmez)
+    if (isNull _iha && {_yaratSn isNotEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> _yaratSn)}) then {
+        _iha = createVehicle [_yaratSn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
+        _iha setPosATL [_poz select 0, _poz select 1, 40];
+        diag_log format ["[IHA-SORTI] %1 sunucuda yaratildi (40 m, FLY) | %2", _yaratSn, mapGridPosition _iha];
+    };
+    [_iha, _mod, _tur, [west, east, independent] select (_tarafI max 0 min 2), _poz, _yar, _men] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
 }] call CBA_fnc_addEventHandler;
 
 // v8.214: Zeus 'ELITE Gozetleme Ata' -> grup secilen karakol / mevzi isaretinde nobet tutar (fnc_gozetleAta)

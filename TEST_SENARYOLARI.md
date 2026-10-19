@@ -319,3 +319,10 @@ Ortam: yogun catisma; bir tarafin grubu %60+ kayip verip dusmana <= 120 m. CBA >
 3. Ana anahtar kapali -> hicbir taraf teslim olmaz. Esik slider'lari degisince davranis degisir.
 Not: ACE esir mekanigi / teslim olanlarin esir alinmasi bu surumde degismedi. Hepsi (T) = dogrulanmadi.
 
+
+## T-IHA-SUNUCU (v8.260)
+1. Zeus > ELITE IHA Gorevi > 'Dron yarat' = O_Crocus_AT, Gorev = Sorti, Tur = FPV-AT; yakinda bilinen dusman zirh olsun.
+2. RPT: `[IHA-SORTI] O_Crocus_AT sunucuda yaratildi (40 m, FLY)` sonra `[IHA-SORTI] ... | mod SORTI | tur FPV-AT` ve `hedef ...` satirlari beklenir; 'Suspending not allowed' hatasi OLMAMALI.
+3. Dron patlarsa `[IHA-SORTI] ... YOK OLDU | yukseklik .. m | hiz .. | olduren ..` satiri nedeni verir (hedefe vurma `HEDEFE VURDU` satiri ayridir).
+4. Dron yerde/yakinda hazir yerlestirilmisse (yaratma = Yok) eski yol: mod yerel degilse setOwner 2 denenir.
+Hepsi (T) = dogrulanmadi.

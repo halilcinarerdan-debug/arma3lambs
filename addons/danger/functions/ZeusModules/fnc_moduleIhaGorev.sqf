@@ -33,18 +33,16 @@ if (_activated && local _logic) then {
                 private _y = (nearestObjects [_poz, ["Air", "LandVehicle"], 40]) select {unitIsUAV _x};
                 _u = if (_y isEqualTo []) then {objNull} else {_y select 0};
             };
+            // v8.260: dron istemcide degil SUNUCUDA, 40 m irtifada ucarak yaratilir (istemcide yaratilinca setOwner gerekiyordu; yerde 2 m'den dusen / carpan dron mod tarafindan patliyor olabilirdi)
+            private _yaratSn = "";
             if (isNull _u && {(round _yaratI) >= 1} && {_gorev < 2}) then {
-                private _sn = _yaratSiniflar param [(round _yaratI) - 1, ""];
-                if (_sn isNotEqualTo "") then {
-                    _u = createVehicle [_sn, [_poz select 0, _poz select 1, 2], [], 0, "NONE"];
-                    systemChat format ["[ELITE] IHA Gorevi: %1 yaratildi (%2)", getText (configOf _u >> "displayName"), _sn];
-                };
+                _yaratSn = _yaratSiniflar param [(round _yaratI) - 1, ""];
             };
-            if (isNull _u) exitWith { systemChat "[ELITE] IHA Gorevi: yakinda (40 m) insansiz hava araci yok - modulu IHA'nin ustune birak ya da 'Dron yarat' sec"; };
+            if (isNull _u && {_yaratSn isEqualTo ""}) exitWith { systemChat "[ELITE] IHA Gorevi: yakinda (40 m) insansiz hava araci yok - modulu IHA'nin ustune birak ya da 'Dron yarat' sec"; };
             private _mod = ["SORTI", "GOZLEM", "KALDIR"] select (_gorev max 0 min 2);
             private _turKod = ["", "FPV-AT", "FPV-AP", "BOMBA", "GOZLEM"] select (_tur max 0 min 4);
-            ["lambs_danger_ihaGorev", [netId _u, _mod, _turKod, _tarafI, _poz, round _yar, round _men]] call CBA_fnc_serverEvent;
-            systemChat format ["[ELITE] IHA gorevi gonderildi: %1 -> %2 (%3)", getText (configOf _u >> "displayName"), _mod, [_turKod, "otomatik tur"] select (_turKod isEqualTo "")];
+            ["lambs_danger_ihaGorev", [["", netId _u] select (!isNull _u), _mod, _turKod, _tarafI, _poz, round _yar, round _men, _yaratSn]] call CBA_fnc_serverEvent;
+            systemChat format ["[ELITE] IHA gorevi gonderildi: %1 -> %2 (%3)", [_yaratSn, getText (configOf _u >> "displayName")] select (!isNull _u), _mod, [_turKod, "otomatik tur"] select (_turKod isEqualTo "")];
         }, {}, {}, [_poz, _bagli, _yaratSiniflar]
     ] call EFUNC(main,showDialog);
 };
