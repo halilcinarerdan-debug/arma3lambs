@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.260"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.261"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -750,6 +750,12 @@ def tani(path):
     if kd and not al("PLAN-KAYIP-DONUS"):
         mx = max(int(x.get("kayip_yuzde", 0)) for x in kd)
         print("  CIKARIM: geri cekilme tetiklenmedi; en yuksek kayip %%%d (esik 50)" % mx + (" -> esik asilmadi" if mx < 50 else " -> esik asildi ama tetiklenmedi (ilk<8 / bilinen dusman<2 / faz uygun degil?)"))
+    # ---- kuvvet orani kapisi (v8.261 hibrit tahmin)
+    po = al("PLAN-ORAN"); pzo = [l for l in L if "ORAN BEKLEME" in l]
+    print("\n-- KUVVET ORANI KAPISI: %d [PLAN-ORAN] satiri, %d tank ORAN BEKLEME satiri --" % (len(po), len(pzo)))
+    for v in po[:12]: print("  ", v.split('" ', 1)[-1][:260])
+    for v in pzo[:6]: print("  ", v.split('" ', 1)[-1][:200])
+    if not po: print("  CIKARIM: kapi hic olculmedi (recon raporu / KESIF'e ulasilmadi, ya da oranEsik = 0 / oranKapisiOff, ya da plan once iptal edildi)")
     # ---- topcu
     tt = [_kv(l) for l in al("TANI-TOPCU")]
     print("\n-- TOPCU DUSUSLERI (%d kayit) --" % len(tt))

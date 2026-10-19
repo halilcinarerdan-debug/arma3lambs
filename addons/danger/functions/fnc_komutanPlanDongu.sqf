@@ -77,6 +77,8 @@ private _gozlemRapor = {
     _plan set ["gozSivil", count _siv];
     _plan set ["gozAdam", count _adam];
     _plan set ["raporHazir", true];
+    // v8.261: gozlem kalitesi (hibrit kuvvet tahmini): sure / 40 sn (en cok 1); recon disi canli gozlem en cok 0.6; temas (gizlilik bozuldu) x0.7
+    _plan set ["gozKalite", (((_gozlemS / 40) min 1) min ([0.6, 1] select (_etiket isEqualTo "recon"))) * ([1, 0.7] select _bozuldu)];
     // komutan inancini gunceller (tam gozlem): gozlenen sayi iddiadan farkliysa gozlenene gecer
     if (_gozlemS >= 40) then { _ay set ["sayi", count _adam]; };
     private _fark = if (_iddia <= 0) then {"iddia sayisi verilmemis"} else {
@@ -331,7 +333,7 @@ private _gucOrani = {
                 if (!isNull _eo && {alive _eo} && {(_tf getFriend (_x select 2)) < 0.6} && {[_eo] call FUNC(gercekHedef)} && {(_gl knowsAbout _eo) >= 0.3} && {((getPosATL _eo) distance2D _ob) <= 500}) then { _bil pushBackUnique _eo; };
             } forEach (_gl nearTargets 900);
         };
-    } forEach _gruplar;
+    } forEach (_gruplar + (_plan getOrDefault ["reconG", []]));
     private _dus = 0;
     {
         if (_x isKindOf "CAManBase") then { _dus = _dus + 1; } else {
@@ -339,9 +341,63 @@ private _gucOrani = {
             _dus = _dus + (if (_x isKindOf "Tank" && {(getNumber (configOf _x >> "armor")) >= 300}) then {6} else { if (_x isKindOf "StaticWeapon") then {2} else { if ((_sn2 select 0) in ["IFV", "TANK"] || {_sn2 select 3}) then {2} else {0} } });
         };
     } forEach _bil;
-    _dus = _dus max (_plan getOrDefault ["iddiaSayi", 0]);
+    // v8.261 HIBRIT TAHMIN (kullanici: 'hibrit olsun, OPORD bilgisi de sallamasyon degil'): Zeus OPORD'undaki iddia (sayi + guven) ile GERCEK gozlem birlestirilir.
+    //   gozlenen G (bilinen gercek dusman, agirlikli) HER ZAMAN sayilir; iddia C'nin gozlenmeyen kismi (C - G) yalniz agirlik w ile eklenir: w = gozlem yok ise [0.5 / 0.75 / 1.0] (guven yetersiz / orta / kesin),
+    //   tam recon gozlemi (kalite q = 1) varsa [0.2 / 0.35 / 0.5] (recon gormedigi dusmanin cogu gercekte yok demektir); araya q ile enterpole edilir. Agirliklar TASARIM degeri (kitapta sayi yok).
+    private _gozO = _dus;
+    private _iddiaC = _plan getOrDefault ["iddiaSayi", 0];
+    private _gv = (_plan getOrDefault ["guven", 1]) max 0 min 2;
+    private _kal = (_plan getOrDefault ["gozKalite", 0]) max 0 min 1;
+    private _wYok = [0.5, 0.75, 1] select _gv;
+    private _wTam = [0.2, 0.35, 0.5] select _gv;
+    private _wH = _wYok + (_wTam - _wYok) * _kal;
+    _dus = _gozO + ((_iddiaC - _gozO) max 0) * _wH;
     private _hazir = (_plan getOrDefault ["bina", false]) || {((["LISTE"] call FUNC(hendekAlani)) findIf {((_x select 0) distance2D _ob) <= 400}) >= 0};
-    [_dost, _dus, [(_dost / _dus), 99] select (_dus <= 0), _hazir]
+    [_dost, _dus, [(_dost / _dus), 99] select (_dus <= 0), _hazir, _gozO, _iddiaC, _kal, _wH]
+};
+
+// v8.261 ORAN KONTROLU (erken: recon raporu gelince TOPLAN'da; gec: KESIF sonunda): "GEC" / "BEKLE" / "IPTAL". Ayni sonuc 15 sn onbellekte. BEKLE'de oranTut = true: tanklar ilerlemez (planZirh), nakil araclari piyadeyi almadan / goturmeden bekler (SENKRON kapisi).
+private _oranKontrol = {
+    params ["_plan", "_gruplar", "_etiket"];
+    private _id = _plan get "id";
+    private _oranE = _plan getOrDefault ["oranEsik", 2];
+    if (_oranE <= 0 || {missionNamespace getVariable ["lambs_danger_oranKapisiOff", false]}) exitWith { _plan set ["oranTut", false]; "GEC" };
+    if ((time - (_plan getOrDefault ["oranT", -99])) < 15) exitWith { _plan getOrDefault ["oranKarar", "GEC"] };
+    _plan set ["oranT", time];
+    private _go = [_plan, _gruplar] call _gucOrani;
+    _go params ["_gD", "_gE", "_gR", "_gH", "_gO", "_gC", "_gK", "_gW"];
+    private _gEs = _oranE * ([1, 1.5] select _gH);
+    _plan set ["oranSon", [_gD, _gE, _gR, _gEs]];
+    private _karar = "GEC";
+    if (_gE > 0 && {_gR < _gEs}) then {
+        if ((_plan getOrDefault ["oranBekleT0", -1]) < 0) then { _plan set ["oranBekleT0", time]; };
+        private _bek = time - (_plan get "oranBekleT0");
+        _plan set ["oranTut", true];
+        _karar = "BEKLE";
+        if ((time - (_plan getOrDefault ["oranLogT", -99])) >= 30) then {
+            _plan set ["oranLogT", time];
+            diag_log format ["[PLAN-ORAN] %1 | %2 | dost %3 : dusman TAHMIN %4 (gozlenen %5 + OPORD iddia %6 x agirlik %7 | guven %8 | gozlem kalitesi %9) = %10 < esik %11 (hazirlanmis savunma %12) -> BEKLE (%13 sn / 300): tanklar ve nakil tutuldu", _id, _etiket, _gD, _gE toFixed 1, _gO toFixed 1, _gC, _gW toFixed 2, ["YETERSIZ", "ORTA", "KESIN"] select ((_plan getOrDefault ["guven", 1]) max 0 min 2), _gK toFixed 2, _gR toFixed 2, _gEs toFixed 2, _gH, round _bek];
+        };
+        if (_bek > 300) then {
+            _plan set ["oranTut", false];
+            _karar = "IPTAL";
+            [_plan, format ["kuvvet orani yetersiz (dost %1 : dusman tahmin %2 = %3 < %4): saldiri iptal", _gD, _gE toFixed 1, _gR toFixed 2, _gEs toFixed 2]] call _kayipCekil;
+        };
+    } else {
+        if ((_plan getOrDefault ["oranTut", false]) || {(_plan getOrDefault ["oranBekleT0", -1]) >= 0} || {(time - (_plan getOrDefault ["oranGecLogT", -99])) > 600}) then {
+            _plan set ["oranGecLogT", time];
+            diag_log format ["[PLAN-ORAN] %1 | %2 | dost %3 : dusman TAHMIN %4 (gozlenen %5 + OPORD iddia %6 x agirlik %7 | gozlem kalitesi %8) = %9 (esik %10) -> SALDIRI IZINLI", _id, _etiket, _gD, _gE toFixed 1, _gO toFixed 1, _gC, _gW toFixed 2, _gK toFixed 2, _gR toFixed 2, _gEs toFixed 2];
+        };
+        if (_plan getOrDefault ["oranTut", false]) then {
+            _plan set ["oranTut", false];
+            _plan set ["oranBekleT0", -1];
+            private _ctlO = _plan getOrDefault ["tasimaCtl", []];
+            if (count _ctlO > 1) then { _ctlO set [1, true]; };
+            _plan set ["hazirBekle", false];
+        };
+    };
+    _plan set ["oranKarar", _karar];
+    _karar
 };
 
 while {true} do {
@@ -393,7 +449,7 @@ while {true} do {
             // v8.226 KESIF ONDE (ATP 4-01.45 / FM 3-98: kesif unsuru ana kolun onunde gider): recon APC OP'ye giden yolun %60'ini gectiyse ana kol kalkar (%60 tasarim degeri)
             private _raG = _plan getOrDefault ["reconArac", objNull];
             private _reconOnde = !isNull _raG && {alive _raG} && {(_plan getOrDefault ["reconAracD0", 0]) > 0} && {(_raG distance2D (_plan get "op")) < 0.4 * (_plan get "reconAracD0")};
-            if ((_reconOk && _tankOk) || {_reconOnde && {_tankOk}} || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}) then {
+            if (!(_plan getOrDefault ["oranTut", false]) && {(_reconOk && _tankOk) || {_reconOnde && {_tankOk}} || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}}) then {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
                 diag_log format ["[PLAN] %1 SENKRON: nakil serbest birakildi (gozlem %2, tanklar %3, %4 sn)", _id, _reconOk, _tankOk, round (time - (_plan getOrDefault ["t0", time]))];
@@ -826,6 +882,23 @@ while {true} do {
                     [_plan, "RECON", format ["%1 grup gozlem noktasina", count _rgl]] call _fazGec;
                     continue
                 };
+                // v8.261 ERKEN ORAN KAPISI (kullanici: 'dusman fazla, saldiri ertelendi ama tanklar gitti, bazi askerler yayan gidiyordu'): recon raporu gelir gelmez HIBRIT kuvvet orani olculur (gozlenen + OPORD iddiasi, bkz. _gucOrani);
+                //   yetersizse piyade RP'de, nakil araclari beklemede, tanklar yerinde (planZirh) kalir; 300 sn'de duzelmezse saldiri IPTAL + HQ'ya donus.
+                if (_tip isNotEqualTo 1 && {_plan getOrDefault ["reconTamam", false]} && {!(_plan getOrDefault ["oranErkenGecti", false])}) then {
+                    private _ek = [_plan, _gruplar, "ERKEN (recon raporu)"] call _oranKontrol;
+                    if (_ek isEqualTo "GEC") then {
+                        _plan set ["oranErkenGecti", true];
+                    } else {
+                        if (_ek isEqualTo "BEKLE") then {
+                            if !(_plan getOrDefault ["hazirBekle", false]) then {
+                                _plan set ["hazirBekle", true];
+                                private _ctlE = _plan getOrDefault ["tasimaCtl", []];
+                                if (count _ctlE > 1) then { _ctlE set [1, false]; };
+                            };
+                        };
+                        continue
+                    };
+                };
                 // v8.129: ele gecirde RP'de toplanan gruplar uygun kara araclariyla INIS NOKTASINA tasinir (objektiften >= 500 m); once TASIMA fazi
                 if (_tip isNotEqualTo 1 && {!(_plan getOrDefault ["tasimaYapildi", false])} && {!(("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")})}) then {
                     _plan set ["tasimaYapildi", true];
@@ -1204,34 +1277,9 @@ while {true} do {
             if (_fazSure > _kesifS2) then {
                 // plan gruplari bu noktaya kadar gozlediklerini rapor eder (recon raporu yoksa); sonra bekleyen hazirlik atisi yeniden degerlendirilir
                 if (_dgz isNotEqualTo 2 && {!(_plan getOrDefault ["raporHazir", false])}) then { [_plan, _gruplar, false, _fazSure, "ORP gozlemi (recon yok)"] call _gozlemRapor; };
-                // v8.258 GUC ORANI KAPISI: oran esigin altindaysa saldiri ERTELENIR (en cok 300 sn: topcu / takviye / dusman zayiflamasi beklenir, 15 sn'de bir yeniden olculur), sure dolunca saldiri IPTAL + HQ'ya donus.
-                //   Esik Zeus 'Min. kuvvet orani' (varsayilan 2.0; 0 = kapi kapali), hazirlanmis savunmaya (bina / hendek alani <= 400 m) x1.5. Dusman bilinmiyorsa (0) kapi gecilir. Kapatma: lambs_danger_oranKapisiOff = true.
-                private _oranE = (_plan getOrDefault ["oranEsik", 2]);
-                if (_oranE > 0 && {!(missionNamespace getVariable ["lambs_danger_oranKapisiOff", false])} && {(time - (_plan getOrDefault ["oranT", -99])) >= 15}) then {
-                    _plan set ["oranT", time];
-                    private _go = [_plan, _gruplar] call _gucOrani;
-                    _go params ["_gD", "_gE", "_gR", "_gH"];
-                    private _gEs = _oranE * ([1, 1.5] select _gH);
-                    _plan set ["oranSon", [_gD, _gE, _gR, _gEs]];
-                    if (_gE > 0 && {_gR < _gEs}) then {
-                        if ((_plan getOrDefault ["oranBekleT0", -1]) < 0) then { _plan set ["oranBekleT0", time]; };
-                        private _bek = time - (_plan get "oranBekleT0");
-                        if ((time - (_plan getOrDefault ["oranLogT", -99])) >= 30) then {
-                            _plan set ["oranLogT", time];
-                            diag_log format ["[PLAN-ORAN] %1 | kuvvet orani dost %2 : dusman %3 = %4 < esik %5 (hazirlanmis savunma %6) -> SALDIRI ERTELENDI (%7 sn / 300)", _id, _gD, _gE, _gR toFixed 2, _gEs toFixed 2, _gH, round _bek];
-                        };
-                        if (_bek > 300) then {
-                            [_plan, format ["kuvvet orani yetersiz (dost %1 : dusman %2 = %3 < %4): saldiri iptal", _gD, _gE, _gR toFixed 2, _gEs toFixed 2]] call _kayipCekil;
-                        };
-                        continue
-                    } else {
-                        if ((_plan getOrDefault ["oranBekleT0", -1]) >= 0 || {(time - (_plan getOrDefault ["oranGecLogT", -99])) > 600}) then {
-                            _plan set ["oranGecLogT", time];
-                            diag_log format ["[PLAN-ORAN] %1 | kuvvet orani dost %2 : dusman %3 = %4 (esik %5) -> SALDIRI IZINLI", _id, _gD, _gE, _gR toFixed 2, _gEs toFixed 2];
-                        };
-                    };
-                };
-                if ((_plan getOrDefault ["oranEsik", 2]) > 0 && {(_plan getOrDefault ["oranBekleT0", -1]) >= 0} && {(time - (_plan getOrDefault ["oranT", -99])) < 15} && {((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 2) < ((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 3)} && {((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 1) > 0}) then { continue };
+                // v8.258 GUC ORANI KAPISI (v8.261: HIBRIT tahmin + _oranKontrol; erken olcum TOPLAN'da recon raporunda): oran esigin altindaysa saldiri ERTELENIR (en cok 300 sn), sure dolunca IPTAL + HQ'ya donus.
+                //   Esik Zeus 'Min. kuvvet orani' (varsayilan 2.0; 0 = kapi kapali), hazirlanmis savunmaya (bina / hendek alani <= 400 m) x1.5. Kapatma: lambs_danger_oranKapisiOff = true.
+                if (([_plan, _gruplar, "KESIF"] call _oranKontrol) in ["BEKLE", "IPTAL"]) then { continue };
                 if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]}) then {
                     _plan set ["hazirlikAtildi", true];
                     [_plan, _obj, "HAZIRLIK (dogrulamadan sonra)"] call _topcuAt;
@@ -1274,7 +1322,7 @@ while {true} do {
                 private _ilkFT = 0; private _simFT = 0;
                 { _ilkFT = _ilkFT + (_ilkF getOrDefault [groupId _x, 0]); _simFT = _simFT + ({alive _x} count (units _x)); } forEach _gruplar;
                 if (_ilkFT >= 8 && {(1 - (_simFT / _ilkFT)) >= 0.5} && {_fazSure > 30}) then {
-                    diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip %2%% (>= 50%%, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
+                    diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip %2% (>= 50%, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
                     [_plan, format ["saldiri kaybi yuzde %1 (esik 50): objektif alinamadi", round ((1 - (_simFT / _ilkFT)) * 100)]] call _kayipCekil;
                     continue
                 };
@@ -1502,8 +1550,8 @@ while {true} do {
                     continue
                 };
                 if (_kayipS >= 0.6 && {(count _dusN) >= 2}) then {
-                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2%% >= 60%% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
-                    [_plan, "BITTI", format ["savunma kaybi %1%% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
+                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2% >= 60% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
+                    [_plan, "BITTI", format ["savunma kaybi %1% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
                 } else {
                     if ((count _dusN) >= 2 && {(_kayipS >= 0.25) || {_yakinD <= 150}} && {(time - (_plan getOrDefault ["savKarsiT", -999])) > 150}) then {
                         // v8.231 TEK GRUP KARSI SALDIRI YAPMAZ (RPT 92fcbcbb: tek savunma grubu hendege yerlesti, 3 sn sonra "KARSI SALDIRI" ile hendekten cikip dusmana saldirdi — "mevzilenmiyorlar"): karsi saldiri YEDEKTIR; savunmada en az bir grup mevzide KALIR
@@ -1519,7 +1567,7 @@ while {true} do {
                                 [_x, "SALDIRI", [_ep]] call FUNC(hqEmir);
                                 _ks set [groupId _x, [time, _ep]];
                                 _x setVariable [QGVAR(hendekte), nil];   // v8.243: karsi saldiri sirasinda mevzi tutma devre disi; donuste hendekYerles tekrar yazar
-                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%%, en yakin dusman objektife %7 m) | dusmanlar: %8", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD,
+                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%, en yakin dusman objektife %7 m) | dusmanlar: %8", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD,
                                     ((_dusN select [0, 6]) apply { format ["%1/%2", typeOf _x, side (group (effectiveCommander _x))] }) joinString ", "];
                             } forEach _yedekG;
                         };

@@ -80,6 +80,21 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     _g setVariable ["lambs_danger_planZirh", true];
     _g setVariable ["lambs_danger_planAktif", true, true];
 
+    // v8.261 ORAN BEKLEME: erken / gec kuvvet orani kapisi saldiriyi ertelediyse (plan oranTut) tank henuz mevziye varmadiysa YERINDE bekler (piyade ve nakil de beklemede); kapi acilinca ates pozisyonuna devam eder
+    if ((_plan getOrDefault ["oranTut", false]) && {_faz in ["TOPLAN", "RECON", "TASIMA", "ORP"]} && {!(_g getVariable ["lambs_danger_planZirhVardi", false])}) then {
+        if !(_g getVariable ["lambs_danger_planZirhOranTut", false]) then {
+            _g setVariable ["lambs_danger_planZirhOranTut", true];
+            _d doStop;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 ORAN BEKLEME: kuvvet orani yetersiz, ates pozisyonuna ilerleme DURDURULDU (mevziye %3 m)", _id, groupId _g, round (_v distance2D (_g getVariable ["lambs_danger_planZirhPoz", getPosATL _v]))];
+        };
+        continue
+    };
+    if (_g getVariable ["lambs_danger_planZirhOranTut", false]) then {
+        _g setVariable ["lambs_danger_planZirhOranTut", nil];
+        _g setVariable ["lambs_danger_planZirhMoveT", -999];
+        diag_log format ["[PLAN-ZIRH] %1 | %2 ORAN BEKLEME bitti: ates pozisyonuna devam", _id, groupId _g];
+    };
+
     // v8.174 ZIRH DOKTRINI (MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur): SALDIRI basinda ates pozisyonu bir kez 350 m civarina ilerletilir
     if (_faz isEqualTo "SALDIRI" && {!(_g getVariable ["lambs_danger_planZirhYakin", false])}) then {
         _g setVariable ["lambs_danger_planZirhYakin", true];

@@ -326,3 +326,12 @@ Not: ACE esir mekanigi / teslim olanlarin esir alinmasi bu surumde degismedi. He
 3. Dron patlarsa `[IHA-SORTI] ... YOK OLDU | yukseklik .. m | hiz .. | olduren ..` satiri nedeni verir (hedefe vurma `HEDEFE VURDU` satiri ayridir).
 4. Dron yerde/yakinda hazir yerlestirilmisse (yaratma = Yok) eski yol: mod yerel degilse setOwner 2 denenir.
 Hepsi (T) = dogrulanmadi.
+
+## T-ORAN-ERKEN (v8.261)
+Ortam: ELE GECIR plani, objektifte ~30 dusman (hendek / bina), plan 8 grup (~32 asker) + 1 tank + 2 BTR, objektif 3 km uzakta; Zeus 'Dusman sayisi' = 30, guven = ORTA; recon grubu ata. Min. kuvvet orani 2.
+1. Recon OP'ye gider, rapor gelir (`[PLAN-ISTIHBARAT] RAPOR`). Hemen ardindan beklenen: `[PLAN-ORAN] ... ERKEN (recon raporu) | dost X : dusman TAHMIN Y (gozlenen G + OPORD iddia C x agirlik W | guven ORTA | gozlem kalitesi Q) ... BEKLE`.
+2. Piyade RP'de, BTR'ler piyadeyi almiyor / kalkmiyor, tank mevziye varmadiysa durur: `[PLAN-ZIRH] ... ORAN BEKLEME`. 300 sn sonra `[PLAN-KAYIP-DONUS]` / saldiri iptal.
+3. Iddia 30 ama recon 10 dusman gordu, tam gozlem: tahmin ~ 10 + 20x0.35 = 17 (iddia tek basina 30 sayilmaz). Iddia 10 ama gozlenen 25: tahmin 25 (gercek gozlem iddiaya ustun).
+4. Dost sayisini artir (ya da esigi 1'e indir): `... SALDIRI IZINLI`, tank ilerler, nakil kalkar.
+5. Eski (KESIF sonu) kapi ayni `_oranKontrol` ile calismaya devam eder (`KESIF` etiketi).
+`python3 tools/rpt_ozet.py --tani <rpt>` KUVVET ORANI KAPISI bolumu. Hepsi (T) = dogrulanmadi.
