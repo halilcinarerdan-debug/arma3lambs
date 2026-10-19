@@ -1322,7 +1322,7 @@ while {true} do {
                 private _ilkFT = 0; private _simFT = 0;
                 { _ilkFT = _ilkFT + (_ilkF getOrDefault [groupId _x, 0]); _simFT = _simFT + ({alive _x} count (units _x)); } forEach _gruplar;
                 if (_ilkFT >= 8 && {(1 - (_simFT / _ilkFT)) >= 0.5} && {_fazSure > 30}) then {
-                    diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip %2% (>= 50%, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
+                    diag_log format ["[PLAN-FRAGO] %1 | SALDIRI BASARISIZ: kayip yuzde %2 (esik yuzde 50, %3 / %4 asker) -> CEKILME", _id, round ((1 - (_simFT / _ilkFT)) * 100), _simFT, _ilkFT];
                     [_plan, format ["saldiri kaybi yuzde %1 (esik 50): objektif alinamadi", round ((1 - (_simFT / _ilkFT)) * 100)]] call _kayipCekil;
                     continue
                 };
@@ -1550,8 +1550,8 @@ while {true} do {
                     continue
                 };
                 if (_kayipS >= 0.6 && {(count _dusN) >= 2}) then {
-                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP %2% >= 60% ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
-                    [_plan, "BITTI", format ["savunma kaybi %1% (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
+                    diag_log format ["[PLAN-SAVUNMA] %1 | KAYIP yuzde %2 (esik yuzde 60) ve dusman %3: mevzi kaybedildi, hayatta kalanlar cekiliyor", _id, round (_kayipS * 100), count _dusN];
+                    [_plan, "BITTI", format ["savunma kaybi yuzde %1 (mevzi kaybedildi)", round (_kayipS * 100)]] call _fazGec;
                 } else {
                     if ((count _dusN) >= 2 && {(_kayipS >= 0.25) || {_yakinD <= 150}} && {(time - (_plan getOrDefault ["savKarsiT", -999])) > 150}) then {
                         // v8.231 TEK GRUP KARSI SALDIRI YAPMAZ (RPT 92fcbcbb: tek savunma grubu hendege yerlesti, 3 sn sonra "KARSI SALDIRI" ile hendekten cikip dusmana saldirdi — "mevzilenmiyorlar"): karsi saldiri YEDEKTIR; savunmada en az bir grup mevzide KALIR
@@ -1567,7 +1567,7 @@ while {true} do {
                                 [_x, "SALDIRI", [_ep]] call FUNC(hqEmir);
                                 _ks set [groupId _x, [time, _ep]];
                                 _x setVariable [QGVAR(hendekte), nil];   // v8.243: karsi saldiri sirasinda mevzi tutma devre disi; donuste hendekYerles tekrar yazar
-                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi %6%, en yakin dusman objektife %7 m) | dusmanlar: %8", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD,
+                                diag_log format ["[PLAN-SAVUNMA] %1 | KARSI SALDIRI: %2 (%3) -> dusman agirlik merkezi %4 (dusman %5, savunma kaybi yuzde %6, en yakin dusman objektife %7 m) | dusmanlar: %8", _id, groupId _x, _roller getOrDefault [groupId _x, "-"], mapGridPosition _ep, count _dusN, round (_kayipS * 100), round _yakinD,
                                     ((_dusN select [0, 6]) apply { format ["%1/%2", typeOf _x, side (group (effectiveCommander _x))] }) joinString ", "];
                             } forEach _yedekG;
                         };
