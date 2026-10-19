@@ -353,3 +353,13 @@ Hepsi (T) = dogrulanmadi.
 2. RPT: `[RECON-ARAC-HAREKET] ... t+3 ... hiz ... yon farki ...` satirlari AI'nin ne yaptigini gosterir (geri vites mi, donuyor mu). `KURTARMA 3 ... kinematik` ilk ~38 sn'den once GORULMEMELI; AI 38 sn icinde gittiyse kinematik hic baslamaz.
 3. `python3 tools/rpt_ozet.py --tani <rpt>`: RECON ARACI AI SURUSU bolumu.
 Hepsi (T) = dogrulanmadi.
+
+## T-TANK-PIYADE-BAG (v8.265)
+1. ELE GECIR plani, objektif 2.5+ km, 1 tank + piyade (yaya + BTR). Tank piyadeden hizli.
+2. Beklenen RPT: tank piyadenin 400 m'den fazla onune gecince `[PLAN-ZIRH] ... PIYADE BAGI: tank piyadenin X m onunde ... BEKLIYOR`; piyade yetisince `PIYADE BAGI bitti ... tank ilerliyor`. SENKRON kapisi tankin beklemesi yuzunden 420 sn tavana takilmamali (`[PLAN] SENKRON: nakil serbest birakildi` makul surede). 300 sn dolarsa `ZAMAN ASIMI`.
+3. CBA: Tank piyade bagi AKTIF kapali -> tank eskisi gibi tek basina ilerler.
+## T-TANK-TERK (v8.265)
+1. Tank motorunu vur (hitengine ~0.9): `[TANK-IMMOBIL] ... canMove false | canFire ... | parcalar >0.5: [...]`, `[PLAN-ZIRH] ... HAREKET EDEMIYOR`.
+2. Murettebat 4 kez geri donup ejekte edilirse (ya da 3 / 60 sn) `[TANK-TERK] ... terk eden murettebat N -> <grup> grubuna katildi`; murettebat yakindaki piyade grubuyla birlikte hareket eder, tanka tekrar kosmaz.
+3. Tanki onar (ACE): `[TANK-TERK] tekrar hareket edebiliyor: terk kalkti`, planZirh pozisyonu yeniden secer.
+`python3 tools/rpt_ozet.py --tani <rpt>`: TANK PIYADE BAGI / HAREKET EDEMEYEN TANK bolumu. Hepsi (T) = dogrulanmadi.

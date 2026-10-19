@@ -55,6 +55,22 @@ if (_faz isEqualTo "KUR") exitWith {};
 private _piyadeTemas = ((_plan getOrDefault ["gruplar", []]) findIf {((_x getVariable ["lambs_danger_contact", 0]) > time)}) >= 0;
 private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piyadeTemas};
 
+// v8.265 PIYADE BAGI (kullanici: 'tank ilerledi, piyade yetisemedi / tanklar piyadeden once gitti'; ATP 3-20.15: tank piyade ile birlikte hareket eder): hareket fazlarinda (TOPLAN / RECON / TASIMA / ORP) tank, plan piyadesinin
+//   (recon / topcu / medevac / zirh haric gruplarin liderlerinin objektife mesafesinin MEDYANI) onunde en cok `lambs_danger_tankPiyadeMesafe` (varsayilan 400 m) ilerleyebilir; fazlasinda yerinde BEKLER (en cok 300 sn, sonra 300 sn muaf).
+//   Savunma planinda, piyade temasinda ve savas fazlarinda kapali. Kapatma: CBA "ELITE zirh / mekanize" > Tank piyade bagi AKTIF (lambs_danger_tankPiyadeV1 = false).
+private _piyMed = -1;
+if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_plan getOrDefault ["tip", 0]) isNotEqualTo 1} && {_faz in ["TOPLAN", "RECON", "TASIMA", "ORP"]} && {!_piyadeTemas}) then {
+    private _dis = [];
+    {
+        private _pg = _x;
+        if (!isNull _pg && {!(_pg in _zg)} && {!(_pg in (_plan getOrDefault ["reconG", []]))} && {!((_pg getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK", "MEDEVAC", "RECON", "RECON_ARAC"])}) then {
+            private _pl = leader _pg;
+            if (!isNull _pl && {alive _pl}) then { _dis pushBack ((vehicle _pl) distance2D _obj); };
+        };
+    } forEach (_plan getOrDefault ["gruplar", []]);
+    if (_dis isNotEqualTo []) then { _dis sort true; _piyMed = _dis select (floor ((count _dis) / 2)); };
+};
+
 {
     private _g = _x;
     if (!local _g || {({alive _x} count (units _g)) isEqualTo 0}) then { continue };
@@ -93,6 +109,46 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
         _g setVariable ["lambs_danger_planZirhOranTut", nil];
         _g setVariable ["lambs_danger_planZirhMoveT", -999];
         diag_log format ["[PLAN-ZIRH] %1 | %2 ORAN BEKLEME bitti: ates pozisyonuna devam", _id, groupId _g];
+    };
+
+    // v8.265 HAREKET EDEMEYEN TANK (canMove false: palet / motor): hareket emri verilmez; bulundugu yer ates pozisyonu sayilir (murettebat iceride kalirsa sabit mevzi olarak ates eder). Onarilirsa pozisyon yeniden secilir.
+    if (_tankMi && {!canMove _v}) then {
+        if !(_g getVariable ["lambs_danger_planZirhImmobil", false]) then {
+            _g setVariable ["lambs_danger_planZirhImmobil", true];
+            _g setVariable ["lambs_danger_planZirhPoz", getPosATL _v];
+            _g setVariable ["lambs_danger_planZirhVardi", true];
+            doStop _d;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 HAREKET EDEMIYOR (canMove false): bulundugu yer ates pozisyonu sayildi (objektife %3 m, canFire %4, hasar %5) - hareket emri verilmeyecek", _id, groupId _g, round (_v distance2D _obj), canFire _v, (damage _v) toFixed 2];
+        };
+    } else {
+        if (_g getVariable ["lambs_danger_planZirhImmobil", false]) then {
+            _g setVariable ["lambs_danger_planZirhImmobil", nil];
+            _g setVariable ["lambs_danger_planZirhPoz", []];
+            _g setVariable ["lambs_danger_planZirhVardi", nil];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 tekrar hareket edebiliyor: ates pozisyonu yeniden secilecek", _id, groupId _g];
+        };
+    };
+
+    // v8.265 PIYADE BAGI: tank piyadenin cok onune gecmesin
+    if (_piyMed >= 0 && {!(_g getVariable ["lambs_danger_planZirhVardi", false])} && {canMove _v} && {time > (_g getVariable ["lambs_danger_planZirhPiyadeSerbest", 0])} && {(_v distance2D _obj) < (_piyMed - (missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400]))}) then {
+        if !(_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) then {
+            _g setVariable ["lambs_danger_planZirhPiyadeTut", true];
+            _g setVariable ["lambs_danger_planZirhPiyadeT0", time];
+            doStop _d;
+            diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI: tank piyadenin %3 m onunde (tank objektife %4 m, piyade medyani %5 m, sinir %6 m) -> piyade yetisene kadar BEKLIYOR | faz %7", _id, groupId _g, round (_piyMed - (_v distance2D _obj)), round (_v distance2D _obj), round _piyMed, missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400], _faz];
+        };
+        if ((time - (_g getVariable ["lambs_danger_planZirhPiyadeT0", time])) > 300) then {
+            _g setVariable ["lambs_danger_planZirhPiyadeTut", nil];
+            _g setVariable ["lambs_danger_planZirhPiyadeSerbest", time + 300];
+            _g setVariable ["lambs_danger_planZirhMoveT", -999];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI ZAMAN ASIMI (300 sn): piyade yetismedi, tank 300 sn serbest", _id, groupId _g];
+        } else { continue };
+    } else {
+        if (_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) then {
+            _g setVariable ["lambs_danger_planZirhPiyadeTut", nil];
+            _g setVariable ["lambs_danger_planZirhMoveT", -999];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI bitti: piyade yetisti (medyan %3 m) / faz degisti (%4) -> tank ilerliyor (%5 sn bekledi)", _id, groupId _g, round _piyMed, _faz, round (time - (_g getVariable ["lambs_danger_planZirhPiyadeT0", time]))];
+        };
     };
 
     // v8.174 ZIRH DOKTRINI (MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur): SALDIRI basinda ates pozisyonu bir kez 350 m civarina ilerletilir
@@ -196,7 +252,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     };
 
     // ---- v8.244 SAVUNMA: gizleme noktasindan birincil mevziye cikis (tetik: dusman <= 1500 m bilinen ya da plan piyadesi temasta ya da savas fazi) ----
-    if (_savunma && {_g getVariable ["lambs_danger_planZirhHide", false]} && {(time - (_g getVariable ["lambs_danger_planZirhTetikT", -999])) > 3}) then {
+    if (_savunma && {canMove _v} && {_g getVariable ["lambs_danger_planZirhHide", false]} && {(time - (_g getVariable ["lambs_danger_planZirhTetikT", -999])) > 3}) then {
         _g setVariable ["lambs_danger_planZirhTetikT", time];
         private _tetik = _savas || {((_l nearTargets 1500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)} && {[_x select 4] call FUNC(gercekHedef)}}) >= 0};
         if (_tetik) then {
@@ -288,7 +344,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     };
 
     // ---- v8.194 YER DEGISTIR: mevzideki tank hasar aldiysa (>= 0.08) yedek mevziye gecer (60 sn'de en fazla bir kez; eski mevzi yeni yedek olur)
-    if (_vardi && {_tankMi} && {_savas}) then {
+    if (_vardi && {_tankMi} && {_savas} && {canMove _v}) then {
         private _hs0 = _g getVariable ["lambs_danger_planZirhHasar", -1];
         if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", damage _v]; _hs0 = damage _v; };
         private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];

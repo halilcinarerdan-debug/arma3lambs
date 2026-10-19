@@ -441,6 +441,7 @@ while {true} do {
                 private _zv = vehicle (leader _zg);
                 private _zp = _zg getVariable ["lambs_danger_planZirhPoz", []];
                 !isNull _zg && {_zv isNotEqualTo (leader _zg)} && {(_zp isEqualTo []) || {(_zv distance2D _zp) > 450}} && {!(_zg getVariable ["lambs_danger_planZirhVardi", false])}
+                && {!(_zg getVariable ["lambs_danger_planZirhPiyadeTut", false])}   // v8.265: piyade baginda bekleyen tank kapiyi tutmaz (karsilikli bekleme kilidi onlenir)
             }) < 0;
             // v8.200: recon araci tasimayi bitirdi / basarisiz oldu ve recon yaya yola ciktiktan 120 sn sonra ana kol beklemez (RPT 59babdf1: recon Stryker takildi, herkes 420 sn'lik tavani bekledi, "kimse hareket etmedi"); ATP 4-01.45: kesif unsuru ana kolun onunde ayrik gider, ana kol bekletilmez
             private _reconYaya = ("reconFazT" in _plan) && {(time - (_plan get "reconFazT")) > 120};

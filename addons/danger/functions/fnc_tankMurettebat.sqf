@@ -53,6 +53,41 @@ private _calis = {
             [_u] orderGetIn true;
         };
     };
+    // v8.265 TERK (kullanici: 'mekanize ve tanki guclendir'): hareket edemeyen tankta murettebat motor hasari yuzunden surekli ejekte ediliyor (RPT f8ad6949 / e31bd8bd: 48 inis, 41 binis). Geri donus denemeleri bir sure sonra birakilir;
+    //   disaridaki murettebat tanki TERK eder: koltuk kaydi / atamasi silinir (geri cagirma biter), 600 m icindeki dost piyade grubuna katilir (yoksa en yakin dost grup liderine gider). Tank onarilirsa (canMove true) terk kalkar.
+    private _terk = {
+        params ["_v", "_neden"];
+        if !(missionNamespace getVariable ["lambs_danger_tankTerkV1", true]) exitWith {};
+        _v setVariable [QGVAR(tankTerk), true];
+        private _kayit = (_v getVariable [QGVAR(murKayit), []]) select {alive (_x select 0)};
+        _v setVariable [QGVAR(murKayit), []];
+        private _disari = (_kayit apply {_x select 0}) select {isNull objectParent _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+        { unassignVehicle _x; } forEach (_kayit apply {_x select 0});
+        private _hedef = grpNull;
+        if (_disari isNotEqualTo []) then {
+            private _tf = side (group (_disari select 0));
+            private _vp = getPosATL _v;
+            private _adaylar = allGroups select {
+                (side _x) isEqualTo _tf && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)} && {isNull objectParent (leader _x)}
+                && {_x isNotEqualTo (group (_disari select 0))} && {({alive _x && {isNull objectParent _x}} count (units _x)) >= 2} && {((leader _x) distance2D _vp) <= 600}
+                && {(_x getVariable [QGVAR(gorev), ""]) isNotEqualTo "MEDEVAC"}
+            };
+            if (_adaylar isNotEqualTo []) then {
+                _adaylar = [_adaylar, [], {(leader _x) distance2D _vp}, "ASCEND"] call BIS_fnc_sortBy;
+                _hedef = _adaylar select 0;
+                _disari joinSilent _hedef;
+                { _x doFollow (leader _hedef); } forEach _disari;
+            } else {
+                private _enYakin = allGroups select {(side _x) isEqualTo _tf && {!isNull (leader _x)} && {alive (leader _x)} && {isNull objectParent (leader _x)} && {_x isNotEqualTo (group (_disari select 0))} && {((leader _x) distance2D _vp) <= 1500}};
+                if (_enYakin isNotEqualTo []) then {
+                    _enYakin = [_enYakin, [], {(leader _x) distance2D _vp}, "ASCEND"] call BIS_fnc_sortBy;
+                    private _hp = getPosATL (leader (_enYakin select 0));
+                    { _x enableAI "PATH"; _x doMove (_hp getPos [8 + random 12, random 360]); } forEach _disari;
+                };
+            };
+        };
+        diag_log format ["[TANK-TERK] %1 | %2 | terk eden murettebat %3 (kayitli %4) -> %5 | hasar %6 canMove %7 canFire %8", getText (configOf _v >> "displayName"), _neden, count _disari, count _kayit, if (isNull _hedef) then {"gruba katilmadi (yakinda dost grup yok ya da yakinina gitti)"} else {format ["%1 grubuna katildi", groupId _hedef]}, (damage _v) toFixed 2, canMove _v, canFire _v];
+    };
     while {true} do {
         sleep 3;
         if (missionNamespace getVariable ["lambs_danger_tankMurettebatOff", false]) then { continue };
@@ -65,7 +100,28 @@ private _calis = {
                 _v setVariable [QGVAR(crewImmobileAyar), true];
                 _v allowCrewInImmobile true;
             };
+            // v8.265: hareket edemeyen TANK / IFV'de allowCrewInImmobile her 10 sn yeniden verilir (motor hasarinda motorun sifirlamasi ihtimali elenir) + TANI logu
+            if (_sinifTM in ["TANK", "IFV"] && {!canMove _v}) then {
+                if ((_v getVariable [QGVAR(immobilT), -1]) < 0) then {
+                    _v setVariable [QGVAR(immobilT), time];
+                    if (_logN < 60) then {
+                        _logN = _logN + 1;
+                        private _hp = getAllHitPointsDamage _v;
+                        private _hpT = [];
+                        if (count _hp > 2) then { { if (((_hp select 2) select _forEachIndex) > 0.5) then { _hpT pushBack format ["%1=%2", _x, (((_hp select 2) select _forEachIndex) toFixed 2)]; }; } forEach (_hp select 0); };
+                        diag_log format ["[TANK-IMMOBIL] %1 | canMove false | canFire %2 | hasar %3 | iceride %4 | murettebat %5 | parcalar >0.5: %6", getText (configOf _v >> "displayName"), canFire _v, (damage _v) toFixed 2, count (crew _v), count (_v getVariable [QGVAR(murKayit), []]), _hpT];
+                    };
+                };
+                if ((time - (_v getVariable [QGVAR(immobilAyarT), -999])) > 10) then { _v setVariable [QGVAR(immobilAyarT), time]; _v allowCrewInImmobile true; };
+            } else {
+                if ((_v getVariable [QGVAR(immobilT), -1]) >= 0) then {
+                    _v setVariable [QGVAR(immobilT), -1];
+                    _v setVariable [QGVAR(murEp), 0];
+                    if (_v getVariable [QGVAR(tankTerk), false]) then { _v setVariable [QGVAR(tankTerk), nil]; diag_log format ["[TANK-TERK] %1 | tekrar hareket edebiliyor: terk kalkti", getText (configOf _v >> "displayName")]; };
+                };
+            };
             if (_sinifTM isNotEqualTo "TANK") then { continue };
+            if (_v getVariable [QGVAR(tankTerk), false]) then { continue };
             // dongu kesici
             if (time < (_v getVariable [QGVAR(murDongu), 0])) then { continue };
             private _donL = (_v getVariable [QGVAR(murDonL), []]) select {(time - _x) < 60};
@@ -74,6 +130,7 @@ private _calis = {
                 _v setVariable [QGVAR(murDonL), []];
                 _v setVariable [QGVAR(murDongu), time + 300];
                 if (_logN < 60) then { _logN = _logN + 1; diag_log format ["[TANK-MURETTEBAT] %1 | DONGU KESILDI: 60 sn'de %2 geri donus -> 300 sn durur (arac hasar %3, canMove %4)", getText (configOf _v >> "displayName"), count _donL, (damage _v) toFixed 2, canMove _v]; };
+                if (!canMove _v) then { [_v, format ["in / bin dongusu (%1 geri donus / 60 sn)", count _donL]] call _terk; };
                 continue
             };
             _v setVariable [QGVAR(murDonL), _donL];
@@ -137,6 +194,11 @@ private _calis = {
                 if (!isNull _donen) then {
                     [_donen, _v, _rol] call _koltuga;
                     (_v getVariable [QGVAR(murDonL), []]) pushBack time;
+                    if (!canMove _v) then {
+                        private _ep = (_v getVariable [QGVAR(murEp), 0]) + 1;
+                        _v setVariable [QGVAR(murEp), _ep];
+                        if (_ep >= 4) then { [_v, format ["hareket edemeyen tankta %1. geri donus: murettebat terk ediyor", _ep]] call _terk; };
+                    };
                     _kayit = _kayit select {(_x select 0) isNotEqualTo _donen};
                     if (_logN < 60) then {
                         _logN = _logN + 1;
