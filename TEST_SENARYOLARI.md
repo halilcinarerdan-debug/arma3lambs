@@ -311,3 +311,11 @@ Ortam: ELE GECIR (WEST) ~24-32 asker + 3 tank; savunan (EAST) ~30 asker + hendek
 4. Panik: dusman tankina karsi AT'siz askerde `[PANIK] ... neden: zirh korkusu (tank N m)` ve KACIS; kacis yonu sag / sola daginik.
 5. Tank yaklasma: `[PLAN-ZIRH] ... TAKILDI` ve 'pozisyona N m' duzenli azalmali (eskiden her 25 sn'de 25 m); WEST tank 650 m'yi ~2 dk'da gecmeli.
 Karsilastirma: `oranKapisiOff`, `panikSans`, `lambs_danger_tankKilitOff`. Hepsi (T) = dogrulanmadi.
+
+## T-TESLIM (v8.259)
+Ortam: yogun catisma; bir tarafin grubu %60+ kayip verip dusmana <= 120 m. CBA > LAMBS Danger > ELITE moral / teslim.
+1. Varsayilan: kayip >= %60, kalan <= 4, baski >= 0.4, moral < 0.30 -> `[TESLIM] ... asker teslim oldu`. Olmuyorsa `[TESLIM-ADAY] ... izin=... moral=... kalan=... baski=... dusman=...` satiri hangi kosulun tutmadigini gosterir.
+2. Fraksiyon: 'Asla teslim olmayan' kutusuna fraksiyon adinin parcasini yaz (RPT [DOKTRIN-PROFIL] / TESLIM-ADAY satirindaki fraksiyon=...): o fraksiyon `izin=false` olmali. 'Her zaman' listesi ve taraf kutulari ayni sekilde dene.
+3. Ana anahtar kapali -> hicbir taraf teslim olmaz. Esik slider'lari degisince davranis degisir.
+Not: ACE esir mekanigi / teslim olanlarin esir alinmasi bu surumde degismedi. Hepsi (T) = dogrulanmadi.
+

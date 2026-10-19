@@ -14,6 +14,10 @@
  *   cikinca (> 150 m, 60 sn) sadece moral toparlanir (teslim geri alinmaz).
  * DUZENSIZ (Taliban-tipi) profili teslim = false.
  *
+ * v8.259 TESLIM ESIKLERI + CBA (kullanici: 'esigi gozden gecir, CBA'dan kapatilip acilabilsin, teslim olma faction bazli'; RPT f8ad6949: 64 olum, teslim 0 - eski kosullar (kalan <= 2, kayip >= %70, baski >= 0.6, dusman <= 50 m, moral < 0.15) neredeyse hic saglanmiyordu):
+ *   yeni varsayilanlar (CBA 'LAMBS Danger > ELITE moral / teslim', sunucu ayari): moral < 0.30, kayip >= %60, kalan <= 4, ort. baski >= 0.40, bilinen dusman <= 120 m (hepsi TASARIM, slider).
+ *   ACMA / KAPAMA: ana anahtar lambs_danger_teslimV1; taraf basina lambs_danger_teslimWest / East / Ind (CBA); FRAKSIYON bazli: 'teslimFraksiyonKapali' (virgullu liste, parca eslesme, kucuk / buyuk harf onemsiz; asla teslim olmaz) ve
+ *   'teslimFraksiyonAcik' (doktrin DUZENSIZ olsa bile teslim olur); oncelik: Kapali liste > Acik liste > taraf onay kutusu + doktrin. Fraksiyon = liderin config fraksiyon adi (faction _lider). Teslim adayi olup olmayan gruplarda [TESLIM-ADAY] neden logu (ilk 40, grup basina 60 sn).
  * Kapatma: lambs_danger_moralV1 = false  (teslim yalniz: lambs_danger_teslimV1 = false).
  * Log: [MORAL] (grup basina moral degisince, en fazla 30 sn'de bir), [TESLIM], [MORAL-OZET] 60 sn.
  *
@@ -76,16 +80,43 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             };
 
             // --- TESLIM ---
+            // izin: ana anahtar + fraksiyon listeleri + taraf onay kutusu + doktrin
+            private _frk = toLower (if (isNull _l) then {""} else {faction _l});
+            private _listeEslesme = {
+                params ["_liste"];
+                private _ok = false;
+                { private _t = toLower ((_x splitString " ") joinString ""); if (_t isNotEqualTo "" && {(_frk find _t) >= 0}) exitWith { _ok = true; }; } forEach (_liste splitString ",;");
+                _ok
+            };
+            private _izinVar = if !(missionNamespace getVariable ["lambs_danger_teslimV1", true]) then {false} else {
+                if ([missionNamespace getVariable ["lambs_danger_teslimFraksiyonKapali", ""]] call _listeEslesme) then {false} else {
+                    if ([missionNamespace getVariable ["lambs_danger_teslimFraksiyonAcik", ""]] call _listeEslesme) then {true} else {
+                        private _tK = switch (side _g) do { case west: {"lambs_danger_teslimWest"}; case east: {"lambs_danger_teslimEast"}; default {"lambs_danger_teslimInd"} };
+                        (missionNamespace getVariable [_tK, true]) && {[_g, "teslim", true] call FUNC(dk)}
+                    };
+                };
+            };
+            private _esikM = missionNamespace getVariable ["lambs_danger_teslimMoral", 0.30];
+            private _esikK = (missionNamespace getVariable ["lambs_danger_teslimKayip", 60]) / 100;
+            private _esikN = missionNamespace getVariable ["lambs_danger_teslimKalan", 4];
+            private _esikB = missionNamespace getVariable ["lambs_danger_teslimBaski", 0.40];
+            private _esikD = missionNamespace getVariable ["lambs_danger_teslimMesafe", 120];
+            private _engel = (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isAmbushing), false]};
+            if (_m < _esikM && {_kayip >= 0.3} && {(time - (_g getVariable [QGVAR(teslimAdayLogT), -99])) > 60} && {(missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) < 40}) then {
+                _g setVariable [QGVAR(teslimAdayLogT), time];
+                missionNamespace setVariable ["lambs_danger_teslimAdayLogN", (missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) + 1];
+                private _enA = if (isNull _l) then {objNull} else {_l findNearestEnemy _l};
+                diag_log format ["[TESLIM-ADAY] %1 | fraksiyon=%2 | izin=%3 | moral=%4 (<%5) | kayip=%6 (>=%7) | kalan=%8 (<=%9) | baski=%10 (>=%11) | dusman=%12 m (<=%13) | engel(retreat/evade/pusu)=%14",
+                    groupId _g, _frk, _izinVar, _m toFixed 2, _esikM, round (_kayip * 100), round (_esikK * 100), count _us, _esikN, _bsk toFixed 2, _esikB, if (isNull _enA) then {"-"} else {round (_l distance2D _enA)}, _esikD, _engel];
+            };
             if (
-                (missionNamespace getVariable ["lambs_danger_teslimV1", true])
-                && {[_g, "teslim", true] call FUNC(dk)}
-                && {_m < ([_g, "teslimEsik", 0.15] call FUNC(dk))}
-                && {(count _us) <= 2} && {_kayip >= 0.70} && {_bsk >= 0.6}
-                && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])}
-                && {!(_g getVariable [QGVAR(isBreakingContact), false])} && {!(_g getVariable [QGVAR(isAmbushing), false])}
+                _izinVar
+                && {_m < _esikM}
+                && {(count _us) <= _esikN} && {_kayip >= _esikK} && {_bsk >= _esikB}
+                && {!_engel}
             ) then {
                 private _en = _l findNearestEnemy _l;
-                if (!isNull _en && {alive _en} && {(_l distance2D _en) <= 50}) then {
+                if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _esikD}) then {
                     _g setVariable [QGVAR(teslimOldu), true];
                     _teslimSay = _teslimSay + 1;
                     {
