@@ -218,7 +218,9 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
       // v8.251: AT atesi drilinde (fnc_aracAtTepki) yer degistiren arac 20 sn planZirh'in yeniden yonlendirme / takilma emirlerinden muaf
       if ((time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20) then {
         // yoldayken yeniden yonlendirme (takilmasin)
-        if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20}) then {
+        // v8.258: 20 sn'de bir KOSULSUZ doMove yenilemesi tankin yol planini her seferinde sifirlayip surunmeyi yavaslatiyordu (RPT f8ad6949: WEST T-72 690 m'yi 270 sn'de, ~8 km/s, her 25 sn'de 'TAKILDI'; 'tanklar cekingendi');
+        //   artik yalniz arac yavas (< 6 km/s) ya da hedef rotasi pozisyondan > 40 m saptiysa yenilenir
+        if (!_vardi && {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 20} && {((speed _v) < 6) || {((((expectedDestination _d) select 0) distance2D _poz) > 40)} || {(time - (_g getVariable ["lambs_danger_planZirhMoveT", -999])) > 90}}) then {
             _g setVariable ["lambs_danger_planZirhMoveT", time];
             // v8.243 SURUCU EMRI ONARIMI (RPT c7592408: planZirh BTR'leri 'komut GET OUT' ile 2+ dk 0 km/s bekledi; nakil iptali / inis sirasinda surucunun arac atamasi kalkmis olabilir - NEDEN KESIN DEGIL):
             //   surucu emri GET OUT ya da arac atamasi yoksa once arac surucu olarak yeniden atanir, yoksa (aracin disindaysa, 30 m icinde) bindirilir. Log [PLAN-ZIRH] ... SURUCU EMRI ONARILDI (ilk 3). Kapatma: lambs_danger_zirhSurucuOnarOff = true.

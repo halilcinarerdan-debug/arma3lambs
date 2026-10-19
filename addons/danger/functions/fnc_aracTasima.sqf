@@ -717,7 +717,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             if (!isNull _gl && {alive _gl}) then {
                                 {
                                     private _eo = _x select 4;
-                                    if (!isNull _eo && {alive _eo} && {[_eo] call FUNC(gercekHedef)} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_gl knowsAbout _eo) > 0.2} && {(_v distance2D _eo) < _edm}) then { _en = _eo; _edm = _v distance2D _eo; };
+                                    if (!isNull _eo && {alive _eo} && {[_eo] call FUNC(gercekHedef)} && {((side (group _d)) getFriend (_x select 2)) < 0.6} && {(_gl knowsAbout _eo) > 0.2} && {(_v distance2D _eo) < _edm}) then { _en = _eo; _edm = _v distance2D _eo; };
                                 } forEach (_gl nearTargets 400);
                             };
                         } forEach ([effectiveCommander _v] + (_binen apply { leader (group _x) }));

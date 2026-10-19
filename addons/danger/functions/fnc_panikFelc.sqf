@@ -67,8 +67,8 @@ private _bolum = {
             _u setSpeedMode "FULL";
             _u setUnitPos "UP";
             _u forceSpeed -1;
-            private _yon = if (_tehditPos isNotEqualTo [0,0,0]) then { (_tehditPos getDir _u) + ((random 50) - 25) } else { random 360 };
-            private _p = (getPosATL _u) getPos [25 + (random 15), _yon];
+            private _yon = if (_tehditPos isNotEqualTo [0,0,0]) then { (_tehditPos getDir _u) + ((random 140) - 70) } else { random 360 };   // v8.258: +-25 -> +-70 derece (sag sola dagilma)
+            private _p = (getPosATL _u) getPos [30 + (random 25), _yon];
             if (surfaceIsWater _p) then { _p = getPosATL _u; };
             _u doMove _p;
         };
@@ -100,7 +100,7 @@ private _calis = {
     while {true} do {
         sleep 3;
         if (missionNamespace getVariable ["lambs_danger_panikOff", false]) then { continue };
-        private _sansCarpan = missionNamespace getVariable ["lambs_danger_panikSans", 0.35];   // v8.74: PvE zorluk korunur (oyuncu karsisinda) - varsayilan 0.35
+        private _sansCarpan = missionNamespace getVariable ["lambs_danger_panikSans", 0.5];   // v8.74: PvE zorluk korunur (oyuncu karsisinda); v8.258: varsayilan 0.35 -> 0.5 (kullanici: 'ukrayna tarafi korkup sag sola dagilabilsin, gercekci ihtimalle')
         {
             private _g = _x;
             private _l = leader _g;
@@ -120,6 +120,19 @@ private _calis = {
             private _moral = _g getVariable [QGVAR(moral), 1];
             private _liderOlu = !alive _l;
             private _retreat = _g getVariable [QGVAR(isRetreating), false];
+            // v8.258 ZIRH KORKUSU: grup liderinin 500 m'de BILDIGI gercek dusman TANKI (zirh >= 300) sayisi / en yakin mesafe (AT'siz asker tanka karsi gerilir; AT'li asker hayatta kalir)
+            private _zirhS = 0;
+            private _zirhY = 1e9;
+            if (_temas || {(time - (_g getVariable [QGVAR(contact), -999])) < 20}) then {
+                {
+                    private _zo = _x select 4;
+                    if (!isNull _zo && {alive _zo} && {_zo isKindOf "Tank"} && {(getNumber (configOf _zo >> "armor")) >= 300} && {((side _g) getFriend (_x select 2)) < 0.6} && {[_zo] call FUNC(gercekHedef)} && {(_l knowsAbout _zo) >= 0.4}) then {
+                        _zirhS = _zirhS + 1;
+                        _zirhY = _zirhY min (_l distance2D _zo);
+                    };
+                } forEach (_l nearTargets 500);
+            };
+            private _atVar = _zirhS > 0 && {(_us findIf {[_x] call FUNC(isATUnit)}) >= 0};
 
             {
                 private _u = _x;
@@ -131,6 +144,7 @@ private _calis = {
 
                 private _s = 0;
                 private _neden = [];
+                private _zirhKorku = false;
                 if (_temas || _lambsPanik) then {
                     private _bask = getSuppression _u;
                     _s = _s + (0.6 * (_bask min 1));
@@ -141,6 +155,12 @@ private _calis = {
                     if (_liderOlu || {(_u distance2D _l) > 60}) then { _s = _s + 0.15; _neden pushBack "lider yok/uzak"; };
                     private _yakinDost = (_us - [_u]) findIf {(_x distance2D _u) <= 60};
                     if (_yakinDost < 0) then { _s = _s + 0.10; _neden pushBack "yalniz"; };
+                    // v8.258: bilinen dusman tanki yakin; AT'siz grup ya da AT'siz asker (ya da tank < 150 m) -> zirh korkusu
+                    if (_zirhS > 0 && {!_atVar || {_zirhY < 150} || {!([_u] call FUNC(isATUnit))}}) then {
+                        _s = _s + 0.25 + ([0, 0.10] select (_zirhY < 200));
+                        _zirhKorku = true;
+                        _neden pushBack format ["zirh korkusu (tank %1 m)", round _zirhY];
+                    };
                 };
 
                 private _tetik = _lambsPanik;
@@ -160,6 +180,7 @@ private _calis = {
                 if !(_tp isEqualType []) then { _tp = [0,0,0]; };
                 private _a = [0.55, 0.35, 0.10];
                 if (_s >= 0.7) then { _a = [0.35, 0.25, 0.40]; };
+                if (_zirhKorku) then { _a = [0.15, 0.10, 0.75]; };   // v8.258: tank korkusunda baskin tepki KACIS (sag sola dagilma)
                 private _r = random 1;
                 private _tur = if (_r < (_a select 0)) then {"DONMA"} else { ["KACIS", "KOR"] select (_r < ((_a select 0) + (_a select 1))) };
                 private _sure = switch (_tur) do { case "DONMA": {3 + (random 4)}; case "KOR": {4 + (random 4)}; default {4 + (random 3)}; };

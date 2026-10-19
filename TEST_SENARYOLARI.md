@@ -302,3 +302,12 @@ Ortam: savunma planinda dost T-14 (hendek yakininda) + yaklasan dusman tanklari 
 3. `[PLAN-ZIRH] ... TAKILDI` hareket edemeyen tankta ve murettebat beklerken GELMEMELI; gelirse ara nokta <= kalan mesafenin %60'i.
 4. Hendek: ek alan ekiplerinin sagliklari `[MEDIC-TASMA]` ile geri yurumemeli; `[KOMUT] ... Group Suppress (Move)` / `Hide (holding)` hendek gruplari icin GELMEMELI; gelirse `[MEVZI-KILIT]` geri gonderir.
 Karsilastirma: `tankKilitOff = true`, `mevziTutOff = true`. Hepsi (T) = dogrulanmadi.
+
+## T-GUC-ORANI (v8.258)
+Ortam: ELE GECIR (WEST) ~24-32 asker + 3 tank; savunan (EAST) ~30 asker + hendek + T-14 (esit / yakin sayi). Objektif panelinde 'Min. kuvvet orani' = 2.
+1. KESIF sonunda `[PLAN-ORAN] ... kuvvet orani dost N : dusman M = x < esik 3.00 (hazirlanmis savunma true) -> SALDIRI ERTELENDI (t / 300)`; 30 sn'de bir tekrar.
+2. 300 sn sonra `[PLAN-KAYIP-DONUS] ... kuvvet orani yetersiz ... saldiri iptal` -> CEKILME -> DONUS (HQ). Oran duzelirse (topcu / takviye) `SALDIRI IZINLI`.
+3. Slider 0: kapi yok, esit sayiya saldirir (eski davranis). Dusman bilinmiyorsa (recon yok, tahmin 0) kapi gecilir - bu bir bilgi sinirlamasi.
+4. Panik: dusman tankina karsi AT'siz askerde `[PANIK] ... neden: zirh korkusu (tank N m)` ve KACIS; kacis yonu sag / sola daginik.
+5. Tank yaklasma: `[PLAN-ZIRH] ... TAKILDI` ve 'pozisyona N m' duzenli azalmali (eskiden her 25 sn'de 25 m); WEST tank 650 m'yi ~2 dk'da gecmeli.
+Karsilastirma: `oranKapisiOff`, `panikSans`, `lambs_danger_tankKilitOff`. Hepsi (T) = dogrulanmadi.

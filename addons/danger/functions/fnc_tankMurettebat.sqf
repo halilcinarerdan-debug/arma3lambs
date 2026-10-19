@@ -69,10 +69,11 @@ private _calis = {
             // dongu kesici
             if (time < (_v getVariable [QGVAR(murDongu), 0])) then { continue };
             private _donL = (_v getVariable [QGVAR(murDonL), []]) select {(time - _x) < 60};
-            if ((count _donL) >= 6) then {
+            // v8.258: esik 6 -> 3 ve bekleme 120 -> 300 sn (RPT f8ad6949: allowCrewInImmobile motor hasarinda (hitengine 0.90) murettebatin inmesini ONLEMEDI - T-72 murettebati 8 kez dongu kesiciye takildi); terk edilen motor-oldu tank birakilir
+            if ((count _donL) >= 3) then {
                 _v setVariable [QGVAR(murDonL), []];
-                _v setVariable [QGVAR(murDongu), time + 120];
-                if (_logN < 60) then { _logN = _logN + 1; diag_log format ["[TANK-MURETTEBAT] %1 | DONGU KESILDI: 60 sn'de %2 geri donus -> 120 sn durur (arac hasar %3, canMove %4)", getText (configOf _v >> "displayName"), count _donL, (damage _v) toFixed 2, canMove _v]; };
+                _v setVariable [QGVAR(murDongu), time + 300];
+                if (_logN < 60) then { _logN = _logN + 1; diag_log format ["[TANK-MURETTEBAT] %1 | DONGU KESILDI: 60 sn'de %2 geri donus -> 300 sn durur (arac hasar %3, canMove %4)", getText (configOf _v >> "displayName"), count _donL, (damage _v) toFixed 2, canMove _v]; };
                 continue
             };
             _v setVariable [QGVAR(murDonL), _donL];

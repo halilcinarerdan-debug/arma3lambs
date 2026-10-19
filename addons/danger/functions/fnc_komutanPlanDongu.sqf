@@ -305,6 +305,45 @@ private _kayipCekil = {
     [_plan, "CEKILME", _neden] call _fazGec;
 };
 
+// v8.258 GUC ORANI (kullanici: "esit sayidaki dusmana sizmak tam bir intihar"; FM 3-90-1: saldirgan icin tipik planlama orani hazirlanmis savunmaya 3:1, hizli savunmaya ~2:1 - TASARIM esigi):
+//   dost = plan gruplarinin yayadaki canli askeri + zirh destek (tank x6, IFV x2); dusman = plan liderlerinin objektif <= 500 m'de BILDIGI gercek dusman (piyade 1, tank 6, IFV / zirhli 2, statik silah 2) ve Zeus tahmini 'sayi'nin buyugu.
+//   Donus: [dost, dusman, oran, hazirlanmisMi] (dusman 0 / bilinmiyorsa oran 99).
+private _gucOrani = {
+    params ["_plan", "_gruplar"];
+    private _ob = _plan get "obj";
+    private _tf = _plan get "taraf";
+    private _dost = 0;
+    { _dost = _dost + ({alive _x && {isNull objectParent _x}} count (units _x)); } forEach _gruplar;
+    {
+        private _zl = leader _x;
+        private _zv = if (isNull _zl) then {objNull} else {vehicle _zl};
+        if (!isNull _zv && {_zv isNotEqualTo _zl} && {alive _zv}) then {
+            private _sn = [_zv] call FUNC(aracSinif);
+            _dost = _dost + ([0, 6] select ((_sn select 0) isEqualTo "TANK")) + ([0, 2] select ((_sn select 0) isEqualTo "IFV"));
+        };
+    } forEach (_plan getOrDefault ["zirhG", []]);
+    private _bil = [];
+    {
+        private _gl = leader _x;
+        if (!isNull _gl && {alive _gl}) then {
+            {
+                private _eo = _x select 4;
+                if (!isNull _eo && {alive _eo} && {(_tf getFriend (_x select 2)) < 0.6} && {[_eo] call FUNC(gercekHedef)} && {(_gl knowsAbout _eo) >= 0.3} && {((getPosATL _eo) distance2D _ob) <= 500}) then { _bil pushBackUnique _eo; };
+            } forEach (_gl nearTargets 900);
+        };
+    } forEach _gruplar;
+    private _dus = 0;
+    {
+        if (_x isKindOf "CAManBase") then { _dus = _dus + 1; } else {
+            private _sn2 = [_x] call FUNC(aracSinif);
+            _dus = _dus + (if (_x isKindOf "Tank" && {(getNumber (configOf _x >> "armor")) >= 300}) then {6} else { if (_x isKindOf "StaticWeapon") then {2} else { if ((_sn2 select 0) in ["IFV", "TANK"] || {_sn2 select 3}) then {2} else {0} } });
+        };
+    } forEach _bil;
+    _dus = _dus max (_plan getOrDefault ["iddiaSayi", 0]);
+    private _hazir = (_plan getOrDefault ["bina", false]) || {((["LISTE"] call FUNC(hendekAlani)) findIf {((_x select 0) distance2D _ob) <= 400}) >= 0};
+    [_dost, _dus, [(_dost / _dus), 99] select (_dus <= 0), _hazir]
+};
+
 while {true} do {
     sleep 3;
     if (missionNamespace getVariable ["lambs_danger_komutanPlanOff", false]) then { continue };
@@ -1165,6 +1204,34 @@ while {true} do {
             if (_fazSure > _kesifS2) then {
                 // plan gruplari bu noktaya kadar gozlediklerini rapor eder (recon raporu yoksa); sonra bekleyen hazirlik atisi yeniden degerlendirilir
                 if (_dgz isNotEqualTo 2 && {!(_plan getOrDefault ["raporHazir", false])}) then { [_plan, _gruplar, false, _fazSure, "ORP gozlemi (recon yok)"] call _gozlemRapor; };
+                // v8.258 GUC ORANI KAPISI: oran esigin altindaysa saldiri ERTELENIR (en cok 300 sn: topcu / takviye / dusman zayiflamasi beklenir, 15 sn'de bir yeniden olculur), sure dolunca saldiri IPTAL + HQ'ya donus.
+                //   Esik Zeus 'Min. kuvvet orani' (varsayilan 2.0; 0 = kapi kapali), hazirlanmis savunmaya (bina / hendek alani <= 400 m) x1.5. Dusman bilinmiyorsa (0) kapi gecilir. Kapatma: lambs_danger_oranKapisiOff = true.
+                private _oranE = (_plan getOrDefault ["oranEsik", 2]);
+                if (_oranE > 0 && {!(missionNamespace getVariable ["lambs_danger_oranKapisiOff", false])} && {(time - (_plan getOrDefault ["oranT", -99])) >= 15}) then {
+                    _plan set ["oranT", time];
+                    private _go = [_plan, _gruplar] call _gucOrani;
+                    _go params ["_gD", "_gE", "_gR", "_gH"];
+                    private _gEs = _oranE * ([1, 1.5] select _gH);
+                    _plan set ["oranSon", [_gD, _gE, _gR, _gEs]];
+                    if (_gE > 0 && {_gR < _gEs}) then {
+                        if ((_plan getOrDefault ["oranBekleT0", -1]) < 0) then { _plan set ["oranBekleT0", time]; };
+                        private _bek = time - (_plan get "oranBekleT0");
+                        if ((time - (_plan getOrDefault ["oranLogT", -99])) >= 30) then {
+                            _plan set ["oranLogT", time];
+                            diag_log format ["[PLAN-ORAN] %1 | kuvvet orani dost %2 : dusman %3 = %4 < esik %5 (hazirlanmis savunma %6) -> SALDIRI ERTELENDI (%7 sn / 300)", _id, _gD, _gE, _gR toFixed 2, _gEs toFixed 2, _gH, round _bek];
+                        };
+                        if (_bek > 300) then {
+                            [_plan, format ["kuvvet orani yetersiz (dost %1 : dusman %2 = %3 < %4): saldiri iptal", _gD, _gE, _gR toFixed 2, _gEs toFixed 2]] call _kayipCekil;
+                        };
+                        continue
+                    } else {
+                        if ((_plan getOrDefault ["oranBekleT0", -1]) >= 0 || {(time - (_plan getOrDefault ["oranGecLogT", -99])) > 600}) then {
+                            _plan set ["oranGecLogT", time];
+                            diag_log format ["[PLAN-ORAN] %1 | kuvvet orani dost %2 : dusman %3 = %4 (esik %5) -> SALDIRI IZINLI", _id, _gD, _gE, _gR toFixed 2, _gEs toFixed 2];
+                        };
+                    };
+                };
+                if ((_plan getOrDefault ["oranEsik", 2]) > 0 && {(_plan getOrDefault ["oranBekleT0", -1]) >= 0} && {(time - (_plan getOrDefault ["oranT", -99])) < 15} && {((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 2) < ((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 3)} && {((_plan getOrDefault ["oranSon", [0, 0, 99, 0]]) select 1) > 0}) then { continue };
                 if (!(_plan getOrDefault ["hazirlikAtildi", false]) && {_topcuTip in [1, 3]}) then {
                     _plan set ["hazirlikAtildi", true];
                     [_plan, _obj, "HAZIRLIK (dogrulamadan sonra)"] call _topcuAt;
