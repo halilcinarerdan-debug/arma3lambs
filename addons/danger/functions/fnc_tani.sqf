@@ -77,14 +77,15 @@ diag_log "[TANI] tani paketi kuruldu (v8.255): [TANI-TOPCU] [OLUM-TANI] [OLUM-OZ
         private _taraf = [side _g, sideUnknown] select (isNull _g);
         private _pos = getPosATL _u;
         private _hn = ["EN-YAKIN", _pos, 60, _taraf] call lambs_danger_fnc_hendekAlani;
-        private _hdD = [(_hn select 2), -1] select (_hn isEqualTo []);
+        private _hdD = if (_hn isEqualTo []) then {-1} else {_hn select 2};   // v8.256: onceki "[.., -1] select" ifadesi bos dizide select 2 hatasi veriyordu (RPT e31bd8bd: OLUM-TANI yalniz ilk 3 olumde yazildi)
+        private _ok = if (!isNull _instigator) then {_instigator} else {_killer};
         private _bilgi = createHashMapFromArray [
             ["t", time], ["taraf", _taraf], ["grup", [groupId _g, "?"] select (isNull _g)], ["rol", [_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"?"}])],
             ["durus", stance _u], ["anim", animationState _u], ["pos", _pos], ["hdD", _hdD],
             ["hendekGrup", !isNull _g && {_g getVariable ["lambs_danger_hendekte", false]}],
             ["aracta", [typeOf (objectParent _u), "-"] select (isNull objectParent _u)],
-            ["oldurenTip", [typeOf (if (!isNull _instigator) then {_instigator} else {_killer}), "-"] select (isNull _instigator && {isNull _killer})],
-            ["oldurenMes", [round (_pos distance2D (if (!isNull _instigator) then {_instigator} else {_killer})), -1] select (isNull _instigator && {isNull _killer})],
+            ["oldurenTip", if (isNull _ok) then {"-"} else {typeOf _ok}],
+            ["oldurenMes", if (isNull _ok) then {-1} else {round (_pos distance2D _ok)}],
             ["ad", name _u]
         ];
         [{

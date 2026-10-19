@@ -95,8 +95,10 @@ if ((_unit checkAIFeature "PATH") && (_stealth || {[_unit] call EFUNC(main,isInd
 } forEach _units;
 
 // leader seeks cover
+// v8.256: hendekte / mevzide olan grubun lideri temasta siperi aramaya cikmaz (RPT e31bd8bd: hendekten ayrilma kaynaklarindan biri); mevzi zaten siper
 if (
     ((expectedDestination _unit) select 1) isEqualTo "DoNotPlan"
+    && {!([_group] call FUNC(mevziDeMi))}
 ) then {
     private _cover = nearestTerrainObjects [ _unit, ["BUSH", "TREE", "SMALL TREE", "HOUSE", "ROCK", "WALL", "FENCE"], 35, false, true ];
     if (_cover isNotEqualTo []) then {

@@ -5,6 +5,9 @@
  * Silah bulma: aracin tum taretlerinde (weaponsTurret) magazinin mermisi 'smoke' iceren (simulation ya da sinif adi) TUM silahlar; tip basina onbellek (lambs_danger_aracDumanCache = [[silah, taretYolu, magazinler]]).
  * v8.252 (RPT f39a5919: T-72 'rhs_weap_smokegen', T-14 'SmokeLauncher' BULUNDU ama hic atis yok): cephane kontrolu 'vehicle ammo silah' sifir donuyordu -> magazinesAllTurrets'ten (silahin magazinleri, tum taretler) sayilir.
  *   Atis: vehicle fireAtTarget [objNull, silah]; 1.2 sn sonra cephane AZALMADIYSA yedek: taret birimi forceWeaponFire [silah, ilk mod]. Sonuc [ARAC-DUMAN] logunda (ATILDI / YEDEK / ATILMADI). Sira: once firlatici, uretec ('smokegen') sonra.
+ * v8.256 (RPT e31bd8bd: T-14 'SmokeLauncher' cephane 2, T-72B 'rhs_weap_smokegen' 999 BULUNDU, fireAtTarget FALSE dondu, forceWeaponFire yedegi de cephaneyi azaltmadi - 10 / 10 ATILMADI): yontem KADEMESI, her yontem 1 sn sonra cephane azaldi mi diye dogrulanir:
+ *   FAT = vehicle fireAtTarget [objNull, silah]; FWF = taret birimi selectWeapon + forceWeaponFire [silah, ilk mod]; ACT = taret birimi action ["UseWeapon", arac, birim, silah indeksi].
+ *   Calisan yontem arac tipi basina hatirlanir (lambs_danger_aracDumanYontem) ve sonraki atista once denenir; hicbiri calismazsa [ARAC-DUMAN] 'HICBIRI CALISMADI' + taret birimi / yol bilgisi yazar.
  * Aracin taretin baktigi yone atar - cagiran once taret/gozcuyu tehdide cevirmeli. 30 sn bekleme / arac. Yerel olmayan arac / cephanesi bitmis -> false. Kapatma: lambs_danger_aracDumanOff = true.
  *
  * Arguments:
@@ -51,34 +54,54 @@ private _kalan = {
     _n
 };
 if (isNil "lambs_danger_aracDumanLogN") then { lambs_danger_aracDumanLogN = 0; };
+if (isNil "lambs_danger_aracDumanYontem") then { lambs_danger_aracDumanYontem = createHashMap; };
 
-private _atildi = false;
-{
-    _x params ["_w", "_yol", "_mags"];
-    private _once = [_v, _mags] call _kalan;
-    if (_once <= 0) then { continue };
-    _atildi = true;
-    private _ok = _v fireAtTarget [objNull, _w];
-    [{
-        params ["_arac", "_w", "_yol", "_mags", "_once", "_ok", "_kalan"];
-        if (isNull _arac || {!alive _arac}) exitWith {};
-        private _sonra = [_arac, _mags] call _kalan;
-        private _sonuc = "ATILDI";
-        if (_sonra >= _once) then {
-            // fireAtTarget etkisiz: taret biriminden dogrudan ates ettir
-            private _u = _arac turretUnit _yol;
-            if (!isNull _u && {alive _u}) then {
-                _u forceWeaponFire [_w, (getArray (configFile >> "CfgWeapons" >> _w >> "modes")) param [0, "Single"]];
-                _sonuc = "ATILMADI -> YEDEK forceWeaponFire";
-            } else {
-                _sonuc = "ATILMADI (taret birimi yok)";
-            };
+private _atilacak = _liste select {([_v, _x select 2] call _kalan) > 0};
+if (_atilacak isEqualTo []) exitWith {false};
+_v setVariable [QGVAR(aracDumanT), time];
+
+[_v, _atilacak, _kalan, _tip] spawn {
+    params ["_v", "_liste", "_kalan", "_tip"];
+    {
+        _x params ["_w", "_yol", "_mags"];
+        private _once = [_v, _mags] call _kalan;
+        private _sira = ["FAT", "FWF", "ACT"];
+        private _bilinen = lambs_danger_aracDumanYontem getOrDefault [_tip, ""];
+        if (_bilinen isNotEqualTo "") then { _sira = [_bilinen] + (_sira - [_bilinen]); };
+        private _u = _v turretUnit _yol;
+        if (isNull _u || {!alive _u}) then {
+            { if (isNull _u || {!alive _u}) then { _u = _x; }; } forEach [gunner _v, commander _v, driver _v];
         };
+        private _sonuc = "HICBIRI CALISMADI";
+        private _ok = "-";
+        {
+            private _y = _x;
+            switch (_y) do {
+                case "FAT": { _ok = _v fireAtTarget [objNull, _w]; };
+                case "FWF": {
+                    if (!isNull _u && {alive _u}) then {
+                        _u selectWeapon _w;
+                        _u forceWeaponFire [_w, (getArray (configFile >> "CfgWeapons" >> _w >> "modes")) param [0, "Single"]];
+                    };
+                };
+                case "ACT": {
+                    if (!isNull _u && {alive _u}) then {
+                        _u action ["UseWeapon", _v, _u, (_v weaponsTurret _yol) find _w];
+                    };
+                };
+            };
+            sleep 1;
+            if (isNull _v || {!alive _v}) exitWith { _sonuc = "ARAC YOK"; };
+            if (([_v, _mags] call _kalan) < _once) exitWith {
+                _sonuc = format ["ATILDI (%1)", _y];
+                lambs_danger_aracDumanYontem set [_tip, _y];
+            };
+        } forEach _sira;
         if (lambs_danger_aracDumanLogN < 40) then {
             lambs_danger_aracDumanLogN = lambs_danger_aracDumanLogN + 1;
-            diag_log format ["[ARAC-DUMAN] %1 | %2 | %3 | fireAtTarget %4 | cephane %5 -> %6 | %7", groupId (group (driver _arac)), getText (configOf _arac >> "displayName"), _w, _ok, _once, _sonra, _sonuc];
+            diag_log format ["[ARAC-DUMAN] %1 | %2 | %3 | yol %4 | taret_birimi %5 | cephane %6 -> %7 | fireAtTarget %8 | %9", groupId (group (driver _v)), getText (configOf _v >> "displayName"), _w, _yol, if (isNull _u) then {"YOK"} else {name _u},
+                _once, [_v, _mags] call _kalan, _ok, _sonuc];
         };
-    }, [_v, _w, _yol, _mags, _once, _ok, _kalan], 1.2] call CBA_fnc_waitAndExecute;
-} forEach _liste;
-if (_atildi) then { _v setVariable [QGVAR(aracDumanT), time]; };
-_atildi
+    } forEach _liste;
+};
+true

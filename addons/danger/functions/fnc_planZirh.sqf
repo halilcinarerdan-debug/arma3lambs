@@ -123,7 +123,8 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
             {
                 private _a = _x;
                 private _p = _obj getPos [_dist, _yon + _a];
-                if (!surfaceIsWater _p && {(nearestObjects [_p, ["House"], 10]) isEqualTo []} && {(count (nearestTerrainObjects [_p, ["TREE"], 12])) < 4} && {((_plan getOrDefault ["zirhPozlar", []]) findIf {(_x distance2D _p) < 70}) < 0}) then {
+                // v8.256: savunmada tank mevzisi piyade hendek alanlarinin <= 25 m'sine konmaz (RPT e31bd8bd: tank hendek alaninin icinde durdu, piyade 'dost arac' kurali ile hendekten itildi, tank ates cekince hendek hedef oldu)
+                if (!surfaceIsWater _p && {(nearestObjects [_p, ["House"], 10]) isEqualTo []} && {(count (nearestTerrainObjects [_p, ["TREE"], 12])) < 4} && {((_plan getOrDefault ["zirhPozlar", []]) findIf {(_x distance2D _p) < 70}) < 0} && {!_savunma || {(["EN-YAKIN", _p, 25, sideUnknown] call FUNC(hendekAlani)) isEqualTo []}}) then {
                     private _e1 = (AGLToASL [_p select 0, _p select 1, 0]) vectorAdd [0, 0, 2.4];
                     private _e2 = (AGLToASL [([_obj, _bakNokta] select _savunma) select 0, ([_obj, _bakNokta] select _savunma) select 1, 0]) vectorAdd [0, 0, 1.5];
                     private _gor = (lineIntersectsSurfaces [_e1, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo [];

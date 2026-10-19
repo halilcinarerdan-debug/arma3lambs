@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.255"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.256"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -673,7 +673,7 @@ def _kv(satir):
 def tani(path):
     """v8.255 TANI PAKETI ozeti: olum nedenleri, hendek kullanimi, arac terk, tank hareket, kayip esigi, duman. Otomatik cikarim 'CIKARIM:' satirlari."""
     L = open(path, encoding="utf-8", errors="replace").read().splitlines()
-    def al(etiket): return [l for l in L if ("[%s]" % etiket) in l]
+    def al(etiket): return [l for l in L if ('"[%s] ' % etiket) in l]   # yalniz satir BASINDAKI etiket (ELITE-BOOT surum notundaki gecen etiketleri sayma)
     print("=" * 78)
     b = re.search(r"build (v[0-9.]+[A-Za-z-]*)", "\n".join(L))
     print(path, "| TANI |", b.group(1) if b else "boot satiri yok")
@@ -725,9 +725,12 @@ def tani(path):
         neden = "belirsiz"
         try: sy = int(d.get("son_hasar_yasi", 999))
         except ValueError: sy = 999
-        if d.get("canMove") == "false" and sy <= 15: neden = "hasar sonrasi hareketsiz (parca: %s)" % d.get("hasarli_parca", "")[:50]
-        elif d.get("birim_komutu") == "GET OUT" and d.get("arac_hasar", "0") in ("0.00", "0.01", "0.02"): neden = "hasarsiz arac: emirle/AI karariyla indi (komut GET OUT)"
-        elif d.get("surucu") in ("-", "") : neden = "surucu yok"
+        parca = d.get("hasarli_parca", "[]")
+        if d.get("durum") == "DEAD": neden = "birim OLU (Zeus silme / olum)"
+        elif d.get("canMove") == "false" and parca not in ("[]", ""): neden = "parca hasari (%s) sonrasi hareketsiz: AI terk (allowCrewInImmobile bunu onler)" % parca[:60]
+        elif d.get("canMove") == "false" and sy <= 15: neden = "hasar sonrasi hareketsiz"
+        elif d.get("birim_komutu") == "GET OUT": neden = "komut GET OUT (AI / script emri); arac hasari %s" % d.get("arac_hasar")
+        elif d.get("surucu") in ("-", ""): neden = "surucu yok"
         print("  %s %s inen=%s rol=%s hasar=%s canMove=%s son_hasar=%ss komut=%s -> %s" % (d.get("arac"), d.get("grup"), d.get("inen"), d.get("rol"), d.get("arac_hasar"), d.get("canMove"), d.get("son_hasar_yasi"), d.get("birim_komutu"), neden))
     print("  ARAC-BINDI (tank mürettebat geri biniş): %d" % len(al("ARAC-BINDI")))
     # ---- hareket
@@ -752,9 +755,15 @@ def tani(path):
     print("\n-- TOPCU DUSUSLERI (%d kayit) --" % len(tt))
     hdm = [d for d in tt if d.get("hendek_alani_mesafe", "").lstrip("-").isdigit() and int(d.get("hendek_alani_mesafe")) <= 3]
     if tt: print("  dususlerin %d'i hendek alaninin <=3 m'sinde; ornek: %s" % (len(hdm), "; ".join("%s %s" % (d.get("dusme"), d.get("40m_icinde")) for d in tt[:3])))
+    # ---- mevzi kilidi / statik silah
+    mk = al("MEVZI-KILIT"); ms = al("MEVZI-STATIK")
+    print("\n-- MEVZI KILIDI: %d geri cagirma (ilk 60 log), STATIK silah atamasi: %d --" % (len(mk), len(ms)))
+    for l in mk[:6] + ms[:6]: print("  ", l.split('" ', 1)[-1][:170])
+    if mk:
+        print("  CIKARIM: hendek grubundan alan disina cikan asker olmus; geri cagrilanlarin komut / mesafesi yukarida (kaynagi bulmak icin ayni saniyedeki [KOMUT] / [ARAC-UZAK] satirlarina bak).")
     # ---- duman / mürettebat
     dm = al("ARAC-DUMAN")
-    ok = len([1 for l in dm if "| ATILDI" in l]); no = len([1 for l in dm if "ATILMADI" in l])
+    ok = len([1 for l in dm if "ATILDI (" in l or "| ATILDI" in l]); no = len([1 for l in dm if "ATILMADI" in l or "CALISMADI" in l])
     print("\n-- DUMAN: ATILDI %d, ATILMADI %d --" % (ok, no))
     for l in dm[:6]: print("  ", l.split('" ', 1)[-1][:170])
     print("-- TANK-MURETTEBAT: %d satir (koltuk degistirme/ geri donus/ BEKLIYOR) --" % len(al("TANK-MURETTEBAT")))

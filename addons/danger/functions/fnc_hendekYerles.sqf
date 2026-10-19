@@ -68,13 +68,15 @@ private _asim = (count (_plan0 select 1)) > _kap0;
         private _u = _x;
         private _pt = _pts select (_forEachIndex min ((count _pts) - 1));
         _u setVariable [QGVAR(hendekSonuc), nil];
-        _u setVariable [QGVAR(hendekNokta), [_pt, _aIdx]];   // v8.255 tani (fnc_hendekDurum)
+        _u setVariable [QGVAR(hendekNokta), [_pt, _aIdx]];   // v8.255 tani (fnc_hendekDurum) + v8.256 mevzi kilidi (fnc_mevziKilit)
+        private _yurS = (90 max (((_u distance2D _pt) / 1.3) + 30)) min 400;   // v8.256: uzak ek alana (250+ m) giden askerin 90 sn'lik zaman asimi yetmiyordu (RPT e31bd8bd: 'en uzak kalan 86 m')
+        _u setVariable [QGVAR(hendekYerlesT), time + (_yurS - 90)];
         _u enableAI "PATH"; _u enableAI "MOVE";
         _u doMove _pt;
-        [_u, _pt, _dirB] spawn {
-            params ["_u", "_pt", "_dirB"];
+        [_u, _pt, _dirB, _yurS] spawn {
+            params ["_u", "_pt", "_dirB", "_yurS"];
             private _bas = time;
-            private _bit = _bas + 90;
+            private _bit = _bas + _yurS;
             private _sonDM = _bas;
             waitUntil {
                 sleep 1;
@@ -96,7 +98,7 @@ private _asim = (count (_plan0 select 1)) > _kap0;
     [{ params ["_gr", "_sn"]; [_gr, _sn] call FUNC(hendekDurum); }, [_g, _x], _x] call CBA_fnc_waitAndExecute;
 } forEach [30, 90];
 
-// varis ozeti (92 sn sonra)
+// varis ozeti (140 sn sonra; uzak ek alanlar icin)
 [{
     params ["_gr", "_unlar"];
     private _s = _unlar select {alive _x && {!isNil {_x getVariable QGVAR(hendekSonuc)}}};
@@ -104,7 +106,7 @@ private _asim = (count (_plan0 select 1)) > _kap0;
     private _enUzak = 0;
     { _enUzak = _enUzak max ((_x getVariable QGVAR(hendekSonuc)) select 1); } forEach _s;
     diag_log format ["[HENDEK-VARIS] %1 | %2 asker: %3 noktada (2.5 m), %4 zaman asimi (en uzak kalan %5 m)", groupId _gr, count _s, count _vardi, (count _s) - (count _vardi), round _enUzak];
-}, [_g, +_us], 92] call CBA_fnc_waitAndExecute;
+}, [_g, +_us], 140] call CBA_fnc_waitAndExecute;
 
 _g setVariable [QGVAR(hendekte), true];
 _g setVariable [QGVAR(mevziIlk), (_g getVariable [QGVAR(mevziIlk), 0]) max (count _us)];   // v8.243: fnc_tactics mevzi tutma kayip esigi (>= %60 kayipta serbest) bu sayiya gore

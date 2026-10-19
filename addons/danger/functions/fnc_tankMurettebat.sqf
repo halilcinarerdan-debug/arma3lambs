@@ -11,6 +11,9 @@
  *      Grup son 8 sn temasliysa yalniz 80 m icindekiler doner (ates altinda uzaga kosturulmaz). 6 sn / birim bekleme (murDonT, murettebatKoru ile ortak).
  *   3) ARAC BEKLER (kullanici: 'yayan kaldi, tank ilerledi, squad leader olarak o kovaladi'): nisanci / surucu koltugu bos ve kayitli murettebat 150 m icinde yayaysa, en yakin dusman >= 150 m ise arac surucusu doStop alir
  *      (en cok 25 sn; planZirh 20 sn dokunmaz - tankManevraT yenilenir), murettebat binince / sure dolunca birakilir. [TANK-MURETTEBAT] ... BEKLIYOR.
+ * v8.256 (RPT e31bd8bd, 10:12-10:15): motoru vurulan (hitengine 0.90, canMove false) hasarsiz T-14'un murettebati MOTOR HASARI SONRASI motor zorunlu olarak 'GET OUT' aldi (AI terk eder), v8.252 mantigi onlari geri soktu, motor yine kovdu: 3 kisi 2.5 dk
+ *   surekli in / bin dongusunde ([ARAC-TERK] 48, [ARAC-BINDI] 41). Duzeltme: (a) TANK / IFV icin 'allowCrewInImmobile true' (hareket edemeyen arac sabit mevzi olarak murettebatini tutar; ates edebildigi surece);
+ *   (b) dongu kesici: ayni aracta 60 sn'de >= 6 geri donus -> 120 sn durur ([TANK-MURETTEBAT] DONGU KESILDI). Kapatma: lambs_danger_crewImmobileOff = true (yalniz (a)).
  * Kapatma: lambs_danger_tankMurettebatOff = true.  Log: [TANK-MURETTEBAT] (ilk 60).
  *
  * Arguments: None
@@ -57,7 +60,22 @@ private _calis = {
             private _v = _x;
             if (!local _v || {!alive _v} || {!(_v isKindOf "LandVehicle")} || {isBurning _v} || {(damage _v) > 0.85}) then { continue };
             if ((crew _v) findIf {isPlayer _x} >= 0) then { continue };
-            if ((([_v] call FUNC(aracSinif)) select 0) isNotEqualTo "TANK") then { continue };
+            private _sinifTM = (([_v] call FUNC(aracSinif)) select 0);
+            if (_sinifTM in ["TANK", "IFV"] && {!(_v getVariable [QGVAR(crewImmobileAyar), false])} && {!(missionNamespace getVariable ["lambs_danger_crewImmobileOff", false])}) then {
+                _v setVariable [QGVAR(crewImmobileAyar), true];
+                _v allowCrewInImmobile true;
+            };
+            if (_sinifTM isNotEqualTo "TANK") then { continue };
+            // dongu kesici
+            if (time < (_v getVariable [QGVAR(murDongu), 0])) then { continue };
+            private _donL = (_v getVariable [QGVAR(murDonL), []]) select {(time - _x) < 60};
+            if ((count _donL) >= 6) then {
+                _v setVariable [QGVAR(murDonL), []];
+                _v setVariable [QGVAR(murDongu), time + 120];
+                if (_logN < 60) then { _logN = _logN + 1; diag_log format ["[TANK-MURETTEBAT] %1 | DONGU KESILDI: 60 sn'de %2 geri donus -> 120 sn durur (arac hasar %3, canMove %4)", getText (configOf _v >> "displayName"), count _donL, (damage _v) toFixed 2, canMove _v]; };
+                continue
+            };
+            _v setVariable [QGVAR(murDonL), _donL];
 
             private _fc = fullCrew [_v, "", true];
             private _gnU = objNull; private _drU = objNull; private _kmU = objNull;
@@ -117,6 +135,7 @@ private _calis = {
                 if (_adaylar isNotEqualTo []) then { _donen = (_adaylar select 0) select 0; };
                 if (!isNull _donen) then {
                     [_donen, _v, _rol] call _koltuga;
+                    (_v getVariable [QGVAR(murDonL), []]) pushBack time;
                     _kayit = _kayit select {(_x select 0) isNotEqualTo _donen};
                     if (_logN < 60) then {
                         _logN = _logN + 1;

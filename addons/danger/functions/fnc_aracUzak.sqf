@@ -7,6 +7,8 @@
  *   KALABALIK: grup son 12 sn'de temasta ve asker 12 m icinde DOST murettebatli zirhli / kara aracinin yaninda (arac ates ceker, hedef olur, ilerleyemez / ezer) -> aractan >= 26 m uzaga gider.
  * v8.252 KENDI MURETTEBATI ISTISNASI (RPT f39a5919, 20:06: tankindan inen murettebat 'dost arac (temas)' kuraliyla 9-11 m'den 40 m uzaga gonderildi, tank onlari birakip ilerledi, lider yaya kovaladi, bir murettebat dost T-14'e ezildi):
  *   asker, aracin kayitli murettebati ya da atanmis surucusu / nisancisi ise (murKayit / assignedVehicle) ve arac yanmiyor + hasar <= 0.85 ise o aractan UZAKLASTIRILMAZ (geri binmesi fnc_tankMurettebat / murettebatKoru'nun isi). Kapatma: lambs_danger_aracUzakMurOff = true.
+ * v8.256 HENDEK ISTISNASI (RPT e31bd8bd, 10:12-10:13: hendekteki piyade, hendek yakinindaki DOST T-14 'dost arac (temas)' kuraliyla 29-37 m uzaga itildi = hendekten ciktilar; 'trenchden ayrilmasinlar'):
+ *   mevzide / hendekte (fnc_mevziDeMi) olan gruplara KALABALIK kurali (dost arac yani) uygulanmaz; yanan / etkisiz arac TEHLIKE kurali (patlama) hala gecerli.
  * Atlanir: oyuncu, aracta olan, TCCC mesgul, ELITE nakil bekleme / iniş toplanma bayragi, ELITE zirh destek, kapali: lambs_danger_aracUzakOff. Log: [ARAC-UZAK] (ilk 80 olay).
  *
  * Arguments: None
@@ -54,7 +56,7 @@ private _calis = {
                     if (_tehlike) exitWith { _kaynak = _v; _gerek = 40; };
                 } forEach _yakin;
                 // 2) kalabalik: temasta iken dost murettebatli arac yaninda
-                if (isNull _kaynak && {_temas}) then {
+                if (isNull _kaynak && {_temas} && {!([_g] call FUNC(mevziDeMi))}) then {
                     private _av = _yakin findIf {alive _x && {(_x distance2D _u) < 12} && {(side (group (driver _x))) isEqualTo (side _g)} && {(count (crew _x)) > 0} && {!(_x isKindOf "StaticWeapon")} && {!(_x isKindOf "Air")} && {!([_u, _x] call _kendiMur)}};
                     if (_av >= 0) then { _kaynak = _yakin select _av; _gerek = 26; };
                 };

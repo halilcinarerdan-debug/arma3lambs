@@ -285,3 +285,12 @@ Ortam: onceki testlerdeki gibi (savunma hendekleri + topcu + tank + piyade). Tes
 6. `[KAYIP-DEGERLENDIRME]` 30 sn'de bir; esik %50.
 Sinirlar: HC varsa HC'nin RPT'si de gerekir; 'topcu_olasi' bir ESTIRIM (zaman + mesafe eslesmesi), kesin neden degil. Hepsi (T) = dogrulanmadi.
 
+## T-HENDEK-KILIT (v8.256)
+Ortam: v8.255 sahnesi (savunma hendekleri + hendek yaninda dost tank + yaklasan dusman tanklari + AT'li piyade) + 1-2 bos DShK / MG statik silah hendeklerin yaninda (<= 250 m).
+1. `[MEVZI-STATIK] <grup> | <asker> (MG) -> <statik> (N m, grup liderine M m)`; statik silahta nisanci gorunur. Atanmazsa `[MEVZI-STATIK] ... yaricapta ... baska statik var: [...]` (RHS statik sinifi beklenen tur degil; sinif adini rapor et).
+2. Dusman gorunce hendek grubundan kimse alan disina cikmamali: `[ARAC-UZAK] ... dost arac (temas)` hendek grubu icin GELMEMELI; `[MEVZI-KILIT]` satiri gelirse kimin hangi komutla ciktigi yazar (ayni saniyedeki [KOMUT] satirlarina bak) ve geri cagrilir.
+3. `[MEVZI-TUT] ... tehdit_gecerli false` gorulurse eski bosluk (hedef gecersiz) yakalanmis demektir.
+4. Tank: motoru vurulunca `[ARAC-TERK]` GELMEMELI (allowCrewInImmobile); gelirse parca / komut yazar. `[TANK-MURETTEBAT] DONGU KESILDI` gelirse in-bin dongusu var.
+5. Duman: `[ARAC-DUMAN] ... | ATILDI (FAT|FWF|ACT)` ya da `HICBIRI CALISMADI` (taret_birimi ve yol bilgisiyle). Calisan yontem sonraki atislarda once denenir.
+6. `python tools/rpt_ozet.py --tani <rpt>`: OLUM TANISI artik tum olumleri sayar (OLUM-TANI hata duzeltmesi).
+Karsilastirma: `mevziKilitOff`, `mevziStatikOff`, `crewImmobileOff`, `aracUzakMurOff`. Hepsi (T) = dogrulanmadi.

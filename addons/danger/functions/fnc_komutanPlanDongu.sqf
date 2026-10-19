@@ -1325,12 +1325,20 @@ while {true} do {
                     private _n = _notlar getOrDefault [groupId _g, [_obj, _B]];
                     // v8.171: en yakin bina (garrison) + bos statik silahlar + COMBAT / comelme -> fnc_mevziKur
                     if ((_n param [2, -1]) >= 0) then { [_g, _n select 2, (_n select 1)] call FUNC(hendekYerles); } else { [_g, _n select 0, _n select 1] call FUNC(mevziKur); };
+                    // v8.256: hendege yerlesen grup da bos statik silahlari (DShK / MG / AT) kullanir (mevziKur zaten kendi statiklerine bakar)
+                    if ((_n param [2, -1]) >= 0) then { [_g, _obj, _n select 1, [_plan getOrDefault ["mevziYar", 0], 300] select ((_plan getOrDefault ["mevziYar", 0]) <= 0)] call FUNC(mevziStatik); };
                 } forEach _gruplar;
                 [_plan, "BEKLE", "sektorlar tutuldu, garrison / mevzi"] call _fazGec;
             };
             continue
         };
         if (_faz isEqualTo "BEKLE") then {
+            // v8.256 STATIK DOLDURMA: 45 sn'de bir bos statik silahlari (olen nisanci yerine) hendek gruplari doldurur
+            if (_tip isEqualTo 1 && {(time - (_plan getOrDefault ["statikT", -99])) >= 45}) then {
+                _plan set ["statikT", time];
+                private _hRs = [_plan getOrDefault ["mevziYar", 0], 300] select ((_plan getOrDefault ["mevziYar", 0]) <= 0);
+                { if (_x getVariable [QGVAR(hendekte), false]) then { [_x, _obj, [_plan getOrDefault ["tehditB", _B], _B] select ((_plan getOrDefault ["tehditB", -1]) < 0), _hRs] call FUNC(mevziStatik); }; } forEach _gruplar;
+            };
             // v8.243 SAVUNMA SURESI UZATMA (RPT c7592408: 1200 sn dolunca savunma plani saldiri baslamadan 12 sn once BITTI, hendekteki gruplar serbest kaldi): sure dolunca temas / bilinen dusman varsa
             //   savunma 2 katina kadar (TASARIM degeri) surer; temas kesilince biter. Kapatma: lambs_danger_savunmaUzatmaOff = true.
             // v8.249 SAVUNMA TEMASSIZ SURE (kullanici: "savunan takim icin zaman limiti koy: 30 dk temas olmadiysa biraksinlar ya da 10 saat beklesinler; catisma ortasinda adamlar temas olmadan savunmayi biraktilar"):

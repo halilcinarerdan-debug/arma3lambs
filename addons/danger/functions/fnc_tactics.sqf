@@ -128,14 +128,15 @@ if (_group getVariable [QGVAR(isBounding), false] && {time - _bndTime > 200}) th
 //   Istisna: grup kaybi >= %60 (mevziIlk'e gore; TASARIM degeri) ise normal komutan beynine duser (cekilme / siper degistirme serbest). Kapatma: lambs_danger_mevziTutOff = true.
 // ---------------------------------------------------------------------------
 private _mevziTut = false;
-if (_tehditGecerli && {[_group] call FUNC(mevziDeMi)}) then {
+// v8.256: _tehditGecerli sarti kaldirildi (RPT e31bd8bd: hedef gecersiz gorunen cagrilarda komutan beyni atlanip LAMBS tacticsAssess 'Hide (holding)' / 'Group Suppress (Move)' ile hendegi bosaltiyordu)
+if ([_group] call FUNC(mevziDeMi)) then {
     private _ilkM = _group getVariable [QGVAR(mevziIlk), 0];
     private _canM = {alive _x} count (units _group);
     if (_ilkM <= 0 || {_canM > (_ilkM * 0.4)}) then {
         _mevziTut = true;
         if ((time - (_group getVariable [QGVAR(mevziTutLogT), -999])) > 60) then {
             _group setVariable [QGVAR(mevziTutLogT), time];
-            diag_log format ["[MEVZI-TUT] %1 | hendekte: komutan beyni / taktik atlandi, mevzi tutuluyor | asker %2 / %3 | dusman %4 m", groupId _group, _canM, _ilkM, round ((leader _group) distance2D _target)];
+            diag_log format ["[MEVZI-TUT] %1 | hendekte: komutan beyni / taktik atlandi, mevzi tutuluyor | asker %2 / %3 | dusman %4 m | tehdit_gecerli %5", groupId _group, _canM, _ilkM, if (_target isEqualType objNull && {!isNull _target}) then {round ((leader _group) distance2D _target)} else {-1}, _tehditGecerli];
         };
     };
 };
@@ -238,6 +239,8 @@ if (_temasKes) exitWith {true};
 // if (_unit call FUNC(tacticsProfiles)) exitWith {true};
 
 // Leader assessment
+// v8.256: mevzideki grup LAMBS tacticsAssess'e (Hide / Suppress / Flank / Assault secimi) hic dusmesin
+if ([_group] call FUNC(mevziDeMi) && {(({alive _x} count (units _group)) > ((_group getVariable [QGVAR(mevziIlk), 0]) * 0.4)) || {(_group getVariable [QGVAR(mevziIlk), 0]) <= 0}} && {!(missionNamespace getVariable ["lambs_danger_mevziTutOff", false])}) exitWith {true};
 if (!isPlayer (leader _unit)) then {_unit call FUNC(tacticsAssess);};
 
 // end
