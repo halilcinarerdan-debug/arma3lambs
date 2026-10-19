@@ -84,7 +84,7 @@ private _savas = (_faz in ["KESIF", "SALDIRI", "TOPLANMA", "CEKILME"]) || {_piya
     if ((_plan getOrDefault ["oranTut", false]) && {_faz in ["TOPLAN", "RECON", "TASIMA", "ORP"]} && {!(_g getVariable ["lambs_danger_planZirhVardi", false])}) then {
         if !(_g getVariable ["lambs_danger_planZirhOranTut", false]) then {
             _g setVariable ["lambs_danger_planZirhOranTut", true];
-            _d doStop;
+            doStop _d;
             diag_log format ["[PLAN-ZIRH] %1 | %2 ORAN BEKLEME: kuvvet orani yetersiz, ates pozisyonuna ilerleme DURDURULDU (mevziye %3 m)", _id, groupId _g, round (_v distance2D (_g getVariable ["lambs_danger_planZirhPoz", getPosATL _v]))];
         };
         continue
