@@ -376,3 +376,11 @@ Hepsi (T) = dogrulanmadi.
 3. Tetik 0: dron hemen yaratilir. Gorev = KALDIR + modulu firlatma noktasina birak: `Zeus KALDIR: 1 bekleyen firlatma emri iptal edildi`.
 4. Dusman hic gelmezse 30 dk sonra `emir bitti: omur doldu (dron yaratilmadi)`.
 Hepsi (T) = dogrulanmadi.
+
+## T-IHA-OPERATOR (v8.268)
+1. Dost bir askerin yanina (<= 40 m) 'ELITE IHA Gorevi' birak: Operator bagi = 'olunce dron DUSER', Dron yarat = O_Crocus_AT, Tetik = 0 (ya da dusman yakinda), Sorti. systemChat `IHA operatoru: <isim>`.
+2. Sorti sirasinda operatoru oldur (Zeus / ates): RPT `[IHA-SORTI] ... OPERATOR OLDU (...) -> KONTROL KAYBI`, dron alcalir, `kontrolsuz dron yere carpti / imha edildi`.
+3. Mod 'DALAR': dron hedefe dalis yaparken operator olursa `HEDEFE VURDU`; hedef secme asamasindayken olursa `operator olu: hedef kilitli degil -> yeni hedef secilmiyor` + dusme.
+4. Firlatma emri bekliyorken operator olurse `[IHA-BEKLEME] ... OPERATOR OLDU: firlatma emri iptal`.
+5. 40 m icinde dost asker yoksa `operator BAGSIZ` uyarisi; Bagsiz seciliyse operator olumunun dronu etkilemedigi eski davranis.
+Hepsi (T) = dogrulanmadi.

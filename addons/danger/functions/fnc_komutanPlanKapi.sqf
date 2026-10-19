@@ -122,7 +122,8 @@ lambs_danger_planKapiStarted = true;
 
 // v8.233: Zeus 'ELITE IHA Gorevi' -> fnc_ihaSorti (sunucu)
 ["lambs_danger_ihaGorev", {
-    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""], ["_tetik", 0]];
+    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""], ["_tetik", 0], ["_opNid", ""], ["_opMod", 0]];
+    private _op = objectFromNetId _opNid;
     if (!isServer) exitWith {};
     private _iha = objectFromNetId _nid;
     private _tf = [west, east, independent] select (_tarafI max 0 min 2);
@@ -136,9 +137,9 @@ lambs_danger_planKapiStarted = true;
     };
     // v8.267 BILINCLI FIRLATMA: 'Dron yarat' dronu hemen degil, firlatma noktasinin tetik mesafesinde BILINEN dusman gorulunce yaratir (fnc_ihaBekle); tetik 0 = hemen (eski)
     if (isNull _iha && {_yaratSn isNotEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> _yaratSn)}) exitWith {
-        [_yaratSn, _tf, _poz, _tur, _yar, _men, _tetik] call (missionNamespace getVariable ["lambs_danger_fnc_ihaBekle", {false}]);
+        [_yaratSn, _tf, _poz, _tur, _yar, _men, _tetik, _op, _opMod] call (missionNamespace getVariable ["lambs_danger_fnc_ihaBekle", {false}]);
     };
-    [_iha, _mod, _tur, _tf, _poz, _yar, _men] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
+    [_iha, _mod, _tur, _tf, _poz, _yar, _men, _op, _opMod] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
 }] call CBA_fnc_addEventHandler;
 
 // v8.214: Zeus 'ELITE Gozetleme Ata' -> grup secilen karakol / mevzi isaretinde nobet tutar (fnc_gozetleAta)

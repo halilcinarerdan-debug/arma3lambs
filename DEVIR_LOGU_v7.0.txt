@@ -2572,3 +2572,8 @@ v8.267 IHA BILINCLI FIRLATMA (kullanici: "dron sadece dusmana yakinken bilincli 
  NEDEN: 'Dron yarat' dronu modul konumunda hemen yaratiyordu (RPT c48e02ec: atandigi gibi bozuldu / sorti dusmansiz basliyordu).
  YAPILAN: fnc_ihaBekle (firlatma emri + tetik mesafesinde bilinen gercek dusman bekleme + 40 m FLY yaratma + ihaSorti), Zeus modulu slider + KALDIR ile emir iptali, komutanPlanKapi olay isleyicisi, PREP.
  YAPILMADI / BILINEN: tetik firlatma noktasina gore (operatore degil; operator asker modeli yok); hedef turu uyumsuzsa (or. FPV-AT icin yalniz piyade) dron hic yaratilmaz; emirler sunucu yeniden baslayinca kaybolur; hepsi (T).
+
+v8.268 IHA OPERATOR BAGI (kullanici: "dron sahibi olunce drona ne oluyor" -> "yap")
+ NEDEN: dronun operatoru yoktu; operator olse de gorev surerdi.
+ YAPILAN: fnc_ihaSorti (_op, _opMod; _aktif operator olum kontrolu, _kontrolKaybi dusme, mod 2 son-hedef dalisi), fnc_ihaBekle (operator olunce emir iptal), Zeus modulu 'Operator bagi' + en yakin dost asker secimi, komutanPlanKapi olay parametreleri.
+ YAPILMADI / BILINEN: operator elle secilemez (modul konumuna en yakin 40 m); operator yaralanip bayginsa (ACE) hala 'canli' sayilir; FPV mod motoru son yaklasmayi surerken operator olursa dusurme dogrulanmadi; hepsi (T).

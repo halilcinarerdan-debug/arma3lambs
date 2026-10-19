@@ -9,6 +9,8 @@
  * Hedef BILINEN olmali: IHA'nin kendi algisi ya da IHA tarafinin herhangi bir grubu knowsAbout >= 0.4 (hile yok). Pil omru 600 sn (FPV: 10 dk; kaynak: Crocus aciklamasi), menzil <= verilen (varsayilan 3000 m; mod 4 km).
  * Mürettebat yoksa createVehicleCrew; AI IHA ates etmez (AUTOTARGET / TARGET kapali), CARELESS / BLUE; gorev HARIC. IHA once vurulur / dusurulurse hedefe ulasamaz (askerlerin dron tepkisi: fnc_havaFarkindalik).
  * KAYNAK (ilke): Ukrayna savasi FPV / hafif bombalayici kullanimi (acik kaynak analizleri); sayilar TASARIM degeri. Mod davranisi DOGRULANMADI — modun kendi patlama / kontrol betigine bagimli degiliz (kendi patlamamizi yaratiriz).
+ * v8.268 OPERATOR BAGI (kullanici: 'dron sahibi olunce drona ne oluyor' -> 'yap'): _op (operator asker) + _opMod: 0 bagsiz (eski), 1 operator olunce dron KONTROLU KAYBEDER ve duser (gorev biter, 20 sn icinde yere / hasar 1),
+ *   2 operator olunce dron HEDEFE kilitliyse (dalis / yaklasma) vurmaya devam eder, yeni hedef secmez; hedefsizse kontrol kaybi (dusme). Operator silinirse (isNull) olu sayilir. Log: [IHA-SORTI] ... OPERATOR OLDU.
  * Kapatma: lambs_danger_ihaSortiOff = true; her IHA icin gorev kaldir: mod "KALDIR".  Log: [IHA-SORTI]
  *
  * Arguments:
@@ -19,6 +21,8 @@
  * 4: Gozlem merkezi <ARRAY>
  * 5: Gozlem yaricapi <NUMBER>
  * 6: Menzil <NUMBER>
+ * 7: Operator <OBJECT> (v8.268)
+ * 8: Operator olunce: 0 bagsiz / 1 duser / 2 son hedefe dalar <NUMBER> (v8.268)
  *
  * Return Value: Baslatildi mi <BOOL>
  * Public: No
@@ -27,7 +31,7 @@
 // v8.260: CBA sunucu olayi 'call' ile (zamanlanmamis ortam) cagirir -> waitUntil / sleep 'Suspending not allowed' veriyordu, gorev hic baslamiyordu
 if (!canSuspend) exitWith { _this spawn FUNC(ihaSorti); true };
 
-params [["_uav", objNull, [objNull]], ["_mod", "SORTI", [""]], ["_turE", "", [""]], ["_tarafP", west, [west]], ["_merkez", [0, 0, 0], [[]]], ["_yar", 300, [0]], ["_men", 3000, [0]]];
+params [["_uav", objNull, [objNull]], ["_mod", "SORTI", [""]], ["_turE", "", [""]], ["_tarafP", west, [west]], ["_merkez", [0, 0, 0], [[]]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_op", objNull, [objNull]], ["_opMod", 0, [0]]];
 if (isNull _uav || {!alive _uav} || {missionNamespace getVariable ["lambs_danger_ihaSortiOff", false]}) exitWith {false};
 
 private _tok = diag_tickTime;
@@ -37,6 +41,9 @@ if (_mod isEqualTo "KALDIR") exitWith {
     diag_log format ["[IHA-SORTI] %1 | gorev KALDIRILDI", typeOf _uav];
     true
 };
+
+if (_opMod > 0 && {!isNull _op} && {!alive _op}) exitWith { diag_log format ["[IHA-SORTI] %1 | operator zaten olu (%2): sorti baslatilmadi", typeOf _uav, name _op]; false };
+if (_opMod > 0 && {!isNull _op}) then { _uav setVariable [QGVAR(ihaOperator), _op]; };
 
 if (!local _uav) then {
     _uav setOwner 2;
@@ -76,12 +83,33 @@ _uav setVariable ["lambs_danger_gorev", "HARIC", true];
 _uav engineOn true;
 diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m | gozlem yaricap %7 m", typeOf _uav, getText (configOf _uav >> "displayName"), _mod, _tur, _taraf, round _men, round _yar];
 
-[_uav, _tok, _tur, _taraf, _merkez, _yar, _men] spawn {
-    params ["_uav", "_tok", "_tur", "_taraf", "_merkez", "_yar", "_men"];
+[_uav, _tok, _tur, _taraf, _merkez, _yar, _men, _op, _opMod] spawn {
+    params ["_uav", "_tok", "_tur", "_taraf", "_merkez", "_yar", "_men", "_op", "_opMod"];
     private _d = driver _uav;
     private _bas = getPosATL _uav;
     private _t0 = time;
-    private _aktif = { alive _uav && {alive _d} && {(_uav getVariable [QGVAR(ihaTok), -1]) isEqualTo _tok} && {(time - _t0) < 600} };
+    // v8.268 OPERATOR: _opVar = operator tanimli; _opOldu = olu ya da silinmis. Mod 1: operator olunce gorev aktif sayilmaz (kontrol kaybi); mod 2: inner hedef dongusu surer, yeni hedef secilmez
+    private _opVar = _opMod > 0 && {!isNull _op};
+    private _opOldu = { _opVar && {isNull _op || {!alive _op}} };
+    private _kontrolKaybi = {
+        if (!alive _uav) exitWith {};
+        diag_log format ["[IHA-SORTI] %1 | OPERATOR OLDU (%2) -> KONTROL KAYBI: dron duser (yukseklik %3 m, %4 sn ucus)", typeOf _uav, ["", name _op] select (!isNull _op), round ((getPosATL _uav) select 2), round (time - _t0)];
+        _uav setVariable [QGVAR(ihaTok), -1];
+        _uav engineOn false;
+        _uav setFuel 0;
+        private _tD = time + 20;
+        while {alive _uav && {((getPosATL _uav) select 2) > 1.2} && {time < _tD}} do {
+            private _vv = velocity _uav;
+            _uav setVelocity [(_vv select 0) * 0.92, (_vv select 1) * 0.92, ((_vv select 2) min -6)];
+            sleep 0.1;
+        };
+        if (alive _uav) then {
+            { _x setDamage 1; } forEach (crew _uav);
+            _uav setDamage 1;
+            diag_log format ["[IHA-SORTI] %1 | kontrolsuz dron yere carpti / imha edildi (%2)", typeOf _uav, mapGridPosition _uav];
+        };
+    };
+    private _aktif = { alive _uav && {alive _d} && {(_uav getVariable [QGVAR(ihaTok), -1]) isEqualTo _tok} && {(time - _t0) < 600} && {!(_opMod isEqualTo 1 && {call _opOldu})} };
     private _merk = if (_merkez isEqualTo [0, 0, 0]) then {_bas} else {_merkez};
 
     // ---- GOZLEM: devriye ----
@@ -93,7 +121,9 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
             private _bit = time + 45;
             waitUntil { sleep 2; !(call _aktif) || {(_uav distance2D _pt) < 80} || {time > _bit} };
         };
-        if (alive _uav) then { _d doMove _bas; _uav land "LAND"; };
+        if (alive _uav && {_opMod > 0} && {call _opOldu}) then { call _kontrolKaybi; } else {
+            if (alive _uav) then { _d doMove _bas; _uav land "LAND"; };
+        };
         diag_log format ["[IHA-SORTI] %1 | gozlem devriyesi bitti (%2 sn)", typeOf _uav, round (time - _t0)];
     };
 
@@ -129,6 +159,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
     private _modMotor = _tur in ["FPV-AT", "FPV-AP"] && {!isNil "FPV_AI_Drones_fnc_fpvLogic"} && {missionNamespace getVariable ["lambs_danger_ihaModMotoru", true]};
     if (_modMotor) then { diag_log "[IHA-SORTI] FPV_AI_Drones modu bulundu: FPV son yaklasma / patlama MOD MOTORUYLA (kapatma: lambs_danger_ihaModMotoru = false)"; };
     while {(call _aktif) && {!_bitti}} do {
+        if (_opMod isEqualTo 2 && {call _opOldu}) exitWith { diag_log format ["[IHA-SORTI] %1 | operator olu: hedef kilitli degil -> yeni hedef secilmiyor", typeOf _uav]; };
         private _h = call _hedefSec;
         if (isNull _h) then { sleep 10; continue };
         diag_log format ["[IHA-SORTI] %1 (%2) | hedef %3 (%4) | %5 m", typeOf _uav, _tur, typeOf _h, mapGridPosition _h, round (_uav distance2D _h)];
@@ -167,7 +198,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         private _modBit = time + 90;
                         waitUntil { sleep 1; isNull _uav || {!alive _uav} || {!alive _h} || {time > _modBit} || {!(call _aktif)} };
                         diag_log format ["[IHA-SORTI] %1 | mod motoru bitti: IHA %2, hedef %3 (%4 sn)", _tur, ["YOK / patladi", "hala var"] select (!isNull _uav && {alive _uav}), ["OLDU", "SAG"] select (alive _h), round (time - _t0)];
-                        _bitti = true;
+                        _bitti = !(_opMod isEqualTo 1 && {call _opOldu} && {alive _uav});   // v8.268: operator olunce mod motoru bitirdiyse kontrol kaybi isleyicisi calissin
                     };
                 } else {
                 if (_dist > 220) then {
@@ -194,8 +225,10 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
             };
         };
     };
-    if (!_bitti && {alive _uav}) then {
-        diag_log format ["[IHA-SORTI] %1 | gorev bitti (sure %2 sn, hedef yok / dusurulmus): geri donuyor", typeOf _uav, round (time - _t0)];
+    if (!_bitti && {alive _uav} && {_opMod > 0} && {call _opOldu}) then { call _kontrolKaybi; } else {
+        if (!_bitti && {alive _uav}) then {
+            diag_log format ["[IHA-SORTI] %1 | gorev bitti (sure %2 sn, hedef yok / dusurulmus): geri donuyor", typeOf _uav, round (time - _t0)];
+        };
     };
     if (_bitti && {alive _uav} && {_tur isEqualTo "BOMBA"}) then { _d doMove _bas; _uav land "LAND"; };
 };
