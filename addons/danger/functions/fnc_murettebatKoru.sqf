@@ -8,6 +8,7 @@
  *   - Kayitli murettebat disarida ise (aractan <= 60 m, yaya, saglikli / yarali, grup 20 sn temassiz, arac hareket edebilir ve hasar <= 0.6, oyuncu araca binmemis):
  *     6 sn'de bir kendi koltuguna geri doner (30 m icinde moveIn, uzakta orderGetIn). Mürettebat kaydi koltugu bossa gecerli; doluysa bir sonraki bos murettebat koltugu.
  * Atlanir: arac yaniyor (isBurning), temasta inme emri iptal edilmez; araba oyuncu icerir, arac devrik / yaniyor (canMove false veya hasar > 0.6), ELITE taşıma indirmesi (tasimaMesgul ve yolcuBirak), kapatma: lambs_danger_murKoruOff = true.
+ * v8.266: grubunda OYUNCU olan botlar kayda alinmaz / geri cagirilmaz / 'GET OUT' iptali yapilmaz (kullanici: 'benim komutumdaki botlar catisma sonrasi aractan inmiyor'; kayitli murettebat, temas bitince >= 20 sn sonra verilen inme emri iptal ediliyordu).
  * Log: [MURETTEBAT-KORU] (ilk inme emri / geri donus; arac basina 20 sn'de en fazla bir).
  *
  * Arguments: None
@@ -32,7 +33,7 @@ private _calis = {
             // yeni murettebati kaydet
             {
                 private _u = _x;
-                if (!alive _u || {isPlayer _u}) then { continue };
+                if (!alive _u || {isPlayer _u} || {((units (group _u)) findIf {isPlayer _x}) >= 0}) then { continue };   // v8.266: oyuncu gruplari (kullanici: 'komutamdaki botlar catisma sonrasi aractan inmiyor') kayda alinmaz
                 private _rol = assignedVehicleRole _u;
                 if (_rol isEqualTo [] || {((_rol select 0) isEqualTo "Cargo") || {(_rol select 0) isEqualTo "cargo"}}) then { continue };
                 if (_kayit findIf {(_x select 0) isEqualTo _u} < 0) then { _kayit pushBack [_u, _rol select 0, if (count _rol > 1) then {_rol select 1} else {[]}]; };
@@ -45,6 +46,8 @@ private _calis = {
             {
                 _x params ["_u", "_rolAd"];
                 private _gr = group _u;
+                // v8.266 OYUNCU GRUBU: oyuncunun komutasindaki botlar (grupta oyuncu var) ne 'GET OUT' iptaline ne geri cagirmaya tabi (oyuncu indir dediginde iner, ELITE koltuga geri sokmaz)
+                if (((units _gr) findIf {isPlayer _x}) >= 0) then { continue };
                 if ((vehicle _u) isEqualTo _v) then {
                     // temasta (son 20 sn) inme emri iptal edilmez: ates altindaki murettebat (AT isabeti, yaklasan tehdit) cikabilir
                     if ((currentCommand _u) isEqualTo "GET OUT" && {(time - (_gr getVariable [QGVAR(contact), -999])) >= 20}) then {

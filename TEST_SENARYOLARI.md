@@ -363,3 +363,9 @@ Hepsi (T) = dogrulanmadi.
 2. Murettebat 4 kez geri donup ejekte edilirse (ya da 3 / 60 sn) `[TANK-TERK] ... terk eden murettebat N -> <grup> grubuna katildi`; murettebat yakindaki piyade grubuyla birlikte hareket eder, tanka tekrar kosmaz.
 3. Tanki onar (ACE): `[TANK-TERK] tekrar hareket edebiliyor: terk kalkti`, planZirh pozisyonu yeniden secer.
 `python3 tools/rpt_ozet.py --tani <rpt>`: TANK PIYADE BAGI / HAREKET EDEMEYEN TANK bolumu. Hepsi (T) = dogrulanmadi.
+
+## T-OYUNCU-GRUBU-ARAC (v8.266)
+1. Oyuncu squad lideri; botlar BTR / tank murettebati (surucu, nisanci, komutan) ve yolcu. Catisma, temas bitince 30+ sn bekle.
+2. Oyuncu aractan inip (ya da arac icinde 'Get Out' emriyle) botlari indirir: botlar INMELI, ELITE koltuga geri sokmamali. RPT'de bu botlar icin `[MURETTEBAT-KORU] ... INME EMRI IPTAL` / `koltuguna dondu` satiri OLMAMALI.
+3. Oyuncu olmayan (AI) arac grubunda eski davranis (murettebat korunur) degismez.
+Hepsi (T) = dogrulanmadi.

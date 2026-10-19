@@ -95,6 +95,8 @@ private _calis = {
             private _v = _x;
             if (!local _v || {!alive _v} || {!(_v isKindOf "LandVehicle")} || {isBurning _v} || {(damage _v) > 0.85}) then { continue };
             if ((crew _v) findIf {isPlayer _x} >= 0) then { continue };
+            // v8.266: murettebatin grubunda oyuncu varsa (oyuncu komutasindaki botlar) koltuk degistirme / geri cagirma / terk YOK
+            if ((crew _v) findIf {private _cg = group _x; ((units _cg) findIf {isPlayer _x}) >= 0} >= 0) then { continue };
             private _sinifTM = (([_v] call FUNC(aracSinif)) select 0);
             if (_sinifTM in ["TANK", "IFV"] && {!(_v getVariable [QGVAR(crewImmobileAyar), false])} && {!(missionNamespace getVariable ["lambs_danger_crewImmobileOff", false])}) then {
                 _v setVariable [QGVAR(crewImmobileAyar), true];
