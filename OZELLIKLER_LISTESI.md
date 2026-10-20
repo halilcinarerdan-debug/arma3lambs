@@ -1,4 +1,4 @@
-# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.237)
+# LAMBS Danger FSM — ELITE fork: Özellik Listesi (v8.274)
 
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
@@ -32,6 +32,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Komutan bekle** (komutan timini geride bırakıp ilerlemez), **buddy bağı** (kalıcı eş, tek başına dolaşma kontrolü), **orphan watchdog**.
 
 ## 3. Formasyon
+> Güncel politika (v8.269 / v8.270): bkz. §10g ve `kaynaklar_doktrin/FORMASYON_POLITIKASI.md` (kitap / tasarım ayrımı, seyir tekniklerine göre COLUMN / WEDGE / VEE).
 - **Formasyon yazma hakemi** (`formSet`): tek yazıcı, öncelikli (0..2), taktik formasyonu 25 sn korunur, histerezis, osilasyon önleme.
 - **Araziye göre formasyon seçimi**; ≥4 araçlı açık arazi yaklaşmasında DIAMOND, aksi COLUMN.
 - **Halt / slot kovalama kesici** (`haltKur`): lider durunca slota yakın askerler yürümeyi keser.
@@ -79,6 +80,7 @@ Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/`
 - **Tehdit yönüne bakış** (boş duvara değil).
 
 ## 9. Mekanize
+> v8.262 – v8.266 eklemeleri (ek araç, kinematik koruma, recon sabır, tank piyade bağı, hareket edemeyen tank) §10g'de.
 - **Mekanize dur-kalk izleyici** (`mekanizeIzle`): sürücü forceSpeed sıfırlama, COLUMN / FULL; **doAssaultSpeed overlay** (araç içindekine uygulanmaz).
 - Aracın roket / duman tepkisi, ≥4 araçta DIAMOND (DÜZENSİZ doktrinde yok).
 - **Araç–piyade senkronu** (T) (`aracSenkron`): araç piyadeyi aşmaz; nakil / medevac görevindeki araç muaf.
@@ -139,7 +141,7 @@ Hepsi **(T)** = oyunda tam doğrulanmadı. Sayısal eşikler **tasarım değerid
 - **Tanı**: `[SURME-TANI-*]` (AI özellikleri, hasar, grup, çevre, sürücü çıkışı), `[SURME-DENEY]` (varsayılan KAPALI; açmak için `surmeDeneyOff = false`), `[TASIMA-KIN]`, `[TASIMA-FIZIK]`. Sunucu donması ayıklama anahtarları (v8.207).
 - **Bilinen açık sorun**: RHS Stryker/M113 AI sürücüsü duran araçta "MOVE" tutup sürmüyor (hedef `DoNotPlan`); nedeni bilinmiyor, kinematik sürüş geçici çözüm.
 
-## 10f. v8.238 – v8.239 (T = doğrulanmadı)
+## 10f. v8.238 – v8.259 (T = doğrulanmadı)
 - **Hendek önceliği (v8.238, T)**: topçu altında hendek alanı varsa 22 sn erken uyarı + 60 m erişim, hendekteyse kalır; hendek bilinci topçu altındaki grubu temassız da hendeğe sokar (`hendekOncelikOff`).
 - **Çoklu mevzi (v8.239, T)**: Zeus Plan Noktası → "MEVZI ekle" (birden çok); SAVUN planı gruplara halka yerine bu mevzileri dağıtır (tehdit yönüne yakın önce; hendek 40 m içindeyse hendeğe). `[PLAN-MEVZI]`.
 - **Araç sürüş A/B testi (v8.239, T)**: Zeus "ELITE Arac SURUS A/B Testi" — AI sürücü kök neden tanısı (ELITE kapalı/açık, doMove/waypoint, yolcu, otomatik bisect). `[SURUS-AB-*]`.
@@ -191,25 +193,13 @@ Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kap
 - **Personnel Replacement (T)**: taraf bazlı panel + CBA varsayılanları — takviye hızı, gecikme, min squad, eşzamanlı paket, beceri, cepheye yakınlık çarpanı, havuz bitince (devam / bitkin / çekil), konvoy zayiatı. Takviye FOB'da doğmaz: **soyut konvoy** varış noktasından squad'a yürür, düşmana ≤ 600 m'de zayiat zarı; A0'da fiziksel araç konvoyu yok.
 - **CBA**: "LAMBS Danger > ELITE Cephe Komutani".
 
-## 11. Geliştirici araçları
-- **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --grup` RPT özetleri, sürüm kontrolü.
-- **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
-- **Telemetri** (`telemetri`): her 20 sn sunucu FPS + grup durumu (karar, bayraklar, hız, temas, baskı, en yakın düşman), `[HIZ-ANOMALI]`, `[DONUS-OZET]`.
-- **Watchdog bekçisi**: her izleyici hata ile ölürse yeniden başlar (`[WATCHDOG-YENIDEN]`).
-- **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
-
-## Planlanan / bekleyen
-- **CEPHE SİMÜLASYONU (sonraki büyük iş)**: tasarım `CEPHE_SIMULASYONU_TASARIM.md` — kayıt, arazi ajanı (3 parça), istihbarat / TTP öğrenme, harekât / OPORD, lojistik (susuzluk-açlık, ikmal), ateş destek, mühendis (COP/FOB inisiyatifi), rapor iş akışı, cephe komutanı; 6 dilim. **Dilim A0 (profil çekirdeği + faction paneli + Personnel Replacement) v8.237'de yapıldı (10e); sıradaki: Dilim A (kayıt + FOB/COP + susuzluk/açlık).** Drone / İHA işleri askıda.
-- **Hat saldırısı / siper hattı planı (Ukrayna benzeri, her şey stabil olduktan SONRA)**: iki noktalı hat (başlangıç / bitiş) → 3–6 hedef kesim, kesim başına squad, dost cephe sınırı HQ'dan hatta, geri çekilme sınırın gerisine; topçu/havan hazırlığı + sızma + siper temizleme. Ön koşul: bina/oda temizleme + el bombası yeniden yazımı, siper temizleme kaynakları (ATP 3-21.8 / MCWP 3-11.2).
-- Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
-- Helikopter medevac / hava nakli (şu an yalnız kara aracı).
-- Karakolda MG / AT yerleşimi, nöbet rotasyonu (temel gözetleme ataması v8.214'te var).
-- Hedef zinciri: alınan noktada tutucu birlik ve ayrı cephe çizgisi yok; HQ takviyesinde "hangi grup hangi hedefe izinli" kısıtı yok.
-- Mühendis / engel (yol haritası 7), HQ güvenlik elemanını role göre seçme.
-- AI sürücü kök nedeni (kinematik sürüşü gereksiz kılar).
-- Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
-- Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
-- Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.
+## 10g. v8.260 – v8.274 (T = doğrulanmadı; hepsi RPT/kullanıcı gözlemi sonrası)
+Konu özeti (ayrıntı her maddede, kök neden + kapatma anahtarı `DEVIR_LOGU_v7.0.txt`'te):
+- **IHA (FPV / Mavic / Crocus)**: v8.260 görev başlamıyordu (zamanlanmamış ortamda `waitUntil`) düzeltildi + Zeus dronu sunucuda 40 m'de yaratır; v8.267 düşman tetik mesafesine girince bilinçli fırlatma (`fnc_ihaBekle`); v8.268 operatör bağı (operatör ölünce dron düşer / hedefe kilitliyse dalar); v8.272 Crocus çantası (asker / yerde) atamada tanınır; v8.273 dalış düzeltmesi (AI pilot kapatılır, hız rampası).
+- **Tank + mekanize**: v8.262 nakilde ek araç + medevac rezervi koltuk kontrolü; v8.263 kinematik sürüş çarpışma koruması; v8.264 recon aracı AI sürüşüne sabır + hareket tanısı; v8.265 tank piyade bağı + hareket edemeyen tankta mürettebat terki / sabit ateş; v8.266 oyuncu grubu araç mürettebatı muaf.
+- **Plan kapısı**: v8.261 erken kuvvet oranı kapısı (recon raporunda) + hibrit düşman tahmini (gözlenen + OPORD iddiası, güvene göre ağırlıklı); bekleme sırasında tank / nakil tutulur.
+- **Formasyon**: v8.269 seyir formasyonu (temassız hareketli gruplar), v8.270 politika kitaba hizalandı (`kaynaklar_doktrin/FORMASYON_POLITIKASI.md`, kitap / tasarım ayrımı).
+- **Harita işaretleri**: v8.271 / v8.274 düşman ELITE işaretleri istemcide gizlenir (CBA "ELITE işaretler"), savunma planında ORP işareti yok.
 
 - **v8.260 IHA gorevi duzeltmesi (Zeus 'ELITE IHA Gorevi')**: RPT c48e02ec: gorev hic baslamiyordu - CBA sunucu olayi fonksiyonu zamanlanmamis ortamda cagiriyor, `waitUntil { sleep ... }` 'Suspending not allowed' hatasi veriyordu (`[IHA-SORTI] ... setOwner basarisiz`). Artik `canSuspend` degilse kendini `spawn` eder. 'Dron yarat' secenegi dronu Zeus istemcisinde degil SUNUCUDA 40 m irtifada ucarak (`FLY`) yaratir (setOwner gerekmez; yerde 2 m'den dusen dronun mod tarafindan patlamasi olasiligi ortadan kalkar). IHA icin `Killed` / `Explosion` olay logu eklendi (`[IHA-SORTI] ... YOK OLDU | yukseklik | hiz | konum | olduren`). Anlik patlamanin kesin nedeni (T) dogrulanmadi: mod davranisi ya da istemcide yaratim; yeni log gosterecek.
 
@@ -240,3 +230,29 @@ Tasarım: `CEPHE_SIMULASYONU_TASARIM.md` (§10 ve 11). Sistem **opsiyonel**; kap
 - **v8.273 FPV DALIS (KAMIKAZE) DUZELTMESI**: (kullanici: "kamikaze calismiyor, dron havada glitchleniyor, tam dalacakken oluyor") Sebep (kod analizi, RPT yok; dogrulanmadi): 220 m kala dalis basliyordu ama AI pilot hala `flyInHeight 40` + `doMove` ile ucmaya calisiyor, betik her 0.1 sn `setVelocity` (28 m/s ani) + `setVectorDir` (yatis sifirlanir) uyguluyordu -> otopilotla fizik / betik savasi, havada titreme, 4 m esigi hic gecilmiyor. Simdi: dalis baslarken pilotun MOVE / PATH'i kapanir (`doStop`), hiz 8 -> 28 m/s'ye 1.2 sn'de yumusakca artar, yon `setVectorDirAndUp` ile (yatis sabit), 0.05 sn adim, 5 m'de patlar; dalis kesilirse (hedef olurse / sure) pilot geri acilir. Log `[IHA-DALIS]` (basladi / 1 sn'de bir mesafe + gercek hiz + irtifa / kesildi). (T)
 
 - **v8.274 ISARET GIZLEME: ZEUS OYUNCUDA DA CALISIR + GORUNUM SECIMI**: (kullanici: "hala dusman markerlari gozukuyor mapte") v8.271'de Zeus (curator) varsayilan olarak hepsini goruyordu; Zeus olarak oynayan kullanicida gizleme hic devreye girmiyordu (en olasi sebep; RPT yok, dogrulanmadi). Simdi: 'Zeus tum ELITE isaretlerini gorur' varsayilan KAPALI; yeni CBA 'ELITE isaret gorunumu' (Otomatik = oyuncu tarafi / Yalniz BLUFOR / OPFOR / INDEP / Hepsi); gizleme her 3 sn'de yeniden uygulanir; tani logu `[ISARET-GIZLE] taraf | gorunum | curator | zeusTum | etkin | ELITE isaret | gizlenen` (istemci RPT'si). Not: oyuncunun tarafi sivil / sanal Zeus ise 'Otomatik' hicbir sey gizlemez -> gorunumu elle sec. LAMBS'in kendi debug isaretleri (`dotMarker`, lambs debug acikken) bu betikle gizlenmez (ELITE_ onekli degil). (T)
+
+## 11. Geliştirici araçları
+- **`tools/rpt_ozet.py`**: `--karne / --form / --zeka / --kayip / --tani / --grup` RPT özetleri, sürüm kontrolü (`--tani`: ölüm, hendek, araç terk, güç oranı kapısı, tank piyade bağı / terk, recon aracı AI sürüşü, topçu düşüşü bölümleri; `--form` seyir formasyonu satırı).
+- **Log etiketleri**: `[TCCC] [TCCC-TX] [TCCC-DURGUN] [SINSI-GERI] [BAYGIN-ROE] [CEPHANE] [HQ-*] [PANIK] [GIZLI] [MEKANIZE] [ARAC-MEDEVAC] [HALT] [GOZCU] [TEHLIKE-ALANI] [DURUM] [ANOMALI]` ve plan / Zeus: `[PLAN] [PLAN-KAPI] [PLAN-ISTEK] [PLAN-YANIT] [PLAN-DEVIR] [PLAN-ATAMA] [PLAN-TOPCU] [GOREV-ATAMA] [KARAKOL] [KARAKOL-GARNIZON] [TASIMA] [TAKSI] [SUNUCU-DEVIR]`.
+- **Telemetri** (`telemetri`): her 20 sn sunucu FPS + grup durumu (karar, bayraklar, hız, temas, baskı, en yakın düşman), `[HIZ-ANOMALI]`, `[DONUS-OZET]`.
+- **Watchdog bekçisi**: her izleyici hata ile ölürse yeniden başlar (`[WATCHDOG-YENIDEN]`).
+- **Yeni log etiketleri (v8.260+)**: `[IHA-SORTI] [IHA-BEKLEME] [IHA-DALIS] [PLAN-ORAN] [TANK-IMMOBIL] [TANK-TERK] [RECON-ARAC-HAREKET] [ISARET-GIZLE]` ve `[KOMUTAN-FORM] ... | SEYIR |`.
+- **Dokümanlar**: `DEVIR_LOGU_v7.0.txt` (sürüm sürüm değişiklik ve kök neden), `DOKTRIN_KAYNAKLARI.md`, `TEST_SENARYOLARI.md`, `kaynaklar_doktrin/arastirma_gerceklik/`.
+
+## Planlanan / bekleyen
+- **CEPHE SİMÜLASYONU (sonraki büyük iş)**: tasarım `CEPHE_SIMULASYONU_TASARIM.md` — kayıt, arazi ajanı (3 parça), istihbarat / TTP öğrenme, harekât / OPORD, lojistik (susuzluk-açlık, ikmal), ateş destek, mühendis (COP/FOB inisiyatifi), rapor iş akışı, cephe komutanı; 6 dilim. **Dilim A0 (profil çekirdeği + faction paneli + Personnel Replacement) v8.237'de yapıldı (10e); sıradaki: Dilim A (kayıt + FOB/COP + susuzluk/açlık).** Drone / İHA işleri askıda.
+- **Hat saldırısı / siper hattı planı (Ukrayna benzeri, her şey stabil olduktan SONRA)**: iki noktalı hat (başlangıç / bitiş) → 3–6 hedef kesim, kesim başına squad, dost cephe sınırı HQ'dan hatta, geri çekilme sınırın gerisine; topçu/havan hazırlığı + sızma + siper temizleme. Ön koşul: bina/oda temizleme + el bombası yeniden yazımı, siper temizleme kaynakları (ATP 3-21.8 / MCWP 3-11.2).
+- Komutan hamle repertuvarı (taciz / keşif atışı / yem / hileli saldırı / sabitle-kanatla) tavır motorunun üstüne.
+- Helikopter medevac / hava nakli (şu an yalnız kara aracı).
+- Karakolda MG / AT yerleşimi, nöbet rotasyonu (temel gözetleme ataması v8.214'te var).
+- Hedef zinciri: alınan noktada tutucu birlik ve ayrı cephe çizgisi yok; HQ takviyesinde "hangi grup hangi hedefe izinli" kısıtı yok.
+- Mühendis / engel (yol haritası 7), HQ güvenlik elemanını role göre seçme.
+- AI sürücü kök nedeni (kinematik sürüşü gereksiz kılar): UAZ-469 recon aracı iki testte de ilk 10 sn'de kalkmadı; v8.264 `[RECON-ARAC-HAREKET]` logu nedeni gösterecek.
+- T-14 `SmokeLauncher` ateşlenmiyor (T-72 duman çalışıyor); tank için piyade dumanı, AT askerinin tankı yakın koruması, IFV'nin ateş altında geri inişi.
+- Yaya yaralı taşıma yok (ACE drag ile kenara çekme var); TCCC A/R (hava yolu / CPR) ve H (hipotermi) adımları yazılmadı.
+- Formasyon aralıkları (kitap: seyir 10 m, gözetimli seyir 20 m, ekipler 50 m) Arma motoruna bırakıldı; formasyon adı seçiliyor, aralık eşlenmedi.
+- `init.sqf` terrain temizliği (yol / kaya / süs obje gizleme, `enableEnvironment [false, true]`, `setTerrainGrid 50`) depoda DEĞİL: kullanıcı kararıyla görev klasörüne elle konur (v8.274 sonrası sohbette verildi).
+- IHA: operatör elle seçilemez (modül konumuna en yakın asker); baygın (ACE) operatör "canlı" sayılır.
+- Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
+- Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
+- Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.

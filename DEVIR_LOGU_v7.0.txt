@@ -2607,3 +2607,5 @@ v8.274 ISARET GIZLEME DUZELTMESI (kullanici: "hala dusman markerlari gozukuyor m
  NEDEN (kod analizi, istemci RPT'si yok): v8.271 isaretGizle curator'u varsayilan 'hepsini gor' yapmisti; Zeus oyuncu / sanal Zeus tarafi (civilian) 'otomatik' gizlemeyi atlatiyordu.
  YAPILAN: zeusTum varsayilan false, CBA 'ELITE isaret gorunumu' (otomatik / tek taraf / hepsi), her turda alfa yeniden uygulama, [ISARET-GIZLE] tani logu.
  YAPILMADI / BILINEN: LAMBS debug markerlari ve ELITE_ onekli olmayan markerlar gizlenmez; hala gorunurse istemci RPT'sindeki [ISARET-GIZLE] satiri gerekir; hepsi (T).
+
+OZELLIKLER_LISTESI.md duzenlendi (v8.274): v8.260-v8.274 maddeleri dosya sonundan yeni "10g" bolumune tasindi + konu ozeti, baslik surumu, gelistirici araclari (rpt_ozet --tani, yeni log etiketleri), Planlanan / bekleyen (acik isler) ve 3. / 9. bolum yonlendirmeleri guncellendi. Kod degismedi.
