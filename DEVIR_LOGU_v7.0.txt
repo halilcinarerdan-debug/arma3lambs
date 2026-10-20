@@ -2592,3 +2592,8 @@ v8.271 ISARET GIZLEME + SAVUNMADA ORP (kullanici: "karsi tarafa dusmansak onlari
  NEDEN: createMarker global (komutanPlan / planKapi); gozetleAta / hendekAlani / moduleObjektif markerPos ve allMapMarkers'a bagli oldugu icin yerel markere cevirmek mantiklari bozardi. Savunma planinda ORP hesaplaniyor/ciziliyor ama (planDongu) yalniz saldiri dallarinda kullaniliyor.
  YAPILAN: fnc_isaretGizle (istemci, renkten taraf, setMarkerAlphaLocal), CBA 'ELITE isaretler', komutanPlan'da tip 1 icin ORP isareti yok + SBF etiketi.
  YAPILMADI / BILINEN: marker adlari hala global (ag verisi gorulebilir, haritada degil); 'elite_hendek*' kullanici markerlari gizlenmez (taraf bilgisi yok); ELITE disi markerlara dokunulmaz; hepsi (T).
+
+v8.272 CROCUS CANTASI IHA ATAMASI (kullanici: "canta olarak crocus bag olunca iha atamasinda saymiyor, crocus at ap secmek gerekiyor, nasil cozeriz")
+ NEDEN: modul `nearestObjects ["Air","LandVehicle"]` + unitIsUAV ile arac ariyordu; canta (backpack) ne arac ne UAV. [GIYIM-TANI] satirlari AT askerlerinin 'canta O_Crocus_AT_Bag' tasidigini gosterir.
+ YAPILAN: fnc_ihaCantaSinif (assembleTo / _Bag eki), modulde cantali asker (nearEntities backpack) ya da yerdeki weaponholder (getBackpackCargo) tespiti, operator = cantali asker, ihaBekle'de firlatma noktasi askeri izler + canta tuketimi + asker olurse iptal, olay parametresi _cantaNid.
+ YAPILMADI / BILINEN: assembleTo moda ozgu (dogrulanmadi; yoksa ad tabanli esleme); mod kendi 'kur' eylemini kullanmiyoruz (kendi yaratimimiz); yerdeki cantada birden fazla canta varsa yalniz ilk Crocus cantasi tuketilir; hepsi (T).

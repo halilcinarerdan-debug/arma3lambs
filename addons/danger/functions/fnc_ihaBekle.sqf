@@ -17,6 +17,7 @@
  * 6: Tetik mesafesi (m, 0 = hemen) <NUMBER>
  * 7: Operator <OBJECT> (v8.268; olu / silinmis operator ile firlatma yapilmaz, bekleyen emir iptal olur)
  * 8: Operator olunce: 0 bagsiz / 1 duser / 2 son hedefe dalar <NUMBER> (fnc_ihaSorti'ye iletilir)
+ * 9: Canta kaynagi <OBJECT> (v8.272; Crocus cantasi tasiyan asker ya da yerdeki canta: firlatma noktasi askeri takip eder, firlatmada canta tuketilir, asker olurse emir iptal olur)
  *
  * Return Value: Emir kaydedildi mi <BOOL>
  * Public: No
@@ -25,7 +26,8 @@
 if (!isServer) exitWith {false};
 if (!canSuspend) exitWith { _this spawn FUNC(ihaBekle); true };
 
-params [["_sn", "", [""]], ["_taraf", west, [west]], ["_poz", [0, 0, 0], [[]]], ["_turE", "", [""]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_tetik", 1200, [0]], ["_op", objNull, [objNull]], ["_opMod", 0, [0]]];
+params [["_sn", "", [""]], ["_taraf", west, [west]], ["_poz", [0, 0, 0], [[]]], ["_turE", "", [""]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_tetik", 1200, [0]], ["_op", objNull, [objNull]], ["_opMod", 0, [0]], ["_canta", objNull, [objNull]]];
+private _cantaAsker = !isNull _canta && {_canta isKindOf "CAManBase"};
 private _opVar = _opMod > 0 && {!isNull _op};
 private _opOldu = { _opVar && {isNull _op || {!alive _op}} };
 if (_sn isEqualTo "" || {!isClass (configFile >> "CfgVehicles" >> _sn)}) exitWith {false};
@@ -44,8 +46,10 @@ if (!_hemen) then {
 private _t0 = time;
 private _logT = time + 60;
 private _hedef = objNull;
-while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef} && {!(call _opOldu)}} do {
+while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef} && {!(call _opOldu)} && {!(_cantaAsker && {!alive _canta})}} do {
     sleep 5;
+    // v8.272: cantali asker hareket ediyorsa firlatma noktasi onu izler
+    if (_cantaAsker && {alive _canta}) then { _poz = getPosATL _canta; _emir set [0, _poz]; };
     private _bilen = allGroups select {(side _x) isEqualTo _taraf && {!isNull (leader _x)}};
     private _bilinen = {
         params ["_t"];
@@ -70,6 +74,10 @@ while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef
 // emir listesinden cik
 _emirler = (missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []]) - [_emir];
 missionNamespace setVariable ["lambs_danger_ihaBekleEmirleri", _emirler];
+if (_cantaAsker && {!alive _canta} && {isNull _hedef}) exitWith {
+    diag_log format ["[IHA-BEKLEME] %1 (%2) | cantali asker OLDU (%3): firlatma emri iptal (canta kayboldu, dron yaratilmadi)", _sn, _tur, name _canta];
+    false
+};
 if ((call _opOldu) && {isNull _hedef}) exitWith {
     diag_log format ["[IHA-BEKLEME] %1 (%2) | OPERATOR OLDU (%3): firlatma emri iptal (dron yaratilmadi)", _sn, _tur, ["", name _op] select (!isNull _op)];
     false
@@ -82,5 +90,19 @@ if (!_hemen && {isNull _hedef}) exitWith {
 private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
 _iha setPosATL [_poz select 0, _poz select 1, 40];
 diag_log format ["[IHA-BEKLEME] %1 (%2) | FIRLATMA: %3 | tetik hedefi %4 (%5 m) | %6 sn bekledi", _sn, _tur, mapGridPosition _iha, if (isNull _hedef) then {"-"} else {typeOf _hedef}, if (isNull _hedef) then {0} else {round (_hedef distance2D _poz)}, round (time - _t0)];
+// v8.272: canta tuketilir
+if (!isNull _canta) then {
+    if (_cantaAsker) then {
+        if ([backpack _canta, true] call FUNC(ihaCantaSinif)) then { removeBackpackGlobal _canta; };
+    } else {
+        private _bp = getBackpackCargo _canta;
+        private _ci = (_bp select 0) findIf {[_x, true] call FUNC(ihaCantaSinif)};
+        if (_ci >= 0) then {
+            clearBackpackCargoGlobal _canta;
+            { private _n = (_bp select 1) select _forEachIndex; if (_forEachIndex isEqualTo _ci) then { _n = _n - 1; }; if (_n > 0) then { _canta addBackpackCargoGlobal [_x, _n]; }; } forEach (_bp select 0);
+        };
+    };
+    diag_log format ["[IHA-BEKLEME] %1 | canta tuketildi (%2)", _sn, ["yerdeki canta", name _canta] select _cantaAsker];
+};
 [_iha, "SORTI", _turE, _taraf, _poz, _yar, _men, _op, _opMod] call FUNC(ihaSorti);
 true

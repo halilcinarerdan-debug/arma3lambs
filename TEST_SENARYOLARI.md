@@ -405,3 +405,11 @@ Tablo: kaynaklar_doktrin/FORMASYON_POLITIKASI.md. Hepsi (T) = dogrulanmadi.
 3. SAVUN planinda `P1 ORP` isareti YOK; `P1 TEHDIT YONU / DESTEK` var (ELE GECIR planinda ORP + SBF eskisi gibi).
 4. Gozetleme atama (Zeus) / hendek / objektif modulu isaretleri hala buluyor (markerlar silinmedi, yalniz gizlendi).
 Hepsi (T) = dogrulanmadi.
+
+## T-IHA-CANTA (v8.272)
+1. Bir dost askere `O_Crocus_AT_Bag` (ya da AP) ver; ELITE IHA Gorevi modulunu onun 40 m icine birak: Dron yarat = Yok, Gorev = Sorti, Tetik = 1200. systemChat `IHA: Crocus cantasi bulundu (<isim>) -> O_Crocus_AT`.
+2. RPT: `[IHA-BEKLEME] ... firlatma emri kaydedildi ... operator <asker>`; dusman 1200 m'ye girince `FIRLATMA` + `canta tuketildi (<asker>)`; askerin sirtinda canta kalmamali, dron askerin konumunda 40 m'de belirmeli ve `[IHA-SORTI]` baslamali.
+3. Yerde bir Crocus cantasi (weaponholder) ile ayni: `canta tuketildi (yerdeki canta)`.
+4. AP cantasi: tur FPV-AP (personel). Cantali asker firlatmadan olurse `cantali asker OLDU: firlatma emri iptal`.
+5. Elle bir sinif secersen canta kullanilmaz / tuketilmez. Canta sinifi bulunamazsa eski mesaj (`yakinda ... yok`) cikar.
+Hepsi (T) = dogrulanmadi.

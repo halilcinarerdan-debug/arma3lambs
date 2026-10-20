@@ -40,13 +40,39 @@ if (_activated && local _logic) then {
             if (isNull _u && {(round _yaratI) >= 1} && {_gorev < 2}) then {
                 _yaratSn = _yaratSiniflar param [(round _yaratI) - 1, ""];
             };
-            if (isNull _u && {_yaratSn isEqualTo ""} && {_gorev < 2}) exitWith { systemChat "[ELITE] IHA Gorevi: yakinda (40 m) insansiz hava araci yok - modulu IHA'nin ustune birak ya da 'Dron yarat' sec"; };
+            // v8.272 CROCUS CANTASI: yakinda (40 m) Crocus cantasi tasiyan dost asker ya da yerde Crocus cantasi varsa ve dron yoksa, 'Dron yarat = Yok' secilmis olsa bile canta tespit edilir:
+            //   arac sinifi cantadan bulunur (fnc_ihaCantaSinif), operator = cantali asker (operator bagi acikken), canta firlatmada tuketilir (asker: removeBackpackGlobal; yerde: cantadan 1 adet).
+            private _cantaObj = objNull;
+            private _cantaSn = "";
+            if (isNull _u && {_gorev < 2}) then {
+                private _tfC = [west, east, independent] select (_tarafI max 0 min 2);
+                private _askC = (_poz nearEntities [["CAManBase"], 40]) select {alive _x && {(side (group _x)) isEqualTo _tfC} && {[backpack _x, true] call FUNC(ihaCantaSinif)}};
+                if (_askC isNotEqualTo []) then {
+                    _cantaObj = ([_askC, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+                    _cantaSn = [backpack _cantaObj] call FUNC(ihaCantaSinif);
+                } else {
+                    private _hC = (nearestObjects [_poz, ["WeaponHolder", "WeaponHolderSimulated", "GroundWeaponHolder"], 40]) select {(((getBackpackCargo _x) select 0) findIf {[_x, true] call FUNC(ihaCantaSinif)}) >= 0};
+                    if (_hC isNotEqualTo []) then {
+                        _cantaObj = _hC select 0;
+                        private _bc = ((getBackpackCargo _cantaObj) select 0) select (((getBackpackCargo _cantaObj) select 0) findIf {[_x, true] call FUNC(ihaCantaSinif)});
+                        _cantaSn = [_bc] call FUNC(ihaCantaSinif);
+                    };
+                };
+                if (_cantaSn isNotEqualTo "" && {_yaratSn isEqualTo ""}) then {
+                    _yaratSn = _cantaSn;
+                    systemChat format ["[ELITE] IHA: Crocus cantasi bulundu (%1) -> %2%3", ["yerde", name _cantaObj] select (_cantaObj isKindOf "CAManBase"), _cantaSn, ""];
+                } else {
+                    _cantaObj = objNull;   // kullanici sinifi elle sectiyse canta tuketilmez
+                };
+            };
+            if (isNull _u && {_yaratSn isEqualTo ""} && {_gorev < 2}) exitWith { systemChat "[ELITE] IHA Gorevi: yakinda (40 m) insansiz hava araci yok - modulu IHA'nin / Crocus cantali askerin ustune birak ya da 'Dron yarat' sec"; };
             // v8.268 OPERATOR: modul konumuna (ya da dron varsa dronun yanina) en yakin, IHA tarafindan canli dost asker (40 m)
             private _opMod = round _opI;
             private _op = objNull;
             if (_opMod > 0 && {_gorev < 2}) then {
                 private _tfS = [west, east, independent] select (_tarafI max 0 min 2);
                 private _opAdaylar = (_poz nearEntities [["CAManBase"], 40]) select {alive _x && {isNull objectParent _x} && {(side (group _x)) isEqualTo _tfS}};
+                if (!isNull _cantaObj && {_cantaObj isKindOf "CAManBase"}) then { _opAdaylar = [_cantaObj]; };   // v8.272: cantali asker operatordur
                 if (_opAdaylar isEqualTo []) then {
                     _opMod = 0;
                     systemChat "[ELITE] IHA Gorevi: 40 m icinde dost operator asker yok -> operator BAGSIZ";
@@ -57,7 +83,7 @@ if (_activated && local _logic) then {
             };
             private _mod = ["SORTI", "GOZLEM", "KALDIR"] select (_gorev max 0 min 2);
             private _turKod = ["", "FPV-AT", "FPV-AP", "BOMBA", "GOZLEM"] select (_tur max 0 min 4);
-            ["lambs_danger_ihaGorev", [["", netId _u] select (!isNull _u), _mod, _turKod, _tarafI, _poz, round _yar, round _men, _yaratSn, round _tetikM, ["", netId _op] select (!isNull _op), _opMod]] call CBA_fnc_serverEvent;
+            ["lambs_danger_ihaGorev", [["", netId _u] select (!isNull _u), _mod, _turKod, _tarafI, _poz, round _yar, round _men, _yaratSn, round _tetikM, ["", netId _op] select (!isNull _op), _opMod, ["", netId _cantaObj] select (!isNull _cantaObj)]] call CBA_fnc_serverEvent;
             systemChat format ["[ELITE] IHA gorevi gonderildi: %1 -> %2 (%3)", [_yaratSn + ([" - dusman " + str (round _tetikM) + " m'ye girince firlatilacak", " - hemen"] select (_tetikM <= 0)), getText (configOf _u >> "displayName")] select (!isNull _u), _mod, [_turKod, "otomatik tur"] select (_turKod isEqualTo "")];
         }, {}, {}, [_poz, _bagli, _yaratSiniflar]
     ] call EFUNC(main,showDialog);
