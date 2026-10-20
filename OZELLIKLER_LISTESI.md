@@ -3,6 +3,7 @@
 LAMBS Danger FSM 2.6.2 üzerine eklenen katmanlar. Her özelliğin yanındaki kapatma değişkeni
 `lambs_danger_<ad>Off = true` biçimindedir. **(T)** = oyunda henüz doğrulanmadı / kısmen doğrulandı.
 Doktrin iddiaları "tasarım tahmini"dir; kaynaklı olanlar `kaynaklar_doktrin/` altındadır.
+**Doğrulanmayanların tam listesi + test senaryo planı (S1–S10): `DOGRULANMAYANLAR.md`.**
 
 ---
 
