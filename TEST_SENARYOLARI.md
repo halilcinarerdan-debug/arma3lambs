@@ -391,3 +391,10 @@ Hepsi (T) = dogrulanmadi.
 3. Duran / mevzideki / recon grubu formasyonu degismemeli. `python3 tools/rpt_ozet.py --form <rpt>` SEYIR FORMASYONU satiri.
 4. Salinim kontrolu: ayni grupta 60 sn'den kisa aralikla ardisik degisim OLMAMALI (`--form` [SORUN] vermemeli).
 Hepsi (T) = dogrulanmadi.
+
+## T-FORM-KITAP (v8.270)
+1. Temassiz, hareketli grup: uzak (> 1200 m) COLUMN, 250-1200 m WEDGE, < 250 m WEDGE (yeri bilinen dusman onde ise VEE); yolda COLUMN; gece COLUMN. RPT `[KOMUTAN-FORM] ... | SEYIR | formasyon -> X | tehdit N m`.
+2. Siçrama (bounding): acik arazide 4-7 kisilik grup artik LINE degil WEDGE. Kanat hareketi COLUMN. Saklanma WEDGE. Hucum acik arazide LINE.
+3. Temasta meskun mahalde STAG COLUMN OLMAMALI (WEDGE / LINE).
+4. `--form` teshisinde salinim ([SORUN]) cikmamali.
+Tablo: kaynaklar_doktrin/FORMASYON_POLITIKASI.md. Hepsi (T) = dogrulanmadi.

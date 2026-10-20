@@ -84,15 +84,17 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
                         diag_log format ["[KOMUTAN-FORM] %1 | temas bitti -> AWARE", groupId _g];
                     };
                     // tehdit mesafesi: bilinen gercek dusmanin en yakini ya da (ele gecir planinda) objektife mesafe; hicbiri yoksa 9999 (uzak)
-                    private _tehditD = 9999;
+                    private _bilinenD = 9999;
                     {
-                        if (((side _g) getFriend (_x select 2)) < 0.6 && {_l knowsAbout (_x select 4) > 0.3} && {[_x select 4] call FUNC(gercekHedef)}) then { _tehditD = _tehditD min (_l distance2D (_x select 0)); };
+                        if (((side _g) getFriend (_x select 2)) < 0.6 && {_l knowsAbout (_x select 4) > 0.3} && {[_x select 4] call FUNC(gercekHedef)}) then { _bilinenD = _bilinenD min (_l distance2D (_x select 0)); };
                     } forEach (_l nearTargets 1500);
+                    private _tehditD = _bilinenD;
                     if (!isNil "lambs_danger_planlar") then {
                         private _pl = lambs_danger_planlar getOrDefault [_g getVariable ["lambs_danger_planId", ""], createHashMap];
                         if ((count _pl) > 0 && {(_pl getOrDefault ["tip", 0]) isEqualTo 0}) then { _tehditD = _tehditD min (_l distance2D (_pl get "obj")); };
                     };
                     _g setVariable [QGVAR(seyirTehditD), _tehditD];
+                    _g setVariable [QGVAR(seyirBilinenD), _bilinenD];
                     private _f = [_g, [0, 0, 0], "TRAVEL"] call (missionNamespace getVariable ["lambs_danger_fnc_selectFormation", {""}]);
                     if (_f isNotEqualTo "" && {(formation _g) isNotEqualTo _f}) then {
                         [_g, _f, "komutan", 0] call FUNC(formSet);

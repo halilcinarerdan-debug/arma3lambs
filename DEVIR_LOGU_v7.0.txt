@@ -2582,3 +2582,8 @@ v8.269 SEYIR FORMASYONU (kullanici: "hayir formasyon hic degismiyor acik arazide
  NEDEN: onceki 'calisiyor' degerlendirmem YANLISTI: loglardaki formasyon degisimleri hep TEMAS ya da taktik kaynakliydi; d9d46ee1'de 143/151 WEDGE. commanderFormation'in TRAVEL dali `_contact > 0` sartliydi, selectFormation TRAVEL acik arazide her zaman WEDGE donuyordu.
  YAPILAN: commanderFormation: hareketli (>4 km/s) temassiz gruplar icin seyir secimi + tehdit mesafesi (nearTargets / plan objektifi); selectFormation TRAVEL: meskun STAG COLUMN, acik arazide mesafe bantlari + histerezis; rpt_ozet --form SEYIR satiri.
  YAPILMADI / BILINEN: oyuncu gruplari atlanir (lider oyuncu); arac icindeki lider atlanir; bantlar tasarim; gorsel dogrulama yok (T).
+
+v8.270 FORMASYON KITABA HIZALAMA (kullanici: "tamamen kitaba uygun yap" + "kitapta yeterli bilgi yoksa kendi kararlarini ver ama mantikli")
+ NEDEN: denetimde seyir bantlari (STAG COLUMN orta bandi, v8.269) kitaptan turemiyordu; bounding LINE (kucuk grup) TC 6-13 ile celisiyordu; temasta meskunda STAG COLUMN ATP 3-42 ile celisiyordu; kod yorumlarinda kaynaksiz '(doktrin)' etiketi vardi.
+ YAPILAN: selectFormation (TRAVEL teknik tabanli, BOUNDING, ASSAULT, COMBAT meskun), commanderFormation (seyirBilinenD), tacticsFlank FILE->COLUMN, tacticsHide LINE->WEDGE, kaynaklar_doktrin/FORMASYON_POLITIKASI.md.
+ YAPILMADI / BILINEN: aralik kitaptaki 10 / 20 / 50 m'ye baglanmadi (Arma motoru); hucum icin ATP/MCWP hatti secildi (TC wedge ile cakisiyor); tasarim kalemleri tabloda [T]; gorsel dogrulama yok (T).

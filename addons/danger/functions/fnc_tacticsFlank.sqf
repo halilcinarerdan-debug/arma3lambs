@@ -120,7 +120,8 @@ _units allowGetIn false;
 // ready group
 _group setFormDir (_unit getDir _target);
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "FILE") then { [_group, "FILE", "flank", 1] call FUNC(formSet); };
+// v8.270: kanat hareketi ortulu / dar rota = manga kolonu (K: MCWP 3-11.2 3102b(1)(c)); dosya yalniz olaganustu durumda (TC 3-21.76 6-13)
+if ((formation _group) isNotEqualTo "COLUMN") then { [_group, "COLUMN", "flank", 1] call FUNC(formSet); };
 {
     _x setUnitPos "DOWN";
     _x forceSpeed -1;

@@ -53,7 +53,8 @@ _target = _target call CBA_fnc_getPos;
 
 // hold-fire combat mode
 _group setVariable [QGVAR(taktikFormT), time];
-if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "hide", 1] call FUNC(formSet); };
+// v8.270: saklanma / bekleme = her yone guvenlik, esnek kama (K: ATP 3-21.8 3-46 / MCWP 3102a(2)); hat yanlardan zayif (ATP 3-42)
+if ((formation _group) isNotEqualTo "WEDGE") then { [_group, "WEDGE", "hide", 1] call FUNC(formSet); };
 // v8.89 ATES KESME DUZELTMESI (RPT e020cec6: IS gruplari 75 karardan 39'unda DELAY = siper + 'WHITE' (ates kesme); 140-250 m'de bilinen dusman ates ederken karsilik vermiyorlardi, 15 bayilan / 4):
 //   WHITE yalniz saklanma / pusu icin anlamli. Bilinen dusman 400 m icinde ve gruptan biri baski altindaysa siper al + KARSILIK VER (YELLOW).
 private _hEn = _unit findNearestEnemy _unit;

@@ -2,6 +2,12 @@
 /*
  * Author: Cinar (ELITE fork)
  * Arazi tipine ve duruma gore en uygun formasyonu secer.
+ * v8.270 DOKTRIN HIZALAMA (kullanici: 'tamamen kitaba uygun yap; kitapta yeterli bilgi yoksa kendi kararini ver ama mantikli'): kaynaklar kaynaklar_doktrin/ ( [K] = kitapta var, [T] = TASARIM / kitapta yok ):
+ *   [K] Hareket tekniklerini temas olasiligi belirler (TC 3-21.76 6-5..6-7): temas beklenmiyor = seyir (traveling); olasi = gozetimli seyir (traveling overwatch, en cok kullanilan); bekleniyor = sicramali gozetim (bounding overwatch).
+ *   [K] Manga kolonu intikalin ana formasyonu (ATP 3-21.8 3-53; MCWP 3-11.2 3102b: hiz / siki kontrol / dar-ortulu rota / sinirli gozlem / gece); kolon on cepheden zayif ve temasta takviye zor (ATP 3-42, MCWP) -> temasta KOLON YOK.
+ *   [K] Kama (wedge): ates ekibinin temel formasyonu, esnek, her yone guvenlik (ATP 3-46; MCWP 3102a(2)); sicramada ekipler kamada (TC 6-13 / 5616). Dosya yalniz olaganustu durumda (TC 6-13).
+ *   [K] V (vee): dusman onde ve gucu / yeri BILINIYORSA, buyuk acik alan gecisi, hatta gecis kolayligi (MCWP 3102b(3)). Hat / skirmishers: hucumda, yeri + gucu bilinen dusman, kisa acik alan (ATP 3-54; MCWP 3102a(3)). Eselon: acik / maruz kanadi korumak (MCWP; ATP 3-42).
+ *   [K] Cakisma: hucumda TC 3-21.76 ekipleri kamada tutar, ATP 3-21.8 / MCWP manga hattini verir -> manga (grup) duzeyi icin ATP / MCWP (hat) secildi. [T] Mesafe esikleri (1200 / 250 m), zirh / MG'ye karsi V (dagilma), meskun mahal kama, STAG COLUMN (MCWP 3-11.1 muharebe formasyonlari listesinde var, kullanim yeri tasarim).
  * LOS kontrolu kaldirildi (ceset/bodybag VIEW filtresini kirletiyordu).
  *
  * Arguments:
@@ -190,23 +196,17 @@ if (_context isEqualTo "COMBAT") then {
 switch (_context) do {
     // BOUNDING
     case "BOUNDING": {
-        // 2026-10-01: DIAMOND/FILE sikisik ve LAMBS brainEngage bu formasyonlarda bastirmayi kapatiyor
+        // [K] sicramali gozetimde ekipler kamada (TC 3-21.76 6-13 / 5616); [T] meskunda STAG COLUMN (sokak kenari, MCWP 3-11.1 formasyon listesi), ormanda esnek V
         if (_isUrban) then {
             _formation = "STAG COLUMN";
-            _reason = "meskun mahal - sokak/bina kenari sasirtmali kolon (doktrin)";
+            _reason = "meskun mahal sicrama - sasirtmali kolon (T: sokak / bina kenari; MCWP 3-11.1 formasyon listesinde)";
         } else {
             if (_isForest) then {
                 _formation = "VEE";
-                _reason = "orman - esnek V";
+                _reason = "orman sicrama - esnek V (T)";
             } else {
-                // v8.69: 8+ kisilik grupta LINE cok genis (lider durunca 9/13 asker slota yuruyor: BOSTA-HAREKET) -> toplu WEDGE
-                if (({alive _x} count (units (group _unit))) >= 8) then {
-                    _formation = "WEDGE";
-                    _reason = "acik arazi - 8+ kisi: toplu WEDGE (LINE cok genis)";
-                } else {
-                    _formation = "LINE";
-                    _reason = "acik arazi - genis cephe";
-                };
+                _formation = "WEDGE";
+                _reason = "acik arazi sicrama - ekipler kamada (K: TC 3-21.76 6-13; v8.270: kucuk grupta LINE kaldirildi)";
             };
         };
     };
@@ -250,18 +250,18 @@ switch (_context) do {
                 _reason = "kayip / ustun dusman - toplu, karsilikli destek";
             } else {
                 if (_eMg >= 1 && {_closest > 60}) then {
-                    _formation = ["VEE", "STAG COLUMN"] select _isUrban;
+                    _formation = ["VEE", "WEDGE"] select _isUrban;   // v8.270: temasta kolon YOK (ATP 3-21.8 3-42); meskunda kama (T)
                     _reason = "dusman MG - dagilmis (MG tek seritle kirmasin)";
                 } else {
                     if (_closest < _t1) then {
-                        _formation = ["LINE", "STAG COLUMN"] select _isUrban;
+                        _formation = ["LINE", "WEDGE"] select _isUrban;   // v8.270: temasta kolon YOK; yakin temas LINE (K: MCWP 3102a(3) yeri bilinen dusman), meskunda kama (T)
                         _reason = "yakin temas - maksimum ates / bina kenari";
                     } else {
                         if (_closest < _t2) then {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {["LINE", _echYon] select (_echYon isNotEqualTo "")}};
+                            _formation = if (_isUrban) then {"WEDGE"} else {if (_isForest) then {"VEE"} else {["LINE", _echYon] select (_echYon isNotEqualTo "")}};
                             _reason = ["orta mesafe temas - arazi + cephe", "orta mesafe temas - dusman yanda: ECH (acik kanat korumasi)"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         } else {
-                            _formation = if (_isUrban) then {"STAG COLUMN"} else {if (_isForest) then {"VEE"} else {["WEDGE", _echYon] select (_echYon isNotEqualTo "")}};
+                            _formation = if (_isUrban) then {"WEDGE"} else {if (_isForest) then {"VEE"} else {["WEDGE", _echYon] select (_echYon isNotEqualTo "")}};
                             _reason = ["uzak temas - esnek intikal", "uzak temas - dusman yanda: ECH"] select (!_isUrban && {!_isForest} && {_echYon isNotEqualTo ""});
                         };
                     };
@@ -293,55 +293,64 @@ switch (_context) do {
 
     // ASSAULT
     case "ASSAULT": {
+        // [K] manga hatti hucum / on-hucum formasyonu (ATP 3-21.8 3-54; MCWP 3-11.2 3102a(3) skirmishers 'hucum sirasinda'); TC 3-21.76 ekipleri kamada tutar (ekip duzeyi, grup formasyonuna indirgenemiyor)
         if (_isUrban) then {
-            _formation = "STAG COLUMN";
-            _reason = "CQB - sasirtmali kolon, bina kenari (doktrin)";
+            _formation = "WEDGE";
+            _reason = "meskun mahal hucum - kama (T: sokakta hat uygulanamaz; esnek, her yone ates - MCWP 3102a(2))";
         } else {
             _formation = "LINE";
-            _reason = "acik arazi - ates gucu";
+            _reason = "acik arazi hucum - manga hatti (K: ATP 3-21.8 3-54 / MCWP 3102a(3))";
         };
     };
 
-    // TRAVEL
+    // TRAVEL - hareket tekniginin temas olasiligina gore secimi (TC 3-21.76 6-5..6-7). Tehdit bandi (commanderFormation seyirTehditD / seyirBilinenD):
+    //   [T] esikler 1200 m / 250 m (kitapta mesafe YOK): >1200 temas beklenmiyor = seyir; 250-1200 olasi = gozetimli seyir; <250 beklenen = sicramali gozetim hazirligi.
     case "TRAVEL": {
-        if (_onRoad) then {
-            _formation = "COLUMN";
-            _reason = "yol - konvoy duzeni";
+        private _td = _grup getVariable [QGVAR(seyirTehditD), 9999];
+        private _bd = _grup getVariable [QGVAR(seyirBilinenD), 9999];
+        private _esik = [1200, 250];
+        private _raw = {_x} count [_td < 1200, _td < 250];
+        private _bOnce = _grup getVariable [QGVAR(selSeyirBand), -1];
+        if (_bOnce >= 0 && {_raw != _bOnce}) then {
+            if (_raw > _bOnce) then {
+                if (_td > ((_esik select _bOnce) - 80)) then { _raw = _bOnce; };
+            } else {
+                if (_td < ((_esik select ((_bOnce - 1) max 0)) + 80)) then { _raw = _bOnce; };
+            };
+        };
+        _grup setVariable [QGVAR(selSeyirBand), _raw];
+        private _gece = sunOrMoon < 0.1;
+        private _temasSonrasi = ((_grup getVariable [QGVAR(contact), 0]) > 0) && {(time - (_grup getVariable [QGVAR(contact), 0])) < 120};
+        if (_temasSonrasi || {_raw >= 2}) then {
+            if (!_temasSonrasi && {_bd < 250}) then {
+                _formation = "VEE";
+                _reason = format ["temas bekleniyor, dusman yeri biliniyor (%1 m) - V (K: MCWP 3-11.2 3102b(3))", round _bd];
+            } else {
+                _formation = "WEDGE";
+                _reason = ["temas bekleniyor - kama (K: sicramali gozetimde ekipler kamada, TC 6-13)", "temas sonrasi 120 sn - her yone guvenlik kamasi (T)"] select _temasSonrasi;
+            };
         } else {
-            if (_isUrban) then {
-                _formation = "STAG COLUMN";
-                _reason = "meskun mahal intikal - sasirtmali kolon";
+            if (_onRoad) then {
+                _formation = "COLUMN";
+                _reason = "yol - dar rota, kolon (K: MCWP 3102b(1)(c) dar ortulu rota)";
             } else {
-            if (_isForest) then {
-                _formation = "STAG COLUMN";
-                _reason = "orman - konvoy";
-            } else {
-                if (sunOrMoon < 0.1) then {
+                if (_raw isEqualTo 0) then {
                     _formation = "COLUMN";
-                    _reason = "gece / sinirli gorus - kolon (MCWP 3-11.2: kontrollu hizli intikal)";
+                    _reason = format ["temas beklenmiyor (tehdit %1 m) - manga kolonu, intikalin ana formasyonu (K: ATP 3-21.8 3-53)", round _td];
                 } else {
-                    if (((_grup getVariable [QGVAR(contact), 0]) > 0) && {(time - (_grup getVariable [QGVAR(contact), 0])) < 120}) then {
-                        _formation = "WEDGE";   // v8.83: DIAMOND kaldirildi (kullanici: cok riskli)
-                        _reason = "temas sonrasi - her yone guvenlik (TASARIM)";
+                    if (_gece) then {
+                        _formation = "COLUMN";
+                        _reason = "gece / sinirli gorus - kolon (K: MCWP 3102b(1) gece harekati, sinirli gozlem)";
                     } else {
-                        // v8.269 SEYIR: acik arazide tehdit mesafesine gore (seyir -> gozetimli seyir -> temas beklenen): COLUMN > 1200 m, STAG COLUMN 600-1200, WEDGE 250-600, VEE < 250 (80 m histerezis; TASARIM, kitapta sayi yok)
-                        private _td = _grup getVariable [QGVAR(seyirTehditD), 9999];
-                        private _esik = [1200, 600, 250];
-                        private _raw = {_x} count [_td < 1200, _td < 600, _td < 250];
-                        private _bOnce = _grup getVariable [QGVAR(selSeyirBand), -1];
-                        if (_bOnce >= 0 && {_raw != _bOnce}) then {
-                            if (_raw > _bOnce) then {
-                                if (_td > ((_esik select _bOnce) - 80)) then { _raw = _bOnce; };
-                            } else {
-                                if (_td < ((_esik select ((_bOnce - 1) max 0)) + 80)) then { _raw = _bOnce; };
-                            };
+                        if (_isUrban) then {
+                            _formation = "STAG COLUMN";
+                            _reason = "meskun mahal, temas olasi - sasirtmali kolon (T: sokak kenari; formasyon MCWP 3-11.1 listesinde)";
+                        } else {
+                            _formation = "WEDGE";
+                            _reason = format ["gozetimli seyir (temas olasi, tehdit %1 m) - kama (K: TC 3-21.76 6-7b en cok kullanilan; ATP 3-46)", round _td];
                         };
-                        _grup setVariable [QGVAR(selSeyirBand), _raw];
-                        _formation = ["COLUMN", "STAG COLUMN", "WEDGE", "VEE"] select _raw;
-                        _reason = format ["acik arazi intikal - tehdit %1 m", round _td];
                     };
                 };
-            };
             };
         };
     };
