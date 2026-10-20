@@ -11,11 +11,11 @@ Kod: `fnc_selectFormation` (baglamlar), `fnc_commanderFormation` (secim zamani, 
 | Gece / sinirli gorus (temas olasi) | COLUMN | [K] MCWP 3102b(1)(e) gece harekati |
 | Temas olasi (250-1200 m), acik | WEDGE | [K] TC 6-7b gozetimli seyir (en cok kullanilan), ATP 3-46; esikler [T] |
 | Temas olasi, meskun mahal | STAG COLUMN | [T] sokak kenari; formasyon MCWP 3-11.1 listesinde |
-| Temas bekleniyor (< 250 m) | WEDGE | [K] TC 6-13 siçramada ekipler kamada |
+| Temas bekleniyor (< 250 m) | WEDGE | [K] TC 6-13 sicramada ekipler kamada |
 | Temas bekleniyor + yeri bilinen dusman onde | VEE | [K] MCWP 3102b(3) |
 | Temas sonrasi 120 sn | WEDGE | [T] her yone guvenlik (ATP 3-46 mantigi) |
-| Siçrama (bounding), acik | WEDGE (8+ ve kucuk grup; eski LINE kaldirildi) | [K] TC 6-13 / 5616 |
-| Siçrama, orman / meskun | VEE / STAG COLUMN | [T] |
+| Sicrama (bounding), acik | WEDGE (8+ ve kucuk grup; eski LINE kaldirildi) | [K] TC 6-13 / 5616 |
+| Sicrama, orman / meskun | VEE / STAG COLUMN | [T] |
 | Temasta: kayip >= %40 ya da ustun dusman | WEDGE | [K] esnek, her yone guvenlik (ATP 3-42, 3-46) |
 | Temasta: yakin (< 50 m) acik | LINE | [K] MCWP 3102a(3) yeri / gucu bilinen dusman, hucum |
 | Temasta: orta mesafe | LINE / ECH (kanat tehdidi) | [K] LINE ayni; ECH = acik kanat (MCWP, ATP 3-42) |
