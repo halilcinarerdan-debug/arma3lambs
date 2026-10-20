@@ -384,3 +384,10 @@ Hepsi (T) = dogrulanmadi.
 4. Firlatma emri bekliyorken operator olurse `[IHA-BEKLEME] ... OPERATOR OLDU: firlatma emri iptal`.
 5. 40 m icinde dost asker yoksa `operator BAGSIZ` uyarisi; Bagsiz seciliyse operator olumunun dronu etkilemedigi eski davranis.
 Hepsi (T) = dogrulanmadi.
+
+## T-FORM-SEYIR (v8.269)
+1. Temas etmemis bir AI grubunu (4+ asker) acik arazide uzak bir noktaya yuru (Zeus waypoint ya da ELE GECIR plani; yakinda dusman yok).
+2. Beklenen: hareket baslayinca ~25 sn icinde `[KOMUTAN-FORM] <grup> | SEYIR | formasyon -> COLUMN | tehdit 9999 m` (ya da plan objektifine mesafe); yol uzerinde COLUMN, orman / meskun STAG COLUMN, yaklasinca (<1200 / <600 / <250 m) STAG COLUMN > WEDGE > VEE. Gruplar goruntude farkli formasyonda ilerlemeli.
+3. Duran / mevzideki / recon grubu formasyonu degismemeli. `python3 tools/rpt_ozet.py --form <rpt>` SEYIR FORMASYONU satiri.
+4. Salinim kontrolu: ayni grupta 60 sn'den kisa aralikla ardisik degisim OLMAMALI (`--form` [SORUN] vermemeli).
+Hepsi (T) = dogrulanmadi.

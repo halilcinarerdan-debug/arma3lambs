@@ -308,6 +308,10 @@ switch (_context) do {
             _formation = "COLUMN";
             _reason = "yol - konvoy duzeni";
         } else {
+            if (_isUrban) then {
+                _formation = "STAG COLUMN";
+                _reason = "meskun mahal intikal - sasirtmali kolon";
+            } else {
             if (_isForest) then {
                 _formation = "STAG COLUMN";
                 _reason = "orman - konvoy";
@@ -320,10 +324,24 @@ switch (_context) do {
                         _formation = "WEDGE";   // v8.83: DIAMOND kaldirildi (kullanici: cok riskli)
                         _reason = "temas sonrasi - her yone guvenlik (TASARIM)";
                     } else {
-                        _formation = "WEDGE";
-                        _reason = "acik arazi intikal";
+                        // v8.269 SEYIR: acik arazide tehdit mesafesine gore (seyir -> gozetimli seyir -> temas beklenen): COLUMN > 1200 m, STAG COLUMN 600-1200, WEDGE 250-600, VEE < 250 (80 m histerezis; TASARIM, kitapta sayi yok)
+                        private _td = _grup getVariable [QGVAR(seyirTehditD), 9999];
+                        private _esik = [1200, 600, 250];
+                        private _raw = {_x} count [_td < 1200, _td < 600, _td < 250];
+                        private _bOnce = _grup getVariable [QGVAR(selSeyirBand), -1];
+                        if (_bOnce >= 0 && {_raw != _bOnce}) then {
+                            if (_raw > _bOnce) then {
+                                if (_td > ((_esik select _bOnce) - 80)) then { _raw = _bOnce; };
+                            } else {
+                                if (_td < ((_esik select ((_bOnce - 1) max 0)) + 80)) then { _raw = _bOnce; };
+                            };
+                        };
+                        _grup setVariable [QGVAR(selSeyirBand), _raw];
+                        _formation = ["COLUMN", "STAG COLUMN", "WEDGE", "VEE"] select _raw;
+                        _reason = format ["acik arazi intikal - tehdit %1 m", round _td];
                     };
                 };
+            };
             };
         };
     };

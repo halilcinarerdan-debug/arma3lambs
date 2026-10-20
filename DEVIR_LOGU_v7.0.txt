@@ -2577,3 +2577,8 @@ v8.268 IHA OPERATOR BAGI (kullanici: "dron sahibi olunce drona ne oluyor" -> "ya
  NEDEN: dronun operatoru yoktu; operator olse de gorev surerdi.
  YAPILAN: fnc_ihaSorti (_op, _opMod; _aktif operator olum kontrolu, _kontrolKaybi dusme, mod 2 son-hedef dalisi), fnc_ihaBekle (operator olunce emir iptal), Zeus modulu 'Operator bagi' + en yakin dost asker secimi, komutanPlanKapi olay parametreleri.
  YAPILMADI / BILINEN: operator elle secilemez (modul konumuna en yakin 40 m); operator yaralanip bayginsa (ACE) hala 'canli' sayilir; FPV mod motoru son yaklasmayi surerken operator olursa dusurme dogrulanmadi; hepsi (T).
+
+v8.269 SEYIR FORMASYONU (kullanici: "hayir formasyon hic degismiyor acik arazide bile")
+ NEDEN: onceki 'calisiyor' degerlendirmem YANLISTI: loglardaki formasyon degisimleri hep TEMAS ya da taktik kaynakliydi; d9d46ee1'de 143/151 WEDGE. commanderFormation'in TRAVEL dali `_contact > 0` sartliydi, selectFormation TRAVEL acik arazide her zaman WEDGE donuyordu.
+ YAPILAN: commanderFormation: hareketli (>4 km/s) temassiz gruplar icin seyir secimi + tehdit mesafesi (nearTargets / plan objektifi); selectFormation TRAVEL: meskun STAG COLUMN, acik arazide mesafe bantlari + histerezis; rpt_ozet --form SEYIR satiri.
+ YAPILMADI / BILINEN: oyuncu gruplari atlanir (lider oyuncu); arac icindeki lider atlanir; bantlar tasarim; gorsel dogrulama yok (T).
