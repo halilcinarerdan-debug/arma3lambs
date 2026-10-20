@@ -2602,3 +2602,8 @@ v8.273 FPV DALIS DUZELTMESI (kullanici: "kamikaze calismiyor, dron havada glitch
  NEDEN (kod analizi): dalista AI pilot otopilotu + flyInHeight betik setVelocity / setVectorDir ile cakisiyor.
  YAPILAN: fnc_ihaSorti dalis blogu (AI MOVE / PATH kapat, hiz rampasi, setVectorDirAndUp, 0.05 sn, 5 m esik, kesilince pilot geri), [IHA-DALIS] logu.
  YAPILMADI / BILINEN: Crocus modunun kendi fizigi (heli / kuadkopter simulasyonu) dogrulanmadi - AI kapaliyken drone dusebilir (hiz her 0.05 sn yeniden verilir); gercek hiz ayarin altinda kalirsa log gosterecek; hepsi (T).
+
+v8.274 ISARET GIZLEME DUZELTMESI (kullanici: "hala dusman markerlari gozukuyor mapte")
+ NEDEN (kod analizi, istemci RPT'si yok): v8.271 isaretGizle curator'u varsayilan 'hepsini gor' yapmisti; Zeus oyuncu / sanal Zeus tarafi (civilian) 'otomatik' gizlemeyi atlatiyordu.
+ YAPILAN: zeusTum varsayilan false, CBA 'ELITE isaret gorunumu' (otomatik / tek taraf / hepsi), her turda alfa yeniden uygulama, [ISARET-GIZLE] tani logu.
+ YAPILMADI / BILINEN: LAMBS debug markerlari ve ELITE_ onekli olmayan markerlar gizlenmez; hala gorunurse istemci RPT'sindeki [ISARET-GIZLE] satiri gerekir; hepsi (T).

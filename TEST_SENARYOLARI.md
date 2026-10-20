@@ -419,3 +419,10 @@ Hepsi (T) = dogrulanmadi.
 2. Beklenen: havada titreme / yerinde donme YOK; `hiz ayar` 8 -> 28 m/s artarken `gercek` hiz buna yaklasmali; < 5 m'de `HEDEFE VURDU` + patlama. Gercek hiz ayarin cok altinda kalirsa (< 10 m/s) bu satirlar nedeni gosterir (fizik / mod direnci).
 3. Hedefi dalis sirasinda baska biri vurursa `dalis kesildi: AI pilot geri acildi` ve dron yeni hedef arar.
 Hepsi (T) = dogrulanmadi.
+
+## T-ISARET-ZEUS (v8.274)
+1. Zeus olan OPFOR oyuncu: BLUFOR planinin OBJ / RP / SBF / CCP isaretleri haritada GORUNMEZ olmali (varsayilan). CBA 'ELITE isaret gorunumu' = Hepsi ya da 'Zeus tum ELITE isaretlerini gorur' = acik -> hepsi gorunur.
+2. Sivil / yalniz-Zeus oyuncu: gorunum = Yalniz BLUFOR secilince OPFOR / INDEP isaretleri gizlenir.
+3. Istemci RPT: `[ISARET-GIZLE] taraf ... gorunum ... curator ... gizlenen N` (N > 0 olmali).
+4. Hala gorunuyorsa: markerin adi `ELITE_` ile basliyor mu? (LAMBS debug isaretleri farkli; lambs debug kapali olmali.) RPT satirini at.
+Hepsi (T) = dogrulanmadi.
