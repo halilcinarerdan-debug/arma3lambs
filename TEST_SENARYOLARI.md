@@ -413,3 +413,9 @@ Hepsi (T) = dogrulanmadi.
 4. AP cantasi: tur FPV-AP (personel). Cantali asker firlatmadan olurse `cantali asker OLDU: firlatma emri iptal`.
 5. Elle bir sinif secersen canta kullanilmaz / tuketilmez. Canta sinifi bulunamazsa eski mesaj (`yakinda ... yok`) cikar.
 Hepsi (T) = dogrulanmadi.
+
+## T-IHA-DALIS (v8.273)
+1. FPV-AT dron + zirhli hedef: dron 220 m'ye gelince `[IHA-DALIS] ... dalis basladi ... AI pilot MOVE / PATH kapatildi`; sonra 1 sn'de bir `mesafe / hiz ayar / gercek / irtifa`.
+2. Beklenen: havada titreme / yerinde donme YOK; `hiz ayar` 8 -> 28 m/s artarken `gercek` hiz buna yaklasmali; < 5 m'de `HEDEFE VURDU` + patlama. Gercek hiz ayarin cok altinda kalirsa (< 10 m/s) bu satirlar nedeni gosterir (fizik / mod direnci).
+3. Hedefi dalis sirasinda baska biri vurursa `dalis kesildi: AI pilot geri acildi` ve dron yeni hedef arar.
+Hepsi (T) = dogrulanmadi.

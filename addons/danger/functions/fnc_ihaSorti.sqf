@@ -166,6 +166,9 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         _uav flyInHeight ([40, 30] select (_tur isEqualTo "BOMBA"));
         private _birakildi = 0;
         private _sonBirak = -99;
+        private _dalis = false;
+        private _dalisT0 = 0;
+        private _dalisLogT = 0;
         while {(call _aktif) && {alive _h} && {!_bitti}} do {
             private _dist = _uav distance2D _h;
             if (_tur isEqualTo "BOMBA") then {
@@ -205,23 +208,48 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     _d doMove (getPosATL _h);
                     sleep 2;
                 } else {
-                    private _fark = ((getPosASL _h) vectorAdd [0, 0, 1.2]) vectorDiff (getPosASL _uav);
+                    // v8.273 DALIS DUZELTMESI (kullanici: 'tam dalacakken havada glitchleniyor, kamikaze calismiyor'): dalis basinda AI pilotun otopilotu (irtifa 40 m + doMove) betik hiziyla SAVASIYORDU
+                    //   (ani 28 m/s hiz atamasi + setVectorDir [yatis sifirlanir] her 0.1 sn). Simdi: dalis baslarken pilotun MOVE / PATH'i kapanir (doStop), hiz 8 m/s'den 28 m/s'ye 1.2 sn'de yumusakca artar,
+                    //   yon setVectorDirAndUp ile (yatis sabit) 0.05 sn adimla; 5 m'de patlar. Dalis hedef olunce / iptal olunca pilot geri acilir. Log: [IHA-DALIS]
+                    if (!_dalis) then {
+                        _dalis = true;
+                        _dalisT0 = time;
+                        _d disableAI "MOVE";
+                        _d disableAI "PATH";
+                        doStop _d;
+                        diag_log format ["[IHA-DALIS] %1 (%2) | dalis basladi: hedef %3 | mesafe %4 m | irtifa %5 m | hiz %6 km/s | AI pilot MOVE / PATH kapatildi", typeOf _uav, _tur, typeOf _h, round _dist, round ((getPosATL _uav) select 2), round (speed _uav)];
+                    };
+                    private _hedefP = (getPosASL _h) vectorAdd [0, 0, 1.2];
+                    private _fark = _hedefP vectorDiff (getPosASL _uav);
                     private _mag = (vectorMagnitude _fark) max 0.1;
-                    _uav setVelocity (_fark vectorMultiply (28 / _mag));
-                    _uav setVectorDir (vectorNormalized _fark);
-                    if (_mag < 4) then {
+                    private _yonV = _fark vectorMultiply (1 / _mag);
+                    private _hz = 8 + (20 * (((time - _dalisT0) / 1.2) min 1));
+                    _uav setVectorDirAndUp [_yonV, [0, 0, 1]];
+                    _uav setVelocity (_yonV vectorMultiply _hz);
+                    if (time > _dalisLogT) then {
+                        _dalisLogT = time + 1;
+                        diag_log format ["[IHA-DALIS] %1 | mesafe %2 m | hiz ayar %3 m/s gercek %4 m/s | irtifa %5 m | %6 sn", typeOf _uav, round _mag, _hz toFixed 1, round (speed _uav / 3.6), round ((getPosATL _uav) select 2), (time - _dalisT0) toFixed 1];
+                    };
+                    if (_mag < 5) then {
                         private _am = ["R_PG32V_F", "R_TBG32V_F"] select (_tur isEqualTo "FPV-AP");
                         private _w = createVehicle [_am, getPosATL _uav, [], 0, "CAN_COLLIDE"];
                         _w setPosASL (getPosASL _uav);
                         triggerAmmo _w;
-                        diag_log format ["[IHA-SORTI] %1 (%2) | HEDEFE VURDU: %3 (%4) | %5 sn ucus", typeOf _uav, _tur, typeOf _h, _am, round (time - _t0)];
+                        diag_log format ["[IHA-SORTI] %1 (%2) | HEDEFE VURDU: %3 (%4) | %5 sn ucus | dalis %6 sn", typeOf _uav, _tur, typeOf _h, _am, round (time - _t0), (time - _dalisT0) toFixed 1];
                         _bitti = true;
                         sleep 0.3;
                         { deleteVehicle _x; } forEach (crew _uav);
                         deleteVehicle _uav;
-                    } else { sleep 0.1; };
+                    } else { sleep 0.05; };
                 };
                 };
+            };
+            // v8.273: dalis hedef olunce / iptal olunca (hedef baskasi tarafindan vuruldu, operator, sure) AI pilot geri acilir
+            if (_dalis && {alive _uav} && {!_bitti}) then {
+                _dalis = false;
+                _d enableAI "MOVE";
+                _d enableAI "PATH";
+                diag_log format ["[IHA-DALIS] %1 | dalis kesildi (hedef %2 / aktif %3): AI pilot geri acildi", typeOf _uav, ["OLDU", "SAG"] select (alive _h), call _aktif];
             };
         };
     };

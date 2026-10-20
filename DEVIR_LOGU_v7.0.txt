@@ -2597,3 +2597,8 @@ v8.272 CROCUS CANTASI IHA ATAMASI (kullanici: "canta olarak crocus bag olunca ih
  NEDEN: modul `nearestObjects ["Air","LandVehicle"]` + unitIsUAV ile arac ariyordu; canta (backpack) ne arac ne UAV. [GIYIM-TANI] satirlari AT askerlerinin 'canta O_Crocus_AT_Bag' tasidigini gosterir.
  YAPILAN: fnc_ihaCantaSinif (assembleTo / _Bag eki), modulde cantali asker (nearEntities backpack) ya da yerdeki weaponholder (getBackpackCargo) tespiti, operator = cantali asker, ihaBekle'de firlatma noktasi askeri izler + canta tuketimi + asker olurse iptal, olay parametresi _cantaNid.
  YAPILMADI / BILINEN: assembleTo moda ozgu (dogrulanmadi; yoksa ad tabanli esleme); mod kendi 'kur' eylemini kullanmiyoruz (kendi yaratimimiz); yerdeki cantada birden fazla canta varsa yalniz ilk Crocus cantasi tuketilir; hepsi (T).
+
+v8.273 FPV DALIS DUZELTMESI (kullanici: "kamikaze calismiyor, dron havada glitchleniyor, tam dalacakken oluyor")
+ NEDEN (kod analizi): dalista AI pilot otopilotu + flyInHeight betik setVelocity / setVectorDir ile cakisiyor.
+ YAPILAN: fnc_ihaSorti dalis blogu (AI MOVE / PATH kapat, hiz rampasi, setVectorDirAndUp, 0.05 sn, 5 m esik, kesilince pilot geri), [IHA-DALIS] logu.
+ YAPILMADI / BILINEN: Crocus modunun kendi fizigi (heli / kuadkopter simulasyonu) dogrulanmadi - AI kapaliyken drone dusebilir (hiz her 0.05 sn yeniden verilir); gercek hiz ayarin altinda kalirsa log gosterecek; hepsi (T).
