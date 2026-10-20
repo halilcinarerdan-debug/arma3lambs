@@ -555,13 +555,18 @@ private _isaretler = [];
     _m setMarkerColor _renk;
     _m setMarkerText _metin;
     _isaretler pushBack _m;
-} forEach [
+} forEach ([
     ["OBJ", _obj, "mil_objective", format ["%1 OBJ", _id]],
     ["RP", _rp, "mil_start", format ["%1 RP", _id]],
     ["ORP", _orp, "mil_triangle", format ["%1 ORP", _id]],
     ["SBF", _sbf, "mil_dot", format ["%1 SBF (destek)", _id]],
     ["CCP", _ccp, "mil_pickup", format ["%1 CCP (yarali toplama)", _id]]
-];
+] select {
+    // v8.271: ORP (hedef onu toplanma noktasi) saldiri kavramidir; savunma planinda (tip 1) kullanilmaz -> isaret konmaz. SBF savunmada tehdit / destek yonu referansi olarak kalir (etiket degisir).
+    !(_tip isEqualTo 1 && {(_x select 0) isEqualTo "ORP"})
+} apply {
+    if (_tip isEqualTo 1 && {(_x select 0) isEqualTo "SBF"}) then { [_x select 0, _x select 1, _x select 2, format ["%1 TEHDIT YONU / DESTEK", _id]] } else { _x }
+});
 // yarali toplama noktasi (CCP): rally point'in yaninda; araçli medevac buraya tasir
 if (isNil "lambs_danger_planCCPlar") then { lambs_danger_planCCPlar = []; };
 lambs_danger_planCCPlar pushBack [_id, _taraf, _ccp];

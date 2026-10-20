@@ -2587,3 +2587,8 @@ v8.270 FORMASYON KITABA HIZALAMA (kullanici: "tamamen kitaba uygun yap" + "kitap
  NEDEN: denetimde seyir bantlari (STAG COLUMN orta bandi, v8.269) kitaptan turemiyordu; bounding LINE (kucuk grup) TC 6-13 ile celisiyordu; temasta meskunda STAG COLUMN ATP 3-42 ile celisiyordu; kod yorumlarinda kaynaksiz '(doktrin)' etiketi vardi.
  YAPILAN: selectFormation (TRAVEL teknik tabanli, BOUNDING, ASSAULT, COMBAT meskun), commanderFormation (seyirBilinenD), tacticsFlank FILE->COLUMN, tacticsHide LINE->WEDGE, kaynaklar_doktrin/FORMASYON_POLITIKASI.md.
  YAPILMADI / BILINEN: aralik kitaptaki 10 / 20 / 50 m'ye baglanmadi (Arma motoru); hucum icin ATP/MCWP hatti secildi (TC wedge ile cakisiyor); tasarim kalemleri tabloda [T]; gorsel dogrulama yok (T).
+
+v8.271 ISARET GIZLEME + SAVUNMADA ORP (kullanici: "karsi tarafa dusmansak onlarin markerlari gozukmesin ve savunan tarafta orp olmasi normal mi?")
+ NEDEN: createMarker global (komutanPlan / planKapi); gozetleAta / hendekAlani / moduleObjektif markerPos ve allMapMarkers'a bagli oldugu icin yerel markere cevirmek mantiklari bozardi. Savunma planinda ORP hesaplaniyor/ciziliyor ama (planDongu) yalniz saldiri dallarinda kullaniliyor.
+ YAPILAN: fnc_isaretGizle (istemci, renkten taraf, setMarkerAlphaLocal), CBA 'ELITE isaretler', komutanPlan'da tip 1 icin ORP isareti yok + SBF etiketi.
+ YAPILMADI / BILINEN: marker adlari hala global (ag verisi gorulebilir, haritada degil); 'elite_hendek*' kullanici markerlari gizlenmez (taraf bilgisi yok); ELITE disi markerlara dokunulmaz; hepsi (T).

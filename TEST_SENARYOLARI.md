@@ -398,3 +398,10 @@ Hepsi (T) = dogrulanmadi.
 3. Temasta meskun mahalde STAG COLUMN OLMAMALI (WEDGE / LINE).
 4. `--form` teshisinde salinim ([SORUN]) cikmamali.
 Tablo: kaynaklar_doktrin/FORMASYON_POLITIKASI.md. Hepsi (T) = dogrulanmadi.
+
+## T-ISARET-GIZLE (v8.271)
+1. Iki oyuncu (BLUFOR ve OPFOR) + Zeus: BLUFOR icin ELITE Objektif / Karakol / HQ koy. OPFOR oyuncunun haritasinda `ELITE_PLAN_* / KARAKOL / HQ` isaretleri 3 sn icinde gorunmez olmali; BLUFOR oyuncuda gorunur.
+2. Zeus (curator) hepsini gorur; CBA 'Zeus tum ELITE isaretlerini gorur' kapatilirsa Zeus da kendi tarafi disindakileri gormez. CBA 'Dusman ELITE isaretlerini gizle' kapali: herkes hepsini gorur.
+3. SAVUN planinda `P1 ORP` isareti YOK; `P1 TEHDIT YONU / DESTEK` var (ELE GECIR planinda ORP + SBF eskisi gibi).
+4. Gozetleme atama (Zeus) / hendek / objektif modulu isaretleri hala buluyor (markerlar silinmedi, yalniz gizlendi).
+Hepsi (T) = dogrulanmadi.
