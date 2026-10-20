@@ -1,4 +1,4 @@
-# DOGRULANMAYANLAR - cephe simulasyonu HARIC, oyunda dogrulanmamis ozellikler + test senaryo plani (v8.274)
+# DOGRULANMAYANLAR - cephe simulasyonu HARIC, oyunda dogrulanmamis ozellikler + test senaryo plani (v8.275)
 
 Kaynak: OZELLIKLER_LISTESI.md (T isaretleri), DEVIR_LOGU_v7.0.txt, bu oturumdaki RPT analizleri. Cephe simulasyonu (`10e`) kapsam disi.
 Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikte gorulunce T'den cikarilir (OZELLIKLER_LISTESI.md'de `(T)` silinir, bu dosyada [x] yapilir).
@@ -29,7 +29,7 @@ Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikt
 - [ ] Tani paketi (`--tani` ciktilari) (her senaryo)
 - [ ] Zeus IHA gorevi: dron yarat (S5)
 
-### C. v8.260 - v8.274 (10g; hepsi T)
+### C. v8.260 - v8.275 (10g; hepsi T)
 - [ ] 260 IHA gorevi duzeltmesi (sunucuda yaratma, "Suspending" hatasi yok) (S5)
 - [ ] 261 Erken kuvvet orani kapisi + hibrit dusman tahmini (S1)
 - [ ] 262 Nakilde ek arac + medevac rezervi koltuk kontrolu (S1)
@@ -38,8 +38,9 @@ Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikt
 - [ ] 265 Tank piyade bagi + hareket edemeyen tank (S1, S3)
 - [ ] 266 Oyuncu grubu arac murettebati muaf (S6)
 - [ ] 267 IHA bilincli firlatma, 268 operator bagi, 272 Crocus cantasi, 273 FPV dalis (S5)
-- [ ] 269 Seyir formasyonu, 270 formasyon politikasi (S4)
-- [ ] 271 / 274 Dusman isaretlerini gizleme + savunmada ORP yok (S2, S7)
+- [x] 269 Seyir formasyonu (RPT 04dfc9d7 + kullanici: 'formasyon yuruyusu guzel calisiyor'); 270 politika tablosu hala T (S4)
+- [x] 271 / 274 Dusman isaretlerini gizleme (kullanici teyidi, RPT 372b264e) - savunmada ORP yok hala T (S2)
+- [ ] 275 Recon kismi binme iptali, tank ARAC-SENKRON muaf, moral cokme + teslim esikleri (S1, S10)
 
 ### D. Log kanitli ama belgede hala T (kapatilabilir, S ile teyit yeterli)
 - Hendek kapasite / ek ekipler (90 sn'de %85-97 icinde), MEVZI-KILIT etkin, statik silah (NSV) atamasi, PLAN-KAYIP-DONUS, ARAC-ZIRH-KAC, OLUM-TANI, formasyon hakemi (FORM-SET) salinimsiz.
@@ -55,11 +56,13 @@ Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikt
 - [ ] `[ISARET-GIZLE]` istemci logu (S7)
 - [ ] `init.sqf` terrain temizligi: hideObjectGlobal + AI navmesh etkisi, `allMissionObjects ""` varsayimi, CUP model adlari (S8)
 - [ ] "Bot aractan inmiyor" kok nedeni (S6)
-- [ ] Teslim olma (faction bazli CBA) gercek macta (S10)
+- [ ] Teslim olma (faction bazli CBA) gercek macta (S10) - v8.275: eski formulde ulasilamazdi; yeni cokme terimi + [TESLIM-ADAY] moral < 0.60 logu
+- [ ] Recon grubu neden tam binemedi (koltuk / etiketli arac) - v8.275 KISMI BINME logu (S1)
+- [ ] IHA seyir hizi / FPV-AT motor bolgesi dalisi (istek, yazilmadi) (S5)
 
 ## 2. TEST SENARYO PLANI (10 senaryo, her biri birden cok maddeyi kapatir)
 Genel: Server + Zeus client; her senaryo sonunda IKI RPT (sunucu + istemci) kaydet (dosya adinda senaryo no). Ardindan `python3 tools/rpt_ozet.py --karne --tani --form <rpt>`.
-Surum kontrolu: RPT'de `[ELITE-BOOT] ... v8.274` gorunmeli.
+Surum kontrolu: RPT'de `[ELITE-BOOT] ... v8.275` gorunmeli.
 
 ### S1 - Ele gecir: tank + BTR + recon + zayif/guclu dusman (en cok madde)  [~25 dk]
 Ortam: WEST 8 grup (~30 asker), 1 T-72, 3 BTR-80 + 3 Ural (Open), AFOU UAZ recon araci (Gorev Ata RECON ARACI), MEDEVAC gruplu 1 hekim, topcu; EAST hendekli objektif (~25 dusman, 1 tank), objektif 2.5-3 km. HQ kur.

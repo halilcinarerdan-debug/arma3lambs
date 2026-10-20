@@ -55,6 +55,9 @@ private _calis = {
             };
 
             if (_g getVariable ["lambs_danger_planZirh", false]) then { ["plan zirh destek"] call _serbest; continue };
+            // v8.275 TANK MUAF (kullanici, RPT 04dfc9d7: 'west tankı cok yavas, dur kalkli'): plan baslamadan once tank yakindaki piyade grubuna eskort sayilip BEKLE (0) / YAVASLA (1.4 m/s) ile
+            //   surunuyordu; plan zirhi olunca (SERBEST) duzeldi. Tank artik varsayilan olarak eskort kuralina girmez (CBA: lambs_danger_tankSenkron = true ile eski davranis)
+            if ((_veh isKindOf "Tank") && {!(missionNamespace getVariable ["lambs_danger_tankSenkron", false])}) then { ["tank: senkron muaf"] call _serbest; continue };
             // v8.186: topcu (M109 / havan) piyadeye eskort DEGIL (RPT 2eac326d: M109G Alpha 3-3 piyadesine SENKRON / YAVASLA ile saga sola titredi)
             if ((getNumber (configOf _veh >> "artilleryScanner")) > 0 || {((_veh getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK"])} || {(_g getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK"]}) then { ["topcu araci"] call _serbest; continue };
             if !([_g, "aracSenkron", true] call FUNC(dk)) then { ["doktrin kapali"] call _serbest; continue };

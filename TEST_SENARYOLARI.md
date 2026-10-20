@@ -426,3 +426,20 @@ Hepsi (T) = dogrulanmadi.
 3. Istemci RPT: `[ISARET-GIZLE] taraf ... gorunum ... curator ... gizlenen N` (N > 0 olmali).
 4. Hala gorunuyorsa: markerin adi `ELITE_` ile basliyor mu? (LAMBS debug isaretleri farkli; lambs debug kapali olmali.) RPT satirini at.
 Hepsi (T) = dogrulanmadi.
+
+## T-RECON-KISMI-BINME (v8.275)
+1. Recon grubu 4+ asker, recon araci 2-3 bos koltuklu (ya da Zeus 'RECON ARACI' etiketli dar arac). Bindirme 60 sn sonra: `[RECON-ARAC] ... KISMI BINME: N bindi, M binemedi ([isim, mesafe]) -> binenler iniyor` + `BASARISIZ: kismi binme (N / toplam) -> recon yaya gidecek`.
+2. Beklenen: binemeyenler araci KOVALAMAZ (yerinde kalir / yaya recon'a gecer), binenler iner, arac surucusu serbest (`forceSpeed -1`), plan `reconAracBasarisiz` ile yaya recon'a gecer.
+3. Herkes binerse eski akis (`N recon askeri bindi -> OP'ye sessiz surus`).
+Hepsi (T) = dogrulanmadi.
+
+## T-TANK-SENKRON-MUAF (v8.275)
+1. Plan baslamadan once tank 300 m icinde piyade grubuyla: RPT'de `[ARAC-SENKRON] <tank grubu> | arac <tank> | SERBEST (tank: senkron muaf)`; BEKLE / YAVASLA satiri tank icin OLMAMALI. Tank dur-kalk yapmamali.
+2. CBA "Tank piyade eskort hiz kuralina girer" = acik -> eski BEKLE / YAVASLA satirlari geri gelir.
+Hepsi (T) = dogrulanmadi.
+
+## T-TESLIM-COKME (v8.275)
+1. 8 kisilik grubu 4 kisiye dusur (kayip yuzde 50), dusman 150 m icinde ates altinda tut: `[MORAL] ... moral:0.4x (hedef 0.4x, cokme -0.25)`; `[TESLIM-ADAY] ... izin=true | moral=... (<0.45) | kayip=50 (>=50) | kalan=4 (<=5) | baski=... (>=0.3) | dusman=... m (<=150) | engel=false`.
+2. Tum kosullar saglaninca `[TESLIM] ... N asker teslim oldu`. Saglanmiyorsa aday satiri hangi kosulun eksik oldugunu gosterir (cogu zaman: baski < 0.30 ya da engel=true = grup retreat / evade'de).
+3. Saga sola dagilma: `[PANIK] ... KACIS` satirlari (zirh korkusu) teslim degildir.
+Hepsi (T) = dogrulanmadi.

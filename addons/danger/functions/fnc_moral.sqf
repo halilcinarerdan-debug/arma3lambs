@@ -66,7 +66,10 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             } else { _komsu = 0; };
             private _temasYok = (_g getVariable [QGVAR(contact), 0]) < (time - 60);
 
-            private _hedef = 1 - (0.50 * _kayip) - (0.25 * _bsk) - (0.15 * (_dusukC / (count _us))) - ([0, 0.15] select (isNull _l || {!alive _l})) - ([0, 0.10] select (_komsu > 100)) + ([0, 0.10] select _temasYok);
+            // v8.275 COKME TERIMI (RPT 04dfc9d7: hic [TESLIM-ADAY] yok, teslim hic tetiklenmedi): eski formulde kayip 0.6 + baski 0.4 ile moral en iyi ihtimalle 0.60'ta kaliyordu,
+            //   0.30 esigi lider olu + cephane yok + dost uzak olmadan ULASILAMAZDI. Simdi grup yarisini kaybedince ek -0.25 (yuzde 40'ta -0.10): kayip 0.5 + baski 0.3 -> hedef 0.425 (< 0.45 yeni esik).
+            private _cokme = if (_kayip >= 0.5) then {0.25} else { [0, 0.10] select (_kayip >= 0.4) };
+            private _hedef = 1 - (0.50 * _kayip) - _cokme - (0.25 * _bsk) - (0.15 * (_dusukC / (count _us))) - ([0, 0.15] select (isNull _l || {!alive _l})) - ([0, 0.10] select (_komsu > 100)) + ([0, 0.10] select _temasYok);
             _hedef = (_hedef max 0) min 1;
             private _m0 = _g getVariable [QGVAR(moral), 1];
             private _m = _m0 + ((_hedef - _m0) * 0.2);
@@ -76,7 +79,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             if ((abs (_m - (_g getVariable [QGVAR(moralLog), 1]))) >= 0.15 && {(time - (_g getVariable [QGVAR(moralLogT), -99])) > 30}) then {
                 _g setVariable [QGVAR(moralLog), _m];
                 _g setVariable [QGVAR(moralLogT), time];
-                diag_log format ["[MORAL] %1 | moral:%2 | kalan:%3/%4 (kayip %5%%) | baski:%6 | cephane dusuk:%7 | komsu:%8 m | temas yok:%9", groupId _g, _m toFixed 2, count _us, _init, round (_kayip * 100), _bsk toFixed 2, _dusukC, if (_komsu > 9000) then {"-"} else {round _komsu}, _temasYok];
+                diag_log format ["[MORAL] %1 | moral:%2 (hedef %3, cokme -%4) | kalan:%5/%6 (kayip yuzde %7) | baski:%8 | cephane dusuk:%9 | komsu:%10 m | temas yok:%11", groupId _g, _m toFixed 2, _hedef toFixed 2, _cokme toFixed 2, count _us, _init, round (_kayip * 100), _bsk toFixed 2, _dusukC, if (_komsu > 9000) then {"-"} else {round _komsu}, _temasYok];
             };
 
             // --- TESLIM ---
@@ -96,13 +99,15 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                     };
                 };
             };
-            private _esikM = missionNamespace getVariable ["lambs_danger_teslimMoral", 0.30];
-            private _esikK = (missionNamespace getVariable ["lambs_danger_teslimKayip", 60]) / 100;
-            private _esikN = missionNamespace getVariable ["lambs_danger_teslimKalan", 4];
-            private _esikB = missionNamespace getVariable ["lambs_danger_teslimBaski", 0.40];
-            private _esikD = missionNamespace getVariable ["lambs_danger_teslimMesafe", 120];
+            // v8.275: varsayilanlar gevsetildi (0.30 / 60 / 4 / 0.40 / 120 -> 0.45 / 50 / 5 / 0.30 / 150); CBA ayarlariyla ayni
+            private _esikM = missionNamespace getVariable ["lambs_danger_teslimMoral", 0.45];
+            private _esikK = (missionNamespace getVariable ["lambs_danger_teslimKayip", 50]) / 100;
+            private _esikN = missionNamespace getVariable ["lambs_danger_teslimKalan", 5];
+            private _esikB = missionNamespace getVariable ["lambs_danger_teslimBaski", 0.30];
+            private _esikD = missionNamespace getVariable ["lambs_danger_teslimMesafe", 150];
             private _engel = (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isAmbushing), false]};
-            if (_m < _esikM && {_kayip >= 0.3} && {(time - (_g getVariable [QGVAR(teslimAdayLogT), -99])) > 60} && {(missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) < 40}) then {
+            // v8.275: aday logu artik moral < 0.60 iken (eski: esigin altinda) -> esige neden ulasilmadigi RPT'den okunur
+            if (_m < (_esikM max 0.6) && {_kayip >= 0.3} && {(time - (_g getVariable [QGVAR(teslimAdayLogT), -99])) > 60} && {(missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) < 40}) then {
                 _g setVariable [QGVAR(teslimAdayLogT), time];
                 missionNamespace setVariable ["lambs_danger_teslimAdayLogN", (missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) + 1];
                 private _enA = if (isNull _l) then {objNull} else {_l findNearestEnemy _l};
@@ -130,7 +135,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                     } forEach _us;
                     _g setBehaviour "SAFE";
                     _g setCombatMode "BLUE";
-                    diag_log format ["[TESLIM] %1 | %2 asker teslim oldu | moral:%3 kayip:%4%% baski:%5 | dusman:%6 m | taraf:%7", groupId _g, count _us, _m toFixed 2, round (_kayip * 100), _bsk toFixed 2, round (_l distance2D _en), side _g];
+                    diag_log format ["[TESLIM] %1 | %2 asker teslim oldu | moral:%3 kayip yuzde %4 baski:%5 | dusman:%6 m | taraf:%7", groupId _g, count _us, _m toFixed 2, round (_kayip * 100), _bsk toFixed 2, round (_l distance2D _en), side _g];
                     [_g, "Teslim", count _us] call _gonder;
                 };
             };

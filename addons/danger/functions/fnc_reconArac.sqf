@@ -70,7 +70,13 @@ private _birimler = [];
 private _basarisiz = {
     params ["_neden"];
     diag_log format ["[RECON-ARAC] %1 | BASARISIZ: %2 -> recon yaya gidecek", _id, _neden];
-    { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; }; } forEach _birimler;
+    // v8.275: binme atamasi kaldirilir (kalan asker araci TAKIP ETMESIN), arac ve surucu serbest birakilir (eskiden tasimaMesgul / forceMove / AUTOCOMBAT kapali kaliyordu)
+    { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; unassignVehicle _x; _x enableAI "PATH"; }; } forEach _birimler;
+    _birimler orderGetIn false;
+    _v setVariable [QGVAR(tasimaMesgul), nil];
+    _v setVariable [QGVAR(reconArac), nil];
+    if (!isNull _vg) then { _vg setVariable [QGVAR(isExecutingTactic), nil]; _vg setBehaviour _eskiBeh; _vg setCombatMode _eskiMod; };
+    if (alive _d) then { _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
     _plan set ["reconAracBasarisiz", true];
 };
 _v setVariable [QGVAR(tasimaMesgul), true];
@@ -110,6 +116,14 @@ waitUntil { sleep 1; !alive _v || {time > _tb} || {(_birimler findIf {alive _x &
 { if (alive _x && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 60} && {(([_v] call FUNC(aracDuzBos))) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); }; } forEach _birimler;
 private _icerde = _birimler select {alive _x && {(vehicle _x) isEqualTo _v}};
 if (_icerde isEqualTo []) exitWith { ["kimse binmedi"] call _basarisiz; };
+// v8.275 KISMI BINME (kullanici, RPT 04dfc9d7: 'recon komutani APC'ye bindi, diger recon elemanlari APC'yi takip etti'): herkes binemediyse
+//   binenler indirilir, binme atamasi kaldirilir, recon YAYA gider. Eskiden binemeyenler assignAsCargo + orderGetIn ile araci kosarak kovaliyordu.
+private _disarida = _birimler select {alive _x && {(vehicle _x) isNotEqualTo _v}};
+if (_disarida isNotEqualTo []) exitWith {
+    diag_log format ["[RECON-ARAC] %1 | %2 | KISMI BINME: %3 bindi, %4 binemedi (%5) -> binenler iniyor", _id, _ad, count _icerde, count _disarida, _disarida apply {[name _x, round (_x distance2D _v)]}];
+    { if (alive _x && {(vehicle _x) isEqualTo _v} && {_x isNotEqualTo _d}) then { unassignVehicle _x; moveOut _x; }; } forEach _icerde;
+    [format ["kismi binme (%1 / %2)", count _icerde, count _birimler]] call _basarisiz;
+};
 { _x disableAI "PATH"; } forEach _icerde;   // sessiz seyir: yolcu kendi basina inmez
 diag_log format ["[RECON-ARAC] %1 | %2 | %3 recon askeri bindi -> OP'ye sessiz surus (%4 m)", _id, _ad, count _icerde, round (_v distance2D _op)];
 ["RECON-BINDI", format ["%1 asker | arac %2 | OP'ye %3 m", count _icerde, _ad, round (_v distance2D _op)]] call FUNC(planZaman);
