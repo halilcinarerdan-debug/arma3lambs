@@ -132,7 +132,7 @@ Oncelik sirasi (en cok madde / en cok risk): S1 -> S3 -> S5 -> S2 -> S4 -> S6 ->
 ## 3. TEST SONUCU - 2026-10-20 (RPT: sunucu 20:40 + istemci 20:29; oyun 20:53:02 - 21:49, coopsteril / tem_anizay)
 Not: yuklenen iki sunucu RPT'si birebir ayni dosya (ayni md5). **Her iki RPT'de build `v8.274-ISARET-ZEUS`; v8.275 degisiklikleri bu testte YOKTU** (275 maddeleri dogrulanamaz, once v8.275 build'i kopyalanmali).
 Senaryo: S1'e yakin (WEST ele gecir, tank + Stryker + Abrams, P2) + EAST savunma (P1); hendek yok, bot oyuncu yok.
-Karne: script hatasi 0 (sunucu + istemci), OK:26 KONTROL:5. 45 olum (EAST 16 / WEST 29), sunucu FPS ~57 (son dakikada 32).
+Karne: script hatasi 0 (sunucu + istemci), OK:26 KONTROL:5. 45 olum (EAST 16 / WEST 29), sunucu FPS ~57 (son dakikadaki 32 alt-tab kaynakli).
 
 ### Dogrulanan (yukaridaki [x] satirlari)
 Nakil + koltuk kapasitesi, arac-piyade senkronu, PID, ezme korumasi, komutan zihni / arac sinifi, karsi saldiri donusu, Stryker FFV duzeltmesi, zirhtan kacis / tank ates / AT tepkisi / tank koruma / murettebat / duman, motor sesi, tani paketi, guc orani kapisi (SALDIRI IZINLI dali), HQ-DESTEK, tank piyade bagi, IHA firlatma + FPV dalisi, `[ISARET-GIZLE]` istemci logu.
@@ -143,7 +143,7 @@ Nakil + koltuk kapasitesi, arac-piyade senkronu, PID, ezme korumasi, komutan zih
 3. **Aracli medevac hic baslamadi**: 3 kez (40 / 40 / 80 sn) `uygun arac YOK` - kosullardan hangisi eliyor loglanmiyor (standoff'tan elenen 0). Elenme nedeni sayaclari eklenmeli.
 4. **Siper yapisma**: `[SIPER-YAPISMA] ayarlandi:0 acikta:2507` (karne KONTROL) - siper yapisma hic ayarlamadi, 2507 kez "acikta" gordu.
 5. **Anomaliler**: `YURUMUYOR 129`, `TEMAS-YOK-COMBAT 53`, `BOSTA-HAREKET 30`, `KILIT-UZUN 22` (Petrov / Afanasyev 42-43 sn, bayrak EVD+TAK), `AI-KAPALI-SIZINTI 9`. KILIT-UZUN bayrak kombinasyonu (EVADE + TAK) incelenmeli.
-6. **Son dakika FPS**: 57 -> 32 (min 31), yerel grup 2 / asker 21 iken; dusuk yukte bile dusus -> IHA log seli (1) ile iliskisi kontrol edilmeli.
+6. ~~Son dakika FPS 57 -> 32~~: kullanici teyidi - oyundan alt-tab yapildigi icin (sunucu degil istemci/pencere kaynakli); bulgu degil.
 7. **Retreat varis orani**: 34/65 (%52).
 
 ### Hala test edilmemis / kanitsiz
