@@ -221,28 +221,86 @@ private _yerlestir = {
 private _tumBirim = 0;
 { _tumBirim = _tumBirim + count ((units _x) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}); } forEach _gruplar;
 private _yumusak = (ceil (_tumBirim / (count _araclar))) max 5;
-for "_tur" from 0 to 1 do {
-    // tur 0: arac basina yumusak tavan (dengeli dagilim); sigmayan olursa tur 1: gercek kapasite
-    _kalan = _kapGercek apply {[_x select 0, if (_tur isEqualTo 0) then {(_x select 1) min _yumusak} else {_x select 1}]};
-    _eslesme = [];
-    _yaya = [];
-    _bolunen = [];
-    {
-        private _g = _x;
-        // v8.137: birim bazli: zaten inis noktasina + 150 m icindeki askerler tasinmaz (sefer 2+: ilk seferde sigmayip geride kalanlar alinir)
-        private _on = (units _g) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}};
-        if (_on isEqualTo []) then { continue };
-        if ([_on, groupId _g] call _yerlestir) then { continue };
-        // sigmadi: takim bazli bol
-        private _takimlar = (([_g] call FUNC(splitFireTeams)) apply {_x select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}}) select {_x isNotEqualTo []};
-        _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
-        private _yerlesen = 0;
+// v8.276 BUTUN GRUP (kullanici RPT 21-10: 'arac azsa 1 squad yola ciksin; squad lideri cepheye gitti ama takimindaki adamlari arkada biraktilar'): takim bazli bolme lideri ve takimini AYIRIYORDU.
+//   Varsayilan artik: grup ya BUTUN olarak (gerekirse birden fazla araca yayilarak, hepsi birlikte) biner ya da BUTUN olarak yuruyerek gider. Hicbir grup sigmiyorsa (tek grup tum araclardan buyuk) eski takim bazli bolme devreye girer.
+//   Eski davranis: lambs_danger_tasimaTakimBol = true.
+private _bolIzin = missionNamespace getVariable ["lambs_danger_tasimaTakimBol", false];
+// grubu birden fazla araca yayarak yerlestirir (hepsi ya da hic); birim sirasi korunur (lider once)
+private _yerlestirCok = {
+    params ["_birimler"];
+    private _n = count _birimler;
+    private _topK = 0;
+    { _topK = _topK + (_x select 1); } forEach _kalan;
+    if (_topK < _n) exitWith { false };
+    private _rest = +_birimler;
+    while {_rest isNotEqualTo []} do {
+        private _i = -1;
+        private _en = 0;
+        { if ((_x select 1) > _en) then { _en = _x select 1; _i = _forEachIndex; }; } forEach _kalan;
+        if (_i < 0) exitWith {};
+        private _al = _rest select [0, _en min (count _rest)];
+        _rest = _rest select [count _al, count _rest];
+        (_kalan select _i) set [1, ((_kalan select _i) select 1) - (count _al)];
+        private _v = (_kalan select _i) select 0;
+        private _e = _eslesme findIf {(_x select 0) isEqualTo _v};
+        if (_e < 0) then { _eslesme pushBack [_v, [_al]]; } else { ((_eslesme select _e) select 1) pushBack _al; };
+    };
+    true
+};
+// v8.276 YUKLEME ONCELIGI (MCWP 3-11.1 s. 8-x: 'komuta unsuru ilk dalgada', 'birlik butunlugu', 'bump plan' = sigmayanlar sonraki sefere): arac azken once komuta grubu (rutbe), MG / AT / nisanci
+//   yogun ve buyuk gruplar biner; kalanlar bir sonraki sefere kalir (sefer: komutan plan dongusu, en cok 2 ek sefer). Kapatma: lambs_danger_tasimaOncelikOff = true.
+private _gSirali = +_gruplar;
+if (!(missionNamespace getVariable ["lambs_danger_tasimaOncelikOff", false]) && {count _gruplar > 1}) then {
+    private _cift = _gruplar apply {
+        private _gg = _x;
+        private _usG = (units _gg) select {alive _x};
+        private _sk = count _usG;
+        { if (([_x] call FUNC(getUnitRole)) in ["MG", "AT", "MARKSMAN"]) then { _sk = _sk + 4; }; } forEach _usG;
+        _sk = _sk + (3 * (rankId (leader _gg)));
+        [_sk, _gg]
+    };
+    _gSirali = ([_cift, [], {_x select 0}, "DESCEND"] call BIS_fnc_sortBy) apply {_x select 1};
+};
+private _esle = {
+    for "_tur" from 0 to 1 do {
+        // tur 0: arac basina yumusak tavan (dengeli dagilim); sigmayan olursa tur 1: gercek kapasite
+        _kalan = _kapGercek apply {[_x select 0, if (_tur isEqualTo 0) then {(_x select 1) min _yumusak} else {_x select 1}]};
+        _eslesme = [];
+        _yaya = [];
+        _bolunen = [];
         {
-            if ([_x, groupId _g] call _yerlestir) then { _yerlesen = _yerlesen + 1; } else { _yaya pushBack [_g, count _x]; };
-        } forEach _takimlar;
-        if (_yerlesen > 0) then { _bolunen pushBack format ["%1 (%2/%3 takim)", groupId _g, _yerlesen, count _takimlar]; };
-    } forEach _gruplar;
-    if (_yaya isEqualTo []) exitWith {};
+            private _g = _x;
+            // v8.137: birim bazli: zaten inis noktasina + 150 m icindeki askerler tasinmaz (sefer 2+: ilk seferde sigmayip geride kalanlar alinir)
+            private _on = (units _g) select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}};
+            if (_on isEqualTo []) then { continue };
+            if ([_on, groupId _g] call _yerlestir) then { continue };
+            if (!_bolIzin) then {
+                // butun grup: birden fazla araca yayarak dene (yalniz gercek kapasite turunda), olmazsa grup BUTUN yuruyerek gider (lider takimini birakip gitmez)
+                if (_tur isEqualTo 1 && {[_on] call _yerlestirCok}) then {
+                    _bolunen pushBack format ["%1 (butun, birden fazla araca yayildi)", groupId _g];
+                } else {
+                    _yaya pushBack [_g, count _on];
+                };
+                continue
+            };
+            // sigmadi: takim bazli bol (eski davranis)
+            private _takimlar = (([_g] call FUNC(splitFireTeams)) apply {_x select {alive _x && {isNull objectParent _x} && {(_x distance2D _obj) > (_dropM + 150)}}}) select {_x isNotEqualTo []};
+            _takimlar = [_takimlar, [], {count _x}, "DESCEND"] call BIS_fnc_sortBy;
+            private _yerlesen = 0;
+            {
+                if ([_x, groupId _g] call _yerlestir) then { _yerlesen = _yerlesen + 1; } else { _yaya pushBack [_g, count _x]; };
+            } forEach _takimlar;
+            if (_yerlesen > 0) then { _bolunen pushBack format ["%1 (%2/%3 takim)", groupId _g, _yerlesen, count _takimlar]; };
+        } forEach _gSirali;
+        if (_yaya isEqualTo []) exitWith {};
+    };
+};
+call _esle;
+// hicbir grup butun olarak sigmadiysa (tek grup tum araclardan buyuk / hepsi dolu) eski takim bazli bolmeye dus
+if (_eslesme isEqualTo [] && {!_bolIzin}) then {
+    _bolIzin = true;
+    diag_log format ["[TASIMA] %1 | hicbir grup butun sigmadi -> takim bazli bolmeye dusuldu", _taraf];
+    call _esle;
 };
 if (_eslesme isEqualTo []) exitWith {
     diag_log format ["[TASIMA] %1 | arac var (%2) ama hicbir takim sigmadi -> yuruyerek", _taraf, count _araclar];

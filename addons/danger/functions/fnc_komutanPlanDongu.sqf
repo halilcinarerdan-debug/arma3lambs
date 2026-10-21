@@ -1211,6 +1211,15 @@ while {true} do {
                         && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")} && {(_x distance2D _kp) < 6000}
                         && {!((group (driver _x)) getVariable ["lambs_danger_planAktif", false])}
                     };
+                    // v8.276 GUVENLI SEFER (FM 3-90 14-41: 'surekli gidis-donusle shuttle'; MCWP 3-11.1: inis noktalari dusman dogrudan / dolayli atesinde olabilir): aracin ORP'ye gidip gelmesi YALNIZ temas yokken
+                    //   (plan gruplarinin hicbiri temasta degil) yapilir; temas varsa sefer ertelenir (kalanlar yuruyerek devam eder). Kapatma: lambs_danger_seferGuvenliOff = true.
+                    private _seferTemas = !(missionNamespace getVariable ["lambs_danger_seferGuvenliOff", false]) && {(_gruplar findIf {(_x getVariable ["lambs_danger_contact", 0]) > time}) >= 0};
+                    if (_seferTemas) then {
+                        if ((time - (_plan getOrDefault ["seferUyariT", -999])) > 60) then {
+                            _plan set ["seferUyariT", time];
+                            diag_log format ["[PLAN] %1 TASIMA: SEFER ERTELENDI - plan gruplarindan biri temasta (arac ORP'ye gidip gelmez; geride %2 asker)", _id, _kalan];
+                        };
+                    } else {
                     if (_bosArac isNotEqualTo []) then {
                         _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
                         _plan set ["seferT", time];
@@ -1223,6 +1232,7 @@ while {true} do {
                             _plan set ["seferUyariT", time];
                             diag_log format ["[PLAN] %1 TASIMA: geride %2 asker kaldi ama bos arac yok (tum araclar nakilde / uygun degil); arac donunce tekrar bakilacak", _id, _kalan];
                         };
+                    };
                     };
                 };
             };

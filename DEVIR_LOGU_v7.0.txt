@@ -2617,3 +2617,20 @@ v8.275 RECON KISMI BINME + TANK SENKRON MUAF + MORAL COKME / TESLIM ESIKLERI (ku
  NEDEN: (1) reconArac bindirme sonrasi binemeyenlerin cargo atamasi silinmiyordu -> araci kovaladilar; BASARISIZ cikislarinda arac / surucu bayraklari sizdi. (2) aracSenkron tanki da eskort sayiyordu (plan oncesi BEKLE / YAVASLA). (3) moral formulu teslim esigine ulasamiyordu (kayip 0.6 + baski 0.4 -> en iyi 0.60 > 0.30).
  YAPILAN: reconArac KISMI BINME iptali + _basarisiz temizligi; aracSenkron tank muaf (CBA lambs_danger_tankSenkron, varsayilan false); moral cokme terimi (-0.25 @ kayip >= 0.5, -0.10 @ >= 0.4), teslim varsayilanlari 0.45 / 50 / 5 / 0.30 / 150 (CBA + kod), [MORAL] hedef + cokme, [TESLIM-ADAY] moral < 0.60; format dizelerindeki %% kaldirildi (yuzde).
  YAPILMADI / BILINEN: IHA hizli seyir + FPV-AT motor bolgesine dalis ISTEK BEKLIYOR (bu oturumda yazilamadi); medevac ekibinin APC'ye binmesi tasarim geregi yok (karar bekliyor); tank duvar carpismasi AI surucu (motor) - kod cozumu yok; recon grubunun neden tam binemedigi RPT'de gorunmedi; hepsi (T).
+
+
+=== v8.276 — TESLIM, BUTUN GRUP NAKLI, TANK BAKISI + ILERI SICRAMA (2026-10-21 RPT sonrasi) ===
+Kok nedenler (RPT 19:57 sunucu): bkz. DOGRULANMAYANLAR.md bolum 4.
+1) TESLIM (fnc_moral): kayitli CBA teslim esikleri 5'i de eski varsayilanlarla (0.30/60/4/0.40/120) birebir aynisa yeni varsayilanlar (0.45/50/5/0.30/200 m) kullanilir
+   (log `[TESLIM] kayitli CBA teslim esikleri ...`; elle degisen deger korunur). Baski artik ZORUNLU degil: umutsuzluk = baski >= esik | lider olu | grup dagilmis (lider-dost > 100 m) | kayip >= %75 | cephanesi bitik asker >= yarisi.
+   2 ardisik tur (10 sn) kosul gerekir. CBA mesafe varsayilani 150 -> 200. [TESLIM-ADAY] logu umutsuz bayragini da yazar.
+2) NAKIL (fnc_aracTasima): varsayilan BUTUN GRUP: grup ya komple (gerekirse birden fazla araca yayilarak) biner ya komple yuruyerek gider; takim bazli bolme yalniz hicbir grup sigmazsa (lambs_danger_tasimaTakimBol = true eski davranis).
+   YUKLEME ONCELIGI: rutbe + MG/AT/nisanci yogunlugu + grup buyuklugu (MCWP 3-11.1: komuta unsuru ilk dalgada, birlik butunlugu, bump plan; lambs_danger_tasimaOncelikOff). Sigmayanlar sonraki sefere (en cok 2 ek sefer; komutan plan dongusu).
+   GUVENLI SEFER: plan gruplarindan biri temasta ise sefer ertelenir (`[PLAN] ... SEFER ERTELENDI`; lambs_danger_seferGuvenliOff).
+   Doktrin: FM 3-90 (2023) 14-41 'shuttling = ayni araclarla bir dizi gidis-donus; ya da yukun ardisik parcalarini kisa mesafeye tasirken kalanlar yuruyerek devam eder' - kitap shuttle'i onaylar; MCWP 3-11.1: inis noktalari dusman dogrudan / dolayli atesinde olabilir
+   -> arac inis noktasinda beklemez (zaten geri rezerve cekilir), sefer yalniz guvenli (temassiz) durumda.
+3) TANK BAKISI (fnc_tankBakis, YENI): mevzideki tank 10 sn'de bir bakis yonunu yeniler: bilinen dusman (zirh/AT once) > +-70 derece sektor taramasi (taret yuksekliginden 800 m isin; 90 m'den kisa acik mesafe = olu nokta reddedilir; en acik yaklasma kanali) > tehdit ekseni.
+   Mevzi seciminde olu nokta cezasi (-40) + acik isin puani; log `[TANK-BAKIS]` (30 sn'de bir, yon > 30 derece degisince). Kapatma: lambs_danger_tankBakisOff.
+4) TANK ILERI SICRAMA (fnc_planZirh): saldirida tank mevziye vardiktan > 150 sn (lambs_danger_tankSicramaS) sonra, savasta, plan piyadesi tanktan >= 40 m daha ilerideyse ve 500 m icinde bilinen dusman tank yoksa
+   kademe 450 -> 330 -> 230 m (objektife <= 260 m'de durur) yeni ates pozisyonuna sicrar; log `ILERI SICRAMA`. Kapatma: lambs_danger_tankSicramaOff. Savunmada degismedi (kitapta mevzi tutulur, yedek mevziye hasarda gecis).
+Yapilmadi / not: sunucu FPS dususu alt-tab kaynaklidir (bulgu degil). Hendek (S2) ve medevac (S9) hala test edilmedi.

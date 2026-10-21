@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.275"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.276"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -744,6 +744,18 @@ def tani(path):
     tz = [l for l in L if ("PIYADE BAGI" in l) or ('"[TANK-TERK]' in l) or ('"[TANK-IMMOBIL]' in l) or ("HAREKET EDEMIYOR" in l)]
     print("\n-- TANK PIYADE BAGI / HAREKET EDEMEYEN TANK (%d satir) --" % len(tz))
     for v in tz[:16]: print("  ", v.split('" ', 1)[-1][:240])
+    # ---- v8.276: tank taret bakisi / ileri sicrama / teslim / butun grup nakli / guvenli sefer
+    tb = al("TANK-BAKIS")
+    sc = [l for l in L if "ILERI SICRAMA" in l]
+    print("\n-- TANK TARET BAKISI: %d satir | ILERI SICRAMA: %d --" % (len(tb), len(sc)))
+    for v in (tb[:6] + sc[:6]): print("  ", v.split('" ', 1)[-1][:240])
+    ts = [l for l in L if '"[TESLIM] ' in l and "teslim oldu" in l]
+    tm = [l for l in L if "kayitli CBA teslim esikleri" in l]
+    print("-- TESLIM: %d grup teslim oldu | eski CBA esik tasima notu: %d --" % (len(ts), len(tm)))
+    for v in (tm[:1] + ts[:6]): print("  ", v.split('" ', 1)[-1][:240])
+    tk = [l for l in L if "takim bazli bolunen" in l or "SEFER ERTELENDI" in l or "butun, birden fazla araca" in l or "SEFER:" in l]
+    print("-- TASIMA (butun grup / sefer): %d satir --" % len(tk))
+    for v in tk[:8]: print("  ", v.split('" ', 1)[-1][:260])
     # ---- recon araci AI surusu (v8.264)
     rh = al("RECON-ARAC-HAREKET")
     print("\n-- RECON ARACI AI SURUSU (%d kayit, ilk 60 sn) --" % len(rh))

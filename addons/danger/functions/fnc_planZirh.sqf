@@ -173,7 +173,9 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         };
     };
     private _yk = _g getVariable ["lambs_danger_planZirhYakin", false];
-    private _merkezD = if (_savunma) then {[150, 110] select _tankMi} else { if (_tankMi) then {[650, 450] select _yk} else {[500, 350] select _yk} };
+    // v8.276 ILERI SICRAMA KADEMESI (kullanici: 'tanklar cok pasif'): saldirida tankin ates pozisyonu kademe kademe objektife yaklasir (650 -> 450 -> 330 -> 230 m); kademe 0/1 eski davranis
+    private _kad = if (_tankMi && {!_savunma}) then { (((([0, 1] select _yk) max (_g getVariable ["lambs_danger_planZirhKademe", 0]))) min 3) } else { -1 };
+    private _merkezD = if (_savunma) then {[150, 110] select _tankMi} else { if (_tankMi) then {[650, 450, 330, 230] select _kad} else {[500, 350] select _yk} };
     // ---- ates pozisyonu (bir kez) ----
     private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
     if (_poz isEqualTo []) then {
@@ -209,13 +211,22 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
                         private _eH = (AGLToASL [_p select 0, _p select 1, 0]) vectorAdd [0, 0, 1.0];
                         if ((lineIntersectsSurfaces [_eH, _e2, objNull, objNull, true, 1, "VIEW", "FIRE"]) isNotEqualTo []) then { _s = _s + 25; };
                     };
+                    // v8.276 OLU NOKTA: mevzi tehdit yonunde 60 m icinde duvar / bina / yamacla kapaliysa taret duvara bakar (-40); tehdit yonu etrafinda 300 m'ye acik isin sayisi x4 (en cok 20)
+                    if (_tankMi) then {
+                        private _bkP = [_obj, _bakNokta] select _savunma;
+                        private _dirP = _p getDir _bkP;
+                        if ((lineIntersectsSurfaces [_e1, (AGLToASL (_p getPos [60, _dirP])) vectorAdd [0, 0, 1.5], objNull, objNull, true, 1, "VIEW", "FIRE"]) isNotEqualTo []) then { _s = _s - 40; };
+                        private _acikIsin = 0;
+                        { if ((lineIntersectsSurfaces [_e1, (AGLToASL (_p getPos [300, _dirP + _x])) vectorAdd [0, 0, 1.5], objNull, objNull, true, 1, "VIEW", "FIRE"]) isEqualTo []) then { _acikIsin = _acikIsin + 1; }; } forEach [-30, -15, 0, 15, 30];
+                        _s = _s + (_acikIsin * 4);
+                    };
                     _s = _s - (abs (_dist - _merkezD)) / 10 - (abs _a) * 0.2;
                     if (isOnRoad _p) then { _s = _s - 5; };
                     _adaylar pushBack [_s, _p];
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30, 45, -45, 60, -60];
-        } forEach (if (_savunma) then {[150, 110, 190, 70, 230, 260]} else { if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300]] select _yk} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk} });
+        } forEach (if (_savunma) then {[150, 110, 190, 70, 230, 260]} else { if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300], [330, 300, 360, 280, 400, 260, 450], [230, 200, 260, 180, 300, 160, 350]] select _kad} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk} });
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         // v8.194 YEDEK MEVZI (ATP 3-20.15 3-76: birincil ve yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinir): en iyi mevziden >= 60 m uzakta en yuksek puanli aday
         private _alt = [];
@@ -275,6 +286,7 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
         _vardi = true;
         _g setVariable ["lambs_danger_planZirhVardi", true];
+        _g setVariable ["lambs_danger_planZirhVardiT", time];
         doStop _d;
         // v8.257 MEVZI KILIDI (RPT e31bd8bd + 10-18: tankin nisancisine planZirh 'doTarget / doFire' verince MOTOR 'ATTACK' komutuyla hedefe SURDU: durdu=48 sn hiz=21 surucu_komut=ATTACK beklenen_hedef=dusman konumu; 'vardi' bayragi kalinca
         //   tank mevziden 100-300 m ilerledi): ates pozisyonuna varinca surucunun MOVE'u kapanir; yeni hareket emri (TETIK / YER DEGISTIR / AT tepkisi / CEKILME / TAKILDI) 'enableAI MOVE' ile acar. Kapatma: lambs_danger_tankKilitOff = true.
@@ -362,6 +374,47 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         };
     };
 
+    // ---- v8.276 ILERI SICRAMA (kullanici: 'tanklarin cok pasif kalmasi kitaba gore normal mi?'; MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur; ATP 3-20.15: tank ates ettikten sonra yer degistirir):
+    //   saldirida tank mevziye vardiktan >= tankSicramaS (150) sn sonra, savasta, plan piyadesinden en az biri tanktan objektife >= 40 m daha yakinsa (piyade ilerledi) ve yakininda (<= 500 m) bilinen dusman
+    //   zirhli yoksa bir sonraki kademeye (objektife 450 -> 330 -> 230 m) sicrar; objektife <= 260 m'de ya da 3. kademede durur. Kapatma: lambs_danger_tankSicramaOff = true.
+    if (_vardi && {_tankMi} && {_savas} && {!_savunma} && {canMove _v} && {!(missionNamespace getVariable ["lambs_danger_tankSicramaOff", false])}) then {
+        private _vT = _g getVariable ["lambs_danger_planZirhVardiT", -1];
+        if (_vT < 0) then { _g setVariable ["lambs_danger_planZirhVardiT", time]; _vT = time; };
+        private _kd = _g getVariable ["lambs_danger_planZirhKademe", 0];
+        if (_kd < 3 && {(time - _vT) > (missionNamespace getVariable ["lambs_danger_tankSicramaS", 150])} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20} && {(_v distance2D _obj) > 260}) then {
+            private _pOn = ((_plan getOrDefault ["gruplar", []]) select {
+                !isNull _x && {!(_x in _zg)} && {!(_x in (_plan getOrDefault ["reconG", []]))} && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK", "MEDEVAC", "RECON", "RECON_ARAC"])}
+                && {alive (leader _x)} && {((vehicle (leader _x)) distance2D _obj) < ((_v distance2D _obj) - 40)}
+            }) isNotEqualTo [];
+            private _zirhliYakin = ((_l nearTargets 500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_x select 4) isKindOf "Tank"} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0;
+            if (_pOn && {!_zirhliYakin}) then {
+                _g setVariable ["lambs_danger_planZirhKademe", _kd + 1];
+                _g setVariable ["lambs_danger_planZirhPoz", []];
+                _g setVariable ["lambs_danger_planZirhVardi", nil];
+                _g setVariable ["lambs_danger_planZirhVardiT", -1];
+                _g setVariable ["lambs_danger_planZirhKilit", nil];
+                _d enableAI "PATH"; _d enableAI "MOVE";
+                diag_log format ["[PLAN-ZIRH] %1 | %2 ILERI SICRAMA: kademe %3 -> %4 (mevzide %5 sn, objektife %6 m, piyade ilerledi) - yeni ates pozisyonu secilecek", _id, groupId _g, _kd, _kd + 1, round (time - _vT), round (_v distance2D _obj)];
+            };
+        };
+    };
+
+    // ---- v8.276 TARET BAKISI: mevzideki tank (ve grubun diger tanklari) olu noktaya / duvara degil en tehlikeli bolgeye bakar (10 sn'de bir; fnc_tankBakis) ----
+    if (_vardi && {_tankMi} && {!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhBakT", -999])) > 10}) then {
+        _g setVariable ["lambs_danger_planZirhBakT", time];
+        private _bk = [_v, _g getVariable ["lambs_danger_planZirhBak", _obj], _g] call FUNC(tankBakis);
+        private _bkH = _bk select 0;
+        if (_bkH isNotEqualTo []) then {
+            { _x doWatch _bkH; } forEach (crew _v);
+            private _eskiAci = _g getVariable ["lambs_danger_planZirhBakAci", -999];
+            if (((abs (((_bk select 2) - _eskiAci + 540) mod 360 - 180)) > 30) && {(time - (_g getVariable ["lambs_danger_planZirhBakLogT", -999])) > 30}) then {
+                _g setVariable ["lambs_danger_planZirhBakAci", _bk select 2];
+                _g setVariable ["lambs_danger_planZirhBakLogT", time];
+                diag_log format ["[TANK-BAKIS] %1 | %2 %3 | taret %4 deg (%5) | acik mesafe %6 m | mevziye objektif %7 m", _id, groupId _g, getText (configOf _v >> "displayName"), _bk select 2, _bk select 1, _bk select 3, round (_v distance2D _obj)];
+            };
+        };
+    };
+
     // ---- v8.187 GRUBUN DIGER ARACLARI (RPT 95be8b53: 2 tankli grupta ikinci tank hic kipirdamadi - yalniz lider aracin surucusu komut aliyordu): her arac poz'a 45 m yanal aralikla gider, varinca durup objektife bakar ----
     private _digerAr = [];
     { private _xv = vehicle _x; if (_xv isNotEqualTo _x && {_xv isNotEqualTo _v} && {alive _xv}) then { _digerAr pushBackUnique _xv; }; } forEach (units _g);
@@ -380,7 +433,9 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
             } else {
                 doStop _od;
                 if (!(missionNamespace getVariable ["lambs_danger_tankKilitOff", false])) then { _od disableAI "MOVE"; };
-                { _x doWatch _obj; } forEach (crew _ov);
+                private _bkO = if (!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false]) && {(([_ov] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then { ([_ov, _g getVariable ["lambs_danger_planZirhBak", _obj], _g] call FUNC(tankBakis)) select 0 } else { _obj };
+                if (_bkO isEqualTo []) then { _bkO = _obj; };
+                { _x doWatch _bkO; } forEach (crew _ov);
             };
         };
     } forEach _digerAr;

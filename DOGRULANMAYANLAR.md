@@ -40,7 +40,7 @@ Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikt
 - [x] 267 IHA bilincli firlatma, 268 operator bagi, 272 Crocus cantasi, 273 FPV dalis (S5) — 267 (IHA-BEKLEME tetik 1200 m, FIRLATMA 5 sn) + 273 (HEDEFE VURDU, AI pilot MOVE/PATH kapatildi, hiz 29 km/s, havada glitch yok). 268 operator bagi: kayitli ("olunce hedefe dalar"), operator OLDURULMEDI -> T; 272 canta tuketimi test edilmedi
 - [x] 269 Seyir formasyonu (RPT 04dfc9d7 + kullanici: 'formasyon yuruyusu guzel calisiyor'); 270 politika tablosu hala T (S4)
 - [x] 271 / 274 Dusman isaretlerini gizleme (kullanici teyidi, RPT 372b264e) - savunmada ORP yok hala T (S2)
-- [ ] 275 Recon kismi binme iptali, tank ARAC-SENKRON muaf, moral cokme + teslim esikleri (S1, S10) — v8.275 SUNUCUDA YOKTU (RPT build v8.274-ISARET-ZEUS) -> bu testle dogrulanamaz
+- [ ] 275 Recon kismi binme iptali, tank ARAC-SENKRON muaf, moral cokme + teslim esikleri (S1, S10) — v8.275 SUNUCUDA YOKTU (RPT build v8.274-ISARET-ZEUS) -> bu testle dogrulanamaz — 21-10 testi (v8.275): moral COKME terimi calisti (20 [MORAL] satiri, cokme -0.25/-0.10), [TESLIM-ADAY] 18 satir ama teslim 0: sunucuda KAYITLI CBA degerleri eski varsayilanlardi (0.30/60/4/0.40/120) ve baski + 120 m kosullari ulasilamazdi -> v8.276 duzeltti (T). Recon KISMI BINME ve tank senkron muafiyeti tetiklenmedi (recon 6/6 bindi).
 
 ### D. Log kanitli ama belgede hala T (kapatilabilir, S ile teyit yeterli)
 - Hendek kapasite / ek ekipler (90 sn'de %85-97 icinde), MEVZI-KILIT etkin, statik silah (NSV) atamasi, PLAN-KAYIP-DONUS, ARAC-ZIRH-KAC, OLUM-TANI, formasyon hakemi (FORM-SET) salinimsiz.
@@ -148,3 +148,16 @@ Nakil + koltuk kapasitesi, arac-piyade senkronu, PID, ezme korumasi, komutan zih
 
 ### Hala test edilmemis / kanitsiz
 Hendek + mevzi + statik (S2), tank mevzi kilidi, T-14 duman (T-14 yoktu), `allowCrewInImmobile` / `[TANK-TERK]` (M1A1FEP immobil kaldi, mürettebat icerde, terk 0 - beklenen davranis olabilir), recon araci (`[RECON-ARAC-HAREKET]` yok), kinematik surus, oyuncu grubu muafiyeti (S6), teslim / moral esikleri (S10; kayip %41 < esik), init.sqf temizligi (S8), aracli medevac, taksi, kapasite uyarisi, operator olunce dron dusurme, v8.275 maddelerinin hepsi.
+
+
+## 4. TEST SONUCU - 2026-10-21 (v8.275; sunucu 19:57 + istemci 19:55; oyun 19:58 - 20:44, coopsteril / tem_anizay)
+Senaryo: P2 WEST ele gecir (45 dost, 1 M1A2 tank + Stryker'lar, recon araci) + P1 EAST savunma (T-72B3, statik silah, hendek YOK). Script hatasi 0. RPT: sunucu 20:44 temiz kapandi.
+Kullanici gozlemleri: (1) arac azken squad'lar bolundu - lider cepheye gitti, takimi arkada kaldi; (2) askerler SONUNA KADAR direndi, teslim olmadi (medevac testi bu yuzden yapilamadi); (3) tank taretleri duvara / olu noktaya bakiyor; (4) tanklar pasif.
+Log kanitlari:
+- `[TASIMA] 2 arac / 12 asker ... takim bazli bolunen: ["squad2 (2/3 takim)","squad1 (1/3 takim)"] | yaya kalan birim: 6` (20:14:14) -> gozlem (1) dogrulandi. 2 arac / 18 asker, SEFER yok (TOPLAN -> ORP 602 sn, sefer kapisi `fazSure < 400`).
+- `[TESLIM-ADAY] Alpha 2-3 | moral=0.42 (<0.3) | kayip=67 (>=60) | kalan=2 (<=4) | baski=0.00 (>=0.4) | dusman=254 m (<=120)`: 18 aday satiri, 0 teslim -> gozlem (2). Kayitli CBA = eski varsayilan (boot satiri 0.45 diyordu); moral hedefi baskisiz ~0.33'un altina inmiyor, baski + 120 m zorunluydu.
+- `[PLAN-ZIRH] ... ates pozisyonu 041095 (objektife 55 m, gorus hatti false ...)` (T-72B3, 20:12:50): mevzi tehdit noktasina GORUS HATTI OLMAYAN yerde -> gozlem (3). Tank taret hedefi sabit nokta (planZirhBak) idi.
+- P2 tank (M1A2) telemetri: 20:21-20:30 034097'de 9 dk (dusman 636-696 m), 20:33-20:41+ 037096'da 8+ dk (dusman 230-320 m) hareketsiz; sicrama yalniz SALDIRI basinda 1 kez -> gozlem (4).
+- Dogrulanan (v8.275 bayraklari): moral cokme terimi, recon araci tam binme + yol zinciri (`[RECON-ARAC]` 6/6, `[RECON-ARAC-HAREKET]` 20 satir, 54 km/h'e cikti), kuvvet orani kapisi (`[PLAN-ORAN]` ERKEN SALDIRI IZINLI, tahmin 10.2 = gozlenen 5.0 + iddia 20 x 0.35), HQ-DESTEK, tank piyade bagi (136 sn), tank duman (T-72B3 `rhs_weap_smokegen` ATILDI).
+- Yapilmayan: hendek (S2), medevac, teslim (S10), S6.
+v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni senaryoyu tekrarla, `[TESLIM]`, `[TANK-BAKIS]`, `ILERI SICRAMA`, `[TASIMA] ... butun`, `SEFER ERTELENDI` satirlarina bak (`rpt_ozet.py --tani`).

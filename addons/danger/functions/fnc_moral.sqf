@@ -100,26 +100,38 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                 };
             };
             // v8.275: varsayilanlar gevsetildi (0.30 / 60 / 4 / 0.40 / 120 -> 0.45 / 50 / 5 / 0.30 / 150); CBA ayarlariyla ayni
+            // v8.276 (RPT 21-10: sunucuda KAYITLI CBA degerleri eski varsayilanlardi - boot satiri 0.45 diyordu ama [TESLIM-ADAY] '(<0.3) ... (>=0.4) ... (<=120)' gosterdi, esige ulasilamadi):
+            //   bes deger de eski varsayilanla BIREBIR ayniysa (kullanici elle degistirmemis, CBA eskisini saklamis) yeni varsayilanlar kullanilir; mesafe 150 -> 200 m. Elle degistirilen deger korunur.
             private _esikM = missionNamespace getVariable ["lambs_danger_teslimMoral", 0.45];
-            private _esikK = (missionNamespace getVariable ["lambs_danger_teslimKayip", 50]) / 100;
+            private _esikKy = missionNamespace getVariable ["lambs_danger_teslimKayip", 50];
             private _esikN = missionNamespace getVariable ["lambs_danger_teslimKalan", 5];
             private _esikB = missionNamespace getVariable ["lambs_danger_teslimBaski", 0.30];
-            private _esikD = missionNamespace getVariable ["lambs_danger_teslimMesafe", 150];
+            private _esikD = missionNamespace getVariable ["lambs_danger_teslimMesafe", 200];
+            if ((abs (_esikM - 0.30)) < 0.005 && {(abs (_esikKy - 60)) < 0.5} && {(abs (_esikN - 4)) < 0.5} && {(abs (_esikB - 0.40)) < 0.005} && {(abs (_esikD - 120)) < 0.5}) then {
+                _esikM = 0.45; _esikKy = 50; _esikN = 5; _esikB = 0.30; _esikD = 200;
+                if !(missionNamespace getVariable ["lambs_danger_teslimEskiLog", false]) then {
+                    missionNamespace setVariable ["lambs_danger_teslimEskiLog", true];
+                    diag_log "[TESLIM] kayitli CBA teslim esikleri eski varsayilanlarla ayni (0.30 / 60 / 4 / 0.40 / 120) -> v8.276 varsayilanlari kullaniliyor (0.45 / 50 / 5 / 0.30 / 200); elle degistirirsen korunur";
+                };
+            };
+            private _esikK = _esikKy / 100;
             private _engel = (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isAmbushing), false]};
             // v8.275: aday logu artik moral < 0.60 iken (eski: esigin altinda) -> esige neden ulasilmadigi RPT'den okunur
             if (_m < (_esikM max 0.6) && {_kayip >= 0.3} && {(time - (_g getVariable [QGVAR(teslimAdayLogT), -99])) > 60} && {(missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) < 40}) then {
                 _g setVariable [QGVAR(teslimAdayLogT), time];
                 missionNamespace setVariable ["lambs_danger_teslimAdayLogN", (missionNamespace getVariable ["lambs_danger_teslimAdayLogN", 0]) + 1];
                 private _enA = if (isNull _l) then {objNull} else {_l findNearestEnemy _l};
-                diag_log format ["[TESLIM-ADAY] %1 | fraksiyon=%2 | izin=%3 | moral=%4 (<%5) | kayip=%6 (>=%7) | kalan=%8 (<=%9) | baski=%10 (>=%11) | dusman=%12 m (<=%13) | engel(retreat/evade/pusu)=%14",
-                    groupId _g, _frk, _izinVar, _m toFixed 2, _esikM, round (_kayip * 100), round (_esikK * 100), count _us, _esikN, _bsk toFixed 2, _esikB, if (isNull _enA) then {"-"} else {round (_l distance2D _enA)}, _esikD, _engel];
+                diag_log format ["[TESLIM-ADAY] %1 | fraksiyon=%2 | izin=%3 | moral=%4 (<%5) | kayip=%6 (>=%7) | kalan=%8 (<=%9) | baski=%10 (>=%11) | dusman=%12 m (<=%13) | engel(retreat/evade/pusu)=%14 | umutsuz(baski/lider olu/dagilmis/kayip75/cephane)=%15",
+                    groupId _g, _frk, _izinVar, _m toFixed 2, _esikM, round (_kayip * 100), round (_esikK * 100), count _us, _esikN, _bsk toFixed 2, _esikB, if (isNull _enA) then {"-"} else {round (_l distance2D _enA)}, _esikD, _engel, ((_bsk >= _esikB) || {isNull _l || {!alive _l}} || {_komsu > 100} || {_kayip >= 0.75} || {_dusukC >= (ceil ((count _us) / 2))})];
             };
-            if (
-                _izinVar
-                && {_m < _esikM}
-                && {(count _us) <= _esikN} && {_kayip >= _esikK} && {_bsk >= _esikB}
-                && {!_engel}
-            ) then {
+            // v8.276 UMUTSUZLUK: baski artik ZORUNLU degil (RPT 21-10: 1-2 askeri kalan gruplar baski 0.00 ile 8 dk sonuna kadar savasti; moral hedefi baski olmadan ~0.33'un altina inmez).
+            //   Su durumlardan BIRI yeterli: ort. baski >= esik | lider olu | grup dagilmis (lider en yakin dostdan > 100 m) | %75+ kayip | askerlerin yarisinin cephanesi bitik.
+            private _umutsuz = (_bsk >= _esikB) || {isNull _l || {!alive _l}} || {_komsu > 100} || {_kayip >= 0.75} || {_dusukC >= (ceil ((count _us) / 2))};
+            private _teslimKosul = _izinVar && {_m < _esikM} && {(count _us) <= _esikN} && {_kayip >= _esikK} && {_umutsuz} && {!_engel};
+            private _teslimSay2 = if (_teslimKosul) then { (_g getVariable [QGVAR(teslimArdisik), 0]) + 1 } else { 0 };
+            _g setVariable [QGVAR(teslimArdisik), _teslimSay2];
+            // 2 ardisik tur (10 sn): tek tikluk kosul teslim ettirmez
+            if (_teslimSay2 >= 2) then {
                 private _en = _l findNearestEnemy _l;
                 if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _esikD}) then {
                     _g setVariable [QGVAR(teslimOldu), true];
