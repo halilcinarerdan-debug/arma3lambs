@@ -2656,3 +2656,14 @@ Yeni bulgular -> duzeltmeler:
 2) MEVZIDE KALMA SINIRI: savunmada 150 sn (lambs_danger_tankYerSureS), SALDIRIDA da 300 sn (lambs_danger_tankYerSureAS) sonra, bilinen dusman varsa yedek mevziye gecis (hasar beklemez). Ileri sicrama (150 sn + piyade onde) bundan once calisir.
 3) IHA SEYIR HIZI: FPV-AT / FPV-AP / BOMBA grubuna setSpeedMode FULL + forceSpeed -1; seyirde yatay hiz < lambs_danger_ihaSeyirHiz (17 m/sn ~ 61 km/sa) ise hedef yonunde 0.1 sn adimla en cok +2 m/sn ivme eklenir (setVectorDir YOK).
    0 = yardim kapali. Mod motoru yolunda (180 m'ye kadar) ayni yardim kullanilir. Dalis (28 m/sn) degismedi. Not: gercek hiz Crocus'un config maxSpeed'i ile sinirli; log [IHA-DALIS] 'hiz' ve ucus suresi karsilastirilmali.
+
+
+=== v8.279 — IHA DALIS HATASI, DUZENSIZ TESLIM, TANK TANISI (2026-10-21 21:53 RPT sonrasi) ===
+1) IHA DALIS HATASI (kullanici: 'crocus hala yavas'): fnc_ihaSorti'de v8.273 'dalis kesildi' blogu ic dongunun ICINDEYDI -> her ilk dalis adimindan sonra dalis iptal, _dalisT0 sifirlaniyor, hiz rampasi hep 8 m/sn'de kaliyordu
+   (RPT: '[IHA-DALIS] dalis basladi' 1493 satir, 'hiz ayar 8.0 m/s ... 0.0 sn', 53 sn ucus / 620 m, dalis 29 km/sa). Blok dongu sonuna alindi; dalis hedefe ya da iptal olana kadar surer (mesafe 220 m'yi gecse de kesilmez).
+   Hizlar: dalis 8 -> 32 m/sn (lambs_danger_ihaDalisHiz, 1.2 sn'de), seyir yardimi 22 m/sn (lambs_danger_ihaSeyirHiz; v8.278'de 17 m/sn: dalis basinda 60 km/sa olculdu, yardim ise yariyor).
+2) TESLIM - OPFOR (kullanici: 'opfor teslim olmadi'): lop_ists_opf -> doktrin DUZENSIZ (teslim yok) -> [TESLIM-ADAY] izin=false, moral 0.28-0.37 / kayip %75 / umutsuz=true olsa da teslim yok.
+   Duzensiz profiller artik teslim olabilir (CBA 'Teslim: duzensiz profiller', varsayilan acik): kayip >= %60 ve 3 ardisik tur (15 sn).
+3) TANK (kullanici: 'tank duellosu cok temkinli'): RPT 21-10 21:53: 0 [TANK-DUELLO] hamle (tanklar birbirini goruyordu, 100-300 m), 45 dk'da HIC tank imha / hareketsiz kalmadi; [TANK-ATES] hedef sectigi halde atis / isabet / hasar loglanmiyordu.
+   fnc_tankIzle: [TANK-ATIS] (ana top atislari), [TANK-HASAR] (isabet, parca hasari) + murettebat becerisi >= 0.85 (lambs_danger_tankEkipSkill, 0 kapali). Gorus hattinda dusman tanki varken grup COMBAT / RED.
+   Not: grubun 'AWARE / YELLOW / FULL / COLUMN' iken 180-290 m'de dusman tanki gorulmesi kok neden olabilir; bir sonraki RPT'de [TANK-ATIS] / [TANK-HASAR] sayilari ile dogrulanacak.

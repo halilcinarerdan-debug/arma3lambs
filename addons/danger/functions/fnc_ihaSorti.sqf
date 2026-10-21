@@ -160,7 +160,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
     //   hiz vektorune hedef yonunde kucuk ivme eklenir (0.1 sn adim, en cok +2 m/sn). Yon / yatis AI pilotta kalir (v8.273'teki betik-pilot catismasi olmasin diye setVectorDir YOK). 0 = kapali.
     private _seyirHizlan = {
         params ["_hedefO", "_sure"];
-        private _sey = missionNamespace getVariable ["lambs_danger_ihaSeyirHiz", 17];
+        private _sey = missionNamespace getVariable ["lambs_danger_ihaSeyirHiz", 22];
         private _tE = time + _sure;
         if (_sey <= 0) exitWith { sleep _sure };
         while {time < _tE && {call _aktif} && {alive _hedefO}} do {
@@ -228,7 +228,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         _bitti = !(_opMod isEqualTo 1 && {call _opOldu} && {alive _uav});   // v8.268: operator olunce mod motoru bitirdiyse kontrol kaybi isleyicisi calissin
                     };
                 } else {
-                if (_dist > 220) then {
+                if (_dist > 220 && {!_dalis}) then {
                     _d doMove (getPosATL _h);
                     [_h, 2] call _seyirHizlan;
                 } else {
@@ -247,7 +247,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     private _fark = _hedefP vectorDiff (getPosASL _uav);
                     private _mag = (vectorMagnitude _fark) max 0.1;
                     private _yonV = _fark vectorMultiply (1 / _mag);
-                    private _hz = 8 + (20 * (((time - _dalisT0) / 1.2) min 1));
+                    private _hz = 8 + (((missionNamespace getVariable ["lambs_danger_ihaDalisHiz", 32]) - 8) * (((time - _dalisT0) / 1.2) min 1));
                     _uav setVectorDirAndUp [_yonV, [0, 0, 1]];
                     _uav setVelocity (_yonV vectorMultiply _hz);
                     if (time > _dalisLogT) then {
@@ -268,13 +268,15 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                 };
                 };
             };
-            // v8.273: dalis hedef olunce / iptal olunca (hedef baskasi tarafindan vuruldu, operator, sure) AI pilot geri acilir
-            if (_dalis && {alive _uav} && {!_bitti}) then {
-                _dalis = false;
-                _d enableAI "MOVE";
-                _d enableAI "PATH";
-                diag_log format ["[IHA-DALIS] %1 | dalis kesildi (hedef %2 / aktif %3): AI pilot geri acildi", typeOf _uav, ["OLDU", "SAG"] select (alive _h), call _aktif];
-            };
+        };
+        // v8.273: dalis hedef olunce / iptal olunca (hedef baskasi tarafindan vuruldu, operator, sure) AI pilot geri acilir
+        // v8.279 HATA DUZELTMESI (RPT 21-10 21:53: '[IHA-DALIS] dalis basladi ... hiz ayar 8.0 m/s ... 0.0 sn' her adimda tekrarlandi, 1493 log satiri, dalis hep 8 m/s = 29 km/sa): bu blok DONGUNUN ICINDEYDI ve ilk dalis adimindan hemen sonra
+        //   dalisi iptal edip _dalisT0'i sifirliyordu; hiz rampasi (8 -> 28 m/sn) hic ilerlemiyordu. Artik yalniz dongu BITINCE (hedef oldu / iptal) calisir.
+        if (_dalis && {alive _uav} && {!_bitti}) then {
+            _dalis = false;
+            _d enableAI "MOVE";
+            _d enableAI "PATH";
+            diag_log format ["[IHA-DALIS] %1 | dalis kesildi (hedef %2 / aktif %3): AI pilot geri acildi", typeOf _uav, ["OLDU", "SAG"] select (alive _h), call _aktif];
         };
     };
     if (!_bitti && {alive _uav} && {_opMod > 0} && {call _opOldu}) then { call _kontrolKaybi; } else {

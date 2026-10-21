@@ -43,7 +43,12 @@ private _dist = _v distance2D _et;
 
 private _gozV = (AGLToASL (getPosATL _v)) vectorAdd [0, 0, 2.4];
 private _gorunur = (lineIntersectsSurfaces [_gozV, _etP, _v, _et, true, 1, "VIEW", "FIRE"]) isEqualTo [];
-if (_gorunur && {_dist <= 1300}) exitWith {false};
+if (_gorunur && {_dist <= 1300}) exitWith {
+    // v8.279: gorus hattinda dusman tanki varken tam savas modu (RPT 21-10: grup 'AWARE / YELLOW / FULL / COLUMN' iken 180-290 m'de dusman tanki vardi)
+    if ((behaviour _l) isNotEqualTo "COMBAT") then { _g setBehaviour "COMBAT"; };
+    if ((combatMode _g) isNotEqualTo "RED") then { _g setCombatMode "RED"; };
+    false
+};
 
 // ---- yeni ates pozisyonu: dusman tankina 500-900 m, gorus hatti var, govde-asagi tercih ----
 private _merkezP = if (_savunma) then { _g getVariable ["lambs_danger_planZirhAsil", getPosATL _v] } else { getPosATL _v };

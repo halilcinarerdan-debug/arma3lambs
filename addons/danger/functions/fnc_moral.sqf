@@ -111,7 +111,9 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                 if ([missionNamespace getVariable ["lambs_danger_teslimFraksiyonKapali", ""]] call _listeEslesme) then {false} else {
                     if ([missionNamespace getVariable ["lambs_danger_teslimFraksiyonAcik", ""]] call _listeEslesme) then {true} else {
                         private _tK = switch (side _g) do { case west: {"lambs_danger_teslimWest"}; case east: {"lambs_danger_teslimEast"}; default {"lambs_danger_teslimInd"} };
-                        (missionNamespace getVariable [_tK, true]) && {[_g, "teslim", true] call FUNC(dk)}
+                        // v8.279 (kullanici: 'opfor teslim olmadi'; RPT 21-10 22:15-22:36: fraksiyon lop_ists_opf -> doktrin DUZENSIZ 'teslim yok' -> [TESLIM-ADAY] izin=false, moral 0.28-0.37 / kayip %75 / umutsuz=true olsa da hic teslim olmadi):
+                        //   duzensiz profiller de teslim olabilir (CBA 'Teslim: duzensiz profiller', varsayilan ACIK) - yalniz kayip >= %60 ve en az 3 ardisik tur (15 sn) kosulu ile. Kapatma: lambs_danger_teslimDuzensiz = false.
+                        (missionNamespace getVariable [_tK, true]) && {([_g, "teslim", true] call FUNC(dk)) || {missionNamespace getVariable ["lambs_danger_teslimDuzensiz", true]}}
                     };
                 };
             };
@@ -143,11 +145,12 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             // v8.276 UMUTSUZLUK: baski artik ZORUNLU degil (RPT 21-10: 1-2 askeri kalan gruplar baski 0.00 ile 8 dk sonuna kadar savasti; moral hedefi baski olmadan ~0.33'un altina inmez).
             //   Su durumlardan BIRI yeterli: ort. baski >= esik | lider olu | grup dagilmis (lider en yakin dostdan > 100 m) | %75+ kayip | askerlerin yarisinin cephanesi bitik.
             private _umutsuz = (_bsk >= _esikB) || {isNull _l || {!alive _l}} || {_komsu > 100} || {_kayip >= 0.75} || {_dusukC >= (ceil ((count _us) / 2))};
-            private _teslimKosul = _izinVar && {_m < _esikM} && {(count _us) <= _esikN} && {_kayip >= _esikK} && {_umutsuz} && {!_engel};
+            private _duzensizP = !([_g, "teslim", true] call FUNC(dk));
+            private _teslimKosul = _izinVar && {_m < _esikM} && {(count _us) <= _esikN} && {_kayip >= (_esikK max ([0, 0.6] select _duzensizP))} && {_umutsuz} && {!_engel};
             private _teslimSay2 = if (_teslimKosul) then { (_g getVariable [QGVAR(teslimArdisik), 0]) + 1 } else { 0 };
             _g setVariable [QGVAR(teslimArdisik), _teslimSay2];
             // 2 ardisik tur (10 sn): tek tikluk kosul teslim ettirmez
-            if (_teslimSay2 >= 2) then {
+            if (_teslimSay2 >= ([2, 3] select _duzensizP)) then {
                 private _en = _l findNearestEnemy _l;
                 if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _esikD}) then {
                     _g setVariable [QGVAR(teslimOldu), true];

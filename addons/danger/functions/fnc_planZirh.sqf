@@ -86,6 +86,8 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     if (isNull _d || {isPlayer _d}) then { continue };
     // v8.175 TANK ROLU: kargosuz tank uzaktan agir ates destegi (650 m, SALDIRI'da 450 m'ye sicrar), hedef onceligi zirh > AT > MG; ates acik alana gelince objektif alanina bastirma atesi (dost 70 m disinda)
     private _tankMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "TANK";
+    // v8.279: tank tani (atis / hasar loglari) + ekip becerisi (arac basina bir kez)
+    if (_tankMi) then { [_v] call FUNC(tankIzle); };
     // v8.250: AT yetenegi olmayan arac (tank degil, ATGM yok) bilinen dusman tankindan kacarken (fnc_aracZirhKac) planZirh ona hedef / hareket emri vermez
     if (!_tankMi && {(time - (_v getVariable ["lambs_danger_zirhKacT", -999])) < 10}) then { continue };
     private _atYeterli = _tankMi || {([_v] call FUNC(aracSinif)) select 3};

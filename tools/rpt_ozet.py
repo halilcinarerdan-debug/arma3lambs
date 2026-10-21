@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.278"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.279"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -753,6 +753,12 @@ def tani(path):
     tm = [l for l in L if "kayitli CBA teslim esikleri" in l]
     print("-- TESLIM: %d grup teslim oldu | eski CBA esik tasima notu: %d --" % (len(ts), len(tm)))
     for v in (tm[:1] + ts[:6]): print("  ", v.split('" ', 1)[-1][:240])
+    ta = [l for l in L if '"[TANK-ATIS]' in l and "atis " in l]
+    th = [l for l in L if '"[TANK-HASAR]' in l]
+    print("-- TANK ATIS / HASAR (v8.279): %d atis logu, %d hasar logu --" % (len(ta), len(th)))
+    for v in (ta[:6] + th[:8]): print("  ", v.split('" ', 1)[-1][:250])
+    ds = [l for l in L if "[IHA-DALIS]" in l and "dalis basladi" in l]
+    print("-- IHA-DALIS: 'dalis basladi' %d kez (v8.279 sonrasi sortide ~1 olmali; >5 = dalis yine her adimda iptal ediliyor) --" % len(ds))
     du = [l for l in L if '"[TANK-DUELLO]' in l]
     print("-- TANK DUELLOSU: %d hamle --" % len(du))
     for v in du[:8]: print("  ", v.split('" ', 1)[-1][:260])
