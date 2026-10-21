@@ -78,6 +78,8 @@ private _taraf = side (group (driver _uav));
 { _x disableAI "AUTOTARGET"; _x disableAI "TARGET"; _x disableAI "SUPPRESSION"; _x setSkill 1; } forEach (crew _uav);
 (group (driver _uav)) setBehaviour "CARELESS";
 (group (driver _uav)) setCombatMode "BLUE";
+// v8.278 SEYIR HIZI (kullanici: 'Crocus AT cok yavas, 20 ile gidiyor'): AI pilot varsayilan NORMAL hizla gidiyordu; FPV / bomba turlerinde FULL (GOZLEM devriyesi NORMAL kalir). Ek olarak asagidaki seyir hizlandirma yardimi kullanilir.
+if (_tur isNotEqualTo "GOZLEM") then { (group (driver _uav)) setSpeedMode "FULL"; (driver _uav) forceSpeed -1; };
 (group (driver _uav)) setVariable ["lambs_danger_gorev", "HARIC", true];
 _uav setVariable ["lambs_danger_gorev", "HARIC", true];
 _uav engineOn true;
@@ -154,6 +156,28 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         _en
     };
 
+    // v8.278 SEYIR HIZLANDIRMA: AI pilot FULL hizda bile duruk / yavas kalabiliyor (RPT 21-10: seyir ~20 km/sa); hedefe dogru yatay hiz `lambs_danger_ihaSeyirHiz` (varsayilan 17 m/sn = ~61 km/sa) altindaysa
+    //   hiz vektorune hedef yonunde kucuk ivme eklenir (0.1 sn adim, en cok +2 m/sn). Yon / yatis AI pilotta kalir (v8.273'teki betik-pilot catismasi olmasin diye setVectorDir YOK). 0 = kapali.
+    private _seyirHizlan = {
+        params ["_hedefO", "_sure"];
+        private _sey = missionNamespace getVariable ["lambs_danger_ihaSeyirHiz", 17];
+        private _tE = time + _sure;
+        if (_sey <= 0) exitWith { sleep _sure };
+        while {time < _tE && {call _aktif} && {alive _hedefO}} do {
+            private _vel = velocity _uav;
+            private _hs = sqrt (((_vel select 0) ^ 2) + ((_vel select 1) ^ 2));
+            if (_hs < _sey && {((getPosATL _uav) select 2) > 3}) then {
+                private _fk = (getPosASL _hedefO) vectorDiff (getPosASL _uav);
+                private _fkXY = [_fk select 0, _fk select 1, 0];
+                private _mg = vectorMagnitude _fkXY;
+                if (_mg > 1) then {
+                    _uav setVelocity (_vel vectorAdd ((_fkXY vectorMultiply (1 / _mg)) vectorMultiply (2 min (_sey - _hs))));
+                };
+            };
+            sleep 0.1;
+        };
+    };
+
     // ---- SORTI ----
     private _bitti = false;
     private _modMotor = _tur in ["FPV-AT", "FPV-AP"] && {!isNil "FPV_AI_Drones_fnc_fpvLogic"} && {missionNamespace getVariable ["lambs_danger_ihaModMotoru", true]};
@@ -187,7 +211,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     // v8.234 HIBRIT (slavkovsky77/Arma3-AI-FPV-Drones incelemesi): hedefi BIZ secer (bilinen, oncelikli) ve 180 m'ye kadar goturuz; son yaklasma / dalis / patlama modun test edilmis motorunda (Crocus'a ozgu tuhafliklar: bos arac, dalis, patlama yaricapi, takilma)
                     if (_dist > 180) then {
                         _d doMove (getPosATL _h);
-                        sleep 2;
+                        [_h, 2] call _seyirHizlan;
                     } else {
                         private _kinds = if (_tur isEqualTo "FPV-AT") then {["LandVehicle", "Car", "Tank"]} else {["Man"]};
                         private _src = ["allUnits", "vehicles"] select (_tur isEqualTo "FPV-AT");
@@ -206,7 +230,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                 } else {
                 if (_dist > 220) then {
                     _d doMove (getPosATL _h);
-                    sleep 2;
+                    [_h, 2] call _seyirHizlan;
                 } else {
                     // v8.273 DALIS DUZELTMESI (kullanici: 'tam dalacakken havada glitchleniyor, kamikaze calismiyor'): dalis basinda AI pilotun otopilotu (irtifa 40 m + doMove) betik hiziyla SAVASIYORDU
                     //   (ani 28 m/s hiz atamasi + setVectorDir [yatis sifirlanir] her 0.1 sn). Simdi: dalis baslarken pilotun MOVE / PATH'i kapanir (doStop), hiz 8 m/s'den 28 m/s'ye 1.2 sn'de yumusakca artar,

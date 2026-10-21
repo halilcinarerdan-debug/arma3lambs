@@ -2647,3 +2647,12 @@ Yeni bulgular -> duzeltmeler:
    Not: ilk 8 dk'da 4 kez PIYADE BAGI bekleme (305 sn): piyade medyani 2150-2500 m (cogu grup yaya) - tasarim geregi.
 3) SAVUNMA TANKI SON KALE: T-90SA ayni mevzide 25+ dk kaldi, 630-730 m'de Stryker / piyade vurdu, M1A1FEP'i 443 m'de durdurdu; WEST'in AT'si 3 adet M136, EAST 10 RPG-26 (tek atimlik, hafif zirh silahi).
    Duzeltme: savunma tanki ayni mevzide savasta > 150 sn (lambs_danger_tankYerSureS) kalir ve bilinen dusman varsa yedek mevziye gecer (birincil <-> yedek); log '[PLAN-ZIRH] YER DEGISTIRIYOR: sure (shoot-and-scoot)'. Kapatma: lambs_danger_tankYerOff.
+
+
+=== v8.278 — TANK DUELLOSU, MEVZIDE KALMA SINIRI, IHA SEYIR HIZI (kullanici istegi, 2026-10-21) ===
+1) TANK DUELLOSU (fnc_tankDuello, YENI; planZirh'ten cagrilir): mevzideki tank bildigi en yakin dusman tankina (knowsAbout > 0.5) gorus hatti yoksa ya da > 1300 m ise, dusmana 500-900 m kala gorus hatti olan
+   (govde-asagi puan +25) yeni pozisyona sicrar (atilim <= 350 m; savunmada birincil mevziden <= 150 m). 45 sn bekleme, grup basina en cok 8 hamle, hasar > 0.45'te yapmaz. Gorus hatti varsa ve <= 1300 m ise yerinde ates eder.
+   Log [TANK-DUELLO]. Kapatma: lambs_danger_tankDuelloOff.
+2) MEVZIDE KALMA SINIRI: savunmada 150 sn (lambs_danger_tankYerSureS), SALDIRIDA da 300 sn (lambs_danger_tankYerSureAS) sonra, bilinen dusman varsa yedek mevziye gecis (hasar beklemez). Ileri sicrama (150 sn + piyade onde) bundan once calisir.
+3) IHA SEYIR HIZI: FPV-AT / FPV-AP / BOMBA grubuna setSpeedMode FULL + forceSpeed -1; seyirde yatay hiz < lambs_danger_ihaSeyirHiz (17 m/sn ~ 61 km/sa) ise hedef yonunde 0.1 sn adimla en cok +2 m/sn ivme eklenir (setVectorDir YOK).
+   0 = yardim kapali. Mod motoru yolunda (180 m'ye kadar) ayni yardim kullanilir. Dalis (28 m/sn) degismedi. Not: gercek hiz Crocus'un config maxSpeed'i ile sinirli; log [IHA-DALIS] 'hiz' ve ucus suresi karsilastirilmali.

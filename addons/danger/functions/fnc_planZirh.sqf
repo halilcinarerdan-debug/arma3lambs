@@ -387,7 +387,8 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];
         // v8.277 SAVUNMA TANKI YER DEGISTIRIR (kullanici: 'tanklar son kale oluyor, piyadelere nefes aldirmiyor'; ATP 3-20.15: birincil / yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinma):
         //   savunma tanki ayni mevzide savasta > tankYerSureS (150) sn kaldiysa ve bilinen dusman varsa yedek mevziye gecer (hasar beklemez); yedek <-> birincil donusumlu. Kapatma: lambs_danger_tankYerOff = true.
-        private _zamanYer = _savunma && {!(_g getVariable ["lambs_danger_planZirhHide", false])} && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (missionNamespace getVariable ["lambs_danger_tankYerSureS", 150])}
+        // v8.278 (kullanici: '25 dakika ayni mevzide durmasinlar'): saldirida da (ileri sicrama olmadiysa) 300 sn sonra yedek mevzi; savunmada 150 sn
+        private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
             && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0};
         if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
@@ -442,6 +443,11 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
                 diag_log format ["[TANK-BAKIS] %1 | %2 %3 | taret %4 deg (%5) | acik mesafe %6 m | mevziye objektif %7 m", _id, groupId _g, getText (configOf _v >> "displayName"), _bk select 2, _bk select 1, _bk select 3, round (_v distance2D _obj)];
             };
         };
+    };
+
+    // ---- v8.278 TANK DUELLOSU: bilinen dusman tanki gorus hattinda degilse / cok uzaksa dusmana 500-900 m kala gorus hatti olan (mumkunse hull-down) yeni pozisyona sicrar (fnc_tankDuello) ----
+    if (_vardi && {_tankMi} && {_savas} && {canMove _v} && {!(missionNamespace getVariable ["lambs_danger_tankDuelloOff", false])}) then {
+        if ([_g, _v, _d, _savunma, _obj, _id] call FUNC(tankDuello)) then { continue };
     };
 
     // ---- v8.187 GRUBUN DIGER ARACLARI (RPT 95be8b53: 2 tankli grupta ikinci tank hic kipirdamadi - yalniz lider aracin surucusu komut aliyordu): her arac poz'a 45 m yanal aralikla gider, varinca durup objektife bakar ----
