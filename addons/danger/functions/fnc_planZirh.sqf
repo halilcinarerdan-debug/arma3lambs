@@ -154,9 +154,12 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     // v8.174 ZIRH DOKTRINI (MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur): SALDIRI basinda ates pozisyonu bir kez 350 m civarina ilerletilir
     if (_faz isEqualTo "SALDIRI" && {!(_g getVariable ["lambs_danger_planZirhYakin", false])}) then {
         _g setVariable ["lambs_danger_planZirhYakin", true];
-        _g setVariable ["lambs_danger_planZirhPoz", []];
-        _g setVariable ["lambs_danger_planZirhVardi", nil];
-        diag_log format ["[PLAN-ZIRH] %1 | %2 SALDIRI basladi: ates pozisyonu piyadeyle karsilikli destek icin ileri sicrayacak (~350 m)", _id, groupId _g];
+        // v8.277 (RPT 21-10: ILERI SICRAMA kademe 1 (350 m) sonrasi SALDIRI basi pozisyonu 450 m'ye GERI aldi): kademe >= 1 ise yeniden secilmez
+        if ((_g getVariable ["lambs_danger_planZirhKademe", 0]) < 1) then {
+            _g setVariable ["lambs_danger_planZirhPoz", []];
+            _g setVariable ["lambs_danger_planZirhVardi", nil];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 SALDIRI basladi: ates pozisyonu piyadeyle karsilikli destek icin ileri sicrayacak (~350 m)", _id, groupId _g];
+        };
     };
     // v8.174 CEKILME: zirh ates ederek RALLY POINT'e doner (piyade ile bulusma); ates pozisyonunda kalmaz
     if (_faz isEqualTo "CEKILME") then {
@@ -281,6 +284,28 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         };
     };
 
+    // ---- v8.277 MEVZIYE ULASAMADI (kullanici: '1 tank cok geride kaldi, manuel koymak zorunda kaldim'; RPT 21-10 21:28-21:31: tank 5 kez TAKILDI, zaman asimi dolunca 'mevzide (542 m kalan)' sayildi ve surucu MOVE'u KAPATILDI -> tank mevziden 542 m geride kilitlendi):
+    //   zaman asimi dolduysa ve mevziye hala > 150 m varsa kilitlenmez: sure en fazla 2 kez uzatilir (180-600 sn), sonra en fazla 2 kez yeni ates pozisyonu secilir (eski mevzi listede kalir -> baska nokta). Kapatma: lambs_danger_tankUlasOff = true.
+    if (!(_g getVariable ["lambs_danger_planZirhVardi", false]) && {_poz isNotEqualTo []} && {canMove _v} && {(_v distance2D _poz) > 150} && {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])} && {!(missionNamespace getVariable ["lambs_danger_tankUlasOff", false])}) then {
+        private _uN = _g getVariable ["lambs_danger_planZirhUzatN", 0];
+        if (_uN < 2) then {
+            _g setVariable ["lambs_danger_planZirhUzatN", _uN + 1];
+            _g setVariable ["lambs_danger_planZirhT", time];
+            _g setVariable ["lambs_danger_planZirhMax", 180 max (((_v distance2D _poz) / 2.2) min 600)];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 MEVZIYE ULASAMADI (%3 m kalan): sure uzatildi (%4/2) - kilitlenmiyor", _id, groupId _g, round (_v distance2D _poz), _uN + 1];
+        } else {
+            private _yN = _g getVariable ["lambs_danger_planZirhYenidenN", 0];
+            if (_yN < 2) then {
+                _g setVariable ["lambs_danger_planZirhYenidenN", _yN + 1];
+                _g setVariable ["lambs_danger_planZirhUzatN", 0];
+                _g setVariable ["lambs_danger_planZirhPoz", []];
+                _g setVariable ["lambs_danger_planZirhVardi", nil];
+                diag_log format ["[PLAN-ZIRH] %1 | %2 MEVZIYE ULASILAMADI (%3 m kalan, 2 uzatma bitti): yeni ates pozisyonu secilecek (%4/2)", _id, groupId _g, round (_v distance2D _poz), _yN + 1];
+                continue
+            };
+        };
+    };
+
     // ---- varis ----
     private _vardi = _g getVariable ["lambs_danger_planZirhVardi", false];
     if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
@@ -360,7 +385,11 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         private _hs0 = _g getVariable ["lambs_danger_planZirhHasar", -1];
         if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", damage _v]; _hs0 = damage _v; };
         private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];
-        if ((damage _v) >= (_hs0 + 0.08) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
+        // v8.277 SAVUNMA TANKI YER DEGISTIRIR (kullanici: 'tanklar son kale oluyor, piyadelere nefes aldirmiyor'; ATP 3-20.15: birincil / yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinma):
+        //   savunma tanki ayni mevzide savasta > tankYerSureS (150) sn kaldiysa ve bilinen dusman varsa yedek mevziye gecer (hasar beklemez); yedek <-> birincil donusumlu. Kapatma: lambs_danger_tankYerOff = true.
+        private _zamanYer = _savunma && {!(_g getVariable ["lambs_danger_planZirhHide", false])} && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (missionNamespace getVariable ["lambs_danger_tankYerSureS", 150])}
+            && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0};
+        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
             _g setVariable ["lambs_danger_planZirhAlt", _poz];
             _g setVariable ["lambs_danger_planZirhPoz", _alt2];
@@ -370,7 +399,7 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
             _g setVariable ["lambs_danger_planZirhHasar", damage _v];
             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
             _d doMove _alt2;
-            diag_log format ["[PLAN-ZIRH] %1 | %2 YER DEGISTIRIYOR: hasar %3 -> yedek mevzi %4 (%5 m)", _id, groupId _g, (damage _v) toFixed 2, mapGridPosition _alt2, round (_v distance2D _alt2)];
+            diag_log format ["[PLAN-ZIRH] %1 | %2 YER DEGISTIRIYOR: %6 (hasar %3) -> yedek mevzi %4 (%5 m)", _id, groupId _g, (damage _v) toFixed 2, mapGridPosition _alt2, round (_v distance2D _alt2), ["hasar", "sure (shoot-and-scoot)"] select (_zamanYer && {(damage _v) < (_hs0 + 0.08)})];
         };
     };
 

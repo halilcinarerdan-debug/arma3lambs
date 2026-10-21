@@ -46,7 +46,23 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             if ((units _g) findIf {isPlayer _x} > -1) then { continue };
             private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.91: bayilanlar etkin guc degil (kayip orani / moral)
             if (_us isEqualTo []) then { continue };
-            if (_g getVariable [QGVAR(teslimOldu), false]) then { continue };
+            if (_g getVariable [QGVAR(teslimOldu), false]) then {
+                // v8.277 ESIR BAKIMI (kullanici RPT 21-10: 'captiveler hareket etmesin; bazi captiveler geri silah aldi'; [ROE-IHLAL] captive:true silahli:true = AT askeri roketatarini tutuyordu, DropWeapon yalniz ana silahi birakir):
+                //   teslim olmus grup 5 sn'de bir kontrol edilir: kalan HER silah (ana / roketatar / tabanca) alinir, AI parcalari kapali tutulur (yurumez, silah toplamaz), durus sabit.
+                if ((time - (_g getVariable [QGVAR(teslimBakimT), 0])) > 5) then {
+                    _g setVariable [QGVAR(teslimBakimT), time];
+                    {
+                        private _eu = _x;
+                        if (alive _eu && {isNull objectParent _eu}) then {
+                            if ((primaryWeapon _eu) isNotEqualTo "" || {(secondaryWeapon _eu) isNotEqualTo ""} || {(handgunWeapon _eu) isNotEqualTo ""}) then { removeAllWeapons _eu; };
+                            { _eu disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
+                            if (!captive _eu) then { _eu setCaptive true; };
+                            doStop _eu;
+                        };
+                    } forEach (units _g);
+                };
+                continue
+            };
             _gSay = _gSay + 1;
 
             private _ilk = _g getVariable [QGVAR(moralIlk), 0];
@@ -142,6 +158,11 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                         _x setVariable [QGVAR(teslim), true, true];
                         private _w = primaryWeapon _x;
                         if (_w isNotEqualTo "") then { _x action ["DropWeapon", _x, _w]; };
+                        // v8.277: roketatar / tabanca da alinir (2 sn sonra; ayni karede birden fazla DropWeapon guvenilmez) + AI parcalari kapatilir (esir yurumez, silah toplamaz)
+                        [{ params ["_eu"]; if (alive _eu) then { removeAllWeapons _eu; }; }, [_x], 2] call CBA_fnc_waitAndExecute;
+                        private _eu2 = _x;
+                        { _eu2 disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
+                        doStop _x;
                         _x action ["Surrender", _x];
                         _x doWatch objNull;
                     } forEach _us;
