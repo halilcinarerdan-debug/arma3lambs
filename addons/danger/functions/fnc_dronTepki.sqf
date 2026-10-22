@@ -87,6 +87,12 @@ _g reveal [_dr, 4];
 private _n = 0;
 {
     private _u = _x;
+    // v8.292 GERCEK ATIS SAYACI (kullanici: 'hala ayni - ateş etmediler'; [DRON-ATES] yalniz EMIR sayisiydi): Fired olayi emirden sonraki 8 sn icindeki atislari sayar
+    if !(_u getVariable [QGVAR(dronAtisEH), false]) then {
+        _u setVariable [QGVAR(dronAtisEH), true];
+        _u addEventHandler ["Fired", { params ["_uu"]; if ((time - (_uu getVariable [QGVAR(dronEmirT), -99])) < 8) then { _uu setVariable [QGVAR(dronAtisN), (_uu getVariable [QGVAR(dronAtisN), 0]) + 1]; }; }];
+    };
+    _u setVariable [QGVAR(dronEmirT), time];
     private _iv = getNumber (configFile >> "CfgMagazines" >> (currentMagazine _u) >> "initSpeed");
     if (_iv <= 0) then { _iv = 800 };
     private _tof = ((_u distance _dr) / (_iv * 0.9)) min 2;
@@ -102,6 +108,20 @@ private _n = 0;
 
 if ((time - (_g getVariable [QGVAR(dronAtesLogT), -999])) > 8) then {
     _g setVariable [QGVAR(dronAtesLogT), time];
-    diag_log format ["[DRON-ATES] %1 | %2 (%3) %4 m (egik) | yukseklik %5 m | ates eden %6 | tur %7", groupId _g, typeOf _dr, _tip, round _egik, round ((getPosATL _dr) select 2), _n, ["GOZLEM", "KAMIKAZE / SILAHLI"] select _kamikaze];
+    private _atisT = 0;
+    { _atisT = _atisT + (_x getVariable [QGVAR(dronAtisN), 0]); } forEach (units _g);
+    private _atisFark = _atisT - (_g getVariable [QGVAR(dronAtisSon), 0]);
+    _g setVariable [QGVAR(dronAtisSon), _atisT];
+    diag_log format ["[DRON-ATES] %1 | %2 (%3) %4 m (egik) | yukseklik %5 m | ates emri %6 | GERCEK ATIS (son logdan beri) %7 | tur %8", groupId _g, typeOf _dr, _tip, round _egik, round ((getPosATL _dr) select 2), _n, _atisFark, ["GOZLEM", "KAMIKAZE / SILAHLI"] select _kamikaze];
+    // emir var ama gercek atis yok: ilk atici icin durum dokumu
+    if (_n > 0 && {_atisFark <= 0} && {(time - (_g getVariable [QGVAR(dronAtisTaniT), -999])) > 25}) then {
+        _g setVariable [QGVAR(dronAtisTaniT), time];
+        private _a0 = (([_adaylar, [], {_x distance _dr}, "ASCEND"] call BIS_fnc_sortBy) param [0, objNull]);
+        if (!isNull _a0) then {
+            diag_log format ["[DRON-ATES] %1 | ATIS YOK (emir verildi) | atici %2 | davranis %3 combatMode %4 | durus %5 | hazir %6 komut '%7' | silah %8 mermi %9 | dron bilgisi %10 | gorus (hat acik) %11 | disableAI hedef: %12",
+                groupId _g, name _a0, behaviour _a0, combatMode (group _a0), stance _a0, unitReady _a0, currentCommand _a0, currentWeapon _a0, _a0 ammo (currentWeapon _a0), (_a0 knowsAbout _dr) toFixed 2,
+                !(lineIntersects [eyePos _a0, getPosASL _dr, _a0, _dr]), !(_a0 checkAIFeature "TARGET")];
+        };
+    };
 };
 _n > 0

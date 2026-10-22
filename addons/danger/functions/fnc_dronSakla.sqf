@@ -39,13 +39,15 @@ if (_ud isEqualTo []) exitWith {0};
 // ates edecek en yakin 3 silahli asker yerinde kalir
 private _atesci = [];
 if (_ates) then {
-    _atesci = (([_ud select {(primaryWeapon _x) isNotEqualTo ""}, [], {_x distance _dr}, "ASCEND"] call BIS_fnc_sortBy)) select [0, 3];
+    // v8.292: yerinde kalip ates eden sayisi 3 -> 2 (grup >= 4) / 1 (daha kucuk) - gerisi KACAR (kullanici: 'hala ayni, kacmadilar')
+    _atesci = (([_ud select {(primaryWeapon _x) isNotEqualTo ""}, [], {_x distance _dr}, "ASCEND"] call BIS_fnc_sortBy)) select [0, [1, 2] select ((count _ud) >= 4)];
 };
 
 _g setVariable [QGVAR(dronSaklaT), time];
 private _atanan = [];
 private _n = 0;
 private _siperN = 0;
+private _binaN = 0;
 {
     private _u = _x;
     if (_mesgul) then {
@@ -55,15 +57,25 @@ private _siperN = 0;
         _n = _n + 1;
         continue
     };
-    _u setVariable [QGVAR(taktikKilit), time + 25];
-    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu setVariable [QGVAR(taktikKilit), nil]; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
+    _u setVariable [QGVAR(taktikKilit), time + 40];   // v8.292: 25 -> 40 sn
+    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu setVariable [QGVAR(taktikKilit), nil]; }; }, [_u], 40] call CBA_fnc_waitAndExecute;
     if (_u in _atesci) then {
         _u setUnitPos "MIDDLE";
         continue
     };
     private _hedef = [];
     private _durus = "DOWN";
-    private _cv = [_u, _dr, 35, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
+    // v8.292: 1) 60 m icinde BINA varsa icine (FPV'ye karsi ust koruma), 2) 60 m icinde sert siper, 3) dronden uzaga 35-60 m acik nokta (eskiden 18-26 m)
+    private _bina = nearestBuilding _u;
+    if (!isNull _bina && {(_u distance2D _bina) < 60}) then {
+        private _bps = (_bina buildingPos -1) select { private _c = _x; (_atanan findIf {(_x distance2D _c) < 1.5}) < 0 };
+        if (_bps isNotEqualTo []) then {
+            _hedef = selectRandom _bps;
+            _durus = "AUTO";
+            _binaN = _binaN + 1;
+        };
+    };
+    private _cv = if (_hedef isEqualTo []) then { [_u, _dr, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover) } else {[]};
     if (_cv isNotEqualTo []) then {
         private _cp = (_cv select 0) select 0;
         if ((_atanan findIf {(_x distance2D _cp) < 10}) < 0) then {
@@ -76,7 +88,7 @@ private _siperN = 0;
         // acik nokta: dronden uzaga, +-50 derece, 18-26 m; atananlara >= 10 m
         private _yon = (_dr getDir _u);
         for "_k" from 0 to 5 do {
-            private _p = (getPosATL _u) getPos [18 + random 8, _yon + ((random 100) - 50)];
+            private _p = (getPosATL _u) getPos [35 + random 25, _yon + ((random 100) - 50)];
             if (!surfaceIsWater _p && {(_atanan findIf {(_x distance2D _p) < 10}) < 0}) exitWith { _hedef = _p; };
         };
     };
@@ -90,6 +102,6 @@ private _siperN = 0;
 
 if ((time - (_g getVariable [QGVAR(dronSaklaLogT), -999])) > 20) then {
     _g setVariable [QGVAR(dronSaklaLogT), time];
-    diag_log format ["[DRON-SAKLAN] %1 | %2 %3 m | %4 asker dagildi (%5 siperde, %6 acikta yatar) | %7 nisanci yerinde | taktikKilit 25 sn", groupId _g, typeOf _dr, round (_dr distance2D (leader _g)), _n, _siperN, _n - _siperN, count _atesci];
+    diag_log format ["[DRON-SAKLAN] %1 | %2 %3 m | %4 asker kacti (%5 binada, %6 siperde, %7 acikta yatar) | %8 nisanci yerinde | taktikKilit 40 sn", groupId _g, typeOf _dr, round (_dr distance2D (leader _g)), _n, _binaN, _siperN, _n - _binaN - _siperN, count _atesci];
 };
 _n

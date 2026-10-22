@@ -2758,3 +2758,11 @@ Kod incelemesi (yeni RPT yok): iki bosluk: (1) fnc_dronSakla bounding / LAMBS ta
 (2) fnc_dronTepki'de atesci adaylari yalniz hizi < 3 km/sa olanlardi -> yuruyen / kosan grupta kimse ates etmiyordu. Ayrica combat'ta (temas <= 15 sn) motor / pervane sesi menzili x0.4.
 Duzeltme: dron <= 200 m (acil) iken taktik yurutenler de tepki verir: taktigi bozmadan 7 sn yere yatar (yurume emri yok), 3 nisanci comelir; dron <= 250 m ise atesciler 9 km/sa'ya kadar hareket halinde de ates eder.
 Tani: [MOTOR-SES-ELE] (grup dronu zaten biliyor, 30 sn'de bir). Hala tetiklenmezse RPT'de su sirayi ara: [MOTOR-SES] IHA duyuldu -> [HAVA-FARK-TANI] knows -> [DRON-SAKLAN] / [DRON-ATES]; hangisi yoksa orada kesiliyor.
+
+
+=== v8.292 — DRON: GERCEK ATIS SAYACI + GUCLU KACIS (kullanici: 'hayir hala ayni') ===
+RPT 22-10 19:37 (v8.291, sunucu + istemci): zincir SUNUCUDA CALISTI: 19:41:43 [MOTOR-SES] FPV pervane sesi 680 m'de duyuldu -> [DRON-SAKLAN] 678 m (4 asker dagildi) -> [DRON-YON] -> [DRON-ATES] 440 m'den itibaren 'ates eden 4' (10 satir, ~90 sn);
+dron kullanici elindeydi (hover 200-300 m, 'hiz 0'), operator 19:43:29'da oldu. Logdaki 'ates eden' yalniz EMIR sayisiydi - gercek atis loglanmiyordu; kacis 18-26 m yatma + 25 sn kilitti (kullanici 'kacmadilar' dedi).
+Duzeltme: (1) gercek atis sayaci (Fired EH, emirden 8 sn icinde): [DRON-ATES] 'GERCEK ATIS (son logdan beri) N'; emir var ama N = 0 ise [DRON-ATES] ATIS YOK dokumu (davranis, combatMode, hazir, komut, silah, mermi, bilgi, gorus hatti, TARGET kapali mi);
+(2) kacis: yerinde ates eden 3 -> 2 (grup >= 4) / 1; digerleri 60 m icinde BINA'ya (buildingPos), yoksa 60 m icinde sert siper (eski 35), yoksa dronden uzaga 35-60 m (eski 18-26 m); taktikKilit 25 -> 40 sn.
+Ilk RPT'de bak: '[DRON-ATES] ... GERCEK ATIS' sayisi 0 ise AI infantry'nin kucuk IHA'ya ates etmemesi (engine) soz konusu olabilir -> ATIS YOK dokumuyle birlikte degerlendirilecek.
