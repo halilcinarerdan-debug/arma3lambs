@@ -73,8 +73,16 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
 private _menzil = if (_kamikaze) then { missionNamespace getVariable ["lambs_danger_dronAtesM", 450] } else {100};
 private _egik = _l distance _dr;
 // v8.288 DAGIL + SAKLAN (kullanici: 'botlar dusman dronu gorunce mesafeyi arttirsinlar ve saklansinlar'): kamikaze / silahli dron <= 700 m ise grup dagilir ve siper alir (fnc_dronSakla); ates menzilindeyse 3 nisanci yerinde kalir
-if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, _egik <= _menzil, _egik <= 200] call FUNC(dronSakla); };
-if (_egik > _menzil || {((getPosATL _dr) select 2) > 200}) exitWith {false};
+// v8.295 DIK ACI (kullanici: 'adamlarin diplerine ucurdum dronu havada bekledim 20 sn hicbir sey yapmadilar'; RPT 22-10: dron 46 m yatay / 62 m yukseklik = ~53 derece, piyade silahi bu aciya cevrilemiyor, 'zorla atis' 0): yukseklik acisi > 40 derece ise
+//   nisancilar yerinde BEKLEMEZ (hepsi dagilir / siper alir), > 50 derece ise ates emri verilmez (yapilamayan atis yerine kacis).
+private _yatD = (_l distance2D _dr) max 1;
+private _elev = atan (((((getPosATL _dr) select 2) - 1.5) max 0) / _yatD);
+if (_elev > 40 && {(time - (_g getVariable [QGVAR(dronDikLogT), -99])) > 10}) then {
+    _g setVariable [QGVAR(dronDikLogT), time];
+    diag_log format ["[DRON-DIK] %1 | %2 | yatay %3 m yukseklik %4 m -> yukseklik acisi %5 derece (> 40: nisancilar yerinde beklemez, > 50: ates emri yok, dagilma / siper)", groupId _g, typeOf _dr, round _yatD, round ((getPosATL _dr) select 2), round _elev];
+};
+if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, (_egik <= _menzil) && {_elev <= 40}, _egik <= 200] call FUNC(dronSakla); };
+if (_egik > _menzil || {((getPosATL _dr) select 2) > 200} || {_elev > 50}) exitWith {false};
 if ((time - (_g getVariable [QGVAR(dronAtesT), -99])) < 3) exitWith {true};
 _g setVariable [QGVAR(dronAtesT), time];
 if ((combatMode _g) in ["BLUE", "GREEN", "WHITE"]) then { _g setCombatMode "YELLOW"; };
