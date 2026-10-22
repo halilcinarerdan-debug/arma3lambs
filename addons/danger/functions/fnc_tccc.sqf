@@ -86,6 +86,8 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
     lambs_danger_tcccMedikOk = {
         params ["_m"];
         alive _m && {!((lifeState _m) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_m getVariable ["ACE_isUnconscious", false])}
+            // v8.296 (kullanici: 'teslim olan rus askeri yerinden kipirdadi, ilk yardima gitti'): teslim olmus / esir hekim tedavi etmez, yurumez; devam eden tedavi de iptal olur
+            && {!(_m getVariable [QGVAR(teslim), false])} && {!captive _m}
     };
     lambs_danger_tcccVarMi = {
         params ["_m", "_cls"];
@@ -463,7 +465,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 _c setVariable [QGVAR(tcccBy), _m];
                 [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
             } forEach _yaralilar;
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false]) || {_x getVariable ["lambs_danger_oyuncuKomutaAktif", false]}}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable [QGVAR(teslimOldu), false])} && {!(_x getVariable ["lambs_danger_tarafKapali", false]) || {_x getVariable ["lambs_danger_oyuncuKomutaAktif", false]}}});
     };
 };
 
