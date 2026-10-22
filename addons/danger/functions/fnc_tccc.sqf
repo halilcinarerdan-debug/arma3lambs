@@ -214,19 +214,20 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         private _durPos = getPosATL _m; private _durT = time; private _durKademe = 0;
         waitUntil {
             sleep 0.7;
+            // v8.304 (kullanici: 'HEKIM YOLDA cikinca glitchleniyor'): AI yol bulma gecikmesi 2-4 sn normal -> durgun esigi 3 -> 5 sn, doStop + script yurutme (anim / hiz vektoru, gorunur titreme) kademe 2 -> 3
             // v8.94: DURGUN tespiti (RPT a331c7eb: hekim 13 m'de 25 sn hic yurumedi) -> 3 sn'de 1 m'den az ilerlediyse kademeli mudahale
             if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _durPos) > 1}) then { _durPos = getPosATL _m; _durT = time; _durKademe = 0; };
-            if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {time - _durT > 3} && {(_m distance2D _c) > 3} && {_durKademe < 3}) then {
+            if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {time - _durT > 5} && {(_m distance2D _c) > 3} && {_durKademe < 4}) then {
                 _durKademe = _durKademe + 1; _durT = time;
                 {_m enableAI _x} forEach ["MOVE", "PATH", "ANIM"];
                 _m setVariable [QGVAR(forceMove), true];
                 _m setVariable [QGVAR(taktikKilit), 0];
                 _m forceSpeed -1; _m setSpeedMode "FULL";
-                if (_durKademe >= 2) then { doStop _m; _m setUnitPos "UP"; };
+                if (_durKademe >= 3) then { doStop _m; _m setUnitPos "UP"; };
                 _m doMove (getPosATL _c);
                 diag_log format ["[TCCC-DURGUN] %1 | %2 -> %3 | kademe %4 | mesafe %5 m | komut:%6 | durus:%7 | MOVE:%8 PATH:%9 ANIM:%10 | baski %11 | panik:%12", groupId _g, name _m, name _c, _durKademe, round (_m distance2D _c), currentCommand _m, stance _m, _m checkAIFeature "MOVE", _m checkAIFeature "PATH", _m checkAIFeature "ANIM", (getSuppression _m) toFixed 2, _m getVariable [QGVAR(panikEskiDAI), "-"]];
                 // v8.95: AI komutu ise yaramiyorsa (RPT 5d7b3371: kademe 1-3 sonrasi da durgun, MOVE/PATH/ANIM acik) hekim kosu animasyonu + hiz vektoruyle yaraliya yurutulur
-                if (_durKademe >= 2) then {
+                if (_durKademe >= 3) then {
                     private _yT = time + 14; private _y0 = _m distance2D _c;
                     _bitis = _bitis + 14;
                     _m setUnitPos "UP";

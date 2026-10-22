@@ -39,6 +39,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
     private _tick = 0;
     while {true} do {
         sleep 0.15;
+        if (missionNamespace getVariable ["lambs_danger_moveAssistOff", false]) then { continue };   // v8.304 (perfBisect)
         _tick = _tick + 1;
         private _agir = (_tick % 2) isEqualTo 0;   // duvar korumasi / sikisma: 0.3 sn'de bir
 
