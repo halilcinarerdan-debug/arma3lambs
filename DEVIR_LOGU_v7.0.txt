@@ -2766,3 +2766,9 @@ dron kullanici elindeydi (hover 200-300 m, 'hiz 0'), operator 19:43:29'da oldu. 
 Duzeltme: (1) gercek atis sayaci (Fired EH, emirden 8 sn icinde): [DRON-ATES] 'GERCEK ATIS (son logdan beri) N'; emir var ama N = 0 ise [DRON-ATES] ATIS YOK dokumu (davranis, combatMode, hazir, komut, silah, mermi, bilgi, gorus hatti, TARGET kapali mi);
 (2) kacis: yerinde ates eden 3 -> 2 (grup >= 4) / 1; digerleri 60 m icinde BINA'ya (buildingPos), yoksa 60 m icinde sert siper (eski 35), yoksa dronden uzaga 35-60 m (eski 18-26 m); taktikKilit 25 -> 40 sn.
 Ilk RPT'de bak: '[DRON-ATES] ... GERCEK ATIS' sayisi 0 ise AI infantry'nin kucuk IHA'ya ates etmemesi (engine) soz konusu olabilir -> ATIS YOK dokumuyle birlikte degerlendirilecek.
+
+
+=== v8.293 — DRONA ZORLA ATES (kullanici: 'ates etmediler') ===
+v8.292 testi yoktu; kullanici bildirimi: yine ates yok. Gercek atis sayaci henuz RPT'de gorulmedi. Muhtemel neden: AI infantry doTarget / doFire / doSuppressiveFire emirlerini kucuk IHA'ya (hava hedefi / gorulmeyen hedef) yok sayiyor (BELIRSIZ).
+Duzeltme: en yakin 3 atici icin, AI karar mekanizmasindan bagimsiz: nisan yonu ongorulu noktaya (doWatch), silah yonu hedefe <= 6 derece oldugunda forceWeaponFire ile 3'lu kisa atis (0.14 sn arayla), 6 sn'lik dongu, birim basina 5 sn'de bir; mermi bitince durur.
+[DRON-ATES] logunda 'zorla atis (toplam)' ve 'GERCEK ATIS' sayilari; kapatma: lambs_danger_dronZorlaOff = true. Not: 6 derece toleransinda uzak (300 m) ucusan dronu isabetle vurmak zor - hedef tepki / bastirma ve kullaniciya gorsel geri bildirim.
