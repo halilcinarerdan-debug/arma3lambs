@@ -16,6 +16,10 @@
  *   SAGTIK_ARAC_DAHIL     false : true = arac / ucak / tank icinde de kapat (varsayilan: arac icinde ELLEME)
  *   SAGTIK_DURBUN_DAHIL   false : true = durbun / lazer isaretleyici zoomunu da kapat
  *   SAGTIK_TUS_DAHIL      true  : optik / zoom eylemlerine atanmis tuslari da engelle
+ *   SAGTIK_TANI           false : true = ekranda gorunum / eylem tanisi goster (zoom neyle olusuyor)
+ *
+ * NOT (zoom turleri): Arma 3'te sag tus BASILI TUTMA = "optics temporary" (nisangahtan bakis + zoom) -> bu betigin engelledigi sey. Nisan ALMADAN calisan ayri bir "kalca zoom"u icin kaynak BULUNAMADI;
+ *   varsa hangi eylemin yaptigini gormek icin SAGTIK_TANI = true yap (ekranda cameraView + optics / opticsTemp / zoomTemp eylem degerleri + FOV gorunur), zoom olurken ne yazdigini bana ilet.
  *
  * DEADZONE (%25) HAKKINDA: 'Aiming deadzone' Arma 3'te OYUNCUNUN kendi oyun ayaridir (Ayarlar > Oyun > Aiming deadzone). Bir betik komutu / zorluk ayari ile sunucudan
  *   sabitlenebildigine dair kaynak BULUNAMADI; bu dosya onu ZORLAYAMAZ. Asagida yalnizca katilan her oyuncuya bir kez hatirlatma gosterilir (SAGTIK_DEADZONE_HATIRLAT).
@@ -30,6 +34,7 @@ if (isNil "SAGTIK_ARAC_DAHIL") then { SAGTIK_ARAC_DAHIL = false; };
 if (isNil "SAGTIK_DURBUN_DAHIL") then { SAGTIK_DURBUN_DAHIL = false; };
 if (isNil "SAGTIK_TUS_DAHIL") then { SAGTIK_TUS_DAHIL = true; };
 if (isNil "SAGTIK_DEADZONE_HATIRLAT") then { SAGTIK_DEADZONE_HATIRLAT = true; };
+if (isNil "SAGTIK_TANI") then { SAGTIK_TANI = false; };
 
 // ---- bu an engellenmeli mi? ----
 SAGTIK_engelle = {
@@ -79,6 +84,14 @@ SAGTIK_KARE = addMissionEventHandler ["EachFrame", {
         _arac switchCamera "INTERNAL";
     };
 }];
+
+// ---- TANI (istege bagli): zoom olurken hangi eylem / gorunum aktif? ----
+if (!isNil "SAGTIK_TANI_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_TANI_KARE]; SAGTIK_TANI_KARE = nil; };
+if (SAGTIK_TANI) then {
+    SAGTIK_TANI_KARE = addMissionEventHandler ["EachFrame", {
+        hintSilent format ["gorunum: %1 | optics: %2 | opticsTemp: %3 | zoomTemp: %4 | silah: %5", cameraView, inputAction "optics", inputAction "opticsTemp", inputAction "zoomTemp", currentWeapon player];
+    }];
+};
 
 // ---- deadzone hatirlatmasi (zorlayamaz; bir kez) ----
 if (SAGTIK_DEADZONE_HATIRLAT) then {
