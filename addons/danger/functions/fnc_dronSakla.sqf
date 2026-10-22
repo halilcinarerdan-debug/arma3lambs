@@ -94,8 +94,11 @@ private _binaN = 0;
     };
     if (_hedef isNotEqualTo []) then {
         _atanan pushBack _hedef;
+        // v8.297 (RPT 22-10 22:53: lider [10478,880] 23:00 -> 23:02 ayni yer; 'DOWN' + doMove = SUREKLI SURUNEREK 35-60 m, 40 sn'de ~10 m): kosarken AYAKTA (UP + FULL hiz), varinca / 15 sn sonra istenen durusa gecer
         _u doMove _hedef;
-        _u setUnitPos _durus;
+        _u setUnitPos "UP";
+        _u setSpeedMode "FULL";
+        [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 4} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }, [_u, _hedef, _durus], 15, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
         _n = _n + 1;
     };
 } forEach _ud;
