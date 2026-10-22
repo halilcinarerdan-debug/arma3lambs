@@ -2705,3 +2705,10 @@ fnc_tacticalUGL: birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown); acikta tek
 fnc_fireSupport (ates destegi): UGL'li asker bekleme 9 -> 5 sn; hedef bilgi esigi knowsAbout 0.8 -> 0.5; acikta tek hedef sansi %25 -> %60 (kume / bina / kapali hat zaten oncelikli).
 fnc_roleStation (rol gorevi): normal atis da 2'li salvo (eskiden hucumda 2, digerlerinde 1).
 Degismeyenler (guvenlik): dost 12 m, atisGuvenli (cali / dal / sekme), HE kontrolu (flare / duman atilmaz), mermi rezervi (< 2 sarjor iken 120 m ustu atilmaz). RPT: [UGL-OZET] 30 sn'de bir neden dagilimi, [UGL-KARAR], [ATES-DESTEK] ... UGL salvo.
+
+
+=== v8.285 — TOPCU YEREL DEGIL (kullanici: 'topcu ates testi icin 2S1 spawnladim, sunucuda yerel degil dedi') ===
+Neden: _topcuAt (fnc_komutanPlanDongu) yalniz YEREL (local _x) topcu araclarini kullanir (doArtilleryFire yerel nisanci ister). Zeus'la yaratilan 2S1 + murettebat Zeus istemcisinde yerel kalir; genel devir bekcisi (fnc_grupSunucuDevir)
+yeni gruplari 120 sn bekletir (envanter / kiyafet kaybi onlemi), uzaktan kontrol edilen ya da oyunculu gruplari hic devretmez. Atis tetiklendiginde araç henuz devredilmemisse '[PLAN-TOPCU] ... ATIS YOK ... sunucuda yerel degil' cikar.
+Duzeltme: atis aninda yerel olmayan topcu aracinin murettebat gruplari (oyuncu / uzaktan kontrol yoksa) hemen setGroupOwner 2 ile devredilir ([PLAN-TOPCU] ... DEVREDILDI), 60 sn'de bir; o seansta atis yok, sonraki seansta yerel olur.
+Test ipucu: Zeus'ta araci uzaktan KONTROL ETME (devredilmez); spawn sonrasi ~1 dk bekle ya da ates emrini bir kez ver, 10-20 sn sonra tekrar ver.

@@ -150,6 +150,31 @@ private _topcuAt = {
     if ((_plan getOrDefault ["dogrulama", 0]) isEqualTo 2) then { diag_log format ["[PLAN-UYARI] %1 | topcu dogrulamasiz (iddiaya guvenerek) atiyor - yanlis istihbarat sivil / dost kaybina yol acabilir", _plan get "id"]; };
     private _dostEn = 99999;
     { if (alive _x && {(side (group _x)) isEqualTo _taraf}) then { _dostEn = _dostEn min (_x distance2D _poz); }; } forEach allUnits;
+    // v8.285 TOPCU YEREL DEGIL (kullanici: 'topcu ates testi icin 2S1 spawnladim, sunucuda yerel degil dedi'): Zeus'la yaratilan arac + murettebat Zeus istemcisinde yerel kalir; doArtilleryFire yerel nisanci ister.
+//   Genel devir bekcisi (fnc_grupSunucuDevir) yeni gruplari 120 sn bekletir. Topcu araci yerel degilse murettebat gruplari BURADA hemen sunucuya devredilir (oyuncu / uzaktan kontrol yoksa, 60 sn'de en fazla bir kez);
+//   bu seansta atis yapilmaz, bir sonraki seansta yerel olur. Log: [PLAN-TOPCU] ... DEVIR. Kapatma: lambs_danger_topcuDevirOff = true.
+    if (isServer && {!(missionNamespace getVariable ["lambs_danger_topcuDevirOff", false])}) then {
+        {
+            private _tv = _x;
+            if (alive _tv && {(side (group _tv)) isEqualTo _taraf} && {(getNumber (configOf _tv >> "artilleryScanner")) > 0} && {!local _tv} && {!isNull (gunner _tv)} && {!isPlayer (gunner _tv)}) then {
+                private _grlar = [];
+                { private _gx = group _x; if (!isNull _gx && {!(_gx in _grlar)}) then { _grlar pushBack _gx; }; } forEach (crew _tv);
+                private _uygun = (_grlar findIf {
+                    ((units _x) findIf {isPlayer _x}) >= 0
+                    || {((units _x) findIf {!isNull (_x getVariable ["bis_fnc_moduleRemoteControl_owner", objNull])}) >= 0}
+                }) < 0;
+                if (_uygun) then {
+                    {
+                        if ((time - (_x getVariable [QGVAR(topcuDevirT), -999])) > 60) then {
+                            _x setVariable [QGVAR(topcuDevirT), time];
+                            diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 sunucuda yerel degil -> murettebat grubu %4 sunucuya DEVREDILDI (sahip makine %5); bu seansta atis yok, sonraki seansta atar", _plan get "id", _ad, typeOf _tv, groupId _x, groupOwner _x];
+                            _x setGroupOwner 2;
+                        };
+                    } forEach _grlar;
+                };
+            };
+        } forEach (vehicles select {alive _x && {(getNumber (configOf _x >> "artilleryScanner")) > 0}});
+    };
     private _araclar = vehicles select {
         alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {!isPlayer (gunner _x)} && {local _x} && {canFire _x}
     };
