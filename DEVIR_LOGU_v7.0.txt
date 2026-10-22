@@ -2691,3 +2691,10 @@ Yeni bulgular -> duzeltmeler:
 === v8.282 — INSANI ISABET (kullanici: 'ama insani boyutu hala olsun dogrulugun') ===
 fnc_varsayilanSkill: aimingAccuracy araligi 0.80-0.88 -> 0.70-0.88 (bireysel fark); isabet TAVANI 0.92 (lambs_danger_skillTavanIsabet), nisan hizi tavani 0.95 (x1.2 carpandan sonra); her askerin ~%15'i TECRUBESIZ (aimingAccuracy ve aimingShake x0.85).
 Optikli ortalama asker ~0.79-0.92, optiksiz ~0.5-0.7 (x0.75). Dinamik insani faktorler (baski, yorgunluk, ortam, hareket / durus) degismedi. Log: [SKILL-VARSAYILAN] satirinda 'TECRUBESIZ'.
+
+
+=== v8.283 — YAT / KALK ANIMASYON HIZI + SENKRON (kullanici: 'sadece yat kalk saga sola don animasyonlarini boostla; senkron sorunu olmasin') ===
+fnc_moveAssist (zaten donus animasyonunu hizlandiriyordu): (1) stance gecis animasyonlari (animationState 'amov..._amov...' iki parca; ornek stand->prone, crouch->stand) x lambs_danger_postureCoef (1.25); donus ('turn') x lambs_danger_turnCoef 1.15 -> 1.2;
+   yurume / sürunme / kosu (tek parca) HIC degismez - secici boost mumkun cunku animasyon adina bakiliyor (genel setAnimSpeedCoef yerine).
+(2) SENKRON: setAnimSpeedCoef etkisi yerel; diger makinelere (-clientOwner) artik yalniz deger degisince (gecis basladi / bitti) ya da 6 sn'de bir nabiz + tick basina en cok 20 birim gonderilir
+   (eskiden her 1.5 sn'de her yerel birim); gecis bitince 1.0'a donus aninda gonderilir. Yerel uygulama 1.5 sn'de bir tazelenir (retreat / evade 1.15 yazimlarina karsi). Not: yalniz gecisler hizlandigi icin konum farki olusmaz.

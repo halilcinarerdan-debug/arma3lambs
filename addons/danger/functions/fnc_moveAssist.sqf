@@ -3,6 +3,7 @@
  * Author: Cinar (ELITE fork)
  * HAREKET YARDIMCISI — yerel AI piyadeler icin (0.3 sn'de bir, tek watchdog):
  *
+ *   0) v8.283: YAT / KALK / COMEL (stance gecis animasyonu, "amov..._amov...") x lambs_danger_postureCoef (1.25) - yurume / sürunme / kosu degismez. Diger makinelere gonderim yalniz degisimde (+6 sn nabiz, tick basina <= 20 birim).
  *   1) SAGA / SOLA DONUS HIZI +%20 (lambs_danger_turnCoef = 1.2): sadece DONUS animasyonu ("turn")
  *      oynarken animasyon hizi 1.2, digerlerinde 1.0 (yurume / kosu hizi degismez -> duvara gomulme azalir).
  *      Geri cekilme / zirhtan kacista yurume 1.15 (o taktikler kendisi koyar), donus yine 1.2.
@@ -25,10 +26,12 @@
 
 if (!isNil "lambs_danger_moveAssistStarted") exitWith {false};
 lambs_danger_moveAssistStarted = true;
-if (isNil "lambs_danger_turnCoef") then { lambs_danger_turnCoef = 1.15; };
+if (isNil "lambs_danger_turnCoef") then { lambs_danger_turnCoef = 1.2; };   // v8.283: 1.15 -> 1.2
+// v8.283 DURUS GECISI (yat / kalk / comel) HIZI: yalniz iki-parcali stance gecis animasyonlari ("amov..._amov...") hizlanir; yurume / sürunme / kosu animasyonu (tek parca) DEGISMEZ.
+if (isNil "lambs_danger_postureCoef") then { lambs_danger_postureCoef = 1.25; };
 lambs_danger_mvLogN = 0;
 
-diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.15 [v8.125: sunucuda 165 FPS ile cok hizli gorundu, 1.38 -> 1.15] + duvar korumasi + sikisma adimi)";
+diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk gecisi x1.25, ag gonderimi yalniz degisimde; eski: donus hizi x1.15 [v8.125: sunucuda 165 FPS ile cok hizli gorundu, 1.38 -> 1.15] + duvar korumasi + sikisma adimi)";
 
 [] spawn {
     private _birakAnim = ["aovr", "ladder", "climb", "vault", "ainv", "adth", "acts", "apanp", "amov_pro", "abdl"];
@@ -39,6 +42,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.15 [v8.125: sun
         _tick = _tick + 1;
         private _agir = (_tick % 2) isEqualTo 0;   // duvar korumasi / sikisma: 0.3 sn'de bir
 
+        private _uzakN = 0;   // v8.283: bu tick'te diger makinelere gonderilen birim sayisi (ag patlamasi siniri)
         private _birimler = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x}
             && {(lifeState _x) in ["HEALTHY", "INJURED"]}
@@ -51,10 +55,15 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.15 [v8.125: sun
             // ---------------------------------------------------------
             // 1) DONUS HIZI (+%20 sadece donus animasyonunda)
             // ---------------------------------------------------------
-            private _donuyor = ((toLower (animationState _u)) find "turn") >= 0;
+            private _anAd = toLower (animationState _u);
+            private _donuyor = (_anAd find "turn") >= 0;
+            private _parca = _anAd splitString "_";
+            private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;
             private _tabanAnim = [1, 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
-            private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.15]} else {_tabanAnim};
+            private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]} else {
+                if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
+            };
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
             // uygulanmiyordu. Artik deger degisince VEYA en geç 1.5 sn'de bir yeniden uygulanir; remoteExec ile TUM makinelerde
             // (setAnimSpeedCoef etkisi yerel: oyuncu istemcisi bot animasyonunu hizlanmis gormezdi).
@@ -67,7 +76,17 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (donus hizi x1.15 [v8.125: sun
                 // YEREL dogrudan uygula (remoteExec CfgRemoteExec ile engellenmis olabilir; v7.22'de sadece remoteExec vardi -> donus hizi hic uygulanmamis olabilir),
                 // sonra diger makinelere (oyuncu istemcisi) gonder
                 _u setAnimSpeedCoef _istenen;
-                if (isMultiplayer) then { [_u, _istenen] remoteExecCall ["setAnimSpeedCoef", -clientOwner]; };
+                // v8.283 SENKRON (kullanici: 'senkron sorunu olmasin'): setAnimSpeedCoef etkisi YEREL; diger makinelere yalniz deger DEGISINCE (gecis basladi / bitti) ya da 6 sn'de bir nabiz olarak
+                //   gonderilir (eskiden her 1.5 sn'de HER birime -> ag trafigi); tick basina en cok 20 birim, kalani sonraki tick'e kalir. Gecis bitince 1.0'a donus da hemen gonderilir (asili kalmaz).
+                if (isMultiplayer) then {
+                    private _gonder = ((_u getVariable [QGVAR(mvAnimR), -1]) isNotEqualTo _istenen) || {time > (_u getVariable [QGVAR(mvAnimRT), 0])};
+                    if (_gonder && {_uzakN < 20}) then {
+                        _uzakN = _uzakN + 1;
+                        _u setVariable [QGVAR(mvAnimR), _istenen];
+                        _u setVariable [QGVAR(mvAnimRT), time + 6];
+                        [_u, _istenen] remoteExecCall ["setAnimSpeedCoef", -clientOwner];
+                    };
+                };
             };
 
             if (_agir) then {
