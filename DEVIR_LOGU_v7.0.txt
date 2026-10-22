@@ -2772,3 +2772,8 @@ Ilk RPT'de bak: '[DRON-ATES] ... GERCEK ATIS' sayisi 0 ise AI infantry'nin kucuk
 v8.292 testi yoktu; kullanici bildirimi: yine ates yok. Gercek atis sayaci henuz RPT'de gorulmedi. Muhtemel neden: AI infantry doTarget / doFire / doSuppressiveFire emirlerini kucuk IHA'ya (hava hedefi / gorulmeyen hedef) yok sayiyor (BELIRSIZ).
 Duzeltme: en yakin 3 atici icin, AI karar mekanizmasindan bagimsiz: nisan yonu ongorulu noktaya (doWatch), silah yonu hedefe <= 6 derece oldugunda forceWeaponFire ile 3'lu kisa atis (0.14 sn arayla), 6 sn'lik dongu, birim basina 5 sn'de bir; mermi bitince durur.
 [DRON-ATES] logunda 'zorla atis (toplam)' ve 'GERCEK ATIS' sayilari; kapatma: lambs_danger_dronZorlaOff = true. Not: 6 derece toleransinda uzak (300 m) ucusan dronu isabetle vurmak zor - hedef tepki / bastirma ve kullaniciya gorsel geri bildirim.
+
+=== senaryo/sagTikZoomKapat.sqf (kullanici istegi, 2026-10-22; mod DEGIL, senaryo klasorune konan istemci betigi) ===
+Her oyuncuda: (1) display 46'da sag tus (MouseButtonDown / Up) + optics / opticsTemp / opticsMode / zoomTemp tuslari tuketilir (return true), (2) yedek: cameraView "GUNNER" ise switchCamera "INTERNAL" ile zorla cikilir.
+Ayarlar: SAGTIK_AKTIF, SAGTIK_ARAC_DAHIL (false), SAGTIK_DURBUN_DAHIL (false), SAGTIK_TUS_DAHIL (true). Kullanim: initPlayerLocal.sqf icine execVM "sagTikZoomKapat.sqf";
+DEADZONE %25 betikle SABITLENEMEZ: Arma 3'te oyuncunun kendi oyun ayari (Ayarlar > Oyun > Aiming deadzone); komut / zorluk ayari kaynagi bulunamadi - betik yalniz bir kez hatirlatma gosterir. Test edilmedi (Arma ortami yok).
