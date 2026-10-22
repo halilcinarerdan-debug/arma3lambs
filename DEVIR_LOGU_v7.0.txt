@@ -2712,3 +2712,9 @@ Neden: _topcuAt (fnc_komutanPlanDongu) yalniz YEREL (local _x) topcu araclarini 
 yeni gruplari 120 sn bekletir (envanter / kiyafet kaybi onlemi), uzaktan kontrol edilen ya da oyunculu gruplari hic devretmez. Atis tetiklendiginde araç henuz devredilmemisse '[PLAN-TOPCU] ... ATIS YOK ... sunucuda yerel degil' cikar.
 Duzeltme: atis aninda yerel olmayan topcu aracinin murettebat gruplari (oyuncu / uzaktan kontrol yoksa) hemen setGroupOwner 2 ile devredilir ([PLAN-TOPCU] ... DEVREDILDI), 60 sn'de bir; o seansta atis yok, sonraki seansta yerel olur.
 Test ipucu: Zeus'ta araci uzaktan KONTROL ETME (devredilmez); spawn sonrasi ~1 dk bekle ya da ates emrini bir kez ver, 10-20 sn sonra tekrar ver.
+
+
+=== v8.286 — TUM AI SUNUCUDA (kullanici: 'hangi oyuncu koyarsa koysun tum botlar her seyi ile sunucuda calissin') ===
+RPT 21-10 (20:58 / 21:53) topcu: M109 'yerel:true' idi (locality sorun DEGILDI). 21:53 testinde: 49 kez 'HAZIRLIK ... dogrulama bekleniyor (rapor yok)'; saldiri basi ve sonrasi 'ATMADI: en yakin dost 190 / 138 / 243 / 121 m < RED 455 m' (TC 3-21.76 danger close kurali) -> atis yok. 20:58 testinde saldiri basinda 4 mermi atildi.
+fnc_grupSunucuDevir (sunucuya devir bekcisi; tum istemcilerdeki, herhangi bir oyuncunun / Zeus'un yarattigi AI gruplari): kontrol 10 -> 5 sn, tur basina 4 -> 6 grup, yeni grup bekleme 120 sn -> piyade 60 sn (lambs_danger_sunucuDevirBekleS) / arac murettebati 30 sn (lambs_danger_sunucuDevirBekleArac);
+devirden 8 sn sonra hala yerel degilse '[SUNUCU-DEVIR] ... DEVIR BASARISIZ' logu. Devredilmeyenler (degismedi): oyuncu iceren grup, Zeus uzaktan kontrolu, headless client'a ait grup, olu / bos / sivil grup.
