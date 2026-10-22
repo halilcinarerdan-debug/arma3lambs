@@ -102,6 +102,8 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 } forEach [1.1, 0.4, 1.5];
                 if (_hP isEqualTo [] || {_d > 6}) then {
                     _sayac set ["acikta", (_sayac get "acikta") + 1];
+                    // v8.303 ACIKTA + yakinda BINA (kullanici: 'arkada ev var adam acikta ama evi siper kullanmiyor'): sert yuzey yok / uzaksa 28 m icindeki binada dusmandan gizli bir noktaya git
+                    [_u, _en] call FUNC(acikSiper);
                     if (isNil "lambs_danger_hugAcikLogN") then { lambs_danger_hugAcikLogN = 0; };
                     if (lambs_danger_hugAcikLogN < 25) then {
                         lambs_danger_hugAcikLogN = lambs_danger_hugAcikLogN + 1;

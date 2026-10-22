@@ -457,6 +457,11 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 if (!_guvenli) then {
                     private _en = _m findNearestEnemy _m;
                     if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 35}}) then { continue };   // v8.82: 50 -> 35 m (medevac guclendirme)
+                    // v8.303 ATES ALTINDA BAKIM (kullanici: 'yaralıya catisma ortasinda gitmek ... goze batiyor'; TCCC care under fire: once ates ustunlugu / siper, acikta tedavi YOK): yaralinin bulundugu nokta bilinen bir dusmana
+                    //   <= 300 m'de ACIK (gorus hatti serbest) ise hekim bekler; yaralinin ilk goruldugu andan 90 sn sonra (kan kaybi) yine de gider.
+                    private _ec = _c findNearestEnemy _c;
+                    if (!isNull _ec && {alive _ec} && {(_c distance2D _ec) <= 300} && {(time - (_c getVariable [QGVAR(tcccGorulduT), time])) < 90}
+                        && {!(lineIntersects [eyePos _ec, (getPosASL _c) vectorAdd [0, 0, 0.6], _ec, _c])}) then { continue };
                 };
                 // v8.76 YARIS DUZELTMESI (RPT 7066b2ea: ayni hekim ayni saniyede 4 yaraliya birden atandi -> hekim yaralilar arasinda gidip geliyor, tedavi 1/5, hekim kendi yaralandi):
                 //   spawn edilen _tedavi mesgul bayragini gec koyuyordu; dongunun sonraki yaralisi ayni hekimi tekrar aday gorur. Bayrak SENKRON, spawn'dan once konur.
