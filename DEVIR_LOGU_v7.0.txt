@@ -2718,3 +2718,12 @@ Test ipucu: Zeus'ta araci uzaktan KONTROL ETME (devredilmez); spawn sonrasi ~1 d
 RPT 21-10 (20:58 / 21:53) topcu: M109 'yerel:true' idi (locality sorun DEGILDI). 21:53 testinde: 49 kez 'HAZIRLIK ... dogrulama bekleniyor (rapor yok)'; saldiri basi ve sonrasi 'ATMADI: en yakin dost 190 / 138 / 243 / 121 m < RED 455 m' (TC 3-21.76 danger close kurali) -> atis yok. 20:58 testinde saldiri basinda 4 mermi atildi.
 fnc_grupSunucuDevir (sunucuya devir bekcisi; tum istemcilerdeki, herhangi bir oyuncunun / Zeus'un yarattigi AI gruplari): kontrol 10 -> 5 sn, tur basina 4 -> 6 grup, yeni grup bekleme 120 sn -> piyade 60 sn (lambs_danger_sunucuDevirBekleS) / arac murettebati 30 sn (lambs_danger_sunucuDevirBekleArac);
 devirden 8 sn sonra hala yerel degilse '[SUNUCU-DEVIR] ... DEVIR BASARISIZ' logu. Devredilmeyenler (degismedi): oyuncu iceren grup, Zeus uzaktan kontrolu, headless client'a ait grup, olu / bos / sivil grup.
+
+
+=== v8.287 — TOPCU ATES ETMEDI (RPT 22-10 18:47 sunucu + istemci; v8.286) ===
+Zaman cizgisi: 18:49:31 2S1 (FP_UAF_2S1, WEST) Zeus'la yaratildi. [TOPCU-TEST] 18:49:38 ve 18:49:56: 'sunucuda YEREL DEGIL (sahip 4)' (Zeus istemcisi) - v8.285 anlik devri yalniz PLAN atisinda (_topcuAt) vardi, Zeus TEST yolunda (fnc_komutanPlanKapi) yoktu.
+18:50:04 genel bekci grubu devretti (arac murettebati 30 sn bekleme). 18:50:11 test: hedef 2 m (arac ustune tiklanmis) -> menzil disi -> yer degistirme (MOVE). 18:50:25 'ATES EMRI VERILDI (3263 m, rhs_mag_3of56_35, 3 mermi, ETA 27 sn)';
+18:50:36 / 18:50:56 [MEKANIZE-YAVAS] 'komut MOVE | beh SAFE | hiz 0' = surucu onceki yer degistirme emriyle, grup SAFE davranista. Sunucu 18:51:04'te kapandi (emirden 39 sn sonra; ETA 27 sn + nisan / yukleme).
+Atis olup olmadigi LOGLANMIYORDU -> neden kesin bilinmiyor (olasi: hareket emri + SAFE davranis, ya da oturum erken bitti).
+Duzeltme: fnc_topcuAtisHazirla (plan + test yolu): atis oncesi hareket emri iptal (doStop), SAFE -> AWARE, BLUE / GREEN -> YELLOW, nisanci TARGET / AUTOTARGET / FSM acik; Fired olayi [TOPCU-ATIS] (ATIS n, mermi); emirden 14 sn sonra atis yoksa durum dokumu
+(yerel, canFire, motor, hiz, davranis, combatMode, nisanci komut, surucu komut, mermi, menzilde mi). Zeus testi yerel olmayan topcuyu da devreder (oyuncu / uzaktan kontrol yoksa). Kapatma: lambs_danger_topcuHazirlaOff.

@@ -219,6 +219,7 @@ private _topcuAt = {
                 private _hd = _nokta getPos [random 30, random 360];
                 if (_nokta isNotEqualTo _poz) then { diag_log format ["[PLAN-TOPCU] %1 | %2 | NISAN KAYDIRILDI: dost %3 m < RED %4 m -> nisan noktasi objektifin %5 m derinligine (dost %6 m)", _plan get "id", _ad, round _dostEn, _red, round (_nokta distance2D _poz), round _dE]; };
                 // v8.206 ATIS PACELEME (kullanici RPT ad7a3eb4: 2 M109 x 4 mermi ayni anda 21 askerin ustune dustu; ACE frag "Cannot create non-ai vehicle ace_explosion_reflection_*" x34 + 8 olum + ragdoll, 5 sn sonra SUNUCU DONDU): mermiler 2'serli partiler halinde 6 sn arayla, toplar 3 sn arayla baslar
+                [_v, _nokta, _mg] call FUNC(topcuAtisHazirla);   // v8.287: hareket emri iptal, davranis / combatMode, atis tanisi ([TOPCU-ATIS])
                 [_v, _nokta, _mg, _mermi, _forEachIndex] spawn {
                     params ["_tv", "_tn", "_tm", "_tk", "_ti"];
                     private _parti = missionNamespace getVariable ["lambs_danger_topcuPartiN", 2];

@@ -239,7 +239,19 @@ lambs_danger_hqYayinla = {
         private _mg = (getArtilleryAmmo [_v]) param [0, ""];
         if (isNull _g) then { _rapor pushBack format ["%1: topcu (gunner) YOK", _ad]; continue };
         if (isPlayer _g) then { _rapor pushBack format ["%1: gunner OYUNCU - AI atis emri verilmez", _ad]; continue };
-        if (!local _v) then { _rapor pushBack format ["%1: sunucuda YEREL DEGIL (sahip %2)", _ad, owner _v]; continue };
+        if (!local _v) then {
+            // v8.287: yerel degilse murettebat gruplari hemen sunucuya devredilir (oyuncu / uzaktan kontrol yoksa); 15-20 sn sonra testi tekrarlayin
+            private _grlar = [];
+            { private _gx = group _x; if (!isNull _gx && {!(_gx in _grlar)}) then { _grlar pushBack _gx; }; } forEach (crew _v);
+            private _engel = (_grlar findIf { ((units _x) findIf {isPlayer _x}) >= 0 || {((units _x) findIf {!isNull (_x getVariable ["bis_fnc_moduleRemoteControl_owner", objNull])}) >= 0} }) >= 0;
+            if (_engel) then {
+                _rapor pushBack format ["%1: sunucuda YEREL DEGIL (sahip %2); murettebatta OYUNCU / ZEUS UZAKTAN KONTROL var -> devredilemez (kontrolu birak)", _ad, owner _v];
+            } else {
+                { _x setGroupOwner 2; } forEach _grlar;
+                _rapor pushBack format ["%1: sunucuda yerel degildi (sahip %2) -> murettebat sunucuya DEVREDILDI; 15-20 sn sonra testi tekrarlayin", _ad, owner _v];
+            };
+            continue
+        };
         if (!canFire _v) then { _rapor pushBack format ["%1: canFire FALSE (hasar / mermi)", _ad]; continue };
         if (_mg isEqualTo "") then { _rapor pushBack format ["%1: mermi YOK (getArtilleryAmmo bos)", _ad]; continue };
         if !(_poz inRangeOfArtillery [[_v], _mg]) then {
@@ -247,6 +259,7 @@ lambs_danger_hqYayinla = {
             _rapor pushBack format ["%1: hedef %2 m'de MENZIL DISI -> %3", _ad, round (_v distance2D _poz), ["yer degistirme emri verilemedi (300 sn kilit / surucu yok)", "yer degistiriyor, 1-2 dk sonra tekrar deneyin"] select _kon];
             continue
         };
+        [_v, _poz, _mg] call (missionNamespace getVariable ["lambs_danger_fnc_topcuAtisHazirla", {false}]);   // v8.287: hareket emri iptal, davranis / combatMode, atis tanisi
         _v doArtilleryFire [_poz getPos [random 25, random 360], _mg, 3];
         _rapor pushBack format ["%1: ATES EMRI VERILDI (%2 m, %3, 3 mermi, ETA %4 sn)", _ad, round (_v distance2D _poz), _mg, round (_v getArtilleryETA [_poz, _mg])];
     } forEach _araclar;
