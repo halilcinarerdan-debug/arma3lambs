@@ -4,8 +4,9 @@
  * VARSAYILAN BECERI (spawn / editor / Zeus) — yeni olusan HER AI piyadesine taban beceri atar; ortam beceri dususu (fnc_ortamSkill) bunun USTUNDEN dusurur.
  *
  * Varsayilan tablo (lambs_danger_skillVarsayilan, [beceri, min, max]; deger min..max arasinda rastgele):
- *   commanding 1.00..1.00 | general 1.00..1.00 | aimingAccuracy 0.65..0.70
- *   (digerleri — spotDistance, spotTime, aimingSpeed, aimingShake, courage, reloadSpeed — misyonun verdigi gibi KALIR; tabloya eklenebilir)
+ *   v8.281 (kullanici: 'dogrulugu baya boostla, general ve commanding full'): commanding 1.00 | general 1.00 | aimingAccuracy 0.80..0.88 (optiksiz x0.75, sonra x skillCarpan 1.2) | aimingSpeed 0.70..0.80 (x1.2)
+ *   | aimingShake 0.75..0.85 | spotDistance 0.75..0.90 | spotTime 0.75..0.90 | reloadSpeed 0.85..1.00   (courage misyonun verdigi gibi KALIR)
+ *   Eski tablo: commanding 1 | general 1 | aimingAccuracy 0.65..0.70.  NOT: setSkill degerleri sunucu zorluk ayarlariyla (skillAI / precisionAI) birlikte olceklenir; o ayar betikle degistirilemez.
  *
  * Calisma:
  *   - Baslangicta: CBA sinif olayi CAManBase "init" (editor birimleri retroaktif dahil, Zeus / script ile spawn olanlar dahil) -> 0.5 sn sonra uygula
@@ -31,7 +32,7 @@ if (isNull _u) exitWith {
     if (!isNil "lambs_danger_skillVarsayilanStarted") exitWith {false};
     lambs_danger_skillVarsayilanStarted = true;
     if (isNil "lambs_danger_skillVarsayilan") then {
-        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.65, 0.70]];
+        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]];
     };
     lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]];
     diag_log format ["[SKILL-VARSAYILAN] varsayilan beceri sistemi baslatildi | tablo:%1", lambs_danger_skillVarsayilan];
@@ -63,7 +64,7 @@ if (!local _u) exitWith { ["yerel_degil"] call _say; false };
 if (_u getVariable ["lambs_danger_skillElle", false]) exitWith { ["elle"] call _say; false };
 if (_u getVariable [QGVAR(skillAyarli), false]) exitWith { ["zaten"] call _say; false };
 
-private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.65, 0.70]]];
+private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]]];
 private _onceki = [];
 private _yeni = [];
 {

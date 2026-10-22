@@ -30,11 +30,11 @@ if (_sk > 0) then {
 };
 
 // v8.280 TANK TOPU HASARI (kullanici: 'tanklari guclendir', 2 vs 3 duello 1 saat surmesin): bu tanka DUSMAN TANKI ana topu / fuzesi (shotShell / shotMissile) ile vurdugunda gelen hasar
-//   lambs_danger_tankTopHasar (varsayilan 1.3) ile carpilir -> tank-tank cati engagement daha hizli sonuclanir. Piyade / AT / mayin hasari degismez. 1 = kapali.
-if ((missionNamespace getVariable ["lambs_danger_tankTopHasar", 1.3]) != 1) then {
+//   lambs_danger_tankTopHasar (varsayilan 1 = KAPALI; v8.281: gizli hasar carpani hile sayildi, kaldirildi) ile carpilir -> tank-tank cati engagement daha hizli sonuclanir. Piyade / AT / mayin hasari degismez. 1 = kapali.
+if ((missionNamespace getVariable ["lambs_danger_tankTopHasar", 1]) != 1) then {
     _v addEventHandler ["HandleDamage", {
         params ["_u", "_sel", "_dmg", "_src", "_proj", "_hi", "_inst"];
-        private _m = missionNamespace getVariable ["lambs_danger_tankTopHasar", 1.3];
+        private _m = missionNamespace getVariable ["lambs_danger_tankTopHasar", 1];
         if (_m == 1 || {_proj isEqualTo ""}) exitWith { _dmg };
         private _kaynak = if (isNull _inst) then {_src} else {_inst};
         if (isNull _kaynak || {!((vehicle _kaynak) isKindOf "Tank")}) exitWith { _dmg };
