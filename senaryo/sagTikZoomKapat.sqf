@@ -87,7 +87,59 @@ SAGTIK_KARE = addMissionEventHandler ["EachFrame", {
     };
 }];
 
+// ---- 3) KATMAN (v3): kullanici-eylem olay isleyicileri ----
+// Fare olayini tuketmek motorun ESLENMIS eylemini (zoom) durdurmayabilir; eylemi adiyla yakalamayi dene.
+// 'true' donusu eylemi iptal ETMEYEBILIR (dogrulanamadi) -> asagidaki 4. katman bagimsiz calisir.
+if (!isNil "SAGTIK_UAEH") then {
+    { removeUserActionEventHandler _x; } forEach SAGTIK_UAEH;
+};
+SAGTIK_UAEH = [];
+if (!isNil "SAGTIK_EYLEMLER") then {
+    {
+        private _ad = _x;
+        {
+            private _id = addUserActionEventHandler [_ad, _x, {
+                if (call SAGTIK_engelle) then {true} else {false}
+            }];
+            if (_id isEqualType 0 && {_id >= 0}) then { SAGTIK_UAEH pushBack [_ad, _x, _id]; };
+        } forEach ["Activate", "Analog"];
+    } forEach SAGTIK_EYLEMLER;
+};
+
+// ---- 4) KATMAN (v3): ZOOM TETIKLENIRSE ANINDA GERI AL ----
+// Zoom eylemlerinden biri aktifken gorunum zorla "INTERNAL"e alinir ve olay RPT'ye yazilir.
+// Nisan ALMAYAN FOV zoomunu betikle sifirlayan bir komut bulunamadi: zoom hala olursa SAGTIK_TANI = true yap, RPT'deki '[SAGTIK-EYLEM]' satirlarindan eylem adini bana ilet.
+SAGTIK_ZOOM_AKTIF = false;
+if (!isNil "SAGTIK_ZOOM_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_ZOOM_KARE]; };
+SAGTIK_ZOOM_KARE = addMissionEventHandler ["EachFrame", {
+    if !(call SAGTIK_engelle) exitWith {};
+    private _aktif = false;
+    { if (inputAction _x > 0) exitWith { _aktif = true; }; } forEach ["optics", "opticsTemp", "zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"];
+    if (_aktif) then {
+        private _arac = vehicle player;
+        if (cameraOn isEqualTo _arac && {cameraView isNotEqualTo "INTERNAL"}) then { _arac switchCamera "INTERNAL"; };
+        if (!SAGTIK_ZOOM_AKTIF) then { SAGTIK_ZOOM_AKTIF = true; diag_log format ["[SAGTIK] zoom eylemi algilandi (gorunum %1)", cameraView]; };
+    } else {
+        SAGTIK_ZOOM_AKTIF = false;
+    };
+}];
+
 // ---- TANI (istege bagli): zoom olurken hangi eylem / gorunum aktif? ----
+// v3: SAGTIK_TANI = true iken butun kullanici eylemleri (UserActionGroups) RPT'ye '[SAGTIK-EYLEM] ad' olarak yazilir
+if (!isNil "SAGTIK_TANI_UAEH") then { { removeUserActionEventHandler _x; } forEach SAGTIK_TANI_UAEH; };
+SAGTIK_TANI_UAEH = [];
+if (SAGTIK_TANI) then {
+    private _adlar = [];
+    {
+        _adlar append (getArray (_x >> "list"));
+    } forEach ("true" configClasses (configFile >> "UserActionGroups"));
+    {
+        private _ad = _x;
+        private _id = addUserActionEventHandler [_ad, "Activate", compile format ["diag_log '[SAGTIK-EYLEM] %1'; false", _ad]];
+        if (_id isEqualType 0 && {_id >= 0}) then { SAGTIK_TANI_UAEH pushBack [_ad, "Activate", _id]; };
+    } forEach (_adlar arrayIntersect _adlar);
+    diag_log format ["[SAGTIK-TANI] %1 eylem izleniyor", count SAGTIK_TANI_UAEH];
+};
 if (!isNil "SAGTIK_TANI_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_TANI_KARE]; SAGTIK_TANI_KARE = nil; };
 if (SAGTIK_TANI) then {
     SAGTIK_TANI_KARE = addMissionEventHandler ["EachFrame", {
