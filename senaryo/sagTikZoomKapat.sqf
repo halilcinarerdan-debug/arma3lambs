@@ -148,7 +148,23 @@ SAGTIK_ZOOM_KARE = addMissionEventHandler ["EachFrame", {
             SAGTIK_SIFIRLA_T = time;
             [] spawn { disableUserInput true; uiSleep 0.06; disableUserInput false; };
         };
-        if (!SAGTIK_ZOOM_AKTIF) then { SAGTIK_ZOOM_AKTIF = true; diag_log format ["[SAGTIK] zoom / basili tutma algilandi (gorunum %1)", cameraView]; };
+        if (!SAGTIK_ZOOM_AKTIF) then {
+            SAGTIK_ZOOM_AKTIF = true;
+            diag_log format ["[SAGTIK] zoom / basili tutma algilandi (gorunum %1)", cameraView];
+            // v6: RHS / CUP silah-optik zoom degerleri RPT'ye dokulur (zoomun silaha ozgu olup olmadigi icin)
+            private _sil = currentWeapon player;
+            private _opt = if (_sil isEqualTo primaryWeapon player) then { (primaryWeaponItems player) param [2, ""] } else { "" };
+            private _ayar = {
+                params ["_cfg"];
+                private _r = [];
+                { _r pushBack format ["%1=%2", _x, getNumber (_cfg >> _x)]; } forEach ["opticsZoomMin", "opticsZoomMax", "opticsZoomInit", "distanceZoomMin", "distanceZoomMax"];
+                _r joinString ", "
+            };
+            diag_log format ["[SAGTIK-SILAH] silah=%1 optik=%2 | silahCfg: %3 | optikCfg: %4 | optics=%5 opticsTemp=%6 zoomTemp=%7 zoomIn=%8 zoomOut=%9",
+                _sil, _opt, [configFile >> "CfgWeapons" >> _sil] call _ayar,
+                if (_opt isEqualTo "") then {"-"} else { [configFile >> "CfgWeapons" >> _opt >> "ItemInfo" >> "OpticsModes"] call _ayar },
+                inputAction "optics", inputAction "opticsTemp", inputAction "zoomTemp", inputAction "zoomIn", inputAction "zoomOut"];
+        };
     } else {
         SAGTIK_ZOOM_AKTIF = false;
     };
