@@ -22,7 +22,7 @@
  *   varsa hangi eylemin yaptigini gormek icin SAGTIK_TANI = true yap (ekranda cameraView + optics / opticsTemp / zoomTemp eylem degerleri + FOV gorunur), zoom olurken ne yazdigini bana ilet.
  *
  * DEADZONE (%25) HAKKINDA: 'Aiming deadzone' Arma 3'te OYUNCUNUN kendi oyun ayaridir (Ayarlar > Oyun > Aiming deadzone). Bir betik komutu / zorluk ayari ile sunucudan
- *   sabitlenebildigine dair kaynak BULUNAMADI; bu dosya onu ZORLAYAMAZ. Asagida yalnizca katilan her oyuncuya bir kez hatirlatma gosterilir (SAGTIK_DEADZONE_HATIRLAT).
+ *   sabitlenebildigine dair kaynak BULUNAMADI; bu dosya onu ZORLAYAMAZ.  Betik artik hatirlatma/uyari GOSTERMEZ.
  */
 
 if (!hasInterface) exitWith {};
@@ -33,12 +33,14 @@ if (isNil "SAGTIK_AKTIF") then { SAGTIK_AKTIF = true; };
 if (isNil "SAGTIK_ARAC_DAHIL") then { SAGTIK_ARAC_DAHIL = false; };
 if (isNil "SAGTIK_DURBUN_DAHIL") then { SAGTIK_DURBUN_DAHIL = false; };
 if (isNil "SAGTIK_TUS_DAHIL") then { SAGTIK_TUS_DAHIL = true; };
-if (isNil "SAGTIK_DEADZONE_HATIRLAT") then { SAGTIK_DEADZONE_HATIRLAT = true; };
 if (isNil "SAGTIK_TANI") then { SAGTIK_TANI = false; };
 // v4: true = sag tik NISAN (ADS) ACIK, yalniz BASILI TUTMA zoomu + zoom tuslari kapali; false = eski davranis (nisan da kapali)
 if (isNil "SAGTIK_ADS_SERBEST") then { SAGTIK_ADS_SERBEST = true; };
 // basili tutma esigi (sn): bundan kisa basis = normal nisan, uzun basis = zoom sayilir ve geri alinir
 if (isNil "SAGTIK_BASILI_SN") then { SAGTIK_BASILI_SN = 0.3; };
+// v5: zoom algilaninca girdi sifirlama (disableUserInput true -> kisa bekle -> false) basili tusu/eylemi iptal eder; INTERNAL gecisi nisansiz FOV zoomunu kapatmadi
+if (isNil "SAGTIK_GIRDI_SIFIRLA") then { SAGTIK_GIRDI_SIFIRLA = true; };
+SAGTIK_SIFIRLA_T = -1;
 
 // ---- bu an engellenmeli mi? ----
 SAGTIK_engelle = {
@@ -141,6 +143,11 @@ SAGTIK_ZOOM_KARE = addMissionEventHandler ["EachFrame", {
     };
     if (_aktif) then {
         if (cameraOn isEqualTo _arac && {cameraView isNotEqualTo "INTERNAL"}) then { _arac switchCamera "INTERNAL"; };
+        // nisan (GUNNER) disindaki zoom: basili eylemi girdi sifirlamayla dusur (Zeus arayuzu / harita / menu aciksa dokunma)
+        if (SAGTIK_GIRDI_SIFIRLA && {cameraView isNotEqualTo "GUNNER"} && {isNull (findDisplay 312)} && {time - SAGTIK_SIFIRLA_T > 0.6}) then {
+            SAGTIK_SIFIRLA_T = time;
+            [] spawn { disableUserInput true; uiSleep 0.06; disableUserInput false; };
+        };
         if (!SAGTIK_ZOOM_AKTIF) then { SAGTIK_ZOOM_AKTIF = true; diag_log format ["[SAGTIK] zoom / basili tutma algilandi (gorunum %1)", cameraView]; };
     } else {
         SAGTIK_ZOOM_AKTIF = false;
@@ -168,13 +175,6 @@ if (SAGTIK_TANI) then {
     SAGTIK_TANI_KARE = addMissionEventHandler ["EachFrame", {
         hintSilent format ["gorunum: %1 | optics: %2 | opticsTemp: %3 | zoomTemp: %4 | zoomIn: %5 | zoomOut: %6 | zoomContinue: %7 | silah: %8", cameraView, inputAction "optics", inputAction "opticsTemp", inputAction "zoomTemp", inputAction "zoomIn", inputAction "zoomOut", inputAction "zoomContinue", currentWeapon player];
     }];
-};
-
-// ---- deadzone hatirlatmasi (zorlayamaz; bir kez) ----
-if (SAGTIK_DEADZONE_HATIRLAT) then {
-    SAGTIK_DEADZONE_HATIRLAT = false;
-    // v2: hintC String ister (RPT: 'hintc: Type Text, expected String', satir 99) -> hint + parseText kullanilir
-    hint parseText "<t size='1.2' color='#ffcc00'>Nisan ayari</t><br/>Bu senaryoda <t color='#ffcc00'>sag tik basili tutma zoomu kapali</t> (kisa sag tik nisan acik).<br/>Oyun ayarlarindan <t color='#ffcc00'>Aiming deadzone</t> degerini <t color='#ffcc00'>%25</t> yap (Ayarlar &gt; Oyun).";
 };
 
 diag_log "[SAGTIK] sag tik zoom engeli aktif (mouse olaylari + gorunum yedegi)";
