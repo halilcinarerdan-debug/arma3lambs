@@ -39,7 +39,7 @@ if (isNil "SAGTIK_ADS_SERBEST") then { SAGTIK_ADS_SERBEST = true; };
 // basili tutma esigi (sn): bundan kisa basis = normal nisan, uzun basis = zoom sayilir ve geri alinir
 if (isNil "SAGTIK_BASILI_SN") then { SAGTIK_BASILI_SN = 0.3; };
 // v5: zoom algilaninca girdi sifirlama (disableUserInput true -> kisa bekle -> false) basili tusu/eylemi iptal eder; INTERNAL gecisi nisansiz FOV zoomunu kapatmadi
-if (isNil "SAGTIK_GIRDI_SIFIRLA") then { SAGTIK_GIRDI_SIFIRLA = true; };
+if (isNil "SAGTIK_GIRDI_SIFIRLA") then { SAGTIK_GIRDI_SIFIRLA = false; };
 SAGTIK_SIFIRLA_T = -1;
 
 // ---- bu an engellenmeli mi? ----
