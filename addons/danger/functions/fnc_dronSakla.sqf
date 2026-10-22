@@ -33,6 +33,11 @@ private _ud = (units _g) select {
     && {(lifeState _x) in ["HEALTHY", "INJURED"]}
     && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
     && {!(_x getVariable [QGVAR(teslim), false])} && {time >= (_x getVariable [QGVAR(tcccBusy), 0])}
+    // v8.298 (kullanici: 'surekli kacmalarina gerek yok'): saklandigi noktada (<8 m) 90 sn'e kadar YERINDE kalir, yeniden kosturulmaz
+    && {
+        private _gp = _x getVariable [QGVAR(dronGizliP), []];
+        _gp isEqualTo [] || {(time - (_x getVariable [QGVAR(dronGizliT), -999])) >= 90} || {(_x distance2D _gp) >= 8}
+    }
 };
 if (_ud isEqualTo []) exitWith {0};
 
@@ -48,6 +53,7 @@ private _atanan = [];
 private _n = 0;
 private _siperN = 0;
 private _binaN = 0;
+private _agacN = 0;
 {
     private _u = _x;
     if (_mesgul) then {
@@ -58,7 +64,9 @@ private _binaN = 0;
         continue
     };
     _u setVariable [QGVAR(taktikKilit), time + 40];   // v8.292: 25 -> 40 sn
-    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu setVariable [QGVAR(taktikKilit), nil]; }; }, [_u], 40] call CBA_fnc_waitAndExecute;
+    // v8.298: 40 sn'de kilit acilir ama saklandigi noktadaysa durus korunur; durus 90 sn'de AUTO'ya doner
+    [{ params ["_uu"]; if (alive _uu) then { _uu setVariable [QGVAR(taktikKilit), nil]; private _gp = _uu getVariable [QGVAR(dronGizliP), []]; if (_gp isEqualTo [] || {(_uu distance2D _gp) >= 8}) then { _uu setUnitPos "AUTO"; }; }; }, [_u], 40] call CBA_fnc_waitAndExecute;
+    [{ params ["_uu"]; if (alive _uu && {(time - (_uu getVariable [QGVAR(dronGizliT), -999])) >= 85}) then { _uu setUnitPos "AUTO"; }; }, [_u], 90] call CBA_fnc_waitAndExecute;
     if (_u in _atesci) then {
         _u setUnitPos "MIDDLE";
         continue
@@ -75,12 +83,30 @@ private _binaN = 0;
             _binaN = _binaN + 1;
         };
     };
+    // v8.298 ORTU (kullanici: 'calilaklara agac altlarina saklanabilsinler'): 45 m icinde dolu agac (>= 4 m, dal alti) / cali (>= 1.2 m) dibi, dronun yonune kosmadan (>= 70 derece aci), yere yatarak
+    if (_hedef isEqualTo []) then {
+        private _dd = _u getDir _dr;
+        private _adayAg = (nearestTerrainObjects [getPosATL _u, ["TREE", "SMALL TREE", "BUSH"], 45, false, true]) select {
+            private _t = _x;
+            private _tp = getPosATL _t;
+            private _bb = boundingBoxReal _t;
+            private _h = ((_bb select 1) select 2) - ((_bb select 0) select 2);
+            _h >= 1.2 && {((_u distance2D _t) < 10) || {(abs ((((_u getDir _t) - _dd) + 540) mod 360 - 180)) >= 70}} && {(_atanan findIf {(_x distance2D _tp) < 4}) < 0}
+        };
+        if (_adayAg isNotEqualTo []) then {
+            private _ag = _adayAg select 0;
+            _hedef = (getPosATL _ag) getPos [0.8, _dr getDir _ag];
+            _durus = "DOWN";
+            _agacN = _agacN + 1;
+        };
+    };
     private _cv = if (_hedef isEqualTo []) then { [_u, _dr, 60, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover) } else {[]};
     if (_cv isNotEqualTo []) then {
         private _cp = (_cv select 0) select 0;
         if ((_atanan findIf {(_x distance2D _cp) < 10}) < 0) then {
             _hedef = _cp;
             _durus = (_cv select 0) select 1;
+            if (_durus in ["UP", "AUTO"]) then { _durus = "MIDDLE"; };   // v8.298: dik siperde ayakta durma (lider RPT 23:57: STAND)
             _siperN = _siperN + 1;
         };
     };
@@ -94,6 +120,8 @@ private _binaN = 0;
     };
     if (_hedef isNotEqualTo []) then {
         _atanan pushBack _hedef;
+        _u setVariable [QGVAR(dronGizliP), _hedef];
+        _u setVariable [QGVAR(dronGizliT), time];
         // v8.297 (RPT 22-10 22:53: lider [10478,880] 23:00 -> 23:02 ayni yer; 'DOWN' + doMove = SUREKLI SURUNEREK 35-60 m, 40 sn'de ~10 m): kosarken AYAKTA (UP + FULL hiz), varinca / 15 sn sonra istenen durusa gecer
         _u doMove _hedef;
         _u setUnitPos "UP";
@@ -105,6 +133,6 @@ private _binaN = 0;
 
 if ((time - (_g getVariable [QGVAR(dronSaklaLogT), -999])) > 20) then {
     _g setVariable [QGVAR(dronSaklaLogT), time];
-    diag_log format ["[DRON-SAKLAN] %1 | %2 %3 m | %4 asker kacti (%5 binada, %6 siperde, %7 acikta yatar) | %8 nisanci yerinde | taktikKilit 40 sn", groupId _g, typeOf _dr, round (_dr distance2D (leader _g)), _n, _binaN, _siperN, _n - _binaN - _siperN, count _atesci];
+    diag_log format ["[DRON-SAKLAN] %1 | %2 %3 m | %4 asker kacti (%5 binada, %9 agac / cali dibinde, %6 siperde, %7 acikta yatar) | %8 nisanci yerinde | taktikKilit 40 sn", groupId _g, typeOf _dr, round (_dr distance2D (leader _g)), _n, _binaN, _siperN, _n - _binaN - _siperN - _agacN, count _atesci, _agacN];
 };
 _n
