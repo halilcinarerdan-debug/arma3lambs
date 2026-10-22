@@ -10,6 +10,7 @@
  *      yatayda hareketsiz silahli askerler ongorulu (lead) toplu ates (doSuppressiveFire), en yakin 3 asker doTarget + doFire; combatMode en az YELLOW, behaviour SAFE / CARELESS ise AWARE. 3 sn'de bir.
  *      GOZLEM dronu: yalniz <= 100 m (ates konumu ele verir; ATP 3-01.8: once pasif onlem).
  *      Retreat / Evade / BreakContact / sniper grubu bu fonksiyona zaten hic gelmez (havaFarkindalik atlar).
+ *   v8.288: kamikaze / silahli dron <= 700 m ise ayrica fnc_dronSakla (dagil + siper / yat); cagiran havaFarkindalik 25 sn boyunca eski toplu HIDE / GARRISON'u atlar.
  *   Doner: ates edildi mi <BOOL> (true ise cagiran diger pasif onlemleri - saklanma - atlar).
  * Kapatma: lambs_danger_dronTepkiOff = true.
  *
@@ -71,6 +72,8 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
 // ---- 2) ATES ----
 private _menzil = if (_kamikaze) then { missionNamespace getVariable ["lambs_danger_dronAtesM", 450] } else {100};
 private _egik = _l distance _dr;
+// v8.288 DAGIL + SAKLAN (kullanici: 'botlar dusman dronu gorunce mesafeyi arttirsinlar ve saklansinlar'): kamikaze / silahli dron <= 700 m ise grup dagilir ve siper alir (fnc_dronSakla); ates menzilindeyse 3 nisanci yerinde kalir
+if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, _egik <= _menzil] call FUNC(dronSakla); };
 if (_egik > _menzil || {((getPosATL _dr) select 2) > 200}) exitWith {false};
 if ((time - (_g getVariable [QGVAR(dronAtesT), -99])) < 3) exitWith {true};
 _g setVariable [QGVAR(dronAtesT), time];

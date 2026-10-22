@@ -2727,3 +2727,10 @@ Zaman cizgisi: 18:49:31 2S1 (FP_UAF_2S1, WEST) Zeus'la yaratildi. [TOPCU-TEST] 1
 Atis olup olmadigi LOGLANMIYORDU -> neden kesin bilinmiyor (olasi: hareket emri + SAFE davranis, ya da oturum erken bitti).
 Duzeltme: fnc_topcuAtisHazirla (plan + test yolu): atis oncesi hareket emri iptal (doStop), SAFE -> AWARE, BLUE / GREEN -> YELLOW, nisanci TARGET / AUTOTARGET / FSM acik; Fired olayi [TOPCU-ATIS] (ATIS n, mermi); emirden 14 sn sonra atis yoksa durum dokumu
 (yerel, canFire, motor, hiz, davranis, combatMode, nisanci komut, surucu komut, mermi, menzilde mi). Zeus testi yerel olmayan topcuyu da devreder (oyuncu / uzaktan kontrol yoksa). Kapatma: lambs_danger_topcuHazirlaOff.
+
+
+=== v8.288 — DRON GORUNCE DAGIL + SAKLAN, ISABETE EK %7 ===
+1) fnc_dronSakla (YENI; fnc_dronTepki'den): kamikaze / silahli dron <= 700 m ise grup tek yigin kalmaz; her asker dronun bakisini kesen en yakin sert siper (findCover SURVIVE, 35 m) ya da dronden uzaga +-50 derece 18-26 m acik noktaya gider (atananlar arasi >= 10 m, mesafe artisi) ve yatar / cömelir;
+   dron ates menzilindeyse (450 m) en yakin 3 silahli asker yerinde kalip ates eder (comelir). 25 sn taktikKilit (buddyBond / dispersion / roleStation geri cekmesin), 15 sn'de bir / grup. Bounding / retreat / evade / medik / esir atlanir. Grup 25 sn boyunca eski toplu HIDE / GARRISON'u atlar.
+   Gozlem dronu icin eski HIDE / GARRISON davranisi aynen duruyor. Log [DRON-SAKLAN]. Kapatma: lambs_danger_dronSaklaOff.
+2) ISABET: aimingAccuracy ek x lambs_danger_skillIsabetEk (1.07) ve isabet tavani 0.92 -> 0.95 (lambs_danger_skillTavanIsabet) - toplam carpan 1.2 x 1.07 = 1.284; tecrubesiz oran / bireysel aralik degismedi (insani boyut).

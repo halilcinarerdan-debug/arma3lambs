@@ -90,7 +90,7 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
-private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.92];
+private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.95];
 private _acemi = (random 1) < 0.15;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * 0.85]; } forEach ["aimingAccuracy", "aimingShake"];
@@ -99,7 +99,9 @@ if (_acemi) then {
 if (_cpn != 1) then {
     {
         private _o = _u skill _x;
-        private _n = (_o * _cpn) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
+        // v8.288: isabete EK %7 (kullanici: 'botlarin dogrulugunu yuzde 7 arttirabilirsin'): aimingAccuracy x lambs_danger_skillIsabetEk (1.07) ve tavan 0.92 -> 0.95 (insani sinir korunur)
+        private _kat = if (_x isEqualTo "aimingAccuracy") then { _cpn * (missionNamespace getVariable ["lambs_danger_skillIsabetEk", 1.07]) } else {_cpn};
+        private _n = (_o * _kat) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
         _u setSkill [_x, _n];
         _yeni pushBack format ["%1 x%2 -> %3", _x, _cpn, _n toFixed 2];
     } forEach ["aimingAccuracy", "aimingSpeed"];
