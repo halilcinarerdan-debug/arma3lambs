@@ -107,26 +107,44 @@ private _n = 0;
                 params ["_u", "_dr"];
                 if ((time - (_u getVariable ["lambs_danger_dronZorlaT", -99])) < 5) exitWith {};
                 _u setVariable ["lambs_danger_dronZorlaT", time];
+                _u setVariable ["lambs_danger_dronZorlaBas", (_u getVariable ["lambs_danger_dronZorlaBas", 0]) + 1];
+                // v8.295: RPT 22-10 (sunucu 22:29): 'ates emri' var, GERCEK ATIS 0, zorla atis 0 -> (a) currentWeapon GP-25 namlusunda (40 mm el bombasi) olabilir: ANA SILAH + ana namlu secilir;
+                //   (b) govde yonu yavas doner -> hedef yone setDir ile hizalanir (yalniz yatay), (c) en kucuk aci / baslama sayisi loglanir ([DRON-ATES] 'zorla dongu').
+                private _w = primaryWeapon _u;
+                if (_w isEqualTo "" || {(_u ammo _w) <= 0}) exitWith {};
+                if ((currentWeapon _u) isNotEqualTo _w || {(currentMuzzle _u) isNotEqualTo _w}) then { _u selectWeapon _w; sleep 0.3; };
                 private _bit = time + 6;
                 private _zN = 0;
-                while {time < _bit && {alive _u} && {!isNull _dr} && {alive _dr} && {(_u ammo (currentWeapon _u)) > 0}} do {
+                private _min = 180;
+                while {time < _bit && {alive _u} && {!isNull _dr} && {alive _dr} && {(_u ammo _w) > 0}} do {
                     private _iv2 = getNumber (configFile >> "CfgMagazines" >> (currentMagazine _u) >> "initSpeed");
                     if (_iv2 <= 0) then { _iv2 = 800 };
                     private _tof2 = ((_u distance _dr) / (_iv2 * 0.9)) min 2;
                     private _lead2 = ASLToAGL ((getPosASL _dr) vectorAdd ((velocity _dr) vectorMultiply _tof2));
                     _u doWatch _lead2;
+                    _u doTarget _dr;
+                    // govde yonu hedefe >15 derece ise dondur (AI govdesi yavas doner; yatay hizalama zararsiz)
+                    private _yatay = (getPosATL _u) getDir _lead2;
+                    private _fy = abs (((_yatay - (getDir _u)) + 540) mod 360 - 180);
+                    if (_fy > 15) then { _u setDir _yatay; };
                     sleep 0.35;
                     private _fark = (AGLToASL _lead2) vectorDiff (eyePos _u);
-                    private _wd = _u weaponDirection (currentWeapon _u);
+                    private _wd = _u weaponDirection _w;
                     if ((vectorMagnitude _fark) > 1 && {(vectorMagnitude _wd) > 0.1}) then {
                         private _aci = acos ((((vectorNormalized _wd) vectorDotProduct (vectorNormalized _fark)) min 1) max -1);
+                        if (_aci < _min) then { _min = _aci; };
                         if (_aci < 6) then {
-                            for "_k" from 1 to 3 do { _u forceWeaponFire [currentMuzzle _u, currentWeaponMode _u]; _zN = _zN + 1; sleep 0.14; };
+                            for "_k" from 1 to 3 do {
+                                _u forceWeaponFire [currentMuzzle _u, currentWeaponMode _u];
+                                _zN = _zN + 1;
+                                _u setVariable ["lambs_danger_dronZorlaN", (_u getVariable ["lambs_danger_dronZorlaN", 0]) + 1];
+                                sleep 0.14;
+                            };
                         };
                     };
                 };
                 _u doWatch objNull;
-                _u setVariable ["lambs_danger_dronZorlaN", (_u getVariable ["lambs_danger_dronZorlaN", 0]) + _zN];
+                _u setVariable ["lambs_danger_dronZorlaAci", _min];
             };
         };
     } else {
@@ -143,7 +161,10 @@ if ((time - (_g getVariable [QGVAR(dronAtesLogT), -999])) > 8) then {
     _g setVariable [QGVAR(dronAtisSon), _atisT];
     private _zorlaT = 0;
     { _zorlaT = _zorlaT + (_x getVariable ["lambs_danger_dronZorlaN", 0]); } forEach (units _g);
-    diag_log format ["[DRON-ATES] %1 | %2 (%3) %4 m (egik) | yukseklik %5 m | ates emri %6 | GERCEK ATIS (son logdan beri) %7 | zorla atis (toplam) %8 | tur %9", groupId _g, typeOf _dr, _tip, round _egik, round ((getPosATL _dr) select 2), _n, _atisFark, _zorlaT, ["GOZLEM", "KAMIKAZE / SILAHLI"] select _kamikaze];
+    private _basT = 0;
+    private _aciMin = 180;
+    { _basT = _basT + (_x getVariable ["lambs_danger_dronZorlaBas", 0]); _aciMin = _aciMin min (_x getVariable ["lambs_danger_dronZorlaAci", 180]); } forEach (units _g);
+    diag_log format ["[DRON-ATES] %1 | %2 (%3) %4 m (egik) | yukseklik %5 m | ates emri %6 | GERCEK ATIS (son logdan beri) %7 | zorla atis (toplam) %8 | zorla dongu %10 | en kucuk nisan acisi %11 derece | tur %9", groupId _g, typeOf _dr, _tip, round _egik, round ((getPosATL _dr) select 2), _n, _atisFark, _zorlaT, ["GOZLEM", "KAMIKAZE / SILAHLI"] select _kamikaze, _basT, round _aciMin];
     // emir var ama gercek atis yok: ilk atici icin durum dokumu
     if (_n > 0 && {_atisFark <= 0} && {(time - (_g getVariable [QGVAR(dronAtisTaniT), -999])) > 25}) then {
         _g setVariable [QGVAR(dronAtisTaniT), time];
