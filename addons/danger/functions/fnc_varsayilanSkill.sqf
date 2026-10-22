@@ -4,7 +4,7 @@
  * VARSAYILAN BECERI (spawn / editor / Zeus) — yeni olusan HER AI piyadesine taban beceri atar; ortam beceri dususu (fnc_ortamSkill) bunun USTUNDEN dusurur.
  *
  * Varsayilan tablo (lambs_danger_skillVarsayilan, [beceri, min, max]; deger min..max arasinda rastgele):
- *   v8.281 (kullanici: 'dogrulugu baya boostla, general ve commanding full'): commanding 1.00 | general 1.00 | aimingAccuracy 0.80..0.88 (optiksiz x0.75, sonra x skillCarpan 1.2) | aimingSpeed 0.70..0.80 (x1.2)
+ *   v8.281 (kullanici: 'dogrulugu baya boostla, general ve commanding full'): commanding 1.00 | general 1.00 | aimingAccuracy 0.70..0.88 (optiksiz x0.75, ~%15 tecrubesiz x0.85, sonra x skillCarpan 1.2, tavan 0.92) | aimingSpeed 0.70..0.80 (x1.2)
  *   | aimingShake 0.75..0.85 | spotDistance 0.75..0.90 | spotTime 0.75..0.90 | reloadSpeed 0.85..1.00   (courage misyonun verdigi gibi KALIR)
  *   Eski tablo: commanding 1 | general 1 | aimingAccuracy 0.65..0.70.  NOT: setSkill degerleri sunucu zorluk ayarlariyla (skillAI / precisionAI) birlikte olceklenir; o ayar betikle degistirilemez.
  *
@@ -32,7 +32,7 @@ if (isNull _u) exitWith {
     if (!isNil "lambs_danger_skillVarsayilanStarted") exitWith {false};
     lambs_danger_skillVarsayilanStarted = true;
     if (isNil "lambs_danger_skillVarsayilan") then {
-        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]];
+        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.70, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]];
     };
     lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]];
     diag_log format ["[SKILL-VARSAYILAN] varsayilan beceri sistemi baslatildi | tablo:%1", lambs_danger_skillVarsayilan];
@@ -64,7 +64,7 @@ if (!local _u) exitWith { ["yerel_degil"] call _say; false };
 if (_u getVariable ["lambs_danger_skillElle", false]) exitWith { ["elle"] call _say; false };
 if (_u getVariable [QGVAR(skillAyarli), false]) exitWith { ["zaten"] call _say; false };
 
-private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]]];
+private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.70, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]]];
 private _onceki = [];
 private _yeni = [];
 {
@@ -88,10 +88,18 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 // v8.280 BOT BECERISI +%20 (kullanici: 'botlarin dogrulugunu ve sağa sola donme animasyon hizini yuzde 20 arttir'): aimingAccuracy (isabet) ve aimingSpeed (nisan alma / donus hizi) x lambs_danger_skillCarpan (1.2), en cok 1.0.
 //   Optik carpanindan SONRA uygulanir. Kapatma: lambs_danger_skillCarpan = 1.
 private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
+// v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
+//   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
+private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.92];
+private _acemi = (random 1) < 0.15;
+if (_acemi) then {
+    { _u setSkill [_x, (_u skill _x) * 0.85]; } forEach ["aimingAccuracy", "aimingShake"];
+    _yeni pushBack "TECRUBESIZ x0.85 (isabet / titreme)";
+};
 if (_cpn != 1) then {
     {
         private _o = _u skill _x;
-        private _n = (_o * _cpn) min 1;
+        private _n = (_o * _cpn) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
         _u setSkill [_x, _n];
         _yeni pushBack format ["%1 x%2 -> %3", _x, _cpn, _n toFixed 2];
     } forEach ["aimingAccuracy", "aimingSpeed"];
