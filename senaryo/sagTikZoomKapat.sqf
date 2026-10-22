@@ -66,7 +66,9 @@ if (!isNil "SAGTIK_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_
 // ---- optik / zoom eylemlerine atanmis klavye tuslari ----
 if (SAGTIK_TUS_DAHIL) then {
     SAGTIK_TUSLAR = [];
-    { SAGTIK_TUSLAR append (actionKeys _x); } forEach ["optics", "opticsTemp", "opticsMode", "zoomTemp"];
+    // v2: daha genis eylem listesi (bilinmeyen ad bos doner, zararsiz); SAGTIK_EYLEMLER ile degistirilebilir
+    if (isNil "SAGTIK_EYLEMLER") then { SAGTIK_EYLEMLER = ["optics", "opticsTemp", "opticsMode", "zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"]; };
+    { SAGTIK_TUSLAR append (actionKeys _x); } forEach SAGTIK_EYLEMLER;
     // fare tuslari (65536+) ayri katmanda; yalniz klavye kodlari
     SAGTIK_TUSLAR = SAGTIK_TUSLAR select {_x < 65536};
     private _id2 = (findDisplay 46) displayAddEventHandler ["KeyDown", {
@@ -89,14 +91,15 @@ SAGTIK_KARE = addMissionEventHandler ["EachFrame", {
 if (!isNil "SAGTIK_TANI_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_TANI_KARE]; SAGTIK_TANI_KARE = nil; };
 if (SAGTIK_TANI) then {
     SAGTIK_TANI_KARE = addMissionEventHandler ["EachFrame", {
-        hintSilent format ["gorunum: %1 | optics: %2 | opticsTemp: %3 | zoomTemp: %4 | silah: %5", cameraView, inputAction "optics", inputAction "opticsTemp", inputAction "zoomTemp", currentWeapon player];
+        hintSilent format ["gorunum: %1 | optics: %2 | opticsTemp: %3 | zoomTemp: %4 | zoomIn: %5 | zoomOut: %6 | zoomContinue: %7 | silah: %8", cameraView, inputAction "optics", inputAction "opticsTemp", inputAction "zoomTemp", inputAction "zoomIn", inputAction "zoomOut", inputAction "zoomContinue", currentWeapon player];
     }];
 };
 
 // ---- deadzone hatirlatmasi (zorlayamaz; bir kez) ----
 if (SAGTIK_DEADZONE_HATIRLAT) then {
     SAGTIK_DEADZONE_HATIRLAT = false;
-    hintC parseText "<t size='1.2' color='#ffcc00'>Nisan ayari</t><br/>Bu senaryoda <t color='#ffcc00'>sag tik zoom kapali</t>.<br/>Oyun ayarlarindan <t color='#ffcc00'>Aiming deadzone</t> degerini <t color='#ffcc00'>%25</t> yap (Ayarlar &gt; Oyun).";
+    // v2: hintC String ister (RPT: 'hintc: Type Text, expected String', satir 99) -> hint + parseText kullanilir
+    hint parseText "<t size='1.2' color='#ffcc00'>Nisan ayari</t><br/>Bu senaryoda <t color='#ffcc00'>sag tik zoom kapali</t>.<br/>Oyun ayarlarindan <t color='#ffcc00'>Aiming deadzone</t> degerini <t color='#ffcc00'>%25</t> yap (Ayarlar &gt; Oyun).";
 };
 
 diag_log "[SAGTIK] sag tik zoom engeli aktif (mouse olaylari + gorunum yedegi)";
