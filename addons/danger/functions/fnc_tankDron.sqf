@@ -76,13 +76,50 @@ if (_dist <= 500) then {
                 _u doTarget _dr;
                 _u doFire _dr;
                 _n = _n + 1;
+                // v8.300 ZORLA ATES (piyadede v8.295-v8.299'da dogrulandi: doTarget / doFire kucuk dronu AI tarafindan yok sayiliyor, zorla atis calisti): taret MG'si dronun ongorulu noktasina doWatch ile cevrilir,
+                //   silah yonu <= 5 derece olunca vehicle fireAtTarget ile 4'lu kisa atis. 5 sn'lik dongu, 5 sn'de bir birim basina. Kapatma: lambs_danger_tankZorlaOff = true.
+                if (!(missionNamespace getVariable ["lambs_danger_tankZorlaOff", false]) && {(time - (_u getVariable [QGVAR(tankZorlaT), -99])) > 5}) then {
+                    _u setVariable [QGVAR(tankZorlaT), time];
+                    if (isNil {_v getVariable QGVAR(tankAtisEH)}) then {
+                        _v setVariable [QGVAR(tankAtisEH), true];
+                        _v addEventHandler ["Fired", { params ["_vv"]; if ((time - (_vv getVariable [QGVAR(tankZorlaT2), -99])) < 8) then { _vv setVariable [QGVAR(tankAtisN), (_vv getVariable [QGVAR(tankAtisN), 0]) + 1]; }; }];
+                    };
+                    [_v, _u, _silahlar select 0, _dr] spawn {
+                        params ["_v", "_u", "_w", "_dr"];
+                        _v setVariable [QGVAR(tankZorlaT2), time];
+                        private _bit = time + 5;
+                        private _wT = 0;
+                        private _min = 180;
+                        while {time < _bit && {alive _v} && {alive _u} && {!isNull _dr} && {alive _dr} && {(_v ammo _w) > 0}} do {
+                            private _lead = ASLToAGL ((getPosASL _dr) vectorAdd ((velocity _dr) vectorMultiply (((_v distance _dr) / 800) min 1.5)));
+                            if (time >= _wT) then { _u doWatch _lead; _wT = time + 1; };
+                            sleep 0.3;
+                            private _fark = (AGLToASL _lead) vectorDiff (getPosASL _v);
+                            private _wd = _v weaponDirection _w;
+                            if ((vectorMagnitude _fark) > 1 && {(vectorMagnitude _wd) > 0.1}) then {
+                                private _aci = acos ((((vectorNormalized _wd) vectorDotProduct (vectorNormalized _fark)) min 1) max -1);
+                                if (_aci < _min) then { _min = _aci; };
+                                if (_aci < 5) then {
+                                    for "_k" from 1 to 4 do {
+                                        _v fireAtTarget [_dr, _w];
+                                        _v setVariable [QGVAR(tankZorlaN), (_v getVariable [QGVAR(tankZorlaN), 0]) + 1];
+                                        sleep 0.12;
+                                    };
+                                };
+                            };
+                        };
+                        _u doWatch objNull;
+                        _v setVariable [QGVAR(tankZorlaAci), _min];
+                    };
+                };
             };
         };
     } forEach ([(commander _v), (gunner _v)] select {!isNull _x});
     if (_n > 0) then { _eylem pushBack format ["ATES(%1)", _n]; };
 };
 // 4) DUMAN
-if (_kamikaze && {_dist <= 260} && {_kap > 3}) then {
+// v8.300: 260 -> 420 m (FPV 30 m/sn: 420 m ~ 14 sn; duman acilmasi birkac sn surer), kapanma esigi 3 -> 2 m/sn
+if (_kamikaze && {_dist <= 420} && {_kap > 2}) then {
     if ((time - (_v getVariable [QGVAR(tankDronDumanT), -99])) > 30) then {
         _v setVariable [QGVAR(tankDronDumanT), time];
         [{ params ["_vv"]; if (!isNull _vv && {alive _vv}) then { [_vv] call FUNC(aracDuman); }; }, [_v], 1.5] call CBA_fnc_waitAndExecute;
@@ -90,7 +127,7 @@ if (_kamikaze && {_dist <= 260} && {_kap > 3}) then {
     };
 };
 // 5) KACINMA
-if (_kamikaze && {_dist <= 130} && {_kap > 8} && {canMove _v} && {(time - (_v getVariable [QGVAR(tankDronKacT), -99])) > 25}) then {
+if (_kamikaze && {_dist <= 200} && {_kap > 6} && {canMove _v} && {(time - (_v getVariable [QGVAR(tankDronKacT), -99])) > 25}) then {
     _v setVariable [QGVAR(tankDronKacT), time];
     private _gelisDir = _v getDir _dr;
     private _yan = _v getPos [30, _gelisDir + (selectRandom [90, -90])];
@@ -110,6 +147,6 @@ if (_kamikaze && {_dist <= 130} && {_kap > 8} && {canMove _v} && {(time - (_v ge
 
 if (_eylem isNotEqualTo [] && {(time - (_v getVariable [QGVAR(tankDronLogT), -99])) > 8}) then {
     _v setVariable [QGVAR(tankDronLogT), time];
-    diag_log format ["[TANK-DRON] %1 | %2 | dron %3 (%4) %5 m | kapanma %6 m/sn | yukseklik %7 m | tepki: %8", groupId _g, getText (configOf _v >> "displayName"), typeOf _dr, _tip, round _dist, _kap toFixed 1, round ((getPosATL _dr) select 2), _eylem joinString "+"];
+    diag_log format ["[TANK-DRON] %1 | %2 | dron %3 (%4) %5 m | kapanma %6 m/sn | yukseklik %7 m | tepki: %8 | GERCEK ATIS %9 | zorla atis %10 | en kucuk nisan acisi %11 derece", groupId _g, getText (configOf _v >> "displayName"), typeOf _dr, _tip, round _dist, _kap toFixed 1, round ((getPosATL _dr) select 2), _eylem joinString "+", _v getVariable [QGVAR(tankAtisN), 0], _v getVariable [QGVAR(tankZorlaN), 0], round (_v getVariable [QGVAR(tankZorlaAci), 180])];
 };
 _eylem isNotEqualTo []
