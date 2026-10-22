@@ -35,6 +35,10 @@ if (isNil "SAGTIK_DURBUN_DAHIL") then { SAGTIK_DURBUN_DAHIL = false; };
 if (isNil "SAGTIK_TUS_DAHIL") then { SAGTIK_TUS_DAHIL = true; };
 if (isNil "SAGTIK_DEADZONE_HATIRLAT") then { SAGTIK_DEADZONE_HATIRLAT = true; };
 if (isNil "SAGTIK_TANI") then { SAGTIK_TANI = false; };
+// v4: true = sag tik NISAN (ADS) ACIK, yalniz BASILI TUTMA zoomu + zoom tuslari kapali; false = eski davranis (nisan da kapali)
+if (isNil "SAGTIK_ADS_SERBEST") then { SAGTIK_ADS_SERBEST = true; };
+// basili tutma esigi (sn): bundan kisa basis = normal nisan, uzun basis = zoom sayilir ve geri alinir
+if (isNil "SAGTIK_BASILI_SN") then { SAGTIK_BASILI_SN = 0.3; };
 
 // ---- bu an engellenmeli mi? ----
 SAGTIK_engelle = {
@@ -55,19 +59,27 @@ SAGTIK_EH = [];
 if (!isNil "SAGTIK_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_KARE]; };
 
 // ---- 1) KATMAN: sag tus olaylarini tuket ----
-{
-    private _id = (findDisplay 46) displayAddEventHandler [_x, {
-        params ["_d", "_dugme"];
-        if (_dugme isEqualTo 1 && {call SAGTIK_engelle}) then {true} else {false}
-    }];
-    SAGTIK_EH pushBack [_x, _id];
-} forEach ["MouseButtonDown", "MouseButtonUp"];
+if (!SAGTIK_ADS_SERBEST) then {
+    {
+        private _id = (findDisplay 46) displayAddEventHandler [_x, {
+            params ["_d", "_dugme"];
+            if (_dugme isEqualTo 1 && {call SAGTIK_engelle}) then {true} else {false}
+        }];
+        SAGTIK_EH pushBack [_x, _id];
+    } forEach ["MouseButtonDown", "MouseButtonUp"];
+};
 
 // ---- optik / zoom eylemlerine atanmis klavye tuslari ----
 if (SAGTIK_TUS_DAHIL) then {
     SAGTIK_TUSLAR = [];
     // v2: daha genis eylem listesi (bilinmeyen ad bos doner, zararsiz); SAGTIK_EYLEMLER ile degistirilebilir
-    if (isNil "SAGTIK_EYLEMLER") then { SAGTIK_EYLEMLER = ["optics", "opticsTemp", "opticsMode", "zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"]; };
+    if (isNil "SAGTIK_EYLEMLER") then {
+        SAGTIK_EYLEMLER = if (SAGTIK_ADS_SERBEST) then {
+            ["zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"]
+        } else {
+            ["optics", "opticsTemp", "opticsMode", "zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"]
+        };
+    };
     { SAGTIK_TUSLAR append (actionKeys _x); } forEach SAGTIK_EYLEMLER;
     // fare tuslari (65536+) ayri katmanda; yalniz klavye kodlari
     SAGTIK_TUSLAR = SAGTIK_TUSLAR select {_x < 65536};
@@ -80,7 +92,7 @@ if (SAGTIK_TUS_DAHIL) then {
 
 // ---- 2) KATMAN (yedek): nisangah gorunumundeyse zorla cik ----
 SAGTIK_KARE = addMissionEventHandler ["EachFrame", {
-    if !(call SAGTIK_engelle) exitWith {};
+    if (SAGTIK_ADS_SERBEST || {!(call SAGTIK_engelle)}) exitWith {};
     private _arac = vehicle player;
     if (cameraOn isEqualTo _arac && {cameraView isEqualTo "GUNNER"}) then {
         _arac switchCamera "INTERNAL";
@@ -110,15 +122,26 @@ if (!isNil "SAGTIK_EYLEMLER") then {
 // Zoom eylemlerinden biri aktifken gorunum zorla "INTERNAL"e alinir ve olay RPT'ye yazilir.
 // Nisan ALMAYAN FOV zoomunu betikle sifirlayan bir komut bulunamadi: zoom hala olursa SAGTIK_TANI = true yap, RPT'deki '[SAGTIK-EYLEM]' satirlarindan eylem adini bana ilet.
 SAGTIK_ZOOM_AKTIF = false;
+SAGTIK_BASILI_T0 = -1;
 if (!isNil "SAGTIK_ZOOM_KARE") then { removeMissionEventHandler ["EachFrame", SAGTIK_ZOOM_KARE]; };
 SAGTIK_ZOOM_KARE = addMissionEventHandler ["EachFrame", {
     if !(call SAGTIK_engelle) exitWith {};
+    private _arac = vehicle player;
+    // (a) zoom eylemleri (kalca / nisansiz FOV zoomu): aktifken gorunum zorla INTERNAL
     private _aktif = false;
-    { if (inputAction _x > 0) exitWith { _aktif = true; }; } forEach ["optics", "opticsTemp", "zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"];
+    { if (inputAction _x > 0) exitWith { _aktif = true; }; } forEach ["zoomTemp", "zoomIn", "zoomOut", "zoomContinue", "zoomInTemp", "zoomOutTemp"];
+    // (b) v4 sag tik BASILI TUTMA: nisan eylemi esikten uzun basili ise zoom sayilir (kisa basis = normal nisan)
+    if (SAGTIK_ADS_SERBEST) then {
+        if (inputAction "optics" > 0 || {inputAction "opticsTemp" > 0}) then {
+            if (SAGTIK_BASILI_T0 < 0) then { SAGTIK_BASILI_T0 = time; };
+            if (time - SAGTIK_BASILI_T0 > SAGTIK_BASILI_SN) then { _aktif = true; };
+        } else {
+            SAGTIK_BASILI_T0 = -1;
+        };
+    };
     if (_aktif) then {
-        private _arac = vehicle player;
         if (cameraOn isEqualTo _arac && {cameraView isNotEqualTo "INTERNAL"}) then { _arac switchCamera "INTERNAL"; };
-        if (!SAGTIK_ZOOM_AKTIF) then { SAGTIK_ZOOM_AKTIF = true; diag_log format ["[SAGTIK] zoom eylemi algilandi (gorunum %1)", cameraView]; };
+        if (!SAGTIK_ZOOM_AKTIF) then { SAGTIK_ZOOM_AKTIF = true; diag_log format ["[SAGTIK] zoom / basili tutma algilandi (gorunum %1)", cameraView]; };
     } else {
         SAGTIK_ZOOM_AKTIF = false;
     };
@@ -151,7 +174,7 @@ if (SAGTIK_TANI) then {
 if (SAGTIK_DEADZONE_HATIRLAT) then {
     SAGTIK_DEADZONE_HATIRLAT = false;
     // v2: hintC String ister (RPT: 'hintc: Type Text, expected String', satir 99) -> hint + parseText kullanilir
-    hint parseText "<t size='1.2' color='#ffcc00'>Nisan ayari</t><br/>Bu senaryoda <t color='#ffcc00'>sag tik zoom kapali</t>.<br/>Oyun ayarlarindan <t color='#ffcc00'>Aiming deadzone</t> degerini <t color='#ffcc00'>%25</t> yap (Ayarlar &gt; Oyun).";
+    hint parseText "<t size='1.2' color='#ffcc00'>Nisan ayari</t><br/>Bu senaryoda <t color='#ffcc00'>sag tik basili tutma zoomu kapali</t> (kisa sag tik nisan acik).<br/>Oyun ayarlarindan <t color='#ffcc00'>Aiming deadzone</t> degerini <t color='#ffcc00'>%25</t> yap (Ayarlar &gt; Oyun).";
 };
 
 diag_log "[SAGTIK] sag tik zoom engeli aktif (mouse olaylari + gorunum yedegi)";
