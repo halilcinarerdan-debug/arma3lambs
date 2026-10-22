@@ -56,7 +56,10 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             // 1) DONUS HIZI (+%20 sadece donus animasyonunda)
             // ---------------------------------------------------------
             private _anAd = toLower (animationState _u);
-            private _donuyor = (_anAd find "turn") >= 0;
+            // v8.299 TITREME (kullanici: 'bir kisi saga sola donerek stutter, Krasko cok feci'): nisan alan bot donus / durus animasyonu arasinda 0.15-0.3 sn'de bir gidip gelince katsayi 1.2 <-> 1.0 her seferinde
+            //   diger makinelere gonderiliyordu -> istemcide animasyon hizi titriyordu. Donus algilaninca 0.7 sn tutulur (histerezis), arada kisa kesintiler katsayiyi dusurmez.
+            if ((_anAd find "turn") >= 0) then { _u setVariable [QGVAR(mvDonusT), time + 0.7]; };
+            private _donuyor = ((_anAd find "turn") >= 0) || {time < (_u getVariable [QGVAR(mvDonusT), 0])};
             private _parca = _anAd splitString "_";
             private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;

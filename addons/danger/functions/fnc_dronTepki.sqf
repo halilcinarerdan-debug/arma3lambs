@@ -124,17 +124,21 @@ private _n = 0;
                 private _bit = time + 6;
                 private _zN = 0;
                 private _min = 180;
+                private _wT = 0;
+                private _dT = 0;
+                private _tgt = false;
                 while {time < _bit && {alive _u} && {!isNull _dr} && {alive _dr} && {(_u ammo _w) > 0}} do {
                     private _iv2 = getNumber (configFile >> "CfgMagazines" >> (currentMagazine _u) >> "initSpeed");
                     if (_iv2 <= 0) then { _iv2 = 800 };
                     private _tof2 = ((_u distance _dr) / (_iv2 * 0.9)) min 2;
                     private _lead2 = ASLToAGL ((getPosASL _dr) vectorAdd ((velocity _dr) vectorMultiply _tof2));
-                    _u doWatch _lead2;
-                    _u doTarget _dr;
-                    // govde yonu hedefe >15 derece ise dondur (AI govdesi yavas doner; yatay hizalama zararsiz)
+                    // v8.299 TITREME (kullanici: 'bir kisi saga sola donerek stutter glitch, Krasko / Timofey'): 0.35 sn'de bir doWatch + setDir (>15 derece) gozcu yonunu surekli bozup
+                    //   donus animasyonunu tekrar tekrar baslatiyordu. Artik doWatch ~1 sn'de bir, doTarget yalniz ilk turda, setDir yalniz govde hedeften > 50 derece sapmissa ve 2 sn'de bir.
+                    if (time >= _wT) then { _u doWatch _lead2; _wT = time + 1; };
+                    if (!_tgt) then { _u doTarget _dr; _tgt = true; };
                     private _yatay = (getPosATL _u) getDir _lead2;
                     private _fy = abs (((_yatay - (getDir _u)) + 540) mod 360 - 180);
-                    if (_fy > 15) then { _u setDir _yatay; };
+                    if (_fy > 50 && {time >= _dT}) then { _u setDir _yatay; _dT = time + 2; };
                     sleep 0.35;
                     private _fark = (AGLToASL _lead2) vectorDiff (eyePos _u);
                     private _wd = _u weaponDirection _w;
