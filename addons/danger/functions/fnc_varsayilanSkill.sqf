@@ -99,8 +99,8 @@ if (_acemi) then {
 if (_cpn != 1) then {
     {
         private _o = _u skill _x;
-        // v8.288: isabete EK %7 (kullanici: 'botlarin dogrulugunu yuzde 7 arttirabilirsin'): aimingAccuracy x lambs_danger_skillIsabetEk (1.07) ve tavan 0.92 -> 0.95 (insani sinir korunur)
-        private _kat = if (_x isEqualTo "aimingAccuracy") then { _cpn * (missionNamespace getVariable ["lambs_danger_skillIsabetEk", 1.07]) } else {_cpn};
+        // v8.288: isabete EK %7 (kullanici: 'botlarin dogrulugunu yuzde 7 arttirabilirsin' -> 'hatta yuzde 5'): aimingAccuracy x lambs_danger_skillIsabetEk (1.05; once 1.07) ve tavan 0.92 -> 0.95 (insani sinir korunur)
+        private _kat = if (_x isEqualTo "aimingAccuracy") then { _cpn * (missionNamespace getVariable ["lambs_danger_skillIsabetEk", 1.05]) } else {_cpn};
         private _n = (_o * _kat) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
         _u setSkill [_x, _n];
         _yeni pushBack format ["%1 x%2 -> %3", _x, _cpn, _n toFixed 2];

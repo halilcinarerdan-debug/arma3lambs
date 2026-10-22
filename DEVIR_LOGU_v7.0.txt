@@ -2734,3 +2734,5 @@ Duzeltme: fnc_topcuAtisHazirla (plan + test yolu): atis oncesi hareket emri ipta
    dron ates menzilindeyse (450 m) en yakin 3 silahli asker yerinde kalip ates eder (comelir). 25 sn taktikKilit (buddyBond / dispersion / roleStation geri cekmesin), 15 sn'de bir / grup. Bounding / retreat / evade / medik / esir atlanir. Grup 25 sn boyunca eski toplu HIDE / GARRISON'u atlar.
    Gozlem dronu icin eski HIDE / GARRISON davranisi aynen duruyor. Log [DRON-SAKLAN]. Kapatma: lambs_danger_dronSaklaOff.
 2) ISABET: aimingAccuracy ek x lambs_danger_skillIsabetEk (1.07) ve isabet tavani 0.92 -> 0.95 (lambs_danger_skillTavanIsabet) - toplam carpan 1.2 x 1.07 = 1.284; tecrubesiz oran / bireysel aralik degismedi (insani boyut).
+
+v8.288 duzeltme: isabete ek %7 -> %5 (kullanici: 'hatta yuzde 5'): lambs_danger_skillIsabetEk 1.05; toplam carpan 1.2 x 1.05 = 1.26; tavan 0.95 kaldi.
