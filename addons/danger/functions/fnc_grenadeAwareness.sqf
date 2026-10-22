@@ -271,7 +271,15 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
             lambs_danger_grTarT = time + 1;
             private _grT0 = diag_tickTime;   // v8.301 PERF: tarama suresi ([PERF-SQF] satirinda)
             // RHS bombalari GrenadeCore degil: tum mermi nesneleri ("Default") arasindan simulation == shotgrenade olanlar (tur basina onbellekli)
-            lambs_danger_grTum = (allMissionObjects "Default") select {
+            // v8.301 PERF (RPT 23-10 sunucu, Enoch: 'el bombasi taramasi son 32-77 ms (en cok 123 ms)', 1 sn'de bir; kullanici: 'bot yokken 15 FPS kaybediyorum'): allMissionObjects "Default" TUM dunyayi tariyordu.
+            //   Sonucu yalniz lider etrafinda <= 150 m (asagidaki _tarR siniri) kullaniliyor -> yerel, oyuncusuz, canli liderlerin 150 m cevresi taranir (esdeger sonuc, binlerce kat daha az nesne).
+            private _grAday = [];
+            {
+                private _gl = leader _x;
+                if (!isNull _gl && {local _gl} && {!isPlayer _gl} && {alive _gl}) then { _grAday append ((getPosATL _gl) nearObjects ["Default", 150]); };
+            } forEach allGroups;
+            _grAday = _grAday arrayIntersect _grAday;
+            lambs_danger_grTum = _grAday select {
                 private _t = typeOf _x;
                 private _k = "lambs_danger_grSim_" + _t;
                 private _v = missionNamespace getVariable [_k, ""];
