@@ -51,7 +51,13 @@ private _calis = {
             private _hava = _v isKindOf "Air";
             private _taban = 0;
             private _tip = "";
-            if (unitIsUAV _v) then { _tip = "IHA"; _taban = 400; }
+            // v8.290 PERVANE SESI (kullanici: 'dronun sesini duysunlar pervane sesini'; RPT 22-10 19:17: FPV'ye knowsAbout 0.00 ile 30-90 m'ye kadar tepki yok; ses 20 sn aralikla + arazi x0.6 ile gec / bir kez duyuldu):
+            //   FPV (Crocus) pervanesi YUKSEK sesli: taban 700 m (lambs_danger_dronSesM), bomba / diger IHA 450, gozlem IHA 400; arazi engeli IHA'da x0.8 (ses yayilir); grup basina 5 sn'de bir; duyunca reveal (asagida)
+            if (unitIsUAV _v) then {
+                _tip = "IHA";
+                private _ihaT = [_v] call FUNC(ihaTip);
+                _taban = if (_ihaT in ["FPV-AT", "FPV-AP"]) then { missionNamespace getVariable ["lambs_danger_dronSesM", 700] } else { if (_ihaT isEqualTo "BOMBA") then {450} else {400} };
+            }
             else { if (_v isKindOf "Helicopter") then { _tip = "HELI"; _taban = if (((getPosATL _v) select 2) > 3) then {2500} else {800}; }
             else { if (_v isKindOf "Plane") then { _tip = "UCAK"; _taban = if (_v isKindOf "UAV") then {400} else { if ((getNumber (configOf _v >> "maxSpeed")) > 600) then {4000} else {2500} }; }
             else { if (_hava) then { _tip = "IHA"; _taban = 400; }
@@ -67,13 +73,13 @@ private _calis = {
                 if ((side _g) getFriend _sTaraf >= 0.6) then { continue };
                 private _d = _l distance _v;
                 if (_d > (_taban * _env * 1.0)) then { continue };
-                if ((time - (_g getVariable [QGVAR(motorSesT), -999])) < 20) then { continue };
+                if ((time - (_g getVariable [QGVAR(motorSesT), -999])) < ([20, 5] select (_tip isEqualTo "IHA"))) then { continue };
                 if ((_g knowsAbout _v) >= 0.5) then { continue };
                 private _m = _taban * _env;
                 if ((_l distance _v) > _m) then { continue };
                 // engel / gurultu carpanlari
                 private _carp = 1;
-                if (terrainIntersectASL [eyePos _l, _vp]) then { _carp = _carp * 0.6; };
+                if (terrainIntersectASL [eyePos _l, _vp]) then { _carp = _carp * ([0.6, 0.8] select (_tip isEqualTo "IHA")); };
                 if ((time - (_g getVariable ["lambs_danger_contact", -999])) < 15) then { _carp = _carp * 0.4; };
                 if !(isNull (nearestBuilding _l)) then { if ((_l distance (nearestBuilding _l)) < 6) then { _carp = _carp * 0.8; }; };
                 if (_d > (_m * _carp)) then { continue };
@@ -85,6 +91,11 @@ private _calis = {
                 _g setVariable [QGVAR(motorSesYon), _yon];
                 _g setVariable [QGVAR(motorSesTip), _tip];
                 _g setVariable [QGVAR(motorSesMesafe), round _d];
+                // v8.290: IHA pervane sesi duyuldu -> grup dronu BILIR (reveal; mesafeye gore seviye 0.45-1.3) -> fnc_havaFarkindalik / fnc_dronTepki (dagil + saklan + ates + operator yonu) devreye girer. Kapatma: lambs_danger_dronSesReveal = false.
+                if (_tip isEqualTo "IHA" && {missionNamespace getVariable ["lambs_danger_dronSesReveal", true]}) then {
+                    private _lvl = (0.45 + (0.85 * (1 - (_d / (_m max 1))))) min 1.3;
+                    if (_lvl > (_g knowsAbout _v)) then { _g reveal [_v, _lvl]; };
+                };
                 private _temasta = (time - (_g getVariable ["lambs_danger_contact", -999])) < 15;
                 if (!_temasta && {(behaviour _l) in ["SAFE", "CARELESS"]}) then { _g setBehaviour "AWARE"; };
                 private _bak = (units _g) select {alive _x && {isNull objectParent _x}};

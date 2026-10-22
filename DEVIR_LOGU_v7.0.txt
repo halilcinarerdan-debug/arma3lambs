@@ -2743,3 +2743,11 @@ CBA Addon Options > LAMBS Danger > "ELITE bot becerisi" (sunucu ayari): Bot bece
 | Nisan hizi taban min (0.70) / max (0.80) | Nisan hizi carpani (1.2) | Tank murettebati beceri tabani (0.95).
 Deger degisince oyuncu olmayan yerel AI'lara HEMEN yeniden uygulanir (fnc_varsayilanSkill taban degerleri yeniden yazar -> carpanlar ust uste binmez; lambs_danger_skillElle isaretli birimler atlanir). Ilk yuklemede (CBA_missionTime < 5) calismaz.
 lambs_danger_skillIsabetEk artik kullanilmiyor (yerine Isabet carpani 1.26 = 1.2 x 1.05). Not: skill degerleri sunucu zorluk ayarlariyla (skillAI / precisionAI) olceklenir.
+
+
+=== v8.290 — DRON PERVANE SESI (kullanici: 'drondan kacmadilar ve ates etmediler; dronun sesini duysunlar pervane sesini') ===
+RPT 22-10 19:17 (istemci; sunucu RPT'si bos - misyon yuklenmemis): v8.288/289 dron kodu CALISTI ([DRON-SAKLAN] x3, [DRON-ATES] x5, [DRON-YON] x1) AMA cok GEC: Crocus AP'ye EAST gruplarinin knowsAbout 0.00 idi (kucuk / hizli dron gorulmuyor);
+[HAVA-FARK-ELE] 'knowsAbout 0.00 < esik 0.4' (325 / 350 / 252 m). Ilk tepki 6-46 m'de ([DRON-SAKLAN] 6 m, [DRON-ATES] 12 m; 2. dron 19:29:46 29-46 m). [MOTOR-SES] IHA duyuldu 141 m (arazi x0.4), 366 m, 87 m (20 sn grup araligi) ama yalniz doWatch + AWARE; reveal verilmiyordu -> HAVA-FARK tetiklenmedi.
+Duzeltme (fnc_motorSes): IHA pervane sesi: FPV (Crocus AT/AP) taban 700 m (lambs_danger_dronSesM), bomba IHA 450, gozlem IHA 400 (eskiden hepsi 400); IHA'da arazi engeli x0.8 (eskiden x0.6); IHA icin grup basina 5 sn'de bir (diger kaynak 20 sn);
+duyulunca grup dronu BILIR: reveal seviyesi 0.45 + 0.85 x (1 - mesafe / menzil), en cok 1.3 -> fnc_havaFarkindalik (esik 0.4) -> fnc_dronTepki: dagil + saklan (<= 700 m), ates (<= 450 m), operator yonu. Kapatma: lambs_danger_dronSesReveal = false (yalniz yon + AWARE).
+Not: 'manuel kilitledim' - Zeus'tan dron hedefi elle kilitlenmis; sunucu RPT'sinde [IHA-*] satiri yok, istemci RPT'sinde de [IHA-SORTI] yok (dron mod motoru / elle kontrolle ucurulmus olabilir).
