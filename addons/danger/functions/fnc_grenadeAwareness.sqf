@@ -269,6 +269,7 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
         // her yeni mermi sinifi bir kez RPT'ye yazilir: [EL-BOMBASI-TARAMA]
         if (time > (missionNamespace getVariable ["lambs_danger_grTarT", 0])) then {
             lambs_danger_grTarT = time + 1;
+            private _grT0 = diag_tickTime;   // v8.301 PERF: tarama suresi ([PERF-SQF] satirinda)
             // RHS bombalari GrenadeCore degil: tum mermi nesneleri ("Default") arasindan simulation == shotgrenade olanlar (tur basina onbellekli)
             lambs_danger_grTum = (allMissionObjects "Default") select {
                 private _t = typeOf _x;
@@ -288,6 +289,8 @@ diag_log "[EL-BOMBASI] el bombasi farkindaligi (yere at -> yaricaptan uzaklas) w
                     diag_log format ["[EL-BOMBASI-TARAMA] mermi nesnesi goruldu: %1 | konum:%2 | atan:%3", _tn, round (_x distance2D player), if (isNull (getShotParents _x select 0)) then {"?"} else {name (getShotParents _x select 0)}];
                 };
             } forEach lambs_danger_grTum;
+            lambs_danger_grTarMs = (diag_tickTime - _grT0) * 1000;
+            lambs_danger_grTarMax = (missionNamespace getVariable ["lambs_danger_grTarMax", 0]) max lambs_danger_grTarMs;
         };
         {
             private _g = _x;

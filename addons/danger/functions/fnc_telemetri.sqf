@@ -65,6 +65,20 @@ private _calis = {
             diag_log format ["[TELEMETRI-SUNUCU] t=%1 | fps %2 (min %3) | yerel AI grup:%4 asker:%5 | taraf [grup, asker]: %6 | plan:%7 | donus animasyonunda:%8 | isServer:%9",
                 round time, round diag_fps, round diag_fpsMin, count _yerel, _asker, _taraf toArray false, _planN, _donus, isServer];
         };
+        // v8.301 PERF (kullanici: 'sunucuda neredeyse hic bot yokken 15 FPS kaybediyorum, mod cikarinca rahatliyor, son zamanlarda'): 60 sn'de bir calisan betik sayisi + en cok betik calistiran dosyalar.
+        //   diag_activeScripts [spawn, execVM, exec, FSM] normal surumde vardir; diag_activeSQFScripts yoksa atlanir. Yuksek sayi = biten gibi gorunmeyen / cok sik acilan dongu.
+        if (isServer && {(_tur % 3) isEqualTo 0}) then {
+            private _as = diag_activeScripts;
+            private _liste = call compile "if (isNil 'diag_activeSQFScripts') then {[]} else {diag_activeSQFScripts}";
+            private _sayac = createHashMap;
+            { private _d = _x param [1, "?"]; _sayac set [_d, (_sayac getOrDefault [_d, 0]) + 1]; } forEach (if (_liste isEqualType []) then {_liste} else {[]});
+            private _sira = (keys _sayac) apply {[_sayac get _x, _x]};
+            _sira sort false;
+            diag_log format ["[PERF-SQF] t=%1 | fps %2 | calisan betik: spawn %3 execVM %4 exec %5 FSM %6 | en cok (dosya x adet): %7 | nesne: allUnits %8 vehicles %9 allGroups %10 allMissionObjects(Default) %11 | el bombasi taramasi son %12 ms (en cok %13 ms)",
+                round time, round diag_fps, _as select 0, _as select 1, _as select 2, _as select 3,
+                (_sira select [0, 8]) apply {format ["%1 x%2", (_x select 1) splitString "\/" select -1, _x select 0]},
+                count allUnits, count vehicles, count allGroups, count (allMissionObjects "Default"), round (missionNamespace getVariable ["lambs_danger_grTarMs", -1]), round (missionNamespace getVariable ["lambs_danger_grTarMax", -1])];
+        };
         // v8.141: gorev atanmis araclarda SURUCU kayboldu mu? (RPT 3deb224e: TASIMA araclarinin murettebati araci terk etmisti, ne zaman / neden bilinmiyordu)
         {
             private _v = _x;
