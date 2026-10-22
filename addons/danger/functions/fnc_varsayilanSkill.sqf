@@ -69,6 +69,15 @@ private _onceki = [];
 private _yeni = [];
 {
     _x params ["_ad", "_min", "_max"];
+    // v8.289 CBA (kullanici: 'cba ayarlarindan botlarin dogruluklarini ayarlayabilelim'): isabet / nisan hizi araligi CBA 'ELITE bot becerisi' ayarindan gelir
+    if (_ad isEqualTo "aimingAccuracy") then {
+        _min = missionNamespace getVariable ["lambs_danger_skillIsabetMin", _min];
+        _max = (missionNamespace getVariable ["lambs_danger_skillIsabetMax", _max]) max _min;
+    };
+    if (_ad isEqualTo "aimingSpeed") then {
+        _min = missionNamespace getVariable ["lambs_danger_skillHizMin", _min];
+        _max = (missionNamespace getVariable ["lambs_danger_skillHizMax", _max]) max _min;
+    };
     private _v = _min + (random (_max - _min));
     _onceki pushBack format ["%1=%2", _ad, (_u skill _ad) toFixed 2];
     _u setSkill [_ad, _v];
@@ -80,9 +89,10 @@ private _yeni = [];
 if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_tablo findIf {(_x select 0) isEqualTo "aimingAccuracy"}) >= 0}) then {
     private _optik = ((primaryWeaponItems _u) param [2, ""]) isNotEqualTo "";
     if (!_optik && {(primaryWeapon _u) isNotEqualTo ""}) then {
-        private _aa = (_u skill "aimingAccuracy") * 0.75;
+        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.75];
+        private _aa = (_u skill "aimingAccuracy") * _oc;
         _u setSkill ["aimingAccuracy", _aa];
-        _yeni pushBack format ["optiksiz x0.75 -> %1", _aa toFixed 2];
+        _yeni pushBack format ["optiksiz x%1 -> %2", _oc, _aa toFixed 2];
     };
 };
 // v8.280 BOT BECERISI +%20 (kullanici: 'botlarin dogrulugunu ve sağa sola donme animasyon hizini yuzde 20 arttir'): aimingAccuracy (isabet) ve aimingSpeed (nisan alma / donus hizi) x lambs_danger_skillCarpan (1.2), en cok 1.0.
@@ -91,21 +101,22 @@ private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
 private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.95];
-private _acemi = (random 1) < 0.15;
+private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.15];
+private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.85];
+private _acemi = (random 1) < _acemiOran;
 if (_acemi) then {
-    { _u setSkill [_x, (_u skill _x) * 0.85]; } forEach ["aimingAccuracy", "aimingShake"];
-    _yeni pushBack "TECRUBESIZ x0.85 (isabet / titreme)";
+    { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];
+    _yeni pushBack format ["TECRUBESIZ x%1 (isabet / titreme)", _acemiK];
 };
-if (_cpn != 1) then {
-    {
-        private _o = _u skill _x;
-        // v8.288: isabete EK %7 (kullanici: 'botlarin dogrulugunu yuzde 7 arttirabilirsin' -> 'hatta yuzde 5'): aimingAccuracy x lambs_danger_skillIsabetEk (1.05; once 1.07) ve tavan 0.92 -> 0.95 (insani sinir korunur)
-        private _kat = if (_x isEqualTo "aimingAccuracy") then { _cpn * (missionNamespace getVariable ["lambs_danger_skillIsabetEk", 1.05]) } else {_cpn};
-        private _n = (_o * _kat) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
-        _u setSkill [_x, _n];
-        _yeni pushBack format ["%1 x%2 -> %3", _x, _cpn, _n toFixed 2];
-    } forEach ["aimingAccuracy", "aimingSpeed"];
-};
+// v8.289: isabet carpani (varsayilan 1.26 = eski 1.2 x 1.05) ve nisan hizi carpani (1.2) CBA'dan ayri ayarlanir
+private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 1.26];
+{
+    private _o = _u skill _x;
+    private _kat = if (_x isEqualTo "aimingAccuracy") then {_katI} else {_cpn};
+    private _n = (_o * _kat) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
+    _u setSkill [_x, _n];
+    _yeni pushBack format ["%1 x%2 -> %3", _x, _kat, _n toFixed 2];
+} forEach ["aimingAccuracy", "aimingSpeed"];
 _u setVariable [QGVAR(skillAyarli), true];
 ["uygulandi"] call _say;
 

@@ -2736,3 +2736,10 @@ Duzeltme: fnc_topcuAtisHazirla (plan + test yolu): atis oncesi hareket emri ipta
 2) ISABET: aimingAccuracy ek x lambs_danger_skillIsabetEk (1.07) ve isabet tavani 0.92 -> 0.95 (lambs_danger_skillTavanIsabet) - toplam carpan 1.2 x 1.07 = 1.284; tecrubesiz oran / bireysel aralik degismedi (insani boyut).
 
 v8.288 duzeltme: isabete ek %7 -> %5 (kullanici: 'hatta yuzde 5'): lambs_danger_skillIsabetEk 1.05; toplam carpan 1.2 x 1.05 = 1.26; tavan 0.95 kaldi.
+
+
+=== v8.289 — BOT BECERISI CBA'DAN AYARLANIR (kullanici: 'cba ayarlarindan botlarin dogruluklarini ayarlayabilelim') ===
+CBA Addon Options > LAMBS Danger > "ELITE bot becerisi" (sunucu ayari): Bot beceri sistemi AKTIF | Isabet taban min (0.70) / max (0.88) | Isabet carpani (1.26) | Isabet TAVANI (0.95) | Optiksiz isabet carpani (0.75) | Tecrubesiz orani (0.15) / carpani (0.85)
+| Nisan hizi taban min (0.70) / max (0.80) | Nisan hizi carpani (1.2) | Tank murettebati beceri tabani (0.95).
+Deger degisince oyuncu olmayan yerel AI'lara HEMEN yeniden uygulanir (fnc_varsayilanSkill taban degerleri yeniden yazar -> carpanlar ust uste binmez; lambs_danger_skillElle isaretli birimler atlanir). Ilk yuklemede (CBA_missionTime < 5) calismaz.
+lambs_danger_skillIsabetEk artik kullanilmiyor (yerine Isabet carpani 1.26 = 1.2 x 1.05). Not: skill degerleri sunucu zorluk ayarlariyla (skillAI / precisionAI) olceklenir.
