@@ -74,7 +74,14 @@ private _calis = {
                 private _d = _l distance _v;
                 if (_d > (_taban * _env * 1.0)) then { continue };
                 if ((time - (_g getVariable [QGVAR(motorSesT), -999])) < ([20, 5] select (_tip isEqualTo "IHA"))) then { continue };
-                if ((_g knowsAbout _v) >= 0.5) then { continue };
+                if ((_g knowsAbout _v) >= 0.5) then {
+                    // v8.291 TANI: zaten biliyorsa nedeni logla (dron tepkisi [HAVA-FARK] / [DRON-*] satirlarinda aranmali)
+                    if (_tip isEqualTo "IHA" && {(time - (_g getVariable [QGVAR(motorSesBilT), -999])) > 30}) then {
+                        _g setVariable [QGVAR(motorSesBilT), time];
+                        diag_log format ["[MOTOR-SES-ELE] IHA (%1) %2 m | %3 zaten biliyor (knowsAbout %4) -> ses islemi atlandi; tepki [HAVA-FARK] / [DRON-*] satirlarinda", typeOf _v, round _d, groupId _g, (_g knowsAbout _v) toFixed 2];
+                    };
+                    continue
+                };
                 private _m = _taban * _env;
                 if ((_l distance _v) > _m) then { continue };
                 // engel / gurultu carpanlari

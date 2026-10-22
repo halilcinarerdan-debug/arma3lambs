@@ -73,7 +73,7 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
 private _menzil = if (_kamikaze) then { missionNamespace getVariable ["lambs_danger_dronAtesM", 450] } else {100};
 private _egik = _l distance _dr;
 // v8.288 DAGIL + SAKLAN (kullanici: 'botlar dusman dronu gorunce mesafeyi arttirsinlar ve saklansinlar'): kamikaze / silahli dron <= 700 m ise grup dagilir ve siper alir (fnc_dronSakla); ates menzilindeyse 3 nisanci yerinde kalir
-if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, _egik <= _menzil] call FUNC(dronSakla); };
+if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, _egik <= _menzil, _egik <= 200] call FUNC(dronSakla); };
 if (_egik > _menzil || {((getPosATL _dr) select 2) > 200}) exitWith {false};
 if ((time - (_g getVariable [QGVAR(dronAtesT), -99])) < 3) exitWith {true};
 _g setVariable [QGVAR(dronAtesT), time];
@@ -82,7 +82,7 @@ if ((behaviour _l) in ["SAFE", "CARELESS"]) then { _g setBehaviour "AWARE"; };
 
 private _vel = velocity _dr;
 private _tp = getPosASL _dr;
-private _adaylar = (units _g) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(primaryWeapon _x) isNotEqualTo ""} && {(speed _x) < 3}};
+private _adaylar = (units _g) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(primaryWeapon _x) isNotEqualTo ""} && {(speed _x) < ([3, 9] select (_egik < 250))}};   // v8.291: dron <= 250 m ise kosarken / yururken de ates
 _g reveal [_dr, 4];
 private _n = 0;
 {

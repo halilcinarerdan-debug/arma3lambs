@@ -7,7 +7,7 @@
  *   - atanan noktalar birbirine >= 10 m (mesafe artisi); su olmayan nokta
  *   - ates edecek 3 asker (dron ates menzilindeyse; fnc_dronTepki) yerinde kalir, yalniz comelir / yatar
  *   - 25 sn boyunca asker `taktikKilit` ile korunur (buddyBond / dispersion / roleStation geri cekmesin); sure bitince durus AUTO, kilit kalkar
- *   - 15 sn'de bir grup basina; bounding / taktik yurutenler, retreat / evade, medik tedavisi, baygin, esir, forceMove askerleri atlanir
+ *   - 15 sn'de bir grup basina; retreat / evade, medik tedavisi, baygin, esir, forceMove askerleri atlanir. v8.291: bounding / taktik yurutenler yalniz dron <= 200 m (acil) iken: taktik bozulmadan 7 sn yere yatar
  * Doner: yonlendirilen asker sayisi <NUMBER>.  Log: [DRON-SAKLAN].  Kapatma: lambs_danger_dronSaklaOff = true.
  *
  * Arguments:
@@ -19,10 +19,14 @@
  * Public: No
 */
 
-params [["_g", grpNull, [grpNull]], ["_dr", objNull, [objNull]], ["_ates", false, [false]]];
+params [["_g", grpNull, [grpNull]], ["_dr", objNull, [objNull]], ["_ates", false, [false]], ["_acil", false, [false]]];
 if (isNull _g || {isNull _dr} || {!alive _dr} || {missionNamespace getVariable ["lambs_danger_dronSaklaOff", false]}) exitWith {0};
 if ((time - (_g getVariable [QGVAR(dronSaklaT), -99])) < 15) exitWith {0};
-if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]}) exitWith {0};
+if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]}) exitWith {0};
+// v8.291 ACIL (kullanici: 'ben combata aldim elemanlari hic tetiklenmedi'): bounding / LAMBS taktigi yurutenler eskiden tamamen atlaniyordu -> combat'taki grup dronda hic tepki vermiyordu.
+//   Dron <= 200 m (acil) ise taktigi bozmadan HERKES 7 sn YERE YATAR (yurume emri verilmez); dagilma / siper yalniz taktik yurutmeyenlerde.
+private _mesgul = (_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]};
+if (_mesgul && {!_acil}) exitWith {0};
 
 private _ud = (units _g) select {
     alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
@@ -44,6 +48,13 @@ private _n = 0;
 private _siperN = 0;
 {
     private _u = _x;
+    if (_mesgul) then {
+        // taktik yurutuyor: yalniz yere yat (7 sn), yurume / kilit yok; ates edenler (3 nisanci) comelir
+        _u setUnitPos (["DOWN", "MIDDLE"] select (_u in _atesci));
+        [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 7] call CBA_fnc_waitAndExecute;
+        _n = _n + 1;
+        continue
+    };
     _u setVariable [QGVAR(taktikKilit), time + 25];
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu setVariable [QGVAR(taktikKilit), nil]; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
     if (_u in _atesci) then {

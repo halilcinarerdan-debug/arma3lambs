@@ -2751,3 +2751,10 @@ RPT 22-10 19:17 (istemci; sunucu RPT'si bos - misyon yuklenmemis): v8.288/289 dr
 Duzeltme (fnc_motorSes): IHA pervane sesi: FPV (Crocus AT/AP) taban 700 m (lambs_danger_dronSesM), bomba IHA 450, gozlem IHA 400 (eskiden hepsi 400); IHA'da arazi engeli x0.8 (eskiden x0.6); IHA icin grup basina 5 sn'de bir (diger kaynak 20 sn);
 duyulunca grup dronu BILIR: reveal seviyesi 0.45 + 0.85 x (1 - mesafe / menzil), en cok 1.3 -> fnc_havaFarkindalik (esik 0.4) -> fnc_dronTepki: dagil + saklan (<= 700 m), ates (<= 450 m), operator yonu. Kapatma: lambs_danger_dronSesReveal = false (yalniz yon + AWARE).
 Not: 'manuel kilitledim' - Zeus'tan dron hedefi elle kilitlenmis; sunucu RPT'sinde [IHA-*] satiri yok, istemci RPT'sinde de [IHA-SORTI] yok (dron mod motoru / elle kontrolle ucurulmus olabilir).
+
+
+=== v8.291 — COMBAT'TAKI GRUPLAR DRONA TEPKI VERMIYORDU (kullanici: 'ben combata aldim elemanlari hic tetiklenmedi') ===
+Kod incelemesi (yeni RPT yok): iki bosluk: (1) fnc_dronSakla bounding / LAMBS taktigi yurutenleri (isBounding / isExecutingTactic) TAMAMEN atliyordu -> combat'ta hareket / taktik yurutan grup dagilmiyor / yatmiyordu;
+(2) fnc_dronTepki'de atesci adaylari yalniz hizi < 3 km/sa olanlardi -> yuruyen / kosan grupta kimse ates etmiyordu. Ayrica combat'ta (temas <= 15 sn) motor / pervane sesi menzili x0.4.
+Duzeltme: dron <= 200 m (acil) iken taktik yurutenler de tepki verir: taktigi bozmadan 7 sn yere yatar (yurume emri yok), 3 nisanci comelir; dron <= 250 m ise atesciler 9 km/sa'ya kadar hareket halinde de ates eder.
+Tani: [MOTOR-SES-ELE] (grup dronu zaten biliyor, 30 sn'de bir). Hala tetiklenmezse RPT'de su sirayi ara: [MOTOR-SES] IHA duyuldu -> [HAVA-FARK-TANI] knows -> [DRON-SAKLAN] / [DRON-ATES]; hangisi yoksa orada kesiliyor.
