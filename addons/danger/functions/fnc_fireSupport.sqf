@@ -62,7 +62,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
             // ---------------- A) UGL ----------------
             private _glFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
             private _glAtici = _uyeler select {
-                (time - (_x getVariable [QGVAR(uglLast), -999])) > 9
+                (time - (_x getVariable [QGVAR(uglLast), -999])) > 5   // v8.284: 9 -> 5 sn
                 && {([_x] call _glFn) isNotEqualTo ""}
                 && {!(_x getVariable [QGVAR(forceMove), false])}
             };
@@ -70,7 +70,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                 private _u = selectRandom _glAtici;
                 private _adaylar = (_u targets [true, 320]) select {
                     _x isKindOf "CAManBase" && {alive _x} && {isNull objectParent _x} && {(_u distance2D _x) > 40}
-                    && {(_u knowsAbout _x) > 0.8}
+                    && {(_u knowsAbout _x) > 0.5}
                 };
                 if (_adaylar isNotEqualTo []) then {
                     // en degerli hedef: binada > kapali hat > kume > acikta duran
@@ -88,7 +88,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                         if (_sk > _enSkor) then { _enSkor = _sk; _en = _x; };
                     } forEach _adaylar;
                     // en az "kapali hat" veya kume / bina; sadece acikta tek hedefe %25
-                    if (!isNull _en && {_enSkor >= 2 || {(random 1) < 0.25}}) then {
+                    if (!isNull _en && {_enSkor >= 2 || {(random 1) < 0.6}}) then {   // v8.284: acikta tek hedef %25 -> %60
                         if ([_u, _en, true, 2] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}])) then {
                             diag_log format ["[ATES-DESTEK] %1 | %2 | UGL salvo -> %3 m (skor %4)", groupId _g, name _u, round (_u distance2D _en), _enSkor];
                         };

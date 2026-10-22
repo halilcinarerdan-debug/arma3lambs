@@ -2698,3 +2698,10 @@ fnc_moveAssist (zaten donus animasyonunu hizlandiriyordu): (1) stance gecis anim
    yurume / sürunme / kosu (tek parca) HIC degismez - secici boost mumkun cunku animasyon adina bakiliyor (genel setAnimSpeedCoef yerine).
 (2) SENKRON: setAnimSpeedCoef etkisi yerel; diger makinelere (-clientOwner) artik yalniz deger degisince (gecis basladi / bitti) ya da 6 sn'de bir nabiz + tick basina en cok 20 birim gonderilir
    (eskiden her 1.5 sn'de her yerel birim); gecis bitince 1.0'a donus aninda gonderilir. Yerel uygulama 1.5 sn'de bir tazelenir (retreat / evade 1.15 yazimlarina karsi). Not: yalniz gecisler hizlandigi icin konum farki olusmaz.
+
+
+=== v8.284 — UGL SIKLIGI (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla') ===
+fnc_tacticalUGL: birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown); acikta tek hedefe atis sansi %70 -> %92 (lambs_danger_uglSans); menzil 35-320 -> 30-340 m; uzak mesafe esigi 200 -> 240 m (doktrin uglUzakM) ve uzakta aralik 25 -> 12 sn (uglUzakAralik).
+fnc_fireSupport (ates destegi): UGL'li asker bekleme 9 -> 5 sn; hedef bilgi esigi knowsAbout 0.8 -> 0.5; acikta tek hedef sansi %25 -> %60 (kume / bina / kapali hat zaten oncelikli).
+fnc_roleStation (rol gorevi): normal atis da 2'li salvo (eskiden hucumda 2, digerlerinde 1).
+Degismeyenler (guvenlik): dost 12 m, atisGuvenli (cali / dal / sekme), HE kontrolu (flare / duman atilmaz), mermi rezervi (< 2 sarjor iken 120 m ustu atilmaz). RPT: [UGL-OZET] 30 sn'de bir neden dagilimi, [UGL-KARAR], [ATES-DESTEK] ... UGL salvo.

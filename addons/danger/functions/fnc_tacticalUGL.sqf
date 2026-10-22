@@ -9,8 +9,8 @@
  *   - dogrudan hat KAPALI (siperde / binada saklanan dusman: tufekle vurulamaz, UGL ust eger)
  *   - hedef BINADA
  *   - 8 m icinde 2+ dusman KUME (alan etkisi)
- *   - yoksa %50 sans (her cagrida degil, dogal gorunsun)
- *   - birim basina 12 sn cooldown
+ *   - yoksa sans (v8.284: %92; eskiden %50 / %70)
+ *   - birim basina cooldown (v8.284: 4 sn; eskiden 12 / 6); menzil 30-340 m; 240 m ustu 12 sn aralik (eskiden 200 m / 25 sn)
  *
  * DUZELTME (v2): LAMBS'in lambs_main_fnc_doUGL'u ILLUMINATION (FLARE / DUMAN) atar — bu fonksiyon onu
  * cagirdigi icin askerler surekli flare ataniyordu. Artik doUGL KULLANILMAZ: yuklu 40mm sarjor
@@ -66,7 +66,8 @@ private _red = {
     };
     false
 };
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < 6) exitWith {"cooldown" call _red};
+// v8.284 UGL SIKLIGI BOOST (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla'): birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown)
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (missionNamespace getVariable ["lambs_danger_uglCooldown", 4])) exitWith {"cooldown" call _red};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
@@ -109,9 +110,9 @@ if ((_unit ammo _gl) <= 0) exitWith {"mermi_yok" call _red};
 // MENZIL
 // ---------------------------------------------------------------------------
 private _d = _unit distance2D _target;
-if (_d < 35 || {_d > 320}) exitWith {"menzil" call _red};
+if (_d < 30 || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 -> 30-340 m
 // UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
-if (_d > ([group _unit, "uglUzakM", 200] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 25] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
+if (_d > ([group _unit, "uglUzakM", 240] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 12] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 
 // Dost atesi: hedefin 12 m cevresinde dost varsa atma (escort / ilerleyen birlik)
 if (((_target nearEntities ["CAManBase", 12]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {"dost_yakin" call _red};
@@ -131,7 +132,7 @@ if (!_uygun) then {
     })) >= 2;
     // v8.62: kume yaricapi 8 -> 15 m; sans %50 -> %70; grup bastirilmissa (kendi ates ustunlugu yok) UGL oncelikli
     private _bastirilmis = ((units group _unit) findIf {alive _x && {(getSuppression _x) > 0.3}}) >= 0;
-    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(random 1) < 0.7};
+    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(random 1) < (missionNamespace getVariable ["lambs_danger_uglSans", 0.92])};   // v8.284: acikta tek hedefe de %70 -> %92
 };
 if (!_uygun) exitWith {"uygun_degil" call _red};
 
