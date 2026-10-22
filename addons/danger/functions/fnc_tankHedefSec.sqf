@@ -6,7 +6,7 @@
  * Verilen aday listesinden (nearTargets girdileri) bu arac icin EN ONEMLI hedefi secer:
  *   taban puan: dusman tanki (zirh >= 300) 100 | ATGM'li arac 95 | AT roketatarli piyade 90 | diger tank 85 | IFV 70 | statik silah 55 | APC 50 | MG 40 | AT disi roketatar 35 | topcu 30 | piyade 25 | diger 20 (hava hedefleri elenir)
  *   - mesafe / 40 | yakin (< 400 m) +15 | hedef son 8 sn ates etti +15
- *   - ates dagitimi: baska bir aracin 12 sn icindeki iddiasi -70 (dusman tanki icin -25: zirh icin ortak ates serbest) | kendi iddiasi +25 (histerezi)
+ *   - ates dagitimi: baska bir aracin 12 sn icindeki iddiasi -70 (dusman tanki icin v8.280: +20 = ODAKLI ATES, tum tanklar ayni dusman tankina yuklenir; kullanici: "tanklar daha koordine olsun") | kendi iddiasi +25 (histerezi)
  * Iddia tablosu: lambs_danger_tankIddia (hedef netId -> [arac netId, zaman]). Kapatma: lambs_danger_tankHedefDagitOff = true (planZirh eski 'en pahali' siralamaya doner).
  *
  * Arguments:
@@ -61,7 +61,7 @@ private _enS = -1e9;
     if ((time - (_o getVariable [QGVAR(sonAtisT), -999])) < 8) then { _s = _s + 15; };
     private _id = _iddia getOrDefault [netId _o, []];
     if (_id isNotEqualTo [] && {(time - (_id select 1)) < 12}) then {
-        _s = _s + (if ((_id select 0) isEqualTo _nid) then {25} else { [-70, -25] select _zirhTank });
+        _s = _s + (if ((_id select 0) isEqualTo _nid) then {25} else { [-70, 20] select _zirhTank });
     };
     if (_s > _enS) then { _enS = _s; _en = _x; };
 } forEach _liste;

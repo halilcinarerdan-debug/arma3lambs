@@ -66,12 +66,15 @@ if (_muzzleItem isNotEqualTo "") then {
     if (isNumber (_ic >> "audibleFire")) then { _audK = getNumber (_ic >> "audibleFire"); };
     if (isNumber (_ic >> "visibleFire")) then { _visK = getNumber (_ic >> "visibleFire"); };
 };
+// v8.280 CEVRE FARKINDALIGI (kullanici: 'susturucu cok guclu, bizi fark edemiyorlar'): susturucu menzili eskiden x(audibleFire max 0.1)x1.3 (>= 40 m) idi -> susturuculu 5.56 tufek ~60 m'de duyuluyordu.
+//   Yeni: x(audibleFire max susturucuAlt 0.3)x1.6 (>= 120 m) -> ~215 m (5.56) / ~310 m (7.62); tum silahlarin taban menzili x sesCarpan (1.2). Eski degerler: lambs_danger_susturucuAlt = 0.1, lambs_danger_sesCarpan = 1.
+_menzil = _menzil * (missionNamespace getVariable ["lambs_danger_sesCarpan", 1.2]);
 private _susturucu = _audK < 0.5;
 if (_susturucu) then {
-    _menzil = (_menzil * ((_audK max 0.1) * 1.3)) max 40;
+    _menzil = (_menzil * (((_audK max (missionNamespace getVariable ["lambs_danger_susturucuAlt", 0.3])) * 1.6))) max 120;
 };
 // Supersonik catlama: susturucu olsa da yakin duyulur (yon kotu)
-private _catlama = _susturucu && {_hizli};
+private _catlama = _susturucu && {_hizli};   // v8.280: supersonik catlama 120 -> 220 m
 
 // Surekli ates
 private _burst = _unit getVariable [QGVAR(sesBurst), [0, 0]];
@@ -87,7 +90,7 @@ if (_launcher) then { _parlamaMenzil = [500, 800] select _gece; };   // arka ale
 if (_glMi) then { _parlamaMenzil = _parlamaMenzil max 80; };
 
 private _maks = (_menzil max _parlamaMenzil) min 1200;
-if (_catlama) then { _maks = _maks max 120; };
+if (_catlama) then { _maks = _maks max 220; };
 
 private _taraf = side (group _unit);
 private _pos = getPosATL _unit;
@@ -105,7 +108,7 @@ private _gruplar = [];
 private _say = 0;
 {
     private _g = group _x;
-    if (!(_g in _gruplar) && {_say < 6}) then {
+    if (!(_g in _gruplar) && {_say < 10}) then {
         _gruplar pushBack _g;
         private _k = _x;
         // grubun atici ile en yakin askeri
@@ -117,7 +120,7 @@ private _say = 0;
 
         // Zaten iyi biliyorsa dokunma
         if ((_k knowsAbout _unit) < 1.5) then {
-            private _duyuldu = _d < _menzil || {_catlama && {_d < 120}};
+            private _duyuldu = _d < _menzil || {_catlama && {_d < 220}};
             private _gorulur = false;
             if (_d < _parlamaMenzil) then {
                 // LOS: parlama / backblast duman gorulebilir mi

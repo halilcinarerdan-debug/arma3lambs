@@ -12,18 +12,20 @@
  * 0: Arac <OBJECT>
  * 1: Tehdit noktasi / nesnesi (eksen) <OBJECT|ARRAY>
  * 2: Grup <GROUP> (opsiyonel; bilinen dusman icin lider kullanilir)
+ * 3: Sektor kaydirma (derece) <NUMBER> (v8.280; opsiyonel)
  *
  * Return Value: [bakilacak nesne ya da pozisyon, tur ("DUSMAN" / "SEKTOR" / "EKSEN"), yon (derece), acik mesafe (m)]
  * Public: No
 */
 
-params [["_v", objNull, [objNull]], ["_tehdit", [], [objNull, []]], ["_g", grpNull, [grpNull]]];
+params [["_v", objNull, [objNull]], ["_tehdit", [], [objNull, []]], ["_g", grpNull, [grpNull]], ["_ofs", 0, [0]]];
 if (isNull _v) exitWith { [[], "EKSEN", 0, 0] };
 
 private _eksenP = if (_tehdit isEqualType objNull) then { getPosATL _tehdit } else { +_tehdit };
 if (_eksenP isEqualTo []) then { _eksenP = _v getPos [500, getDir _v]; };
 private _vP = getPosATL _v;
-private _eksen = _vP getDir _eksenP;
+// v8.280 KOORDINASYON: ayni plandaki tanklar tehdit ekseninin farkli sektorlerine bakar (_ofs = tank basina +-40 derece kaydirma; hepsi ayni noktaya bakmaz, 360 derece guvenlik)
+private _eksen = (_vP getDir _eksenP) + _ofs;
 
 // ---- 1) bilinen dusman ----
 private _sonuc = [];

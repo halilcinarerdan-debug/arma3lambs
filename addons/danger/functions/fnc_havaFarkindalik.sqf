@@ -173,6 +173,9 @@ private _calis = {
                 continue;
             };
 
+            // v8.280 DRONA KARSI TEPKI (fnc_dronTepki): kamikaze / silahli dron <= 450 m'de (gozlem dronu <= 100 m) uygunsa grup ates eder; ucus izinden operator / firlatma yonu cikarilir ve komsu gruplara bildirilir
+            if (_dron && {[_g, _hedef, _hd] call FUNC(dronTepki)}) then { continue };
+
             // v8.54: kucuk silah zarfi = EGIK mesafe (3B) <= 600 m (heli 300 m yukseklikte 114 m yataydayken eski kural 'alt<=300' sinirda kaciyordu)
             private _egik = _l distance _hedef;
             private _zarf = _egik <= 600;

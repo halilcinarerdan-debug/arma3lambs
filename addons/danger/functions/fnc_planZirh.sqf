@@ -71,6 +71,16 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     if (_dis isNotEqualTo []) then { _dis sort true; _piyMed = _dis select (floor ((count _dis) / 2)); };
 };
 
+// v8.280 TANK KOORDINASYONU (kullanici: 'tanklar daha koordine ve zeki olsun'): bir planda ayni anda yalniz BIR tank grubu mevzi degistirir (ileri sicrama / yer degistirme / duello); digerleri yerinde ortu ates verir (birbirini ortme).
+//   Hasar nedenli acil yer degistirme bu kilitten muaf. Kilit 45 sn sonra ya da grup yok olunca kendiliginden acilir.
+private _hareketIzin = {
+    params ["_g2"];
+    private _k = _plan getOrDefault ["tankHareketK", [grpNull, -999]];
+    isNull (_k select 0) || {(_k select 0) isEqualTo _g2} || {(time - (_k select 1)) > 45} || {({alive _x} count (units (_k select 0))) isEqualTo 0}
+};
+private _hareketKaydet = { params ["_g2"]; _plan set ["tankHareketK", [_g2, time]]; };
+private _nZ = count _zg;
+
 {
     private _g = _x;
     if (!local _g || {({alive _x} count (units _g)) isEqualTo 0}) then { continue };
@@ -88,6 +98,8 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     private _tankMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "TANK";
     // v8.279: tank tani (atis / hasar loglari) + ekip becerisi (arac basina bir kez)
     if (_tankMi) then { [_v] call FUNC(tankIzle); };
+    // v8.280: tank dron savunmasi (uyari paylasimi, yon, makineli ates, duman, kacinma)
+    if (_tankMi) then { [_g, _v, _d] call FUNC(tankDron); };
     // v8.250: AT yetenegi olmayan arac (tank degil, ATGM yok) bilinen dusman tankindan kacarken (fnc_aracZirhKac) planZirh ona hedef / hareket emri vermez
     if (!_tankMi && {(time - (_v getVariable ["lambs_danger_zirhKacT", -999])) < 10}) then { continue };
     private _atYeterli = _tankMi || {([_v] call FUNC(aracSinif)) select 3};
@@ -392,8 +404,9 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
         // v8.278 (kullanici: '25 dakika ayni mevzide durmasinlar'): saldirida da (ileri sicrama olmadiysa) 300 sn sonra yedek mevzi; savunmada 150 sn
         private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
             && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0};
-        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
+        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
+            [_g] call _hareketKaydet;
             _g setVariable ["lambs_danger_planZirhAlt", _poz];
             _g setVariable ["lambs_danger_planZirhPoz", _alt2];
             _g setVariable ["lambs_danger_planZirhVardi", nil];
@@ -419,7 +432,8 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
                 && {alive (leader _x)} && {((vehicle (leader _x)) distance2D _obj) < ((_v distance2D _obj) - 40)}
             }) isNotEqualTo [];
             private _zirhliYakin = ((_l nearTargets 500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_x select 4) isKindOf "Tank"} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0;
-            if (_pOn && {!_zirhliYakin}) then {
+            if (_pOn && {!_zirhliYakin} && {[_g] call _hareketIzin}) then {
+                [_g] call _hareketKaydet;
                 _g setVariable ["lambs_danger_planZirhKademe", _kd + 1];
                 _g setVariable ["lambs_danger_planZirhPoz", []];
                 _g setVariable ["lambs_danger_planZirhVardi", nil];
@@ -434,7 +448,7 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
     // ---- v8.276 TARET BAKISI: mevzideki tank (ve grubun diger tanklari) olu noktaya / duvara degil en tehlikeli bolgeye bakar (10 sn'de bir; fnc_tankBakis) ----
     if (_vardi && {_tankMi} && {!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhBakT", -999])) > 10}) then {
         _g setVariable ["lambs_danger_planZirhBakT", time];
-        private _bk = [_v, _g getVariable ["lambs_danger_planZirhBak", _obj], _g] call FUNC(tankBakis);
+        private _bk = [_v, _g getVariable ["lambs_danger_planZirhBak", _obj], _g, (_forEachIndex - ((_nZ - 1) / 2)) * 40] call FUNC(tankBakis);
         private _bkH = _bk select 0;
         if (_bkH isNotEqualTo []) then {
             { _x doWatch _bkH; } forEach (crew _v);
@@ -449,7 +463,7 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
 
     // ---- v8.278 TANK DUELLOSU: bilinen dusman tanki gorus hattinda degilse / cok uzaksa dusmana 500-900 m kala gorus hatti olan (mumkunse hull-down) yeni pozisyona sicrar (fnc_tankDuello) ----
     if (_vardi && {_tankMi} && {_savas} && {canMove _v} && {!(missionNamespace getVariable ["lambs_danger_tankDuelloOff", false])}) then {
-        if ([_g, _v, _d, _savunma, _obj, _id] call FUNC(tankDuello)) then { continue };
+        if ([_g, _v, _d, _savunma, _obj, _id, _plan] call FUNC(tankDuello)) then { continue };
     };
 
     // ---- v8.187 GRUBUN DIGER ARACLARI (RPT 95be8b53: 2 tankli grupta ikinci tank hic kipirdamadi - yalniz lider aracin surucusu komut aliyordu): her arac poz'a 45 m yanal aralikla gider, varinca durup objektife bakar ----
@@ -470,7 +484,7 @@ if ((missionNamespace getVariable ["lambs_danger_tankPiyadeV1", true]) && {(_pla
             } else {
                 doStop _od;
                 if (!(missionNamespace getVariable ["lambs_danger_tankKilitOff", false])) then { _od disableAI "MOVE"; };
-                private _bkO = if (!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false]) && {(([_ov] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then { ([_ov, _g getVariable ["lambs_danger_planZirhBak", _obj], _g] call FUNC(tankBakis)) select 0 } else { _obj };
+                private _bkO = if (!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false]) && {(([_ov] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then { ([_ov, _g getVariable ["lambs_danger_planZirhBak", _obj], _g, ((_forEachIndex + 1) * 45) * ([1, -1] select ((_forEachIndex mod 2) isEqualTo 1))] call FUNC(tankBakis)) select 0 } else { _obj };
                 if (_bkO isEqualTo []) then { _bkO = _obj; };
                 { _x doWatch _bkO; } forEach (crew _ov);
             };

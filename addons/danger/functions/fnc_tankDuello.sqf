@@ -21,11 +21,14 @@
  * Public: No
 */
 
-params ["_g", "_v", "_d", "_savunma", "_obj", "_id"];
+params ["_g", "_v", "_d", "_savunma", "_obj", "_id", ["_plan", createHashMap, [createHashMap]]];
 private _l = leader _g;
 if (isNull _l || {!local _l} || {!canMove _v} || {(damage _v) > 0.45}) exitWith {false};
 if ((time - (_g getVariable ["lambs_danger_tankDuelloT", -999])) < 45) exitWith {false};
 if ((_g getVariable ["lambs_danger_tankDuelloN", 0]) >= 8) exitWith {false};
+// v8.280 KOORDINASYON (birbirini ortme): ayni planda baska bir tank grubu son 45 sn icinde hamle yaptiysa bu tank yerinde kalip ortu ates verir
+private _hk = _plan getOrDefault ["tankHareketK", [grpNull, -999]];
+if (!isNull (_hk select 0) && {(_hk select 0) isNotEqualTo _g} && {(time - (_hk select 1)) < 45} && {({alive _x} count (units (_hk select 0))) > 0}) exitWith {false};
 
 private _taraf = side _g;
 private _ets = (_l nearTargets 1600) select {
@@ -88,6 +91,7 @@ _g setVariable ["lambs_danger_planZirhUzatN", 0];
 _g setVariable ["lambs_danger_planZirhT", time];
 _g setVariable ["lambs_danger_planZirhMax", 100 max (((_v distance2D _en) / 2.2) min 300)];
 _g setVariable ["lambs_danger_planZirhYerT", time];
+_plan set ["tankHareketK", [_g, time]];
 _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
 _d doMove _en;
 diag_log format ["[TANK-DUELLO] %1 | %2 %3 | dusman tanki %4 (%5 m, gorus hatti %6) -> yeni ates pozisyonu %7 (%8 m atilim, dusmana %9 m, puan %10) | hamle %11/8",

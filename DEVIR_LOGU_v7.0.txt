@@ -2667,3 +2667,15 @@ Yeni bulgular -> duzeltmeler:
 3) TANK (kullanici: 'tank duellosu cok temkinli'): RPT 21-10 21:53: 0 [TANK-DUELLO] hamle (tanklar birbirini goruyordu, 100-300 m), 45 dk'da HIC tank imha / hareketsiz kalmadi; [TANK-ATES] hedef sectigi halde atis / isabet / hasar loglanmiyordu.
    fnc_tankIzle: [TANK-ATIS] (ana top atislari), [TANK-HASAR] (isabet, parca hasari) + murettebat becerisi >= 0.85 (lambs_danger_tankEkipSkill, 0 kapali). Gorus hattinda dusman tanki varken grup COMBAT / RED.
    Not: grubun 'AWARE / YELLOW / FULL / COLUMN' iken 180-290 m'de dusman tanki gorulmesi kok neden olabilir; bir sonraki RPT'de [TANK-ATIS] / [TANK-HASAR] sayilari ile dogrulanacak.
+
+
+=== v8.280 — CEVRE FARKINDALIGI, DRONA TEPKI, BOT BECERISI, TANK KOORDINASYONU / GUCLENDIRME (kullanici istegi, 2026-10-22) ===
+1) SES / SUSTURUCU (fnc_soundAwareness): susturucu menzili x(audibleFire max susturucuAlt 0.3)x1.6, en az 120 m (eski x(max 0.1)x1.3, 40 m) -> susturuculu 5.56 ~60 -> ~215 m, 7.62 ~310 m;
+   tum silahlarin taban menzili x lambs_danger_sesCarpan (1.2); supersonik catlama 120 -> 220 m; dinleyici sayisi atis basina 6 -> 10 grup. Eski deger: susturucuAlt 0.1, sesCarpan 1.
+2) BOT BECERISI (fnc_varsayilanSkill): aimingAccuracy ve aimingSpeed x lambs_danger_skillCarpan (1.2, en cok 1.0) - optik carpanindan sonra. (aimingSpeed = nisan alma / donus hizi.) Mevcut birimlere init olayi ile geriye donuk uygulanir.
+3) DRONA KARSI ASKERLER (fnc_dronTepki, havaFarkindalik'tan): kamikaze / bomba / silahli dron <= 450 m (lambs_danger_dronAtesM), yukseklik <= 200 m ise grup ates eder (en yakin 3 asker doTarget+doFire, kalanlar ongorulu doSuppressiveFire; 3 sn'de bir);
+   gozlem dronuna yalniz <= 100 m. Ucus izi (2 sn'de bir kayit, >= 6 sn / >= 25 m) -> gelis yonu; operator / firlatma yonu = tersi (700 m, +-15 derece hata); 400 m icindeki dost gruplar `lambs_danger_dronYon` + sesSonPos alir, 2 asker 12 sn o yone bakar. Log [DRON-YON], [DRON-ATES].
+4) TANK DRON SAVUNMASI (fnc_tankDron, planZirh'ten): 700 m icinde dusman dron -> dost zirhli araclara uyari (20 sn), murettebat dronu izler (<= 600 m), komutan / nisanci MG ile ates (<= 500 m), kamikaze + yaklasiyor + <= 260 m duman, <= 130 m ve hizli yaklasiyorsa 30 m yana kacinma. Log [TANK-DRON].
+5) TANK KOORDINASYONU: (a) ayni planda ayni anda tek tank grubu mevzi degistirir (ileri sicrama / yer degistirme / duello; hasar nedenli acil yer degistirme muaf) - digerleri ortu ates verir, 45 sn kilit; (b) tank taretleri tehdit ekseninin farkli sektorlerine bakar (tank basina +-40 derece);
+   (c) dusman tanki icin ODAKLI ATES: baska tankin iddiasi artik -25 degil +20 (tum tanklar ayni dusman tankina yuklenir).
+6) TANK GUCLENDIRME: ekip becerisi 0.85 -> 0.95; dusman tanki ana topu / fuzesi ile vurulunca gelen hasar x lambs_danger_tankTopHasar (1.3, HandleDamage). Piyade / AT / mayin hasari degismez.

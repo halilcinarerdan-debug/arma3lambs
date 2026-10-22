@@ -84,6 +84,17 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
         _yeni pushBack format ["optiksiz x0.75 -> %1", _aa toFixed 2];
     };
 };
+// v8.280 BOT BECERISI +%20 (kullanici: 'botlarin dogrulugunu ve sağa sola donme animasyon hizini yuzde 20 arttir'): aimingAccuracy (isabet) ve aimingSpeed (nisan alma / donus hizi) x lambs_danger_skillCarpan (1.2), en cok 1.0.
+//   Optik carpanindan SONRA uygulanir. Kapatma: lambs_danger_skillCarpan = 1.
+private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
+if (_cpn != 1) then {
+    {
+        private _o = _u skill _x;
+        private _n = (_o * _cpn) min 1;
+        _u setSkill [_x, _n];
+        _yeni pushBack format ["%1 x%2 -> %3", _x, _cpn, _n toFixed 2];
+    } forEach ["aimingAccuracy", "aimingSpeed"];
+};
 _u setVariable [QGVAR(skillAyarli), true];
 ["uygulandi"] call _say;
 
