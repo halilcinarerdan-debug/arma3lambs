@@ -53,7 +53,9 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                     _g setVariable [QGVAR(teslimBakimT), time];
                     {
                         private _eu = _x;
-                        if (alive _eu && {isNull objectParent _eu}) then {
+                        // v8.294 ACE CAPTIVES: oyuncu esiri kelepcelediyse (ace_captives_isHandcuffed) ya da serbest biraktiysa bakim BIRAKILIR (ACE yonetir; setCaptive / doStop / AI kapatma ACE ile catismaz)
+                        if (_eu getVariable ["ace_captives_isHandcuffed", false]) then { _eu setVariable [QGVAR(aceEsir), true]; };
+                        if (alive _eu && {isNull objectParent _eu} && {!(_eu getVariable [QGVAR(aceEsir), false])}) then {
                             if ((primaryWeapon _eu) isNotEqualTo "" || {(secondaryWeapon _eu) isNotEqualTo ""} || {(handgunWeapon _eu) isNotEqualTo ""}) then { removeAllWeapons _eu; };
                             { _eu disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
                             if (!captive _eu) then { _eu setCaptive true; };
@@ -166,7 +168,8 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                         private _eu2 = _x;
                         { _eu2 disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
                         doStop _x;
-                        _x action ["Surrender", _x];
+                        // v8.294 ACE CAPTIVES: ACE yuklu ise ACE teslim durumu (ace_captives_isSurrendering) -> ACE etkilesiminde 'Esir al' (kelepce / refakat / araca yukle) cikar; degilse vanilla Surrender
+                        if (!isNil "ace_captives_fnc_setSurrendered") then { [_x, true] call ace_captives_fnc_setSurrendered; } else { _x action ["Surrender", _x]; };
                         _x doWatch objNull;
                     } forEach _us;
                     _g setBehaviour "SAFE";
