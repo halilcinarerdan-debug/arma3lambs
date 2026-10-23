@@ -40,7 +40,10 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
     private _sayac = createHashMapFromArray [["ayarlandi", 0], ["acikta", 0], ["reddedildi", 0], ["kaymaTop", 0], ["UP", 0], ["MIDDLE", 0], ["DOWN", 0]];
     private _sonOzet = time;
     while {true} do {
-        sleep 1.5;
+        // v8.312 HIZLI SIPER (kullanici: 'botlarin cover alma hizini ve tam covera yapismasini ayarlayabilir misin, genellikle acikta oluyorlar, ates ustunlugu kurarken'): tick 1.5 -> 0.8 sn, asker basina yeniden degerlendirme 3 -> 1.5 sn, tick butcesi 8 -> 12, yurume esigi 0.6 -> 1.0 km/s.
+        //   CBA 'ELITE siper' lambs_danger_siperHizli (varsayilan acik); kapaliyken eski degerler.
+        private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
+        sleep ([1.5, 0.8] select _hizli);
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             private _a = _sayac get "ayarlandi";
@@ -48,7 +51,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
         if (missionNamespace getVariable ["lambs_danger_coverHugOff", false]) then { continue };
-        private _butce = 8;   // v8.19: 5 -> 8 asker / tik
+        private _butce = [8, 12] select _hizli;   // v8.19: 5 -> 8 asker / tik; v8.312 hizli: 12
 
         {
             private _g = _x;
@@ -67,7 +70,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 if (_butce <= 0) exitWith {};
                 if (
                     !alive _u || {!local _u} || {isPlayer _u} || {!isNull objectParent _u}
-                    || {(speed _u) >= 0.6} || {(insideBuilding _u) > 0.5}
+                    || {(speed _u) >= ([0.6, 1.0] select _hizli)} || {(insideBuilding _u) > 0.5}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
                     || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                     || {time < (_u getVariable [QGVAR(hugT), 0])}
@@ -82,7 +85,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 private _ed = _u distance2D _en;
                 if (_ed < 6 || {_ed > 400}) then { continue };
 
-                _u setVariable [QGVAR(hugT), time + 3];
+                _u setVariable [QGVAR(hugT), time + ([3, 1.5] select _hizli)];
                 _butce = _butce - 1;
 
                 private _eASL = eyePos _en;
@@ -113,7 +116,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 };
 
                 private _dir = vectorNormalized (_uASL vectorDiff _eASL);
-                private _tASL = _hP vectorAdd (_dir vectorMultiply (missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.35]));   // 45 -> 35 cm (kullanici: daha yapisik)
+                private _tASL = _hP vectorAdd (_dir vectorMultiply (missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.30]));   // 45 -> 35 cm (kullanici: daha yapisik)
                 _tASL set [2, _pASL select 2];
                 private _t = ASLToATL _tASL;
                 _t set [2, (getPosATL _u) select 2];

@@ -20,7 +20,10 @@
 params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]]];
 if (isNull _u || {isNull _en} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
-_u setVariable [QGVAR(acikSiperT), time + 25];
+// v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
+private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
+private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 22];
+_u setVariable [QGVAR(acikSiperT), time + ([25, 10] select _hizli)];
 private _g = group _u;
 if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isRetreating), false]}) exitWith {false};
 
@@ -42,7 +45,7 @@ private _objAd = "";
     private _op = getPosATL _o;
     private _bb = boundingBoxReal _o;
     private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
-    if (_yk >= 0.7) then {
+    if (_yk >= 0.7 && {(_u distance2D _op) <= _yar}) then {
         private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5;
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
         if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_dolu findIf {((_x select 0) distance2D _pos) < 1.5}) < 0}) then {
@@ -55,7 +58,7 @@ private _objAd = "";
             };
         };
     };
-} forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "HIDE"], 14, false, true]);
+} forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "HIDE"], _yar, false, true]);
 
 if (_obj isNotEqualTo []) exitWith {
     _dolu pushBack [_obj, time];
@@ -82,7 +85,7 @@ private _binaAd = "";
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= 28 && {_d < _enD} && {(_bp distance2D _en) >= (_ed - 8)} && {(_dolu findIf {((_x select 0) distance2D _bp) < 1.8}) < 0}) then {
+        if (_d <= (_yar + 10) && {_d < _enD} && {(_bp distance2D _en) >= (_ed - 8)} && {(_dolu findIf {((_x select 0) distance2D _bp) < 1.8}) < 0}) then {
             if (lineIntersects [_eASL, (AGLToASL _bp) vectorAdd [0, 0, 1.3], _en, _u]) then {
                 _enD = _d;
                 _en_iyi = _bp;
@@ -90,7 +93,7 @@ private _binaAd = "";
             };
         };
     } forEach (_b buildingPos -1);
-} forEach ((nearestObjects [_p, ["House"], 30]) select {(count (_x buildingPos -1)) > 0});
+} forEach ((nearestObjects [_p, ["House"], _yar + 12]) select {(count (_x buildingPos -1)) > 0});
 
 if (_en_iyi isEqualTo []) exitWith {false};
 
