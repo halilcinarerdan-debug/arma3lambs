@@ -274,7 +274,7 @@ diag_log "[PATLAYICI] disiplinli el bombasi / roket / UGL ek mermi izleyicisi ba
         if (time > _sonOzet) then {
             _sonOzet = time + 60;
             private _ys = missionNamespace getVariable ["lambs_danger_patlayiciSayac", createHashMap];
-            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 roket %2 | UGL ek mermi verilen %3 | bomba firlatma sonucu (toplam): atildi %4 | atilmadi %6", _sayac get "bomba", _sayac get "roket", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], 0, _ys getOrDefault ["yok", 0]];
+            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 roket %2 | UGL ek mermi verilen %3 | bomba firlatma sonucu (toplam): atildi %4 | atilmadi %5", _sayac get "bomba", _sayac get "roket", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0]];
             { _sayac set [_x, 0]; } forEach ["bomba", "roket"];
         };
     };
