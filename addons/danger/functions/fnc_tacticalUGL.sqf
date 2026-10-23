@@ -67,7 +67,7 @@ private _red = {
     false
 };
 // v8.284 UGL SIKLIGI BOOST (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla'): birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown)
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (missionNamespace getVariable ["lambs_danger_uglCooldown", 4])) exitWith {"cooldown" call _red};
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (missionNamespace getVariable ["lambs_danger_uglCooldown", 3])) exitWith {"cooldown" call _red};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
