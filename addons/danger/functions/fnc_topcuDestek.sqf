@@ -4,7 +4,8 @@
  * TOPCU DESTEK (v8.214; yol haritasi 4) — plan topcusu disinda ek destek ateslari:
  *  "SIS"   : DUMAN PERDESI — saldiri basinda dusman gozetlemesini kor etmek icin hedefin onune (yaklasma yonune) duman mermisi (dost sinirinda; ates kaydirma/yikici deyil). Duman mermisi yoksa loglanir, atilmaz.
  *  "KARSI" : KARSI-BATARYA — tarafin BILDIGI (knowsAbout) dusman topcu / havan araci icin tarafin kendi topcusu 3 mermi atar (dost mesafesi >= 200 m; ayni hedefe 90 sn'de bir). Kaynak ilkesi (FM 3-09 karsi atesli destek): dusman atesli desteginin imhasi / bastirilmasi; sayisal esikler tasarim degerleridir.
- * Log: [PLAN-SIS] / [PLAN-KARSI-BATARYA]
+ *  "OPERATOR": DRON OPERATORU KARSI ATESI (v8.307; kullanici: 'dronun geldigi yone acimasinlar') — nokta = tahmini operator / firlatma bolgesi (ucus izinden geri cikarim); dost 200 m icinde ise atilmaz; HE (duman / isik / fisek haric) 3 mermi, 45 m yayilim.
+ * Log: [PLAN-SIS] / [PLAN-KARSI-BATARYA] / [DRON-KARSI-ATES]
  *
  * Arguments:
  * 0: Taraf <SIDE>
@@ -42,6 +43,28 @@ if (_mod isEqualTo "SIS") then {
             };
         };
     } forEach _topcular;
+};
+
+if (_mod isEqualTo "OPERATOR") then {
+    private _dostVar = false;
+    { if (alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _poz) < 200}) exitWith { _dostVar = true; }; } forEach allUnits;
+    if (!_dostVar && {!surfaceIsWater _poz}) then {
+        {
+            private _v = _x;
+            private _mg = ((getArtilleryAmmo [_v]) select {
+                private _a = toLower _x;
+                (_a find "smoke") < 0 && {(_a find "illum") < 0} && {(_a find "flare") < 0} && {(_a find "cluster") < 0} && {(_a find "mine") < 0}
+            }) param [0, ""];
+            if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
+                [_v, _poz, _mg, _atan] spawn {
+                    params ["_tv", "_tn", "_tm", "_ti"];
+                    sleep (3 * _ti);
+                    if (alive _tv && {canFire _tv}) then { _tv doArtilleryFire [_tn getPos [random 45, random 360], _tm, 3]; };
+                };
+                _atan = _atan + 1;
+            };
+        } forEach _topcular;
+    };
 };
 
 if (_mod isEqualTo "KARSI") then {

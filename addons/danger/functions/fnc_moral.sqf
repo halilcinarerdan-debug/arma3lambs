@@ -154,7 +154,14 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             // 2 ardisik tur (10 sn): tek tikluk kosul teslim ettirmez
             if (_teslimSay2 >= ([2, 3] select _duzensizP)) then {
                 private _en = _l findNearestEnemy _l;
-                if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _esikD}) then {
+                // v8.307 (kullanici: 'askerler teslim olmadi'; RPT 23-10 05:29: [TESLIM-ADAY] umutsuz=true / kayip 71 / moral 0.41 ama 'dusman=- m (<=200)' -> yakinda bilinen piyade yoktu, dron 40 dk uzerlerindeydi):
+                //   100 m'den yakin DUSMAN yoksa 450 m icindeki dusman IHA (dron uzerlerinde) teslim muhatabi sayilir. Kapatma: CBA lambs_danger_teslimDron = false.
+                private _teslimEsik = _esikD;
+                if (missionNamespace getVariable ["lambs_danger_teslimDron", true] && {isNull _en || {(_l distance2D _en) > _esikD}}) then {
+                    private _drn = (_l nearEntities ["Air", 450]) select {unitIsUAV _x && {alive _x} && {((side _g) getFriend (side (group (effectiveCommander _x)))) < 0.6}};
+                    if (_drn isNotEqualTo []) then { _en = _drn select 0; _teslimEsik = 450; };
+                };
+                if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _teslimEsik}) then {
                     _g setVariable [QGVAR(teslimOldu), true];
                     _teslimSay = _teslimSay + 1;
                     {

@@ -39,7 +39,9 @@ private _calis = {
         };
         if (_kaynaklar isEqualTo []) then { continue };
         private _dinleyiciler = allGroups select {
-            local _x && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)} && {isNull objectParent (leader _x)} && {(side _x) isNotEqualTo civilian} && {(units _x) findIf {isPlayer _x} < 0}
+            local _x && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)}
+            && {isNull objectParent (leader _x) || {(objectParent (leader _x)) isKindOf "Tank"} || {(objectParent (leader _x)) isKindOf "Tracked_APC_F"} || {(objectParent (leader _x)) isKindOf "Wheeled_APC_F"}}
+            && {(side _x) isNotEqualTo civilian} && {(units _x) findIf {isPlayer _x} < 0}
         };
         if (_dinleyiciler isEqualTo []) then { continue };
         private _islenen = 0;
@@ -71,6 +73,9 @@ private _calis = {
                 if (_islenen >= 8) exitWith {};
                 private _l = leader _g;
                 if ((side _g) getFriend _sTaraf >= 0.6) then { continue };
+                // v8.307 (kullanici: 'tanklar drona karsi tavir takinmadi'; RPT 23-10 05:29: tank FPV'yi 48 m'de fark etti, kule / top 1.00 hasar): zirhli ekibi de dinler (tanka kapali ses yalitimi: menzil x0.45), kendi araci atlanir
+                private _vOz = objectParent _l;
+                if (!isNull _vOz && {_vOz isEqualTo _v}) then { continue };
                 private _d = _l distance _v;
                 if (_d > (_taban * _env * 1.0)) then { continue };
                 if ((time - (_g getVariable [QGVAR(motorSesT), -999])) < ([20, 5] select (_tip isEqualTo "IHA"))) then { continue };
@@ -85,7 +90,7 @@ private _calis = {
                 private _m = _taban * _env;
                 if ((_l distance _v) > _m) then { continue };
                 // engel / gurultu carpanlari
-                private _carp = 1;
+                private _carp = [1, 0.45] select (!isNull _vOz);
                 if (terrainIntersectASL [eyePos _l, _vp]) then { _carp = _carp * ([0.6, 0.8] select (_tip isEqualTo "IHA")); };
                 if ((time - (_g getVariable ["lambs_danger_contact", -999])) < 15) then { _carp = _carp * 0.4; };
                 if !(isNull (nearestBuilding _l)) then { if ((_l distance (nearestBuilding _l)) < 6) then { _carp = _carp * 0.8; }; };

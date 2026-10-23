@@ -386,6 +386,8 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
 
     while {true} do {
         sleep 3;
+        // v8.307: CBA 'TCCC hekim sistemi AKTIF' (kullanici: 'tccc opsiyonel kalkabilsin'); kapaliyken hekim atamasi yapilmaz (ACE'nin kendi AI tedavisi etkilenmez)
+        if (!(missionNamespace getVariable ["lambs_danger_tcccAktif", true])) then { continue };
         {
             private _g = _x;
             private _l = leader _g;

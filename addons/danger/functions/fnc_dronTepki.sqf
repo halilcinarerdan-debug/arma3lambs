@@ -62,6 +62,41 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
             };
         } forEach allGroups;
         _g setVariable [QGVAR(dronYonT), time];
+        // v8.307 KARSI ATES (kullanici: 'dronun geldigi yone acimasinlar'; 'bizim konumumuza cagri atesi yapmadilar'): tahmini operator bolgesine topcu / havan HE atar. Iki farkli zamanin geri-yon dogrulari
+        //   (>= 20 sn, >= 15 derece aci) KESISIYORSA kesisim (150-2000 m); yoksa tek dogru uzerinde 500 / 800 / 1100 m. 180 sn'de bir / taraf; dost 200 m icinde ise atilmaz. CBA: lambs_danger_dronKarsiAtes.
+        if (missionNamespace getVariable ["lambs_danger_dronKarsiAtes", true]) then {
+            private _tarafK = side _g;
+            private _ozK = format ["lambs_danger_opAtesT_%1", _tarafK];
+            private _obs = (missionNamespace getVariable ["lambs_danger_dronOpObs", []]) select {(time - (_x select 2)) < 120 && {(_x select 3) isEqualTo _tarafK}};
+            _obs pushBack [_p0, _geri, time, _tarafK];
+            missionNamespace setVariable ["lambs_danger_dronOpObs", _obs];
+            if ((time - (missionNamespace getVariable [_ozK, -999])) > 180) then {
+                private _pts = [];
+                {
+                    private _a = _x select 0; private _t1 = _x select 1;
+                    if ((time - (_x select 2)) >= 20 && {(abs ((((_geri - _t1) + 540) mod 360) - 180)) <= 165}) then {
+                        private _d1 = [sin _t1, cos _t1];
+                        private _d2 = [sin _geri, cos _geri];
+                        private _det = ((_d1 select 0) * (_d2 select 1)) - ((_d1 select 1) * (_d2 select 0));
+                        if ((abs _det) > 0.26) then {   // aci >= ~15 derece
+                            private _ab = [(_p0 select 0) - (_a select 0), (_p0 select 1) - (_a select 1)];
+                            private _t = (((_ab select 0) * (_d2 select 1)) - ((_ab select 1) * (_d2 select 0))) / _det;
+                            private _s = (((_ab select 0) * (_d1 select 1)) - ((_ab select 1) * (_d1 select 0))) / _det;
+                            if (_t > 150 && {_t < 2000} && {_s > 150} && {_s < 2000}) then { _pts = [[(_a select 0) + _t * (_d1 select 0), (_a select 1) + _t * (_d1 select 1), 0]]; };
+                        };
+                    };
+                    if (_pts isNotEqualTo []) exitWith {};
+                } forEach (_obs select [0, (count _obs) - 1]);
+                private _tur = "KESISIM";
+                if (_pts isEqualTo []) then { _pts = [500, 800, 1100] apply { _p0 getPos [_x, _geri] }; _tur = "TEK DOGRU"; };
+                private _kN = 0;
+                { _kN = _kN + ([_tarafK, _x, "OPERATOR", groupId _g] call FUNC(topcuDestek)); } forEach _pts;
+                if (_kN > 0) then {
+                    missionNamespace setVariable [_ozK, time];
+                    diag_log format ["[DRON-KARSI-ATES] %1 | %2 | tahmini operator bolgesi (%3): %4 nokta, %5 top 3'er mermi | geri yon %6 derece", groupId _g, _tarafK, _tur, count _pts, _kN, round _geri];
+                };
+            };
+        };
         if ((time - (_dr getVariable [QGVAR(dronYonLogT), -999])) > 20) then {
             _dr setVariable [QGVAR(dronYonLogT), time];
             diag_log format ["[DRON-YON] %1 | %2 (%3) | gelis %4 derece -> operator / firlatma yonu %5 derece (700 m, hata +-15) | iz %6 m / %7 sn | haberdar edilen grup %8", groupId _g, typeOf _dr, _tip, round _gelis, round _geri, round (_p0 distance2D _p1), round (time - ((_iz select 0) select 0)), _n];
