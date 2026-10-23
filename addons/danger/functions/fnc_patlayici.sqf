@@ -4,7 +4,7 @@
  * DISIPLINLI PATLAYICI KULLANIMI (v8.310; kullanici: 'patlayici kullanimini arttir el bombasi roket ama disiplinli' + 've ugl'). Yeni taktik degil: mevcut temasta olan askerin elindeki patlayiciyi DAHA SIK ve DOGRU hedefe kullandirir.
  * Izleyici 2.5 sn'de bir, yerel oyuncusuz, TEMASTA (contact) olan gruplarda; tick basina en cok 4 atis. Hedef: bilinen (knowsAbout >= 1.0) dusman PIYADE. 'Deger' sartlari (bos yere atilmaz):
  *   KUME (hedefin 8 m icinde baska bilinen dusman) | BINADA | KAPALI HAT (tufege gorus hatti kesik: siper / duvar) | BASKI (grupta >= 2 asker baski > 0.4)
- *   EL BOMBASI (frag; duman / isik / sok haric): 10-45 m (v8.313; guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
+ *   EL BOMBASI (frag; duman / isik / sok haric): 10-60 m, deger sarti YOK (v8.315; v8.313: guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
  *   ROKET (omuz roketatari, yuklu): 60-280 m, hedef 20 m icinde dost YOK, arkasinda (8 m, 120-240 derece) dost YOK, BINADA / KUME >= 3 / KAPALI HAT (>= 60 m); 60 sn / birim, 20 sn / grup;
  *        dusman ZIRHLI (tank / APC) 900 m icinde biliniyorsa ATILMAZ (AT rezervi)
  *   UGL ek mermi: UGL'li askere CBA 'lambs_danger_uglEkMermi' (varsayilan 4) kadar HE 40mm eklenir (bir kez; envanter doluysa eklenmez) - UGL darbogazi 'mermi_yok' idi.
@@ -214,7 +214,7 @@ lambs_danger_patlayiciDon = {
             private _tr = _l nearTargets 320;
             private _dusman = _tr select {
                 private _o = _x select 4;
-                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 1.0}
+                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 0.6}   // v8.315: 1.0 -> 0.6 (kullanici: 'kosullari esnet')
             };
             // v8.314 TANI (kullanici: 'el bombasi kullanimi hala yok'; RPT 23-10 09:25: sayaclar 0 = hic aday bulunamadi; asker 'iceride' idi ve eski kod bina ici askeri eliyordu): grup basina 20 sn'de bir neden satiri (en cok 60)
             if ((time - (_g getVariable [QGVAR(patTaniT), -999])) > 20 && {(missionNamespace getVariable ["lambs_danger_patTaniN", 0]) < 60}) then {
@@ -248,32 +248,44 @@ lambs_danger_patlayiciDon = {
                     private _bn = (insideBuilding _o) > 0.5;
                     if (_m < _enM && {_k >= 2 || _kp || _bn || _baski || _pusu}) then { _enIyi = _o; _enM = _m; _kumeN = _k; _kapali = _kp; _binada = _bn; };
                 } forEach _dusman;
-                if (isNull _enIyi) then { continue };
+                // v8.315 KOSULLARI ESNET (kullanici: 'el bombasini kullanabilsinler o mesafede sart ... kosullari esnet'; RPT 23-10 09:25: dusman 45-50 m'de, bina icindeki asker): el bombasi icin 'deger' sarti ARANMAZ,
+                //   temasta bilinen en yakin dusman piyade 10-60 m aralikta ise yeterli (disiplin: asker 20 sn, grup 4 sn, 60 sn'de <= 3, yay temizligi, dost 12 m, guvenli min mesafe). Roket icin deger sarti kalir.
+                private _bH = objNull;
+                private _bM = 1e9;
+                {
+                    private _o = _x select 4;
+                    private _m = _u distance _o;
+                    if (_m >= 10 && {_m <= 60} && {_m < _bM}) then { _bH = _o; _bM = _m; };
+                } forEach _dusman;
+                if (isNull _enIyi && {isNull _bH}) then { continue };
+                private _bT = if (!isNull _enIyi && {_enM <= 60}) then { _enIyi } else { _bH };
+                private _bTM = if (isNull _bT) then { 1e9 } else { _u distance _bT };
+                private _bKume = if (!isNull _enIyi && {_bT isEqualTo _enIyi}) then { _kumeN } else { 1 };
 
                 // --- EL BOMBASI ---
                 if (missionNamespace getVariable ["lambs_danger_elBombasiAktif", true]) then {
-                    if (_enM < 10 || {_enM > 45}) then { _sayac set ["g_mesafe", (_sayac getOrDefault ["g_mesafe", 0]) + 1]; };
-                    if (_enM >= 10 && {_enM <= 45} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > 30} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > 6}) then {
+                    if (isNull _bT) then { _sayac set ["g_mesafe", (_sayac getOrDefault ["g_mesafe", 0]) + 1]; };
+                    if (!isNull _bT && {_bTM >= 10} && {_bTM <= 60} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > 20} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > 4}) then {
                         private _fraglar = (magazines _u) select {[_x] call _fragMi};
                         if (_fraglar isEqualTo []) then { _sayac set ["g_frag_yok", (_sayac getOrDefault ["g_frag_yok", 0]) + 1]; };
                         private _gecmis = (_u getVariable [QGVAR(bombaListe), []]) select {(time - _x) < 60};
                         _u setVariable [QGVAR(bombaListe), _gecmis];
-                        private _yedek = (count _fraglar) <= 1 && {_kumeN < 3};
+                        private _yedek = (count _fraglar) <= 1 && {_bKume < 3} && {!_baski} && {!_pusu} && {_bTM > 25};   // v8.315: son bomba yedek - baski / pusu / 25 m icinde ise yedek bozulur
                         if (_fraglar isNotEqualTo [] && {_yedek}) then { _sayac set ["g_yedek", (_sayac getOrDefault ["g_yedek", 0]) + 1]; };
-                        if (_fraglar isNotEqualTo [] && {!_yedek} && {(count _gecmis) < 2}) then {
+                        if (_fraglar isNotEqualTo [] && {!_yedek} && {(count _gecmis) < 3}) then {
                             private _mag = _fraglar select 0;
                             // v8.313: guvenli minimum mesafe = bombanin olum yaricapi (indirectHitRange) x 1.8, en az 12 m (eskiden sabit 15 m)
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");
                             private _icerde = (insideBuilding _u) > 0.5;
-                            if (_enM < (((_ihr * 1.8) max 12) max ([0, 15] select _icerde))) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
-                            private _dostYakin = (_enIyi nearEntities ["CAManBase", 12]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
+                            if (_bTM < (((_ihr * 1.8) max 12) max ([0, 15] select _icerde))) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
+                            private _dostYakin = (_bT nearEntities ["CAManBase", 12]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                             if (_dostYakin) then { _sayac set ["g_dost", (_sayac getOrDefault ["g_dost", 0]) + 1]; };
                             if (!_dostYakin && {(speed _u) < 6}) then {
                                 _u setVariable [QGVAR(bombaT), time];
                                 _g setVariable [QGVAR(bombaGT), time];
                                 _gecmis pushBack time;
                                 _u setVariable [QGVAR(bombaListe), _gecmis];
-                                [_u, _enIyi, _mag] call _firlat;
+                                [_u, _bT, _mag] call _firlat;
                                 _sayac set ["bomba", (_sayac get "bomba") + 1];
                                 _butce = _butce - 1;
                                 continue
@@ -285,8 +297,8 @@ lambs_danger_patlayiciDon = {
                 // --- ROKET (omuz roketatari) ---
                 if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli}) then {
                     private _ls = secondaryWeapon _u;
-                    if (_ls isNotEqualTo "" && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
-                        && {_enM >= 60} && {_enM <= 280} && {_binada || {_kumeN >= 3} || {_kapali}}
+                    if (!isNull _enIyi && {_ls isNotEqualTo ""} && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
+                        && {_enM >= 50} && {_enM <= 300} && {_binada || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu}}
                         && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > 60} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > 20}) then {
                         private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                         private _arkada = ((_u nearEntities ["CAManBase", 8]) findIf {_x isNotEqualTo _u && {alive _x} && {(_taraf getFriend (side (group _x))) >= 0.6} && {((abs (((_u getRelDir _x) + 180) mod 360 - 180)) >= 60)}}) >= 0;
