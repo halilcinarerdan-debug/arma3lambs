@@ -130,15 +130,25 @@ private _n = 0;
                 while {time < _bit && {alive _u} && {!isNull _dr} && {alive _dr} && {(_u ammo _w) > 0}} do {
                     private _iv2 = getNumber (configFile >> "CfgMagazines" >> (currentMagazine _u) >> "initSpeed");
                     if (_iv2 <= 0) then { _iv2 = 800 };
-                    private _tof2 = ((_u distance _dr) / (_iv2 * 0.9)) min 2;
+                    private _tof2 = (((_u distance _dr) / (_iv2 * 0.9)) min 2) * 0.5;   // v8.306: nisan kontrol noktasi yarim ongoru (bakis dronun kendisinde)
                     private _lead2 = ASLToAGL ((getPosASL _dr) vectorAdd ((velocity _dr) vectorMultiply _tof2));
                     // v8.299 TITREME (kullanici: 'bir kisi saga sola donerek stutter glitch, Krasko / Timofey'): 0.35 sn'de bir doWatch + setDir (>15 derece) gozcu yonunu surekli bozup
                     //   donus animasyonunu tekrar tekrar baslatiyordu. Artik doWatch ~1 sn'de bir, doTarget yalniz ilk turda, setDir yalniz govde hedeften > 50 derece sapmissa ve 2 sn'de bir.
-                    if (time >= _wT) then { _u doWatch _lead2; _wT = time + 1; };
-                    if (!_tgt) then { _u doTarget _dr; _tgt = true; };
+                    // v8.306 BAKIS ACISI (kullanici: 'bakis acisi olarak ... bir anda isinlaniyor'): her sn yeni 'ongoru noktasina' doWatch bakisi aniden kaydiriyordu -> dronun KENDISINE bir kez doWatch (motor yumusak izler)
+                    if (!_tgt) then { _u doWatch _dr; _u doTarget _dr; _tgt = true; };
                     private _yatay = (getPosATL _u) getDir _lead2;
                     private _fy = abs (((_yatay - (getDir _u)) + 540) mod 360 - 180);
-                    if (_fy > 50 && {time >= _dT}) then { _u setDir _yatay; _dT = time + 2; };
+                    // v8.306 (kullanici: 'hala sag sol cok sert donuyor, dron yonunde bir anda isinlaniyor'): setDir ANINDA donduruyordu. Artik AI once kendi doner (doWatch, ilk 1.5 sn); hala > 35 derece sapmissa
+                    //   govde 8 derece / 0.04 sn adimlarla (~200 derece/sn) yumusakca doner, 3 sn'de bir.
+                    if (_fy > 35 && {time >= _dT} && {time > (_bit - 4.5)}) then {
+                        _dT = time + 3;
+                        private _isaret = [-1, 1] select ((((_yatay - (getDir _u)) + 540) mod 360 - 180) > 0);
+                        for "_i" from 1 to (ceil (_fy / 8)) do {
+                            if (!alive _u) exitWith {};
+                            _u setDir ((getDir _u) + (8 * _isaret));
+                            sleep 0.04;
+                        };
+                    };
                     sleep 0.35;
                     private _fark = (AGLToASL _lead2) vectorDiff (eyePos _u);
                     private _wd = _u weaponDirection _w;
