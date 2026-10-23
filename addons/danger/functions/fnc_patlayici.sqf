@@ -4,7 +4,7 @@
  * DISIPLINLI PATLAYICI KULLANIMI (v8.310; kullanici: 'patlayici kullanimini arttir el bombasi roket ama disiplinli' + 've ugl'). Yeni taktik degil: mevcut temasta olan askerin elindeki patlayiciyi DAHA SIK ve DOGRU hedefe kullandirir.
  * Izleyici 2.5 sn'de bir, yerel oyuncusuz, TEMASTA (contact) olan gruplarda; tick basina en cok 4 atis. Hedef: bilinen (knowsAbout >= 1.0) dusman PIYADE. 'Deger' sartlari (bos yere atilmaz):
  *   KUME (hedefin 8 m icinde baska bilinen dusman) | BINADA | KAPALI HAT (tufege gorus hatti kesik: siper / duvar) | BASKI (grupta >= 2 asker baski > 0.4)
- *   EL BOMBASI (frag; duman / isik / sok haric): 10-60 m, deger sarti YOK (v8.315; v8.313: guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
+ *   EL BOMBASI (frag; duman / isik / sok haric): 10-60 m, ESNEK deger sarti (v8.316: kume 12 m / binada / kapali hat / alcak durus / duragan >= 20 m / baski > 0.3 / pusu; v8.315 sarti kaldirmisti; v8.313: guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
  *   ROKET (omuz roketatari, yuklu): 60-280 m, hedef 20 m icinde dost YOK, arkasinda (8 m, 120-240 derece) dost YOK, BINADA / KUME >= 3 / KAPALI HAT (>= 60 m); 60 sn / birim, 20 sn / grup;
  *        dusman ZIRHLI (tank / APC) 900 m icinde biliniyorsa ATILMAZ (AT rezervi)
  *   UGL ek mermi: UGL'li askere CBA 'lambs_danger_uglEkMermi' (varsayilan 4) kadar HE 40mm eklenir (bir kez; envanter doluysa eklenmez) - UGL darbogazi 'mermi_yok' idi.
@@ -209,6 +209,7 @@ lambs_danger_patlayiciDon = {
             private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(teslim), false])}};   // v8.314: bina ici de dahil (bomba atabilir; roket icin ayrica disarida sarti)
             if (_uyeler isEqualTo []) then { continue };
             private _baski = ({(getSuppression _x) > 0.4} count _uyeler) >= 2;
+            private _baskiGev = ({(getSuppression _x) > 0.3} count _uyeler) >= 1;   // v8.316: esnek baski (bomba icin)
             private _pusu = (time - (_g getVariable [QGVAR(pusuT), -999])) < 30;   // v8.313: pusu alarmi (fnc_pusuTepki) son 30 sn -> bilinen atici icin bomba / roket 'deger tasir' sayilir
             private _taraf = side _g;
             private _tr = _l nearTargets 320;
@@ -248,15 +249,24 @@ lambs_danger_patlayiciDon = {
                     private _bn = (insideBuilding _o) > 0.5;
                     if (_m < _enM && {_k >= 2 || _kp || _bn || _baski || _pusu}) then { _enIyi = _o; _enM = _m; _kumeN = _k; _kapali = _kp; _binada = _bn; };
                 } forEach _dusman;
-                // v8.315 KOSULLARI ESNET (kullanici: 'el bombasini kullanabilsinler o mesafede sart ... kosullari esnet'; RPT 23-10 09:25: dusman 45-50 m'de, bina icindeki asker): el bombasi icin 'deger' sarti ARANMAZ,
-                //   temasta bilinen en yakin dusman piyade 10-60 m aralikta ise yeterli (disiplin: asker 20 sn, grup 4 sn, 60 sn'de <= 3, yay temizligi, dost 12 m, guvenli min mesafe). Roket icin deger sarti kalir.
+                // v8.316 DEGER SARTI VAR AMA ESNEK (kullanici: 'deger sarti olsun ama esnetilsin'; v8.315 sarti tamamen kaldirmisti): el bombasi hedefi 10-60 m, temasta bilinen dusman piyade ve ASAGIDAKILERDEN EN AZ BIRI:
+    //   KUME (12 m icinde baska dusman) | BINADA | KAPALI HAT (bas ya da gogus hizasinda gorus hatti kesik) | ALCAK DURUS (CROUCH / PRONE) | DURAGAN (hiz < 1.5 m/sn, >= 20 m) | grupta EN AZ 1 askerde baski > 0.3 | pusu alarmi (son 30 sn).
+    //   Yalniz acikta, ayakta KOSAN / yuruyen ve baski olmayan dusmana atilmaz (bos yere bomba harcanmaz). Diger disiplin: asker 20 sn, grup 4 sn, 60 sn'de <= 3, yay temizligi, dost 12 m, guvenli min mesafe.
                 private _bH = objNull;
                 private _bM = 1e9;
+                private _bAday = false;
                 {
                     private _o = _x select 4;
                     private _m = _u distance _o;
-                    if (_m >= 10 && {_m <= 60} && {_m < _bM}) then { _bH = _o; _bM = _m; };
+                    if (_m >= 10 && {_m <= 60} && {_m < _bM}) then {
+                        _bAday = true;
+                        private _kk = ({ (_x select 4) isNotEqualTo _o && {((_x select 4) distance _o) < 12} } count _dusman) + 1;
+                        private _deger = _kk >= 2 || {(insideBuilding _o) > 0.5} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
+                            || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu};
+                        if (_deger) then { _bH = _o; _bM = _m; };
+                    };
                 } forEach _dusman;
+                if (_bAday && {isNull _bH}) then { _sayac set ["g_deger", (_sayac getOrDefault ["g_deger", 0]) + 1]; };
                 if (isNull _enIyi && {isNull _bH}) then { continue };
                 private _bT = if (!isNull _enIyi && {_enM <= 60}) then { _enIyi } else { _bH };
                 private _bTM = if (isNull _bT) then { 1e9 } else { _u distance _bT };
@@ -317,8 +327,8 @@ lambs_danger_patlayiciDon = {
         if (time > _sonOzet) then {
             _sonOzet = time + 60;
             private _ys = missionNamespace getVariable ["lambs_danger_patlayiciSayac", createHashMap];
-            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 roket %2 | UGL ek mermi verilen %3 | bomba firlatma sonucu (toplam): atildi %4 | atilmadi %5 | bomba neden atilmadi: mesafe %6 frag_yok %7 yedek %8 yakin %9 dost %10", _sayac get "bomba", _sayac get "roket", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0], _sayac getOrDefault ["g_mesafe", 0], _sayac getOrDefault ["g_frag_yok", 0], _sayac getOrDefault ["g_yedek", 0], _sayac getOrDefault ["g_yakin", 0], _sayac getOrDefault ["g_dost", 0]];
-            { _sayac set [_x, 0]; } forEach ["bomba", "roket", "g_mesafe", "g_frag_yok", "g_yedek", "g_yakin", "g_dost"];
+            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 roket %2 | UGL ek mermi verilen %3 | bomba firlatma sonucu (toplam): atildi %4 | atilmadi %5 | bomba neden atilmadi: mesafe %6 frag_yok %7 yedek %8 yakin %9 dost %10 deger_yok %11", _sayac get "bomba", _sayac get "roket", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0], _sayac getOrDefault ["g_mesafe", 0], _sayac getOrDefault ["g_frag_yok", 0], _sayac getOrDefault ["g_yedek", 0], _sayac getOrDefault ["g_yakin", 0], _sayac getOrDefault ["g_dost", 0], _sayac getOrDefault ["g_deger", 0]];
+            { _sayac set [_x, 0]; } forEach ["bomba", "roket", "g_mesafe", "g_frag_yok", "g_yedek", "g_yakin", "g_dost", "g_deger"];
         };
     };
 };
