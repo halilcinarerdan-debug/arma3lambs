@@ -206,7 +206,7 @@ lambs_danger_patlayiciDon = {
             if (isNull _l || {!local _g} || {isPlayer _l} || {(side _g) isEqualTo civilian}) then { continue };
             if ((_g getVariable [QGVAR(contact), 0]) <= time) then { continue };
             if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(teslimOldu), false]}) then { continue };
-            private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(teslim), false])} && {(insideBuilding _x) < 0.5}};
+            private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(teslim), false])}};   // v8.314: bina ici de dahil (bomba atabilir; roket icin ayrica disarida sarti)
             if (_uyeler isEqualTo []) then { continue };
             private _baski = ({(getSuppression _x) > 0.4} count _uyeler) >= 2;
             private _pusu = (time - (_g getVariable [QGVAR(pusuT), -999])) < 30;   // v8.313: pusu alarmi (fnc_pusuTepki) son 30 sn -> bilinen atici icin bomba / roket 'deger tasir' sayilir
@@ -215,6 +215,14 @@ lambs_danger_patlayiciDon = {
             private _dusman = _tr select {
                 private _o = _x select 4;
                 !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 1.0}
+            };
+            // v8.314 TANI (kullanici: 'el bombasi kullanimi hala yok'; RPT 23-10 09:25: sayaclar 0 = hic aday bulunamadi; asker 'iceride' idi ve eski kod bina ici askeri eliyordu): grup basina 20 sn'de bir neden satiri (en cok 60)
+            if ((time - (_g getVariable [QGVAR(patTaniT), -999])) > 20 && {(missionNamespace getVariable ["lambs_danger_patTaniN", 0]) < 60}) then {
+                _g setVariable [QGVAR(patTaniT), time];
+                missionNamespace setVariable ["lambs_danger_patTaniN", (missionNamespace getVariable ["lambs_danger_patTaniN", 0]) + 1];
+                private _tumDus = _tr select { private _o = _x select 4; !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} };
+                private _enY = if (_tumDus isEqualTo []) then {"-"} else { private _o = (([_tumDus, [], {(_x select 4) distance _l}, "ASCEND"] call BIS_fnc_sortBy) select 0) select 4; format ["%1 m knows %2", round (_l distance _o), (_l knowsAbout _o) toFixed 2] };
+                diag_log format ["[PATLAYICI-TANI] %1 | temasta | asker %2 (binada %3) | frag tasiyan %4 | 320 m icinde dusman %5 (bilinen >= 1.0: %6) | en yakin %7 | baski:%8 pusu:%9", groupId _g, count _uyeler, ({(insideBuilding _x) > 0.5} count _uyeler), ({((magazines _x) findIf {[_x] call _fragMi}) >= 0} count _uyeler), count _tumDus, count _dusman, _enY, _baski, _pusu];
             };
             if (_dusman isEqualTo []) then { continue };
             private _zirhli = (_l nearTargets 900) findIf {
@@ -256,7 +264,8 @@ lambs_danger_patlayiciDon = {
                             private _mag = _fraglar select 0;
                             // v8.313: guvenli minimum mesafe = bombanin olum yaricapi (indirectHitRange) x 1.8, en az 12 m (eskiden sabit 15 m)
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");
-                            if (_enM < ((_ihr * 1.8) max 12)) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
+                            private _icerde = (insideBuilding _u) > 0.5;
+                            if (_enM < (((_ihr * 1.8) max 12) max ([0, 15] select _icerde))) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
                             private _dostYakin = (_enIyi nearEntities ["CAManBase", 12]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                             if (_dostYakin) then { _sayac set ["g_dost", (_sayac getOrDefault ["g_dost", 0]) + 1]; };
                             if (!_dostYakin && {(speed _u) < 6}) then {
@@ -276,7 +285,7 @@ lambs_danger_patlayiciDon = {
                 // --- ROKET (omuz roketatari) ---
                 if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli}) then {
                     private _ls = secondaryWeapon _u;
-                    if (_ls isNotEqualTo "" && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
+                    if (_ls isNotEqualTo "" && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
                         && {_enM >= 60} && {_enM <= 280} && {_binada || {_kumeN >= 3} || {_kapali}}
                         && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > 60} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > 20}) then {
                         private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
