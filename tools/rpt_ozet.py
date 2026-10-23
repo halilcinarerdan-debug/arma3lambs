@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.307"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.308"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -766,6 +766,12 @@ def tani(path):
     dsk = [l for l in L if '"[DRON-SAKLAN]' in l]
     print("-- DRON TEPKISI (v8.280): [DRON-YON] %d | [DRON-ATES] %d | [TANK-DRON] %d | [DRON-SAKLAN] %d --" % (len(dy), len(da), len(td), len(dsk)))
     for v in (dy[:3] + da[:3] + td[:4] + dsk[:3]): print("  ", v.split('" ', 1)[-1][:260])
+    pt = [l for l in L if '"[PUSU-TEPKI]' in l]
+    pc = [l for l in L if '"[PUSU-CAGRI]' in l or '"[DRON-KARSI-ATES]' in l]
+    ik = [l for l in L if '"[ISTIKSAF]' in l]
+    tb = [l for l in L if '"[TESLIM-BIREY]' in l]
+    print("-- PUSU / GERILLA (v8.307-308): [PUSU-TEPKI] %d | cagri atesi ([PUSU-CAGRI] / [DRON-KARSI-ATES]) %d | [ISTIKSAF] %d | [TESLIM-BIREY] %d --" % (len(pt), len(pc), len(ik), len(tb)))
+    for v in (pt[:4] + pc[:4] + ik[:4] + tb[:4]): print("  ", v.split('" ', 1)[-1][:280])
     ds = [l for l in L if "[IHA-DALIS]" in l and "dalis basladi" in l]
     print("-- IHA-DALIS: 'dalis basladi' %d kez (v8.279 sonrasi sortide ~1 olmali; >5 = dalis yine her adimda iptal ediliyor) --" % len(ds))
     du = [l for l in L if '"[TANK-DUELLO]' in l]

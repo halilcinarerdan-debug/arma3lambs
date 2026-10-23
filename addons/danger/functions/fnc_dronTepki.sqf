@@ -97,6 +97,11 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
                 };
             };
         };
+        // v8.308 ISTIKSAF (kullanici: 'dronun geldigi yonu inceleme'): grup temasta degilse 2 asker operator yonune (geri-yon, <= 300 m ilerleyip durur) kesfe cikar; grup basina 240 sn'de bir. CBA: lambs_danger_dronIstiksaf.
+        if (missionNamespace getVariable ["lambs_danger_dronIstiksaf", true] && {(_g getVariable [QGVAR(contact), 0]) <= time} && {(time - (_g getVariable [QGVAR(dronIstiksafT), -999])) > 240} && {((units _g) select {alive _x}) isNotEqualTo []} && {(count ((units _g) select {alive _x})) >= 4}) then {
+            private _istN = [_g, _supheli, "ISTIKSAF"] call FUNC(istiksaf);
+            if (_istN > 0) then { _g setVariable [QGVAR(dronIstiksafT), time]; };
+        };
         if ((time - (_dr getVariable [QGVAR(dronYonLogT), -999])) > 20) then {
             _dr setVariable [QGVAR(dronYonLogT), time];
             diag_log format ["[DRON-YON] %1 | %2 (%3) | gelis %4 derece -> operator / firlatma yonu %5 derece (700 m, hata +-15) | iz %6 m / %7 sn | haberdar edilen grup %8", groupId _g, typeOf _dr, _tip, round _gelis, round _geri, round (_p0 distance2D _p1), round (time - ((_iz select 0) select 0)), _n];

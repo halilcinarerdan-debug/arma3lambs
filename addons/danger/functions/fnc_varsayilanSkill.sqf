@@ -78,6 +78,11 @@ private _yeni = [];
         _min = missionNamespace getVariable ["lambs_danger_skillHizMin", _min];
         _max = (missionNamespace getVariable ["lambs_danger_skillHizMax", _max]) max _min;
     };
+    // v8.308 REAKSIYON / FARKINDALIK (kullanici: 'cevre farkindaliklari reaksiyon sureleri guclenebilir'): spotDistance (fark etme mesafesi) ve spotTime (fark etme HIZI) araligi CBA 'ELITE bot becerisi' ayarindan
+    if (_ad in ["spotDistance", "spotTime"]) then {
+        _min = missionNamespace getVariable ["lambs_danger_skillFarkMin", _min];
+        _max = (missionNamespace getVariable ["lambs_danger_skillFarkMax", _max]) max _min;
+    };
     private _v = _min + (random (_max - _min));
     _onceki pushBack format ["%1=%2", _ad, (_u skill _ad) toFixed 2];
     _u setSkill [_ad, _v];
