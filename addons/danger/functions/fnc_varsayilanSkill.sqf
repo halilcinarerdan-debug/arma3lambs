@@ -32,7 +32,7 @@ if (isNull _u) exitWith {
     if (!isNil "lambs_danger_skillVarsayilanStarted") exitWith {false};
     lambs_danger_skillVarsayilanStarted = true;
     if (isNil "lambs_danger_skillVarsayilan") then {
-        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.70, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]];
+        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.95], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.85, 0.95], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]];
     };
     lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]];
     diag_log format ["[SKILL-VARSAYILAN] varsayilan beceri sistemi baslatildi | tablo:%1", lambs_danger_skillVarsayilan];
@@ -64,7 +64,23 @@ if (!local _u) exitWith { ["yerel_degil"] call _say; false };
 if (_u getVariable ["lambs_danger_skillElle", false]) exitWith { ["elle"] call _say; false };
 if (_u getVariable [QGVAR(skillAyarli), false]) exitWith { ["zaten"] call _say; false };
 
-private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.70, 0.88], ["aimingSpeed", 0.70, 0.80], ["aimingShake", 0.75, 0.85], ["spotDistance", 0.75, 0.90], ["spotTime", 0.75, 0.90], ["reloadSpeed", 0.85, 1.00]]];
+// v8.309 GOC (kullanici: 'yeni taktik istemiyorum, sadece AI daha vurucu olsun hizli olsun'): CBA'da KAYITLI deger eski varsayilanla BIREBIR aynıysa (kullanici elle degistirmemis) yeni varsayilana tasinir (fnc_moral'daki yontem); elle degisen korunur.
+if (!(missionNamespace getVariable ["lambs_danger_skillMigV309", false])) then {
+    missionNamespace setVariable ["lambs_danger_skillMigV309", true];
+    private _gec = [
+        ["lambs_danger_skillIsabetMin", 0.70, 0.80], ["lambs_danger_skillIsabetMax", 0.88, 0.95], ["lambs_danger_skillTavanIsabet", 0.95, 0.97],
+        ["lambs_danger_skillOptiksizCarpan", 0.75, 0.90], ["lambs_danger_skillAcemiOran", 0.15, 0.05], ["lambs_danger_skillAcemiCarpan", 0.85, 0.90],
+        ["lambs_danger_skillHizMin", 0.70, 0.85], ["lambs_danger_skillHizMax", 0.80, 0.95]
+    ];
+    private _gecen = [];
+    {
+        _x params ["_ad", "_eski", "_yeni"];
+        private _mevcut = missionNamespace getVariable [_ad, _eski];
+        if ((abs (_mevcut - _eski)) < 0.005) then { missionNamespace setVariable [_ad, _yeni]; _gecen pushBack format ["%1 %2->%3", _ad select [19], _eski, _yeni]; };
+    } forEach _gec;
+    diag_log format ["[SKILL-VARSAYILAN] v8.309 vurucu / hizli varsayilanlara gecis (kayitli deger eski varsayilanla ayniysa): %1", if (_gecen isEqualTo []) then {"yok (elle degistirilmis ya da zaten yeni)"} else {_gecen joinString " | "}];
+};
+private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.95], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.85, 0.95], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]]];
 private _onceki = [];
 private _yeni = [];
 {
@@ -118,7 +134,7 @@ private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 
 {
     private _o = _u skill _x;
     private _kat = if (_x isEqualTo "aimingAccuracy") then {_katI} else {_cpn};
-    private _n = (_o * _kat) min ([0.95, _tavanI] select (_x isEqualTo "aimingAccuracy"));
+    private _n = (_o * _kat) min ([missionNamespace getVariable ["lambs_danger_skillTavanHiz", 0.98], _tavanI] select (_x isEqualTo "aimingAccuracy"));
     _u setSkill [_x, _n];
     _yeni pushBack format ["%1 x%2 -> %3", _x, _kat, _n toFixed 2];
 } forEach ["aimingAccuracy", "aimingSpeed"];
