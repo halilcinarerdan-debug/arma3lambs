@@ -162,6 +162,10 @@ private _calis = {
                 private _us = (units _g) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}};
                 private _ayril = ((count (units _g select {alive _x})) - 3) max 0;
                 private _aday = (_us - [leader _g]);
+                // v8.341 SIHHIYE KORUMASI (kullanici: 'komutan ve sihhiye takimi degilse formasyonda sihhiyeler geride dursun, once atilmasin'): formasyon sirasinda sihhiyeler EN SONDA oldugu icin
+                //   asagidaki 'reverse' onlari ILK nobet / devriyeye atiyordu. Komutan / MEDEVAC grubu ya da sihhiye cogunluklu grup disinda sihhiye havuza ALINMAZ.
+                private _medGrup = ((_g getVariable ["lambs_danger_gorev", ""]) in ["MEDEVAC", "KOMUTAN"]) || {(({([_x] call _rolFn) isEqualTo "MEDIC"} count _us) * 2) > (count _us)};
+                if (!_medGrup) then { _aday = _aday select {([_x] call _rolFn) isNotEqualTo "MEDIC"}; };
                 reverse _aday;
                 { _havuz pushBack _x; } forEach (_aday select [0, _ayril min (count _aday)]);
             } forEach (allGroups select {!(call _altGrupAd)});

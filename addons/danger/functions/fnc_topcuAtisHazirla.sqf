@@ -34,12 +34,33 @@ if !(_v getVariable [QGVAR(topcuIzleEH), false]) then {
         params ["_u", "_w", "_m", "_mode", "_ammo", "_mag"];
         private _n = (_u getVariable [QGVAR(topcuAtisN), 0]) + 1;
         _u setVariable [QGVAR(topcuAtisN), _n];
+        // v8.341 YANLIS MERMI (RPT 22-22: RHS M252 ilk atista rhs_m821_he, ikinci atista vanilla 8Rnd_82mm_Mo_shells / Sh_82mm_AMOS atti; vanilla mermi RHS namlusunun balistigine uymaz -> hedeften ~5.6 km uzaga dustu):
+        //   secilen mermiden farkli bir mermi atildiysa o mermi tipi aracin namlusundan cikarilir ve loglanir.
+        private _secim = _u getVariable [QGVAR(topcuMermiSecim), ""];
+        if (_secim isNotEqualTo "" && {_mag isNotEqualTo _secim} && {!(missionNamespace getVariable ["lambs_danger_topcuYabanciMermiOff", false])}) then {
+            private _gn = gunner _u;
+            if (!isNull _gn) then { _u removeMagazinesTurret [_mag, _u unitTurret _gn]; };
+            diag_log format ["[TOPCU-ATIS] %1 | YANLIS MERMI: %2 atildi, secilen %3 -> %2 namludan cikarildi (balistik uyumsuz)", getText (configOf _u >> "displayName"), _mag, _secim];
+        };
         if (_n <= 12) then {
             diag_log format ["[TOPCU-ATIS] %1 | ATIS %2 | %3 / %4 | hedef %5", getText (configOf _u >> "displayName"), _n, _mag, _ammo, mapGridPosition (_u getVariable [QGVAR(topcuHedef), getPosATL _u])];
         };
     }];
 };
 _v setVariable [QGVAR(topcuHedef), _poz];
+_v setVariable [QGVAR(topcuMermiSecim), _mg];
+// v8.341 YABANCI MERMI ONLEMI: nisancinin namlusuyla uyumlu ama aracin topcu mermisi listesinde (getArtilleryAmmo) OLMAYAN magazinler (RHS namlusunda vanilla mermi) cikarilir
+if !(missionNamespace getVariable ["lambs_danger_topcuYabanciMermiOff", false]) then {
+    private _tp = _v unitTurret _gn;
+    private _art = getArtilleryAmmo [_v];
+    private _uyumlu = [];
+    { _uyumlu append (compatibleMagazines _x); } forEach (_v weaponsTurret _tp);
+    private _yabanci = (magazinesAllTurrets _v) select {(_x select 1) isEqualTo _tp && {(_x select 0) in _uyumlu} && {!((_x select 0) in _art)}};
+    if (_yabanci isNotEqualTo []) then {
+        { _v removeMagazinesTurret [_x select 0, _tp]; } forEach _yabanci;
+        diag_log format ["[TOPCU-ATIS] %1 | YABANCI MERMI temizlendi: %2 (kalan topcu mermisi: %3)", getText (configOf _v >> "displayName"), (_yabanci apply {_x select 0}) arrayIntersect (_yabanci apply {_x select 0}), _art];
+    };
+};
 
 if !(missionNamespace getVariable ["lambs_danger_topcuHazirlaOff", false]) then {
     private _g = group _gn;
