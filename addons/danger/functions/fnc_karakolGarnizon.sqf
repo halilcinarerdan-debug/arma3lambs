@@ -50,8 +50,18 @@ private _pozisyonlar = {
     private _aday = [];
     if (_ustKat) then {
         private _bl = (nearestObjects [_poz, ["House", "Building"], _yar]) select {(count (_x buildingPos -1)) > 0};
+        private _kara = missionNamespace getVariable ["lambs_danger_ustKatKara", []];
         {
-            private _bp = _x buildingPos -1;
+            // v8.343 DUSEN ASKER (kullanici: 'askerler asagiya dusuyor'; RPT 23-15: USTKAT 055056 = Land_dp_bigTank_F (silindirik depo ustu), nobetci 120 sn'de varamayinca isinlandi ve kaydi):
+            //   (1) depo / baca / silo sinifi binalar elenir, (2) pozisyonun altinda ZEMIN (yuzey) yoksa elenir, (3) onceden dusen konumlar kara listede
+            private _ad2 = toLower (typeOf _x);
+            if ((["tank", "chimney", "silo", "_pipe"] findIf {(_ad2 find _x) >= 0}) >= 0) then { continue };
+            private _bp = (_x buildingPos -1) select {
+                private _q = _x;
+                (_kara findIf {(_x distance _q) < 3}) < 0
+                && {(lineIntersectsSurfaces [AGLToASL (_q vectorAdd [0, 0, 0.8]), AGLToASL (_q vectorAdd [0, 0, -0.8]), objNull, objNull, true, 1]) isNotEqualTo []}
+            };
+            if (_bp isEqualTo []) then { continue };
             private _en = _bp select 0;
             { if ((_x select 2) > (_en select 2)) then { _en = _x; }; } forEach _bp;
             if ((_en select 2) < 2.5) then { continue };
@@ -208,7 +218,20 @@ private _calis = {
                     } else {
                         if (!(_u getVariable ["lambs_danger_nobet", false]) && {time > (_u getVariable ["lambs_danger_nobetT", 0])} && {(time - (_u getVariable ["lambs_danger_nobetT", time])) <= 120}) then { _u doMove _p; };
                         if ((time - (_u getVariable ["lambs_danger_nobetT", time])) > 120 && {!(_u getVariable ["lambs_danger_nobet", false])}) then {
-                            _u setPosATL _p;
+                            _u setPosATL (_p vectorAdd [0, 0, 0.05]);
+                            // v8.343: 4 sn sonra pozisyonun >1.5 m altindaysa (dustu) konum kara listeye alinir
+                            if ((_x select 2) isEqualTo "USTKAT") then {
+                                [{
+                                    params ["_uu", "_pp"];
+                                    if (alive _uu && {((getPosATL _uu) select 2) < ((_pp select 2) - 1.5)}) then {
+                                        private _kr = missionNamespace getVariable ["lambs_danger_ustKatKara", []];
+                                        _kr pushBack _pp;
+                                        missionNamespace setVariable ["lambs_danger_ustKatKara", _kr];
+                                        _uu setVariable ["lambs_danger_nobet", false, true];
+                                        diag_log format ["[KARAKOL-GARNIZON] USTKAT %1 DUSTU (%2): konum kara listeye alindi", mapGridPosition _pp, name _uu];
+                                    };
+                                }, [_u, _p], 4] call CBA_fnc_waitAndExecute;
+                            };
                             _u setVariable ["lambs_danger_nobetT", time];
                             // isinlanan nobetci hemen pozisyonda sayilir (RPT 23251a0a: ayni nobetciler 120 sn'de bir tekrar isinlaniyordu, PATH acik kalip yuruyordu)
                             _u setVariable ["lambs_danger_nobet", true, true];

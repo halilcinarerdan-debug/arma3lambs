@@ -70,7 +70,7 @@ private _adaylar = allGroups select {
     local _x && {(side _x) isEqualTo _taraf} && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)} && {isNull objectParent (leader _x)}
     && {(_x getVariable [QGVAR(contact), 0]) <= time} && {!((_x getVariable [QGVAR(planAktif), false]) || {_x getVariable ["lambs_danger_planAktif", false]}) || {[_x] call _savunmaPlani}}
     && {!(_x getVariable [QGVAR(isRetreating), false])} && {!(_x getVariable [QGVAR(isEvading), false])} && {!(_x getVariable [QGVAR(teslimOldu), false])} && {!(_x getVariable [QGVAR(dronAviGrup), false])}
-    && {(({alive _x} count (units _x)) >= 5)}   // lider + 1 asker kaynakta kalir, en az 3 asker cikar
+    && {(({alive _x} count (units _x)) >= 4)}   // v8.343: lider + 1 asker kaynakta kalir, en az 2 asker cikar (ekip buyuklugunu sistem secer)
     && {((leader _x) distance2D _est) >= 250} && {((leader _x) distance2D _est) <= 3000}
 };
 if (_adaylar isEqualTo []) exitWith {
@@ -90,8 +90,13 @@ private _kisiler = ((units _kaynak) select {
     _x isNotEqualTo _l && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
     && {!(_x getVariable [QGVAR(teslim), false])} && {!captive _x} && {(primaryWeapon _x) isNotEqualTo ""}
     && {!(([_x] call _rolFn) in ["MG", "AT", "MEDIC"])}
-}) select [0, (_mod min (((count (units _kaynak select {alive _x})) - 2) max 3))];   // 5-6 kisilik gruptan 3, 7+ kisilikten _mod
-if ((count _kisiler) < 3) exitWith {0};
+});
+// v8.343 EKIP BUYUKLUGU SISTEMDE (kullanici: 'dron karsiti takimi 3-4 ile sinirlandirmayalim, sistem kendisi secip gitsin, arac koltugu denk gelemeyebiliyor'): uygun askerlerin ~%70'i
+//   (kaynakta lider + en az 1 asker kalir), en az 2, en cok 10; arac secilirse koltuk sayisina gore asagida kirpilir (fazlasi kaynak gruba doner).
+private _topN = ((floor ((count _kisiler) * 0.7)) max 2) min 10;
+_topN = _topN min (((count (units _kaynak select {alive _x})) - 2) max 2);
+_kisiler = _kisiler select [0, _topN];
+if ((count _kisiler) < 2) exitWith {0};
 
 // ---- devriye ----
 private _pg = createGroup _taraf;
@@ -121,7 +126,18 @@ if (_aracIste) then {
         _av = ["SEC", _arPlan] call FUNC(reconArac);
         if (!isNull _av) then { diag_log format ["[DRON-AVI] %1 | hafif arac yok -> eldeki arac: %2", groupId _kaynak, getText (configOf _av >> "displayName")]; };
     };
-    if (!isNull _av) then { _arPlan set ["reconArac", _av]; _aracVar = true; };
+    if (!isNull _av) then {
+        _arPlan set ["reconArac", _av];
+        _aracVar = true;
+        // v8.343: koltuk sayisina gore ekibi kirp (surucu ayri; yolcu + nisanci + komutan koltuklari); fazlasi kaynak gruba doner
+        private _kol = (_av emptyPositions "cargo") + (_av emptyPositions "gunner") + (_av emptyPositions "commander");
+        if (_kol >= 2 && {_kol < (count _kisiler)}) then {
+            private _fazla = _kisiler select [_kol, (count _kisiler) - _kol];
+            _fazla joinSilent _kaynak;
+            diag_log format ["[DRON-AVI] %1 | arac %2 %3 koltuk: ekip %4 -> %5 askere kirpildi (%6 asker kaynak gruba dondu)", groupId _kaynak, getText (configOf _av >> "displayName"), _kol, count _kisiler, _kol, count _fazla];
+            _kisiler = _kisiler select [0, _kol];
+        };
+    };
 };
 
 if (!_aracVar) then {
@@ -137,7 +153,7 @@ for "_i" from 1 to _adim do {
 };
 };
 missionNamespace setVariable [_ozK, time];
-diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahmin %6, %7 yonu %8 derece) | kaynak grup %9 | operasyon emri modu %10", groupId _kaynak, _taraf, count _kisiler, "3-4 kisilik alt grup", round _mesafe, _tur, mapGridPosition _est, round _brg, groupId _kaynak, _mod];
+diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahmin %6, %7 yonu %8 derece) | kaynak grup %9 | operasyon emri modu %10", groupId _kaynak, _taraf, count _kisiler, "ekip buyuklugunu sistem secti", round _mesafe, _tur, mapGridPosition _est, round _brg, groupId _kaynak, _mod];
 
 [_pg, _kaynak, _kisiler, _mesafe, _aracVar, _arPlan, _opN, _est] spawn {
     params ["_pg", "_orijin", "_kisiler", "_mesafe", "_aracVar", "_arPlan", "_opN", "_est"];

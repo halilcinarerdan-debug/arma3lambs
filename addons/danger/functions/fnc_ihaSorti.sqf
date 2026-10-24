@@ -67,6 +67,7 @@ if !(_uav getVariable [QGVAR(ihaKilledEH), false]) then {
 
 private _tur = if (_turE isNotEqualTo "") then {_turE} else { [_uav] call FUNC(ihaTip) };
 if (_mod isEqualTo "GOZLEM") then { _tur = "GOZLEM"; };
+_uav setVariable [QGVAR(ihaGorevTur), _tur];   // v8.343: gozlemli topcu (fnc_dronTopcu) B_Crocus_AP gibi sinifi FPV gorunen ama GOZLEM gorevinde olan dronu da gozlemci sayar
 if (isNull (driver _uav)) then {
     createVehicleCrew _uav;
     if (_tarafP isNotEqualTo sideUnknown) then {

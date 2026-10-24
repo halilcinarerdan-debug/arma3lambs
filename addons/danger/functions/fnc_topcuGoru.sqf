@@ -22,5 +22,5 @@ private _goz = eyePos _fo;
 [time, ((_fo nearTargets 1800) select {
     private _o = _x select 4;
     !isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_o distance2D _fo) >= 300} && {(_fo knowsAbout _o) >= 1.0}
-    && {([_fo, _o] checkVisibility [_goz, (getPosASL _o) vectorAdd [0, 0, 1.2]]) >= 0.3}
+    && {(_fo checkVisibility [_goz, (getPosASL _o) vectorAdd [0, 0, 1.2]]) >= 0.3}
 }) apply {_x select 4}]

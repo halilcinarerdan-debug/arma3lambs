@@ -38,7 +38,7 @@ lambs_danger_dronTopcuStarted = true;
         private _dronA = missionNamespace getVariable ["lambs_danger_dronTopcuAktif", true];
         private _tacizA = missionNamespace getVariable ["lambs_danger_tacizAktif", true];
         if ((missionNamespace getVariable ["lambs_danger_dronTopcuOff", false]) || {!_dronA && {!_tacizA}}) then { continue };
-        private _minD = missionNamespace getVariable ["lambs_danger_dronTopcuMinDeger", 3];
+        private _minD = missionNamespace getVariable ["lambs_danger_dronTopcuMinDeger", 1];
         private _uzak = missionNamespace getVariable ["lambs_danger_dronTopcuUzak", 700];
         private _gozleyiciler = vehicles select {unitIsUAV _x && {alive _x} && {local _x} && {((getPosATL _x) select 2) > 10}};
 
@@ -58,7 +58,7 @@ lambs_danger_dronTopcuStarted = true;
                 private _mur = (crew _u) select {alive _x};
                 if (_mur isNotEqualTo [] && {({isPlayer _x} count _mur) isEqualTo 0} && {(side (group (_mur select 0))) isEqualTo _taraf}) then {
                     private _gk = _u getVariable ["lambs_danger_ihaGorulen", [-99, []]];
-                    if ((time - (_gk select 0)) < 15 && {(count (_gk select 1)) > (count _goru)} && {([_u] call FUNC(ihaTip)) isEqualTo "GOZLEM"} && {(_u weaponsTurret [0]) isEqualTo []}) then {
+                    if ((time - (_gk select 0)) < 15 && {(count (_gk select 1)) > (count _goru)} && {((_u getVariable [QGVAR(ihaGorevTur), ""]) isEqualTo "GOZLEM") || {(([_u] call FUNC(ihaTip)) isEqualTo "GOZLEM") && {(_u weaponsTurret [0]) isEqualTo []}}}) then {
                         _fo = _u;
                         _goru = _gk select 1;
                     };
