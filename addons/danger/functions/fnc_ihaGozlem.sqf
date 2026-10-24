@@ -46,7 +46,7 @@ lambs_danger_ihaGozlemStarted = true;
             if (_mur isEqualTo [] || {({isPlayer _x} count (crew _u)) > 0}) then { continue };
             private _taraf = side (group (_mur select 0));
             private _tg = (_u nearTargets 1500) select {
-                (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
+                (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_u distance (_x select 4)) <= (1500 * ([_u, _x select 4] call lambs_danger_fnc_ihaGorus))} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
             };
             _u setVariable ["lambs_danger_ihaGorulen", [time, _tg apply {_x select 4}]];   // v8.338: gozlemli topcu (fnc_dronTopcu) icin gercek algi listesi (yalniz bu makinede)
             if (_tg isEqualTo []) then { continue };

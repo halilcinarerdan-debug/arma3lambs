@@ -29,7 +29,7 @@ private _bolge = (missionNamespace getVariable ["lambs_danger_dtBolge", []]) sel
 private _aday = _bel select {
     private _e0 = _x;
     private _yas = time - (_e0 select 1);
-    _yas >= 60 && {_yas <= 900} && {(_e0 select 2) >= 3} && {(_e0 select 3) < 3} && {(time - (_e0 select 4)) > 600} && {(_bolge findIf {((_x select 0) distance2D (_e0 select 0)) < 200}) < 0}
+    _yas >= 60 && {_yas <= 900} && {(_e0 select 2) >= 3} && {(_e0 select 3) < 3} && {(time - (_e0 select 4)) > 600} && {(_e0 param [5, 1]) >= 2} && {(_bolge findIf {((_x select 0) distance2D (_e0 select 0)) < 200}) < 0}
 };
 if (_aday isEqualTo []) exitWith {false};
 

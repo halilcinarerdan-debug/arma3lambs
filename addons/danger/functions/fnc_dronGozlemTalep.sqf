@@ -23,11 +23,13 @@ _obs pushBack [time, _taraf, netId _dr, _p0, _geri];
 if ((count _obs) > 20) then { _obs = _obs select [(count _obs) - 20, 20]; };
 missionNamespace setVariable ["lambs_danger_dronGozObs", _obs];
 
+// v8.344 FARKLI YONLER: yalniz ayni yondeki (geri-yon +-40 derece) gozlemler birlikte degerlendirilir (farkli operatorlerin dogrulari kesistirilmez)
+_obs = _obs select {(abs ((((_x select 4) - _geri) + 540) mod 360 - 180)) <= 40};
 private _dronlar = [];
 { _dronlar pushBackUnique (_x select 2); } forEach _obs;
 private _son300 = {(time - (_x select 0)) < 300} count _obs;
 if ((count _dronlar) < 2 && {_son300 < 4}) exitWith {false};
-private _ozK = format ["lambs_danger_dronGozTalepT_%1", _taraf];
+private _ozK = format ["lambs_danger_dronGozTalepT_%1_%2", _taraf, floor (_geri / 60)];
 if ((time - (missionNamespace getVariable [_ozK, -999])) < 240) exitWith {false};
 
 // ---- operator bolgesi tahmini: farkli dronlarin geri-yon dogrularinin kesisimi (>= 15 derece, 100-2500 m) ----

@@ -199,3 +199,7 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] v8.341: operator / karsi-batarya atisinda `[TOPCU-ATIS] ... YABANCI MERMI temizlendi` / `YANLIS MERMI` gorunuyor mu; tum mermiler hedefe yakin dusuyor mu (`[TANI-TOPCU]`). Karakol nobet / devriye kadrosunda sihhiye yok (komutan / MEDEVAC grubu haric).
 - [ ] v8.342: `[FO-HAKIM]` atama (BINA ust kat / cati ya da ARAZI), lider gercekten cikiyor mu (merdiven), varista `gozlem noktasinda`, sonra `[DRON-TOPCU] CAGRI ... (YER GOZLEMCISI ...)`; plandaki grupta yalniz lider gidince grup / LAMBS tepkisi (komutan bekle, buddy).
 - [ ] v8.343: gozlem dronu (B_Crocus_AP GOZLEM) tek askeri gorunce `[DRON-TOPCU] CAGRI` baslar mi (esik 1; hedef 10 sn duragan olmali); yer gozlemcisi `[FO-HAKIM]` + `CAGRI ... (YER GOZLEMCISI`; `[DRON-AVI]` ekip sayisi sistemin sectigi; USTKAT dusme: `DUSTU` logu yok.
+- [ ] v8.344: farkli iki yonden dron saldirisi -> iki ayri tahmin ([DRON-KARSI-ATES] / [DRON-AVI]); tek dron / tek dogru -> 'ZAYIF TAHMIN' (topcu atilmaz); dron avi 'tuzak olasiligi'.
+- [ ] v8.344: AI FPV gece termalsiz / sisli havada hedefi daha gec buluyor mu (`lambs_danger_ihaGorusMenzil`, kilit suresi); TI sinifi gece normal.
+- [ ] v8.344: `[SIHA-KESIF]` FAZ 1-3 ve CIKARIM (ucan GOZLEM turu dron ver: Darter / Falcon); plan tehdit yonu guncellendi mi.
+- [ ] v8.344: `[MOD-UYUM]` satirlari (RHS tek; CUP yuklenince CUP sayilari).

@@ -653,6 +653,8 @@ if (_tip isEqualTo 1 && {(_ayar getOrDefault ["otoGarnizon", 0]) > 0}) then {
         _this call (missionNamespace getVariable ["lambs_danger_fnc_otoGarnizon", {0}]);
     };
 };
+// v8.344 SIHA / IHA KESIF: tarafin ucan kesif IHA'si varsa objektif cevresini gozetler, yaklasma yollarini tarar, dusmanin geldigi yonu cikarir (fnc_sihaKesif)
+[_plan] spawn FUNC(sihaKesif);
 // v8.204 ORTAK RESIM: ELITE plani kurulunca KUMANDA cekirdegi (istihbarat / SPOTREP agi, takviye, kanat, feint, destek, medevac) otomatik acilir - onceki testlerde Zeus 'Kumanda' modulu konmadigi icin bu katman HIC calismiyordu ([HQ-TAHTA] / [HQ-ISTIHBARAT] satiri yok). Kapatma: lambs_danger_hqPlanOtomatikOff = true
 if (!(missionNamespace getVariable ["lambs_danger_hqPlanOtomatikOff", false]) && {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then {
     missionNamespace setVariable ["lambs_danger_hqAktif", true, true];

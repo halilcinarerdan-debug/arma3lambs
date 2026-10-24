@@ -161,25 +161,28 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     _dumanT0 = -1;
                 };
                 _kilit = _kilit + _dt;
-                if (_kilit < _kilitGerek) then { _sonuc = 1; };
+                // v8.344: gorus kotuyse (gece termalsiz, sis, kamufle hedef) kilit daha uzun surer
+                if (_kilit < (_kilitGerek / ([_uav, _h] call FUNC(ihaGorus)))) then { _sonuc = 1; };
             };
         };
         _sonuc
     };
+    // v8.344 GORUS: dron kamerasinin temel tespit menzili (m) x fnc_ihaGorus katsayisi (termal / isik / hava / hedef kamuflaji). Menzil disindaki hedef 'gorulmedi' sayilir (hedef secilmez; dron 10 sn sonra tekrar bakar).
+    private _gorusM = missionNamespace getVariable ["lambs_danger_ihaGorusMenzil", 2500];
     private _hedefSec = {
         private _en = objNull;
         private _enS = -1e9;
         private _yasakNesne = (_yasak select {(_x select 1) > time}) apply {_x select 0};
         if (_tur isEqualTo "FPV-AT") then {
             {
-                if (alive _x && {!(_x in _yasakNesne)} && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
+                if (alive _x && {!(_x in _yasakNesne)} && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen} && {(_x distance2D _uav) <= (_gorusM * ([_uav, _x] call FUNC(ihaGorus)))}) then {
                     private _s = -(_x distance2D _uav);
                     if (_s > _enS) then { _enS = _s; _en = _x; };
                 };
             } forEach (vehicles select {_x isKindOf "LandVehicle" && {!isNull (driver _x)}});
         } else {
             {
-                if (alive _x && {!(_x in _yasakNesne)} && {isNull objectParent _x} && {(_taraf getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
+                if (alive _x && {!(_x in _yasakNesne)} && {isNull objectParent _x} && {(_taraf getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen} && {(_x distance2D _uav) <= (_gorusM * ([_uav, _x] call FUNC(ihaGorus)))}) then {
                     private _kume = {alive _x && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}} count (_x nearEntities ["CAManBase", 15]);
                     private _s = _kume * 100 - (_x distance2D _uav) * 0.05;
                     if (_s > _enS) then { _enS = _s; _en = _x; };

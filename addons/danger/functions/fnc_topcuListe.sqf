@@ -14,7 +14,8 @@
 
 params [["_taraf", sideUnknown, [sideUnknown]]];
 
-private _haric = ["smoke", "illum", "flare", "cluster", "mine", "laser", "guid", "rocket", "mlrs", "230mm"];
+// v8.344 RHS / CUP UYUMU: roketatar (MLRS / Grad / Smerch / M270 / TOS) mermi adlari da haric (RED tablosunda yok): RHS 9M22 / 9M28 / 9M55, CUP MLRS / BM21 / Grad
+private _haric = ["smoke", "illum", "flare", "cluster", "mine", "laser", "guid", "rocket", "mlrs", "230mm", "9m22", "9m28", "9m55", "9m42", "bm21", "bm-21", "grad", "smerch", "m270", "tos1", "tos-1", "_he_rkt", "rkt"];
 private _cikti = [];
 {
     private _v = _x;

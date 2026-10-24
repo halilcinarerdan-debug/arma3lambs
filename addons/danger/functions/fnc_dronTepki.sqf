@@ -74,6 +74,10 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
             _obs pushBack [_p0, _geri, time, _tarafK, netId _dr];
             if ((count _obs) > 16) then { _obs = _obs select [(count _obs) - 16, 16]; };
             missionNamespace setVariable ["lambs_danger_dronOpObs", _obs];
+            // v8.344 FARKLI YONLER (kullanici: 'dron saldirilari farkli yonlerden gelirse'): gozlemler tum yonlerden havuzlaniyordu -> farkli operatorlerin dogrulari kesisip anlamsiz nokta uretiyordu.
+            //   Artik yalniz AYNI YONDEN (geri-yon +-40 derece) gelen gozlemler birlikte degerlendirilir; zaman kilidi de yon dilimi (60 derece) basina.
+            _ozK = format ["%1_%2", _ozK, floor (_geri / 60)];
+            _obs = _obs select {(abs ((((_x select 1) - _geri) + 540) mod 360 - 180)) <= 40};
             if ((time - (missionNamespace getVariable [_ozK, -999])) > 180) then {
                 private _dronlar = [];
                 { _dronlar pushBackUnique (_x select 4); } forEach _obs;
@@ -116,10 +120,30 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
                 private _eminlik = ((_nD - 1) max 0) min 3;
                 private _yay = [110, 70, 40, 16] select _eminlik;
                 private _topN = [1, 2, 3, 99] select _eminlik;
+                // v8.344 KANDIRILMA DIRENCI (kullanici: 'sistem kandirilmaya musait olmasin, zeki olsun'): tek dron + tek dogru = zayif tahmin (tek bir yem / yanlis yonlu ucus topcuyu bos yere atardi).
+                //   Guven: 2 = kesisim; 1 = >= 2 farkli dron ya da >= 3 gozlem ve >= 20 sn aralik; 0 = zayif. CBA 'dronGuvenMin' (varsayilan 1): altinda topcu ATILMAZ (istiksaf / gozlem dronu / dron avi surer).
+                //   Ek: ayni yon diliminde 600 sn'de en cok 3 topcu gorevi (yem ile mermi harcatma sinirlanir).
+                private _gSure = if (_obs isEqualTo []) then {0} else {(selectMax (_obs apply {_x select 2})) - (selectMin (_obs apply {_x select 2}))};
+                private _guven = 0;
+                if (_kesX isNotEqualTo []) then { _guven = 2; } else { if (_nD >= 2 || {(count _obs) >= 3 && {_gSure >= 20}}) then { _guven = 1; }; };
+                private _gK = format ["lambs_danger_opAtesL_%1_%2", _tarafK, floor (_geri / 60)];
+                private _gL = (missionNamespace getVariable [_gK, []]) select {(time - _x) < 600};
+                if (_guven < (missionNamespace getVariable ["lambs_danger_dronGuvenMin", 1])) then {
+                    if ((time - (_g getVariable [QGVAR(zayifLogT), -999])) > 60) then {
+                        _g setVariable [QGVAR(zayifLogT), time];
+                        diag_log format ["[DRON-KARSI-ATES] %1 | %2 | ZAYIF TAHMIN (guven %3 < %4: %5 dron, %6 gozlem, %7 sn, kesisim yok) - topcu ATILMADI, istiksaf / gozlem dronu / dron avi surer", groupId _g, _tarafK, _guven, missionNamespace getVariable ["lambs_danger_dronGuvenMin", 1], _nD, count _obs, round _gSure];
+                    };
+                } else {
+                    if ((count _gL) >= 3) then {
+                        diag_log format ["[DRON-KARSI-ATES] %1 | %2 | yon dilimi %3: 600 sn'de 3 topcu gorevi doldu (yem / mermi harcatma korumasi) - atilmadi", groupId _g, _tarafK, floor (_geri / 60)];
+                    } else {
                 private _kN = [_tarafK, _pt, "OPERATOR", groupId _g, _yay, _topN] call FUNC(topcuDestek);
-                if (_kN > 0) then {
-                    missionNamespace setVariable [_ozK, time];
-                    diag_log format ["[DRON-KARSI-ATES] %1 | %2 | tahmini operator bolgesi (%3): %4 | dron sayisi %5 (gozlem %6, kesisim %7) -> yayilim %8 m, %9 top 3'er mermi | geri yon %10 derece", groupId _g, _tarafK, _tur, mapGridPosition _pt, _nD, count _obs, count _kesX, _yay, _kN, round _geri];
+                        if (_kN > 0) then {
+                            missionNamespace setVariable [_ozK, time];
+                            diag_log format ["[DRON-KARSI-ATES] %1 | %2 | tahmini operator bolgesi (%3): %4 | dron sayisi %5 (gozlem %6, kesisim %7) -> yayilim %8 m, %9 top 3'er mermi | geri yon %10 derece", groupId _g, _tarafK, _tur, mapGridPosition _pt, _nD, count _obs, count _kesX, _yay, _kN, round _geri];
+                        };
+                        if (_kN > 0) then { _gL pushBack time; missionNamespace setVariable [_gK, _gL]; };
+                    };
                 };
             };
         };

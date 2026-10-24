@@ -106,11 +106,13 @@ lambs_danger_dronTopcuStarted = true;
                     private _i2 = _bel findIf {((_x select 0) distance2D (_c select 0)) < 100};
                     if (_i2 >= 0) then {
                         private _e = _bel select _i2;
+                        // v8.344: ayni kayit >= 20 sn arayla tekrar gorulurse 'nGor' artar (taciz icin >= 2 bagimsiz gorus sart: tek seferlik yem tacizi tetiklemesin)
+                        if ((time - (_e select 1)) >= 20) then { _e set [5, ((_e param [5, 1]) + 1)]; };
                         _e set [0, _c select 0];
                         _e set [1, time];
                         _e set [2, _c select 2];
                     } else {
-                        _bel pushBack [_c select 0, time, _c select 2, 0, -999];
+                        _bel pushBack [_c select 0, time, _c select 2, 0, -999, 1];
                     };
                 } forEach (_kl2 select {(_x select 2) >= 3});
                 missionNamespace setVariable [_bk, _bel select [0, 30]];

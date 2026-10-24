@@ -38,8 +38,10 @@ if (_mod <= 0) exitWith {0};
 private _obs = (missionNamespace getVariable ["lambs_danger_dronAviObs", []]) select {(time - (_x select 2)) < 120 && {(_x select 3) isEqualTo _taraf}};
 _obs pushBack [_p0, _geri, time, _taraf];
 missionNamespace setVariable ["lambs_danger_dronAviObs", _obs];
+// v8.344 FARKLI YONLER: yalniz ayni yondeki (geri-yon +-40 derece) gozlemler birlikte sayilir; zaman kilidi yon dilimi (60 derece) basina
+_obs = _obs select {(abs ((((_x select 1) - _geri) + 540) mod 360 - 180)) <= 40};
 if ((count _obs) < 2) exitWith {0};
-private _ozK = format ["lambs_danger_dronAviT_%1", _taraf];
+private _ozK = format ["lambs_danger_dronAviT_%1_%2", _taraf, floor (_geri / 60)];
 if ((time - (missionNamespace getVariable [_ozK, -999])) < 300) exitWith {0};
 
 // ---- operator bolgesi tahmini ----
@@ -97,6 +99,15 @@ private _topN = ((floor ((count _kisiler) * 0.7)) max 2) min 10;
 _topN = _topN min (((count (units _kaynak select {alive _x})) - 2) max 2);
 _kisiler = _kisiler select [0, _topN];
 if ((count _kisiler) < 2) exitWith {0};
+
+// v8.344 TUZAK KONTROLU (kullanici: 'sistem kandirilmaya musait olmasin'): tahmin bolgesinin 500 m yakininda tarafin BILDIGI (temas bellegi, 300 sn) buyuk dusman kumesi varsa
+//   (deger >= ekip x 2) devriye oraya GITMEZ (yem / pusu olasiligi); log. Karsi tarafin kuvveti tahminde ise 3 kisilik devriye yetmez.
+private _tehdit = (missionNamespace getVariable [format ["lambs_danger_dtBellek_%1", _taraf], []]) select {(time - (_x select 1)) < 300 && {((_x select 0) distance2D _est) < 500} && {(_x select 2) >= ((count _kisiler) * 2)}};
+if (_tehdit isNotEqualTo []) exitWith {
+    diag_log format ["[DRON-AVI] %1 | %2 | devriye GITMEDI: tahmin %3 yakininda buyuk dusman kumesi (deger %4 >= ekip %5 x 2) - tuzak / pusu olasiligi", groupId _kaynak, _taraf, mapGridPosition _est, (_tehdit select 0) select 2, count _kisiler];
+    missionNamespace setVariable [_ozK, time - 120];
+    0
+};
 
 // ---- devriye ----
 private _pg = createGroup _taraf;

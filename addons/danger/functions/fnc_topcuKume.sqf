@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * HEDEF KUMELEME (v8.338) — gozlemlenen dusman nesnelerini 60 m'lik kumelere ayirir (dron gozlemli atis ve taciz bellegi icin).
  *   Degerler [T]: adam 1; hafif / yumusak arac 2.5; zirhli arac (Tank / APC) 3; statik silah 2; topcu / havan 4. Ic araca binmis adam ayrica sayilmaz (arac sayilir).
- *   Dost, sivil, esir (captive), muretttebatsiz arac ve olu nesne sayilmaz.
+ *   Dost, sivil, esir (captive), SILAHSIZ asker (v8.344: teslim / yem), muretttebatsiz arac ve olu nesne sayilmaz.
  *
  * Arguments:
  * 0: Nesneler <ARRAY>
@@ -19,7 +19,7 @@ private _aday = _nesneler select {
     !isNull _x && {alive _x} && {!(captive _x)}
     && {
         if (_x isKindOf "CAManBase") then {
-            isNull objectParent _x && {(_taraf getFriend (side (group _x))) < 0.6} && {(side (group _x)) isNotEqualTo civilian}
+            isNull objectParent _x && {(_taraf getFriend (side (group _x))) < 0.6} && {(side (group _x)) isNotEqualTo civilian} && {((primaryWeapon _x) isNotEqualTo "") || {(secondaryWeapon _x) isNotEqualTo ""} || {(handgunWeapon _x) isNotEqualTo ""}}
         } else {
             _x isKindOf "LandVehicle" && {
                 private _mur = (crew _x) select {alive _x};

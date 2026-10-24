@@ -510,3 +510,13 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 - **Oturum D — Savunma / garnizon**: T-OTO-GARNIZON (OPORD 4/4 Evet; ORP / CCP'den >= 70 m), hedef zinciri TUT (`[PLAN-TUT]`), eski hendek / karakol sistemi (v8.330 haline dondu: hendek yerlestirme + `GOZLETME` calisiyor mu — regresyon).
 - **Oturum E — Piyade davranisi**: T-SIS-BUTCE (saldiri basina 120 sn'de en cok 2 sis olayi), patlayici (el bombasi / roket / UGL), ates ve hareket, pusu tepkisi (`[PUSU-*]`), teslim / TCCC.
 - **Oturum F — Performans / dayaniklilik**: 40+ AI, 20 dk; `[PERF-SQF]`, `[ELITE-HB]` FPS; dedicated sunucuda Zeus ile istemcide yaratilan AI (setGroupOwner 2); `tools/hemtt_kontrol.sh` 0 hata.
+
+## T-SIHA-KESIF (v8.344)
+1. Tarafa AI murettebatli UCAN bir GOZLEM dronu koy (Zeus: AR-2 Darter / MQ-12 Falcon, havada) ve ELITE Objektif planini kur. Beklenen: `[SIHA-KESIF] ... kesif sortisine alindi`, `FAZ 1 CEVRE`, `FAZ 2 YOLLAR: N yaklasma yolu`, dusman gorulunce `CIKARIM: dusman X derece yonunden geliyor`, plan tehdit yonu guncellenir, `FAZ 3 PATROL`. Ucan dron yoksa `kesif IHA / SIHA bulunamadi`.
+
+## T-DRON-YONLER (v8.344)
+1. Iki farkli operator (zit yonler, 800+ m) dron gondersin. Beklenen: her yon icin ayri `[DRON-KARSI-ATES]` / `[DRON-AVI]` tahmini; kesisim yalniz AYNI yondeki dronlardan. Tek dron + tek dogru: `ZAYIF TAHMIN ... topcu ATILMADI`; ikinci dron / 3. gozlem: topcu atar.
+
+## T-DRON-GORUS (v8.344)
+1. Gece, termalsiz FPV (Crocus AT) ve termalli (AT TI) ile ayni hedefe sorti: termalsiz hedefi daha uzaktan kaybeder / kilidi uzun surer. Sis / yagmur (Zeus hava) ve yatik / kamuflajli hedef kilidi geciktirir.
+
