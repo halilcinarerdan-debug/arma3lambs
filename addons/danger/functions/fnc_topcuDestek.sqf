@@ -68,6 +68,9 @@ if (_mod isEqualTo "OPERATOR") then {
                 diag_log format ["[DRON-KARSI-ATES] %1 | %2 ATMADI (kitap emniyeti): %3", _id, typeOf _v, if (_guv select 0) then {format ["gozlemsiz atista danger close: en yakin dost %1 m <= 600 m", round (_guv select 2)]} else {_guv select 1}];
             };
             if (_guvOk && {_mg isNotEqualTo ""} && {_atan < _topMax} && {_poz inRangeOfArtillery [[_v], _mg]}) then {
+                // v8.339: hareket emri iptal / davranis / nisanci AI + [TOPCU-ATIS] Fired tanisi (plan atisiyla ayni hazirlik); RPT 21-43: operator atesinde bir mermi hedeften ~1.6 km uzaga dustu (Sh_82mm_AMOS), neden bu logla ayirt edilecek
+                [_v, _poz, _mg] call FUNC(topcuAtisHazirla);
+                diag_log format ["[DRON-KARSI-ATES] %1 | ATIS EMRI: %2 (%3) mermi %4 -> %5 | mesafe %6 m | ETA %7 sn | yayilim %8 m | tum mermiler: %9", _id, typeOf _v, getText (configOf _v >> "displayName"), _mg, mapGridPosition _poz, round (_v distance2D _poz), round (_v getArtilleryETA [_poz, _mg]), _yay, getArtilleryAmmo [_v]];
                 [_v, _poz, _mg, _atan, _yay] spawn {
                     params ["_tv", "_tn", "_tm", "_ti", "_ty"];
                     sleep (3 * _ti);
@@ -104,6 +107,7 @@ if (_mod isEqualTo "KARSI") then {
                     diag_log format ["[PLAN-KARSI-BATARYA] %1 | %2 ATMADI (kitap emniyeti): %3", _id, typeOf _v, if (_guv select 0) then {format ["gozlemsiz atista danger close: en yakin dost %1 m <= 600 m", round (_guv select 2)]} else {_guv select 1}];
                 };
                 if (_guvOk && {_mg isNotEqualTo ""} && {_v isNotEqualTo _h} && {_hp inRangeOfArtillery [[_v], _mg]}) then {
+                    [_v, _hp, _mg] call FUNC(topcuAtisHazirla);   // v8.339: hazirlik + [TOPCU-ATIS] tanisi
                     [_v, _hp, _mg, _atan] spawn {
                         params ["_tv", "_tn", "_tm", "_ti"];
                         sleep (3 * _ti);

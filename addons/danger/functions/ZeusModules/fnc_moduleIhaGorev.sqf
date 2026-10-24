@@ -19,7 +19,7 @@ if (_activated && local _logic) then {
         [
             ["Gorev", "LIST", "Sorti: IHA kendi basina hedef secer ve saldirir (FPV: kamikaze; BOMBA: 3 bomba). Gozlem: modul konumu etrafinda devriye, gordugu dusman ortak resme verilir. Kaldir: gorevi iptal eder.", ["Sorti (otomatik hedef)", "Gozlem devriyesi", "Gorevi KALDIR"], 0],
             ["Tur", "LIST", "Otomatik: sinif adindan tahmin (crocus / fpv -> FPV, mavic -> BOMBA, digerleri GOZLEM). Yanlissa elle sec.", ["Otomatik", "FPV-AT (zirh avcisi)", "FPV-AP (personel / termobarik)", "BOMBA (Mavic: el bombasi)", "GOZLEM"], 0],
-            ["Taraf (muretttebat yoksa)", "LIST", "IHA'nin AI muretttebati yoksa bu tarafta yaratilir.", ["BLUFOR", "OPFOR", "INDEP"], 1],
+            ["Taraf (muretttebat yoksa)", "LIST", "IHA'nin AI muretttebati yoksa bu tarafta yaratilir. OTOMATIK (varsayilan, v8.339): arac sinifinin tarafi (B_ = BLUFOR, O_ = OPFOR, I_ = INDEP), cantali asker varsa onun tarafi, yoksa yakindaki en yakin askerin tarafi. Elle secersen o gecer (sinifla celisirse uyari verilir).", ["Otomatik (sinif / asker)", "BLUFOR", "OPFOR", "INDEP"], 0],
             ["Menzil (m)", "SLIDER", "Kalkis noktasindan hedefe en fazla bu kadar (FPV Crocus: 4 km, 10 dk pil).", [500, 4000], [100, 500], 3000, 0],
             ["Gozlem yaricapi (m)", "SLIDER", "Gozlem devriyesinde modul konumu etrafinda.", [100, 800], [50, 100], 300, 0],
             ["Firlatma tetik mesafesi (m)", "SLIDER", "'Dron yarat' seciliyse: dron HEMEN degil, bu noktanin bu kadar yakininda IHA tarafinin BILDIGI dusman gorulunce yaratilir (hile yok). 0 = hemen yarat. Emir 30 dk gecerli; iptal: Gorevi KALDIR (modulu bu noktaya birak).", [0, 3000], [100, 200], 1200, 0],
@@ -30,6 +30,9 @@ if (_activated && local _logic) then {
             params ["_data", "_args"];
             _args params ["_poz", "_bagli", "_yaratSiniflar"];
             _data params ["_gorev", "_tur", "_tarafI", "_men", "_yar", "_tetikM", "_opI", "_yaratI"];
+            private _tarafSecim = round _tarafI;   // v8.339: 0 = otomatik, 1 BLUFOR, 2 OPFOR, 3 INDEP
+            private _tarafOto = _tarafSecim <= 0;
+            _tarafI = (_tarafSecim - 1) max 0 min 2;
             private _u = _bagli;
             if (isNull _u || {!(unitIsUAV _u)}) then {
                 private _y = (nearestObjects [_poz, ["Air", "LandVehicle"], 40]) select {unitIsUAV _x};
@@ -46,7 +49,7 @@ if (_activated && local _logic) then {
             private _cantaSn = "";
             if (isNull _u && {_gorev < 2}) then {
                 private _tfC = [west, east, independent] select (_tarafI max 0 min 2);
-                private _askC = (_poz nearEntities [["CAManBase"], 40]) select {alive _x && {(side (group _x)) isEqualTo _tfC} && {[backpack _x, true] call FUNC(ihaCantaSinif)}};
+                private _askC = (_poz nearEntities [["CAManBase"], 40]) select {alive _x && {_tarafOto || {(side (group _x)) isEqualTo _tfC}} && {(side (group _x)) in [west, east, independent]} && {[backpack _x, true] call FUNC(ihaCantaSinif)}};
                 if (_askC isNotEqualTo []) then {
                     _cantaObj = ([_askC, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy) select 0;
                     _cantaSn = [backpack _cantaObj] call FUNC(ihaCantaSinif);
@@ -66,6 +69,35 @@ if (_activated && local _logic) then {
                 };
             };
             if (isNull _u && {_yaratSn isEqualTo ""} && {_gorev < 2}) exitWith { systemChat "[ELITE] IHA Gorevi: yakinda (40 m) insansiz hava araci yok - modulu IHA'nin / Crocus cantali askerin ustune birak ya da 'Dron yarat' sec"; };
+            // v8.339 TARAF: otomatik secimde (1) cantali asker (2) dron / yaratilacak sinifin config tarafi (3) yakindaki en yakin AI askerin tarafi (4) eski varsayilan OPFOR.
+            //   Elle secim sinifin tarafiyla celisirse UYARI (kullanici RPT 21-43: B_Crocus_AP gozlem dronlari varsayilan OPFOR ile DOGU olarak dogdu, BATI mevzisinin icinde vuruldu).
+            private _dusmanDron = false;
+            private _snTaraf = [typeOf _u, _yaratSn] select (isNull _u);
+            private _cfgYon = -1;
+            if (_snTaraf isNotEqualTo "") then {
+                private _cs = getNumber (configFile >> "CfgVehicles" >> _snTaraf >> "side");
+                if (_cs in [0, 1, 2]) then { _cfgYon = [1, 0, 2] select _cs; };
+            };
+            if (_tarafOto) then {
+                private _idx = -1;
+                if (!isNull _cantaObj && {_cantaObj isKindOf "CAManBase"}) then { _idx = [west, east, independent] find (side (group _cantaObj)); };
+                if (_idx < 0) then { _idx = _cfgYon; };
+                if (_idx < 0) then {
+                    private _yk = (_poz nearEntities [["CAManBase"], 60]) select {alive _x && {(side (group _x)) in [west, east, independent]}};
+                    if (_yk isNotEqualTo []) then { _idx = [west, east, independent] find (side (group (([_yk, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy) select 0))); };
+                };
+                if (_idx < 0) then { _idx = 1; };
+                _tarafI = _idx;
+                systemChat format ["[ELITE] IHA tarafi OTOMATIK: %1", ["BLUFOR", "OPFOR", "INDEP"] select _tarafI];
+            } else {
+                // v8.339: sinifin tarafi secilen tarafin DUSMANI ise gorev IPTAL (kullanici: 'eger dron dusmansa iptal etsin, sistem yazi ciksin')
+                if (_cfgYon >= 0 && {_cfgYon isNotEqualTo _tarafI} && {(([west, east, independent] select _tarafI) getFriend ([west, east, independent] select _cfgYon)) < 0.6}) then {
+                    _dusmanDron = true;
+                    systemChat format ["[ELITE] IHA gorevi IPTAL: %1 sinifi %2 (secilen taraf %3 icin DUSMAN dron). Tarafi 'Otomatik' yap ya da dogru tarafi sec.", _snTaraf, ["BLUFOR", "OPFOR", "INDEP"] select _cfgYon, ["BLUFOR", "OPFOR", "INDEP"] select _tarafI];
+                    diag_log format ["[IHA-GOREV] IPTAL: %1 sinifi %2, secilen taraf %3 (dusman dron)", _snTaraf, ["BLUFOR", "OPFOR", "INDEP"] select _cfgYon, ["BLUFOR", "OPFOR", "INDEP"] select _tarafI];
+                };
+            };
+            if (_dusmanDron && {_gorev < 2}) exitWith {};
             // v8.268 OPERATOR: modul konumuna (ya da dron varsa dronun yanina) en yakin, IHA tarafindan canli dost asker (40 m)
             private _opMod = round _opI;
             private _op = objNull;

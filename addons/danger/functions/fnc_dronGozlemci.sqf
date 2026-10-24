@@ -47,6 +47,19 @@ lambs_danger_dronGozlemciStarted = true;
         diag_log format ["[DRON-GOZLEM] %1 | HAZIR gozlem dronu gonderildi: %2 (%3) -> tahmin %4 (yaricap %5 m, %6) | %7 farkli dron / %8 gozlem", _taraf, typeOf _u, getText (configOf _u >> "displayName"), mapGridPosition _est, _yar, ["tek dogru", "kesisim"] select _kesisim, _nDron, _nGoz];
     };
 
+    // 1b) v8.339: BEKLEYEN GOZLEM emri (Zeus 'ELITE IHA Gorevi' > Dron yarat; dusman tetik mesafesine girene kadar dron YARATILMAZ -> eskiden 'gozlemci YOK' cikiyordu): ayni tarafin
+    //     bekleyen GOZLEM emri tahmin bolgesine <= 3500 m ise hemen serbest birakilir (fnc_ihaBekle dronu yaratir ve istasyona yollar).
+    private _bekleyen = (missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []]) select {
+        (count _x) >= 5 && {!(_x select 1)} && {(_x select 4) isEqualTo []} && {(_x select 2) isEqualTo "GOZLEM"} && {(_x select 3) isEqualTo _taraf} && {((_x select 0) distance2D _est) <= 3500}
+    };
+    if (_bekleyen isNotEqualTo []) exitWith {
+        _bekleyen = [_bekleyen, [], {(_x select 0) distance2D _est}, "ASCEND"] call BIS_fnc_sortBy;
+        private _b = _bekleyen select 0;
+        _b set [4, [_est, _yar]];
+        missionNamespace setVariable [_kT, time];
+        diag_log format ["[DRON-GOZLEM] %1 | BEKLEYEN gozlem emri serbest birakildi: firlatma %2 -> istasyon %3 (yaricap %4 m, %5) | %6 farkli dron / %7 gozlem", _taraf, mapGridPosition (_b select 0), mapGridPosition _est, _yar, ["tek dogru", "kesisim"] select _kesisim, _nDron, _nGoz];
+    };
+
     // 2) gozlemci asker (GOZLEM dronuna donusen sirt cantasi)
     private _aday = [];
     {
@@ -63,7 +76,7 @@ lambs_danger_dronGozlemciStarted = true;
         && {((group _x) getVariable [QGVAR(contact), 0]) <= time} && {(_x distance2D _est) >= 250}
     });
     if (_aday isEqualTo []) exitWith {
-        diag_log format ["[DRON-GOZLEM] %1 | gozlemci YOK: hazir GOZLEM dronu ve gozlem dronu cantali asker bulunamadi (tahmin %2, %3 farkli dron) - gozlem dronu gonderilemedi", _taraf, mapGridPosition _est, _nDron];
+        diag_log format ["[DRON-GOZLEM] %1 | gozlemci YOK: hazir GOZLEM dronu, bekleyen GOZLEM emri ve gozlem dronu cantali asker bulunamadi (tahmin %2, %3 farkli dron) - gozlem dronu gonderilemedi", _taraf, mapGridPosition _est, _nDron];
     };
     _aday = [_aday, [], {(_x select 0) distance2D _est}, "ASCEND"] call BIS_fnc_sortBy;
     (_aday select 0) params ["_op", "_sn"];

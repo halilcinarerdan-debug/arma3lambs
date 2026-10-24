@@ -32,11 +32,17 @@ private _opVar = _opMod > 0 && {!isNull _op};
 private _opOldu = { _opVar && {isNull _op || {!alive _op}} };
 if (_sn isEqualTo "" || {!isClass (configFile >> "CfgVehicles" >> _sn)}) exitWith {false};
 
+// v8.339: sinifin config tarafi emri veren tarafin DUSMANI ise emir kaydedilmez (Zeus modulu zaten uyarip iptal eder; baska cagrilar icin sunucu korumasi)
+private _cfgSide = getNumber (configFile >> "CfgVehicles" >> _sn >> "side");
+if (_cfgSide in [0, 1, 2] && {(_taraf getFriend ([east, west, independent] select _cfgSide)) < 0.6}) exitWith {
+    diag_log format ["[IHA-BEKLEME] %1 | IPTAL: sinif tarafi %2, emir tarafi %3 (dusman dron)", _sn, [east, west, independent] select _cfgSide, _taraf];
+    false
+};
 private _tur = if (_turE isNotEqualTo "") then {_turE} else { [_sn] call FUNC(ihaTip) };
 private _hemen = _tetik <= 0 || {missionNamespace getVariable ["lambs_danger_ihaBekleOff", false]};
 
 private _emirler = missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []];
-private _emir = [_poz, false];   // [firlatma noktasi, iptal]
+private _emir = [_poz, false, _tur, _taraf, []];   // [firlatma noktasi, iptal, tur, taraf, serbest]; v8.339: serbest = [istasyon, yaricap] -> fnc_dronGozlemci bekleyen GOZLEM dronunu hemen firlatir
 if (!_hemen) then {
     _emirler pushBack _emir;
     missionNamespace setVariable ["lambs_danger_ihaBekleEmirleri", _emirler];
@@ -46,7 +52,7 @@ if (!_hemen) then {
 private _t0 = time;
 private _logT = time + 60;
 private _hedef = objNull;
-while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef} && {!(call _opOldu)} && {!(_cantaAsker && {!alive _canta})}} do {
+while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef} && {(_emir select 4) isEqualTo []} && {!(call _opOldu)} && {!(_cantaAsker && {!alive _canta})}} do {
     sleep 5;
     // v8.272: cantali asker hareket ediyorsa firlatma noktasi onu izler
     if (_cantaAsker && {alive _canta}) then { _poz = getPosATL _canta; _emir set [0, _poz]; };
@@ -82,14 +88,15 @@ if ((call _opOldu) && {isNull _hedef}) exitWith {
     diag_log format ["[IHA-BEKLEME] %1 (%2) | OPERATOR OLDU (%3): firlatma emri iptal (dron yaratilmadi)", _sn, _tur, ["", name _op] select (!isNull _op)];
     false
 };
-if (!_hemen && {isNull _hedef}) exitWith {
+private _serbest = _emir select 4;   // v8.339: dron gozlemcisi talebiyle serbest birakildi mi
+if (!_hemen && {isNull _hedef} && {_serbest isEqualTo []}) exitWith {
     diag_log format ["[IHA-BEKLEME] %1 (%2) | emir bitti: %3 (dron yaratilmadi)", _sn, _tur, ["omur doldu (1800 sn)", "Zeus iptal etti"] select (_emir select 1)];
     false
 };
 
 private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
 _iha setPosATL [_poz select 0, _poz select 1, 40];
-diag_log format ["[IHA-BEKLEME] %1 (%2) | FIRLATMA: %3 | tetik hedefi %4 (%5 m) | %6 sn bekledi", _sn, _tur, mapGridPosition _iha, if (isNull _hedef) then {"-"} else {typeOf _hedef}, if (isNull _hedef) then {0} else {round (_hedef distance2D _poz)}, round (time - _t0)];
+diag_log format ["[IHA-BEKLEME] %1 (%2) | FIRLATMA: %3 | tetik hedefi %4 (%5 m) | %6 sn bekledi%7", _sn, _tur, mapGridPosition _iha, if (isNull _hedef) then {"-"} else {typeOf _hedef}, if (isNull _hedef) then {0} else {round (_hedef distance2D _poz)}, round (time - _t0), ["", format [" | GOZLEMCI TALEBIYLE serbest: istasyon %1", mapGridPosition (_serbest select 0)]] select (_serbest isNotEqualTo [])];
 // v8.272: canta tuketilir
 if (!isNull _canta) then {
     if (_cantaAsker) then {
@@ -103,6 +110,12 @@ if (!isNull _canta) then {
         };
     };
     diag_log format ["[IHA-BEKLEME] %1 | canta tuketildi (%2)", _sn, ["yerdeki canta", name _canta] select _cantaAsker];
+};
+if (_serbest isNotEqualTo []) exitWith {
+    // v8.339: dron gozlemcisi talebi: dron istasyonda GOZLEM devriyesi yapar (fnc_ihaGozlem ortak resme verir, fnc_dronTopcu gozlemci olarak kullanir)
+    missionNamespace setVariable [format ["lambs_danger_dronGozIHA_%1", _taraf], _iha];
+    [_iha, "GOZLEM", "GOZLEM", _taraf, _serbest select 0, _serbest select 1, _men, _op, _opMod] call FUNC(ihaSorti);
+    true
 };
 [_iha, "SORTI", _turE, _taraf, _poz, _yar, _men, _op, _opMod] call FUNC(ihaSorti);
 true
