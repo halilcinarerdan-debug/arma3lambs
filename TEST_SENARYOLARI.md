@@ -459,6 +459,10 @@ Hepsi (T) = dogrulanmadi.
 ## T-DRON-AVI-SAVUNMA (v8.327)
 1. EAST savunma planinda (grup >= 5 kisi); batidan 2+ kez dron uçur. Beklenen: `[DRON-AVI] ... devriye: 3-4 asker (3-4 kisilik alt grup)`; olmazsa `devriye cikmadi: ...` sayaclari nedeni gosterir.
 
+## T-DRON-GOZLEMCI (v8.336)
+1. EAST'e GOZLEM turu bir IHA (orn. vanilla AR-2 / Darter, silahsiz) ya da gozlem dronu cantali asker koy. Bati tarafindan 2 farkli dron (ya da ayni dronla 4 gozlem) ucur. Beklenen: `[DRON-GOZLEM] ... saldiri israrla tekrarlaniyor ... gozlem dronu talebi`, ardindan `HAZIR gozlem dronu gonderildi` ya da `GOZLEMCI ASKER ... dron firlatti`; `[IHA-SORTI] ... mod GOZLEM`; operator gorulurse `[IHA-GOZLEM] ... hedef goruldu`.
+2. Gozlemci yoksa: `[DRON-GOZLEM] ... gozlemci YOK`. CBA `dronGozlemAktif` kapaliyken hicbir sey olmaz.
+
 ## T-TOPCU-EMINLIK (v8.327)
 1. 1 dron uçur: `[DRON-KARSI-ATES] ... dron sayisi 1 ... yayilim 110 m, 1 top`. 3-4 farkli dron (farkli yonlerden): yayilim 40 -> 16 m, top sayisi artar; atis tahmini operator bolgesine yakin mi.
 

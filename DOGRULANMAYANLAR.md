@@ -174,6 +174,7 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] Tank agresifligi (CBA `tankAgresif` 2): savunmada gizleme noktasi yok, mevzi ~200 m, saldirida 60 sn'de ileri sicrama, 5 kademe.
 - [ ] Genel arac unstuck (`[ARAC-UNSTUCK]` kademe 1-4, `[ARAC-UNSTUCK-OZET]`): ag aca / kayaya takilan arac kurtuluyor mu; yanlis pozitif (bekleyen arac) var mi.
 - [ ] Dron operatoru avi savunma planindaki gruptan 3-4 kisi cikariyor mu (`[DRON-AVI]`); `devriye cikmadi` nedeni.
+- [ ] Dron gozlemcisi (v8.336): israrli saldirida `[DRON-GOZLEM]` talep + hazir IHA / gozlemci asker, gozlem dronu tahmin bolgesine ucuyor mu, operatoru goruyor mu (`[IHA-GOZLEM]`); canta -> dron config'i.
 - [ ] Topcu eminligi: 1 dron 110 m / 4+ dron 16 m yayilim (`[DRON-KARSI-ATES] ... dron sayisi`), atis operatore yakin mi.
 - [ ] AI IHA duman kilidi (`[IHA-DUMAN]`): duman varken dalis yok / kor sapma; kilit suresi 1,2 sn.
 - [ ] FPV-AT gercek carpma (`[IHA-SORTI] ... yontem: govde yuzeyi`, `[IHA-ETKI]`): tank hasari > 0 / parca > 0.3 mi (ACE Vehicle Damage acik / kapali karsilastir).

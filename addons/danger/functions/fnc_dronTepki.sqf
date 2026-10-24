@@ -130,6 +130,8 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
         };
         // v8.320 DRON OPERATORU AVI (HQ devriye; operasyon emrinde / CBA'da ayarlanir): tahmini operator bolgesine 2 / 4 kisilik devriye
         [_g, _p0, _geri] call FUNC(dronAvi);
+        // v8.336 DRON GOZLEMCISI: saldiri israrla tekrarlaniyorsa gelis yonune gozlem dronu (tarafin gozlemcisi varsa)
+        [_g, _p0, _geri, _dr] call FUNC(dronGozlemTalep);
         if ((time - (_dr getVariable [QGVAR(dronYonLogT), -999])) > 20) then {
             _dr setVariable [QGVAR(dronYonLogT), time];
             diag_log format ["[DRON-YON] %1 | %2 (%3) | gelis %4 derece -> operator / firlatma yonu %5 derece (700 m, hata +-15) | iz %6 m / %7 sn | haberdar edilen grup %8", groupId _g, typeOf _dr, _tip, round _gelis, round _geri, round (_p0 distance2D _p1), round (time - ((_iz select 0) select 0)), _n];
