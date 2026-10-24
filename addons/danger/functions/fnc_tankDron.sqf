@@ -31,7 +31,7 @@ private _taraf = side _g;
 private _dronlar = (_v nearEntities ["Air", 700]) select {
     unitIsUAV _x && {alive _x} && {((getPosATL _x) select 2) <= 200}
     && {(_taraf getFriend (side (group (effectiveCommander _x)))) < 0.6}
-    && {(!isNull _l && {(_l knowsAbout _x) > 0.2}) || {(time - (_v getVariable [QGVAR(tankDronUyari), [-99]] select 0)) < 20}}
+    && {((_g knowsAbout _x) > 0.2) || {(!isNull _l && {(_l knowsAbout _x) > 0.2})} || {(time - (_v getVariable [QGVAR(tankDronUyari), [-99]] select 0)) < 20}}   // v8.319: grup bilgisi de sayilir
 };
 // koordinasyon: dost tankin uyarisi (dron henuz bilinmiyor olsa da)
 private _dr = objNull;
