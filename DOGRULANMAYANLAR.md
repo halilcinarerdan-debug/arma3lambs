@@ -206,3 +206,4 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] v8.345: sessiz tempoda drona ates yok (`[DRON-ATES] ... ATES YOK (sessizlik`); `dronAtesModu` 0 / 1 / 2; gozlem dronu `[IHA-GOZLEM] N hedef goruldu` artik 1'de takilmiyor; `[DRON-TOPCU-OZET]` periyodik geliyor, hata sonrasi `BEKCI ... yeniden baslatildi` gorunmuyor.
 - [ ] v8.346: ayni anda 3 dron cikinca '1 bagimsiz dron' sayiliyor mu (ZAYIF TAHMIN logunda 'N bagimsiz dron'), 5 dk ucan dronun gozlemi 'zayif izli' sayiliyor mu.
 - [ ] v8.347: 2+ AI FPV ayni anda gorevde: `[IHA-TIM] ROL: GOZCU` ilk dron hedef cevresinde doner, dalmaz; `ROL: VURUCU` diger dronlar dalar; `[IHA-ISABET]` olasiliklari ve sonuclari (iska / EW); yedek donusum `gozcu -> BIREYSEL`.
+- [ ] v8.348: Mavic 3 `[IHA-YENILE]` (donus, animasyon, 2. sorti); `[TANK-ARALIK]` (YAKLASIYOR / PARK / USTUSTE) 2-3 tankla; recon / STEALTH grup drona ates etmiyor (`[DRON-ATES] ... ATES YOK`).

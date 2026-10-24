@@ -112,7 +112,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
             diag_log format ["[IHA-SORTI] %1 | kontrolsuz dron yere carpti / imha edildi (%2)", typeOf _uav, mapGridPosition _uav];
         };
     };
-    private _aktif = { alive _uav && {alive _d} && {(_uav getVariable [QGVAR(ihaTok), -1]) isEqualTo _tok} && {(time - _t0) < 600} && {!(_opMod isEqualTo 1 && {call _opOldu})} };
+    private _aktif = { alive _uav && {alive _d} && {(_uav getVariable [QGVAR(ihaTok), -1]) isEqualTo _tok} && {(time - _t0) < ([600, 1800] select (_tur isEqualTo "BOMBA"))} && {!(_opMod isEqualTo 1 && {call _opOldu})} };   // v8.348: BOMBA (Mavic 3) yenilenerek tekrar kullanilir, toplam 1800 sn
     private _merk = if (_merkez isEqualTo [0, 0, 0]) then {_bas} else {_merkez};
 
     // ---- GOZLEM: devriye ----
@@ -216,6 +216,36 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
 
     // ---- SORTI ----
     private _bitti = false;
+    private _bombaSorti = 1;
+    // v8.348 MAVIC 3 TEKRAR KULLANIM (kullanici: 'mavic 3 tekrar kullanilabilir bir dron olsun, tanimli personelin yanina gidince cok basit bir animasyonla birakacagi patlayici yenilensin'):
+    //   3 bomba bitince dron operatore (_op) / yoksa kalkis noktasina doner, 3 m'de asili kalir; personel basit bir animasyon (MedicStart -> MedicStop, ~6 sn) oynar, bombalar yenilenir (3'e), yeni hedef aranir.
+    //   En cok CBA bombaSortiMax (4) sorti, toplam 1800 sn; operator olurse / personel yoksa yenilenmez (kalkis noktasina 40 m'den yakinsa personelsiz yenilenir). Kapatma: CBA bombaYenile.
+    private _bombaYenile = {
+        private _pers = if (!isNull _op && {alive _op}) then {_op} else {objNull};
+        private _donus = if (!isNull _pers) then {getPosATL _pers} else {_bas};
+        _uav flyInHeight 15;
+        private _tOut = time + 150;
+        waitUntil { _d doMove _donus; sleep 3; !(call _aktif) || {(_uav distance2D _donus) < 8} || {time > _tOut} };
+        private _ok = (call _aktif) && {(_uav distance2D _donus) < 14};
+        if (_ok) then {
+            _uav flyInHeight 3;
+            _d doMove _donus;
+            sleep 3;
+            if (isNull _pers) then { _pers = ((_donus nearEntities ["CAManBase", 25]) select {alive _x && {(side (group _x)) isEqualTo _taraf} && {isNull objectParent _x} && {!isPlayer _x}}) param [0, objNull]; };
+            if (!isNull _pers) then {
+                _pers doWatch _uav;
+                _pers playActionNow "MedicStart";
+                sleep 6;
+                _pers playActionNow "MedicStop";
+                _pers doWatch objNull;
+            } else { sleep 4; };
+            diag_log format ["[IHA-YENILE] %1 | BOMBA yenilendi: %2. sorti, personel %3 | toplam %4 sn", typeOf _uav, _bombaSorti + 1, if (isNull _pers) then {"yok (kalkis noktasi)"} else {name _pers}, round (time - _t0)];
+            _uav flyInHeight 30;
+        } else {
+            diag_log format ["[IHA-YENILE] %1 | yenileme BASARISIZ (donus noktasina %2 m kaldi / sure)", typeOf _uav, round (_uav distance2D _donus)];
+        };
+        _ok
+    };
     private _modMotor = _tur in ["FPV-AT", "FPV-AP"] && {!isNil "FPV_AI_Drones_fnc_fpvLogic"} && {missionNamespace getVariable ["lambs_danger_ihaModMotoru", true]};
     if (_modMotor) then { diag_log "[IHA-SORTI] FPV_AI_Drones modu bulundu: FPV son yaklasma / patlama MOD MOTORUYLA (kapatma: lambs_danger_ihaModMotoru = false)"; };
     while {(call _aktif) && {!_bitti}} do {
@@ -290,7 +320,13 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     _g setVelocity [0, 0, 0];
                     diag_log format ["[IHA-SORTI] %1 | bomba %2/3 birakildi (hedefe %3 m)", typeOf _uav, _birakildi, round _dist];
                 };
-                if (_birakildi >= 3 && {(time - _sonBirak) > 8}) then { _bitti = true; };
+                if (_birakildi >= 3 && {(time - _sonBirak) > 8}) then {
+                    if ((missionNamespace getVariable ["lambs_danger_bombaYenile", true]) && {_bombaSorti < (missionNamespace getVariable ["lambs_danger_bombaSortiMax", 4])} && {call _bombaYenile}) then {
+                        _bombaSorti = _bombaSorti + 1;
+                        _birakildi = 0;
+                        _h = objNull;   // ic dongu biter, dis dongu yeni hedef secer
+                    } else { _bitti = true; };
+                };
                 sleep 1;
             } else {
                 if (_modMotor) then {

@@ -20,7 +20,15 @@
 params [["_g", grpNull, [grpNull]], ["_dr", objNull, [objNull]], ["_dist", 9999, [0]]];
 private _mod = missionNamespace getVariable ["lambs_danger_dronAtesModu", 1];
 if (_mod <= 0) exitWith {false};
-if (_mod >= 2 || {isNull _g} || {isNull _dr}) exitWith {true};
+if (isNull _g || {isNull _dr}) exitWith {true};
+// v8.348 RECON + STEALTH (kullanici: 'ozellikle recon gorevinde, recon hatta stealthlarin hepsi drona ates etmesin'): kesif / gizli gruplar HICBIR modda (serbest dahil), oz savunma istisnasi da dahil, drona ates ETMEZ - konum ele verilmez;
+//   dagilma / siper / gizlenme surer. Recon = gorev RECON / RECON_ARAC ya da planin recon grubu; stealth = davranis STEALTH, combatMode GREEN / BLUE degil ise de keskin nisanci / gozcu takimi. Kapatma: lambs_danger_dronReconAtesOff = true.
+private _recon = !(missionNamespace getVariable ["lambs_danger_dronReconAtesOff", false]) && {
+    ((_g getVariable ["lambs_danger_gorev", ""]) in ["RECON", "RECON_ARAC"]) || {_g getVariable [QGVAR(sniperTeam), false]} || {_g getVariable ["lambs_danger_isSniper", false]}
+    || {(behaviour (leader _g)) isEqualTo "STEALTH"} || {((values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) findIf {_g in (_x getOrDefault ["reconG", []])}) >= 0}
+};
+if (_recon) exitWith {false};
+if (_mod >= 2) exitWith {true};
 
 private _sessiz = (combatMode _g) in ["GREEN", "BLUE"] || {(behaviour (leader _g)) isEqualTo "STEALTH"};
 if (!_sessiz) then {
