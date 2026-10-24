@@ -129,7 +129,7 @@ if ((formation _group) isNotEqualTo "COLUMN") then { [_group, "COLUMN", "flank",
 } forEach (_units select {isNull objectParent _x});
 
 // leader smoke ~ deploy concealment to enable movement
-if (!GVAR(disableAutonomousSmokeGrenades)) then {[_unit, _overwatch] call EFUNC(main,doSmoke);};
+if (!GVAR(disableAutonomousSmokeGrenades) && {[_group, "DIGER"] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])}) then {[_unit, _overwatch] call EFUNC(main,doSmoke);};   // v8.330: ortak sis butcesi
 
 // function
 [{_this call EFUNC(main,doGroupFlank)}, [_group, _units, _vehicles, _posList, _overwatch], 2 + random 8] call CBA_fnc_waitAndExecute;

@@ -9,7 +9,7 @@
  *                    2 atici varsa 5 sn arayla 2 sis (derin perde).
  *
  * Kurallar:
- *   - grup basina 45 sn cooldown
+ *   - grup basina 45 sn cooldown (v8.330: ortak SIS BUTCESI fnc_sisButce - taraf 120 sn'de en cok 2 olay, grup 90 / 60 sn, gercek tehdit sart; ekonomi 45 m / 100 sn)
  *   - tehdit 30m'den yakinsa (CQB) veya 400m'den uzaksa atilmaz
  *   - ruzgar telafisi (sis ruzgar yonune kayar -> 3 sn "ruzgar ustu" nisan)
  *   - sadece beyaz/standart sis (kirmizi/yesil/mavi sinyal sisleri atilmaz)
@@ -78,6 +78,8 @@ if (_aticilar isEqualTo []) exitWith {false};
 // tehdide en yakin (en onde) olandan basla
 _aticilar = [_aticilar, [], {_x distance2D _targetPos}, "ASCEND"] call BIS_fnc_sortBy;
 
+// v8.330 SIS BUTCESI: ortak taraf / grup butcesi + gercek tehdit kapisi (fnc_sisButce); olay basina tek kayit
+if !([_group, _mode] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])) exitWith {false};
 _group setVariable [QGVAR(smokeLast), time];
 
 private _mod = _mode;
@@ -85,7 +87,7 @@ private _mod = _mode;
     params ["_aticilar", "_targetPos", "_mod"];
 
     // v8.10: temas kesmede 3 atici (derin + GENIS perde: yanlara +-14 derece), 2.5 sn arayla (eskiden 2 atici, 5 sn: sis yetmiyordu)
-    private _atisSayisi = if (_mod isEqualTo "BREAK_CONTACT") then { 3 min (count _aticilar) } else { 1 };
+    private _atisSayisi = if (_mod isEqualTo "BREAK_CONTACT") then { 2 min (count _aticilar) } else { 1 };   // v8.330: derin perde 3 -> 2 atis (tek butce olayi)
 
     for "_i" from 0 to (_atisSayisi - 1) do {
         private _atici = _aticilar select _i;
@@ -107,7 +109,7 @@ private _mod = _mode;
         // v8.110 SIS EKONOMISI (kullanici: 'ayni acida 1 sis varsa 3 tane atilmasina gerek yok'): bu acida (<= 10 derece) 12 sn onceden planlanmis / atilmis (75 sn) sis veya yasayan sis nesnesi
         //   (8-60 m, standart sis) varsa bu atis yapilmaz. Temas kesmedeki +-14 derecelik genis perde ayri aci sayilir.
         if (isNil "lambs_danger_sisListe") then { lambs_danger_sisListe = []; };
-        lambs_danger_sisListe = lambs_danger_sisListe select {(time - (_x select 1)) < 75};
+        lambs_danger_sisListe = lambs_danger_sisListe select {(time - (_x select 1)) < 100};
         private _acikFn = { params ["_a1", "_a2"]; abs ((((_a1 - _a2) + 540) mod 360) - 180) };
         private _kayit = lambs_danger_sisListe findIf {
             ([_aticiPos getDir (_x select 0), _yon] call _acikFn) <= 10 && {(_aticiPos distance2D (_x select 0)) >= 8} && {(_aticiPos distance2D (_x select 0)) <= 60}
@@ -142,8 +144,8 @@ private _mod = _mode;
 
         // v8.112: AYNI NOKTA kontrolu (RPT 6cdc8fa0: bir bolgede 3 farkli sis). Aci kontrolu atici konumuna gore oldugu icin FARKLI grup / askerlerin ayni noktaya attigi sisleri yakalamiyordu:
         //   inis noktasinin 22 m'sinde son 75 sn'de planlanan / atilan sis ya da yasayan standart sis nesnesi varsa atis yapilmaz.
-        private _noktaKayit = lambs_danger_sisListe findIf {((_x select 0) distance2D _sisPos) <= 22};
-        private _noktaNesne = (nearestObjects [_sisPos, ["SmokeShell"], 22]) findIf {
+        private _noktaKayit = lambs_danger_sisListe findIf {((_x select 0) distance2D _sisPos) <= 45};
+        private _noktaNesne = (nearestObjects [_sisPos, ["SmokeShell"], 45]) findIf {
             private _tn = toLower (typeOf _x);
             ((_tn find "red") < 0) && {(_tn find "green") < 0} && {(_tn find "blue") < 0} && {(_tn find "yellow") < 0} && {(_tn find "purple") < 0} && {(_tn find "orange") < 0}
         };

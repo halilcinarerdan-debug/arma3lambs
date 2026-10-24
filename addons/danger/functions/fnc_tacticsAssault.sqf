@@ -159,7 +159,8 @@ _group setVariable [QEGVAR(main,currentTactic), "Assaulting", EGVAR(main,debug_f
 [_unit, "combat", "Advance", 125] call EFUNC(main,doCallout);
 
 // concealment
-if (!GVAR(disableAutonomousSmokeGrenades)) then {
+// v8.330: fnc_tactics ASSAULT / SUPPRESS_ASSAULT zaten tacticalSmoke cagiriyor; bu ikinci (lider + 40mm) sis ortak SIS BUTCESINE tabi (ayni saldirida 3 sis atiliyordu)
+if (!GVAR(disableAutonomousSmokeGrenades) && {[_group, "DIGER"] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])}) then {
 
     // leader smoke
     [_unit, _target] call EFUNC(main,doSmoke);
