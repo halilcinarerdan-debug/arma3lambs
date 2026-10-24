@@ -443,3 +443,39 @@ Hepsi (T) = dogrulanmadi.
 2. Tum kosullar saglaninca `[TESLIM] ... N asker teslim oldu`. Saglanmiyorsa aday satiri hangi kosulun eksik oldugunu gosterir (cogu zaman: baski < 0.30 ya da engel=true = grup retreat / evade'de).
 3. Saga sola dagilma: `[PANIK] ... KACIS` satirlari (zirh korkusu) teslim degildir.
 Hepsi (T) = dogrulanmadi.
+
+## T-TANK-OTOMATIK-SECIM (v8.325)
+1. HQ'ya bagli 2 tank (objektife > 4 km), saldiri plani kur. Beklenen: `[PLAN-ARAC] ... [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi` (mesafe sinirina takilmaz); alinmazsa `plana ALINMADI: <neden>`.
+2. `[PLAN-ZIRH] ... ates pozisyonu` + tank yola cikar.
+
+## T-TANK-AGRESIF (v8.327)
+1. CBA `tankAgresif` = 2 (varsayilan). Savunma plani: `[PLAN-ZIRH] ... SAVUNMA MEVZISI` gizleme noktasi birincil mevzi ile ayni, tank dogrudan mevzide.
+2. Saldiri plani: `ILERI SICRAMA` ~60 sn arayla, kademe 4'e kadar (170 m). `tankAgresif` = 0 ile eski temkinli davranisla karsilastir.
+
+## T-ARAC-UNSTUCK (v8.328)
+1. Bir araci (MOVE emriyle) agac / kayaya sokup birak. Beklenen: `[ARAC-UNSTUCK] ... KADEME 1 | neden: ON KORIDORDA engel` ~3 sn sonra, `GERI ALINDI`, `ara noktaya ULASILDI -> asil hedefe devam`.
+2. Kurtulamazsa kademe 2 (daha uzun geri), 3 (`KALDIRILDI`), 4 (`TASINDI`). Hareket eden / bekleyen araca mudahale ETMEMELI (yanlis pozitif kontrolu); `[ARAC-UNSTUCK-OZET]` 60 sn.
+
+## T-DRON-AVI-SAVUNMA (v8.327)
+1. EAST savunma planinda (grup >= 5 kisi); batidan 2+ kez dron uçur. Beklenen: `[DRON-AVI] ... devriye: 3-4 asker (3-4 kisilik alt grup)`; olmazsa `devriye cikmadi: ...` sayaclari nedeni gosterir.
+
+## T-TOPCU-EMINLIK (v8.327)
+1. 1 dron uçur: `[DRON-KARSI-ATES] ... dron sayisi 1 ... yayilim 110 m, 1 top`. 3-4 farkli dron (farkli yonlerden): yayilim 40 -> 16 m, top sayisi artar; atis tahmini operator bolgesine yakin mi.
+
+## T-IHA-DUMAN (v8.327)
+1. AI FPV-AT'nin hedefi (tank) ile dron arasina duman at (el / tank). Beklenen: `[IHA-DUMAN] ... DUMANLA kesik ... bekliyor`, dalis yok; duman acilinca `kilit suresi basliyor`; 22 sn kilit yoksa `hedef 45 sn birakildi`; dalista duman: `kor dalis, N m sapma`.
+
+## T-FPV-CARPMA (v8.329)
+1. AI FPV-AT'yi T-72'ye uçur. Beklenen: `[IHA-SORTI] ... HEDEFE VURDU ... yontem: govde yuzeyi`; 1.7 sn sonra `[IHA-ETKI] <arac> <- R_PG32V_F | toplam hasar | canMove canFire | parcalar >0.3`. ACE Vehicle Damage acik / kapali (`force ace_vehicle_damage_enabled = false;`) iki durumu karsilastir; eski davranis: parca yok, hasar +0.00.
+
+## T-SIS-BUTCE (v8.330)
+1. Saldiri baslat (ASSAULT / FLANK): taraf basina 120 sn'de en cok 2 sis olayi. `[SIS-BUTCE] ... ATILMADI: taraf butcesi dolu / grup araligi / gercek tehdit yok` loglanir. CBA `sisButceMax` 0 = hic sis atilmaz.
+
+## T-OTO-GARNIZON (v8.327)
+1. OPORD 4/4 'Otomatik mevzi / garnizon bolgeleri' = Evet; savunma plani kur. 20 sn sonra `[OTO-GARNIZON] P1 | KARAKOL ... MEVZI ... GOZLETME ...` (ORP'ye / CCP'ye >= 70 m); `[KARAKOL] ...`; nobetciler pozisyonda, devriye dolasir. Saldiri planinda OBJEKTIF ALINDI sonrasi ayni.
+
+## T-YURUNEBILIR-ALAN (v8.331 / v8.333)
+1. Eden: Systems > Modules > 'ELITE Yurunebilir Alan' yogun objeli hendege koy, alan tutamaclariyla boyutla. Oyunda `[YURUYUS-ALANI] modul kaydedildi`; Zeus'ta turuncu isaret + 3D cerceve.
+2. Hendege gonderilen asker takilirsa `[YURUYUS] ... nesne ustunden betikle yuruyor` -> `bitti: vardi`.
+3. Zeus: modulu birak, panelde sekil / a / b / yon sec; `[YURUYUS-ALANI] Zeus alani ayarladi`. Diger oyuncular alani gormez (CBA `yuruGorunum` kapali).
+Hepsi (T) = dogrulanmadi.

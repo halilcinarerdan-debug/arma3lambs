@@ -1,4 +1,4 @@
-# DOGRULANMAYANLAR - cephe simulasyonu HARIC, oyunda dogrulanmamis ozellikler + test senaryo plani (v8.275)
+# DOGRULANMAYANLAR - cephe simulasyonu HARIC, oyunda dogrulanmamis ozellikler + test senaryo plani (v8.333)
 
 Kaynak: OZELLIKLER_LISTESI.md (T isaretleri), DEVIR_LOGU_v7.0.txt, bu oturumdaki RPT analizleri. Cephe simulasyonu (`10e`) kapsam disi.
 Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikte gorulunce T'den cikarilir (OZELLIKLER_LISTESI.md'de `(T)` silinir, bu dosyada [x] yapilir).
@@ -161,3 +161,25 @@ Log kanitlari:
 - Dogrulanan (v8.275 bayraklari): moral cokme terimi, recon araci tam binme + yol zinciri (`[RECON-ARAC]` 6/6, `[RECON-ARAC-HAREKET]` 20 satir, 54 km/h'e cikti), kuvvet orani kapisi (`[PLAN-ORAN]` ERKEN SALDIRI IZINLI, tahmin 10.2 = gozlenen 5.0 + iddia 20 x 0.35), HQ-DESTEK, tank piyade bagi (136 sn), tank duman (T-72B3 `rhs_weap_smokegen` ATILDI).
 - Yapilmayan: hendek (S2), medevac, teslim (S10), S6.
 v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni senaryoyu tekrarla, `[TESLIM]`, `[TANK-BAKIS]`, `ILERI SICRAMA`, `[TASIMA] ... butun`, `SEFER ERTELENDI` satirlarina bak (`rpt_ozet.py --tani`).
+
+## 5. v8.276 - v8.333 (guncelleme 2026-10-24; kanit = bu oturumdaki RPT / kullanici gozlemi; digerleri T)
+### Log kanitiyla DOGRULANAN
+- [x] Teslim (v8.276), butun grup nakli, `[TANK-BAKIS]`, ILERI SICRAMA kademe 1 — RPT 2026-10-21 (v8.276 notu).
+- [x] Dron zinciri: `[MOTOR-SES]` -> `[DRON-YON]` -> `[DRON-SAKLAN]` calisiyor (RPT 22-10 22:53, v8.294-v8.297); zorla ates `[DRON-ATES]` (132 zorla atis, hepsi kacirdi - isabetsizlik hitbox / hasar suphesi).
+- [x] `[TANK-DRON]` tepkisi (YON + ATES + DUMAN + KACINMA, tank GERCEK ATIS 92) ve `[DRON-KARSI-ATES]` (7 olay) — RPT 40d48a79 (v8.324).
+- [x] `[SIS-EKONOMI]` (ayni acida / noktada tekrar atmama) — 9 atlanan, RPT 40d48a79.
+- [x] Tank mevziye yerlesme + TETIK + `YER DEGISTIRIYOR` (shoot-and-scoot) — RPT 40d48a79; `TAKILDI` 3 kez (tank agaclara takildi, v8.327-v8.328 bunun icin).
+### v8.327 - v8.333 (T, hepsi oyunda denenmedi)
+- [ ] Tank otomatik secimi HQ'ya bagli tanki mesafe sinirina takmaz (v8.325): `[PLAN-ARAC] ... OTOMATIK alindi` ya da `plana ALINMADI: <neden>`.
+- [ ] Tank agresifligi (CBA `tankAgresif` 2): savunmada gizleme noktasi yok, mevzi ~200 m, saldirida 60 sn'de ileri sicrama, 5 kademe.
+- [ ] Genel arac unstuck (`[ARAC-UNSTUCK]` kademe 1-4, `[ARAC-UNSTUCK-OZET]`): ag aca / kayaya takilan arac kurtuluyor mu; yanlis pozitif (bekleyen arac) var mi.
+- [ ] Dron operatoru avi savunma planindaki gruptan 3-4 kisi cikariyor mu (`[DRON-AVI]`); `devriye cikmadi` nedeni.
+- [ ] Topcu eminligi: 1 dron 110 m / 4+ dron 16 m yayilim (`[DRON-KARSI-ATES] ... dron sayisi`), atis operatore yakin mi.
+- [ ] AI IHA duman kilidi (`[IHA-DUMAN]`): duman varken dalis yok / kor sapma; kilit suresi 1,2 sn.
+- [ ] FPV-AT gercek carpma (`[IHA-SORTI] ... yontem: govde yuzeyi`, `[IHA-ETKI]`): tank hasari > 0 / parca > 0.3 mi (ACE Vehicle Damage acik / kapali karsilastir).
+- [ ] Sis butcesi (`[SIS-BUTCE]` ret nedenleri): taraf 120 sn'de en cok 2 olay; saldirida tek sis.
+- [ ] Otomatik mevzi / garnizon (`[OTO-GARNIZON]`): KARAKOL + MEVZI + GOZLETME kuruldu mu, ORP / CCP'den >= 70 m, nobet / devriye kuruldu mu; savunma planinda cakisma.
+- [ ] Yurunebilir Alan modulu: Eden Systems > Modules'te gorunur mu; `[YURUYUS-ALANI]` kaydi; takilan asker nesne ustunden yuruyor mu (`[YURUYUS]`); Zeus listesinde modul + 4 alanli panel; Zeus'ta turuncu harita isareti + 3D cerceve; Eden `objectArea` degiskeni dogru mu.
+- [ ] Hedef zinciri TUT (v8.324): `[PLAN-TUT]`, tutan squad'in savunma plani + isaretler.
+- [ ] Patlayici (el bombasi / roket / UGL) ve ates-hareket (v8.310-v8.317): son oturumlarda sunucuda temas az, `[PATLAYICI-OZET]` hep 0; yeniden denenmeli.
+- [ ] `tools/hemtt_kontrol.sh`: depoda 0 hata (v8.332); lint uyarilari yalniz stil.
