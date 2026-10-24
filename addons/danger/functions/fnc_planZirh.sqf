@@ -367,11 +367,11 @@ private _nZ = count _zg;
                 _d forceSpeed -1;
                 diag_log format ["[PLAN-ZIRH] %1 | %2 yol yuruyusu %3 (pozisyona %4 m)", _id, groupId _g, ["KAPALI: COMBAT / NORMAL", "ACIK: SAFE / FULL"] select _uzak, round (_v distance2D _poz)];
             };
-            // takilma: 25 sn'den uzun < 1.5 km/s ise 220 m'lik (yola oturtulmus, +-50 derece) ara noktaya yonlendirilir
+            // takilma: 25 sn'den (v8.326: piyade temasi / savas fazinda 70 sn; arac hedefe ates ederken duruyor, RPT 5372f629: BTR'ler temasta 7 kez 'TAKILDI' sayilip 220 m yana yonlendirildi / 2. seferde setPosATL ile tasindi) uzun < 1.5 km/s ise 220 m'lik (yola oturtulmus, +-50 derece) ara noktaya yonlendirilir
             if ((speed _v) < 1.5) then {
                 if ((_g getVariable ["lambs_danger_planZirhDurT", -1]) < 0) then { _g setVariable ["lambs_danger_planZirhDurT", time]; };
                 // v8.257: hareket edemeyen (canMove false) ya da murettebat bekleyen tank 'takildi' sayilmaz; ara nokta mesafesi hedefe kalan mesafenin %60'ini asmaz (RPT e31bd8bd: pozisyona 84 m kalmisken 240 m'lik ara nokta)
-                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > 25 && {(_v distance2D _poz) > 80} && {canMove _v} && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0}) then {
+                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > ([25, 70] select _savas) && {(_v distance2D _poz) > 80} && {canMove _v} && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0}) then {
                     _g setVariable ["lambs_danger_planZirhDurT", time];
                     private _ara = (getPosATL _v) getPos [(220 min (0.6 * (_v distance2D _poz))), ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
                     private _yl = _ara nearRoads 120;
