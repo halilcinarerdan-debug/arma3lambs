@@ -477,11 +477,4 @@ Hepsi (T) = dogrulanmadi.
 
 ## T-OTO-GARNIZON (v8.327)
 1. OPORD 4/4 'Otomatik mevzi / garnizon bolgeleri' = Evet; savunma plani kur. 20 sn sonra `[OTO-GARNIZON] P1 | KARAKOL ... MEVZI ... GOZLETME ...` (ORP'ye / CCP'ye >= 70 m); `[KARAKOL] ...`; nobetciler pozisyonda, devriye dolasir. Saldiri planinda OBJEKTIF ALINDI sonrasi ayni.
-
-## T-YURUNEBILIR-ALAN (v8.331 / v8.333)
-1. Eden: Systems > Modules > 'ELITE Yurunebilir Alan' yogun objeli hendege koy, alan tutamaclariyla boyutla. Oyunda `[YURUYUS-ALANI] modul kaydedildi`; Zeus'ta turuncu isaret + 3D cerceve.
-2. Hendege gonderilen asker takilirsa `[YURUYUS] ... nesne ustunden betikle yuruyor` -> `bitti: vardi`.
-3a. KULLANIM KOLAYLIGI (v8.335): alani koy; Zeus'ta 5 sn icinde sohbet raporu `[ELITE] Yurunebilir alan <kare>: TAMAM|UYARI|HATA|BOS - ...` + isaret / cerceve rengi (yesil / turuncu / kirmizi / sari); alani boyutlandirinca yeniden taranir; RPT'de `[YURUYUS-ALANI] tarama`.
-3b. YOGUN KAYA / NESNE BANDI (v8.334): bant boyunca ust uste binen birkac modul (>= 8 m); gecit ucundan diger uca hareket emri ver. Beklenen: `[YURUYUS] ... takildi ... alanin icinde / kenarda` -> `bitti: vardi ... en yuksek yuzey N m` (kayanin USTUNDEN; icinden gecme / havada durma gozlemle); asiri yuksek kayada `bitti: gecilemez engel`.
-3. Zeus: modulu birak, panelde sekil / a / b / yon sec; `[YURUYUS-ALANI] Zeus alani ayarladi`. Diger oyuncular alani gormez (CBA `yuruGorunum` kapali).
 Hepsi (T) = dogrulanmadi.

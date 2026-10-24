@@ -180,9 +180,6 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] FPV-AT gercek carpma (`[IHA-SORTI] ... yontem: govde yuzeyi`, `[IHA-ETKI]`): tank hasari > 0 / parca > 0.3 mi (ACE Vehicle Damage acik / kapali karsilastir).
 - [ ] Sis butcesi (`[SIS-BUTCE]` ret nedenleri): taraf 120 sn'de en cok 2 olay; saldirida tek sis.
 - [ ] Otomatik mevzi / garnizon (`[OTO-GARNIZON]`): KARAKOL + MEVZI + GOZLETME kuruldu mu, ORP / CCP'den >= 70 m, nobet / devriye kuruldu mu; savunma planinda cakisma.
-- [ ] Yurunebilir Alan tarama / renk / sohbet raporu (v8.335): durum dogru mu (nesneli = yesil, bos = sari, 3 m ustu = turuncu / kirmizi), rapor spam yapiyor mu.
-- [ ] Yurunebilir Alan (v8.334 yogun kaya bandi): GEOM isini terrain kayalarinda nesne donduruyor mu, 3 m tirmanma siniri / yan gecis / gecis koridoru / ust uste alan zinciri; `en yuksek yuzey` logu.
-- [ ] Yurunebilir Alan modulu: Eden Systems > Modules'te gorunur mu; `[YURUYUS-ALANI]` kaydi; takilan asker nesne ustunden yuruyor mu (`[YURUYUS]`); Zeus listesinde modul + 4 alanli panel; Zeus'ta turuncu harita isareti + 3D cerceve; Eden `objectArea` degiskeni dogru mu.
 - [ ] Hedef zinciri TUT (v8.324): `[PLAN-TUT]`, tutan squad'in savunma plani + isaretler.
 - [ ] Patlayici (el bombasi / roket / UGL) ve ates-hareket (v8.310-v8.317): son oturumlarda sunucuda temas az, `[PATLAYICI-OZET]` hep 0; yeniden denenmeli.
 - [ ] `tools/hemtt_kontrol.sh`: depoda 0 hata (v8.332); lint uyarilari yalniz stil.

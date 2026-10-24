@@ -202,7 +202,7 @@ private _calis = {
                             diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET pozisyonda: %2 (%3 %4)", _ad, name _u, _x select 2, mapGridPosition _p];
                         };
                     } else {
-                        if (!(_u getVariable ["lambs_danger_nobet", false]) && {time > (_u getVariable ["lambs_danger_nobetT", 0])} && {(time - (_u getVariable ["lambs_danger_nobetT", time])) <= 120}) then { _u setVariable [QGVAR(yurHedef), [_p, time]]; _u doMove _p; };
+                        if (!(_u getVariable ["lambs_danger_nobet", false]) && {time > (_u getVariable ["lambs_danger_nobetT", 0])} && {(time - (_u getVariable ["lambs_danger_nobetT", time])) <= 120}) then { _u doMove _p; };
                         if ((time - (_u getVariable ["lambs_danger_nobetT", time])) > 120 && {!(_u getVariable ["lambs_danger_nobet", false])}) then {
                             _u setPosATL _p;
                             _u setVariable ["lambs_danger_nobetT", time];
@@ -226,7 +226,6 @@ private _calis = {
                     _sec setVariable ["lambs_danger_nobetT", time];
                     _sec setVariable ["lambs_danger_nobet", nil, true];
                     _sec enableAI "PATH";
-                    _sec setVariable [QGVAR(yurHedef), [_p, time]];
                     _sec doMove _p;
                     _atama set [str _i, _sec];
                     _birimler pushBack _sec;
