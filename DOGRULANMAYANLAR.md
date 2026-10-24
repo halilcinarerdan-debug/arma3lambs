@@ -204,3 +204,4 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] v8.344: `[SIHA-KESIF]` FAZ 1-3 ve CIKARIM (ucan GOZLEM turu dron ver: Darter / Falcon); plan tehdit yonu guncellendi mi.
 - [ ] v8.344: `[MOD-UYUM]` satirlari (RHS tek; CUP yuklenince CUP sayilari).
 - [ ] v8.345: sessiz tempoda drona ates yok (`[DRON-ATES] ... ATES YOK (sessizlik`); `dronAtesModu` 0 / 1 / 2; gozlem dronu `[IHA-GOZLEM] N hedef goruldu` artik 1'de takilmiyor; `[DRON-TOPCU-OZET]` periyodik geliyor, hata sonrasi `BEKCI ... yeniden baslatildi` gorunmuyor.
+- [ ] v8.346: ayni anda 3 dron cikinca '1 bagimsiz dron' sayiliyor mu (ZAYIF TAHMIN logunda 'N bagimsiz dron'), 5 dk ucan dronun gozlemi 'zayif izli' sayiliyor mu.

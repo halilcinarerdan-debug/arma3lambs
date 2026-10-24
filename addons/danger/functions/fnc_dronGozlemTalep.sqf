@@ -25,8 +25,14 @@ missionNamespace setVariable ["lambs_danger_dronGozObs", _obs];
 
 // v8.344 FARKLI YONLER: yalniz ayni yondeki (geri-yon +-40 derece) gozlemler birlikte degerlendirilir (farkli operatorlerin dogrulari kesistirilmez)
 _obs = _obs select {(abs ((((_x select 4) - _geri) + 540) mod 360 - 180)) <= 40};
+// v8.345 SALVO: ayni anda (<= 40 sn arayla ilk gorulen) cikan dronlar TEK sayilir
+private _ilkZ = createHashMap;
+{ private _nid = _x select 2; _ilkZ set [_nid, (_ilkZ getOrDefault [_nid, 1e9]) min (_x select 0)]; } forEach _obs;
+private _zam = values _ilkZ;
+_zam sort true;
 private _dronlar = [];
-{ _dronlar pushBackUnique (_x select 2); } forEach _obs;
+private _sonZ = -1e9;
+{ if ((_x - _sonZ) > 40) then { _dronlar pushBack _x; _sonZ = _x; }; } forEach _zam;
 private _son300 = {(time - (_x select 0)) < 300} count _obs;
 if ((count _dronlar) < 2 && {_son300 < 4}) exitWith {false};
 private _ozK = format ["lambs_danger_dronGozTalepT_%1_%2", _taraf, floor (_geri / 60)];

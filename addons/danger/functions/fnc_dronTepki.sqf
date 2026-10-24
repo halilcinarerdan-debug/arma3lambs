@@ -33,6 +33,8 @@ private _silahli = ((_dr weaponsTurret [-1]) isNotEqualTo []) || {(_dr weaponsTu
 private _kamikaze = _silahli || {_tip in ["FPV-AT", "FPV-AP", "BOMBA"]};
 
 // ---- 1) IZ + GELIS YONU ----
+private _ilkGor = _dr getVariable [QGVAR(dronIlkGor), -1];
+if (_ilkGor < 0) then { _ilkGor = time; _dr setVariable [QGVAR(dronIlkGor), time]; };
 private _iz = _dr getVariable [QGVAR(dronIz), []];
 if (_iz isEqualTo [] || {(time - ((_iz select -1) select 0)) >= 2}) then {
     _iz pushBack [time, getPosATL _dr];
@@ -71,17 +73,31 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
             //   ikiser ikiser kesistirilir (>= 15 derece, 100-2500 m), kesisimlerin MEDYANI operator bolgesi. Kesisim yoksa tek dogru uzerinde yalniz 380 m (eskiden 500 / 800 / 1100 m uc nokta). Yayilim ve top sayisi dron sayisina gore:
             //   1 dron: 110 m / 1 top | 2: 70 m (kesisim) / 2 top | 3: 40 m / 3 top | 4+: 16 m / tum toplar. Dost 200 m icinde ise atilmaz.
             private _obs = (missionNamespace getVariable ["lambs_danger_dronOpObs", []]) select {(time - (_x select 2)) < 600 && {(_x select 3) isEqualTo _tarafK}};
-            _obs pushBack [_p0, _geri, time, _tarafK, netId _dr];
+            // v8.345 ZAYIF IZ (kullanici: 'zayif tahmin ekle'; RPT 01-19: operatorun 5 dk ucan dronundan alinan geri yon 57 -> 91 derece, yani operator yeri DEGIL): dron > 90 sn'dir goruluyorsa ya da izi dogru degilse
+            //   (iz duzluk orani = yer degistirme / yol uzunlugu < 0.75: daire / manevra) geri yon operator yerini gostermez -> gozlem 'zayif' isaretlenir, guven ve kesisimde SAYILMAZ.
+            private _yol = 0;
+            for "_k" from 1 to ((count _iz) - 1) do { _yol = _yol + (((_iz select (_k - 1)) select 1) distance2D ((_iz select _k) select 1)); };
+            private _duzluk = if (_yol > 1) then { (_p0 distance2D _p1) / _yol } else { 1 };
+            private _zayifIz = (time - _ilkGor) > 90 || {_duzluk < 0.75};
+            _obs pushBack [_p0, _geri, time, _tarafK, netId _dr, _zayifIz];
             if ((count _obs) > 16) then { _obs = _obs select [(count _obs) - 16, 16]; };
             missionNamespace setVariable ["lambs_danger_dronOpObs", _obs];
             // v8.344 FARKLI YONLER (kullanici: 'dron saldirilari farkli yonlerden gelirse'): gozlemler tum yonlerden havuzlaniyordu -> farkli operatorlerin dogrulari kesisip anlamsiz nokta uretiyordu.
             //   Artik yalniz AYNI YONDEN (geri-yon +-40 derece) gelen gozlemler birlikte degerlendirilir; zaman kilidi de yon dilimi (60 derece) basina.
             _ozK = format ["%1_%2", _ozK, floor (_geri / 60)];
             _obs = _obs select {(abs ((((_x select 1) - _geri) + 540) mod 360 - 180)) <= 40};
+            private _obsTum = +_obs;
+            _obs = _obs select {!(_x param [5, false])};   // zayif izli gozlemler kesisim / guvene girmez
             if ((time - (missionNamespace getVariable [_ozK, -999])) > 180) then {
-                private _dronlar = [];
-                { _dronlar pushBackUnique (_x select 4); } forEach _obs;
-                private _nD = count _dronlar;
+                // v8.345 SALVO: ayni anda (<= 40 sn arayla ilk gorulen) cikan birden cok dron TEK operator / TEK kanit sayilir (kullanici: 'ayni anda 3-4 dron cikmasina gerek yok'; testte 3 dron ayni anda cikti)
+                private _ilkZ = createHashMap;
+                { private _nid = _x select 4; _ilkZ set [_nid, (_ilkZ getOrDefault [_nid, 1e9]) min (_x select 2)]; } forEach _obs;
+                private _zamanlar = (values _ilkZ);
+                _zamanlar sort true;
+                private _nD = 0;
+                private _sonZ = -1e9;
+                { if ((_x - _sonZ) > 40) then { _nD = _nD + 1; _sonZ = _x; }; } forEach _zamanlar;
+                private _dronlar = keys _ilkZ;
                 private _kesX = [];
                 private _kesY = [];
                 for "_i" from 0 to ((count _obs) - 2) do {
@@ -126,12 +142,13 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
                 private _gSure = if (_obs isEqualTo []) then {0} else {(selectMax (_obs apply {_x select 2})) - (selectMin (_obs apply {_x select 2}))};
                 private _guven = 0;
                 if (_kesX isNotEqualTo []) then { _guven = 2; } else { if (_nD >= 2 || {(count _obs) >= 3 && {_gSure >= 20}}) then { _guven = 1; }; };
+                if (_obs isEqualTo [] && {_obsTum isNotEqualTo []}) then { _guven = 0; };   // yalniz zayif (uzun ucan / donen) iz var
                 private _gK = format ["lambs_danger_opAtesL_%1_%2", _tarafK, floor (_geri / 60)];
                 private _gL = (missionNamespace getVariable [_gK, []]) select {(time - _x) < 600};
                 if (_guven < (missionNamespace getVariable ["lambs_danger_dronGuvenMin", 1])) then {
                     if ((time - (_g getVariable [QGVAR(zayifLogT), -999])) > 60) then {
                         _g setVariable [QGVAR(zayifLogT), time];
-                        diag_log format ["[DRON-KARSI-ATES] %1 | %2 | ZAYIF TAHMIN (guven %3 < %4: %5 dron, %6 gozlem, %7 sn, kesisim yok) - topcu ATILMADI, istiksaf / gozlem dronu / dron avi surer", groupId _g, _tarafK, _guven, missionNamespace getVariable ["lambs_danger_dronGuvenMin", 1], _nD, count _obs, round _gSure];
+                        diag_log format ["[DRON-KARSI-ATES] %1 | %2 | ZAYIF TAHMIN (guven %3 < %4: %5 bagimsiz dron (ayni anda cikanlar tek sayilir), %6 gozlem (zayif iz haric), %7 sn, kesisim yok; zayif izli gozlem %8) - topcu ATILMADI, istiksaf / gozlem dronu / dron avi surer", groupId _g, _tarafK, _guven, missionNamespace getVariable ["lambs_danger_dronGuvenMin", 1], _nD, count _obs, round _gSure, (count _obsTum) - (count _obs)];
                     };
                 } else {
                     if ((count _gL) >= 3) then {
