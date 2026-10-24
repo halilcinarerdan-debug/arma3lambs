@@ -40,7 +40,7 @@ private _adaylar = [];
     for "_b" from 0 to 330 step 30 do {
         private _p = _obj getPos [_r, _b];
         if (!surfaceIsWater _p && {(_yasakNokta findIf {(_x distance2D _p) < 70}) < 0}) then {
-            private _evler = count ((nearestObjects [_p, ["House"], 45]) select {(count (_x buildingPos -1)) > 0});
+            private _evler = count ((nearestObjects [_p, ["House"], 45]) select {(_x buildingPos -1) isNotEqualTo []});
             private _ort = count (nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS"], 22, false, true]);
             private _h = (getTerrainHeightASL _p) - _zObj;
             private _hiz = if (_tehdit >= 0) then { cos (_b - _tehdit) } else { 0 };

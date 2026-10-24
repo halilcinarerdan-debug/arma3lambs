@@ -36,7 +36,7 @@ private _taraf = side _g;
 private _anahtar = format ["lambs_danger_sisButce_%1", _taraf];
 private _liste = (missionNamespace getVariable [_anahtar, []]) select {(time - _x) < 120};
 if ((count _liste) >= _maks) exitWith { [format ["taraf butcesi dolu (%1 / 120 sn)", count _liste]] call _ret };
-if (_liste isNotEqualTo [] && {(time - (_liste select ((count _liste) - 1))) < 25}) exitWith { ["taraf araligi (< 25 sn)"] call _ret };
+if (_liste isNotEqualTo [] && {(time - (_liste select -1)) < 25}) exitWith { ["taraf araligi (< 25 sn)"] call _ret };
 
 private _grupAralik = missionNamespace getVariable ["lambs_danger_sisGrupAralik", 90];
 if (_mod isEqualTo "BREAK_CONTACT") then { _grupAralik = _grupAralik * 0.67; };

@@ -360,8 +360,8 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
     private _vg = group _d;
     private _rpi = [_rp, _forEachIndex, count _eslesme] call _noktaYay;
     private _dropi = [_drop, _forEachIndex, count _eslesme] call _noktaYay;
-    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl, _destekKal, _obj, _senk] spawn {
-        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl", "_destekKal", "_obj", "_senk"];
+    _isler pushBack ([_v, _d, _vg, _gl, _rpi, _dropi, _ctl, _destekKal, _obj, _senk, _taraf] spawn {   // v8.332: _taraf spawn parametresi (HEMTT L-S13: ARAC KURTARMA blogunda _taraf tanimsizdi -> hata)
+        params ["_v", "_d", "_vg", "_gl", "_rp", "_drop", "_ctl", "_destekKal", "_obj", "_senk", "_taraf"];
         private _senkSay = false;
         private _senkBitti = { if (!_senkSay) then { _senkSay = true; _senk set [0, (_senk select 0) + 1]; }; };
         _v setVariable [QGVAR(tasimaMesgul), true];

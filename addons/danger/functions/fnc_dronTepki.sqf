@@ -34,14 +34,14 @@ private _kamikaze = _silahli || {_tip in ["FPV-AT", "FPV-AP", "BOMBA"]};
 
 // ---- 1) IZ + GELIS YONU ----
 private _iz = _dr getVariable [QGVAR(dronIz), []];
-if (_iz isEqualTo [] || {(time - ((_iz select (count _iz - 1)) select 0)) >= 2}) then {
+if (_iz isEqualTo [] || {(time - ((_iz select -1) select 0)) >= 2}) then {
     _iz pushBack [time, getPosATL _dr];
     if ((count _iz) > 14) then { _iz deleteAt 0; };
     _dr setVariable [QGVAR(dronIz), _iz];
 };
 if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
     private _p0 = (_iz select 0) select 1;
-    private _p1 = (_iz select (count _iz - 1)) select 1;
+    private _p1 = (_iz select -1) select 1;
     if ((_p0 distance2D _p1) >= 25 && {(time - (_g getVariable [QGVAR(dronYonT), -999])) > 15}) then {
         private _gelis = _p0 getDir _p1;
         private _geri = (_gelis + 180) mod 360;

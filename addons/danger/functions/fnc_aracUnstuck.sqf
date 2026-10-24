@@ -10,7 +10,7 @@
  *   2) daha uzun geri (4 sn) + 45 m ara nokta
  *   3) KALDIR + YAN KAYDIR: bos yana 2.5 m + 0.6 m yukari, hiz sifirlanir, setVectorUp (govde agaca saplanmissa kurtarir) + 65 m ara nokta
  *   4+) TASI: hedef yonune 12-30 m icinde engelsiz (genislik + 3 m) en yakin bos konuma setVehiclePosition, yon hedefe cevrilir
- * Atlanir: oyuncu surucu, kinematik surus (kinSurus), recon araci, yolcu birakma, murettebat bekleme, KARAKOL_ARAC gorevi, planZirh mevzide (Vardi), forceSpeed 0. Kapatma: lambs_danger_aracUnstuckOff = true ya da CBA 'Arac takilma kurtarma'.
+ * Atlanir: oyuncu surucu, kinematik surus (kinSurus), recon araci, yolcu birakma, murettebat bekleme, KARAKOL_ARAC gorevi, planZirh mevzide (Vardi). Kapatma: lambs_danger_aracUnstuckOff = true ya da CBA 'Arac takilma kurtarma'.
  * Log: [ARAC-UNSTUCK] (kademe, neden, engel, konum) + 60 sn ozet.
  *
  * Arguments: None
@@ -65,7 +65,6 @@ private _calis = {
                 && {!(_v getVariable [QGVAR(kinSurus), false])} && {!(_v getVariable [QGVAR(reconArac), false])} && {!(_v getVariable [QGVAR(yolcuBirak), false])}
                 && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0} && {!(_v getVariable [QGVAR(unstuckBusy), false])}
                 && {(_v getVariable ["lambs_danger_gorev", ""]) isNotEqualTo "KARAKOL_ARAC"} && {!((group _d) getVariable ["lambs_danger_planZirhVardi", false])}
-                && {(forceSpeed _d) isNotEqualTo 0}
                 && {((crew _v) findIf {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 10}) < 0};
             private _dest = if (_uygun) then { (expectedDestination _d) select 0 } else { [] };
             if (_dest isEqualTo [0, 0, 0]) then { _dest = []; };
@@ -84,7 +83,9 @@ private _calis = {
             private _pos = getPosATL _v;
             private _yakinEngel = nearestTerrainObjects [_pos, _tur, (_boy / 2) + 2.5, false, true];
             private _onEngel = nearestTerrainObjects [_v modelToWorld [0, (_boy / 2) + 2.5, 0], _tur, (_gen / 2) + 1.2, false, true];
-            private _esik = if (_onEngel isNotEqualTo []) then {3} else { if (_yakinEngel isNotEqualTo []) then {7} else {40} };
+            private _esik = 40;
+            if (_yakinEngel isNotEqualTo []) then { _esik = 7; };
+            if (_onEngel isNotEqualTo []) then { _esik = 3; };
             if ((_v getVariable [QGVAR(ukAsama), 0]) > 0) then { _esik = _esik max 6; };   // kademe arasi bekleme
             if ((_v getVariable [QGVAR(tasimaMesgul), false]) || {(group _d) getVariable ["lambs_danger_planZirh", false]}) then { _esik = _esik * ([2, 3] select (_yakinEngel isNotEqualTo [] || {_onEngel isNotEqualTo []})); };
             if ((time - (_v getVariable [QGVAR(ukT0), time])) < _esik || {(time - (_v getVariable [QGVAR(ukEylemT), -999])) < 8}) then { continue };
@@ -99,7 +100,9 @@ private _calis = {
             _v setVariable [QGVAR(unstuckBusy), true];
             _sayac set ["tespit", (_sayac get "tespit") + 1];
             _sayac set [format ["asama%1", _asama min 4], (_sayac get (format ["asama%1", _asama min 4])) + 1];
-            private _nedenI = (([0, 1] select (_yakinEngel isNotEqualTo [])) max ([0, 2] select (_onEngel isNotEqualTo [])));
+            private _nedenI = 0;
+            if (_yakinEngel isNotEqualTo []) then { _nedenI = 1; };
+            if (_onEngel isNotEqualTo []) then { _nedenI = 2; };
             private _neden = ["engel yok (40 sn)", "yanda / cevrede engel", "ON KORIDORDA engel"] select _nedenI;
             private _ilkEngel = if (_onEngel isNotEqualTo []) then { _onEngel select 0 } else { if (_yakinEngel isNotEqualTo []) then { _yakinEngel select 0 } else { objNull } };
             diag_log format ["[ARAC-UNSTUCK] %1 | %2 | KADEME %3 | neden: %4 | en yakin engel %5 (%6 m) | konum %7 | hedefe %8 m | hasar %9",

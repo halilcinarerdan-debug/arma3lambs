@@ -22,7 +22,7 @@ if (isNull _g || {_p0 isEqualTo []} || {missionNamespace getVariable ["lambs_dan
 private _taraf = side _g;
 
 // ---- ayar: operasyon emri (aktif plan) > CBA ----
-private _mod = if (missionNamespace getVariable ["lambs_danger_dronAviAktif", true]) then {3} else {0};   // v8.327: _mod = devriye EN FAZLA kac asker (3 / 4); asgari 3 (kullanici: zorunlu 4 kisi sart degil, alt grup olabilir ama 3'ten kucuk olmasin)
+private _mod = [0, 3] select (missionNamespace getVariable ["lambs_danger_dronAviAktif", true]);   // v8.327: _mod = devriye EN FAZLA kac asker (3 / 4); asgari 3 (kullanici: zorunlu 4 kisi sart degil, alt grup olabilir ama 3'ten kucuk olmasin)
 private _aracIste = missionNamespace getVariable ["lambs_danger_dronAviArac", true];   // v8.322: CBA - arac (hafif, recon mantigi) varsa aracla
 private _planlar = (values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) select {(_x getOrDefault ["taraf", sideUnknown]) isEqualTo _taraf};
 if (_planlar isNotEqualTo []) then {
