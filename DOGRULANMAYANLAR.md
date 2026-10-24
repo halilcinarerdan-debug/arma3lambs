@@ -195,4 +195,4 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] Plan atisinda 122 mm (2S1) icin RED 455 m: `[PLAN-TOPCU] ... ATMADI: en yakin dost ... < RED 455`.
 - [ ] v8.339: Zeus IHA modulu Taraf Otomatik (B_ sinif -> BLUFOR); dusman dron secilirse 'IHA gorevi IPTAL' yazisi; bekleyen GOZLEM emri `[DRON-GOZLEM] BEKLEYEN gozlem emri serbest birakildi` -> `[IHA-BEKLEME] ... GOZLEMCI TALEBIYLE serbest`.
 - [ ] Operator atesinde Sh_82mm_AMOS mermisi hedeften ~1.6 km uzaga dusuyor mu (`[DRON-KARSI-ATES] ... ATIS EMRI` + `[TANI-TOPCU]` karsilastir).
-
+- [ ] v8.340: dron vurulma suresi uzadi mi (`[DRON-ISABET]` olasiliklari; yakin + yuksek beceri ~1, uzak / hizli dusuk); `dronIsabetOran` 0.5 / 2 ile karsilastir.

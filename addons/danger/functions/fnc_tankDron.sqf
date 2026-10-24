@@ -99,7 +99,7 @@ if (_dist <= 500) then {
                             if ((vectorMagnitude _fark) > 1 && {(vectorMagnitude _wd) > 0.1}) then {
                                 private _aci = acos ((((vectorNormalized _wd) vectorDotProduct (vectorNormalized _fark)) min 1) max -1);
                                 if (_aci < _min) then { _min = _aci; };
-                                if (_aci < 5) then {
+                                if (_aci < 5 && {random 1 < ([_u, _dr] call FUNC(dronVurusOlasi))}) then {   // v8.340: atis olasiligi nisancinin becerisine (CBA isabet) bagli
                                     for "_k" from 1 to 4 do {
                                         _v fireAtTarget [_dr, _w];
                                         _v setVariable [QGVAR(tankZorlaN), (_v getVariable [QGVAR(tankZorlaN), 0]) + 1];
