@@ -308,4 +308,26 @@ class CfgVehicles {
             };
         };
     };
+    // ELITE fork (v8.331): Eden (3D editor) modulu - yogun objeli hendeklerde AI nesnelerin USTUNDEN yurusun; ad yazmaya gerek yok, alan modulun kendi tutamaclariyla ayarlanir
+    class GVAR(YuruyusAlani) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(YuruyusAlani);
+        scope = 2;
+        scopeCurator = 0;
+        displayName = "ELITE Yurunebilir Alan (yogun objeli hendek)";
+        isGlobal = 0;
+        isTriggerActivated = 0;
+        isDisposable = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
+        function = QFUNC(moduleYuruyusAlani);
+        functionPriority = 5;
+        canSetArea = 1;
+        canSetAreaShape = 1;
+        canSetAreaHeight = 0;
+        class AttributeValues {
+            size3[] = {12, 4, -1};
+            isRectangle = 1;
+        };
+    };
 };
