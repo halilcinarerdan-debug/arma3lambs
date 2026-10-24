@@ -139,21 +139,6 @@ Ortam: kısa harita bölgesi, düz arazi, sunucuda ELITE + RHS (US/RUS). Zaman: 
 5. **Olumsuz durum**: hendek işaretini sil/yanlış adla (ör. `hendek_1`) → eski davranış (düz arazide yat) — hata/log kirliliği olmamalı.
 Başarı ölçütü: 1'de açık farkla daha az kayıp; 2'de ≥ %80 asker hendeğe girip çıkabiliyor; 3-4'te `[HENDEK-YERLES]` ve çömelen asker sayısı ≥ %70. Not: hepsi doğrulanmamış (T).
 
-## T-CEPHE-A0 (v8.237): cephe simulasyonu — profil cekirdegi, faction paneli, Personnel Replacement
-Ortam: sunucu (dedicated ya da host) + RHS US / RUS (ya da GM), Zeus'lu bir oyuncu. CBA > LAMBS Danger > ELITE Cephe Komutani: kisa test icin tavan 60, oyuncu yaricapi 1000, sanallama beklemesi 20, min fiziksel kalis 30 yapin (varsayilanlar uzun test icin).
-RPT yardimcisi: `python tools/rpt_ozet.py --cephe <sunucu.rpt>`. Zaman cizelgesi [CEPHE-*] t+sn satirlaridir.
-1. **Acilis**: boot satirinda `v8.237-CEPHE-A0`, `[CEPHE] olaylar kaydedildi`, `[CEPHE] cephe dongusu baslatildi`, `[ELITE-CBA] cephe ayarlari kaydedildi`. Zeus'ta "ELITE Cephe Paneli" modulu gorunmeli.
-2. **Faction ekle**: modulu 3 km uzaga birak -> "Faction asker ekle" -> BLUFOR bir faction, asker 120, rezerv 40, yaricap 500, varis noktasi isaretli. Beklenen: `[CEPHE-FACTION] ... +120 asker`, ardindan `~15 sanal squad profili olusturuldu`; sistem kendiliginden acilir. Ayni islemi karsi taraf icin 2 km yanina yap (120 asker). Faction listesi gelmiyorsa `[CEPHE-FACTION-TARAMA]` satirina bak.
-3. **Sanal kal**: oyuncu 3 km'den uzaktayken `[CEPHE-OZET]`: L0 ~30, L1 0, fiziksel asker 0. Hicbir asker gorunmemeli (harita/Zeus'ta yok).
-4. **Oyuncu yakinligi (tier 1)**: oyuncu bir squad'in 900 m'sine yurusun: `[CEPHE-FIZIKLE] ... OYUNCU-YAKIN`, 8 askerlik grup belirir (`Zeus`ta gorulur), AI normal davranir. 1.3x yaricap disina cikip bekleyince (>= 20 + 30 sn) `[CEPHE-SANALLA] ... tetik yok (bekleme doldu)`; askerler silinir, olu varsa bedeni yerinde kalir.
-5. **Oyuncusuz temas (tier 3)**: oyuncu 5 km uzakta/Zeus kamerasinda: iki tarafin profillerini 1 km icine yaklastirmak icin Zeus'tan bir tarafin squad'ina (once fiziksel yap: oyuncu yakinligi) hedef ver YA DA iki modul konumunu 1 km arayla birak. Beklenen: `[CEPHE-FIZIKLE] ... TEMAS | oyuncu ... m | dusman ... m` iki tarafta da, oyuncu uzakta olsa da; askerler gercekten catisir. Temastaki fiziksel squad temas bitene kadar `[CEPHE-SANALLA]` almaz.
-6. **Tavan**: tavani 16 yap, 5'teki catismayi tekrarla. Beklenen: `tavan-blok` sayisi OZET'te artar, tavana sigmayan sanal temas icin `[CEPHE-SOYUT]` (30 sn'de bir, kayip <= %15), `--cephe` ciktisinda "TAVANA DAYANDI".
-7. **Personnel Replacement**: panel > PR ayarlari: hiz 120/saat, gecikme 30 sn, min squad 6, es zamanli 2. 5'teki catismada bir squad'in canli sayisi 6'nin altina duserse: `[CEPHE-TAKVIYE] TALEP` (hemen), 30 sn sonra `YOLDA | n asker -> squad | varis noktasi ..., ETA` , sanal yuruyus, `VARDI | ... squad simdi X/Y`. Rezerv `[CEPHE-DURUM]` ile (panel > Durum raporu) dusmeli. Dusmana yakin gecen paket icin `[CEPHE-KONVOY] KONVOY-SANAL` zaiyat.
-8. **Havuz bitti**: rezervi kucuk tut (10), "Havuz bitince = Cekil": `HAVUZ BITTI | ... CEKILIYOR`.
-9. **Saglik/yara tasima**: bir fiziksel askeri yarala (ACE), sanalla, tekrar fizikselle: yaralanma/tibbi durum korunmali (ACE yoksa hitpoint). Loadout (silah/mermi) ayni kalmali.
-10. **Kapatma**: CBA > Aktif kapat: `[CEPHE-OZET]` durur, hicbir profil silinmez; Zeus elle yerlestirilmis birimler hic etkilenmez.
-Basari olcutu: gecis nedenleri mantikli (`--cephe`), 120 sn icinde sanal->fiziksel salinim 0, tavan asilmiyor (temasli haric), RPT'de `Error` / `[WATCHDOG-YENIDEN] cephe` yok. Hepsi (T) = dogrulanmadi.
-
 ## T-MEVZI (v8.239): coklu mevzi ile SAVUN
 1. Zeus: ELITE Plan Noktasi (manuel) -> taraf, tip "MEVZI ekle", "Mevzi yonu = modul yonu" isaretli; modulu 150-400 m cevreye 3 farkli yere birak (her birinde modulu dusmana dogru dondur). Haritada ucgen "MEVZI 1..3".
 2. Objektif -> SAVUN (en az 3 grup, objektif 3 mevzinin ortasi, tehdit yonu verilirse tehdit yonune en yakin mevzi once dolar). Beklenen log: `[PLAN-MEVZI] ... 3 manuel mevzi plana alindi`, her grup icin `[PLAN-MEVZI] ... -> mevzi N (grid, sira, yon, hendek)`; gruplar 3 ayri mevziye gider, 4. grup varsa 1. mevzide 18 m yaninda.

@@ -1,6 +1,6 @@
-# DOGRULANMAYANLAR - cephe simulasyonu HARIC, oyunda dogrulanmamis ozellikler + test senaryo plani (v8.333)
+# DOGRULANMAYANLAR - oyunda dogrulanmamis ozellikler + test senaryo plani (v8.333)
 
-Kaynak: OZELLIKLER_LISTESI.md (T isaretleri), DEVIR_LOGU_v7.0.txt, bu oturumdaki RPT analizleri. Cephe simulasyonu (`10e`) kapsam disi.
+Kaynak: OZELLIKLER_LISTESI.md (T isaretleri), DEVIR_LOGU_v7.0.txt, bu oturumdaki RPT analizleri.
 Kural: bir madde, ASAGIDAKI senaryodaki beklenen log + kullanici gozlemi birlikte gorulunce T'den cikarilir (OZELLIKLER_LISTESI.md'de `(T)` silinir, bu dosyada [x] yapilir).
 
 ## 1. LISTE
