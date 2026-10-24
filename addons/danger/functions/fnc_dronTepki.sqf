@@ -178,6 +178,14 @@ if (_elev > 40 && {(time - (_g getVariable [QGVAR(dronDikLogT), -99])) > 10}) th
 if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, (_egik <= _menzil) && {_elev <= 40}, _egik <= 200] call FUNC(dronSakla); };
 if (_egik > _menzil || {((getPosATL _dr) select 2) > 200} || {_elev > 50}) exitWith {false};
 if ((time - (_g getVariable [QGVAR(dronAtesT), -99])) < 3) exitWith {true};
+// v8.345: komutan niyeti sessizse (ya da CBA dronAtesModu kapaliysa) zorla ates yok; dagilma / siper yukarida zaten yapildi
+if !([_g, _dr, _egik] call FUNC(dronAtesIzin)) exitWith {
+    if ((time - (_g getVariable [QGVAR(dronAtesYasakLogT), -99])) > 30) then {
+        _g setVariable [QGVAR(dronAtesYasakLogT), time];
+        diag_log format ["[DRON-ATES] %1 | ATES YOK (sessizlik / dronAtesModu): %2 %3 m - konum ele verilmesin, dagilma / siper surer (oz savunma: saldiri tipi dron <= 200 m ve yaklasiyorsa ates serbest)", groupId _g, typeOf _dr, round _egik];
+    };
+    false
+};
 _g setVariable [QGVAR(dronAtesT), time];
 if ((combatMode _g) in ["BLUE", "GREEN", "WHITE"]) then { _g setCombatMode "YELLOW"; };
 if ((behaviour _l) in ["SAFE", "CARELESS"]) then { _g setBehaviour "AWARE"; };

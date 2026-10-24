@@ -24,7 +24,8 @@
 if (!isServer || {!isNil "lambs_danger_dronTopcuStarted"}) exitWith {false};
 lambs_danger_dronTopcuStarted = true;
 
-[] spawn {
+// v8.345 BEKCI: bir betik hatasi (RPT 01-19: topcuGoru checkVisibility) dongu betigini oldurup tum sistemi susturuyordu -> dongu kod degiskeninde, olurse 20 sn icinde yeniden baslar
+lambs_danger_dtKod = {
     private _tick = 0;
     private _sayac = createHashMap;
     private _ozetT = time + 90;
@@ -207,6 +208,17 @@ lambs_danger_dronTopcuStarted = true;
                 diag_log format ["[DRON-TOPCU-OZET] son 90 sn: %1 | temas bellegi (taraf: kayit): %2", (keys _sayac) apply {format ["%1:%2", _x, _sayac get _x]}, [west, east, independent] apply {format ["%1:%2", _x, count (missionNamespace getVariable [format ["lambs_danger_dtBellek_%1", _x], []])]}];
                 _sayac = createHashMap;
             };
+        };
+    };
+};
+
+lambs_danger_dtH = [] spawn lambs_danger_dtKod;
+[] spawn {
+    while {true} do {
+        sleep 20;
+        if (!isNil "lambs_danger_dtH" && {scriptDone lambs_danger_dtH}) then {
+            diag_log "[DRON-TOPCU] BEKCI: dongu betigi olmustu (betik hatasi) -> yeniden baslatildi";
+            lambs_danger_dtH = [] spawn lambs_danger_dtKod;
         };
     };
 };

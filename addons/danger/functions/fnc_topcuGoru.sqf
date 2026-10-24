@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * GOZLEMCININ GORDUKLERI (v8.342) — ileri gozlemcinin (dron ya da yerdeki lider) o an gordugu dusman nesneleri.
  *   DRON : fnc_ihaGozlem'in yazdigi 'lambs_danger_ihaGorulen' [zaman, nesneler] (dronun gercek algisi).
- *   ASKER: kendi nearTargets (1800 m) listesi; dusman, canli, >= 300 m (tufek catismasi disi), knowsAbout >= 1.0 ve GORUS HATTI ACIK (checkVisibility >= 0.3). Haritadan konum OKUNMAZ.
+ *   ASKER: kendi nearTargets (1800 m) listesi; dusman, canli, >= 300 m (tufek catismasi disi), knowsAbout >= 1.0 ve GORUS HATTI ACIK (terrainIntersectASL + lineIntersects; checkVisibility komutu surum sozdizimi sorunlu oldugu icin KULLANILMAZ). Haritadan konum OKUNMAZ.
  *   Yaralanmis / baygin / olu gozlemci bos liste verir.
  *
  * Arguments:
@@ -22,5 +22,5 @@ private _goz = eyePos _fo;
 [time, ((_fo nearTargets 1800) select {
     private _o = _x select 4;
     !isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_o distance2D _fo) >= 300} && {(_fo knowsAbout _o) >= 1.0}
-    && {(_fo checkVisibility [_goz, (getPosASL _o) vectorAdd [0, 0, 1.2]]) >= 0.3}
+    && {private _hp = (getPosASL _o) vectorAdd [0, 0, 1.2]; !(terrainIntersectASL [_goz, _hp]) && {!(lineIntersects [_goz, _hp, _fo, _o])}}
 }) apply {_x select 4}]

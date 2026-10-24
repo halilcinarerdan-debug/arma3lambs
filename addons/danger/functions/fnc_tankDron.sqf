@@ -60,8 +60,8 @@ if (_dist <= 600) then {
     { if (alive _x) then { _x doWatch _dr; }; } forEach (crew _v);
     _eylem pushBack "YON";
 };
-// 3) ATES: komutan / nisanci makineli (taret ana topu disinda MG)
-if (_dist <= 500) then {
+// 3) ATES: komutan / nisanci makineli (taret ana topu disinda MG); v8.345: sessizlik / CBA dronAtesModu kapisi
+if (_dist <= 500 && {[group (commander _v), _dr, _dist] call FUNC(dronAtesIzin)}) then {
     private _n = 0;
     {
         private _u = _x;

@@ -48,6 +48,32 @@ lambs_danger_ihaGozlemStarted = true;
             private _tg = (_u nearTargets 1500) select {
                 (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_u distance (_x select 4)) <= (1500 * ([_u, _x select 4] call lambs_danger_fnc_ihaGorus))} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
             };
+            // v8.345 KAMERA TARAMASI (kullanici: 'dron hic iyi spotlayamiyor'; RPT 01-19: gozlem dronu 3 dk boyunca hep '1 hedef goruldu'): AI IHA muretttebatinin kendi algisi (nearTargets) zayif. Dronun kamerasi gibi,
+            //   1200 m icindeki DUSMANI gorus hatti (arazi + nesne) ACIKSA ve fnc_ihaGorus katsayili menzil icindeyse (gunduz 1200 m, gece termalsiz ~300 m, sis / yagmur / kamuflaj / yatik azaltir) tarama basina %60 ihtimalle gorur.
+            //   Haritadan konum OKUNMAZ; kapatma lambs_danger_ihaTaramaOff = true. Muretttebat spotDistance / spotTime 1.0'a cekilir (bir kez).
+            if (!(_u getVariable ["lambs_danger_ihaSpotSkill", false])) then {
+                _u setVariable ["lambs_danger_ihaSpotSkill", true];
+                { _x setSkill ["spotDistance", 1]; _x setSkill ["spotTime", 1]; } forEach (crew _u);
+            };
+            if (!(missionNamespace getVariable ["lambs_danger_ihaTaramaOff", false])) then {
+                private _gozU = getPosASL _u;
+                private _mevcut = _tg apply {_x select 4};
+                private _ek = (_u nearEntities [["CAManBase", "LandVehicle"], 1200]) select {
+                    alive _x && {!(_x in _mevcut)} && {!(captive _x)}
+                    && {
+                        private _sd = if (_x isKindOf "CAManBase") then { side (group _x) } else { private _cm = (crew _x) select {alive _x}; if (_cm isEqualTo []) then {civilian} else { side (group (_cm select 0)) } };
+                        (_taraf getFriend _sd) < 0.6 && {_sd isNotEqualTo civilian}
+                    }
+                };
+                {
+                    if ((count _tg) < 24 && {random 1 < 0.6}) then {
+                        private _hp = (getPosASL _x) vectorAdd [0, 0, 1.2];
+                        if ((_u distance _x) <= (1200 * ([_u, _x] call lambs_danger_fnc_ihaGorus)) && {!(terrainIntersectASL [_gozU, _hp])} && {!(lineIntersects [_gozU, _hp, _u, _x])}) then {
+                            _tg pushBack [getPosATL _x, "", _taraf, 0, _x, 1];
+                        };
+                    };
+                } forEach (_ek select [0, 30]);
+            };
             _u setVariable ["lambs_danger_ihaGorulen", [time, _tg apply {_x select 4}]];   // v8.338: gozlemli topcu (fnc_dronTopcu) icin gercek algi listesi (yalniz bu makinede)
             if (_tg isEqualTo []) then { continue };
             private _ids = (_tg select [0, 12]) apply {netId (_x select 4)};

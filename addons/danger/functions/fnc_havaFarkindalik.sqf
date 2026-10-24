@@ -306,11 +306,13 @@ private _calis = {
                 if (_yontem isEqualTo "HIDE") then { [_g, _hedef, false, _sure] call FUNC(tacticsHide); };
             };
             // hava savunma: AA'li asker kimligi belli dusman silahli araca ates eder (Weapons-Tight)
+            if ([_g, _hedef, (leader _g) distance _hedef] call FUNC(dronAtesIzin)) then {   // v8.345: sessizlik / CBA dronAtesModu kapisi
             {
                 _g reveal [_hedef, 4];
                 _x doTarget _hedef;
                 _x doFire _hedef;
             } forEach _aa;
+            };
 
             if (_logN < 120) then {
                 _logN = _logN + 1;
