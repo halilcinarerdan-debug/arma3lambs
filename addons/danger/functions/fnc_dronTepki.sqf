@@ -67,33 +67,59 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
         if (missionNamespace getVariable ["lambs_danger_dronKarsiAtes", true]) then {
             private _tarafK = side _g;
             private _ozK = format ["lambs_danger_opAtesT_%1", _tarafK];
-            private _obs = (missionNamespace getVariable ["lambs_danger_dronOpObs", []]) select {(time - (_x select 2)) < 120 && {(_x select 3) isEqualTo _tarafK}};
-            _obs pushBack [_p0, _geri, time, _tarafK];
+            // v8.327 EMINLIK (kullanici: 'topcu atisi cok uzaga gidiyor, dron sayisi arttikca eminlik artsin, daha nokta atisi atsinlar'): gozlemler 600 sn tutulur (dron kimligiyle); FARKLI dronlarin geri-yon dogrulari
+            //   ikiser ikiser kesistirilir (>= 15 derece, 100-2500 m), kesisimlerin MEDYANI operator bolgesi. Kesisim yoksa tek dogru uzerinde yalniz 380 m (eskiden 500 / 800 / 1100 m uc nokta). Yayilim ve top sayisi dron sayisina gore:
+            //   1 dron: 110 m / 1 top | 2: 70 m (kesisim) / 2 top | 3: 40 m / 3 top | 4+: 16 m / tum toplar. Dost 200 m icinde ise atilmaz.
+            private _obs = (missionNamespace getVariable ["lambs_danger_dronOpObs", []]) select {(time - (_x select 2)) < 600 && {(_x select 3) isEqualTo _tarafK}};
+            _obs pushBack [_p0, _geri, time, _tarafK, netId _dr];
+            if ((count _obs) > 16) then { _obs = _obs select [(count _obs) - 16, 16]; };
             missionNamespace setVariable ["lambs_danger_dronOpObs", _obs];
             if ((time - (missionNamespace getVariable [_ozK, -999])) > 180) then {
-                private _pts = [];
-                {
-                    private _a = _x select 0; private _t1 = _x select 1;
-                    if ((time - (_x select 2)) >= 20 && {(abs ((((_geri - _t1) + 540) mod 360) - 180)) <= 165}) then {
-                        private _d1 = [sin _t1, cos _t1];
-                        private _d2 = [sin _geri, cos _geri];
-                        private _det = ((_d1 select 0) * (_d2 select 1)) - ((_d1 select 1) * (_d2 select 0));
-                        if ((abs _det) > 0.26) then {   // aci >= ~15 derece
-                            private _ab = [(_p0 select 0) - (_a select 0), (_p0 select 1) - (_a select 1)];
-                            private _t = (((_ab select 0) * (_d2 select 1)) - ((_ab select 1) * (_d2 select 0))) / _det;
-                            private _s = (((_ab select 0) * (_d1 select 1)) - ((_ab select 1) * (_d1 select 0))) / _det;
-                            if (_t > 150 && {_t < 2000} && {_s > 150} && {_s < 2000}) then { _pts = [[(_a select 0) + _t * (_d1 select 0), (_a select 1) + _t * (_d1 select 1), 0]]; };
+                private _dronlar = [];
+                { _dronlar pushBackUnique (_x select 4); } forEach _obs;
+                private _nD = count _dronlar;
+                private _kesX = [];
+                private _kesY = [];
+                for "_i" from 0 to ((count _obs) - 2) do {
+                    for "_j" from (_i + 1) to ((count _obs) - 1) do {
+                        private _o1 = _obs select _i;
+                        private _o2 = _obs select _j;
+                        if ((_o1 select 4) isNotEqualTo (_o2 select 4) || {abs ((_o2 select 2) - (_o1 select 2)) >= 20}) then {
+                            private _d1 = [sin (_o1 select 1), cos (_o1 select 1)];
+                            private _d2 = [sin (_o2 select 1), cos (_o2 select 1)];
+                            private _det = ((_d1 select 0) * (_d2 select 1)) - ((_d1 select 1) * (_d2 select 0));
+                            if ((abs _det) > 0.26) then {   // aci >= ~15 derece
+                                private _a1 = _o1 select 0; private _a2 = _o2 select 0;
+                                private _ab = [(_a2 select 0) - (_a1 select 0), (_a2 select 1) - (_a1 select 1)];
+                                private _t = (((_ab select 0) * (_d2 select 1)) - ((_ab select 1) * (_d2 select 0))) / _det;
+                                private _sK = (((_ab select 0) * (_d1 select 1)) - ((_ab select 1) * (_d1 select 0))) / _det;
+                                if (_t > 100 && {_t < 2500} && {_sK > 100} && {_sK < 2500}) then {
+                                    _kesX pushBack ((_a1 select 0) + _t * (_d1 select 0));
+                                    _kesY pushBack ((_a1 select 1) + _t * (_d1 select 1));
+                                };
+                            };
                         };
                     };
-                    if (_pts isNotEqualTo []) exitWith {};
-                } forEach (_obs select [0, (count _obs) - 1]);
+                };
                 private _tur = "KESISIM";
-                if (_pts isEqualTo []) then { _pts = [500, 800, 1100] apply { _p0 getPos [_x, _geri] }; _tur = "TEK DOGRU"; };
-                private _kN = 0;
-                { _kN = _kN + ([_tarafK, _x, "OPERATOR", groupId _g] call FUNC(topcuDestek)); } forEach _pts;
+                private _pt = [];
+                if (_kesX isNotEqualTo []) then {
+                    private _sx = +_kesX;
+                    private _sy = +_kesY;
+                    _sx sort true;
+                    _sy sort true;
+                    _pt = [_sx select (floor ((count _sx) / 2)), _sy select (floor ((count _sy) / 2)), 0];
+                } else {
+                    _pt = _p0 getPos [380, _geri];
+                    _tur = "TEK DOGRU";
+                };
+                private _eminlik = ((_nD - 1) max 0) min 3;
+                private _yay = [110, 70, 40, 16] select _eminlik;
+                private _topN = [1, 2, 3, 99] select _eminlik;
+                private _kN = [_tarafK, _pt, "OPERATOR", groupId _g, _yay, _topN] call FUNC(topcuDestek);
                 if (_kN > 0) then {
                     missionNamespace setVariable [_ozK, time];
-                    diag_log format ["[DRON-KARSI-ATES] %1 | %2 | tahmini operator bolgesi (%3): %4 nokta, %5 top 3'er mermi | geri yon %6 derece", groupId _g, _tarafK, _tur, count _pts, _kN, round _geri];
+                    diag_log format ["[DRON-KARSI-ATES] %1 | %2 | tahmini operator bolgesi (%3): %4 | dron sayisi %5 (gozlem %6, kesisim %7) -> yayilim %8 m, %9 top 3'er mermi | geri yon %10 derece", groupId _g, _tarafK, _tur, mapGridPosition _pt, _nD, count _obs, count _kesX, _yay, _kN, round _geri];
                 };
             };
         };

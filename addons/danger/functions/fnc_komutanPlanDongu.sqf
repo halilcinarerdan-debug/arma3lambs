@@ -684,6 +684,10 @@ while {true} do {
                 if (_scu isNotEqualTo []) then { [format ["ELITE PLAN %1 ZARAR: %2", _id, _zrr joinString " | "]] remoteExec ["systemChat", _scu]; };
             };
             diag_log _aar;
+            // v8.327 OTOMATIK MEVZI / GARNIZON (operasyon emri, opsiyonel): saldiri plani OBJEKTIF ALINDI ile bittiyse ele gecirilen objektifte arazi analiziyle KARAKOL / MEVZI / GOZLETME bolgeleri kurulur; askerler nobet / devriye ile orada kalir
+            if (_sonuc isEqualTo "OBJEKTIF ALINDI" && {_tip isEqualTo 0} && {((_plan getOrDefault ["ayar", createHashMap]) getOrDefault ["otoGarnizon", 0]) > 0}) then {
+                [_plan get "taraf", _plan get "obj", _plan getOrDefault ["tehditB", -1], _plan getOrDefault ["orp", []], _plan getOrDefault ["ccp", []], _plan getOrDefault ["rp", []], _id, (_plan get "ayar") getOrDefault ["otoGarnizon", 1]] spawn (missionNamespace getVariable ["lambs_danger_fnc_otoGarnizon", {0}]);
+            };
             // v8.214 ZINCIR: objektif alindiysa siradaki hedefe gec (hayatta kalan gruplar elle secim olarak devredilir; yeni plan TOPLAN-ORP-KESIF-SALDIRI akisini bastan yurutur)
             private _zincirK = _plan getOrDefault ["zincir", []];
             if (_zincirK isNotEqualTo [] && {_sonuc isEqualTo "OBJEKTIF ALINDI"}) then {

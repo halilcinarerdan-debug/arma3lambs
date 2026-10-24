@@ -134,19 +134,51 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         params ["_t"];
         ((_uav knowsAbout _t) >= 0.3) || {((allGroups select {(side _x) isEqualTo _taraf && {!isNull leader _x}}) findIf {_x knowsAbout _t >= 0.4}) >= 0}
     };
+    // v8.327 DUMAN (kullanici: 'IHA AI lar smokedan etkilensin, spot time olarak'): kilit suresi dolmadan dalis yok; duman hattı kesiyorsa kilit sifirlanir, 22 sn'de kilitlenemezse hedef 45 sn yasaklanir
+    private _yasak = [];
+    private _kilitGerek = missionNamespace getVariable ["lambs_danger_ihaKilitSure", 1.2];
+    private _kilit = 0;
+    private _dumanT0 = -1;
+    private _kilitSon = time;
+    private _kilitSonuc = {
+        // 0 = devam (kilit tamam / duman kapali), 1 = bekle, 2 = vazgec
+        private _sonuc = 0;
+        if (!(missionNamespace getVariable ["lambs_danger_ihaDumanOff", false])) then {
+            private _pr = [getPosASL _uav, (getPosASL _h) vectorAdd [0, 0, 1.2]] call FUNC(dumanPerde);
+            private _dt = (time - _kilitSon) min 1;
+            _kilitSon = time;
+            if (_pr > 0) then {
+                _kilit = 0;
+                if (_dumanT0 < 0) then {
+                    _dumanT0 = time;
+                    diag_log format ["[IHA-DUMAN] %1 (%2) | hedef %3 %4 m: gorus hatti DUMANLA kesik (%5 bulut) -> kilitlenemiyor, bekliyor", typeOf _uav, _tur, typeOf _h, round (_uav distance2D _h), _pr];
+                };
+                _sonuc = [1, 2] select ((time - _dumanT0) > 22);
+            } else {
+                if (_dumanT0 >= 0) then {
+                    diag_log format ["[IHA-DUMAN] %1 | duman acildi / hat temiz (%2 sn bekledi) -> kilit suresi basliyor", typeOf _uav, round (time - _dumanT0)];
+                    _dumanT0 = -1;
+                };
+                _kilit = _kilit + _dt;
+                if (_kilit < _kilitGerek) then { _sonuc = 1; };
+            };
+        };
+        _sonuc
+    };
     private _hedefSec = {
         private _en = objNull;
         private _enS = -1e9;
+        private _yasakNesne = (_yasak select {(_x select 1) > time}) apply {_x select 0};
         if (_tur isEqualTo "FPV-AT") then {
             {
-                if (alive _x && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
+                if (alive _x && {!(_x in _yasakNesne)} && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
                     private _s = -(_x distance2D _uav);
                     if (_s > _enS) then { _enS = _s; _en = _x; };
                 };
             } forEach (vehicles select {_x isKindOf "LandVehicle" && {!isNull (driver _x)}});
         } else {
             {
-                if (alive _x && {isNull objectParent _x} && {(_taraf getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
+                if (alive _x && {!(_x in _yasakNesne)} && {isNull objectParent _x} && {(_taraf getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_x distance2D _bas) <= _men} && {[_x] call _bilinen}) then {
                     private _kume = {alive _x && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}} count (_x nearEntities ["CAManBase", 15]);
                     private _s = _kume * 100 - (_x distance2D _uav) * 0.05;
                     if (_s > _enS) then { _enS = _s; _en = _x; };
@@ -193,6 +225,9 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         private _dalis = false;
         private _dalisT0 = 0;
         private _dalisLogT = 0;
+        _kilit = 0; _dumanT0 = -1; _kilitSon = time;
+        private _sapma = [0, 0, 0];
+        private _perdeT = 0;
         while {(call _aktif) && {alive _h} && {!_bitti}} do {
             private _dist = _uav distance2D _h;
             if (_tur isEqualTo "BOMBA") then {
@@ -213,6 +248,14 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         _d doMove (getPosATL _h);
                         [_h, 2] call _seyirHizlan;
                     } else {
+                        private _ks = call _kilitSonuc;
+                        if (_ks isEqualTo 1) then { _d doMove (getPosATL _uav); sleep 0.3; continue };
+                        if (_ks isEqualTo 2) then {
+                            _yasak pushBack [_h, time + 45];
+                            diag_log format ["[IHA-DUMAN] %1 | hedef %2 icin kilit alinamadi (duman, 22 sn): hedef 45 sn birakildi", typeOf _uav, typeOf _h];
+                            _h = objNull;
+                            continue
+                        };
                         private _kinds = if (_tur isEqualTo "FPV-AT") then {["LandVehicle", "Car", "Tank"]} else {["Man"]};
                         private _src = ["allUnits", "vehicles"] select (_tur isEqualTo "FPV-AT");
                         _uav setVariable ["FPV_AI_Drones_managed", true, true];
@@ -232,6 +275,16 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     _d doMove (getPosATL _h);
                     [_h, 2] call _seyirHizlan;
                 } else {
+                    if (!_dalis) then {
+                        private _ks = call _kilitSonuc;
+                        if (_ks isEqualTo 1) then { _d doMove (getPosATL _uav); sleep 0.3; continue };
+                        if (_ks isEqualTo 2) then {
+                            _yasak pushBack [_h, time + 45];
+                            diag_log format ["[IHA-DUMAN] %1 | hedef %2 icin kilit alinamadi (duman, 22 sn): hedef 45 sn birakildi", typeOf _uav, typeOf _h];
+                            _h = objNull;
+                            continue
+                        };
+                    };
                     // v8.273 DALIS DUZELTMESI (kullanici: 'tam dalacakken havada glitchleniyor, kamikaze calismiyor'): dalis basinda AI pilotun otopilotu (irtifa 40 m + doMove) betik hiziyla SAVASIYORDU
                     //   (ani 28 m/s hiz atamasi + setVectorDir [yatis sifirlanir] her 0.1 sn). Simdi: dalis baslarken pilotun MOVE / PATH'i kapanir (doStop), hiz 8 m/s'den 28 m/s'ye 1.2 sn'de yumusakca artar,
                     //   yon setVectorDirAndUp ile (yatis sabit) 0.05 sn adimla; 5 m'de patlar. Dalis hedef olunce / iptal olunca pilot geri acilir. Log: [IHA-DALIS]
@@ -243,7 +296,16 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         doStop _d;
                         diag_log format ["[IHA-DALIS] %1 (%2) | dalis basladi: hedef %3 | mesafe %4 m | irtifa %5 m | hiz %6 km/s | AI pilot MOVE / PATH kapatildi", typeOf _uav, _tur, typeOf _h, round _dist, round ((getPosATL _uav) select 2), round (speed _uav)];
                     };
-                    private _hedefP = (getPosASL _h) vectorAdd [0, 0, 1.2];
+                    if (time > _perdeT) then {
+                        _perdeT = time + 0.4;
+                        if (_sapma isEqualTo [0, 0, 0] && {!(missionNamespace getVariable ["lambs_danger_ihaDumanOff", false])} && {([getPosASL _uav, (getPosASL _h) vectorAdd [0, 0, 1.2]] call FUNC(dumanPerde)) > 0}) then {
+                            private _sa = random 360;
+                            private _sm = 7 + random 5;
+                            _sapma = [(sin _sa) * _sm, (cos _sa) * _sm, 0];
+                            diag_log format ["[IHA-DUMAN] %1 | dalista hedef dumana girdi: kor dalis, %2 m sapma", typeOf _uav, round _sm];
+                        };
+                    };
+                    private _hedefP = ((getPosASL _h) vectorAdd [0, 0, 1.2]) vectorAdd _sapma;
                     private _fark = _hedefP vectorDiff (getPosASL _uav);
                     private _mag = (vectorMagnitude _fark) max 0.1;
                     private _yonV = _fark vectorMultiply (1 / _mag);

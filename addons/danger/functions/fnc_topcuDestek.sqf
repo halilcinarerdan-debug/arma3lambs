@@ -12,12 +12,14 @@
  * 1: Nokta (SIS icin duman noktasi; KARSI icin yok sayilir) <ARRAY>
  * 2: Mod "SIS" / "KARSI" <STRING>
  * 3: Plan kimligi (log) <STRING>
+ * 4: OPERATOR modu yayilim yaricapi (m, varsayilan 45) <NUMBER>
+ * 5: OPERATOR modu en cok top (varsayilan 99) <NUMBER>
  *
  * Return Value: Atan arac sayisi <NUMBER>
  * Public: No
 */
 
-params [["_taraf", sideUnknown, [sideUnknown]], ["_poz", [0, 0, 0], [[]]], ["_mod", "SIS", [""]], ["_id", "?", [""]]];
+params [["_taraf", sideUnknown, [sideUnknown]], ["_poz", [0, 0, 0], [[]]], ["_mod", "SIS", [""]], ["_id", "?", [""]], ["_yay", 45, [0]], ["_topMax", 99, [0]]];   // v8.327: OPERATOR modunda yayilim (m) ve en cok top
 
 private _topcular = vehicles select {
     alive _x && {(side (group _x)) isEqualTo _taraf} && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {!isPlayer (gunner _x)} && {local _x} && {canFire _x}
@@ -55,11 +57,11 @@ if (_mod isEqualTo "OPERATOR") then {
                 private _a = toLower _x;
                 (_a find "smoke") < 0 && {(_a find "illum") < 0} && {(_a find "flare") < 0} && {(_a find "cluster") < 0} && {(_a find "mine") < 0}
             }) param [0, ""];
-            if (_mg isNotEqualTo "" && {_poz inRangeOfArtillery [[_v], _mg]}) then {
-                [_v, _poz, _mg, _atan] spawn {
-                    params ["_tv", "_tn", "_tm", "_ti"];
+            if (_mg isNotEqualTo "" && {_atan < _topMax} && {_poz inRangeOfArtillery [[_v], _mg]}) then {
+                [_v, _poz, _mg, _atan, _yay] spawn {
+                    params ["_tv", "_tn", "_tm", "_ti", "_ty"];
                     sleep (3 * _ti);
-                    if (alive _tv && {canFire _tv}) then { _tv doArtilleryFire [_tn getPos [random 45, random 360], _tm, 3]; };
+                    if (alive _tv && {canFire _tv}) then { _tv doArtilleryFire [_tn getPos [random _ty, random 360], _tm, 3]; };
                 };
                 _atan = _atan + 1;
             };

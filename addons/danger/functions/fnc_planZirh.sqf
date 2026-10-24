@@ -108,6 +108,8 @@ private _nZ = count _zg;
     //   (objektife 70-260 m) tehdit yonune bakan, gövde-asagi (hull-down) birincil mevziye yerlesir; tehdit yaklasana kadar birincil mevzinin 55 m ARKASINDAKI gizleme noktasinda bekler (4-76/4-77).
     //   Mesafeler TASARIM degeri (kitapta sayi YOK). Kapatma: lambs_danger_tankMevziOff = true (eski ileri ates pozisyonu).
     private _savunma = ((_plan getOrDefault ["tip", 0]) isEqualTo 1) && {!(missionNamespace getVariable ["lambs_danger_tankMevziOff", false])};
+    // v8.327 AGRESIFLIK (kullanici: 'tanklar cok savunmaci, daha agresif olabilir'): CBA lambs_danger_tankAgresif 0 temkinli (eski) / 1 dengeli / 2 agresif (varsayilan)
+    private _agr = ((round (missionNamespace getVariable ["lambs_danger_tankAgresif", 2])) max 0) min 2;
     _g setVariable ["lambs_danger_planZirh", true];
     _g setVariable ["lambs_danger_planAktif", true, true];
 
@@ -192,8 +194,8 @@ private _nZ = count _zg;
     };
     private _yk = _g getVariable ["lambs_danger_planZirhYakin", false];
     // v8.276 ILERI SICRAMA KADEMESI (kullanici: 'tanklar cok pasif'): saldirida tankin ates pozisyonu kademe kademe objektife yaklasir (650 -> 450 -> 330 -> 230 m); kademe 0/1 eski davranis
-    private _kad = if (_tankMi && {!_savunma}) then { (((([0, 1] select _yk) max (_g getVariable ["lambs_danger_planZirhKademe", 0]))) min 3) } else { -1 };
-    private _merkezD = if (_savunma) then {[150, 110] select _tankMi} else { if (_tankMi) then {[650, 450, 330, 230] select _kad} else {[500, 350] select _yk} };
+    private _kad = if (_tankMi && {!_savunma}) then { (((([0, 1] select _yk) max (_g getVariable ["lambs_danger_planZirhKademe", 0]))) min ([3, 3, 4] select _agr)) } else { -1 };
+    private _merkezD = if (_savunma) then {([[150, 110], [180, 150], [230, 200]] select _agr) select _tankMi} else { if (_tankMi) then {[650, 450, 330, 230, 170] select _kad} else {[500, 350] select _yk} };
     // ---- ates pozisyonu (bir kez) ----
     private _poz = _g getVariable ["lambs_danger_planZirhPoz", []];
     if (_poz isEqualTo []) then {
@@ -240,11 +242,13 @@ private _nZ = count _zg;
                     };
                     _s = _s - (abs (_dist - _merkezD)) / 10 - (abs _a) * 0.2;
                     if (isOnRoad _p) then { _s = _s - 5; };
+                    // v8.327 AGAC (kullanici: 'tanklar cok agaclara takiliyor'): mevzi cevresinde agac yogunlugu cezasi (25 m)
+                    if (_tankMi) then { _s = _s - (1.5 * (count (nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], 25, false, true]))); };
                     _adaylar pushBack [_s, _p];
                     if (_s > _enS) then { _enS = _s; _en = _p; };
                 };
             } forEach [0, 15, -15, 30, -30, 45, -45, 60, -60];
-        } forEach (if (_savunma) then {[150, 110, 190, 70, 230, 260]} else { if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300], [330, 300, 360, 280, 400, 260, 450], [230, 200, 260, 180, 300, 160, 350]] select _kad} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk} });
+        } forEach (if (_savunma) then {[[150, 110, 190, 70, 230, 260], [150, 180, 110, 220, 70, 260], [200, 230, 170, 260, 150, 110]] select _agr} else { if (_tankMi) then {[[650, 600, 700, 550, 750, 800, 500, 450], [450, 400, 500, 350, 550, 600, 300], [330, 300, 360, 280, 400, 260, 450], [230, 200, 260, 180, 300, 160, 350], [170, 150, 190, 130, 210, 110, 250]] select _kad} else {[[500, 450, 550, 400, 600, 650], [350, 300, 400, 330, 380, 450]] select _yk} });
         if (_en isEqualTo []) then { _en = _obj getPos [_merkezD, _yon]; };
         // v8.194 YEDEK MEVZI (ATP 3-20.15 3-76: birincil ve yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinir): en iyi mevziden >= 60 m uzakta en yuksek puanli aday
         private _alt = [];
@@ -256,8 +260,9 @@ private _nZ = count _zg;
         if (_savunma) then {
             // birincil mevzi = _en; arac once 55 m GERIDEKI gizleme noktasina gider, tetikte (dusman <= 1500 m bilinen / piyade temasi) birincile cikar
             _g setVariable ["lambs_danger_planZirhAsil", _en];
-            _g setVariable ["lambs_danger_planZirhHide", true];
+            _g setVariable ["lambs_danger_planZirhHide", _agr < 2];   // v8.327: agresifte gizleme noktasi yok, tank dogrudan birincil mevzide
             private _hidePt = _en getPos [55, _yon + 180];
+            if (_agr >= 2) then { _hidePt = _en; };
             if (surfaceIsWater _hidePt) then { _hidePt = _en; };
             (_plan getOrDefault ["zirhPozlar", []]) pushBack _en;
             _plan set ["zirhPozlar", _plan getOrDefault ["zirhPozlar", []]];
@@ -283,7 +288,7 @@ private _nZ = count _zg;
     // ---- v8.244 SAVUNMA: gizleme noktasindan birincil mevziye cikis (tetik: dusman <= 1500 m bilinen ya da plan piyadesi temasta ya da savas fazi) ----
     if (_savunma && {canMove _v} && {_g getVariable ["lambs_danger_planZirhHide", false]} && {(time - (_g getVariable ["lambs_danger_planZirhTetikT", -999])) > 3}) then {
         _g setVariable ["lambs_danger_planZirhTetikT", time];
-        private _tetik = _savas || {((_l nearTargets 1500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)} && {[_x select 4] call FUNC(gercekHedef)}}) >= 0};
+        private _tetik = _savas || {((_l nearTargets ([1500, 1500, 2500] select _agr)) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {(_l knowsAbout (_x select 4)) > 0.3} && {alive (_x select 4)} && {[_x select 4] call FUNC(gercekHedef)}}) >= 0};
         if (_tetik) then {
             private _asil = _g getVariable ["lambs_danger_planZirhAsil", _poz];
             _g setVariable ["lambs_danger_planZirhHide", false];
@@ -371,9 +376,36 @@ private _nZ = count _zg;
             if ((speed _v) < 1.5) then {
                 if ((_g getVariable ["lambs_danger_planZirhDurT", -1]) < 0) then { _g setVariable ["lambs_danger_planZirhDurT", time]; };
                 // v8.257: hareket edemeyen (canMove false) ya da murettebat bekleyen tank 'takildi' sayilmaz; ara nokta mesafesi hedefe kalan mesafenin %60'ini asmaz (RPT e31bd8bd: pozisyona 84 m kalmisken 240 m'lik ara nokta)
-                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > ([25, 70] select _savas) && {(_v distance2D _poz) > 80} && {canMove _v} && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0}) then {
+                // v8.327 AGAC: tankin 6-12 m onunde agac varsa esik 10 sn (geri al + agacsiz yone sap); aksi halde temassiz 25 / temasta 70 sn
+                private _agacOn = _tankMi && {(nearestTerrainObjects [_v modelToWorld [0, 9, 0], ["TREE", "SMALL TREE"], 6, false, true]) isNotEqualTo []};
+                if ((time - (_g getVariable ["lambs_danger_planZirhDurT", time])) > ([[25, 70] select _savas, 10] select _agacOn) && {(_v distance2D _poz) > 80} && {canMove _v} && {(_v getVariable ["lambs_danger_murBekleT0", -1]) < 0}) then {
                     _g setVariable ["lambs_danger_planZirhDurT", time];
-                    private _ara = (getPosATL _v) getPos [(220 min (0.6 * (_v distance2D _poz))), ((getPosATL _v) getDir _poz) + (selectRandom [-50, 50, -25, 25])];
+                    // v8.327: aday acilar arasinda agac yogunlugu en dusuk olan secilir (tank agaca girmesin); agac onundeyse once 2.5 sn geri alinir
+                    private _araM = 220 min (0.6 * (_v distance2D _poz));
+                    private _araYon = (getPosATL _v) getDir _poz;
+                    private _enAci = selectRandom [-50, 50, -25, 25];
+                    if (_tankMi) then {
+                        private _enAgac = 1e9;
+                        {
+                            private _pa = (getPosATL _v) getPos [_araM, _araYon + _x];
+                            private _pm = (getPosATL _v) getPos [_araM * 0.5, _araYon + _x];
+                            private _ag = (count (nearestTerrainObjects [_pa, ["TREE", "SMALL TREE"], 25, false, true])) + (count (nearestTerrainObjects [_pm, ["TREE", "SMALL TREE"], 20, false, true]));
+                            if (surfaceIsWater _pa) then { _ag = _ag + 100; };
+                            if (_ag < _enAgac) then { _enAgac = _ag; _enAci = _x; };
+                        } forEach [-50, 50, -25, 25, -80, 80, 0];
+                    };
+                    if (_agacOn) then {
+                        [_v] spawn {
+                            params ["_gv"];
+                            private _tB = time + 2.5;
+                            while {alive _gv && {time < _tB}} do {
+                                private _vm = velocityModelSpace _gv;
+                                _gv setVelocityModelSpace [_vm select 0, -3, _vm select 2];
+                                sleep 0.1;
+                            };
+                        };
+                    };
+                    private _ara = (getPosATL _v) getPos [_araM, _araYon + _enAci];
                     private _yl = _ara nearRoads 120;
                     if (_yl isNotEqualTo []) then { _ara = getPosATL (_yl select 0); };
                     if (surfaceIsWater _ara) then { _ara = _poz; };
@@ -403,7 +435,7 @@ private _nZ = count _zg;
         // v8.277 SAVUNMA TANKI YER DEGISTIRIR (kullanici: 'tanklar son kale oluyor, piyadelere nefes aldirmiyor'; ATP 3-20.15: birincil / yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinma):
         //   savunma tanki ayni mevzide savasta > tankYerSureS (150) sn kaldiysa ve bilinen dusman varsa yedek mevziye gecer (hasar beklemez); yedek <-> birincil donusumlu. Kapatma: lambs_danger_tankYerOff = true.
         // v8.278 (kullanici: '25 dakika ayni mevzide durmasinlar'): saldirida da (ileri sicrama olmadiysa) 300 sn sonra yedek mevzi; savunmada 150 sn
-        private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
+        private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {(missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]) * ([1, 1.5, 2] select _agr)} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
             && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0};
         if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
@@ -427,7 +459,7 @@ private _nZ = count _zg;
         private _vT = _g getVariable ["lambs_danger_planZirhVardiT", -1];
         if (_vT < 0) then { _g setVariable ["lambs_danger_planZirhVardiT", time]; _vT = time; };
         private _kd = _g getVariable ["lambs_danger_planZirhKademe", 0];
-        if (_kd < 3 && {(time - _vT) > (missionNamespace getVariable ["lambs_danger_tankSicramaS", 150])} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20} && {(_v distance2D _obj) > 260}) then {
+        if (_kd < ([3, 3, 4] select _agr) && {(time - _vT) > (([(missionNamespace getVariable ["lambs_danger_tankSicramaS", 150]), 100, 60] select _agr) min (missionNamespace getVariable ["lambs_danger_tankSicramaS", 150]))} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20} && {(_v distance2D _obj) > ([260, 260, 190] select _agr)}) then {
             private _pOn = ((_plan getOrDefault ["gruplar", []]) select {
                 !isNull _x && {!(_x in _zg)} && {!(_x in (_plan getOrDefault ["reconG", []]))} && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["TOPCU", "TOPCU_YOK", "MEDEVAC", "RECON", "RECON_ARAC"])}
                 && {alive (leader _x)} && {((vehicle (leader _x)) distance2D _obj) < ((_v distance2D _obj) - 40)}

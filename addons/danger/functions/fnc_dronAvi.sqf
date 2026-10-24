@@ -5,7 +5,7 @@
  * Cagiran: fnc_dronTepki (dron izi geri-yonu bulununca). Ayni tarafin IKI ayri gozleminden (>= 20 sn arayla) operator bolgesi tahmini cikarilir (dogrular kesisirse kesisim, yoksa son dogru uzerinde 700 m);
  * temasta olmayan, plan gorevinde olmayan en yakin YEREL dost gruptan 2 (ya da 4) asker AYRI bir devriye grubuna alinir ve tahmin edilen bolgeye (en cok 800 / 1000 m) kisa adimlarla (<= 220 m, AWARE / YELLOW)
  * gider, son noktada ARAMA (SAD, 70 m); sure (mesafe / 1.2 m/sn + 150 sn) dolunca / devriye kayiplariyla / hedefe varinca asil gruba katilir. Taraf basina 300 sn'de bir.
- * AYAR: OPERASYON EMRI (ELITE Objektif 4/4 'Dron operatoru avi'): 0 CBA'ya uy | 1 Hayir | 2 Evet: 2 kisilik devriye | 3 Evet: 4 kisilik tim (guclu, 1000 m). Aktif plan yoksa / 0 ise CBA 'lambs_danger_dronAviAktif' (varsayilan acik = 2 kisilik).
+ * AYAR: OPERASYON EMRI (ELITE Objektif 4/4 'Dron operatoru avi'): 0 CBA'ya uy | 1 Hayir | 2 Evet: 3 kisilik alt grup | 3 Evet: 4 kisilik alt grup (guclu, 1000 m); asgari 3 (v8.327). Aktif plan yoksa / 0 ise CBA 'lambs_danger_dronAviAktif' (varsayilan acik = 2 kisilik).
  * Kapatma: lambs_danger_dronAviOff = true.   Log: [DRON-AVI]
  *
  * Arguments:
@@ -22,13 +22,13 @@ if (isNull _g || {_p0 isEqualTo []} || {missionNamespace getVariable ["lambs_dan
 private _taraf = side _g;
 
 // ---- ayar: operasyon emri (aktif plan) > CBA ----
-private _mod = if (missionNamespace getVariable ["lambs_danger_dronAviAktif", true]) then {2} else {0};
+private _mod = if (missionNamespace getVariable ["lambs_danger_dronAviAktif", true]) then {3} else {0};   // v8.327: _mod = devriye EN FAZLA kac asker (3 / 4); asgari 3 (kullanici: zorunlu 4 kisi sart degil, alt grup olabilir ama 3'ten kucuk olmasin)
 private _aracIste = missionNamespace getVariable ["lambs_danger_dronAviArac", true];   // v8.322: CBA - arac (hafif, recon mantigi) varsa aracla
 private _planlar = (values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) select {(_x getOrDefault ["taraf", sideUnknown]) isEqualTo _taraf};
 if (_planlar isNotEqualTo []) then {
     private _opt = ((_planlar select 0) getOrDefault ["ayar", createHashMap]) getOrDefault ["dronAvi", 0];
     if (_opt > 0) then {
-        _mod = [0, 0, 2, 4, 2, 4] select (_opt min 5);
+        _mod = [0, 0, 3, 4, 3, 4] select (_opt min 5);
         if (_opt >= 2) then { _aracIste = _opt >= 4; };   // 2 / 3 = yaya, 4 / 5 = hafif aracla
     };
 };
@@ -64,22 +64,34 @@ if (_est isEqualTo []) then { _est = _p0 getPos [700, _geri]; };
 
 // ---- devriye grubu: temasta olmayan, plan gorevinde olmayan en yakin yerel dost grup ----
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+// v8.327 (RPT 40d48a79: tum EAST gruplari SAVUNMA planinda (planAktif) oldugu icin 16 dron gozleminde hic devriye cikmadi): savunma planindaki (tip 1) grup da kaynak olabilir; taarruz plani gruplari yine haric
+private _savunmaPlani = { params ["_gg"]; (((missionNamespace getVariable ["lambs_danger_planlar", createHashMap]) getOrDefault [_gg getVariable ["lambs_danger_planId", ""], createHashMap]) getOrDefault ["tip", 0]) isEqualTo 1 };
 private _adaylar = allGroups select {
     local _x && {(side _x) isEqualTo _taraf} && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)} && {isNull objectParent (leader _x)}
-    && {(_x getVariable [QGVAR(contact), 0]) <= time} && {!(_x getVariable [QGVAR(planAktif), false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+    && {(_x getVariable [QGVAR(contact), 0]) <= time} && {!((_x getVariable [QGVAR(planAktif), false]) || {_x getVariable ["lambs_danger_planAktif", false]}) || {[_x] call _savunmaPlani}}
     && {!(_x getVariable [QGVAR(isRetreating), false])} && {!(_x getVariable [QGVAR(isEvading), false])} && {!(_x getVariable [QGVAR(teslimOldu), false])} && {!(_x getVariable [QGVAR(dronAviGrup), false])}
-    && {(({alive _x} count (units _x)) >= (_mod + 2))}
+    && {(({alive _x} count (units _x)) >= 5)}   // lider + 1 asker kaynakta kalir, en az 3 asker cikar
     && {((leader _x) distance2D _est) >= 250} && {((leader _x) distance2D _est) <= 3000}
 };
-if (_adaylar isEqualTo []) exitWith {0};
+if (_adaylar isEqualTo []) exitWith {
+    // v8.327 TANI: neden devriye cikmadi (60 sn'de bir)
+    if ((time - (missionNamespace getVariable ["lambs_danger_dronAviTaniT", -999])) > 60) then {
+        missionNamespace setVariable ["lambs_danger_dronAviTaniT", time];
+        private _yerel = allGroups select {local _x && {(side _x) isEqualTo _taraf} && {!isNull (leader _x)} && {alive (leader _x)}};
+        diag_log format ["[DRON-AVI] %1 | devriye cikmadi: aday grup yok | yerel grup %2 | temasta %3 | taarruz planinda %4 | kucuk (< %5 kisi) %6 | araci %7 | tahmin mesafesi disinda (250-3000 m) %8", _taraf, count _yerel,
+            {(_x getVariable [QGVAR(contact), 0]) > time} count _yerel, {(_x getVariable [QGVAR(planAktif), false]) && {!([_x] call _savunmaPlani)}} count _yerel, 5, {({alive _x} count (units _x)) < 5} count _yerel,
+            {!isNull objectParent (leader _x)} count _yerel, {private _dd = (leader _x) distance2D _est; _dd < 250 || {_dd > 3000}} count _yerel];
+    };
+    0
+};
 private _kaynak = ([_adaylar, [], {(leader _x) distance2D _est}, "ASCEND"] call BIS_fnc_sortBy) select 0;
 private _l = leader _kaynak;
 private _kisiler = ((units _kaynak) select {
     _x isNotEqualTo _l && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
     && {!(_x getVariable [QGVAR(teslim), false])} && {!captive _x} && {(primaryWeapon _x) isNotEqualTo ""}
     && {!(([_x] call _rolFn) in ["MG", "AT", "MEDIC"])}
-}) select [0, _mod];
-if ((count _kisiler) < (_mod min 2)) exitWith {0};
+}) select [0, (_mod min (((count (units _kaynak select {alive _x})) - 2) max 3))];   // 5-6 kisilik gruptan 3, 7+ kisilikten _mod
+if ((count _kisiler) < 3) exitWith {0};
 
 // ---- devriye ----
 private _pg = createGroup _taraf;
@@ -91,7 +103,7 @@ _pg setSpeedMode "NORMAL";
 _pg setFormation "WEDGE";
 private _lp = getPosATL _l;
 private _brg = _lp getDir _est;
-private _maxM = [800, 1000] select (_mod > 2);
+private _maxM = [800, 1000] select (_mod > 3);
 private _mesafe = ((_lp distance2D _est) min _maxM) max 150;
 private _adim = (ceil (_mesafe / 220)) max 1;
 // ---- v8.322 ARAC (RECON MANTIGI: kullanici 'reconla ayni kafada gitsinler, ayni mantikta, kitaba uygunsa kucuk ve hizli arac, humvee gibi') ----
@@ -125,7 +137,7 @@ for "_i" from 1 to _adim do {
 };
 };
 missionNamespace setVariable [_ozK, time];
-diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahmin %6, %7 yonu %8 derece) | kaynak grup %9 | operasyon emri modu %10", groupId _kaynak, _taraf, count _kisiler, ["2 kisilik", "4 kisilik tim"] select (_mod > 2), round _mesafe, _tur, mapGridPosition _est, round _brg, groupId _kaynak, _mod];
+diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahmin %6, %7 yonu %8 derece) | kaynak grup %9 | operasyon emri modu %10", groupId _kaynak, _taraf, count _kisiler, "3-4 kisilik alt grup", round _mesafe, _tur, mapGridPosition _est, round _brg, groupId _kaynak, _mod];
 
 [_pg, _kaynak, _kisiler, _mesafe, _aracVar, _arPlan, _opN, _est] spawn {
     params ["_pg", "_orijin", "_kisiler", "_mesafe", "_aracVar", "_arPlan", "_opN", "_est"];

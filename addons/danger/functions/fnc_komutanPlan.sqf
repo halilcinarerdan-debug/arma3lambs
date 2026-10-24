@@ -622,7 +622,7 @@ if (_tip isEqualTo 1) then {
 };
 private _plan = createHashMapFromArray [
     ["id", _id], ["taraf", _taraf], ["obj", _obj], ["tip", _tip], ["hqId", _hqId], ["hqPoz", if (_hqKayit isEqualTo []) then {[]} else {+(_hqKayit select 2)}], ["hqYar", if (_hqKayit isEqualTo []) then {100} else {_hqKayit select 4}], ["gruplar", _gruplar], ["roller", _roller], ["komutan", _komutanG],
-    ["rp", _rp], ["orp", _orp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
+    ["rp", _rp], ["orp", _orp], ["ccp", _ccp], ["sbf", _sbf], ["B", _B], ["kanatNokta", _kanatNokta], ["kanatGerek", _kanatGerek],
     ["ayar", _ayar], ["tempo", ([_ayar getOrDefault ["tempo", 0], 1] select (((_ayar getOrDefault ["baskin", 0]) > 0 || {(_ayar getOrDefault ["guven", 1]) isEqualTo 0}) && {(_ayar getOrDefault ["tempo", 0]) isEqualTo 0}))], ["baslaT", time + ([0, 30, 60, 120, 300, 0] select ((_ayar getOrDefault ["basla", 0]) min 5))], ["bekleOnay", (_ayar getOrDefault ["basla", 0]) isEqualTo 5],
     ["sureSn", [0, 600, 1200, 1800, 2700, 3600, 7200, 14400, 36000] select ((_ayar getOrDefault ["sure", 0]) min 8)], ["tehditB", [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8)],
     ["baskinS", [0, 300, 600] select ((_ayar getOrDefault ["baskin", 0]) min 2)], ["sivil", _ayar getOrDefault ["sivil", false]], ["agirYasak", _ayar getOrDefault ["agirYasak", false]], ["topcu", _ayar getOrDefault ["topcu", 0]], ["topcuN", _ayar getOrDefault ["topcuN", 4]], ["topcuBasit", _ayar getOrDefault ["topcuBasit", 0]],
@@ -646,6 +646,13 @@ diag_log format ["[PLAN] %1 KURULDU | %2 | %3 | objektif %4 | komutan %5 (%6) | 
     _plan get "sureSn", [_plan get "tehditB", "bilinmiyor"] select ((_plan get "tehditB") < 0), _plan get "sivil", _plan get "agirYasak",
     ["yok", "hazirlik", "cagri", "hazirlik + cagri"] select ((_ayar getOrDefault ["topcu", 0]) min 3)];
 ["PLAN-KURULDU", format ["tip %1 | grup %2 | obje %3", _tip, count _gruplar, mapGridPosition _obj]] call FUNC(planZaman);
+// v8.327 OTOMATIK MEVZI / GARNIZON (operasyon emri, opsiyonel): savunma planinda plan kurulunca (squadlar yerlestikten 20 sn sonra) arazi analiziyle KARAKOL / MEVZI / GOZLETME bolgeleri
+if (_tip isEqualTo 1 && {(_ayar getOrDefault ["otoGarnizon", 0]) > 0}) then {
+    [_taraf, _obj, [-1, 0, 45, 90, 135, 180, 225, 270, 315] select ((_ayar getOrDefault ["tehditY", 0]) min 8), _orp, _ccp, _rp, _id, _ayar getOrDefault ["otoGarnizon", 1]] spawn {
+        sleep 20;
+        _this call (missionNamespace getVariable ["lambs_danger_fnc_otoGarnizon", {0}]);
+    };
+};
 // v8.204 ORTAK RESIM: ELITE plani kurulunca KUMANDA cekirdegi (istihbarat / SPOTREP agi, takviye, kanat, feint, destek, medevac) otomatik acilir - onceki testlerde Zeus 'Kumanda' modulu konmadigi icin bu katman HIC calismiyordu ([HQ-TAHTA] / [HQ-ISTIHBARAT] satiri yok). Kapatma: lambs_danger_hqPlanOtomatikOff = true
 if (!(missionNamespace getVariable ["lambs_danger_hqPlanOtomatikOff", false]) && {!(missionNamespace getVariable ["lambs_danger_hqAktif", false])}) then {
     missionNamespace setVariable ["lambs_danger_hqAktif", true, true];
