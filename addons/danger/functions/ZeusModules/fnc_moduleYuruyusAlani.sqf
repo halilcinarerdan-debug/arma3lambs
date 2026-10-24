@@ -4,7 +4,7 @@
  * ELITE YURUNEBILIR ALAN (v8.331; v8.333 Zeus uyumlu) — Eden (3D editor) VE Zeus modulu; yogun objeli hendeklerde AI'nin nesneler USTUNDEN yurumesi icin alan tanimlar. Ad yazmaya gerek yok.
  *   EDEN  : Systems > Modules > 'ELITE Yurunebilir Alan'; dikdortgen / elips alan boyutu ve yonu modulun kendi tutamaclariyla ayarlanir (yari boyutlar: a = yan, b = boy). Modul sunucuda kaydi loglar.
  *   ZEUS  : Zeus modul listesinde ayni modul (LAMBS Danger kategorisi); birakilinca bir ayar paneli acilir: sekil, yari genislik (a), yari boy (b), yon. Panel kapatilsa bile 12 x 4 m varsayilan alan gecerlidir;
- *           alani degistirmek icin modulu silip yeniden birak (ya da Zeus'ta modulu tasi / dondur: merkez ve yon modulun konumu / yonundan okunmaz, panelde girilen degerler gecerlidir).
+*           alani degistirmek icin modulu silip yeniden birak (ya da Zeus'ta modulu tasi / dondur: merkez ve yon modulun konumu / yonundan okunmaz, panelde girilen degerler gecerlidir).
  * Alan degeri modul nesnesinde 'objectArea' = [a, b, yon, dikdortgenMi, -1] olarak (Zeus'ta public) tutulur; alan listesi fnc_yuruyusAlani ile okunur, yurutme fnc_yuruyusIzle, GORSEL (harita isareti + Zeus 3D cizgi) fnc_yuruyusGorsel.
  *
  * Arguments:
@@ -24,6 +24,10 @@ private _alan = _logic getVariable ["objectArea", []];
 // ---- ZEUS: calisma zamaninda curator'un makinesinde birakildi (alan degeri henuz yok) ----
 if (_alan isEqualTo [] && {hasInterface} && {time > 10} && {local _logic} && {!isNull (getAssignedCuratorLogic player)}) exitWith {
     _logic setVariable ["objectArea", [12, 4, round (getDir _logic), true, -1], true];
+    if (!(missionNamespace getVariable ["lambs_danger_yuruIpucuGosterildi", false])) then {
+        lambs_danger_yuruIpucuGosterildi = true;
+        systemChat "[ELITE] Yurunebilir alan IPUCU: nesne yogun hendek / kaya bandinin USTUNE koy (merkez bandin ortasi, b = boy ekseni bant yonunde). Renk: YESIL tamam | TURUNCU uyari | KIRMIZI hata | SARI nesne yok. Kivrimli bant icin >= 8 m binen birkac alan.";
+    };
     [
         "ELITE Yurunebilir Alan (yogun objeli hendek)",
         [
@@ -48,3 +52,11 @@ if (_alan isEqualTo [] && {hasInterface} && {time > 10} && {local _logic} && {!i
 if (!isServer) exitWith {};
 if (_alan isEqualTo []) then { _alan = [10, 4, 0, true, -1]; };
 diag_log format ["[YURUYUS-ALANI] modul kaydedildi: %1 | yari boyut %2 x %3 m | yon %4 | sekil %5", mapGridPosition _logic, _alan param [0, 10], _alan param [1, 4], round (_alan param [2, 0]), ["elips", "dikdortgen"] select (_alan param [3, true])];
+// v8.335: sunucuda alan taramasi (nesne sayisi, en yuksek nesne, su / bina) - Eden'de nesneler yuklendikten sonra
+[_logic, _alan] spawn {
+    params ["_l", "_al"];
+    sleep 8;
+    if (isNull _l) exitWith {};
+    private _rap = [[getPosATL _l, _al param [0, 10], _al param [1, 4], _al param [2, 0], _al param [3, true], _l]] call FUNC(yuruyusTara);
+    diag_log format ["[YURUYUS-ALANI] tarama %1: %2", mapGridPosition _l, _rap select 1];
+};

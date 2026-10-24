@@ -52,5 +52,6 @@ Not: `ELITE_COVER_RANGE` (main/script_component.hpp) 60 m — 30 m önerilir.
 
 - Özet özellik listesi: `OZELLIKLER_LISTESI.md` (bölüm 10h: v8.276 – v8.333), ayrıntılı döküm: `OZELLIKLER_DETAYLI.md` (G5), doğrulanmayanlar + test planı: `DOGRULANMAYANLAR.md` / `TEST_SENARYOLARI.md`, sürüm sürüm kök neden: `DEVIR_LOGU_v7.0.txt`.
 - Bu depo üst LAMBS Danger deposunun **üzerine bindirilen** dosyaları içerir (`script_component.hpp`, `Cfg3DEN.hpp`, `CfgEventHandlers.hpp`, `ZEN_CfgContext.hpp` vb. yoktur). Yeni fonksiyonlar `addons/danger/XEH_PREP.hpp` içinde `PREP(...)` ile kayıtlıdır; yeni Eden / Zeus modülü `addons/danger/CfgVehicles.hpp` (`ELITE Yürünebilir Alan`).
+- Yürünebilir alan (Eden / Zeus modülü) kullanım rehberi: `YURUNEBILIR_ALAN_KULLANIM.md` (nereye koyulur, hangi nesneler, renkler, sorun giderme).
 - Araçlar: `tools/rpt_ozet.py` (`--karne / --form / --zeka / --kayip / --tani / --grup`, sürüm kontrolü), `tools/hemtt_kontrol.sh` (HEMTT sözdizimi / lint kontrolü), `tools/faction_export.sqf` (Arsenal'den fraksiyon config'i).
 - Kapatma anahtarları `lambs_danger_<ad>Off = true`; ayarlar CBA Addon Options > LAMBS Danger > ELITE ... kategorilerinde.
