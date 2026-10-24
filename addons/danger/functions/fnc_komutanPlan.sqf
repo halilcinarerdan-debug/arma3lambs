@@ -193,10 +193,23 @@ if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planO
             && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
             && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
             && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
-            && {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}
+            && {_hqKayit isNotEqualTo [] || {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}}   // v8.325: HQ'ya bagli tank mesafe sinirina takilmaz (piyade ile ayni kural; RPT 5372f629: T-80BV objektife 4.8 km, sinir 4 km -> plana hic alinmadi)
             && {(([_tv] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then {
             _zirhG pushBack _x;
             diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi (objektife %3 m)", groupId _x, getText (configOf _tv >> "displayName"), round (_tl distance2D _obj)];
+        } else {
+            // v8.325 TANI: tank neden plana alinmadi (sessizce elenmesin)
+            if (!isNull _tv && {_tv isKindOf "LandVehicle"} && {(side _x) isEqualTo _taraf} && {(([_tv] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then {
+                private _ned = [];
+                if (!alive _tl) then { _ned pushBack "lider olu"; };
+                if (isPlayer _tl || {(crew _tv) findIf {isPlayer _x} >= 0}) then { _ned pushBack "oyuncu var"; };
+                if (_x getVariable ["lambs_danger_tarafKapali", false]) then { _ned pushBack "taraf kapali"; };
+                if (_x getVariable ["lambs_danger_planAktif", false]) then { _ned pushBack "baska planda"; };
+                if ((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"]) then { _ned pushBack format ["gorev %1", _x getVariable ["lambs_danger_gorev", ""]]; };
+                if (_hqKayit isNotEqualTo [] && {(_x getVariable ["lambs_danger_hqId", ""]) isNotEqualTo _hqId}) then { _ned pushBack format ["baska HQ (%1)", _x getVariable ["lambs_danger_hqId", "-"]]; };
+                if (_hqKayit isEqualTo [] && {(_tl distance2D _obj) > (_ayar getOrDefault ["grupMesafe", 4000])}) then { _ned pushBack format ["mesafe %1 m > sinir", round (_tl distance2D _obj)]; };
+                diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] plana ALINMADI: %3", groupId _x, getText (configOf _tv >> "displayName"), _ned joinString ", "];
+            };
         };
     } forEach allGroups;
 };

@@ -442,8 +442,13 @@ while {true} do {
         private _sbf = _plan get "sbf";
         private _B = _plan get "B";
         private _roller = _plan get "roller";
-        private _gruplar = (_plan get "gruplar") select {!isNull _x && {({alive _x} count (units _x)) > 0}};
+        private _gruplarHam = _plan get "gruplar";
+        private _gruplar = _gruplarHam select {!isNull _x && {({alive _x} count (units _x)) > 0}};
         _plan set ["gruplar", _gruplar];
+        // v8.325 TANI (RPT 5372f629: P1 711 sn sonra 'grup kalmadi' ile bitti, oysa manevra / Alpha 3-2 canliydi): liste neden bosaldi
+        if (_gruplar isEqualTo [] && {_gruplarHam isNotEqualTo []} && {!(_faz in ["BITTI", "IPTAL"])}) then {
+            diag_log format ["[PLAN-GRUP-BOS] %1 | faz %2 | ham liste %3 grup: %4", _id, _faz, count _gruplarHam, _gruplarHam apply { format ["%1(null=%2 birim=%3 canli=%4)", groupId _x, isNull _x, count (units _x), {alive _x} count (units _x)] }];
+        };
         private _fazSure = time - (_plan get "fazT");
         // v8.255 TANI: kayip degerlendirmesi (30 sn'de bir) - geri cekilme esigine (%50) ne kadar kaldigi; 'neden tetiklenmedi / neden tetiklendi' sorusu
         if ((time - (_plan getOrDefault ["kayipLogT", -99])) >= 30 && {!(_faz in ["KUR", "BITTI", "IPTAL"])} && {!(missionNamespace getVariable ["lambs_danger_taniOff", false])}) then {
