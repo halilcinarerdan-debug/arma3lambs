@@ -37,7 +37,14 @@ if (_mod isEqualTo "SEC") exitWith {
         && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
         && {((units (group _d)) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
         && {(getNumber (configOf _v >> "attendant")) isEqualTo 0}
-        && {(([_v] call FUNC(aracSinif)) select 0) in ["APC", "KAMYON", "IFV"]}
+        && {
+            // v8.322 HAFIF ARAC MODU (dron operatoru avi devriyesi, plan["aracHafif"]): kucuk ve hizli ARABA (Humvee / Tigr / UAZ sinifi: Car, zirhli tasiyici degil, <= 8 koltuk, IHA degil); normal recon: APC / KAMYON / IFV
+            if (_plan getOrDefault ["aracHafif", false]) then {
+                (_v isKindOf "Car") && {!(_v isKindOf "Wheeled_APC_F")} && {!unitIsUAV _v} && {(([_v] call FUNC(aracDuzBos))) <= 8} && {(([_v] call FUNC(aracSinif)) select 0) in ["DIGER", "KAMYON", "APC"]}
+            } else {
+                (([_v] call FUNC(aracSinif)) select 0) in ["APC", "KAMYON", "IFV"]
+            }
+        }
     };
     if (_aday isEqualTo []) exitWith {
         diag_log format ["[RECON-ARAC] %1 | uygun arac YOK (kargo >= %2, AI surucu, planda / mesgul degil) -> recon yaya gidecek", _plan get "id", count _birimler];
@@ -49,7 +56,12 @@ if (_mod isEqualTo "SEC") exitWith {
         //   oncelik: Gorev Ata "RECON ARACI" (4) > MEDEVAC takimi araci (3) > gorevsiz arac (2) > TASIMA atanmis arac (1, son care); sonra sinif, sonra yakinlik
         private _gv = [_this getVariable ["lambs_danger_gorev", ""], (group (driver _this)) getVariable ["lambs_danger_gorev", ""]];
         private _kademe = if ("RECON_ARAC" in _gv) then {4} else { if ("MEDEVAC" in _gv) then {3} else { if ("TASIMA" in _gv) then {1} else {2} } };
-        _kademe * 10000000 + ([0, 1, 2] select (["IFV", "KAMYON", "APC"] find _s)) * 100000 - (_this distance2D _mrk)
+        // v8.322: hafif arac modunda sinif yerine EN KUCUK (en az koltuklu = en hizli / gizli) arac tercih edilir
+        if (_plan getOrDefault ["aracHafif", false]) then {
+            _kademe * 10000000 + (100 - (([_this] call FUNC(aracDuzBos)) min 99)) * 100000 - (_this distance2D _mrk)
+        } else {
+            _kademe * 10000000 + ([0, 1, 2] select (["IFV", "KAMYON", "APC"] find _s)) * 100000 - (_this distance2D _mrk)
+        }
     };
     _aday = [_aday, [], {-(_x call _puan)}, "ASCEND"] call BIS_fnc_sortBy;
     private _v = _aday select 0;
