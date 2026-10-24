@@ -4,7 +4,7 @@
  * DRON OPERATORU AVI — HQ DEVRIYE (v8.320; kullanici: 'objektiften uzaktan dron gonderdigimizde ... devriye gondersinler ama operasyon emrinde ayarlanabilsin, opsiyonel').
  * Cagiran: fnc_dronTepki (dron izi geri-yonu bulununca). Ayni tarafin IKI ayri gozleminden (>= 20 sn arayla) operator bolgesi tahmini cikarilir (dogrular kesisirse kesisim, yoksa son dogru uzerinde 700 m);
  * temasta olmayan, plan gorevinde olmayan en yakin YEREL dost gruptan 2 (ya da 4) asker AYRI bir devriye grubuna alinir ve tahmin edilen bolgeye (en cok 800 / 1000 m) kisa adimlarla (<= 220 m, AWARE / YELLOW)
- * gider, son noktada ARAMA (SAD, 70 m); sure (9 dk) dolunca / devriye kayiplariyla / hedefe varinca asil gruba katilir. Taraf basina 300 sn'de bir.
+ * gider, son noktada ARAMA (SAD, 70 m); sure (mesafe / 1.2 m/sn + 150 sn) dolunca / devriye kayiplariyla / hedefe varinca asil gruba katilir. Taraf basina 300 sn'de bir.
  * AYAR: OPERASYON EMRI (ELITE Objektif 4/4 'Dron operatoru avi'): 0 CBA'ya uy | 1 Hayir | 2 Evet: 2 kisilik devriye | 3 Evet: 4 kisilik tim (guclu, 1000 m). Aktif plan yoksa / 0 ise CBA 'lambs_danger_dronAviAktif' (varsayilan acik = 2 kisilik).
  * Kapatma: lambs_danger_dronAviOff = true.   Log: [DRON-AVI]
  *
@@ -103,9 +103,11 @@ for "_i" from 1 to _adim do {
 missionNamespace setVariable [_ozK, time];
 diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahmin %6, %7 yonu %8 derece) | kaynak grup %9 | operasyon emri modu %10", groupId _kaynak, _taraf, count _kisiler, ["2 kisilik", "4 kisilik tim"] select (_mod > 2), round _mesafe, _tur, mapGridPosition _est, round _brg, groupId _kaynak, _mod];
 
-[_pg, _kaynak, _kisiler] spawn {
-    params ["_pg", "_orijin", "_kisiler"];
-    private _bit = time + 540;
+[_pg, _kaynak, _kisiler, _mesafe] spawn {
+    params ["_pg", "_orijin", "_kisiler", "_mesafe"];
+    // v8.321: sure yurume mesafesine gore (~1.2 m/sn + 150 sn arama; eskiden sabit 540 sn: 800 m'ye yaya varmadan geri cagriliyordu)
+    private _sure = (_mesafe / 1.2) + 150;
+    private _bit = time + _sure;
     waitUntil {
         sleep 5;
         time > _bit || {({alive _x} count (units _pg)) isEqualTo 0} || {(currentWaypoint _pg) >= (count (waypoints _pg))}
@@ -116,6 +118,6 @@ diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahm
         _kalan joinSilent _orijin;
     };
     deleteGroup _pg;
-    diag_log format ["[DRON-AVI] devriye bitti | %1 asker asil gruba katildi | sure %2 sn", count _kalan, round (540 - (_bit - time))];
+    diag_log format ["[DRON-AVI] devriye bitti | %1 asker asil gruba katildi | sure %2 sn", count _kalan, round (_sure - (_bit - time))];
 };
 count _kisiler
