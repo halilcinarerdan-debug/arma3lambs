@@ -17,10 +17,10 @@
  * Public: No
 */
 
-params [["_v", objNull, [objNull]]];
+params [["_v", objNull, [objNull]], ["_bekle", 30, [0]]];   // v8.318: _bekle = ayni arac icin bekleme (sn); dron savunmasi 14 sn kullanir
 if (isNull _v || {!alive _v} || {!local _v}) exitWith {false};
 if (missionNamespace getVariable ["lambs_danger_aracDumanOff", false]) exitWith {false};
-if ((time - (_v getVariable [QGVAR(aracDumanT), -999])) < 30) exitWith {false};
+if ((time - (_v getVariable [QGVAR(aracDumanT), -999])) < _bekle) exitWith {false};
 
 private _tip = typeOf _v;
 if (isNil "lambs_danger_aracDumanCache") then { lambs_danger_aracDumanCache = createHashMap; };

@@ -99,7 +99,8 @@ private _nZ = count _zg;
     // v8.279: tank tani (atis / hasar loglari) + ekip becerisi (arac basina bir kez)
     if (_tankMi) then { [_v] call FUNC(tankIzle); };
     // v8.280: tank dron savunmasi (uyari paylasimi, yon, makineli ates, duman, kacinma)
-    if (_tankMi) then { [_g, _v, _d] call FUNC(tankDron); };
+    // v8.318 (kullanici: 'araca dron gelirken kacsin'): IFV / APC de dron savunmasi (uyari, yon, MG, duman, kacinma) kullanir
+    if (_tankMi || {(([_v] call FUNC(aracSinif)) select 0) in ["IFV", "APC"]}) then { [_g, _v, _d] call FUNC(tankDron); };
     // v8.250: AT yetenegi olmayan arac (tank degil, ATGM yok) bilinen dusman tankindan kacarken (fnc_aracZirhKac) planZirh ona hedef / hareket emri vermez
     if (!_tankMi && {(time - (_v getVariable ["lambs_danger_zirhKacT", -999])) < 10}) then { continue };
     private _atYeterli = _tankMi || {([_v] call FUNC(aracSinif)) select 3};

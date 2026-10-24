@@ -7,8 +7,8 @@
  *   - 1) UYARI: yakindaki (<= 900 m) dost zirhli araclara dron konumu / zaman bildirilir (lambs_danger_tankDronUyari)
  *   - 2) YON: tehdit <= 600 m ise murettebat dronun gelis yonune doWatch (taret ve komutan dronu izler)
  *   - 3) ATES: <= 500 m ise taret disindaki (komutan / nisanci) MG'li murettebat doTarget + doFire (koaksiyel / komutan makineli); 3 sn'de bir
- *   - 4) DUMAN: kamikaze tur, <= 260 m ve yaklasiyor (kapanma hizi > 3 m/sn) ise taret donduktan 1.5 sn sonra fnc_aracDuman (gorus hattini keser; 30 sn bekleme zaten fnc_aracDuman'da)
- *   - 5) KACINMA: <= 130 m ve kapanma hizi > 8 m/sn ve tank hareket edebilir ise 30 m yana (dronun gelis yonune dik) atilir, 7 sn sonra durur (mevzi kilidi varsa yeniden kilitlenir). 25 sn bekleme.
+ *   - 4) DUMAN: kamikaze tur, <= 520 m ve (yaklasiyor ya da <= 300 m) ise fnc_aracDuman (gorus hattini keser; v8.318: 14 sn bekleme)
+ *   - 5) KACINMA: v8.318 zigzag: <= 380 m ve kapanma > 4 m/sn, canMove: 38 m yana + 4.5 sn sonra ters yana (FULL hiz), mevzi kilidi gecici acilir, ~11 sn sonra durur. 12 sn bekleme.
  * Kapatma: lambs_danger_tankDronOff = true.  Log: [TANK-DRON]
  *
  * Arguments:
@@ -118,30 +118,37 @@ if (_dist <= 500) then {
     if (_n > 0) then { _eylem pushBack format ["ATES(%1)", _n]; };
 };
 // 4) DUMAN
-// v8.300: 260 -> 420 m (FPV 30 m/sn: 420 m ~ 14 sn; duman acilmasi birkac sn surer), kapanma esigi 3 -> 2 m/sn
-if (_kamikaze && {_dist <= 420} && {_kap > 2}) then {
-    if ((time - (_v getVariable [QGVAR(tankDronDumanT), -99])) > 30) then {
+// v8.318 (kullanici: 'yakinlasinca smoke kullanimi artsin, bu testte hic olmadi'; RPT 24-10 03:01: dron hic bilinmedi -> TANK-DRON 0; Crocus CBA ayari duzeltildi): kamikaze <= 520 m ve (yaklasiyor ya da <= 300 m) -> duman; ayni arac icin bekleme 30 -> 14 sn (ikinci / ucuncu perde)
+if (_kamikaze && {_dist <= 520} && {_kap > 0 || {_dist <= 300}}) then {
+    if ((time - (_v getVariable [QGVAR(tankDronDumanT), -99])) > 14) then {
         _v setVariable [QGVAR(tankDronDumanT), time];
-        [{ params ["_vv"]; if (!isNull _vv && {alive _vv}) then { [_vv] call FUNC(aracDuman); }; }, [_v], 1.5] call CBA_fnc_waitAndExecute;
+        [{ params ["_vv"]; if (!isNull _vv && {alive _vv}) then { [_vv, 14] call FUNC(aracDuman); }; }, [_v], 1.0] call CBA_fnc_waitAndExecute;
         _eylem pushBack "DUMAN";
     };
 };
-// 5) KACINMA
-if (_kamikaze && {_dist <= 200} && {_kap > 6} && {canMove _v} && {(time - (_v getVariable [QGVAR(tankDronKacT), -99])) > 25}) then {
+// 5) KACINMA (v8.318: 'araca dron gelirken kacsin, hareket edebilsin')
+//   kamikaze <= 380 m ve kapanma > 4 m/sn: ZIGZAG kacis: 1. ayak dronun gelis yonune dik 38 m (+ 10 m geri), 4.5 sn sonra 2. ayak ters yana (+ 15 m geri); FULL hiz, hareket kilidi (mevzi) gecici acilir, ~11 sn sonra durur / yeniden kilitlenir. 12 sn bekleme.
+if (_kamikaze && {_dist <= 380} && {_kap > 4} && {canMove _v} && {(time - (_v getVariable [QGVAR(tankDronKacT), -99])) > 12}) then {
     _v setVariable [QGVAR(tankDronKacT), time];
     private _gelisDir = _v getDir _dr;
-    private _yan = _v getPos [30, _gelisDir + (selectRandom [90, -90])];
-    if (!surfaceIsWater _yan) then {
-        _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
-        _d doMove _yan;
-        _v setVariable [QGVAR(tankManevraT), time];   // planZirh yeniden yonlendirmesi 20 sn susar
+    private _taraf2 = selectRandom [90, -90];
+    private _yan1 = (_v getPos [38, _gelisDir + _taraf2]) getPos [10, _gelisDir + 180];
+    if (!surfaceIsWater _yan1) then {
+        _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _d setSpeedMode "FULL";
+        _d doMove _yan1;
+        _v setVariable [QGVAR(tankManevraT), time + 8];   // planZirh yeniden yonlendirmesi susar (8 sn daha)
         _eylem pushBack "KACINMA";
-        [{
-            params ["_vv", "_dd", "_g2"];
+        [_v, _d, _g, _gelisDir, _taraf2] spawn {
+            params ["_vv", "_dd", "_g2", "_gd", "_t2"];
+            sleep 4.5;
+            if (isNull _vv || {!alive _vv} || {isNull _dd} || {!alive _dd} || {!canMove _vv}) exitWith {};
+            private _yan2 = (_vv getPos [34, _gd - _t2]) getPos [15, _gd + 180];
+            if (!surfaceIsWater _yan2) then { _dd enableAI "MOVE"; _dd doMove _yan2; };
+            sleep 6;
             if (isNull _vv || {!alive _vv} || {isNull _dd} || {!alive _dd}) exitWith {};
             doStop _dd;
             if (_g2 getVariable ["lambs_danger_planZirhKilit", false]) then { _dd disableAI "MOVE"; };
-        }, [_v, _d, _g], 7] call CBA_fnc_waitAndExecute;
+        };
     };
 };
 
