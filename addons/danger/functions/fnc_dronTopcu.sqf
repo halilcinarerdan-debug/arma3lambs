@@ -65,6 +65,24 @@ lambs_danger_dronTopcuStarted = true;
                 };
             } forEach _gozleyiciler;
 
+            // ---- 1b) YER GOZLEMCISI (v8.342): dron yoksa gorus hatti ACIK lider (hakim noktaya cikan lider once) FO olur ----
+            if (isNull _fo && {_dronA} && {missionNamespace getVariable ["lambs_danger_foAktif", true]}) then {
+                private _foSt = missionNamespace getVariable [format ["lambs_danger_foGorev_%1", _taraf], []];
+                private _lgrp = allGroups select {
+                    (side _x) isEqualTo _taraf && {local _x} && {!isNull (leader _x)} && {alive (leader _x)} && {!isPlayer (leader _x)} && {isNull objectParent (leader _x)}
+                    && {(lifeState (leader _x)) in ["HEALTHY", "INJURED"]} && {(getSuppression (leader _x)) < 0.5} && {!(_x getVariable [QGVAR(isRetreating), false])}
+                };
+                private _bak = [];
+                if (_foSt isNotEqualTo [] && {alive (_foSt select 1)}) then { _bak pushBack (_foSt select 1); };
+                if (_lgrp isNotEqualTo []) then {
+                    for "_i" from 0 to (((count _lgrp) min 6) - 1) do { _bak pushBackUnique (leader (_lgrp select ((_tick * 6 + _i) mod (count _lgrp)))); };
+                };
+                {
+                    private _gkF = [_x, _taraf] call FUNC(topcuGoru);
+                    if ((count (_gkF select 1)) > (count _goru)) then { _fo = _x; _goru = _gkF select 1; };
+                } forEach _bak;
+            };
+
             // ---- 4) temas bellegi (20 sn'de bir) ----
             if ((_tick mod 4) isEqualTo 0) then {
                 private _gorulen = +_goru;
@@ -157,6 +175,11 @@ lambs_danger_dronTopcuStarted = true;
                         ["gozlemci yok; talep beklemede / dron zaten gorevde"] call _say;
                     };
                 };
+            };
+
+            // ---- yer gozlemcisi: lider hakim noktaya (ev ust kati / cati / arazi) (20 sn'de bir) ----
+            if (_dronA && {(_tick mod 4) isEqualTo 2}) then {
+                [_taraf, !isNull _fo] call FUNC(foHakim);
             };
 
             // ---- taciz zamani ----

@@ -41,7 +41,7 @@ private _T = +_hedef0;
 
 // gozlemcinin hedef kumesini gorusu: [taze, merkez, deger, adam, arac]
 private _yenile = {
-    private _gk = _fo getVariable ["lambs_danger_ihaGorulen", [-99, []]];
+    private _gk = [_fo, _taraf] call FUNC(topcuGoru);   // v8.342: dron (ihaGorulen) ya da yer gozlemcisi (kendi gorusu)
     private _taze = alive _fo && {(time - (_gk select 0)) < 15};
     private _kl = [(_gk select 1) select {(_x distance2D _T) < 150}, _taraf] call FUNC(topcuKume);
     if (_kl isEqualTo []) then { [_taze, [], 0, 0, 0] } else {
@@ -71,8 +71,8 @@ call {
 
     // ---- 2) CAGRI (call for fire) ----
     private _yon = (getPosATL _fo) getDir _T;
-    diag_log format ["[DRON-TOPCU] %1 | CAGRI (call for fire): gozlemci %2 | UYARI EMRI: ADJUST FIRE | HEDEF YERI: grid %3 (gozlemciden %4 m, yon %5 derece) | HEDEF TANIMI: %6 adam %7 arac, duragan, acik arazi (varsayilan) | YONTEM: alan atesi%8 | topcu: %9 arac menzilde (ilk: %10, %11 m) | en yakin dost %12 m, RED %13 m",
-        _kimlik, typeOf _fo, mapGridPosition _T, round ((getPosATL _fo) distance2D _T), round _yon, _na0, _nv0, ["", ", DANGER CLOSE (creeping <= 100 m, bracketing yok)"] select _dc, count _menzilde, typeOf ((_menzilde select 0) select 0), round (((_menzilde select 0) select 0) distance2D _T), round _dF, _red];
+    diag_log format ["[DRON-TOPCU] %1 | CAGRI (call for fire): gozlemci %2%14 | UYARI EMRI: ADJUST FIRE | HEDEF YERI: grid %3 (gozlemciden %4 m, yon %5 derece) | HEDEF TANIMI: %6 adam %7 arac, duragan, acik arazi (varsayilan) | YONTEM: alan atesi%8 | topcu: %9 arac menzilde (ilk: %10, %11 m) | en yakin dost %12 m, RED %13 m",
+        _kimlik, typeOf _fo, mapGridPosition _T, round ((getPosATL _fo) distance2D _T), round _yon, _na0, _nv0, ["", ", DANGER CLOSE (creeping <= 100 m, bracketing yok)"] select _dc, count _menzilde, typeOf ((_menzilde select 0) select 0), round (((_menzilde select 0) select 0) distance2D _T), round _dF, _red, ["", " (YER GOZLEMCISI: lider " + name _fo + ")"] select (_fo isKindOf "CAManBase")];
 
     // ---- 3) ADJUST FIRE ----
     private _A = +_T;

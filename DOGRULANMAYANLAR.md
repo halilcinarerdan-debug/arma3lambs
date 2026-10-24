@@ -197,3 +197,4 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] Operator atesinde Sh_82mm_AMOS mermisi hedeften ~1.6 km uzaga dusuyor mu (`[DRON-KARSI-ATES] ... ATIS EMRI` + `[TANI-TOPCU]` karsilastir).
 - [ ] v8.340: dron vurulma suresi uzadi mi (`[DRON-ISABET]` olasiliklari; yakin + yuksek beceri ~1, uzak / hizli dusuk); `dronIsabetOran` 0.5 / 2 ile karsilastir.
 - [ ] v8.341: operator / karsi-batarya atisinda `[TOPCU-ATIS] ... YABANCI MERMI temizlendi` / `YANLIS MERMI` gorunuyor mu; tum mermiler hedefe yakin dusuyor mu (`[TANI-TOPCU]`). Karakol nobet / devriye kadrosunda sihhiye yok (komutan / MEDEVAC grubu haric).
+- [ ] v8.342: `[FO-HAKIM]` atama (BINA ust kat / cati ya da ARAZI), lider gercekten cikiyor mu (merdiven), varista `gozlem noktasinda`, sonra `[DRON-TOPCU] CAGRI ... (YER GOZLEMCISI ...)`; plandaki grupta yalniz lider gidince grup / LAMBS tepkisi (komutan bekle, buddy).
