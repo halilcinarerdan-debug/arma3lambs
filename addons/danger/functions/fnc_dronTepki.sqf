@@ -102,6 +102,8 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
             private _istN = [_g, _supheli, "ISTIKSAF"] call FUNC(istiksaf);
             if (_istN > 0) then { _g setVariable [QGVAR(dronIstiksafT), time]; };
         };
+        // v8.320 DRON OPERATORU AVI (HQ devriye; operasyon emrinde / CBA'da ayarlanir): tahmini operator bolgesine 2 / 4 kisilik devriye
+        [_g, _p0, _geri] call FUNC(dronAvi);
         if ((time - (_dr getVariable [QGVAR(dronYonLogT), -999])) > 20) then {
             _dr setVariable [QGVAR(dronYonLogT), time];
             diag_log format ["[DRON-YON] %1 | %2 (%3) | gelis %4 derece -> operator / firlatma yonu %5 derece (700 m, hata +-15) | iz %6 m / %7 sn | haberdar edilen grup %8", groupId _g, typeOf _dr, _tip, round _gelis, round _geri, round (_p0 distance2D _p1), round (time - ((_iz select 0) select 0)), _n];

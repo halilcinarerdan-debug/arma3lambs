@@ -76,7 +76,8 @@ if (_activated && local _logic) then {
                                                 ["Topcu atis sayisi (mermi)", "SLIDER", "Atis seansi basina mermi.", [1, 12], [1, 2], 4, 0],
                                                 ["Topcu modu", "LIST", "Standart: Dogrulama disiplini ve dost mesafesi (RED) kurallari uygulanir. BASIT: dogrulama beklenmez, plan baslar baslamaz (topcu menzile girdiginde) objektife atar; yalniz dost mesafesi (RED) ve menzil kurallari kalir. Topcu 'yok' ise etkisiz.", ["Standart (dogrulamali)", "BASIT (dogrulamasiz, hemen)"], 0],
                                                 ["Hedef zinciri (cephe)", "LIST", "Hayir: bagimsiz plan. Zincire ekle: AYNI taraftaki AKTIF ele gecir planinin SIRADAKI hedefi olur; plan objektifi alinca (OBJEKTIF ALINDI) hayatta kalan gruplar duzenlenip siradaki hedefe otomatik ilerler (tek tek yeni plan kurmadan, cephe hatti ilerler). Aktif plan yoksa normal plan kurulur.", ["Hayir (bagimsiz plan)", "Zincire ekle (siradaki hedef)"], 0],
-                                                ["Recon: ek gozlem (dusman noktalari)", "LIST", "Hayir: recon yalniz objektif gozlem noktasina gider. Evet: objektifin 2 km icindeki DUSMAN karakol / mevzi / gozetleme noktalarini da sirayla gizlice (STEALTH, ates yok) gozlemler ve raporlar.", ["Hayir", "Evet (gizlice incele)"], 0]
+                                                ["Recon: ek gozlem (dusman noktalari)", "LIST", "Hayir: recon yalniz objektif gozlem noktasina gider. Evet: objektifin 2 km icindeki DUSMAN karakol / mevzi / gozetleme noktalarini da sirayla gizlice (STEALTH, ates yok) gozlemler ve raporlar.", ["Hayir", "Evet (gizlice incele)"], 0],
+                                                ["Dron operatoru avi (devriye)", "LIST", "Dusman dronu birden cok kez gorulunce ucus izinden tahmin edilen OPERATOR bolgesine HQ devriye gonderir (temasta olmayan, plan gorevinde olmayan en yakin gruptan 2 ya da 4 asker, 800 / 1000 m'ye kadar kisa adimlarla, son noktada arama; 9 dk sonra gruba doner). CBA'ya uy: 'ELITE pusu / gerilla > Dron operatoru avi (HQ devriye)' ayari (varsayilan acik).", ["CBA ayarina uy (varsayilan)", "Hayir (devriye yok)", "Evet: 2 kisilik devriye", "Evet: 4 kisilik tim (guclu, 1000 m)"], 0]
                                             ],
                                             {
                                                 params ["_data", "_args"];
@@ -84,7 +85,7 @@ if (_activated && local _logic) then {
                                                 _d1 params ["_tarafI", "_tip", "_tempo", "_basla", "_sure", "_hqI", "_grupN", "_secimModu"];   // alan sirasi: Taraf, Gorev tipi, Tempo, Baslama, Sure, HQ / US, Grup sayisi, Grup secimi
                                                 _d2 params ["_piy", "_zrh", "_at", "_mg", "_nis", "_bina", "_say"];
                                                 _d3 params ["_sivil", "_agir", "_rally", "_orp", "_baskin", "_tehditY", ["_rpIsaretI", 0], ["_mevziYar", 500], ["_oranEsik", 2]];
-                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN", ["_topcuBasit", 0], ["_zincir", 0], ["_reconEk", 0]];
+                                                _data params ["_guven", "_dogr", "_topcu", "_topcuN", ["_topcuBasit", 0], ["_zincir", 0], ["_reconEk", 0], ["_dronAvi", 0]];
                                                 private _taraf = [west, east, independent] select (_tarafI max 0 min 2);
                                                 // v8.178 HQ DOGRULAMA (kullanici hatasi korumasi): ELE GECIR icin HQ / US zorunlu; secilen HQ'nun tarafi plan tarafi ile ayni olmali
                                                 private _hqLi = missionNamespace getVariable ["lambs_danger_hqListe", []];
@@ -106,7 +107,7 @@ if (_activated && local _logic) then {
                                                     ["hqId", if (_hq isEqualTo []) then {""} else {format ["%1_%2", _hq select 2, _hq select 1]}],
                                                     ["tip", _tip], ["grupN", round _grupN], ["tumHQ", _secimModu in [2, 3]], ["tumHQGuvenlik", _secimModu isEqualTo 2], ["piyade", _piy], ["zirh", _zrh], ["at", _at], ["mg", _mg], ["nisanci", _nis], ["bina", _bina],
                                                     ["sayi", round _say], ["rallyM", round _rally], ["orpM", round _orp], ["baskin", _baskin], ["guven", _guven], ["dogrulama", _dogr],
-                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN], ["topcuBasit", _topcuBasit], ["zincir", _zincir isEqualTo 1], ["reconEk", _reconEk isEqualTo 1], ["rpIsaret", _rpIsaret], ["mevziYar", round _mevziYar], ["oranEsik", _oranEsik]
+                                                    ["tempo", _tempo], ["basla", _basla], ["sure", _sure], ["tehditY", _tehditY], ["sivil", _sivil], ["agirYasak", _agir], ["topcu", _topcu], ["topcuN", round _topcuN], ["topcuBasit", _topcuBasit], ["zincir", _zincir isEqualTo 1], ["reconEk", _reconEk isEqualTo 1], ["dronAvi", _dronAvi], ["rpIsaret", _rpIsaret], ["mevziYar", round _mevziYar], ["oranEsik", _oranEsik]
                                                 ];
                                                 // v8.150: Elle grup secimi (yalniz ele gecir / savun): squad listesi paneli, secilenler "secili" ile gonderilir
                                                 if (_secimModu isEqualTo 1 && {_tip in [0, 1]}) exitWith {
