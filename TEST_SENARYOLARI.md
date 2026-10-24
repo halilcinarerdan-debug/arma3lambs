@@ -478,3 +478,35 @@ Hepsi (T) = dogrulanmadi.
 ## T-OTO-GARNIZON (v8.327)
 1. OPORD 4/4 'Otomatik mevzi / garnizon bolgeleri' = Evet; savunma plani kur. 20 sn sonra `[OTO-GARNIZON] P1 | KARAKOL ... MEVZI ... GOZLETME ...` (ORP'ye / CCP'ye >= 70 m); `[KARAKOL] ...`; nobetciler pozisyonda, devriye dolasir. Saldiri planinda OBJEKTIF ALINDI sonrasi ayni.
 Hepsi (T) = dogrulanmadi.
+
+## T-DRON-TOPCU (v8.338): dron gozlemli topcu atisi
+Kurulum (Enoch / Altis, ACE'li olabilir): BATI: 1 Mk6 havan (81 mm) ya da M109 + AI nisanci (SUNUCUDA yerel; Zeus ile istemcide kurduysan 15-20 sn bekle, `[TOPCU-TEST]`), 1 piyade manga (dusmandan >= 800 m geride), 1 AI mürettebatlı silahsiz IHA (AR-2 Darter; yerde). DOGU: 6 kisilik manga, dusmana gorus hattinda, `doStop` / HOLD.
+1. Hizli yol: debug konsolundan dronu elle istasyona gonder: `[_dron,"GOZLEM","GOZLEM",west,(getPosATL dusmanLider) getPos [380,180],130,3000,objNull,0] spawn lambs_danger_fnc_ihaSorti;` (dron uçmaya baslayinca `[IHA-GOZLEM]` ile gorulen dusman listelenmeli).
+2. Dogal yol: bati manga liderine dusmani 'gordur' (`westLider reveal [dusmanLider, 4]`; 5 sn'de bir tekrar) -> `[DRON-TOPCU] UZAKTAN GORUNEN DUSMAN ... gozlemci talebi` -> `[DRON-GOZLEM] ... HAZIR gozlem dronu gonderildi`.
+3. Beklenen sira: `CAGRI` -> `ADJUST 1/3: SPLASH ... hedefe N m` (1-3 kez) -> `ETKI ATESI (FIRE FOR EFFECT)` -> `BDA: onceki N -> kalan M` -> (kalan >= 2 ve >= %50 ise) `REPEAT` -> `SON (END OF MISSION): tamam`.
+4. Gecme: (a) adjust sonrasi hata esigin altina iniyor ya da `yakinsamadi` mantikli sebeple (b) FFE mermileri hedefe 30 m civarinda (c) dost kaybi yok (d) 150 sn bekleme / 240 sn bolge kilidi calisiyor (e) `[DRON-TOPCU-OZET]` sayaclari.
+5. Basarisizlik ipuclari: `adjust mermisi dusmedi` (Fired/izleme), `gozlem kesildi / hedef gorunmuyor` (dron algisi), `hedef kaydi` (hedef hareketli), `guvenlik: ...` (RED / NFA / sivil), `mermi butcesi dolu`.
+
+## T-DANGER-CLOSE (v8.338)
+1. 81 mm havan + piyade hedefe 450 m: `YONTEM: alan atesi, DANGER CLOSE (creeping <= 100 m, bracketing yok)`, ilk mermi hedefin dosttan UZAK yaninda, duzeltmeler <= 100 m, FFE tek top x 2 mermi.
+2. M109 (RED 455) + dost 450 m: `guvenlik: dost 450 m < RED 455 m + 20` (atilmaz). Dostu 700 m'ye al: normal gorev.
+
+## T-NFA (v8.338)
+1. Haritaya elips isaret koy, adi `nfa_test` (yaricap 150 m), dusman kumesinin ustune. Gozlemli atis: `guvenlik: ATESE YASAK ALAN (NFA isareti nfa_test)`. Komutan plani objektifi bu isaretin icinde: `[PLAN-TOPCU] ... ATMADI: ATESE YASAK ALAN ... (NFA)`. Taciz de atmaz. Isareti sil -> atar.
+2. Sivil: dusman kumesinin 100 m icine bir sivil koy -> `sivil < 120 m (NFA)`.
+
+## T-TACIZ (v8.338)
+1. CBA `tacizAralik` = 60 (hizli test). Bati manga liderine dusmani 20 sn gordur (reveal tekrar), sonra dusman mangasini gorus disina al (Zeus: sil / uzaga tasi) -> `[DRON-TOPCU-OZET]` bellekte kayit gorunur. 60-900 sn sonra `[TACIZ] ... TACIZ ATISI (harassing fire, gozlemsiz): hedef ... bayat temas: N sn once ... 2 mermi dagitik (40 m)`.
+2. Gecme: mermiler 18-38 sn arayla, ayni noktaya 3 taciz sonrasi ya da 600 sn icinde tekrar yok, dost >= 600 m, mermi butcesi (30 / 600 sn) asilmiyor, aralik 60-120 sn arasinda duzensiz.
+
+## T-KARSI-BATARYA-EMNIYET (v8.338)
+1. Dron saldirisi ac (operator 300 m dostun yakininda): `[DRON-KARSI-ATES] ... ATMADI (kitap emniyeti): gozlemsiz atista danger close: en yakin dost N m <= 600 m`. Operator bolgesi dosttan > 600 m ise atar. `lambs_danger_topcuEskiMesafe = true` ile karsilastir.
+
+## TOPLU TEST PLANI v8.338 (en cok 6 oturum; hepsi (T) = dogrulanmadi)
+Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rpt_ozet.py --tani <rpt>`; boot satirinda `v8.338` gorunmeli.
+- **Oturum A — Zirh / arac (Enoch, RHS, 2 tank + 1 IFV + piyade, HQ'ya bagli)**: T-TANK-OTOMATIK-SECIM, T-TANK-AGRESIF (`tankAgresif` 2 ve 0 karsilastir), T-ARAC-UNSTUCK (araci agaca sok), T-IHA-DUMAN (AI FPV-AT + duman), T-FPV-CARPMA (ACE Vehicle Damage acik ve kapali; `[IHA-ETKI]`). Bak: `[PLAN-ARAC]`, `[PLAN-ZIRH]`, `[ARAC-UNSTUCK]`, `[IHA-DUMAN]`, `[IHA-ETKI]`.
+- **Oturum B — Dolayli ates (yeni)**: T-DRON-TOPCU, T-DANGER-CLOSE, T-NFA, T-TACIZ, T-KARSI-BATARYA-EMNIYET. Ek regresyon: komutan plani + M109 + 2S1 (122 mm) ile `[PLAN-TOPCU]`: RED 455 (2S1) ve 'NISAN KAYDIRILDI' hala calisiyor mu; Zeus topcu testi (`[TOPCU-TEST]`).
+- **Oturum C — Dron savunmasi**: piyade dron tepkisi (`[DRON-YON]` / `[DRON-SAKLAN]`), tank dron tepkisi (`[TANK-DRON]`), T-DRON-AVI-SAVUNMA (savunma planindan 3-4 kisilik devriye), T-DRON-GOZLEMCI (israrli saldiri -> gozlem dronu), T-TOPCU-EMINLIK (1 dron 110 m / 4 dron 16 m yayilim).
+- **Oturum D — Savunma / garnizon**: T-OTO-GARNIZON (OPORD 4/4 Evet; ORP / CCP'den >= 70 m), hedef zinciri TUT (`[PLAN-TUT]`), eski hendek / karakol sistemi (v8.330 haline dondu: hendek yerlestirme + `GOZLETME` calisiyor mu — regresyon).
+- **Oturum E — Piyade davranisi**: T-SIS-BUTCE (saldiri basina 120 sn'de en cok 2 sis olayi), patlayici (el bombasi / roket / UGL), ates ve hareket, pusu tepkisi (`[PUSU-*]`), teslim / TCCC.
+- **Oturum F — Performans / dayaniklilik**: 40+ AI, 20 dk; `[PERF-SQF]`, `[ELITE-HB]` FPS; dedicated sunucuda Zeus ile istemcide yaratilan AI (setGroupOwner 2); `tools/hemtt_kontrol.sh` 0 hata.

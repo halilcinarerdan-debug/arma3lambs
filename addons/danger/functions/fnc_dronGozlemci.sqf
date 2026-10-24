@@ -19,14 +19,15 @@ if (!isServer || {!isNil "lambs_danger_dronGozlemciStarted"}) exitWith {false};
 lambs_danger_dronGozlemciStarted = true;
 
 ["lambs_danger_dronGozlemIstegi", {
-    params ["_taraf", "_est", "_geri", "_kesisim", ["_nDron", 0], ["_nGoz", 0]];
+    params ["_taraf", "_est", "_geri", "_kesisim", ["_nDron", 0], ["_nGoz", 0], ["_yarOv", 0]];   // v8.338: _yarOv > 0 ise gozlem yaricapi (dron gozlemli topcu istasyonu)
     if (!isServer || {missionNamespace getVariable ["lambs_danger_dronGozlemOff", false]}) exitWith {};
     private _kT = format ["lambs_danger_dronGozT_%1", _taraf];
     private _kI = format ["lambs_danger_dronGozIHA_%1", _taraf];
     if ((time - (missionNamespace getVariable [_kT, -999])) < 240) exitWith {};
     private _aktif = missionNamespace getVariable [_kI, objNull];
-    if (!isNull _aktif && {alive _aktif}) exitWith {};
+    if (!isNull _aktif && {alive _aktif} && {(diag_tickTime - (_aktif getVariable [QGVAR(ihaTok), -999])) < 650}) exitWith {};   // v8.338: gorevi biten (inmis) dron aktif sayilmaz (pil omru 600 sn)
     private _yar = [450, 300] select _kesisim;
+    if (_yarOv > 0) then { _yar = _yarOv; };
     private _tarafNo = [east, west, independent, civilian] find _taraf;
 
     // 1) hazir GOZLEM IHA'si

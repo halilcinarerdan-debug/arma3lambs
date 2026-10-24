@@ -162,7 +162,7 @@ Log kanitlari:
 - Yapilmayan: hendek (S2), medevac, teslim (S10), S6.
 v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni senaryoyu tekrarla, `[TESLIM]`, `[TANK-BAKIS]`, `ILERI SICRAMA`, `[TASIMA] ... butun`, `SEFER ERTELENDI` satirlarina bak (`rpt_ozet.py --tani`).
 
-## 5. v8.276 - v8.333 (guncelleme 2026-10-24; kanit = bu oturumdaki RPT / kullanici gozlemi; digerleri T)
+## 5. v8.276 - v8.338 (guncelleme 2026-10-24; kanit = bu oturumdaki RPT / kullanici gozlemi; digerleri T)
 ### Log kanitiyla DOGRULANAN
 - [x] Teslim (v8.276), butun grup nakli, `[TANK-BAKIS]`, ILERI SICRAMA kademe 1 — RPT 2026-10-21 (v8.276 notu).
 - [x] Dron zinciri: `[MOTOR-SES]` -> `[DRON-YON]` -> `[DRON-SAKLAN]` calisiyor (RPT 22-10 22:53, v8.294-v8.297); zorla ates `[DRON-ATES]` (132 zorla atis, hepsi kacirdi - isabetsizlik hitbox / hasar suphesi).
@@ -183,3 +183,13 @@ v8.276 bu dort gozlem icin yazildi (bkz. DEVIR_LOGU v8.276); test icin: ayni sen
 - [ ] Hedef zinciri TUT (v8.324): `[PLAN-TUT]`, tutan squad'in savunma plani + isaretler.
 - [ ] Patlayici (el bombasi / roket / UGL) ve ates-hareket (v8.310-v8.317): son oturumlarda sunucuda temas az, `[PATLAYICI-OZET]` hep 0; yeniden denenmeli.
 - [ ] `tools/hemtt_kontrol.sh`: depoda 0 hata (v8.332); lint uyarilari yalniz stil.
+### v8.338 (T, hicbiri oyunda denenmedi)
+- [ ] AI GOZLEM dronu gercekten hedef goruyor mu: `[IHA-GOZLEM] ... hedef goruldu`; `ihaGorulen` dolu mu (`[DRON-TOPCU-OZET]` 'gozlemci hedef gormuyor' sayaci cok yuksekse HAYIR).
+- [ ] Gozlemli atis zinciri: `[DRON-TOPCU] CAGRI` -> `ADJUST n/3: SPLASH ...` -> `ETKI ATESI` -> `BDA` -> `SON (END OF MISSION)`; `Fired` ile dusme noktasi yakalaniyor mu (`adjust mermisi dusmedi` = HAYIR).
+- [ ] Adjust gercekten yakinsiyor mu (AI topun kendi dagilimi 60 m esigini asiyor mu: `adjust yakinsamadi`).
+- [ ] Danger close: dost <= 600 m (81 mm icin RED 195 m) -> `DANGER CLOSE (creeping <= 100 m)`, tek top 2 mermi; M109 / 155 mm ile dost 455+20 m icindeyse `guvenlik: dost ... < RED`.
+- [ ] NFA: `nfa...` adli harita isareti hem gozlemli atisi hem plan atisini (`[PLAN-TOPCU] ... (NFA)`) durduruyor mu; sivil < 120 m.
+- [ ] Taciz atisi: `[TACIZ] ... bayat temas`, 18-38 sn arayla 2 mermi, dost >= 600 m, butce.
+- [ ] Uzaktan gorunen dusman -> `[DRON-TOPCU] UZAKTAN GORUNEN DUSMAN ... gozlemci talebi` -> `[DRON-GOZLEM]` dron ucuyor -> gozlemli atis.
+- [ ] Karsi-batarya / operator atesi kitap emniyeti: `[DRON-KARSI-ATES] ... ATMADI (kitap emniyeti)`; eskisi gibi hic atmiyorsa `lambs_danger_topcuEskiMesafe = true` ile karsilastir.
+- [ ] Plan atisinda 122 mm (2S1) icin RED 455 m: `[PLAN-TOPCU] ... ATMADI: en yakin dost ... < RED 455`.

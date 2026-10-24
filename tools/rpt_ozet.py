@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.337"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.338"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -793,6 +793,16 @@ def tani(path):
     dg = [l for l in L if '"[DRON-GOZLEM]' in l]
     print("-- DRON GOZLEMCISI (v8.336): %d [DRON-GOZLEM] satiri (talep / hazir dron / gozlemci asker / gozlemci yok) --" % len(dg))
     for v in dg[:8]: print("  ", v.split('" ', 1)[-1][:300])
+    dt = [l for l in L if '"[DRON-TOPCU]' in l]
+    dtc = [l for l in dt if "CAGRI" in l]
+    dta = [l for l in dt if "ADJUST " in l and "SPLASH" in l]
+    dte = [l for l in dt if "ETKI ATESI" in l or "REPEAT" in l]
+    dts = [l for l in dt if "SON (END OF MISSION)" in l]
+    dto = [l for l in L if '"[DRON-TOPCU-OZET]' in l]
+    tz = [l for l in L if '"[TACIZ]' in l]
+    kg = [l for l in L if "ATMADI (kitap emniyeti)" in l or "(NFA)" in l]
+    print("-- DRON GOZLEMLI TOPCU + TACIZ (v8.338): %d [DRON-TOPCU] | cagri %d | adjust/splash %d | etki/repeat %d | gorev sonu %d | %d [TACIZ] | %d kitap-emniyeti/NFA reddi | %d ozet --" % (len(dt), len(dtc), len(dta), len(dte), len(dts), len(tz), len(kg), len(dto)))
+    for v in (dtc[:3] + dta[:6] + dte[:3] + dts[:4] + tz[:5] + kg[:4] + dto[-2:]): print("  ", v.split('" ', 1)[-1][:340])
     sb = [l for l in L if '"[SIS-BUTCE]' in l]
     se = [l for l in L if '"[SIS-EKONOMI]' in l]
     print("-- SIS BUTCESI (v8.330): %d [SIS-BUTCE] ret | %d [SIS-EKONOMI] atlanan --" % (len(sb), len(se)))

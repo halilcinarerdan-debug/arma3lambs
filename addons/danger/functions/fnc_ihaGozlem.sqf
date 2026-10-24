@@ -48,6 +48,7 @@ lambs_danger_ihaGozlemStarted = true;
             private _tg = (_u nearTargets 1500) select {
                 (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
             };
+            _u setVariable ["lambs_danger_ihaGorulen", [time, _tg apply {_x select 4}]];   // v8.338: gozlemli topcu (fnc_dronTopcu) icin gercek algi listesi (yalniz bu makinede)
             if (_tg isEqualTo []) then { continue };
             private _ids = (_tg select [0, 12]) apply {netId (_x select 4)};
             ["lambs_danger_ihaGordu", [_taraf, _ids, getPosATL _u]] call CBA_fnc_globalEvent;

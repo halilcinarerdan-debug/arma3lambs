@@ -5,6 +5,9 @@
  *  "SIS"   : DUMAN PERDESI — saldiri basinda dusman gozetlemesini kor etmek icin hedefin onune (yaklasma yonune) duman mermisi (dost sinirinda; ates kaydirma/yikici deyil). Duman mermisi yoksa loglanir, atilmaz.
  *  "KARSI" : KARSI-BATARYA — tarafin BILDIGI (knowsAbout) dusman topcu / havan araci icin tarafin kendi topcusu 3 mermi atar (dost mesafesi >= 200 m; ayni hedefe 90 sn'de bir). Kaynak ilkesi (FM 3-09 karsi atesli destek): dusman atesli desteginin imhasi / bastirilmasi; sayisal esikler tasarim degerleridir.
  *  "OPERATOR": DRON OPERATORU KARSI ATESI (v8.307; kullanici: 'dronun geldigi yone acimasinlar') — nokta = tahmini operator / firlatma bolgesi (ucus izinden geri cikarim); dost 200 m icinde ise atilmaz; HE (duman / isik / fisek haric) 3 mermi, 45 m yayilim.
+ * v8.338 KITAP DENETIMI: OPERATOR ve KARSI modlari dost mesafesini tek tip 200 m ile denetliyordu; kitaptaki RED (TC 3-21.76 Tablo 3-3) 120 mm icin ~430 m, 105 / 155 mm icin ~455 m. Artik her top icin
+ *   fnc_topcuRed + fnc_topcuGuvenlik: dost >= RED + 20 m, ates yasak alan (NFA) ve sivil yok; ayrica gozlemsiz (duzeltmesiz) atis oldugu icin DANGER CLOSE alaninda (dost <= 600 m) ATILMAZ.
+ *   Eski davranis (200 m): lambs_danger_topcuEskiMesafe = true. SIS (duman) modu degismedi (duman mermisi yaralayici degil).
  * Log: [PLAN-SIS] / [PLAN-KARSI-BATARYA] / [DRON-KARSI-ATES]
  *
  * Arguments:
@@ -49,6 +52,7 @@ if (_mod isEqualTo "SIS") then {
 
 if (_mod isEqualTo "OPERATOR") then {
     private _dostVar = false;
+    private _eski = missionNamespace getVariable ["lambs_danger_topcuEskiMesafe", false];
     { if (alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _poz) < 200}) exitWith { _dostVar = true; }; } forEach allUnits;
     if (!_dostVar && {!surfaceIsWater _poz}) then {
         {
@@ -57,7 +61,13 @@ if (_mod isEqualTo "OPERATOR") then {
                 private _a = toLower _x;
                 (_a find "smoke") < 0 && {(_a find "illum") < 0} && {(_a find "flare") < 0} && {(_a find "cluster") < 0} && {(_a find "mine") < 0}
             }) param [0, ""];
-            if (_mg isNotEqualTo "" && {_atan < _topMax} && {_poz inRangeOfArtillery [[_v], _mg]}) then {
+            // v8.338: kitap RED + gozlemsiz atista danger close (600 m) yasagi
+            private _guv = if (_eski || {_mg isEqualTo ""}) then {[true, "", 0, false, []]} else {[_taraf, _poz, [_v, _mg] call FUNC(topcuRed)] call FUNC(topcuGuvenlik)};
+            private _guvOk = (_guv select 0) && {_eski || {!(_guv select 3)}};
+            if (!_guvOk && {_mg isNotEqualTo ""}) then {
+                diag_log format ["[DRON-KARSI-ATES] %1 | %2 ATMADI (kitap emniyeti): %3", _id, typeOf _v, if (_guv select 0) then {format ["gozlemsiz atista danger close: en yakin dost %1 m <= 600 m", round (_guv select 2)]} else {_guv select 1}];
+            };
+            if (_guvOk && {_mg isNotEqualTo ""} && {_atan < _topMax} && {_poz inRangeOfArtillery [[_v], _mg]}) then {
                 [_v, _poz, _mg, _atan, _yay] spawn {
                     params ["_tv", "_tn", "_tm", "_ti", "_ty"];
                     sleep (3 * _ti);
@@ -79,13 +89,21 @@ if (_mod isEqualTo "KARSI") then {
         private _h = _x;
         private _hp = getPosATL _h;
         private _dost = false;
+        private _eski = missionNamespace getVariable ["lambs_danger_topcuEskiMesafe", false];
         { if (alive _x && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _hp) < 200}) exitWith { _dost = true; }; } forEach allUnits;
         if (!_dost) then {
             private _atanBu = 0;
             {
                 private _v = _x;
                 private _mg = (getArtilleryAmmo [_v]) param [0, ""];
-                if (_mg isNotEqualTo "" && {_v isNotEqualTo _h} && {_hp inRangeOfArtillery [[_v], _mg]}) then {
+                // v8.338: kitap RED + gozlemsiz atista danger close (600 m) yasagi (karsi-batarya duzeltmesiz atilir)
+                private _guv = if (_eski || {_mg isEqualTo ""}) then {[true, "", 0, false, []]} else {[_taraf, _hp, [_v, _mg] call FUNC(topcuRed)] call FUNC(topcuGuvenlik)};
+                private _guvOk = (_guv select 0) && {_eski || {!(_guv select 3)}};
+                if (!_guvOk && {_mg isNotEqualTo ""} && {(time - (_h getVariable ["lambs_danger_karsiBatRetT", -999])) > 60}) then {
+                    _h setVariable ["lambs_danger_karsiBatRetT", time];
+                    diag_log format ["[PLAN-KARSI-BATARYA] %1 | %2 ATMADI (kitap emniyeti): %3", _id, typeOf _v, if (_guv select 0) then {format ["gozlemsiz atista danger close: en yakin dost %1 m <= 600 m", round (_guv select 2)]} else {_guv select 1}];
+                };
+                if (_guvOk && {_mg isNotEqualTo ""} && {_v isNotEqualTo _h} && {_hp inRangeOfArtillery [[_v], _mg]}) then {
                     [_v, _hp, _mg, _atan] spawn {
                         params ["_tv", "_tn", "_tm", "_ti"];
                         sleep (3 * _ti);

@@ -189,7 +189,7 @@ private _topcuAt = {
         // v8.181: top hedefe gore menzil disindaysa yer degistirir (min menzil ihlali / uzak); bu seans atmaz, bir sonraki seansta menzil icinde olur
         if (_mg isNotEqualTo "" && {!(_poz inRangeOfArtillery [[_v], _mg])}) then { [_v, _poz, _plan get "id"] call FUNC(topcuKonumla); };
         private _cap = toLower (_mg + "|" + typeOf _v);
-        private _red = 300;
+        private _red = [455, 300] select (missionNamespace getVariable ["lambs_danger_topcuEskiMesafe", false]);   // v8.338: kitapta olmayan kalibre (122 mm vb.) icin en buyuk tablo degeri 455 m (eski: 300; geri almak icin lambs_danger_topcuEskiMesafe = true)
         if ((_cap find "60mm") >= 0) then { _red = 145; };
         if ((_cap find "81mm") >= 0 || {(_cap find "82mm") >= 0}) then { _red = 195; };
         if ((_cap find "120mm") >= 0) then { _red = 430; };
@@ -212,8 +212,13 @@ private _topcuAt = {
                 } forEach [40, 80, 120, 160, 200];
             };
         };
+        // v8.338 KITAP DENETIMI: ates yasak alani (NFA, TC 3-21.76) - haritada adi 'nfa' ile baslayan isaret; plan atisi icinde dost mesafesi yukaridaki RED mantigiyla denetlenir
+        private _nfaK = [_taraf, _nokta, _red, true] call FUNC(topcuGuvenlik);
+        if !(_nfaK select 0) then { _dE = -1; diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 ATMADI: %4 (NFA)", _plan get "id", _ad, typeOf _v, _nfaK select 1]; };
         if (_dE < _red) then {
+            if (_dE >= 0) then {
             diag_log format ["[PLAN-TOPCU] %1 | %2 | %3 ATMADI: en yakin dost %4 m < RED %5 m, 200 m derinlige kaydirmayla da yeterli mesafe yok (TC 3-21.76 Tablo 3-3, %6)", _plan get "id", _ad, typeOf _v, round _dostEn, _red, _mg];
+            };
         } else {
             if (_mg isNotEqualTo "" && {_nokta inRangeOfArtillery [[_v], _mg]}) then {
                 private _hd = _nokta getPos [random 30, random 360];
