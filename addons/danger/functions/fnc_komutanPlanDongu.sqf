@@ -685,7 +685,38 @@ while {true} do {
                 private _sirada = _zincirK select 0;
                 private _yeniAyar = +(_sirada select 1);
                 _yeniAyar set ["zincir", false];
-                _yeniAyar set ["secili", ((_plan get "gruplar") select {({alive _x} count (units _x)) >= 2}) apply {netId _x}];
+                // v8.324 TUT (kullanici: 'coklu objektifte eski objektifi korusunlar, mevzi / karakol / gozetleme noktasi kurabilsinler ele gecirdikleri objektifte'): ele gecirilen objektifte 1 / 2 squad birakilir (operasyon emri 'tut'), geri kalan ilerler
+                private _hepsi = (_plan get "gruplar") select {({alive _x} count (units _x)) >= 2};
+                private _tutN = ((_plan getOrDefault ["ayar", createHashMap]) getOrDefault ["tut", 0]) min 2;
+                private _tutanlar = [];
+                if (_tutN > 0 && {(count _hepsi) > 1}) then {
+                    private _uygun = _hepsi select {_x isNotEqualTo (_plan getOrDefault ["komutan", grpNull]) && {!(_x in (_plan getOrDefault ["reconG", []]))}};
+                    private _zG = _plan getOrDefault ["zirhG", []];
+                    _uygun = [_uygun, [], {({alive _x} count (units _x)) + ([0, 100] select (_x in _zG))}, "ASCEND"] call BIS_fnc_sortBy;
+                    _tutanlar = _uygun select [0, (_tutN min ((count _hepsi) - 1)) max 0];
+                };
+                _yeniAyar set ["secili", (_hepsi - _tutanlar) apply {netId _x}];
+                if (_tutanlar isNotEqualTo []) then {
+                    [_plan get "taraf", _plan get "obj", _sirada select 0, _tutanlar, _id] spawn {
+                        params ["_zt", "_eo", "_so", "_tg", "_pid"];
+                        private _brg = _eo getDir _so;
+                        // harita kayitlari: KARAKOL (merkez, 100 m), GOZLETME (siradaki hedefe dogru 85 m), MEVZI (arka 85 m); kayitlar birbirinden >= 60 m (ayni noktadaki eski kayit silinir)
+                        private _gozPoz = _eo getPos [85, _brg];
+                        ["lambs_danger_karakolIstegi", [_zt, _eo, 0, 100, 0, false]] call CBA_fnc_serverEvent;
+                        ["lambs_danger_karakolIstegi", [_zt, _gozPoz, 2, 60, 0, false]] call CBA_fnc_serverEvent;
+                        ["lambs_danger_karakolIstegi", [_zt, _eo getPos [85, _brg + 150], 1, 60, 0, false]] call CBA_fnc_serverEvent;
+                        sleep 2;
+                        private _g0 = _tg select 0;
+                        private _tIdx = ((round (((_brg % 360) + 360) % 360 / 45)) mod 8) + 1;
+                        private _ok = false;
+                        if (!isNull _g0 && {({alive _x} count (units _g0)) > 0}) then {
+                            _ok = [_zt, _eo, createHashMapFromArray [["tip", 1], ["grupN", 1], ["secili", [netId _g0]], ["rallyM", 250], ["orpM", 150], ["basla", 0], ["sure", 0], ["tehditY", _tIdx], ["bina", true], ["piyade", true]]] call (missionNamespace getVariable ["lambs_danger_fnc_komutanPlan", {false}]);
+                        };
+                        private _gm = format ["ELITE_KARAKOL_%1_%2", _zt, round (_gozPoz select 0)];
+                        { if (!isNull _x && {({alive _x} count (units _x)) > 0}) then { [_x, _gm] call (missionNamespace getVariable ["lambs_danger_fnc_gozetleAta", {}]); }; } forEach (_tg select [1, 9]);
+                        diag_log format ["[PLAN-TUT] %1 | ele gecirilen objektif %2 tutuluyor: %3 squad birakildi (savunma plani %4, gozetleme nobeti %5 squad) | karakol / gozletme / mevzi isaretleri kondu | tehdit yonu %6 derece", _pid, mapGridPosition _eo, count _tg, ["KURULAMADI", "kuruldu"] select (_ok isEqualTo true), count (_tg select [1, 9]), round _brg];
+                    };
+                };
                 private _kalan = +(_zincirK select [1, 99]);
                 diag_log format ["[PLAN-ZINCIR] %1 | objektif alindi -> siradaki hedef %2 (%3 grup devredildi, kalan zincir %4)", _id, mapGridPosition (_sirada select 0), count (_yeniAyar get "secili"), count _kalan];
                 [_plan get "taraf", _sirada select 0, _yeniAyar, _kalan] spawn {
