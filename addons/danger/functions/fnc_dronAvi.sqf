@@ -103,6 +103,12 @@ private _opN = _lp getPos [((_lp distance2D _est) min 1600) max 250, _brg];
 if (_aracIste) then {
     _arPlan = createHashMapFromArray [["id", format ["DRONAVI-%1", round time]], ["taraf", _taraf], ["reconG", [_pg]], ["rp", _lp], ["hqPoz", _lp], ["aracHafif", true]];
     private _av = ["SEC", _arPlan] call FUNC(reconArac);
+    // v8.323 (kullanici: 'ama mumkunse, yoksa eldekini degerlendirsinler'): hafif arac yoksa eldeki uygun araca (APC / kamyon / IFV; recon arac secimi) bin; o da yoksa yaya
+    if (isNull _av) then {
+        _arPlan set ["aracHafif", false];
+        _av = ["SEC", _arPlan] call FUNC(reconArac);
+        if (!isNull _av) then { diag_log format ["[DRON-AVI] %1 | hafif arac yok -> eldeki arac: %2", groupId _kaynak, getText (configOf _av >> "displayName")]; };
+    };
     if (!isNull _av) then { _arPlan set ["reconArac", _av]; _aracVar = true; };
 };
 
