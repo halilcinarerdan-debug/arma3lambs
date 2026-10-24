@@ -72,6 +72,7 @@ private _asim = (count (_plan0 select 1)) > _kap0;
         private _yurS = (90 max (((_u distance2D _pt) / 1.3) + 30)) min 400;   // v8.256: uzak ek alana (250+ m) giden askerin 90 sn'lik zaman asimi yetmiyordu (RPT e31bd8bd: 'en uzak kalan 86 m')
         _u setVariable [QGVAR(hendekYerlesT), time + (_yurS - 90)];
         _u enableAI "PATH"; _u enableAI "MOVE";
+        _u setVariable [QGVAR(yurHedef), [_pt, time]];   // v8.334: yurunebilir alan bekcisi gercek hedefi buradan okur
         _u doMove _pt;
         [_u, _pt, _dirB, _yurS] spawn {
             params ["_u", "_pt", "_dirB", "_yurS"];
@@ -80,7 +81,7 @@ private _asim = (count (_plan0 select 1)) > _kap0;
             private _sonDM = _bas;
             waitUntil {
                 sleep 1;
-                if (alive _u && {(_u distance2D _pt) >= 2.5} && {(time - _sonDM) >= 20}) then { _sonDM = time; _u doMove _pt; };
+                if (alive _u && {(_u distance2D _pt) >= 2.5} && {(time - _sonDM) >= 20}) then { _sonDM = time; _u setVariable [QGVAR(yurHedef), [_pt, time]]; _u doMove _pt; };
                 !alive _u || {(_u distance2D _pt) < 2.5} || {time > _bit}
             };
             if (alive _u) then {

@@ -56,6 +56,7 @@ _g setVariable ["lambs_danger_gozetleDongu", true];
                     private _a = (360 / _n) * _forEachIndex;
                     private _p = _merkez getPos [(_r * 0.6) min 40, _a];
                     _x enableAI "PATH"; _x enableAI "MOVE";
+                    _x setVariable [QGVAR(yurHedef), [_p, time]];
                     _x doMove _p;
                     _x doWatch (_merkez getPos [150, _a]);
                     _x setUnitPos "MIDDLE";
