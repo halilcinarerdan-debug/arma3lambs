@@ -313,7 +313,7 @@ class CfgVehicles {
         author = "ELITE fork";
         _generalMacro = QGVAR(YuruyusAlani);
         scope = 2;
-        scopeCurator = 0;
+        scopeCurator = 2;   // v8.333: Zeus uyumlu (birakilinca ayar paneli)
         displayName = "ELITE Yurunebilir Alan (yogun objeli hendek)";
         isGlobal = 0;
         isTriggerActivated = 0;

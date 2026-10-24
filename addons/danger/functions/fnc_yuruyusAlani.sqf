@@ -1,7 +1,7 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * YURUNEBILIR ALAN KAYDI (v8.331) — Eden 'ELITE Yurunebilir Alan' modul nesnelerinden alan listesi (30 sn onbellek, her makinede ayri okunur).
+ * YURUNEBILIR ALAN KAYDI (v8.331) — Eden 'ELITE Yurunebilir Alan' modul nesnelerinden alan listesi (10 sn onbellek, her makinede ayri okunur; Zeus'ta birakilan alan birkac sn icinde gorunur).
  * Modlar:
  *   "LISTE"           -> [[merkez, a, b, yon, dikdortgenMi, modul], ...]
  *   "MESAFE", konum   -> [indeks, mesafe] : konumun en yakin alana mesafesi (0 = icinde); alan yoksa [-1, 1e9]
@@ -18,7 +18,7 @@
 
 params [["_mod", "LISTE", [""]], ["_p", [0, 0, 0], [[]]], ["_idx", -1, [0]]];
 
-if (time > ((missionNamespace getVariable ["lambs_danger_yuruyusT", -99]) + 30)) then {
+if (time > ((missionNamespace getVariable ["lambs_danger_yuruyusT", -99]) + 10)) then {
     lambs_danger_yuruyusT = time;
     lambs_danger_yuruyusL = (entities [[QGVAR(YuruyusAlani)], [], false, false]) apply {
         private _al = _x getVariable ["objectArea", [10, 4, 0, true, -1]];
