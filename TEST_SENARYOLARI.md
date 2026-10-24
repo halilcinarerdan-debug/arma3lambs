@@ -358,6 +358,18 @@ Hepsi (T) = dogrulanmadi.
 1. ELE GECIR plani, objektif 2.5+ km, 1 tank + piyade (yaya + BTR). Tank piyadeden hizli.
 2. Beklenen RPT: tank piyadenin 400 m'den fazla onune gecince `[PLAN-ZIRH] ... PIYADE BAGI: tank piyadenin X m onunde ... BEKLIYOR`; piyade yetisince `PIYADE BAGI bitti ... tank ilerliyor`. SENKRON kapisi tankin beklemesi yuzunden 420 sn tavana takilmamali (`[PLAN] SENKRON: nakil serbest birakildi` makul surede). 300 sn dolarsa `ZAMAN ASIMI`.
 3. CBA: Tank piyade bagi AKTIF kapali -> tank eskisi gibi tek basina ilerler.
+## T-ZIRH-GECIT (v8.349)
+1. ELE GECIR plani, objektif 800-1500 m, rotada tepe sirti ya da kopru / orman yolu olan arazi; 1 tank + yaya piyade (piyade tanktan YAVAS). Beklenen: `[ZIRH-GECIT] ... rota analizi: ... engel N: GORUS CIZGISI @ ...` / `GECIT @ ...`. Tank engelin ~150 m onunde durur: `[ZIRH-GECIT] ... onunde: piyade henuz temizlemedi -> zirh BEKLIYOR`. Piyade engeli asinca `piyade TEMIZLEDI -> zirh geciyor`; asmazsa 120 sn sonra `ZAMAN ASIMI`.
+2. Dusuk guven: harita duz ise `engel 0` normaldir. Savunma planinda, CEKILME'de ve plan piyadesi yokken devreye girmez. CBA 'Zirh: gecit / gorus cizgisinde piyadeyi bekle' kapaliyken hic `[ZIRH-GECIT]` bekleme logu yok. Tank bekledigi icin `[PLAN] SENKRON` kapisi 420 sn tavana takilmamali.
+
+## T-ZIRH-SICRAMA (v8.349)
+1. Iki ayri tank grubu (ya da tek grupta 2 tank) + piyade, objektife saldiri. Objektife <= 1400 m'de (ya da savas fazinda) ikinci tank / grup `[ZIRH-SICRAMA] ... YERINDE GOZETLIYOR`, es / lider mevziye varinca `ilerliyor (N sn gozetledi)`. En cok 150 sn.
+2. Mevzide iki arac ayni anda sicramaz: ILERI SICRAMA / yer degistirmede lider, diger arac hareket ederken yeni sicrama baslatmaz (`[PLAN-ZIRH] ILERI SICRAMA` satirlari arasi). Ayar kapaliyken (CBA 'Zirh: sicramali gozetleme') eski davranis: araclar ayni anda gider.
+
+## T-ZIRH-UYARI (v8.349)
+1. Dusman tankina / IFV'ye ATGM at (oyuncu RHS ATGM'si, helikopter ya da AI Konkurs/Kornet). Beklenen: `[ZIRH-UYARI] ... <- gudumlu fuze ... | arac tepkisi ... | uyarilan komsu zirhli arac N`; ayrica `[ARAC-AT-TEPKI]` (duman, yer degistirme). AI atisinda `[ARAC-AT-TEPKI]` zaten `atAtisIzle` ile gelmis olabilir (25 sn kilit): `arac tepkisi false` normal.
+2. Roketatar (RPG-7 gibi gudumsuz) `IncomingMissile` tetiklemez: bu durumda yalniz eski `atAtisIzle` yolu calisir.
+
 ## T-TANK-TERK (v8.265)
 1. Tank motorunu vur (hitengine ~0.9): `[TANK-IMMOBIL] ... canMove false | canFire ... | parcalar >0.5: [...]`, `[PLAN-ZIRH] ... HAREKET EDEMIYOR`.
 2. Murettebat 4 kez geri donup ejekte edilirse (ya da 3 / 60 sn) `[TANK-TERK] ... terk eden murettebat N -> <grup> grubuna katildi`; murettebat yakindaki piyade grubuyla birlikte hareket eder, tanka tekrar kosmaz.
@@ -504,7 +516,7 @@ Kurulum (Enoch / Altis, ACE'li olabilir): BATI: 1 Mk6 havan (81 mm) ya da M109 +
 
 ## TOPLU TEST PLANI v8.338 (en cok 6 oturum; hepsi (T) = dogrulanmadi)
 Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rpt_ozet.py --tani <rpt>`; boot satirinda `v8.338` gorunmeli.
-- **Oturum A — Zirh / arac (Enoch, RHS, 2 tank + 1 IFV + piyade, HQ'ya bagli)**: T-TANK-OTOMATIK-SECIM, T-TANK-AGRESIF (`tankAgresif` 2 ve 0 karsilastir), T-ARAC-UNSTUCK (araci agaca sok), T-IHA-DUMAN (AI FPV-AT + duman), T-FPV-CARPMA (ACE Vehicle Damage acik ve kapali; `[IHA-ETKI]`). Bak: `[PLAN-ARAC]`, `[PLAN-ZIRH]`, `[ARAC-UNSTUCK]`, `[IHA-DUMAN]`, `[IHA-ETKI]`.
+- **Oturum A — Zirh / arac (Enoch, RHS, 2 tank + 1 IFV + piyade, HQ'ya bagli)**: T-TANK-OTOMATIK-SECIM, T-TANK-AGRESIF (`tankAgresif` 2 ve 0 karsilastir), T-ARAC-UNSTUCK (araci agaca sok), T-IHA-DUMAN (AI FPV-AT + duman), T-FPV-CARPMA (ACE Vehicle Damage acik ve kapali; `[IHA-ETKI]`). Bak: `[PLAN-ARAC]`, `[PLAN-ZIRH]`, `[ARAC-UNSTUCK]`, `[IHA-DUMAN]`, `[IHA-ETKI]`. v8.348-349 ek: T-ZIRH-GECIT, T-ZIRH-SICRAMA, T-ZIRH-UYARI (`[ZIRH-GECIT]`, `[ZIRH-SICRAMA]`, `[ZIRH-UYARI]`, `[TANK-ARALIK]`).
 - **Oturum B — Dolayli ates (yeni)**: T-DRON-TOPCU, T-DANGER-CLOSE, T-NFA, T-TACIZ, T-KARSI-BATARYA-EMNIYET. Ek regresyon: komutan plani + M109 + 2S1 (122 mm) ile `[PLAN-TOPCU]`: RED 455 (2S1) ve 'NISAN KAYDIRILDI' hala calisiyor mu; Zeus topcu testi (`[TOPCU-TEST]`).
 - **Oturum C — Dron savunmasi**: piyade dron tepkisi (`[DRON-YON]` / `[DRON-SAKLAN]`), tank dron tepkisi (`[TANK-DRON]`), T-DRON-AVI-SAVUNMA (savunma planindan 3-4 kisilik devriye), T-DRON-GOZLEMCI (israrli saldiri -> gozlem dronu), T-TOPCU-EMINLIK (1 dron 110 m / 4 dron 16 m yayilim).
 - **Oturum D — Savunma / garnizon**: T-OTO-GARNIZON (OPORD 4/4 Evet; ORP / CCP'den >= 70 m), hedef zinciri TUT (`[PLAN-TUT]`), eski hendek / karakol sistemi (v8.330 haline dondu: hendek yerlestirme + `GOZLETME` calisiyor mu — regresyon).

@@ -60,6 +60,9 @@ tartar. Eski ozelliklerin (formasyon, ORP, bounding, retreat, feint, mekanize in
 | Hull-down mevzi, birincil / yedek mevzi, sektorler | ATP 3-20.15 3-76 (kullanici gonderdi; `DOKTRIN_KAYNAKLARI.md` 'Recon karari, tank mevzisi'); FM 3-34 satir 20065 | `[K]` |
 | Saldirgan varsayilan (`tankAgresif` 2): gizleme noktasi yok, mevzi ~200 m, 60 sn'de ileri sicrama | Kitap tersine: savunmada defilade / gizlenme ve **kesin cati engagement'tan kacinma** | `[U]` kullanici karari ('cok savunmaci'); `tankAgresif` 0-1 = kitaba yakin |
 | Sicrama / tetik / mesafe sayilari | Kitapta yok | `[T]` |
+| Zirh, rotadaki gorus engeli cizgisini (tepe sirti) ve bogazi (kopru, orman yolu, koy ici, yarma) piyade temizlemeden gecmez (`fnc_zirhGecit` + `fnc_zirhBekle`, engel basina <= 120 sn) | MCWP 3-11.1 satir 8751-8766 (gorus engeli cizgileri / bogazlar once piyade tarafindan temizlenir) | `[K]` ilke; 30 m ornekleme, 28 m yan mesafe, 150 m durus, 120 sn `[T]` |
+| Sicramali gozetleme: temas olasi bolgede esler arasi biri ilerlerken digeri yerinde gozetler (`fnc_zirhBekle` ES SICRAMA, `fnc_planZirh` grup ici) | MCWP 3-11.1 satir 8742-8766 (arac araligi: birbirini gorecek kadar yakin) + s. 6-36 (zirh piyade temizledikce ileri sicrar) | `[K~]` ilke (bounding overwatch kavrami); 1400 m, 150 sn, esleme 0-1 / 2-3 `[T]` |
+| Gudumlu fuze uyarisi: duman + karsi ates + yer degistirme + komsu zirhliya bildirim (`fnc_zirhUyari`) | ATP 3-20.15 3-81..3-98 (temasta eylemler), 3-136 (duman) | `[K]`; 500 m `[T]` |
 
 ## 5. Savunma / garnizon / saglik
 | Davranis | Kitap | Etiket |

@@ -42,6 +42,9 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
             { private _dv = driver (vehicle _x); if (!isNull _dv && {_dv isNotEqualTo _x || {!isNull objectParent _x}}) then { _dv enableAI "MOVE"; _dv enableAI "PATH"; }; } forEach (units _g);
             _g setVariable ["lambs_danger_planZirhKilit", nil];
             _g setVariable ["lambs_danger_planZirhCapa", nil];
+            _g setVariable ["lambs_danger_zirhBekleNeden", nil];   // v8.349
+            _g setVariable ["lambs_danger_zirhGecitL", nil];
+            _g setVariable ["lambs_danger_zirhEsT0", nil];
             diag_log format ["[PLAN-ZIRH] %1 | %2 serbest birakildi (plan %3)", _id, groupId _g, _faz];
         };
     } forEach _zg;
@@ -79,6 +82,11 @@ private _hareketIzin = {
     isNull (_k select 0) || {(_k select 0) isEqualTo _g2} || {(time - (_k select 1)) > 45} || {({alive _x} count (units (_k select 0))) isEqualTo 0}
 };
 private _hareketKaydet = { params ["_g2"]; _plan set ["tankHareketK", [_g2, time]]; };
+// v8.349 SICRAMALI GOZETLEME: grubun diger araclari hala yer degistiriyorsa (zirhHareketT = hareket baslangici, en cok 240 sn) lider arac yeni bir sicrama baslatmaz (biri hareket ederken digeri gozetler; ikisi birden hareket etmez)
+private _digerYerlesti = {
+    params ["_g2", "_v2"];
+    ({ private _xv = vehicle _x; _xv isNotEqualTo _x && {_xv isNotEqualTo _v2} && {alive _xv} && {(_xv getVariable ["lambs_danger_zirhHareketT", -999]) >= 0} && {(time - (_xv getVariable ["lambs_danger_zirhHareketT", -999])) < 240} } count (units _g2)) isEqualTo 0
+};
 private _nZ = count _zg;
 
 {
@@ -168,6 +176,9 @@ private _nZ = count _zg;
         };
     };
 
+    // v8.349 GECIT / GORUS CIZGISI / ES SICRAMA beklemesi (MCWP 3-11.1 8751-8766; fnc_zirhBekle): rotadaki gorus engeli cizgisini / bogazi piyade temizlemeden zirh gecmez; es zirh grubu ilerlerken ikinci grup gozetler.
+    //   Bekleme sirasinda hareket emri yenilenmez, 'takildi' / 'mevziye ulasamadi' / varis zaman asimi sayilmaz; ates, hedef secimi ve diger arac kurallari surer.
+    private _bekleNeden = [_plan, _g, _v, _d, _faz, _savas, _zg, _forEachIndex] call FUNC(zirhBekle);
     // v8.174 ZIRH DOKTRINI (MCWP 3-11.1 s. 6-36: arac / zirh piyade temizledikce ileri sicrar ve etkili destegi surdurur): SALDIRI basinda ates pozisyonu bir kez 350 m civarina ilerletilir
     if (_faz isEqualTo "SALDIRI" && {!(_g getVariable ["lambs_danger_planZirhYakin", false])}) then {
         _g setVariable ["lambs_danger_planZirhYakin", true];
@@ -306,7 +317,7 @@ private _nZ = count _zg;
 
     // ---- v8.277 MEVZIYE ULASAMADI (kullanici: '1 tank cok geride kaldi, manuel koymak zorunda kaldim'; RPT 21-10 21:28-21:31: tank 5 kez TAKILDI, zaman asimi dolunca 'mevzide (542 m kalan)' sayildi ve surucu MOVE'u KAPATILDI -> tank mevziden 542 m geride kilitlendi):
     //   zaman asimi dolduysa ve mevziye hala > 150 m varsa kilitlenmez: sure en fazla 2 kez uzatilir (180-600 sn), sonra en fazla 2 kez yeni ates pozisyonu secilir (eski mevzi listede kalir -> baska nokta). Kapatma: lambs_danger_tankUlasOff = true.
-    if (!(_g getVariable ["lambs_danger_planZirhVardi", false]) && {_poz isNotEqualTo []} && {canMove _v} && {(_v distance2D _poz) > 150} && {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])} && {!(missionNamespace getVariable ["lambs_danger_tankUlasOff", false])}) then {
+    if (!(_g getVariable ["lambs_danger_planZirhVardi", false]) && {_bekleNeden isEqualTo ""} && {_poz isNotEqualTo []} && {canMove _v} && {(_v distance2D _poz) > 150} && {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])} && {!(missionNamespace getVariable ["lambs_danger_tankUlasOff", false])}) then {
         private _uN = _g getVariable ["lambs_danger_planZirhUzatN", 0];
         if (_uN < 2) then {
             _g setVariable ["lambs_danger_planZirhUzatN", _uN + 1];
@@ -328,7 +339,7 @@ private _nZ = count _zg;
 
     // ---- varis ----
     private _vardi = _g getVariable ["lambs_danger_planZirhVardi", false];
-    if (!_vardi && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
+    if (!_vardi && {_bekleNeden isEqualTo ""} && {((_v distance2D _poz) < 40) || {(time - (_g getVariable ["lambs_danger_planZirhT", time])) > (_g getVariable ["lambs_danger_planZirhMax", 240])}}) then {
         _vardi = true;
         _g setVariable ["lambs_danger_planZirhVardi", true];
         _g setVariable ["lambs_danger_planZirhVardiT", time];
@@ -344,7 +355,7 @@ private _nZ = count _zg;
         diag_log format ["[PLAN-ZIRH] %1 | %2 mevzide%3 (%4 m kalan) | objektife %5 m", _id, groupId _g, [""," (GIZLEME NOKTASI)"] select (_g getVariable ["lambs_danger_planZirhHide", false]), round (_v distance2D _poz), round (_v distance2D _obj)];
     } else {
       // v8.251: AT atesi drilinde (fnc_aracAtTepki) yer degistiren arac 20 sn planZirh'in yeniden yonlendirme / takilma emirlerinden muaf
-      if ((time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20) then {
+      if ((time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20 && {_bekleNeden isEqualTo ""}) then {
         // yoldayken yeniden yonlendirme (takilmasin)
         // v8.258: 20 sn'de bir KOSULSUZ doMove yenilemesi tankin yol planini her seferinde sifirlayip surunmeyi yavaslatiyordu (RPT f8ad6949: WEST T-72 690 m'yi 270 sn'de, ~8 km/s, her 25 sn'de 'TAKILDI'; 'tanklar cekingendi');
         //   artik yalniz arac yavas (< 6 km/s) ya da hedef rotasi pozisyondan > 40 m saptiysa yenilenir
@@ -437,7 +448,7 @@ private _nZ = count _zg;
         // v8.278 (kullanici: '25 dakika ayni mevzide durmasinlar'): saldirida da (ileri sicrama olmadiysa) 300 sn sonra yedek mevzi; savunmada 150 sn
         private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {(missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]) * ([1, 1.5, 2] select _agr)} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
             && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0};
-        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
+        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin} && {[_g, _v] call _digerYerlesti}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
             [_g] call _hareketKaydet;
             _g setVariable ["lambs_danger_planZirhAlt", _poz];
@@ -465,7 +476,7 @@ private _nZ = count _zg;
                 && {alive (leader _x)} && {((vehicle (leader _x)) distance2D _obj) < ((_v distance2D _obj) - 40)}
             }) isNotEqualTo [];
             private _zirhliYakin = ((_l nearTargets 500) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_x select 4) isKindOf "Tank"} && {(_l knowsAbout (_x select 4)) > 0.5}}) >= 0;
-            if (_pOn && {!_zirhliYakin} && {[_g] call _hareketIzin}) then {
+            if (_pOn && {!_zirhliYakin} && {[_g] call _hareketIzin} && {[_g, _v] call _digerYerlesti}) then {
                 [_g] call _hareketKaydet;
                 _g setVariable ["lambs_danger_planZirhKademe", _kd + 1];
                 _g setVariable ["lambs_danger_planZirhPoz", []];
@@ -505,16 +516,37 @@ private _nZ = count _zg;
     {
         private _ov = _x;
         private _od = driver _ov;
-        if (!isNull _od && {!isPlayer _od} && {local _od} && {(time - (_ov getVariable ["lambs_danger_planZirhOvT", -999])) > 20}) then {
+        // v8.349 bekleme sirasinda kontrol 5 sn'de bir (lider mevziye varinca ikinci arac hemen ilerlesin), normalde 20 sn
+        if (!isNull _od && {!isPlayer _od} && {local _od} && {(time - (_ov getVariable ["lambs_danger_planZirhOvT", -999])) > ([20, 5] select ((_ov getVariable ["lambs_danger_zirhBekleT0", -1]) >= 0))}) then {
             _ov setVariable ["lambs_danger_planZirhOvT", time];
             private _op = _poz getPos [45 * (_forEachIndex + 1), (_obj getDir _poz) + 90];
             if (surfaceIsWater _op) then { _op = _poz; };
-            if ((_ov distance2D _op) > 35) then {
+            // v8.349 SICRAMALI GOZETLEME (grup ici; bounding overwatch, MCWP 3-11.1 8742-8766 / s. 6-36): lider arac ates pozisyonuna giderken (henuz varmadi) temas olasi bolgede (savas fazi / piyade temasi / objektife <= 1400 m)
+            //   ikinci arac YERINDE durur ve gozetler; lider mevziye varinca (ya da 150 sn sonra) ilerler. Lider gecit / gorus cizgisinde bekliyorsa (bekleNeden) ikinci arac da bekler. Sicrama sirasinda lider yeni bir sicrama baslatmaz (zirhHareketT).
+            private _tutOv = false;
+            if (missionNamespace getVariable ["lambs_danger_zirhSicramaAktif", true] && {!(missionNamespace getVariable ["lambs_danger_zirhSicramaOff", false])} && {!_vardi} && {canMove _v} && {(_ov distance2D _op) > 100}
+                && {_bekleNeden isNotEqualTo "" || {_savas} || {(_ov distance2D _obj) < (missionNamespace getVariable ["lambs_danger_zirhSicramaMesafe", 1400])}}) then {
+                private _bt0 = _ov getVariable ["lambs_danger_zirhBekleT0", -1];
+                if (_bt0 < 0) then {
+                    _bt0 = time;
+                    _ov setVariable ["lambs_danger_zirhBekleT0", _bt0];
+                    diag_log format ["[ZIRH-SICRAMA] %1 | %2 lider arac (%3) mevziye gidiyor: %4 YERINDE GOZETLIYOR (sicramali gozetleme, en cok 150 sn; objektife %5 m, neden %6)", _id, groupId _g, getText (configOf _v >> "displayName"), getText (configOf _ov >> "displayName"), round (_ov distance2D _obj), ["savas / temas olasi", _bekleNeden] select (_bekleNeden isNotEqualTo "")];
+                };
+                _tutOv = (time - _bt0) < 150;
+            } else {
+                if ((_ov getVariable ["lambs_danger_zirhBekleT0", -1]) >= 0) then {
+                    diag_log format ["[ZIRH-SICRAMA] %1 | %2 lider arac mevzide / durum degisti: %3 ilerliyor (%4 sn gozetledi)", _id, groupId _g, getText (configOf _ov >> "displayName"), round (time - (_ov getVariable ["lambs_danger_zirhBekleT0", time]))];
+                    _ov setVariable ["lambs_danger_zirhBekleT0", -1];
+                };
+            };
+            if ((_ov distance2D _op) > 35 && {!_tutOv}) then {
                 (group _od) setVariable ["lambs_danger_planZirh", true];
+                if ((_ov getVariable ["lambs_danger_zirhHareketT", -999]) < 0) then { _ov setVariable ["lambs_danger_zirhHareketT", time]; };   // hareketin BASLANGIC zamani (varinca -999)
                 _od enableAI "PATH"; _od enableAI "MOVE"; _od forceSpeed -1;
                 _od action ["EngineOn", _ov];
                 _od doMove _op;
             } else {
+                if (!_tutOv) then { _ov setVariable ["lambs_danger_zirhHareketT", -999]; };
                 doStop _od;
                 if (!(missionNamespace getVariable ["lambs_danger_tankKilitOff", false])) then { _od disableAI "MOVE"; };
                 private _bkO = if (!(missionNamespace getVariable ["lambs_danger_tankBakisOff", false]) && {(([_ov] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then { ([_ov, _g getVariable ["lambs_danger_planZirhBak", _obj], _g, ((_forEachIndex + 1) * 45) * ([1, -1] select ((_forEachIndex mod 2) isEqualTo 1))] call FUNC(tankBakis)) select 0 } else { _obj };
