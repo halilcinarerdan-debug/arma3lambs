@@ -318,10 +318,43 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                     };
                     if (_mag < 5) then {
                         private _am = ["R_PG32V_F", "R_TBG32V_F"] select (_tur isEqualTo "FPV-AP");
-                        private _w = createVehicle [_am, getPosATL _uav, [], 0, "CAN_COLLIDE"];
-                        _w setPosASL (getPosASL _uav);
-                        triggerAmmo _w;
-                        diag_log format ["[IHA-SORTI] %1 (%2) | HEDEFE VURDU: %3 (%4) | %5 sn ucus | dalis %6 sn", typeOf _uav, _tur, typeOf _h, _am, round (time - _t0), (time - _dalisT0) toFixed 1];
+                        // v8.329 GERCEK CARPMA (kullanici: 'tanklarin zirhi cok guclu'; RPT 40d48a79: 3 / 3 FPV-AT vurusunda tank hasari +0.00, hicbir parca > 0.3): eskiden harbi dronun 5 m yakininda havada triggerAmmo ile patlatiyorduk = yalniz
+                        //   sicrama; ACE araç hasari (bilesen sistemi) mermi carpmasi ister. AT icin: dalis yonunde govde yuzeyi bulunur (lineIntersectsSurfaces), harbi yuzeyin 0.5 m onunde hedefe dogru 180 m/sn ile yaratilir -> GERCEK carpma; 0.4 sn'de patlamadiysa triggerAmmo.
+                        //   Duman sapmasi varsa (iskaladi) ya da FPV-AP: eski yol (havada patlatma). Kapatma: lambs_danger_ihaGercekCarpmaOff = true. Log [IHA-ETKI].
+                        private _gercek = _tur isEqualTo "FPV-AT" && {_sapma isEqualTo [0, 0, 0]} && {alive _h} && {!(missionNamespace getVariable ["lambs_danger_ihaGercekCarpmaOff", false])};
+                        private _w = objNull;
+                        private _ipNot = "havada patlatma";
+                        if (_gercek) then {
+                            private _bas = getPosASL _uav;
+                            private _ip = [];
+                            {
+                                if ((_x select 2) isEqualTo _h || {(_x select 3) isEqualTo _h}) exitWith { _ip = _x select 0; };
+                            } forEach (lineIntersectsSurfaces [_bas, _bas vectorAdd (_yonV vectorMultiply 9), _uav, objNull, true, 4, "FIRE", "GEOM"]);
+                            _ipNot = "govde yuzeyi";
+                            if (_ip isEqualTo []) then { _ip = (getPosASL _h) vectorAdd [0, 0, 1.2]; _ipNot = "hedef merkezi (yuzey bulunamadi)"; };
+                            private _bp = _ip vectorAdd (_yonV vectorMultiply -0.5);
+                            _w = createVehicle [_am, ASLToAGL _bp, [], 0, "CAN_COLLIDE"];
+                            _w setPosASL _bp;
+                            _w setVectorDir _yonV;
+                            _w setVelocity (_yonV vectorMultiply 180);
+                            [_w, _h, _am] spawn {
+                                params ["_ww", "_hh", "_aa"];
+                                sleep 0.4;
+                                if (!isNull _ww) then { triggerAmmo _ww; };
+                                sleep 1.3;
+                                if (!isNull _hh) then {
+                                    (getAllHitPointsDamage _hh) params [["_ad", []], "_sec", ["_dg", []]];
+                                    private _hs = [];
+                                    { if ((_dg select _forEachIndex) > 0.3) then { _hs pushBack format ["%1=%2", _x, (_dg select _forEachIndex) toFixed 2]; }; } forEach _ad;
+                                    diag_log format ["[IHA-ETKI] %1 <- %2 | toplam hasar %3 | canMove %4 canFire %5 | yasiyor %6 | parcalar >0.3: %7", typeOf _hh, _aa, (damage _hh) toFixed 2, canMove _hh, canFire _hh, alive _hh, _hs];
+                                };
+                            };
+                        } else {
+                            _w = createVehicle [_am, getPosATL _uav, [], 0, "CAN_COLLIDE"];
+                            _w setPosASL (getPosASL _uav);
+                            triggerAmmo _w;
+                        };
+                        diag_log format ["[IHA-SORTI] %1 (%2) | HEDEFE VURDU: %3 (%4) | %5 sn ucus | dalis %6 sn | yontem: %7", typeOf _uav, _tur, typeOf _h, _am, round (time - _t0), (time - _dalisT0) toFixed 1, _ipNot];
                         _bitti = true;
                         sleep 0.3;
                         { deleteVehicle _x; } forEach (crew _uav);
