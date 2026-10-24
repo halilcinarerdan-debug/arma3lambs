@@ -221,7 +221,53 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
     while {(call _aktif) && {!_bitti}} do {
         if (_opMod isEqualTo 2 && {call _opOldu}) exitWith { diag_log format ["[IHA-SORTI] %1 | operator olu: hedef kilitli degil -> yeni hedef secilmiyor", typeOf _uav]; };
         private _h = call _hedefSec;
+        // ---- v8.347 GOZCU + VURUCU (kullanici: 'eger 2 farkli dron giderse 1 dron izlesin, 2. ve 3. dronlar hedefi imha etsin, ilk giden dron hic gozunu uzerinden ayirmasin'; 'tamamen gercekci') ----
+        //   Gercekte kesif dronu (Mavic vb.) hedefin ustunde KALIR, FPV'ler video / hedef bilgisiyle vurur. Ilk giden FPV, bekleyen baska FPV emri ya da sortideki baska FPV varsa GOZCU olur: hedefin 140 m cevresinde 70 m'de doner,
+        //   dalmaz, hedef bilgisini takima yayar (lambs_danger_ihaTim_<taraf>). Sonrakiler VURUCU: gozcunun hedefine dalar, isabet olasiligi gozcu destegiyle artar. Vurucu hic gelmezse 110 sn sonra (ya da vurucular bitince 25 sn sonra)
+        //   gozcu kendisi vurur (yedek). Kapatma CBA ihaTimAktif.
+        private _rol = "BIREYSEL";
+        private _timK = format ["lambs_danger_ihaTim_%1", _taraf];
+        private _timSt = [];
+        if (_tur in ["FPV-AT", "FPV-AP"] && {missionNamespace getVariable ["lambs_danger_ihaTimAktif", true]}) then {
+            isNil {
+                _timSt = missionNamespace getVariable [_timK, []];
+                private _gAktif = _timSt isNotEqualTo [] && {alive (_timSt select 0)} && {(_timSt select 0) isNotEqualTo _uav} && {(time - (_timSt select 2)) < 30} && {alive (_timSt select 1)};
+                if (_gAktif) then { _rol = "VURUCU"; } else {
+                    private _bek = {(count _x) >= 5 && {!(_x select 1)} && {(_x select 3) isEqualTo _taraf} && {(_x select 2) in ["FPV-AT", "FPV-AP"]}} count (missionNamespace getVariable ["lambs_danger_ihaBekleEmirleri", []]);
+                    private _dgr = {unitIsUAV _x && {alive _x} && {_x isNotEqualTo _uav} && {(_x getVariable [QGVAR(ihaTok), -1]) >= 0} && {(_x getVariable [QGVAR(ihaGorevTur), ""]) in ["FPV-AT", "FPV-AP"]} && {(side (group (driver _x))) isEqualTo _taraf}} count vehicles;
+                    if ((_bek + _dgr) >= 1 && {!isNull _h}) then { _rol = "GOZCU"; missionNamespace setVariable [_timK, [_uav, _h, time, 0]]; };
+                };
+            };
+        };
+        if (_rol isEqualTo "VURUCU" && {isNull _h || {(_timSt select 1) isNotEqualTo _h}}) then { _h = _timSt select 1; };
         if (isNull _h) then { sleep 10; continue };
+        _uav setVariable [QGVAR(ihaRol), _rol];
+        if (_rol isNotEqualTo "BIREYSEL") then { diag_log format ["[IHA-TIM] %1 (%2) | ROL: %3 | hedef %4 (%5) | takim: %6", typeOf _uav, _tur, _rol, typeOf _h, mapGridPosition _h, _taraf]; };
+        if (_rol isEqualTo "GOZCU") then {
+            _uav flyInHeight 70;
+            private _gT0 = time;
+            private _aci = random 360;
+            private _vurucuGordu = false;
+            private _sonVurucu = time;
+            while {(call _aktif) && {alive _h} && {(time - _gT0) < 300}} do {
+                _aci = _aci + 25;
+                _d doMove ((getPosATL _h) getPos [140, _aci]);
+                missionNamespace setVariable [_timK, [_uav, _h, time, 0]];
+                private _vur = vehicles select {unitIsUAV _x && {alive _x} && {(_x getVariable [QGVAR(ihaRol), ""]) isEqualTo "VURUCU"} && {(side (group (driver _x))) isEqualTo _taraf}};
+                if (_vur isNotEqualTo []) then { _vurucuGordu = true; _sonVurucu = time; };
+                if (!_vurucuGordu && {(time - _gT0) > 110}) exitWith { _rol = "BIREYSEL"; };
+                if (_vurucuGordu && {(time - _sonVurucu) > 25}) exitWith { _rol = "BIREYSEL"; };
+                sleep 3;
+            };
+            missionNamespace setVariable [_timK, []];
+            _uav setVariable [QGVAR(ihaRol), ""];
+            if (_rol isEqualTo "GOZCU") then {
+                diag_log format ["[IHA-TIM] %1 | gozcu gorevi bitti (hedef %2 / sure %3 sn)", typeOf _uav, ["OLDU", "SAG"] select (alive _h), round (time - _gT0)];
+                continue
+            };
+            diag_log format ["[IHA-TIM] %1 | gozcu -> BIREYSEL (yedek): %2 sn, vurucu %3", typeOf _uav, round (time - _gT0), ["hic gelmedi", "bitti"] select _vurucuGordu];
+            _uav flyInHeight ([40, 30] select (_tur isEqualTo "BOMBA"));
+        };
         diag_log format ["[IHA-SORTI] %1 (%2) | hedef %3 (%4) | %5 m", typeOf _uav, _tur, typeOf _h, mapGridPosition _h, round (_uav distance2D _h)];
         _uav flyInHeight ([40, 30] select (_tur isEqualTo "BOMBA"));
         private _birakildi = 0;
@@ -232,6 +278,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         _kilit = 0; _dumanT0 = -1; _kilitSon = time;
         private _sapma = [0, 0, 0];
         private _perdeT = 0;
+        private _isKarar = false;
         while {(call _aktif) && {alive _h} && {!_bitti}} do {
             private _dist = _uav distance2D _h;
             if (_tur isEqualTo "BOMBA") then {
@@ -299,6 +346,31 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         _d disableAI "PATH";
                         doStop _d;
                         diag_log format ["[IHA-DALIS] %1 (%2) | dalis basladi: hedef %3 | mesafe %4 m | irtifa %5 m | hiz %6 km/s | AI pilot MOVE / PATH kapatildi", typeOf _uav, _tur, typeOf _h, round _dist, round ((getPosATL _uav) select 2), round (speed _uav)];
+                    };
+                    // v8.347 GERCEKCI ISABET (kullanici: 'tamamen gercekci; AI dron isabet oranini cok kisabilirsin'): FPV her dalista %100 vurmaz. Olasilik = taban (AT 0.45 / AP 0.50) x CBA ihaIsabetOrani; VURUCU rolunde gozcu videosu +0.20,
+                    //   tek basina x0.85; hedef hizli (> 25 km/s) x0.7; yatik / comelmis piyade x0.8; gorus katsayisi (isik / hava / kamuflaj) x(0.6 + 0.4 f); en cok 0.90. Iskalarsa 6-18 m sapma ile yanindan gecip patlar.
+                    //   Ayrica elektronik harp / link kaybi: dalis basinda %8 (x CBA ihaEWOrani) kontrol kaybi (dusme). Mod motoru yolu etkilenmez. Log [IHA-ISABET].
+                    if (!_isKarar) then {
+                        _isKarar = true;
+                        private _gor = [_uav, _h] call FUNC(ihaGorus);
+                        private _p = ([0.45, 0.5] select (_tur isEqualTo "FPV-AP")) * (missionNamespace getVariable ["lambs_danger_ihaIsabetOrani", 1]);
+                        _p = if (_rol isEqualTo "VURUCU") then { _p + 0.2 } else { _p * 0.85 };
+                        if ((speed _h) > 25) then { _p = _p * 0.7; };
+                        if (_h isKindOf "CAManBase" && {(stance _h) in ["PRONE", "CROUCH"]}) then { _p = _p * 0.8; };
+                        _p = (_p * (0.6 + 0.4 * _gor)) min 0.9;
+                        private _ew = random 1 < (0.08 * (missionNamespace getVariable ["lambs_danger_ihaEWOrani", 1]));
+                        private _iska = !_ew && {random 1 > _p};
+                        diag_log format ["[IHA-ISABET] %1 (%2, rol %3) | hedef %4 %5 m | olasilik %6 (gorus %7) | sonuc: %8", typeOf _uav, _tur, _rol, typeOf _h, round _dist, _p toFixed 2, _gor toFixed 2, ["ISABET SANSI TUTTU", "ISKA (sapma)", "EW / LINK KAYBI"] select ([0, 1, 2] select ((parseNumber _iska) + (2 * (parseNumber _ew))) )];
+                        if (_ew) then {
+                            _bitti = true;
+                            call _kontrolKaybi;
+                        } else {
+                            if (_iska && {_sapma isEqualTo [0, 0, 0]}) then {
+                                private _sa = random 360;
+                                private _sm = 6 + random 12;
+                                _sapma = [(sin _sa) * _sm, (cos _sa) * _sm, 0];
+                            };
+                        };
                     };
                     if (time > _perdeT) then {
                         _perdeT = time + 0.4;
