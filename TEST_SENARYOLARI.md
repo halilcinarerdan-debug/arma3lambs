@@ -356,6 +356,7 @@ Hepsi (T) = dogrulanmadi.
 2. Roketatar (RPG-7 gibi gudumsuz) `IncomingMissile` tetiklemez: bu durumda yalniz eski `atAtisIzle` yolu calisir.
 
 ## T-CQB-KOSE (v8.351)
+0. (v8.352) RPT 30-10 dersi: bu testi ACIK ARAZIDE degil, dusmanin BINALARIN ICINDE / arkasinda oldugu koyde yap (dusman 10-30 m); temassiz yururken `[CQB-KOSE]` cikMAMALI. 
 1. Koy / sehir (Enoch Bozcaada ya da RHS haritasi), 1 manga (6-8 kisi) + 1 dusman manga 150-200 m ileride, aralarinda binalar; manga liderine dusmani gordur (temas isareti), sonra sokak boyunca ilerlet. Beklenen: `[CQB-KOSE] ... NOKTA | kose N m ileride ... sonuc: temizlendi (~3 sn)`; ardindan ayni kosede arkadaki asker `ISTIF`. Sahada: asker kosenin 2-12 m onunde durur, comelir, silahi koseye cevirir; sonra yavas gecer. `forceSpeed` takili kalan asker olmamali (12 sn sigorta).
 2. Paralel duvar boyunca (kose yok) yurut: `[CQB-KOSE]` satiri OLMAMALI (3 kez ikiye bolme sahte siçramayi eler). Sokak agzi / bina ucunda olmali.
 3. Dusman 35 m icinde bilinince temkin birakilmali (`sonuc: iptal`), cqbReflex / coverHug devralir. CBA 'ELITE CQB' kapaliyken hic `[CQB-KOSE]` yok.

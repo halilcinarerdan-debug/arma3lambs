@@ -19,6 +19,7 @@
 
 params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]]];
 if (isNull _u || {isNull _en} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};
+if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   // v8.352: teslim olan / esir asker nesne arkasina gonderilmez (STOP -> MOVE salinimi)
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
 // v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
 private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];

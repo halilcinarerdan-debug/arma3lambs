@@ -89,7 +89,7 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             };
 
             // BIRIM-AI-KAPALI
-            private _dai = _us select {_x getVariable [QGVAR(disableAI), false]};
+            private _dai = _us select {_x getVariable [QGVAR(disableAI), false] && {!(_x getVariable [QGVAR(teslim), false])}};   // v8.352: teslim olanlarin disableAI'si beklenen durum
             if (!_bayrakVar && {_dai isNotEqualTo []}) then {
                 if ((_g getVariable [QGVAR(saglikDaiT), -1]) < 0) then { _g setVariable [QGVAR(saglikDaiT), time]; };
                 if ((time - (_g getVariable [QGVAR(saglikDaiT), time])) > 20) then {

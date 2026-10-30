@@ -72,6 +72,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     !alive _u || {!local _u} || {isPlayer _u} || {!isNull objectParent _u}
                     || {(speed _u) >= ([0.6, 1.0] select _hizli)} || {(insideBuilding _u) > 0.5}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
+                    || {captive _u} || {_u getVariable [QGVAR(teslim), false]}   // v8.352: teslim / esir siper aramaz
                     || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                     || {time < (_u getVariable [QGVAR(hugT), 0])}
                 ) then { continue };
