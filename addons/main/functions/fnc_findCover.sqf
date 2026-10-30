@@ -87,6 +87,14 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     } else {
         [ELITE_COVER_MIN_DIST, 20] select (_survive)
     };
+    // v8.351 CQB / MESKUN MAHAL (kullanici: 'covera tam yapismiyor, cover sistemini iyi secemiyor'): sabit 25 m (SURVIVE 20 m) alt sinir yuzunden dusman 25 m icindeyken HICBIR aday kalmiyordu
+    //   (findCover bos donuyor, fnc_doCover yalniz 6 m'deki agac / HIDE yedegine dusuyor: duvar, bina kosesi, kapi pervazi hic secilmiyordu). Dusman < 70 m ise alt sinir dusmana mesafenin %30'u (en az 5 m) olur.
+    //   Kapatma: lambs_danger_cqbV2 = false (CBA 'ELITE CQB')
+    private _cqbV2 = missionNamespace getVariable ["lambs_danger_cqbV2", true];
+    private _cqbYakin = _cqbV2 && {!_evade} && {_unitEnemyDist < 70};
+    if (_cqbYakin) then {
+        _minDist = (((_unitEnemyDist * 0.3) max 5) min _minDist);
+    };
 
     // ---------------------------------------------------------------------
     // Aday objeler: sert (agac/bina/HIDE) + yumusak (cali/kucuk agac) + araclar
@@ -143,6 +151,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
 
     private _adaylar = [];
     private _degerlendirilen = 0;
+    private _kose = 0;   // v8.351: kose adayi eklenen nesne sayisi
 
     {
         if (_degerlendirilen >= 60) exitWith {};
@@ -173,6 +182,33 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
             private _golge = _objPos getPos [_t + 0.8, _awayDir];
             _golge set [2, 0.1];
             _buildingPos = [_golge];
+        };
+
+        // v8.351 KOSE ADAYLARI (CQB): bina / duvar boyutundaki nesnelerin dusmandan GIZLI yuzunun iki UC noktasi (yuzeyden 0.8 m, uctan 0.6 m iceride): duvar ortasi yerine kose arkasinda durup
+        //   kenardan bakilabilir (peek). Yalniz en yakin 8 nesne, dusman <= 70 m. Skorlama / gizlilik testleri ayni (gizli degilse aday olmaz).
+        if (_cqbYakin && {!_yumusakMi} && {_kose < 8} && {_forEachIndex < 14}) then {
+            (boundingBoxReal _obj) params ["_kMin", "_kMax"];
+            private _bw = (_kMax select 0) - (_kMin select 0);
+            private _bl = (_kMax select 1) - (_kMin select 1);
+            if ((_bw max _bl) >= 3 && {(_bw min _bl) >= 0.25} && {(_kMax select 2) >= 2}) then {
+                _kose = _kose + 1;
+                private _dm = _obj worldToModel _enemyPos;
+                private _nx = ((_dm select 0) - (((_kMin select 0) + (_kMax select 0)) / 2)) / ((_bw / 2) max 0.1);
+                private _ny = ((_dm select 1) - (((_kMin select 1) + (_kMax select 1)) / 2)) / ((_bl / 2) max 0.1);
+                private _kAdaylar = [];
+                if ((abs _nx) >= (abs _ny)) then {
+                    private _fx = [(_kMin select 0) - 0.8, (_kMax select 0) + 0.8] select (_nx < 0);   // dusmana TERS yuz
+                    if (_bl > 1.5) then { _kAdaylar = [[_fx, (_kMin select 1) + 0.6], [_fx, (_kMax select 1) - 0.6]]; };
+                } else {
+                    private _fy = [(_kMin select 1) - 0.8, (_kMax select 1) + 0.8] select (_ny < 0);
+                    if (_bw > 1.5) then { _kAdaylar = [[(_kMin select 0) + 0.6, _fy], [(_kMax select 0) - 0.6, _fy]]; };
+                };
+                {
+                    private _kp = _obj modelToWorld [_x select 0, _x select 1, 0];
+                    _kp set [2, 0.1];
+                    if (!surfaceIsWater _kp) then { _buildingPos pushBack _kp; };
+                } forEach _kAdaylar;
+            };
         };
 
         {
@@ -356,7 +392,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
         //   Kapatma: lambs_main_coverV2 = false
         // -----------------------------------------------------------------
         if (missionNamespace getVariable ["lambs_main_coverV2", true]) then {
-            private _k = 6 min (count _adaylar);
+            private _k = ([6, 8] select _cqbYakin) min (count _adaylar);   // v8.351: CQB'de 8 aday (kose adaylari da elenebilsin)
             private _bas = _adaylar select [0, _k];
             private _ilkPos = (_bas select 0) select 1;
             private _atisModu = _mode in ["DEFEND", "OVERWATCH", "ADVANCE"];
@@ -498,7 +534,8 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                             _pp set [2, (_pos select 2) + 1.45];
                             if (!([_dangerPos, AGLToASL _pp, _unit] call _gizli)) exitWith { _lean = true; };
                         } forEach [90, -90];
-                        _a set [0, (_a select 0) + ([-15, 10] select _lean)];
+                        // v8.351 PASIF NOKTA (kullanici: 'pasif birakacak noktalarda konumlaniyor'): yakin mesafede ne ayakta ne egilerek hedefi goremeyen nokta atis yapamaz -> -25 (eski -15)
+                        _a set [0, (_a select 0) + ([-15 - (10 * ([0, 1] select _cqbYakin)), 10] select _lean)];
                     };
                 };
             } forEach _bas;

@@ -9,6 +9,8 @@
  *     - ayaktaysa ve dusman <= 15 m: diz cokup nisan (daha stabil, daha az gorunur)
  *     - CQB KALIBRASYONU: yakin mesafede nisan hizi / dogrulugu "egitimli asker" tabanina cekilir
  *       (aimingSpeed >= 0.65, aimingAccuracy >= 0.55; asla dusurulmez); temas bitince 8 sn sonra ESKI degerler
+ *     - v8.351 C) YAKIN SIPER (6-28 m, dusmandan ACIK ve binada degil, 6 sn'de bir): govde yuksekliginde dusman gozunden ray temizse (siper yok) 6 m icindeki EN IYI sert siper / bina kosesine
+ *       (findCover DEFEND; CQB'de alt mesafe siniri dusman mesafesinin %30'u) 3 sn'lik kosu; ardindan fnc_coverHug yuzeye yapistirir. Kapatma: lambs_danger_cqbV2 = false (CBA 'ELITE CQB').
  *  B) SIPER DISIPLINI (bilinen dusman <= 220 m, baski >= 0.35, ayakta, acikta, 25 sn'de bir):
  *     - 12 m icinde siper varsa oraya gider (findCover DEFEND), yoksa YATAR (acikta ayakta ezilmez)
  *
@@ -71,9 +73,35 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                         };
                         _u setVariable [QGVAR(cqbSon), time];
 
-                        if ((time - (_u getVariable [QGVAR(cqbLast), -999])) > 4) then {
+                        if ((time - (_u getVariable [QGVAR(cqbLast), -999])) > 4 && {(_u getVariable [QGVAR(cqbSiperKilit), 0]) <= time}) then {
                             _u setVariable [QGVAR(cqbLast), time];
                             _u setVariable [QGVAR(stationLast), time];
+
+                            // v8.351 C) YAKIN SIPER: dusmana ACIK (govde yuksekliginde ray temiz) ve yakinda sert siper varsa 3 sn'lik kosuyla siper / kose arkasina
+                            private _siperGitti = false;
+                            if (
+                                (missionNamespace getVariable ["lambs_danger_cqbV2", true]) && {_d >= 6} && {_butce > 0} && {(insideBuilding _u) < 0.5}
+                                && {(time - (_u getVariable [QGVAR(cqbSiperT), -999])) > 6}
+                                && {(lineIntersectsSurfaces [eyePos _e, (getPosASL _u) vectorAdd [0, 0, 1.1], _e, _u, true, 1, "FIRE", "NONE"]) isEqualTo []}
+                            ) then {
+                                _u setVariable [QGVAR(cqbSiperT), time];
+                                _butce = _butce - 1;
+                                private _cs = [_u, _e, 6, "ASCEND", 1, "DEFEND"] call EFUNC(main,findCover);
+                                if (_cs isNotEqualTo []) then {
+                                    private _csp = (_cs select 0) select 0;
+                                    if (!surfaceIsWater _csp && {(_u distance2D _csp) > 0.8} && {(_csp distance2D _e) >= 4}) then {
+                                        _u setVariable [QGVAR(cqbSiperKilit), time + 3];
+                                        _u forceSpeed -1;
+                                        _u doMove _csp;
+                                        _u setUnitPosWeak "UP";   // kosu icin ayakta; varista fnc_coverHug durusu ayarlar
+                                        _siperGitti = true;
+                                        if ((missionNamespace getVariable ["lambs_danger_cqbSiperLogN", 0]) < 40) then {
+                                            missionNamespace setVariable ["lambs_danger_cqbSiperLogN", (missionNamespace getVariable ["lambs_danger_cqbSiperLogN", 0]) + 1];
+                                            diag_log format ["[CQB-SIPER] %1 | %2 | dusman %3 m, govde acik (siper yok) -> %4 m ilerideki sert siper / kose | durus %5", groupId _g, name _u, round _d, round (_u distance2D _csp), (_cs select 0) select 1];
+                                        };
+                                    };
+                                };
+                            };
 
                             // roketatar -> tufek (zirh degilse)
                             if (
@@ -86,10 +114,12 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                             };
 
                             _u doWatch _e;
-                            _u doTarget _e;
-                            _u doFire _e;
+                            if (!_siperGitti) then {
+                                _u doTarget _e;
+                                _u doFire _e;
+                            };
 
-                            if (_d <= 15 && {(stance _u) isEqualTo "STAND"} && {(getSuppression _u) < 0.7}) then {
+                            if (!_siperGitti && {_d <= 15} && {(stance _u) isEqualTo "STAND"} && {(getSuppression _u) < 0.7}) then {
                                 _u setUnitPosWeak "MIDDLE";
                             };
 
