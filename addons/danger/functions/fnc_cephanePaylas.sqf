@@ -12,6 +12,11 @@
  * HAREKET: <= 6 m ise hemen (1.5 sn yukleme beklemesi); sakin (temas >= 15 sn yok) ise verici alici yanina yurur (<= 40 m, 25 sn sinir), aktarimdan sonra doFollow; temasta YALNIZ <= 6 m ESLER arasi.
  * Aktarim FIZIKSEL: verici 'PutDown' animasyonuyla mermiyi / bombayi YERE birakir (GroundWeaponHolder, aliciya 1.5 m), alici GIDIP YERDEN ALIR (50 sn; alamazsa 120 sn yerde kalir). 1-2 sarjor (alicinin 0 yedegi varsa 2), en dolu sarjor; 1 bomba. ('PutDown' aksiyon adi dogrulanamadi: gecersizse animasyon oynamaz, aktarim yine yapilir.) Grupta ayni anda 1 aktarim; alici 15 sn bekleme.   Kapatma: lambs_danger_cephanePaylasOff = true.   Log: [CEPHANE] (ilk 100) + [CEPHANE-OZET] 90 sn
  *
+ * v8.354 OYUNCUYA PASLAMA (kullanici: 'oyunculara mermi paslama olsun, envantere gelsin, mermimiz bitince; mermi paslamayi check et'): (1) OYUNCULU GRUPLAR artik atlanmaz (eskiden lider oyuncuysa grup tamamen atlaniyor,
+ *   oyuncunun manga arkadaslari birbirine de mermi paslamiyordu); (2) OYUNCU ALICI: grubundaki oyuncunun ana silahina uyan yedek sarjoru azaldiysa (envanterdeki uyumlu sarjor, 40 mm haric, < 3; yuklu sarjor dahil)
+ *   ayni gruptan >= 4 uyumlu sarjorlu (oyuncuda 0 yedek kaldiysa >= 3) AI verici bulunur; SAKINSE verici oyuncunun 5 m yakinina yurur (<= 25 sn, <= 40 m), temasta yalniz <= 15 m verici; verici 1-3 sarjoru (oyuncuyu 4'e tamamlar,
+ *   kendinde >= 2 birakir) DOGRUDAN OYUNCUNUN ENVANTERINE ekler (fnc_cephaneOyuncuAl; sigmayan ayagina), oyuncuya sohbet satiri gelir. Oyuncu basina 20 sn bekleme. Esik: lambs_danger_cephaneOyuncuEsik (3). Kapatma: lambs_danger_cephaneOyuncuOff = true. Log: [CEPHANE-OYUNCU].
+ *
  * Arguments: None
  * Return Value: Baslatildi mi <BOOL>
  * Public: No
@@ -113,9 +118,68 @@ private _aktar = {
 };
 missionNamespace setVariable ["lambs_danger_cephaneAktarFn", _aktar];
 
+// ---- v8.354 oyuncuya aktarim: verici (AI) sarjoru kendi envanterinden alir, OYUNCUNUN envanterine verir ----
+private _oyuncuAktar = {
+    params ["_v", "_p", "_sinif", "_adet", "_sebep"];
+    private _t0 = time;
+    private _g = group _v;
+    _v setVariable [QGVAR(cephaneT), time];
+    _p setVariable [QGVAR(cephaneAliciT), time];
+    _p setVariable [QGVAR(cephaneAliciBusy), true];
+    _g setVariable [QGVAR(cephaneAktif), true];
+    _v setVariable [QGVAR(taktikKilit), time + 40];
+    private _temizle = {
+        params ["_vv", "_pp", "_gg"];
+        _gg setVariable [QGVAR(cephaneAktif), nil];
+        if (!isNull _pp) then { _pp setVariable [QGVAR(cephaneAliciBusy), nil]; _pp setVariable [QGVAR(cephaneAliciT), time]; };
+        if (alive _vv) then { _vv setVariable [QGVAR(taktikKilit), nil]; _vv doWatch objNull; _vv doFollow (leader _gg); };
+    };
+    // 1) verici oyuncuya yaklasir (<= 5 m): oyuncu hareket ediyorsa hedef 1 sn'de bir tazelenir
+    if ((_v distance2D _p) > 5) then {
+        waitUntil {
+            if (alive _v && {alive _p}) then { _v doMove (getPosATL _p); };
+            sleep 1;
+            !alive _v || {!alive _p} || {(_v distance2D _p) <= 5} || {time > (_t0 + 25)}
+        };
+    };
+    if (!alive _v || {!alive _p} || {(_v distance2D _p) > 9} || {!isNull objectParent _p}) exitWith {
+        [_v, _p, _g] call _temizle;
+        diag_log format ["[CEPHANE-OYUNCU] %1 | %2 -> %3 | %4 x%5 | IPTAL (ulasilamadi / oyuncu araca bindi / oldu)", groupId _g, name _v, name _p, _sinif, _adet];
+    };
+    // 2) verici oyuncuya doner, 1 sn sonra sarjoru verir
+    doStop _v;
+    _v doWatch _p;
+    sleep 1.0;
+    private _liste = [];
+    if (alive _v && {alive _p}) then {
+        private _l = (magazinesAmmo _v) select {(toLower (_x select 0)) isEqualTo (toLower _sinif)};
+        if (_l isNotEqualTo []) then {
+            _l = [_l, [], {_x select 1}, "DESCEND"] call BIS_fnc_sortBy;
+            for "_i" from 0 to ((_adet min (count _l)) - 1) do { _liste pushBack (_l select _i); };
+            private _kalan = _l select [count _liste, count _l];
+            _v removeMagazines _sinif;
+            { _v addMagazine [_sinif, _x select 1]; } forEach _kalan;
+        };
+    };
+    private _eklenen = 0;
+    if (_liste isNotEqualTo []) then {
+        private _sayilar = _liste apply {_x select 1};
+        if (local _p) then {
+            _eklenen = [_p, _sinif, _sayilar, name _v] call FUNC(cephaneOyuncuAl);
+        } else {
+            [_p, _sinif, _sayilar, name _v] remoteExecCall ["lambs_danger_fnc_cephaneOyuncuAl", _p];
+            _eklenen = count _sayilar;   // uzak makinede eklenir; sayi bildirimle ayni
+        };
+    };
+    [_v, _p, _g] call _temizle;
+    diag_log format ["[CEPHANE-OYUNCU] %1 | %2 -> %3 (OYUNCU) | %4 x%5 verildi | %6 | %7 sn", groupId _g, name _v, name _p, _sinif, _eklenen, _sebep, round (time - _t0)];
+};
+missionNamespace setVariable ["lambs_danger_cephaneOyuncuAktarFn", _oyuncuAktar];
+
 private _calis = {
     missionNamespace setVariable ["lambs_danger_cephaneAdim", "basladi"];
     private _aktarFn = missionNamespace getVariable "lambs_danger_cephaneAktarFn";
+    private _oyuncuAktarFn = missionNamespace getVariable "lambs_danger_cephaneOyuncuAktarFn";
     private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
     private _asistFn = missionNamespace getVariable ["lambs_danger_fnc_asistanTur", {""}];
     private _uygunMag = {
@@ -170,7 +234,8 @@ private _calis = {
         {
             private _g = _x;
             private _l = leader _g;
-            if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
+            // v8.354: oyuncu liderli gruplar atlanmaz (oyuncuya paslama + AI'lar arasi); AI lider aracta ise yine atlanir
+            if (isNull _l || {!local _g} || {!alive _l} || {!(isPlayer _l) && {!isNull objectParent _l}}) then { continue };
             if ((time - (_g getVariable [QGVAR(cephaneGrupT), -999])) < 5) then { continue };
             if (_g getVariable [QGVAR(cephaneAktif), false]) then {
                 if ((time - (_g getVariable [QGVAR(cephaneGrupT), -999])) > 90) then { _g setVariable [QGVAR(cephaneAktif), nil]; };   // yarim kalan betik kilidi 90 sn sonra acilir
@@ -181,7 +246,11 @@ private _calis = {
                 alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
                 && {!(_x getVariable ["ACE_isUnconscious", false])} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
             };
-            if ((count _us) < 2) then { continue };
+            // v8.354: oyuncu alici (grupta canli, aractan inmis, bayilmamis oyuncular)
+            private _oyuncular = (units _g) select {
+                isPlayer _x && {alive _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}
+            };
+            if ((count _us) < ([2, 1] select (_oyuncular isNotEqualTo [])) || {(count _us) < 1}) then { continue };
             // v8.105: 'temas' = GERCEK ates degisimi (son 10 sn atis ya da baski > 0.2 ya da bilinen dusman < 60 m). LAMBS contact bayragi temastan sonra uzun sure (yuzlerce sn) acik kalir;
             //   eski kosul (contact > time) yuzunden grup neredeyse hep 'temasta' sayilip yalniz <= 6 m esler paslasabiliyordu (kullanici: 2 sarjorlu M4'e arkadaslari vermedi).
             private _sit = _g getVariable [QGVAR(cmdSit), []];
@@ -218,6 +287,59 @@ private _calis = {
                 diag_log format ["[CEPHANE-TANI] %1 | dusuk cephaneli: %2 | gruptaki asker %3, tabloya girenler %4 (forceMove / taktikKilit / bayilmis elenir) | sakin:%5 aktifAtes:%6 | >= 5 sarjorlu verici adayi: %7",
                     groupId _g, _dusukTbl apply {format ["%1 (%2 sarjor, sinif %3)", name (_x select 0), _x select 2, _x select 1]},
                     count (units _g), count _us, _sakin, _aktif, {(_x select 2) >= 5} count _tablo];
+            };
+
+            // ---- v8.354 OYUNCU ALICI: oyuncunun ana silah yedegi azaldiysa AI vericiden DOGRUDAN envantere ----
+            if (_oyuncular isNotEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_cephaneOyuncuOff", false])}) then {
+                private _oyBasladi = false;
+                {
+                    if (_oyBasladi) exitWith {};
+                    private _p = _x;
+                    if ((time - (_p getVariable [QGVAR(cephaneAliciT), -999])) < 20 || {_p getVariable [QGVAR(cephaneAliciBusy), false]}) then { continue };
+                    private _pw = primaryWeapon _p;
+                    if (_pw isEqualTo "") then { continue };
+                    private _pgl = [_p] call _uglFn;
+                    private _pglM = if (_pgl isEqualTo "") then { [] } else { [_pw, _pgl] call _mags };
+                    private _pUyum = (compatibleMagazines _pw) apply {toLower _x};
+                    private _pAna = (magazinesAmmo _p) select {private _k = toLower (_x select 0); _k in _pUyum && {!(_k in _pglM)}};
+                    private _pSayi = count _pAna;
+                    if (_pSayi >= (missionNamespace getVariable ["lambs_danger_cephaneOyuncuEsik", 3])) then { continue };
+                    // verici adaylari: ayni grup, AI, oyuncunun silahina uyan >= 4 (oyuncuda yedek kalmadiysa >= 3) sarjor; sakinse <= 40 m, temasta <= 15 m
+                    private _esikV = [4, 3] select (_pSayi <= 1);
+                    private _vOy = _tablo select {
+                        private _vu = _x select 0;
+                        (time - (_vu getVariable [QGVAR(cephaneT), -999])) > 10
+                        && {(count ([_x select 11, _pUyum, _x select 10] call _uygunMag)) >= _esikV}
+                        && {(_vu distance2D _p) <= ([15, 40] select _sakin)}
+                    };
+                    if (_vOy isEqualTo []) then {
+                        _say set ["oyuncuVericiYok", (_say getOrDefault ["oyuncuVericiYok", 0]) + 1];
+                        if (_logN < 40 && {(time - (missionNamespace getVariable ["lambs_danger_cephaneNedenT", -999])) > 20}) then {
+                            missionNamespace setVariable ["lambs_danger_cephaneNedenT", time];
+                            _logN = _logN + 1;
+                            diag_log format ["[CEPHANE-NEDEN] %1 | OYUNCU alici %2 (%3 sarjor) | verici yok (esik >= %4 uyumlu sarjor, mesafe <= %5 m) | sakin:%6", groupId _g, name _p, _pSayi, _esikV, [15, 40] select _sakin, _sakin];
+                        };
+                        continue
+                    };
+                    _vOy = _vOy apply {
+                        private _vu = _x select 0;
+                        [(count ([_x select 11, _pUyum, _x select 10] call _uygunMag)) * 10 - ((_vu distance2D _p) / 5), _x]
+                    };
+                    _vOy = [_vOy, [], {_x select 0}, "DESCEND"] call BIS_fnc_sortBy;
+                    private _vTbl = (_vOy select 0) select 1;
+                    private _v = _vTbl select 0;
+                    private _vmC = ([_vTbl select 11, _pUyum, _vTbl select 10] call _uygunMag) apply {toLower (_x select 0)};
+                    private _pSinif = if (_pAna isEqualTo []) then {""} else {toLower ((_pAna select 0) select 0)};
+                    private _sinif = if (_pSinif in _vmC) then { _pSinif } else { _vmC param [0, ""] };
+                    if (_sinif isEqualTo "") then { continue };
+                    private _adet = (((4 - _pSayi) max 1) min 3) min (((count _vmC) - 2) max 1);
+                    private _sebep = format ["oyuncu yedek %1 sarjor | verici stok %2 | mesafe %3 m | %4", _pSayi, count _vmC, round (_v distance2D _p), ["temasta", "sakin"] select _sakin];
+                    _oyBasladi = true;
+                    _g setVariable [QGVAR(cephaneGrupT), time + 10];
+                    _say set ["OYUNCU", (_say getOrDefault ["OYUNCU", 0]) + 1];
+                    [_v, _p, _sinif, _adet, _sebep] spawn _oyuncuAktarFn;
+                } forEach _oyuncular;
+                if (_oyBasladi) then { continue };
             };
 
             private _aliciSec = [];

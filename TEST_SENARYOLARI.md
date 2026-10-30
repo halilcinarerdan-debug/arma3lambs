@@ -362,6 +362,16 @@ Hepsi (T) = dogrulanmadi.
 3. Dusman 35 m icinde bilinince temkin birakilmali (`sonuc: iptal`), cqbReflex / coverHug devralir. CBA 'ELITE CQB' kapaliyken hic `[CQB-KOSE]` yok.
 4. Yakin siper: dusman 10-25 m'de acikta; `[CQB-SIPER] ... -> N m ilerideki sert siper / kose`, ardindan `[SIPER-YAPIS]`. Eski surumde bu mesafede `[SIPER-ANALIZ] aday:0` / hic siper yoktu.
 
+## T-MERMI-OYUNCU (v8.354)
+1. Kendi mangani (4-6 AI) kur, sen lider ol. Silahindaki yedek sarjoru at / envanterden sil (yalniz 1-2 sarjor kalsin), ates et. Beklenen: AI asker yanina gelir (sakin ise <= 25 sn) ya da <= 15 m ise hemen, sohbette `[ASKER] <ad> sana 2 sarjor verdi (<sarjor adi>)`, envanterde sarjor artar. RPT: `[CEPHANE-OYUNCU] ... (OYUNCU) | <sinif> x2 verildi`. Verici >= 4 uyumlu sarjorlu olmali; kimse yoksa `[CEPHANE-NEDEN] OYUNCU alici ... verici yok`.
+2. Envanteri doldur: sarjor sigmazsa sohbette `envanter DOLU: N sarjor ayagina birakildi`, yerde alinabilir. Araca binince verilmez. `lambs_danger_cephaneOyuncuOff = true` ile kapanir.
+3. AI->AI: bir AI'nin sarjorunu 1'e indir; oyuncu liderli grupta da `[CEPHANE] ... yere birakti -> aldi` gorulmeli (v8.353'te grup tamamen atlaniyordu).
+
+## T-BINA-AKTIF (v8.354)
+1. Koy; dusman 80-150 m, AI manga sokakta/acikta. Beklenen: `[ACIK-SIPER] ... bina <sinif> (N m, ATIS POZISYONU: dusman gorunuyor, durus UP|MIDDLE ...)`; asker binanin icinde pencere hizasinda durur, dusmana bakar ve ates eder (eskiden 'pasif gizlenme': duvar arkasinda dusmani goremez).
+2. Binayi garnizon et (LAMBS / savunma plani), dusman 100 m disinda kapali duvar arkasinda: duvara bakan asker `[BINA-PENCERE] ... ayni binada ATIS pozisyonu` ile pencereye gecer (<= 14 m, ayni kat); ayni pencereye yigilma yok; 40 sn sonra serbest.
+3. Kapatma: CBA 'ELITE CQB' kapali -> eski davranis (yalniz gizli nokta) ve `[BINA-PENCERE]` yok.
+
 ## T-TANK-TERK (v8.265)
 1. Tank motorunu vur (hitengine ~0.9): `[TANK-IMMOBIL] ... canMove false | canFire ... | parcalar >0.5: [...]`, `[PLAN-ZIRH] ... HAREKET EDEMIYOR`.
 2. Murettebat 4 kez geri donup ejekte edilirse (ya da 3 / 60 sn) `[TANK-TERK] ... terk eden murettebat N -> <grup> grubuna katildi`; murettebat yakindaki piyade grubuyla birlikte hareket eder, tanka tekrar kosmaz.
@@ -508,7 +518,7 @@ Kurulum (Enoch / Altis, ACE'li olabilir): BATI: 1 Mk6 havan (81 mm) ya da M109 +
 
 ## TOPLU TEST PLANI v8.338 (en cok 6 oturum; hepsi (T) = dogrulanmadi)
 Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rpt_ozet.py --tani <rpt>`; boot satirinda `v8.338` gorunmeli.
-- **Oturum A — Zirh / arac (Enoch, RHS, 2 tank + 1 IFV + piyade, HQ'ya bagli)**: T-TANK-OTOMATIK-SECIM, T-TANK-AGRESIF (`tankAgresif` 2 ve 0 karsilastir), T-ARAC-UNSTUCK (araci agaca sok), T-IHA-DUMAN (AI FPV-AT + duman), T-FPV-CARPMA (ACE Vehicle Damage acik ve kapali; `[IHA-ETKI]`). Bak: `[PLAN-ARAC]`, `[PLAN-ZIRH]`, `[ARAC-UNSTUCK]`, `[IHA-DUMAN]`, `[IHA-ETKI]`. v8.351 ek: T-CQB-KOSE (`[CQB-KOSE]`, `[CQB-SIPER]`). v8.348-349 ek: T-ZIRH-GECIT, T-ZIRH-SICRAMA, T-ZIRH-UYARI (`[ZIRH-GECIT]`, `[ZIRH-SICRAMA]`, `[ZIRH-UYARI]`, `[TANK-ARALIK]`).
+- **Oturum A — Zirh / arac (Enoch, RHS, 2 tank + 1 IFV + piyade, HQ'ya bagli)**: T-TANK-OTOMATIK-SECIM, T-TANK-AGRESIF (`tankAgresif` 2 ve 0 karsilastir), T-ARAC-UNSTUCK (araci agaca sok), T-IHA-DUMAN (AI FPV-AT + duman), T-FPV-CARPMA (ACE Vehicle Damage acik ve kapali; `[IHA-ETKI]`). Bak: `[PLAN-ARAC]`, `[PLAN-ZIRH]`, `[ARAC-UNSTUCK]`, `[IHA-DUMAN]`, `[IHA-ETKI]`. v8.354 ek: T-MERMI-OYUNCU, T-BINA-AKTIF (`[CEPHANE-OYUNCU]`, `[ACIK-SIPER]` ATIS POZISYONU, `[BINA-PENCERE]`). v8.351 ek: T-CQB-KOSE (`[CQB-KOSE]`, `[CQB-SIPER]`). v8.348-349 ek: T-ZIRH-GECIT, T-ZIRH-SICRAMA, T-ZIRH-UYARI (`[ZIRH-GECIT]`, `[ZIRH-SICRAMA]`, `[ZIRH-UYARI]`, `[TANK-ARALIK]`).
 - **Oturum B — Dolayli ates (yeni)**: T-DRON-TOPCU, T-DANGER-CLOSE, T-NFA, T-TACIZ, T-KARSI-BATARYA-EMNIYET. Ek regresyon: komutan plani + M109 + 2S1 (122 mm) ile `[PLAN-TOPCU]`: RED 455 (2S1) ve 'NISAN KAYDIRILDI' hala calisiyor mu; Zeus topcu testi (`[TOPCU-TEST]`).
 - **Oturum C — Dron savunmasi**: piyade dron tepkisi (`[DRON-YON]` / `[DRON-SAKLAN]`), tank dron tepkisi (`[TANK-DRON]`), T-DRON-AVI-SAVUNMA (savunma planindan 3-4 kisilik devriye), T-DRON-GOZLEMCI (israrli saldiri -> gozlem dronu), T-TOPCU-EMINLIK (1 dron 110 m / 4 dron 16 m yayilim).
 - **Oturum D — Savunma / garnizon**: T-OTO-GARNIZON (OPORD 4/4 Evet; ORP / CCP'den >= 70 m), hedef zinciri TUT (`[PLAN-TUT]`), eski hendek / karakol sistemi (v8.330 haline dondu: hendek yerlestirme + `GOZLETME` calisiyor mu — regresyon).

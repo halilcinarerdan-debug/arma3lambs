@@ -7,7 +7,7 @@
  *   2) aday: dusmanin gozunden o noktaya hat bina tarafindan KESILIYOR (lineIntersects) + dusmana 8 m'den fazla yaklasmaz + baska askere ayrilmis degil (1.8 m, 30 sn)
  *   3) en yakin aday: doMove, FULL hiz, 15 sn taktik kilidi (diger hareket arbitrajlari ezmesin); asker basina 25 sn'de bir
  * ATLANIR: bounding / taktik yurutenler (hucumda ilerlemek bilincli), CBA kapatma: lambs_danger_acikSiperOff = true
- * Log: [ACIK-SIPER]
+ * v8.354: bina kolu ATIS POZISYONU tercih eder (dusmana pencere hatti acik, ust ortulu); pasif gizlenme yalniz son care. Log: [ACIK-SIPER]
  *
  * Arguments:
  * 0: Asker <OBJECT>
@@ -79,18 +79,55 @@ if (_obj isNotEqualTo []) exitWith {
 };
 
 private _en_iyi = [];
-private _enD = 1e9;
+private _enS = 1e9;
 private _binaAd = "";
+private _atisVar = false;
+private _durusB = "AUTO";
+// v8.354 BINAYI AKTIF KULLAN (kullanici: 'binalari aktif kullansinlar'; RPT 30-10: ACIK-SIPER bina kolu yalniz dusmandan GIZLI nokta seciyor -> asker binaya girip dusmani goremeyen, ates edemeyen 'pasif' noktada bekliyordu):
+//   ATIS POZISYONU = dusman gozunden askerin ayakta (1.5 m) ya da comelmis (1.0 m) goz hizasina hat ACIK (pencere / kapi) ama ust ortulu (ic mekan); 5 yanal ornekten (+-0.8 m) hepsi aciksa (tamamen acik yapi) +8 ceza;
+//   ust ortu yoksa +15; AT +12 (geri tepme: bina ici); keskin nisanci ust katta -6; kat farki x1.5; dusmani goremeyen gizli nokta yalniz SON CARE (+30). Kat sinirli: |dz| < 4 m (ulasilamaz ust kat yok).
+//   Kapatma: lambs_danger_cqbV2 = false (eski: yalniz gizli nokta, en yakin).
+private _cqbV2 = missionNamespace getVariable ["lambs_danger_cqbV2", true];
+private _rolB = if (_cqbV2) then { [_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}]) } else { "RIFLE" };
+private _uZ = (getPosATL _u) select 2;
+private _edir = _p getDir _en;
 {
     private _b = _x;
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= (_yar + 10) && {_d < _enD} && {(_bp distance2D _en) >= (_ed - 8)} && {(_dolu findIf {((_x select 0) distance2D _bp) < 1.8}) < 0}) then {
-            if (lineIntersects [_eASL, (AGLToASL _bp) vectorAdd [0, 0, 1.3], _en, _u]) then {
-                _enD = _d;
-                _en_iyi = _bp;
-                _binaAd = typeOf _b;
+        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {(_dolu findIf {((_x select 0) distance2D _bp) < 1.8}) < 0}) then {
+            private _bA = AGLToASL _bp;
+            if (!_cqbV2) then {
+                if (_d < _enS && {lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.3], _en, _u]}) then { _enS = _d; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = false; };
+            } else {
+                if ((abs ((_bp select 2) - _uZ)) < 4) then {
+                    private _gUp = (lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.5], _en, _u]) || {terrainIntersectASL [_eASL, _bA vectorAdd [0, 0, 1.5]]};
+                    private _gMid = (lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.0], _en, _u]) || {terrainIntersectASL [_eASL, _bA vectorAdd [0, 0, 1.0]]};
+                    private _atis = !_gUp || {!_gMid};
+                    private _sk = _d;
+                    private _durus = "AUTO";
+                    if (_atis) then {
+                        _durus = ["MIDDLE", "UP"] select (!_gUp);
+                        private _perp = [cos _edir, -(sin _edir), 0];
+                        private _acik = 0;
+                        {
+                            private _yp = (_bA vectorAdd [0, 0, 1.4]) vectorAdd (_perp vectorMultiply _x);
+                            if (!((lineIntersects [_eASL, _yp, _en, _u]) || {terrainIntersectASL [_eASL, _yp]})) then { _acik = _acik + 1; };
+                        } forEach [-0.8, -0.4, 0, 0.4, 0.8];
+                        if (_acik >= 5) then { _sk = _sk + 8; };
+                    } else {
+                        _sk = _sk + 30;
+                    };
+                    if !(lineIntersects [_bA vectorAdd [0, 0, 1.6], _bA vectorAdd [0, 0, 25], _u]) then { _sk = _sk + 15; };
+                    switch (_rolB) do {
+                        case "AT": { _sk = _sk + 12; };
+                        case "MARKSMAN": { if (((_bp select 2) - _uZ) > 2.2) then { _sk = _sk - 6; }; };
+                        default {};
+                    };
+                    _sk = _sk + ((abs ((_bp select 2) - _uZ)) * 1.5);
+                    if (_sk < _enS) then { _enS = _sk; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = _atis; _durusB = _durus; };
+                };
             };
         };
     } forEach (_b buildingPos -1);
@@ -105,8 +142,13 @@ _u forceSpeed -1;
 _u setSpeedMode "FULL";
 _u setUnitPos "AUTO";
 _u doMove _en_iyi;
+// v8.354: atis pozisyonuna varinca durus + dusmana bak (pasif beklemesin); 45 sn sonra serbest
+if (_atisVar) then {
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu doWatch objNull; }; }, [_u], 45] call CBA_fnc_waitAndExecute;
+};
 if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
-    diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> bina %4 (%5 m, dusmandan gizli nokta)", groupId _g, name _u, round _ed, _binaAd, round _enD];
+    diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> bina %4 (%5 m, %6, skor %7)", groupId _g, name _u, round _ed, _binaAd, round (_u distance2D _en_iyi), if (_atisVar) then {format ["ATIS POZISYONU: dusman gorunuyor, durus %1", _durusB]} else {"pasif gizlenme (atis pozisyonu yok)"}, round _enS];
 };
 true
