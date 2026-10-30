@@ -827,6 +827,8 @@ if (EGVAR(main,debug_functions)) then {
                 ((time - _atesBasi) >= 1.5)
                 && {isNull _odak || {!alive _odak} || {(getSuppression _odak) >= 0.25}}
             }
+            // v8.355: odak UZAK makinede (oyuncu / baska makine) ise getSuppression -1 doner -> kapi hic 'bastirildi' demiyor ve 5 sn'in tamamini bekliyordu (RPT 30-10: kapi 5.3-5.9 sn); bu durumda 3 sn
+            || {((time - _atesBasi) >= 3) && {!isNull _odak} && {(getSuppression _odak) < 0}}
         };
 
         if (!(call _hala)) exitWith {};
