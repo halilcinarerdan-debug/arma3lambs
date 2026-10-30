@@ -17,7 +17,7 @@
  *   - Yuruyus yonu = hiz vektoru. 11 isin (-75..+75 derece, 24 m; bina ici 14 m), goz yuksekliginde 'VIEW' geometrisi; kucuk nesneler (< 2.5 m) engel sayilmaz.
  *   - Komsu iki isin arasi mesafe farki >= 4 m ise o aralik 3 kez ikiye bolunur (ayni yuzeye siyirma acisiyla devam eden duvarin sahte siçramasini eler); kalan fark >= 5 m (bina ici 4 m), yakin taraf <= 14 m (ici 8 m)
  *     ve kose ileride 1.8-12 m (ici 7 m), +-52 derece icindeyse KOSE sayilir. Kosenin ardindaki bilinmeyen sektor = yakin isin tarafina 9 ve 20 derece sapma.
- * DAVRANIS (yalniz AKTIF temas (QGVAR(contact) damgasi > time) ya da liderin 250 m icinde bilinen dusmani varken - v8.352: davranis COMBAT tek basina yetmez; bina icinde yalniz aktif temasta; teslim / esir (captive) atlanir; oyuncu iceren grup, arac, tactic / retreat / evade / bounding calisan grup, keskin nisanci ekibi, forceMove atlanir):
+ * DAVRANIS (AKTIF temas (QGVAR(contact) damgasi > time) ya da liderin 250 m icinde bilinen dusmani varken TAM kip; dusman bilinmiyor ama lider COMBAT davranisinda ise (Zeus'ta bilerek COMBAT verildi) HAFIF kip x0.6; ikisi de yoksa temkin yok; bina icinde yalniz aktif temasta; teslim / esir (captive) atlanir; oyuncu iceren grup, arac, tactic / retreat / evade / bounding calisan grup, keskin nisanci ekibi, forceMove atlanir):
  *   NOKTA (kosede ilk gelen): forceSpeed 0 + comel + 0.8 sn uzak sektore, 0.6 sn yakin sektore doWatch (dilim 1 / 2); sonra forceSpeed 1.3 (agir adim) ile kosenin 2 m yakinina / (mesafe + 1.5 m) ilerleyene kadar (en cok 2.5 sn) gecer ve 'kose temiz' hafizasi (60 sn, 8 m) yazilir (v8.352: toplam ~3 sn, eskiden 5.5).
  *   ISTIF (ayni kosede ikinci / ucuncu asker): ayakta (#2 yuksek) durur, uzak sektore bakar, NOKTA bitene kadar (en cok 6 sn) bekler -> yigilmadan, birer birer gecer.
  *   Iptal: dusman <= 35 m bilinirse (knowsAbout >= 1) / baski > 0.6 / yarali dustu / baska sistem forceMove verdi / 12 sn sigorta -> hemen serbest (normal savas: fnc_cqbReflex, fnc_coverHug).
@@ -108,7 +108,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
 
     // kose sekansi (birim basina spawn): ROL "NOKTA" = dilimler ve gecer; "ISTIF" = sirada bekler
     private _sekans = {
-        params ["_u", "_g", "_kose", "_rol", "_kimlik", "_sayac"];
+        params ["_u", "_g", "_kose", "_rol", "_kimlik", "_sayac", ["_olcek", 1]];
         _kose params ["_kPoz", "_pozU", "_pozY", "_ileri", "_aci", "_sgn", "_fark"];
         private _t0 = time;
         private _iptal = {
@@ -158,12 +158,12 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
                     _bitti = true;
                 } else {
                     switch (_faz) do {
-                        case 0: { if ((time - _fazT) >= 0.8) then { _faz = 1; _fazT = time; _u doWatch _pozY; }; };
-                        case 1: { if ((time - _fazT) >= 0.6) then { _faz = 2; _fazT = time; _p0 = getPosATL _u; _u forceSpeed 1.3; }; };
+                        case 0: { if ((time - _fazT) >= (0.8 * _olcek)) then { _faz = 1; _fazT = time; _u doWatch _pozY; }; };
+                        case 1: { if ((time - _fazT) >= (0.6 * _olcek)) then { _faz = 2; _fazT = time; _p0 = getPosATL _u; _u forceSpeed 1.3; }; };
                         case 2: {
                             // v8.352: RPT'de her kose 5.5 sn surdu (yavas gecis 3.5 sn tavana dayaniyordu): kosenin 2 m yakinina varinca ya da baslangictan (kose mesafesi + 1.5 m, en cok 5 m) ilerleyince biter; tavan 2.5 sn
                             if ((_u distance2D _kPoz) < 2.0 || {(_u distance2D _p0) >= (((_ileri + 1.5) min 5) max 2)}) then { _bitti = true; };
-                            if ((time - _fazT) >= 2.5) then { _bitti = true; };
+                            if ((time - _fazT) >= (2.5 * _olcek)) then { _bitti = true; };
                         };
                     };
                 };
@@ -183,7 +183,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
         if ((missionNamespace getVariable ["lambs_danger_koseLogN", 0]) < 40) then {
             missionNamespace setVariable ["lambs_danger_koseLogN", (missionNamespace getVariable ["lambs_danger_koseLogN", 0]) + 1];
             diag_log format ["[CQB-KOSE] %1 | %2 | %3 | kose %4 m ileride (aci %5, mesafe farki %6 m, bilinmeyen sektor %7) | sonuc: %8 (%9 sn)",
-                groupId _g, name _u, _rol, _ileri toFixed 1, round _aci, _fark toFixed 1, ["SOL", "SAG"] select (_sgn > 0), _bitis, (time - _t0) toFixed 1];
+                groupId _g, name _u, _rol + (["", " (COMBAT uyari, hafif)"] select (_olcek < 1)), _ileri toFixed 1, round _aci, _fark toFixed 1, ["SOL", "SAG"] select (_sgn > 0), _bitis, (time - _t0) toFixed 1];
         };
     };
 
@@ -208,11 +208,17 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
             if (isNull _g || {!local _g}) then { continue };
             // v8.352 TEHDIT KAPISI (RPT 30-10 17:58: 'TEMAS-YOK-COMBAT' - temas bitmis, dusman 140 m uzakta, lider yalniz COMBAT davranisinda iken 4 asker avluda 5.5 sn'lik kose beklemesi yapti): davranis COMBAT'i
             //   tek basina yetmez. QGVAR(contact) = temas BITIS damgasi (gelecek zaman, ~10 dk): temas aktif ya da liderin 250 m icinde taze bilinen (knowsAbout >= 0.3) dusmani var.
+            //   v8.353 (kullanici: 'ben combata soktum'): Zeus / gorev yoneticisi grubu BILEREK COMBAT'a aldiysa bu bir uyari durumudur -> HAFIF kip (olcek 0.6: dilimler 0.5 + 0.4 sn, gecis <= 1.5 sn, ~2 sn);
+            //   aktif temas / bilinen yakin dusmanda TAM kip (olcek 1: ~3 sn). COMBAT degilse ve tehdit yoksa temkin yok.
             private _temasT = _g getVariable [QGVAR(contact), 0];
+            private _olcek = 1;
             if (_temasT <= time) then {
                 private _ld = leader _g;
                 private _ed = if (isNull _ld || {!alive _ld}) then {objNull} else {_ld findNearestEnemy _ld};
-                if (isNull _ed || {!alive _ed} || {(_ld distance2D _ed) > 250} || {(_ld knowsAbout _ed) < 0.3}) then { continue };
+                if (isNull _ed || {!alive _ed} || {(_ld distance2D _ed) > 250} || {(_ld knowsAbout _ed) < 0.3}) then {
+                    if (isNull _ld || {(behaviour _ld) isNotEqualTo "COMBAT"}) then { continue };
+                    _olcek = 0.6;
+                };
             };
             if (_g getVariable [QGVAR(sniperTeam), false]) then { continue };
             if (
@@ -275,7 +281,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
                         _uu setVariable [QGVAR(koseT), time];
                     };
                 }, [_u, _kimlik], 12] call CBA_fnc_waitAndExecute;
-                [_u, _g, _kose, _rol, _kimlik, _sayac] spawn _sekans;
+                [_u, _g, _kose, _rol, _kimlik, _sayac, _olcek] spawn _sekans;
             } forEach (units _g);
         } forEach allGroups;
     };
