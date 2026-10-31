@@ -539,3 +539,8 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 ## T-DRON-GORUS (v8.344)
 1. Gece, termalsiz FPV (Crocus AT) ve termalli (AT TI) ile ayni hedefe sorti: termalsiz hedefi daha uzaktan kaybeder / kilidi uzun surer. Sis / yagmur (Zeus hava) ve yatik / kamuflajli hedef kilidi geciktirir.
 
+
+## T-IHA-EVE-DON (v8.356)
+1. OPFOR FPV (Crocus AT) emri ver, hedefin etrafina 2 duman at: beklenen `[IHA-DUMAN]` 22 sn, hedef birakilir, 2. basarisizlikta `KOR DALIS` (havada 3 dk asili kalmamali).
+2. Hedefi yok et / uzaklastir, dron 60 sn hedefsiz kalsin: `[IHA-DONUS] eve donuyor` -> operatorun yanina iner, MedicStart animasyonu, `yere kondu, pil DEGISTI`; yeni dusman 1200 m icine girince `YENIDEN HAVALANDI`.
+3. Etrafta Mavic gozlem dronu YOKKEN iki FPV: ikisi de dogrudan dalmali (GOZCU rolu cikmamali).
