@@ -377,7 +377,8 @@ private _calis = {
                             private _vm = [_x select 11, _aUyum, _x select 10] call _uygunMag;
                             (count _vm) >= ([5, 2] select _asistEsi)
                         };
-                        case "40MM": { false };
+                        // v8.357: 40 mm alicinin ayni tur (compatible) atesleme mermisini >= 6 tasiyan verici (kendinde >= 5 kalir); eskiden 'false' idi -> alici secilip verici bulunamayan bosuna aday (RPT 31-10: 90 sn'de 13 kez)
+                        case "40MM": { (({(toLower (_x select 0)) in (_aTbl select 10)} count (_x select 11)) >= 6) };
                         case "PARCALI": { (_x select 5) >= 3 };
                         case "DUMAN": { (_x select 6) >= 3 };
                         default { false };
@@ -390,7 +391,7 @@ private _calis = {
                     if (_logN < 40 && {(time - (missionNamespace getVariable ["lambs_danger_cephaneNedenT", -999])) > 20}) then {
                         missionNamespace setVariable ["lambs_danger_cephaneNedenT", time];
                         _logN = _logN + 1;
-                        diag_log format ["[CEPHANE-NEDEN] %1 | alici %2 (%3: %4 sarjor) | verici yok | sakin:%5 | grupta >= 5 sarjorlu: %6", groupId _g, name _a, _tur, _aTbl select 2, _sakin, {(_x select 2) >= 5} count _tablo];
+                        diag_log format ["[CEPHANE-NEDEN] %1 | alici %2 (%3: %4 sarjor / 40mm %7) | verici yok | sakin:%5 | grupta >= 5 sarjorlu: %6", groupId _g, name _a, _tur, _aTbl select 2, _sakin, {(_x select 2) >= 5} count _tablo, _aTbl select 4];
                     };
                     continue
                 };
@@ -410,6 +411,16 @@ private _calis = {
                     };
                     case "PARCALI": { ((magazines _v) select {([_x, _vTbl select 10] call _turFn) isEqualTo "F"}) param [0, ""] };
                     case "DUMAN": { ((magazines _v) select {([_x, _vTbl select 10] call _turFn) isEqualTo "S"}) param [0, ""] };
+                    case "40MM": {
+                        // vericinin envanterinde, alicinin 40 mm silahina uyan en cok bulunan sinif (alicinin kendi sinifi varsa o)
+                        private _gM = _aTbl select 10;
+                        private _vk = ((_vTbl select 11) apply {toLower (_x select 0)}) select {_x in _gM};
+                        private _kv = _vk arrayIntersect _vk;
+                        private _sn = "";
+                        private _sg = -1;
+                        { private _k = _x; private _c = {_x isEqualTo _k} count _vk; if (_c > _sg) then { _sg = _c; _sn = _k; }; } forEach _kv;
+                        _sn
+                    };
                     default { "" };
                 };
                 if (_sinif isEqualTo "") then { continue };

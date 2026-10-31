@@ -24,7 +24,7 @@ lambs_danger_tankAralikStarted = true;
         sleep 3;
         if (missionNamespace getVariable ["lambs_danger_tankAralikOff", false] || {!(missionNamespace getVariable ["lambs_danger_tankAralikAktif", true])}) then { continue };
         private _araclar = vehicles select {
-            alive _x && {local _x} && {isEngineOn _x} && {canMove _x}
+            alive _x && {local _x} && {isEngineOn _x} && {canMove _x} && {_x isKindOf "LandVehicle"} && {!unitIsUAV _x}   // v8.357: insansiz kara araci (UGV, displayName "Ground") tank sayilmaz (RPT 30-10: "Ground / Ground (1 m)" USTUSTE)
             && {(_x isKindOf "Tank") || {_x isKindOf "Wheeled_APC_F"} || {_x isKindOf "APC_Tracked_01_base_F"} || {(getNumber (configOf _x >> "armor")) >= 200}}
             && {private _dd = driver _x; !isNull _dd && {!isPlayer _dd} && {local _dd}}
         };
