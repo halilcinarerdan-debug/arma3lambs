@@ -55,7 +55,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                         private _eu = _x;
                         // v8.294 ACE CAPTIVES: oyuncu esiri kelepcelediyse (ace_captives_isHandcuffed) ya da serbest biraktiysa bakim BIRAKILIR (ACE yonetir; setCaptive / doStop / AI kapatma ACE ile catismaz)
                         if (_eu getVariable ["ace_captives_isHandcuffed", false]) then { _eu setVariable [QGVAR(aceEsir), true]; };
-                        if (alive _eu && {isNull objectParent _eu} && {!(_eu getVariable [QGVAR(aceEsir), false])}) then {
+                        if (alive _eu && {isNull objectParent _eu} && {!(_eu getVariable [QGVAR(aceEsir), false])} && {(time - (_eu getVariable [QGVAR(teslimAnimT), -999])) > 6}) then {   // v8.358: teslim animasyonu suruyorsa (fnc_teslimOl) bakim bekler
                             if ((primaryWeapon _eu) isNotEqualTo "" || {(secondaryWeapon _eu) isNotEqualTo ""} || {(handgunWeapon _eu) isNotEqualTo ""}) then { removeAllWeapons _eu; };
                             { _eu disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
                             if (!captive _eu) then { _eu setCaptive true; };
@@ -164,21 +164,8 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
                 if (!isNull _en && {alive _en} && {(_l distance2D _en) <= _teslimEsik}) then {
                     _g setVariable [QGVAR(teslimOldu), true];
                     _teslimSay = _teslimSay + 1;
-                    {
-                        _x setVariable [QGVAR(disableAI), true];
-                        _x setCaptive true;
-                        _x setVariable [QGVAR(teslim), true, true];
-                        private _w = primaryWeapon _x;
-                        if (_w isNotEqualTo "") then { _x action ["DropWeapon", _x, _w]; };
-                        // v8.277: roketatar / tabanca da alinir (2 sn sonra; ayni karede birden fazla DropWeapon guvenilmez) + AI parcalari kapatilir (esir yurumez, silah toplamaz)
-                        [{ params ["_eu"]; if (alive _eu) then { removeAllWeapons _eu; }; }, [_x], 2] call CBA_fnc_waitAndExecute;
-                        private _eu2 = _x;
-                        { _eu2 disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
-                        doStop _x;
-                        // v8.294 ACE CAPTIVES: ACE yuklu ise ACE teslim durumu (ace_captives_isSurrendering) -> ACE etkilesiminde 'Esir al' (kelepce / refakat / araca yukle) cikar; degilse vanilla Surrender
-                        if (!isNil "ace_captives_fnc_setSurrendered") then { [_x, true] call ace_captives_fnc_setSurrendered; } else { _x action ["Surrender", _x]; };
-                        _x doWatch objNull;
-                    } forEach _us;
+                    // v8.358: silah birakma -> silahsiz durus -> ACE / vanilla teslim animasyonu SIRAYLA (fnc_teslimOl; eskiden hepsi ayni karede, animasyon takiliyordu); v8.294 ACE CAPTIVES uyumu orada
+                    { [_x] call FUNC(teslimOl); } forEach _us;
                     _g setBehaviour "SAFE";
                     _g setCombatMode "BLUE";
                     diag_log format ["[TESLIM] %1 | %2 asker teslim oldu | moral:%3 kayip yuzde %4 baski:%5 | dusman:%6 m | taraf:%7", groupId _g, count _us, _m toFixed 2, round (_kayip * 100), _bsk toFixed 2, round (_l distance2D _en), side _g];

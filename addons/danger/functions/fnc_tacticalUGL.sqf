@@ -167,7 +167,9 @@ _unit doWatch _target;
 _unit doTarget _target;
 if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _unit selectWeapon _gl };
 
-[{
+// v8.358 UGL GECIKMESI (kullanici: 'uglde fazla dusunuyorlar'): sabit 1.5 sn bekleme + 2 sn tufege donus yerine namlu (muzzle) HAZIR olunca (currentMuzzle = 40mm, en cok 0.9 sn) atilir, atistan 1.2 sn sonra tufege doner;
+//   ikinci / ucuncu atis araligi 4.5 -> 3.2 sn (40mm tek atimlik yeniden yukleme; sayilar [T])
+private _atisFn = {
     params ["_u", "_t", "_muzzle", "_salvo"];
     if (alive _u && {!isNull _t} && {alive _t} && {(_u ammo _muzzle) > 0} && {[_u, _t, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
         _u fireAtTarget [_t, _muzzle];
@@ -178,8 +180,15 @@ if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then 
             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u2 selectWeapon (primaryWeapon _u2) };
             _u2 doWatch objNull;
         };
-    }, [_u, _salvo], 2] call CBA_fnc_waitAndExecute;
-}, [_unit, _target, _gl, _salvo], 1.5] call CBA_fnc_waitAndExecute;   // _salvo ic bloga ARGUMAN olarak gecmeli (hemtt L-S13: tanimsiz degisken)
+    }, [_u, _salvo], 1.2] call CBA_fnc_waitAndExecute;
+};
+[{
+    params ["_u", "_t", "_muzzle", "_salvo", "_fn"];
+    [{ params ["_u", "_t", "_muzzle"]; !alive _u || {isNull _t} || {!alive _t} || {(currentMuzzle _u) isEqualTo _muzzle} },
+     { _this call (_this select 4) },
+     [_u, _t, _muzzle, _salvo, _fn], 0.9,
+     { _this call (_this select 4) }] call CBA_fnc_waitUntilAndExecute;
+}, [_unit, _target, _gl, _salvo, _atisFn], 0.4] call CBA_fnc_waitAndExecute;
 
 // SALVO: ikinci / ucuncu atis (yeniden yukleme sonrasi), ayni hedefe — ilk atis duzeltme, sonrakiler etki
 for "_i" from 1 to ((_salvo min 3) - 1) do {
@@ -195,7 +204,7 @@ for "_i" from 1 to ((_salvo min 3) - 1) do {
                 [{ params ["_u4"]; if (alive _u4 && {!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false])}) then { _u4 selectWeapon (primaryWeapon _u4); }; }, [_u3], 1.5] call CBA_fnc_waitAndExecute;
             }, [_u, _t, _muzzle], 1] call CBA_fnc_waitAndExecute;
         };
-    }, [_unit, _target, _gl], 4.5 * _i] call CBA_fnc_waitAndExecute;
+    }, [_unit, _target, _gl], 3.2 * _i] call CBA_fnc_waitAndExecute;
 };
 
 true

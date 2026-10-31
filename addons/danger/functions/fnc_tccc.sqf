@@ -209,6 +209,12 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         private _bitis = time + ((25 max (((_m distance2D _c) / 3) + 8)) min 100);
         _m setUnitPos "UP";
         _m doMove (getPosATL _c);
+        // v8.358 (kullanici: 'medic squaddan uzakta birine yardima gidiyorsa arada kaliyor, git gel yapiyor'): uzak (> 20 m) yaklasmada LAMBS tepkileri (Dodge / Hide / Attacking) hekimin yolunu kesip geri cevirmesin
+        //   -> LAMBS birim bayragi (disableAI) yaklasma suresince acik (varista ESKI degere doner); doMove tazelenirken taktikKilit de tazelenir (baska taktikler hekimi ezmesin); geri savrulma [TCCC-GITGEL] ile loglanir
+        private _eskiDAI = _m getVariable [QGVAR(disableAI), false];
+        private _daiAc = (_m distance2D _c) > 20;
+        if (_daiAc) then { _m setVariable [QGVAR(disableAI), true]; };
+        private _gitgel = 0;
         private _tazeT = time + 1.5;
         private _enYakin = _m distance2D _c;
         private _durPos = getPosATL _m; private _durT = time; private _durKademe = 0;
@@ -246,13 +252,30 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 };
             };
             // v8.93: baska taktik (Group Flank / bounding) hekimin doMove'unu eziyor (RPT a331c7eb: hekim flank takiminda 240 m ileri, 13-117 m'de 'yetisemedi') -> her 1.5 sn'de emri tazele
-            if (time > _tazeT && {([_m] call lambs_danger_tcccMedikOk)} && {alive _c}) then { _tazeT = time + 1.5; _m doMove (getPosATL _c); };
+            if (time > _tazeT && {([_m] call lambs_danger_tcccMedikOk)} && {alive _c}) then {
+                _tazeT = time + 1.5;
+                // git-gel tespiti: en yakin mesafeden 10 m+ uzaklasti (bir baska emir hekimi geri cekiyor)
+                if ((_m distance2D _c) > (_enYakin + 10)) then {
+                    _gitgel = _gitgel + 1;
+                    if (_gitgel <= 3 && {(missionNamespace getVariable ["lambs_danger_tcccGitgelN", 0]) < 20}) then {
+                        missionNamespace setVariable ["lambs_danger_tcccGitgelN", (missionNamespace getVariable ["lambs_danger_tcccGitgelN", 0]) + 1];
+                        diag_log format ["[TCCC-GITGEL] %1 | %2 -> %3 | en yakin %4 m iken simdi %5 m (geri savruldu) | komut:%6 | lidere %7 m | taktikKilit:%8 forceMove:%9 | LAMBS bayragi:%10", groupId _g, name _m, name _c, round _enYakin, round (_m distance2D _c), currentCommand _m, round (_m distance2D (leader _g)), (_m getVariable [QGVAR(taktikKilit), 0]) > time, _m getVariable [QGVAR(forceMove), false], _daiAc];
+                    };
+                    _enYakin = _m distance2D _c;
+                };
+                _m setVariable [QGVAR(taktikKilit), time + 3];
+                _m setVariable [QGVAR(forceMove), true];
+                _m doMove (getPosATL _c);
+            };
             // v8.190: yaklasiyorsa (3 m+ ilerleme) sure uzar (toplam 150 sn'ye kadar); RPT 2a205c2b: 8-39 m'de "sure doldu" iptalleri
             if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) < (_enYakin - 3)}) then { _enYakin = _m distance2D _c; _bitis = (_bitis max (time + 12)) min (_t0 + 150); };
             !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 4.5} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
         };
+        if (_daiAc) then { _m setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI]; };
         if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 6}) exitWith {
+            // v8.358: iptal sonrasi ayni yarali icin hemen yeniden atama yapilmaz (geri don -> 3 sn sonra tekrar git dongusu); bekleme 12 sn x iptal sayisi (en cok 48 sn)
+            if (alive _c) then { _c setVariable [QGVAR(tcccIptalT), time]; _c setVariable [QGVAR(tcccIptalN), (_c getVariable [QGVAR(tcccIptalN), 0]) + 1]; };
             // v8.80 IPTAL NEDENI (RPT f8015d87: 5 hekim atandi, 1 yaraliyi bitirdi; digerleri sessizce birakildi)
             diag_log format ["[TCCC] %1 | %2 -> %3 | IPTAL (yaklasma): %4 | mesafe %5 m | hekim baski %6 | %7 sn", groupId _g, name _m, name _c,
                 ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!([_m] call lambs_danger_tcccMedikOk))),
@@ -381,6 +404,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             groupId _g, name _m, name _c, round (time - _t0),
             ([_c] call _kanKaybi) toFixed 3, (_c getVariable ["ace_medical_bloodVolume", 6]) toFixed 2, [_c] call _baygin
         ];
+        _c setVariable [QGVAR(tcccIptalN), 0];
         [_m, _c] call _birak;
     };
 
@@ -412,6 +436,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     isNull _by || {!([_by] call lambs_danger_tcccMedikOk)} || {time > (_by getVariable [QGVAR(tcccBusy), 0])}
                 }
                 && {(time - (_x getVariable [QGVAR(tcccDone), -999])) > 60}
+                && {(time - (_x getVariable [QGVAR(tcccIptalT), -999])) > (12 * (1 max ((_x getVariable [QGVAR(tcccIptalN), 0]) min 4)))}
             };
             if (_yaralilar isEqualTo []) then { continue };
             // v8.102 TRIYAJ ONCELIGI (kullanici: 'medikler icin oncelik belirtilsin'): kalp durmasi > kanama hizi > dusuk kan hacmi > en uzun suredir bekleyen (ilk bayilan atlanmasin)

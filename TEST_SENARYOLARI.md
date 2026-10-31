@@ -544,3 +544,9 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 1. OPFOR FPV (Crocus AT) emri ver, hedefin etrafina 2 duman at: beklenen `[IHA-DUMAN]` 22 sn, hedef birakilir, 2. basarisizlikta `KOR DALIS` (havada 3 dk asili kalmamali).
 2. Hedefi yok et / uzaklastir, dron 60 sn hedefsiz kalsin: `[IHA-DONUS] eve donuyor` -> operatorun yanina iner, MedicStart animasyonu, `yere kondu, pil DEGISTI`; yeni dusman 1200 m icine girince `YENIDEN HAVALANDI`.
 3. Etrafta Mavic gozlem dronu YOKKEN iki FPV: ikisi de dogrudan dalmali (GOZCU rolu cikmamali).
+
+## T-MEDIK-TESLIM-UGL (v8.358)
+1. Grup lideri/hekim dururken 80-150 m uzakta bir askeri bayilt: hekim tek seferde gidip tedavi etmeli, geri-ileri yapmamali; ates altinda iptal olursa 12 sn+ sonra tekrar denemeli. RPT: `[TCCC]` / `[TCCC-GITGEL]`.
+2. Mermisiz askeri 100 m dusmanla birak: teslim animasyonu silah birakip temiz girmeli (`[TESLIM-ANIM]`).
+3. UGL'li asker 100-250 m piyadeye: karar -> atis suresi onceki surumden kisa olmali (`[UGL-KARAR]`, `[UGL-OZET]`).
+4. Zeus Objektif'te 'Recon: ek gozlem = Evet' ve haritada RECON grubu yokken plan kur: sohbette UYARI.

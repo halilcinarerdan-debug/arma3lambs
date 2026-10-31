@@ -44,7 +44,7 @@ diag_log "[TESLIM-BIREY] bireysel teslim izleyicisi baslatildi (v8.308)";
             private _eu = _x;
             if (_eu getVariable [QGVAR(teslim), false] && {!((group _eu) getVariable [QGVAR(teslimOldu), false])}) then {
                 if (_eu getVariable ["ace_captives_isHandcuffed", false]) then { _eu setVariable [QGVAR(aceEsir), true]; };
-                if (alive _eu && {isNull objectParent _eu} && {!(_eu getVariable [QGVAR(aceEsir), false])}) then {
+                if (alive _eu && {isNull objectParent _eu} && {!(_eu getVariable [QGVAR(aceEsir), false])} && {(time - (_eu getVariable [QGVAR(teslimAnimT), -999])) > 6}) then {   // v8.358: teslim animasyonu suruyorsa bakim bekler
                     if ((primaryWeapon _eu) isNotEqualTo "" || {(secondaryWeapon _eu) isNotEqualTo ""} || {(handgunWeapon _eu) isNotEqualTo ""}) then { removeAllWeapons _eu; };
                     { _eu disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
                     if (!captive _eu) then { _eu setCaptive true; };
@@ -97,16 +97,7 @@ diag_log "[TESLIM-BIREY] bireysel teslim izleyicisi baslatildi (v8.308)";
             };
 
             // TESLIM
-            _u setVariable [QGVAR(disableAI), true];
-            _u setCaptive true;
-            _u setVariable [QGVAR(teslim), true, true];
-            private _w = primaryWeapon _u;
-            if (_w isNotEqualTo "") then { _u action ["DropWeapon", _u, _w]; };
-            [{ params ["_eu"]; if (alive _eu) then { removeAllWeapons _eu; }; }, [_u], 2] call CBA_fnc_waitAndExecute;
-            { _u disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
-            doStop _u;
-            if (!isNil "ace_captives_fnc_setSurrendered") then { [_u, true] call ace_captives_fnc_setSurrendered; } else { _u action ["Surrender", _u]; };
-            _u doWatch objNull;
+            [_u] call FUNC(teslimOl);   // v8.358: sirali teslim (silah birak -> silahsiz durus -> teslim animasyonu)
             if (_logN < 40) then {
                 _logN = _logN + 1;
                 diag_log format ["[TESLIM-BIREY] %1 | %2 | karsilik veremez (silah:%3 / ates edilebilir mermi yok) | dusman %4 m | dron %5 | baski %6 | %7", groupId _g, name _u, primaryWeapon _u, if (_enD > 1e8) then {"-"} else {round _enD}, count _drn, (getSuppression _u) toFixed 2, side _g];

@@ -100,6 +100,14 @@ if (_activated && local _logic) then {
                                                     systemChat format ["[ELITE] HATA: secilen %1 (%2) ile plan tarafi (%3) ayni degil. Plan kurulmadi.", _hq select 2, _hq select 1, str _taraf];
                                                     diag_log format ["[PLAN-ISTEK] reddedildi: HQ tarafi %1 != plan tarafi %2", _hq select 1, str _taraf];
                                                 };
+                                                // v8.358 RECON UYARISI (kullanici: 'objektifte recon varsa ama mapte recon yoksa uyari vermeli'): 'Recon: ek gozlem' secili ama bu taraf icin RECON gorevli (>= 2 canli asker) grup yoksa plan sessizce recon'suz kurulurdu
+                                                private _reconSay = {(_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {(side _x) isEqualTo _taraf} && {({alive _x} count (units _x)) >= 2}} count allGroups;
+                                                if (_reconSay isEqualTo 0) then {
+                                                    if (_reconEk isEqualTo 1) then {
+                                                        systemChat format ["[ELITE] UYARI: 'Recon: ek gozlem' secili ama haritada %1 icin RECON gorevli grup yok (Gorev Ata -> RECON, en az 2 asker). Plan recon'suz kurulacak; dogrulama canli gozleme kalir.", str _taraf];
+                                                        diag_log format ["[PLAN-ISTEK] UYARI: reconEk secili, %1 icin RECON grubu yok", str _taraf];
+                                                    };
+                                                };
                                                 private _rpIsaret = "";
                                                 if (_rpIsaretI > 0) then {
                                                     private _mkL = [(allMapMarkers select {(_x find format ["ELITE_KARAKOL_%1_", str _taraf]) isEqualTo 0}), [], {(markerPos _x) distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy;
