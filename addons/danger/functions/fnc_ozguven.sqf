@@ -12,6 +12,7 @@
  *      ceza = baskiEtki x baski x (1 - 0.6 x courage)          courage 0.9 + baski 1.0 + etki 0.5 -> 0.23 | courage 0.3 -> 0.41
  *      aimingShake  = taban x (1 - ceza)      aimingSpeed = taban x (1 - 0.5 x ceza)         (aimingAccuracy'ye DOKUNULMAZ: fnc_ortamSkill ile cakismasin)
  *    Taban: baski yokken okunan deger; baska bir sistem / Zeus beceriyi degistirirse (yazdigimizdan farkli) taban yeniden ogrenilir. Baski bitince taban geri yazilir.
+ * LAMBS SUPPRESSION (v8.369): yuklu ise baskiEtki x lambs_danger_baskiLambsCarpan (0.4) - cift sayim olmasin.
  * Her 1.5 sn'de en fazla 40 yerel, oyuncusuz, yaya AI (donusumlu). Kapatma: CBA 'ELITE siper' > Ozguven + baski (lambs_danger_ozguvenAktif). Log: [OZGUVEN] (ilk 30 degisim) + 90 sn ozeti.
  *
  * Arguments: None
@@ -25,6 +26,8 @@ lambs_danger_ozguvenStarted = true;
 diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi (v8.368)";
 
 [] spawn {
+    // v8.369: LAMBS Suppression YUKLUYSE motor zaten baskiyi nisan hatasina cevirir (CfgBrains: bastirma azalma 25 sn beceri0 -> 4 sn beceri1; nisan oturma 3.5 -> 0.6 sn) -> kendi cezamiz CIFT SAYILMASIN diye carpanla kisilir
+    private _lSup = isClass (configFile >> "CfgPatches" >> "lambs_suppression");
     private _indeks = 0;
     private _logN = 0;
     private _ozetT = time + 90;
@@ -41,6 +44,7 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
         if (!(missionNamespace getVariable ["lambs_danger_ozguvenAktif", true])) then { continue };
         private _ozg = (missionNamespace getVariable ["lambs_danger_ozguven", 0.5]) max 0 min 1;
         private _etki = (missionNamespace getVariable ["lambs_danger_baskiEtki", 0.5]) max 0 min 1;
+        if (_lSup) then { _etki = _etki * ((missionNamespace getVariable ["lambs_danger_baskiLambsCarpan", 0.4]) max 0 min 1); };
         private _adaylar = allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, independent]}};
         private _n = count _adaylar;
         if (_n isEqualTo 0) then { continue };

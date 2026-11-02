@@ -2978,3 +2978,13 @@ YAPILAN: (1) YENI fnc_cqbCevik (dusman 3-32 m): dusmani goren = ATES unsuru (yat
   (5) YENI fnc_isinlanmaKoruma: aracta / yeni inen AI'nin tek tikte > 20 m ya da inisten 8 sn icinde > 60 m sicramasi son guvenli konuma geri alinir + [ISINLANMA] tani satiri (NEDEN KESIN DEGIL: kodumuzda murettebata setPos yok; Arma / ACE ragdoll sanisi).
   (6) CBA: ELITE siper > CQB cevik / menzil, Ozguven + baski (3 ayar), Bastirma yogunlugu, Isinlanma korumasi, STEALTH sese tepki. rpt_ozet v8.368 satiri.
 DOKTRIN CEVABI (sohbette ayrintili): yakin dovuste yerinde yatmak/saklanmak doktrinde yok (once ates ustunlugu, sonra ya hareket ya cikis); ates-hareket cift esli; bastirma 'pinning' icindir, mermi disiplini ayri; stealth devriye sesi duyunca once DUR-DINLE-YONELIM, yakin/yuksek ise teması kabul eder.
+
+v8.369 LAMBS SUPPRESSION + LAMBS TURRETS ENTEGRASYONU (kullanici: 'lambs supression kullaniyorum sistemi onunla entegre hale getir ve lambs turrets de kullaniyorum'). Oyunda DENENMEDI; HEMTT 0 hata.
+KAYNAK (nk3nny/LambsMods, master): IKI MOD DA SADE CONFIG, SQF / degisken / CBA ayari YOK -> "entegrasyon" onlarin degiskenlerini cagirmak degil, config etkilerini bilip ELITE'i ona gore ayarlamak.
+  Suppression 1.12: CfgBrains AIBrainSuppressionComponent worstDecreaseTime 25 sn (beceri 0) / bestDecreaseTime 4 sn (beceri 1) / causeExplosionWeight 1.5; AIBrainAimingErrorComponent 3.5 / 0.6 sn, turningInfluence 1.2.
+  Turrets 1.2: LMG_RCWS / HMG_127 / LMG_coax close..far aiDispersionCoefX 6 Y 7 (kok 5/4), autocannon_Base_F 6/5, aiBurstTerminable 0 (ates serisi KESILEMEZ), CfgBrains maxAngularErrorTurrets 0.15.
+  (Yuklu surumunuz farkli olabilir: acilista [LAMBS-MOD] satiri GERCEK degerleri yazar. Hangi beceri alt degerinin baski suresini belirledigi DOGRULANMADI.)
+YAPILAN: (1) fnc_modUyum: [LAMBS-MOD] logu (yukleme + yukaridaki config degerleri). (2) fnc_ozguven: LAMBS Suppression varsa kendi baski->nisan cezamiz x lambs_danger_baskiLambsCarpan (0.4): motor zaten uyguluyor, cift sayim yok.
+  (3) fnc_cqbCevik: 'civilenmis' baski kapisi 0.6 -> 0.6 + 0.3 x courage (LAMBS Suppression baskiyi beceri 0'da 25 sn tutar; cesur asker yine yer degistirebilsin). (4) YENI fnc_turretEkip (yalniz LAMBS Turrets yukluyse):
+  tank/hava DISI silahli arac + statik silah AI ekibinin aimingAccuracy/Shake/Speed >= 0.85 (CBA), tank ekibi zaten 0.95. [TURRET-EKIP]. Ates serisi kesilemez -> mermi israfi mod tasarimi, dokunulmadi.
+  (5) CBA: LAMBS Turrets telafisi (2 ayar), Suppression carpani.

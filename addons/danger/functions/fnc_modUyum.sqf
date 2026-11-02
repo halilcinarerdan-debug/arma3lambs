@@ -50,6 +50,16 @@ lambs_danger_modUyumStarted = true;
     } forEach _araclar;
     private _lg = 0;
     { if (((toLower (configName _x)) find "laser") >= 0 || {((toLower (configName _x)) find "_lg") >= 0}) then { _lg = _lg + 1; }; } forEach ("true" configClasses (configFile >> "CfgMagazines"));
+    // v8.369 LAMBS Suppression / Turrets: SQF DEGIL saf config modlari (nk3nny/LambsMods); gercek (yuklu surum) degerleri RPT'ye yazilir, ELITE bunlara gore ayarlanir (ozguven baski carpani, turret ekip telafisi)
+    private _lS = isClass (configFile >> "CfgPatches" >> "lambs_suppression");
+    private _lT = isClass (configFile >> "CfgPatches" >> "lambs_turrets");
+    private _bk = configFile >> "CfgBrains" >> "DefaultSoldierBrain" >> "Components";
+    private _n = { params ["_c", "_k"]; if (isNumber (_c >> _k)) then { getNumber (_c >> _k) } else { -1 } };
+    private _rc = configFile >> "CfgWeapons" >> "LMG_RCWS" >> "close";
+    diag_log format ["[LAMBS-MOD] Suppression:%1 | bastirma azalma suresi beceri0 %2 sn -> beceri1 %3 sn (patlama agirligi %4) | nisan oturma beceri0 %5 sn -> beceri1 %6 sn (donus %7) | Turrets:%8 | RCWS close dagilim X %9 Y %10 | ates serisi kesilebilir (aiBurstTerminable) %11 | turret maxAngularError %12",
+        _lS, [_bk >> "AIBrainSuppressionComponent", "worstDecreaseTime"] call _n, [_bk >> "AIBrainSuppressionComponent", "bestDecreaseTime"] call _n, [_bk >> "AIBrainSuppressionComponent", "causeExplosionWeight"] call _n,
+        [_bk >> "AIBrainAimingErrorComponent", "worstDecreaseTime"] call _n, [_bk >> "AIBrainAimingErrorComponent", "bestDecreaseTime"] call _n, [_bk >> "AIBrainAimingErrorComponent", "turningInfluence"] call _n,
+        _lT, [_rc, "aiDispersionCoefX"] call _n, [_rc, "aiDispersionCoefY"] call _n, [_rc, "aiBurstTerminable"] call _n, [_bk >> "AIBrainAimingErrorComponent", "maxAngularErrorTurrets"] call _n];
     diag_log format ["[MOD-UYUM] yuklu: %1 | yok: %2", _yuklu, _yok];
     diag_log format ["[MOD-UYUM] sinif aileleri (artilleryScanner / isUav / Tank / APC, mod basina): %1 | lazer gudumlu magazin sinifi: %2", (keys _say) apply {format ["%1=%2", _x, _say get _x]}, _lg];
     diag_log "[MOD-UYUM] ELITE sinif ADINA degil config ailesine dayanir (artilleryScanner, unitIsUAV, isKindOf Tank / APC, CfgWeapons turu): RHS / CUP / vanilla ayni yolu kullanir; ACE / FPV_AI_Drones / Crocus / ACRE / TFAR yoksa ilgili ozellik atlanir.";

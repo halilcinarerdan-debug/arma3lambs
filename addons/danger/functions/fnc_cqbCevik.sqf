@@ -29,6 +29,8 @@ lambs_danger_cqbCevikStarted = true;
 diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u baslatildi (v8.368): dusman 3-32 m, ates unsuru / yanal hareket unsuru";
 
 [] spawn {
+    // v8.369: LAMBS Suppression baskiyi uzun tutar (beceri 0 icin 25 sn): 'civilenmis' baski kapisi courage ile yukselir (0.6 -> en cok 0.9) - baskili ama cesur asker yine de yer degistirebilsin
+    private _lSup = isClass (configFile >> "CfgPatches" >> "lambs_suppression");
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _sayac = createHashMapFromArray [["civilenmis", 0], ["yanal", 0], ["ates", 0], ["kalk", 0], ["yerYok", 0]];
     private _ozetT = time + 60;
@@ -80,7 +82,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                 private _yerde = time - (_u getVariable [QGVAR(cevikPosT), time]);
                 private _durus = stance _u;
                 private _siperde = (count (lineIntersectsSurfaces [eyePos _u, (eyePos _u) vectorAdd (((eyePos _u) vectorFromTo (eyePos _en)) vectorMultiply 1.8), _u, objNull, true, 1, "FIRE", "NONE"])) > 0;
-                private _civili = (_durus in ["PRONE", "CROUCH"]) && {_yerde >= 3.5} && {(getSuppression _u) < 0.6} && {!_siperde} && {(speed _u) < 1.5};
+                private _civili = (_durus in ["PRONE", "CROUCH"]) && {_yerde >= 3.5} && {(getSuppression _u) < (0.6 + ([0, 0.3 * (_u skill "courage")] select _lSup))} && {!_siperde} && {(speed _u) < 1.5};
                 _bilgi pushBack [_u, _en, _d, _goruyor, _civili];
             } forEach _us;
             if (_bilgi isEqualTo []) then { continue };
