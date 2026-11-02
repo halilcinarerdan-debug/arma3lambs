@@ -89,6 +89,17 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             // v8.296 (kullanici: 'teslim olan rus askeri yerinden kipirdadi, ilk yardima gitti'): teslim olmus / esir hekim tedavi etmez, yurumez; devam eden tedavi de iptal olur
             && {!(_m getVariable [QGVAR(teslim), false])} && {!captive _m}
     };
+    // v8.367 HEKIM DURUSU (kullanici: 'medic yaralinin yaninda bir degisik duruyor; o egilirse medic de egilsin'): NEDEN = yaklasma boyunca setUnitPos "UP" (kosu) tedavi animasyonuna (diz cokmus 'medicOther')
+    //   KADAR korunuyordu: motor 'ayakta dur' ile 'diz coker' emirlerini cakistiriyor, hekim yaralidan 4.5-6 m uzakta, yaraliya donuk olmadan, yari ayakta / yari egik poz aliyordu ([DURUM] 20:13:34:
+    //   hekim CROUCH, yon yaralinin 85 derece yaninda). Simdi tedavi baslamadan duruş yaralinin durusuna ESLENIR: yarali AYAKTA -> hekim AYAKTA (temas yoksa; ates altinda diz), yarali EGIK (CROUCH) ya da yatiyor
+    //   (PRONE / baygin) -> hekim DIZ COKMUS (MIDDLE; 'medicOther' animasyonu zaten diz cokerek oynar, daha alcagi animasyonsuz). Sonuc donus degeri: uygulanan durus (log icin).
+    lambs_danger_tcccDurus = {
+        params ["_m", "_c"];
+        private _guvenli = (((group _m) getVariable [QGVAR(contact), 0]) < time) && {(getSuppression _m) < 0.2};
+        private _ds = ["MIDDLE", "UP"] select ((stance _c) isEqualTo "STAND" && {_guvenli});
+        _m setUnitPos _ds;
+        _ds
+    };
     lambs_danger_tcccVarMi = {
         params ["_m", "_cls"];
         private _l = lambs_danger_tcccMalzeme getOrDefault [toLower _cls, []];
@@ -144,12 +155,14 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         if (_tip isEqualTo 0 || {isNil "CBA_fnc_targetEvent"} || {_tip < 5 && {_esya isEqualTo ""}}) exitWith {
             // eski yol (yedek)
             private _once = count (items _m);
+            [_m, _c] call lambs_danger_tcccDurus;
             _m playActionNow "MedicOther";
             if (isNil "ace_medical_treatment_fnc_treatment") then { _m action ["HealSoldier", _c]; } else { [_m, _c, _part, _cls] call ace_medical_treatment_fnc_treatment; };
             sleep 2.5;
             (count (items _m)) < _once || {_cls isEqualTo "CPR"}
         };
         // v8.101: ace_medical_ai_fnc_playTreatmentAnim cagrisi RPT 30f9155e'de 'Type Bool, expected String' hatasiyla hekim betigini oldurdu (hekim 150 sn yaralinin yaninda dondu); ACE surumu imzasi farkli -> kendi animasyon
+        [_m, _c] call lambs_danger_tcccDurus;
         _m playActionNow "MedicOther";
         private _t = time + _sure;
         waitUntil { sleep 0.3; time > _t || {!([_m] call lambs_danger_tcccMedikOk)} || {!alive _c} || {(_m distance2D _c) > 6} };
@@ -189,6 +202,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             _m setVariable [QGVAR(tcccFM), nil];
             _m setVariable [QGVAR(tcccBusy), 0];
             _m setUnitPos "AUTO";
+            _m doWatch objNull;   // v8.367: tedavi bitince yaralinin cesedine bakip kalmasin
             _m doFollow (leader _m);
         };
         if (!isNull _c) then { _c setVariable [QGVAR(tcccBy), objNull]; _c setVariable [QGVAR(tcccDone), time]; };
@@ -283,6 +297,27 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!([_m] call lambs_danger_tcccMedikOk))),
                 round (_m distance2D _c), (getSuppression _m) toFixed 2, round (time - _t0)];
             [_m, _c] call _birak;
+        };
+
+        // 1b) SON YAKLASMA + DURUS (v8.367): dongu 4.5 m'de biter; tedavi icin yaralinin ~1.1 m YANINA (geldigi taraftan, govdenin ustunden gecmeden) git, yaraliya don, durusu esle
+        if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) > 1.9}) then {
+            private _yp = (getPosATL _c) getPos [1.1, _c getDir _m];
+            _m setVariable [QGVAR(taktikKilit), time + 6];
+            _m setVariable [QGVAR(forceMove), true];
+            _m doMove _yp;
+            private _sT = time + 5;
+            waitUntil { sleep 0.3; !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) <= 1.9} || {time > _sT} };
+        };
+        if (([_m] call lambs_danger_tcccMedikOk) && {alive _c}) then {
+            private _ds = [_m, _c] call lambs_danger_tcccDurus;
+            _m doWatch _c;
+            private _donuk = abs ((((_m getDir _c) - (getDir _m)) + 540) mod 360 - 180);
+            if (_donuk > 25) then { _m setDir (_m getDir _c); };
+            if (isNil "lambs_danger_tcccDurusN") then { lambs_danger_tcccDurusN = 0; };
+            if (lambs_danger_tcccDurusN < 20) then {
+                lambs_danger_tcccDurusN = lambs_danger_tcccDurusN + 1;
+                diag_log format ["[TCCC-DURUS] %1 | %2 -> %3 | yarali durus:%4 (%5) | hekim durus:%6 | yaralidan %7 m | yaraliya donukluk sapmasi %8 derece (>25 ise donduruldu)", groupId _g, name _m, name _c, stance _c, ["bilincli", "baygin"] select ([_c] call _baygin), _ds, (_m distance2D _c) toFixed 1, round _donuk];
+            };
         };
 
         // 2) baygin ise dusmandan uzaga siperli kenara cek

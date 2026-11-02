@@ -456,6 +456,16 @@ if (EGVAR(main,debug_functions)) then {
         private _hop = 0;
         private _acik = 0;
 
+        // v8.367 YIGILMA NEDENI #2 (RPT 20:13:14: 3 kosucu + hekim ayni noktaya 1-2 m aralikla vardi, [DURUM] yigilma 4/8): findCover yalniz KENDI 1. siradaki sonucunu rezerv defterine yaziyordu,
+        //   kosucunun gercekten sectigi (1-6. sira) nokta defterde yoktu -> siradaki kosucu ayni siperi yeniden secti. Simdi: (a) aday puanina kalabalik cezasi (baska kosucunun rezervi 4 m icinde -14,
+        //   o anda 3 m icinde duran dost -10), (b) siper yokken yelpaze kaymasi dort yone denenir, en bos olan secilir, (c) SECILEN nokta defterine yazilir.
+        private _talepB = ((group _kosan) getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 10 && {(_x select 2) isNotEqualTo _kosan}};
+        private _dostB = ((units (group _kosan)) select {alive _x && {_x isNotEqualTo _kosan}}) apply {getPosATL _x};
+        private _kalabalik = {
+            params ["_pk"];
+            (({((_x select 0) distance2D _pk) < 4} count _talepB) * 14) + (({(_x distance2D _pk) < 3} count _dostB) * 10)
+        };
+
         private _enIyi = -999999;
         {
             private _cp = _x select 0;
@@ -477,7 +487,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
                 };
                 private _aciFark = abs ((((_kPos getDir _cp) - ((_kosan getDir _hedef) + _aci)) + 540) % 360 - 180);
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark);
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark) - ([_cp] call _kalabalik);
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
@@ -492,10 +502,23 @@ if (EGVAR(main,debug_functions)) then {
             private _kayma = if (_aci isNotEqualTo 0) then {_aci} else {[-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2)};
             private _kalan = (_mesafe - _hucumMenzil) max 0;
             _hop = (_atMax * 0.6) min _kalan;
-            _movePos = _kPos getPos [_hop, ((_kosan getDir _hedef) + _kayma)];
-            if (surfaceIsWater _movePos) then { _movePos = _kPos; _hop = 0; };
+            private _enAz = 1e9;
+            {
+                private _tp = _kPos getPos [_hop, ((_kosan getDir _hedef) + _x)];
+                if (!surfaceIsWater _tp) then {
+                    private _kk = [_tp] call _kalabalik;
+                    if (_kk < _enAz) then { _enAz = _kk; _movePos = _tp; };
+                };
+                if (_enAz isEqualTo 0) exitWith {};
+            } forEach [_kayma, -_kayma, _kayma * 1.8, -_kayma * 1.8];
+            if (_movePos isEqualTo []) then { _movePos = _kPos; _hop = 0; };
             _stance = "MIDDLE";
         };
+
+        // SECILEN nokta ortak rezerv defterine (findCover / eliteCover / acikSiper ile ayni defter, 8-10 sn)
+        private _clB = ((group _kosan) getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 10};
+        _clB pushBack [_movePos, time, _kosan];
+        (group _kosan) setVariable [QEGVAR(main,coverClaims), _clB];
 
         _kosan setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
         _kosan setVariable [QGVAR(forceMove), true];

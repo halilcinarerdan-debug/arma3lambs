@@ -34,6 +34,34 @@ private _ed = _u distance2D _en;
 private _dolu = missionNamespace getVariable ["lambs_danger_acikSiperDolu", []];
 _dolu = _dolu select {(time - (_x select 1)) < 30};
 
+// v8.367 YIGILMA NEDENI #1 (RPT 20:12:10 ve 20:15:39-46: 3-4 asker AYNI nesneye - Land_PowerLine_01_wire_50m_F / Land_PowerPoleWooden_L_off - gonderildi, [DURUM] yigilma 2-3/8):
+//   (a) rezerv defteri yalniz 1.5 m'de cakisan noktayi eliyordu; ayni nesnenin 3 m yanindaki ikinci nokta 'bos' sayiliyordu -> asgari aralik 4 m (CBA yigilmaAralik),
+//   (b) o anda ORADA DURAN dost (ya da grubun findCover / eliteCover / bounding rezervi, coverClaims) hic hesaba katilmiyordu -> canli dost 3 m + ortak defter,
+//   (c) sert yuzey testi tek isinla yapiliyordu: ince direk / tel de 'siper' sayiliyordu -> govde genisligi icin +-0.25 m yan isinlar da kapali olmali (asagida).
+private _aralik = missionNamespace getVariable ["lambs_danger_yigilmaAralik", 4];
+private _talepler = ((_g getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 8 && {(_x select 2) isNotEqualTo _u}}) apply {_x select 0};
+private _dostPoz = ((_u nearEntities ["CAManBase", _yar + 14]) select {_x isNotEqualTo _u && {alive _x} && {(side group _x) isEqualTo (side group _u)}}) apply {getPosATL _x};
+private _doluMu = {
+    params ["_pt", "_r"];
+    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min 3)}) >= 0}
+};
+// govde genisligi testi: istenen durus yuksekliginde hedef noktanin +-0.25 m yanindan da isin nesneye carpmali
+private _govdeKapali = {
+    params ["_eA", "_gA", "_hh", "_enm", "_unt"];
+    private _hd = _gA vectorAdd [0, 0, _hh];
+    private _vv = _hd vectorDiff _eA;
+    private _pp = vectorNormalized [-(_vv select 1), _vv select 0, 0];
+    ({(lineIntersectsSurfaces [_eA, _hd vectorAdd (_pp vectorMultiply _x), _enm, _unt, true, 1, "FIRE", "NONE"]) isNotEqualTo []} count [-0.25, 0.25]) isEqualTo 2
+};
+// talep: bu askerin secimi grubun ortak rezerv defterine + kendi 'hedef' degiskenine yazilir ([YIGILMA-NEDEN] ayni noktaya giden askerleri buradan adlandirir)
+private _talepYaz = {
+    params ["_pt", "_ad"];
+    private _cl = (_g getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 8};
+    _cl pushBack [_pt, time, _u];
+    _g setVariable [QEGVAR(main,coverClaims), _cl];
+    _u setVariable [QGVAR(acikSiperHedef), [_pt, time, _ad]];
+};
+
 // v8.305 NESNENIN ARKASINA GEC (kullanici: 'siper cok guzel seciyor ama sadece yaklasiyor, siperin yanindaysa guvende saniyor, agac varsa sadece agacin yanindan gecip gidiyor'):
 //   14 m icindeki sert nesneler (agac / kaya / duvar, yukseklik >= 0.7 m): dusmandan nesneye dogru yonde nesnenin 0.55 m ARKASI hesaplanir; dusmanin gozunden o noktaya (1.5 / 1.0 / 0.4 m) hat nesne
 //   tarafindan kesiliyorsa aday (en yuksek korunan durus: UP > MIDDLE > DOWN); skor = mesafe + durus cezasi (0 / 2 / 5); dusmana 10 m'den fazla yaklasmaz.
@@ -49,10 +77,15 @@ private _objAd = "";
     if (_yk >= 0.7 && {(_u distance2D _op) <= _yar}) then {
         private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5;
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
-        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_dolu findIf {((_x select 0) distance2D _pos) < 1.5}) < 0}) then {
+        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
             private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, "FIRE", "NONE"]) isNotEqualTo [] };
-            private _ds = if (_bl select 0) then {["UP", 0]} else { if (_bl select 1) then {["MIDDLE", 2]} else { if (_bl select 2) then {["DOWN", 5]} else {["", 99]} } };
+            // en yuksek durus: ortadaki isin kapali VE govde genisligi (+-0.25 m) kapali (ince direk / tel siper sayilmaz)
+            private _ds = ["", 99];
+            {
+                _x params ["_dn", "_dh", "_dc"];
+                if ((_bl select _forEachIndex) && {[_eASL, _gASL, _dh, _en, _u] call _govdeKapali}) exitWith { _ds = [_dn, _dc]; };
+            } forEach [["UP", 1.5, 0], ["MIDDLE", 1.0, 2], ["DOWN", 0.4, 5]];
             if ((_ds select 0) isNotEqualTo "") then {
                 private _sk = (_u distance2D _pos) + (_ds select 1);
                 if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds select 0; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
@@ -64,6 +97,7 @@ private _objAd = "";
 if (_obj isNotEqualTo []) exitWith {
     _dolu pushBack [_obj, time];
     missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
+    [_obj, _objAd] call _talepYaz;
     _u setVariable [QGVAR(taktikKilit), time + 15];
     _u forceSpeed -1;
     _u setSpeedMode "FULL";
@@ -96,7 +130,7 @@ private _edir = _p getDir _en;
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {(_dolu findIf {((_x select 0) distance2D _bp) < 1.8}) < 0}) then {
+        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
             private _bA = AGLToASL _bp;
             if (!_cqbV2) then {
                 if (_d < _enS && {lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.3], _en, _u]}) then { _enS = _d; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = false; };
@@ -137,6 +171,7 @@ if (_en_iyi isEqualTo []) exitWith {false};
 
 _dolu pushBack [_en_iyi, time];
 missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
+[_en_iyi, _binaAd] call _talepYaz;
 _u setVariable [QGVAR(taktikKilit), time + 15];
 _u forceSpeed -1;
 _u setSpeedMode "FULL";

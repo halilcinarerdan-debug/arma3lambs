@@ -21,8 +21,8 @@ import re, sys, collections, statistics
 TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-BASLA", "BND", "BND-BITTI", "BND-CIKIS", "OVERWATCH",
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
-        "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.366"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+        "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS"]
+BEKLENEN_SURUM = "v8.367"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -825,6 +825,17 @@ def tani(path):
     auo = [l for l in L if '"[ATIS-USTUNLUK-OZET]' in l]
     print("-- ATIS USTUNLUGU (v8.355): %d [ATIS-USTUNLUK] (grup bazli ilk emir) | %d ozet --" % (len(au), len(auo)))
     for v in (au[:6] + auo[-3:]): print("  ", v.split('" ', 1)[-1][:300])
+    yn = [l for l in L if '"[YIGILMA-NEDEN]' in l]
+    yc = [l for l in L if '"[YIGILMA-COZ]' in l]
+    yb = [l for l in L if '"[YIGILMA-BAYGIN]' in l]
+    td = [l for l in L if '"[TCCC-DURUS]' in l]
+    nedenler = collections.Counter()
+    for l in yn:
+        for m in re.finditer(r'=([A-Z][A-Z-]+)(?:\(muaf\))?(?:,|"|$)', l.split("uyeler: ", 1)[-1]): nedenler[m.group(1)] += 1
+    print("-- v8.367 YIGILMA NEDENI: %d [YIGILMA-NEDEN] (kalici kume) | %d [YIGILMA-COZ] (%d tasima) | %d [YIGILMA-BAYGIN] | %d [TCCC-DURUS] --" % (len(yn), len(yc), len([l for l in yc if "bos noktaya" in l]), len(yb), len(td)))
+    if nedenler: print("   uye nedenleri:", ", ".join("%s:%d" % (k, v) for k, v in nedenler.most_common()))
+    print("   OKUMA: ACIK-SIPER-ORTAK / BOUND-KAPSAMA / TEMAS-DURAN / FORMASYON-SIKISIK = cozulebilir yigilma (cozucu tasir); HEKIM / BOMBA / ISTASYON / BOUND-VARIS / EMIR-FM / BINA = muaf (bilincli emir); YIGILMA-BAYGIN = askerler birlikte vuruldu")
+    for v in (yn[:5] + yc[:5] + yb[:3] + td[:4]): print("  ", v.split('" ', 1)[-1][:340])
     ec = [l for l in L if '"[ELIT-COVER]' in l]
     yt = [l for l in L if '"[YETIM-TOPLA]' in l]
     pl = [l for l in L if '"[PEEL]' in l]

@@ -589,3 +589,12 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 2. Tabloyu BOZ (SUPHE'yi 0.1 yap): fnc_bilgiEsik monoton tutar (SUPHE >= SEZILDI), davranis bozulmaz.
 3. `tools/tutarlilik_denetimi.py`: '[BILGI-ESIK]' hatasi YOK; bir dosyaya `(_g knowsAbout _x) >= 0.5` yaz: HATA vermeli.
 4. Karsilastirma: ayni senaryoyu v8.365 ve v8.366 ile oynat; `[DRON-TOPCU]`, `[IHA-BEKLEME]`, `[CQB-KOSE]`, `[PUSU]` sayilarini kiyasla.
+
+## T-YIGILMA (v8.367)
+1. 8 kisilik grubu ac arazide (yakinda direk / tel / agac) 200 m'den temasa sok: `[ACIK-SIPER]` satirlarinda ayni nesne en fazla BIR kez (4 m icinde ikinci nokta secilmemeli); tel / ince direk 'siper' olarak secilmemeli.
+2. BOUNDING (6+ kisi, siper az): kosucular ayni siperde / noktada < 3 m birikmemeli; `[DOKTRIN] yigilma(<2.5m)` <= 2/8.
+3. Bir yigilma olustur (4 asker emri olmadan 1 m'de dur): 6 sn (temas) / 12 sn (sakin) icinde `[YIGILMA-NEDEN] ... uyeler: ad=NEDEN` ve `[YIGILMA-COZ] ... yana bos noktaya` cikmali; hekim / bombaci / istasyondaki asker TASINMAMALI (`(muaf)`).
+4. 4 askeri ayni noktada vurdur (bomba): `[YIGILMA-BAYGIN]` cikmali; `[DOKTRIN]` yigilma sayisi baygin askerleri SAYMAMALI (`baygin:N`).
+5. Hekim: yaralinin yanina gelince ~1.1 m yaninda, yaraliya donuk, yarali yatiyorsa / egikse DIZ COKMUS; yarali ayaktaysa (temas yoksa) ayakta; tedavi bitince serbest (`[TCCC-DURUS]`, `[DURUM]` stance MIDDLE + anim *medicother).
+6. CBA 'ELITE siper > Yigilma nedeni + cozucu' kapaliyken `[YIGILMA-*]` HIC cikmamali.
+7. `tools/hemtt_kontrol.sh` + `tools/tutarlilik_denetimi.py`: 0 HATA 0 UYARI.

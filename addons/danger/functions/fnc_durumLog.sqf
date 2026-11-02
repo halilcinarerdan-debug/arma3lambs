@@ -97,6 +97,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
             private _lProj = 0;
             private _onde = 0;
             private _yigil = 0;
+            private _baygin = 0;
             private _aralikT = 0;
             private _ayakta = 0;
             private _hareket = 0;
@@ -114,7 +115,10 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 { if (_x isNotEqualTo _u) then { _komsu = _komsu min (_u distance2D _x); }; } forEach _us;
                 if (_n > 1) then {
                     _aralikT = _aralikT + (_komsu min 60);
-                    if (_komsu < 2.5) then { _yigil = _yigil + 1; };
+                    // v8.367: YIGILMA yalniz AYAKTA / bilincli askerler arasinda sayilir (RPT 20:13:34: yan yana yatan baygin askerler 'yigilma 5/8' puani dusuruyordu); baygin kumesi ayri sayilir
+                    private _aktif = (lifeState _u) in ["HEALTHY", "INJURED"];
+                    if (!_aktif) then { _baygin = _baygin + 1; };
+                    if (_aktif && {_komsu < 2.5} && {({(_x isNotEqualTo _u) && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _u) < 2.5}} count _us) > 0}) then { _yigil = _yigil + 1; };
                 };
 
                 private _st = stance _u;
@@ -165,9 +169,9 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 - ((_dusukC / _n) * 10);
 
             diag_log format [
-                "[DOKTRIN] %1 | komutan_onde:%2 | yigilma(<2.5m):%3/%4 | ort.aralik:%5 m | temasta_ayakta:%6/%7 | hareket:%8%% | bound_donusum:%9 | dusuk_cephane:%10 | PUAN:%11/100",
+                "[DOKTRIN] %1 | komutan_onde:%2 | yigilma(<2.5m):%3/%4 | ort.aralik:%5 m | temasta_ayakta:%6/%7 | hareket:%8%% | bound_donusum:%9 | dusuk_cephane:%10 | PUAN:%11/100 | baygin:%12",
                 groupId _g, _komutanOnde, _yigil, _n, if (_n > 1) then {round (_aralikT / _n)} else {0},
-                _ayakta, _n, round (_hareketOran * 100), ["IHLAL", "ok"] select _boundOk, _dusukC, round (_puan max 0)
+                _ayakta, _n, round (_hareketOran * 100), ["IHLAL", "ok"] select _boundOk, _dusukC, round (_puan max 0), _baygin
             ];
         } forEach allGroups;
     };
