@@ -2988,3 +2988,7 @@ YAPILAN: (1) fnc_modUyum: [LAMBS-MOD] logu (yukleme + yukaridaki config degerler
   (3) fnc_cqbCevik: 'civilenmis' baski kapisi 0.6 -> 0.6 + 0.3 x courage (LAMBS Suppression baskiyi beceri 0'da 25 sn tutar; cesur asker yine yer degistirebilsin). (4) YENI fnc_turretEkip (yalniz LAMBS Turrets yukluyse):
   tank/hava DISI silahli arac + statik silah AI ekibinin aimingAccuracy/Shake/Speed >= 0.85 (CBA), tank ekibi zaten 0.95. [TURRET-EKIP]. Ates serisi kesilemez -> mermi israfi mod tasarimi, dokunulmadi.
   (5) CBA: LAMBS Turrets telafisi (2 ayar), Suppression carpani.
+
+v8.370 CQB CEVIK DUZELTMESI (RPT 22:43-22:58: "civilenmis tespit 7 | yanal hareket 0"). Oyunda DENENMEDI.
+ - fnc_cqbCevik: ates unsuru olmayan ama >= 6 sn yerinde civilenmis asker TEK BASINA yanal atilim yapar; dusmani goremeyen civilenmis asker MIDDLE'a kalkar + dusmana doner.
+ - Bilinen acik: "Throwing smoke grenade" gorevinde 15 sn duran asker (LAMBS FSM kaynakli, bu repoda etiket yok) henuz ele alinmadi.

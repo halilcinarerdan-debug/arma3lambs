@@ -18,6 +18,8 @@
  *   MUAF: forceMove / taktikKilit / hekim tedavisi / bomba tepkisi / panik / yeniden doldurma / teslim / aracta / oyuncu; grup: retreat / evade / temas kes / peel / bina temizleme / hendek / keskin nisanci / AT taarruzu.
  *   Asker basina 5 sn bekleme, tikte en fazla 6 emir. Kapatma: CBA 'ELITE siper' > CQB cevik (lambs_danger_cqbCevikAktif). Log: [CQB-CEVIK] (ilk 60) + 60 sn ozeti.
  *
+ * v8.370: tek basina >= 6 sn civilenmis asker de yanal atilim yapar; dusmani goremeyen civilenmis asker kalkar + dusmana doner (RPT: tespit 7 / hareket 0).
+ *
  * Arguments: None
  * Return Value: Baslatildi mi <BOOL>
  * Public: No
@@ -106,7 +108,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                 private _rol = [_u] call _rolFn;
                 private _hareketMi = (!_goruyor || {_civili}) && {_hareketSay < (_hareketEdebilir max 1)} && {(insideBuilding _u) < 0.5} && {_rol isNotEqualTo "MG"};
                 // ates unsuru yoksa civilenmis asker kendisi ates unsuru olur (tek basina kosmaz)
-                if (_hareketMi && {(_atesU findIf {(_x select 0) isNotEqualTo _u}) < 0}) then { _hareketMi = false; };
+                if (_hareketMi && {(_atesU findIf {(_x select 0) isNotEqualTo _u}) < 0} && {!(_civili && {(time - (_u getVariable [QGVAR(cevikPosT), time])) >= 6})}) then { _hareketMi = false; };
 
                 if (_hareketMi) then {
                     // ---- HAREKET unsuru: yanal bos nokta ----
@@ -176,7 +178,10 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                     };
                 } else {
                     // ---- ATES unsuru: kalk (yatiksa) + hedefe ates ----
-                    if (!_goruyor) then { continue };
+                    if (!_goruyor) then {
+                        if (_civili) then { _u setUnitPosWeak "MIDDLE"; _u doWatch _en; _sayac set ["kalk", (_sayac get "kalk") + 1]; _u setVariable [QGVAR(cevikT), time - 2]; };
+                        continue
+                    };
                     private _st = stance _u;
                     if (_st isEqualTo "PRONE" && {_d < 22} && {(getSuppression _u) < 0.5}) then {
                         _u setUnitPosWeak "MIDDLE";
