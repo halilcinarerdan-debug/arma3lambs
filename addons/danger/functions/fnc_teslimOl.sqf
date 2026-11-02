@@ -5,6 +5,7 @@
  * Eskiden fnc_moral / fnc_teslimBirey ayni karede DropWeapon aksiyonu + disableAI + doStop + ACE setSurrendered cagiriyor, 2 sn sonra removeAllWeapons yapiyordu:
  * silah birakma (silah degistirme) animasyonu yarida kesiliyor, silah animasyonda kalirken silahlar siliniyor (tufekli durus + silahsiz = takili animasyon).
  *
+ * v8.359: birakilan silah = ELDEKI silah (currentWeapon); once ana silaha gecme animasyonu oynamaz.
  * SIRA: (1) AI parcalari kapatilir, captive, doStop (aninda; ates / hareket durur)
  *       (2) birim basina 0-0.6 sn rastgele gecikme (grup ayni karede donmasin)
  *       (3) ana silah DropWeapon ile birakilir; silah elden cikana kadar (en cok 2.5 sn) beklenir; kalan silahlar (roketatar / tabanca) silinir
@@ -36,11 +37,14 @@ _u doWatch objNull;
     sleep (random 0.6);
     if (!alive _u) exitWith {};
     private _t0 = time;
-    private _w = primaryWeapon _u;
+    // v8.359 (kullanici: 'teslim olacakken silah degistiriyor'): ELDEKI silah birakilir (eskiden hep ana silah; mermi kritikte tabanca secili iken ana silahi birakmak icin once silah degistirme animasyonu oynuyordu)
+    private _cw = currentWeapon _u;
+    private _w = if (_cw isNotEqualTo "" && {_cw in [primaryWeapon _u, handgunWeapon _u, secondaryWeapon _u]}) then {_cw} else {primaryWeapon _u};
+    private _wDrop = _w;
     if (_w isNotEqualTo "") then {
         _u action ["DropWeapon", _u, _w];
         private _tB = time + 2.5;
-        waitUntil { sleep 0.1; !alive _u || {(primaryWeapon _u) isEqualTo ""} || {time > _tB} };
+        waitUntil { sleep 0.1; !alive _u || {!(_wDrop in (weapons _u))} || {time > _tB} };
     };
     if (!alive _u) exitWith {};
     removeAllWeapons _u;
@@ -57,7 +61,7 @@ _u doWatch objNull;
     private _n = missionNamespace getVariable ["lambs_danger_teslimAnimN", 0];
     if (_n < 30) then {
         missionNamespace setVariable ["lambs_danger_teslimAnimN", _n + 1];
-        diag_log format ["[TESLIM-ANIM] %1 | %2 | silah birakma %3 sn | onceki anim %4 -> %5 | teslim animasyonu zorlandi: %6", groupId (group _u), name _u, (time - _t0) toFixed 1, _as0, _as1, _zorla];
+        diag_log format ["[TESLIM-ANIM] %1 | %2 | silah birakma %3 sn (%6) | onceki anim %4 -> %5 | teslim animasyonu zorlandi: %7", groupId (group _u), name _u, (time - _t0) toFixed 1, _as0, _as1, _wDrop, _zorla];
     };
 };
 

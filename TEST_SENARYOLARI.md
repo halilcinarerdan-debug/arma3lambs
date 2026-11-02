@@ -550,3 +550,9 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 2. Mermisiz askeri 100 m dusmanla birak: teslim animasyonu silah birakip temiz girmeli (`[TESLIM-ANIM]`).
 3. UGL'li asker 100-250 m piyadeye: karar -> atis suresi onceki surumden kisa olmali (`[UGL-KARAR]`, `[UGL-OZET]`).
 4. Zeus Objektif'te 'Recon: ek gozlem = Evet' ve haritada RECON grubu yokken plan kur: sohbette UYARI.
+
+## T-TANK-MUHIMMAT (v8.359)
+1. Bir tank + 300-800 m'de dusman piyade ve bir dusman tank. Once piyadeye atarken HE, tank gorununce / hedef olunca AP'ye geciyor mu (`[TANK-MUHIMMAT]`).
+2. IFV/APC hedef: HEAT. Kamyon/cip: HE. Hedef yokken 1500 m'de dusman tank: on yukleme AP.
+3. AP/HE stogu tukenince siradaki tur seciliyor mu; 8 sn'den sik degistirmiyor mu.
+4. `[TANK-MUHIMMAT] ... DESTEKSIZ` cikarsa arac tipini ve yuklu mermiyi at.

@@ -22,7 +22,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.358"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.359"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -825,6 +825,10 @@ def tani(path):
     auo = [l for l in L if '"[ATIS-USTUNLUK-OZET]' in l]
     print("-- ATIS USTUNLUGU (v8.355): %d [ATIS-USTUNLUK] (grup bazli ilk emir) | %d ozet --" % (len(au), len(auo)))
     for v in (au[:6] + auo[-3:]): print("  ", v.split('" ', 1)[-1][:300])
+    tm = [l for l in L if '"[TANK-MUHIMMAT]' in l]
+    tmo = [l for l in L if '"[TANK-MUHIMMAT-OZET]' in l]
+    print("-- v8.359 TANK MUHIMMAT: %d [TANK-MUHIMMAT] (ana top / degisim / DESTEKSIZ) | %d ozet --" % (len(tm), len(tmo)))
+    for v in (tm[:8] + tmo[-3:]): print("  ", v.split('" ', 1)[-1][:320])
     ta = [l for l in L if '"[TESLIM-ANIM]' in l]
     tg = [l for l in L if '"[TCCC-GITGEL]' in l]
     print("-- v8.358: %d [TESLIM-ANIM] (zorlandi: %d) | %d [TCCC-GITGEL] (hekim geri savruldu) --" % (len(ta), len([l for l in ta if "zorlandi: true" in l]), len(tg)))

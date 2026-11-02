@@ -88,6 +88,7 @@ diag_log "[TESLIM-BIREY] bireysel teslim izleyicisi baslatildi (v8.308)";
 
             private _say = (_u getVariable [QGVAR(birTeslimSay), 0]) + 1;
             _u setVariable [QGVAR(birTeslimSay), _say];
+            _u setVariable [QGVAR(teslimAdayT), time];   // v8.359: teslim adayi tabancaya / baska silaha gecmez (mermiDisiplin KRITIK secimi 20 sn durur)
             if (_say < 2) then { continue };
 
             // lider ise once halef

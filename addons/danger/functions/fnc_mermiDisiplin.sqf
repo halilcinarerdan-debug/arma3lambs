@@ -76,7 +76,7 @@ private _calis = {
                     _u setVariable [QGVAR(mermiKritik), _yeniK];
                     if (_yeniK) then {
                         private _h = handgunWeapon _u;
-                        if (_h isNotEqualTo "" && {((magazines _u) findIf {(toLower _x) in ((compatibleMagazines _h) apply {toLower _x})}) >= 0}) then {
+                        if (_h isNotEqualTo "" && {!(_u getVariable [QGVAR(teslim), false])} && {(time - (_u getVariable [QGVAR(teslimAdayT), -999])) > 20} && {((magazines _u) findIf {(toLower _x) in ((compatibleMagazines _h) apply {toLower _x})}) >= 0}) then {
                             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon _h };
                             _say set ["tabanca", (_say getOrDefault ["tabanca", 0]) + 1];
                         };
