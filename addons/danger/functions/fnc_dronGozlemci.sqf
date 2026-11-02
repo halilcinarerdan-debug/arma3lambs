@@ -25,14 +25,14 @@ lambs_danger_dronGozlemciStarted = true;
     private _kI = format ["lambs_danger_dronGozIHA_%1", _taraf];
     if ((time - (missionNamespace getVariable [_kT, -999])) < 240) exitWith {};
     private _aktif = missionNamespace getVariable [_kI, objNull];
-    if (!isNull _aktif && {alive _aktif} && {(diag_tickTime - (_aktif getVariable [QGVAR(ihaTok), -999])) < 650}) exitWith {};   // v8.338: gorevi biten (inmis) dron aktif sayilmaz (pil omru 600 sn)
+    if (!isNull _aktif && {alive _aktif} && {(diag_tickTime - (_aktif getVariable [QGVAR(ihaTok), -999])) < ((_aktif getVariable [QGVAR(ihaSureS), 600]) + 50)}) exitWith {};   // v8.338: gorevi biten (inmis) dron aktif sayilmaz (pil omru 600 sn); v8.363: gorev suresi dronun kendi ihaSureS degeri (ayarli gozlem suresi)
     private _yar = [450, 300] select _kesisim;
     if (_yarOv > 0) then { _yar = _yarOv; };
     private _tarafNo = [east, west, independent, civilian] find _taraf;
 
     // 1) hazir GOZLEM IHA'si
     private _hazir = vehicles select {
-        unitIsUAV _x && {alive _x} && {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > 650}} && {([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM"} && {(_x weaponsTurret [0]) isEqualTo []}
+        unitIsUAV _x && {alive _x} && {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > ((_x getVariable [QGVAR(ihaSureS), 600]) + 50)}} && {([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM"} && {(_x weaponsTurret [0]) isEqualTo []}
         && {
             private _mur = (crew _x) select {alive _x};
             if (_mur isEqualTo []) then { (getNumber (configOf _x >> "side")) isEqualTo _tarafNo } else { (side (group (_mur select 0))) isEqualTo _taraf }

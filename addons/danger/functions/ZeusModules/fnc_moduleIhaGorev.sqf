@@ -12,24 +12,27 @@ if (_activated && local _logic) then {
     private _bagli = attachedTo _logic;
     deleteVehicle _logic;
     // v8.249: yakinda dron yoksa modul KENDISI yaratir (kullanici: 'Crocus dronlari sirtcantasi (Bag) olarak yere koymak zaman kaybi'): mod, Bag nesnesinin yani sira dogrudan arac sinifi da tanimliyor (B_/O_/I_Crocus_AT / AP)
-    private _yaratSiniflar = ["B_Crocus_AT", "B_Crocus_AP", "O_Crocus_AT", "O_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP"] select {isClass (configFile >> "CfgVehicles" >> _x)};
-    private _yaratEtiket = ["Yok (yakindaki / ustundeki dronu kullan)"] + (_yaratSiniflar apply { format ["%1 (%2)", getText (configFile >> "CfgVehicles" >> _x >> "displayName"), _x] });
+    // v8.363: liste artik yuklu TUM ucucu IHA siniflari (vanilla Darter / Falcon / Greyhawk / Ababil / Sentinel / Pelican, RHS / CUP, Crocus ...): fnc_ihaSiniflar (config ailesinden, sinif adina bakmadan)
+    private _ihaListe = call FUNC(ihaSiniflar);
+    private _yaratSiniflar = _ihaListe select 0;
+    private _yaratEtiket = ["Yok (yakindaki / ustundeki dronu kullan)"] + (_ihaListe select 1);
     [
         "ELITE IHA Gorevi",
         [
-            ["Gorev", "LIST", "Sorti: IHA kendi basina hedef secer ve saldirir (FPV: kamikaze; BOMBA: 3 bomba). Gozlem: modul konumu etrafinda devriye, gordugu dusman ortak resme verilir. Kaldir: gorevi iptal eder.", ["Sorti (otomatik hedef)", "Gozlem devriyesi", "Gorevi KALDIR"], 0],
+            ["Gorev", "LIST", "Sorti: IHA kendi basina hedef secer ve saldirir (FPV: kamikaze; BOMBA: 3 bomba). Gozlem: modul konumu etrafinda devriye (quad / helikopter tipi: rastgele noktalar 120 m; UCAK tipi: daire cizerek 400 m), gordugu dusman ortak resme verilir; 'Dron yarat' ile birlikte HEMEN yaratilir (tetik mesafesi yok sayilir). Kaldir: gorevi iptal eder.", ["Sorti (otomatik hedef)", "Gozlem devriyesi", "Gorevi KALDIR"], 0],
             ["Tur", "LIST", "Otomatik: sinif adindan tahmin (crocus / fpv -> FPV, mavic -> BOMBA, digerleri GOZLEM). Yanlissa elle sec.", ["Otomatik", "FPV-AT (zirh avcisi)", "FPV-AP (personel / termobarik)", "BOMBA (Mavic: el bombasi)", "GOZLEM"], 0],
             ["Taraf (muretttebat yoksa)", "LIST", "IHA'nin AI muretttebati yoksa bu tarafta yaratilir. OTOMATIK (varsayilan, v8.339): arac sinifinin tarafi (B_ = BLUFOR, O_ = OPFOR, I_ = INDEP), cantali asker varsa onun tarafi, yoksa yakindaki en yakin askerin tarafi. Elle secersen o gecer (sinifla celisirse uyari verilir).", ["Otomatik (sinif / asker)", "BLUFOR", "OPFOR", "INDEP"], 0],
             ["Menzil (m)", "SLIDER", "Kalkis noktasindan hedefe en fazla bu kadar (FPV Crocus: 4 km, 10 dk pil).", [500, 4000], [100, 500], 3000, 0],
             ["Gozlem yaricapi (m)", "SLIDER", "Gozlem devriyesinde modul konumu etrafinda.", [100, 800], [50, 100], 300, 0],
             ["Firlatma tetik mesafesi (m)", "SLIDER", "'Dron yarat' seciliyse: dron HEMEN degil, bu noktanin bu kadar yakininda IHA tarafinin BILDIGI dusman gorulunce yaratilir (hile yok). 0 = hemen yarat. Emir 30 dk gecerli; iptal: Gorevi KALDIR (modulu bu noktaya birak).", [0, 3000], [100, 200], 1200, 0],
             ["Operator bagi", "LIST", "Operator = modul konumuna en yakin (40 m) secilen taraftan canli dost asker. Bagsiz: eski davranis. Operator olunce: dron kontrolu kaybeder ve duser (firlatma emri varsa iptal olur) / dron o an bir hedefe kilitliyse (dalis) vurmaya devam eder, yeni hedef secmez, hedefsizse duser.", ["Bagsiz (operator yok)", "Operator olunce dron DUSER", "Operator olunce hedefe kilitliyse DALAR"], 1],
-            ["Dron yarat (40 m icinde dron yoksa)", "LIST", "Sirtcantasini yere koyup kurmaya gerek yok: secilen arac sinifi modul konumunda dogrudan yaratilir ve gorev verilir. Yakinda zaten dron varsa o kullanilir (yaratilmaz).", _yaratEtiket, 0]
+            ["Dron yarat (40 m icinde dron yoksa)", "LIST", "Sirtcantasini yere koyup kurmaya gerek yok: secilen arac sinifi modul konumunda dogrudan yaratilir ve gorev verilir. Yakinda zaten dron varsa o kullanilir (yaratilmaz). Liste yuklu tum ucucu IHA siniflaridir (vanilla + mod); ucak tipleri havada baslar (400 m).", _yaratEtiket, 0],
+            ["Gozlem suresi (dk, 0 = ayardaki)", "SLIDER", "Yalniz Gozlem devriyesi: IHA kac dk devriye atsin. 0 = CBA ayari 'Gozlem IHA suresi' (varsayilan 20 dk). Ucak tipi icin sure dolunca devriye surer (yakit bitene kadar); quad / helikopter tipi sure dolunca konar.", [0, 120], [5, 10], 0, 0]
         ],
         {
             params ["_data", "_args"];
             _args params ["_poz", "_bagli", "_yaratSiniflar"];
-            _data params ["_gorev", "_tur", "_tarafI", "_men", "_yar", "_tetikM", "_opI", "_yaratI"];
+            _data params ["_gorev", "_tur", "_tarafI", "_men", "_yar", "_tetikM", "_opI", "_yaratI", ["_sureDk", 0]];
             private _tarafSecim = round _tarafI;   // v8.339: 0 = otomatik, 1 BLUFOR, 2 OPFOR, 3 INDEP
             private _tarafOto = _tarafSecim <= 0;
             _tarafI = (_tarafSecim - 1) max 0 min 2;
@@ -115,7 +118,7 @@ if (_activated && local _logic) then {
             };
             private _mod = ["SORTI", "GOZLEM", "KALDIR"] select (_gorev max 0 min 2);
             private _turKod = ["", "FPV-AT", "FPV-AP", "BOMBA", "GOZLEM"] select (_tur max 0 min 4);
-            ["lambs_danger_ihaGorev", [["", netId _u] select (!isNull _u), _mod, _turKod, _tarafI, _poz, round _yar, round _men, _yaratSn, round _tetikM, ["", netId _op] select (!isNull _op), _opMod, ["", netId _cantaObj] select (!isNull _cantaObj)]] call CBA_fnc_serverEvent;
+            ["lambs_danger_ihaGorev", [["", netId _u] select (!isNull _u), _mod, _turKod, _tarafI, _poz, round _yar, round _men, _yaratSn, round _tetikM, ["", netId _op] select (!isNull _op), _opMod, ["", netId _cantaObj] select (!isNull _cantaObj), round (_sureDk * 60)]] call CBA_fnc_serverEvent;
             systemChat format ["[ELITE] IHA gorevi gonderildi: %1 -> %2 (%3)", [_yaratSn + ([" - dusman " + str (round _tetikM) + " m'ye girince firlatilacak", " - hemen"] select (_tetikM <= 0)), getText (configOf _u >> "displayName")] select (!isNull _u), _mod, [_turKod, "otomatik tur"] select (_turKod isEqualTo "")];
         }, {}, {}, [_poz, _bagli, _yaratSiniflar]
     ] call EFUNC(main,showDialog);

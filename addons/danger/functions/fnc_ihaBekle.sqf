@@ -18,6 +18,7 @@
  * 7: Operator <OBJECT> (v8.268; olu / silinmis operator ile firlatma yapilmaz, bekleyen emir iptal olur)
  * 8: Operator olunce: 0 bagsiz / 1 duser / 2 son hedefe dalar <NUMBER> (fnc_ihaSorti'ye iletilir)
  * 9: Canta kaynagi <OBJECT> (v8.272; Crocus cantasi tasiyan asker ya da yerdeki canta: firlatma noktasi askeri takip eder, firlatmada canta tuketilir, asker olurse emir iptal olur)
+ * 10: Gozlem suresi (sn, 0 = CBA ayari) <NUMBER> (v8.363; yalniz GOZLEM turu)
  *
  * Return Value: Emir kaydedildi mi <BOOL>
  * Public: No
@@ -26,7 +27,7 @@
 if (!isServer) exitWith {false};
 if (!canSuspend) exitWith { _this spawn FUNC(ihaBekle); true };
 
-params [["_sn", "", [""]], ["_taraf", west, [west]], ["_poz", [0, 0, 0], [[]]], ["_turE", "", [""]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_tetik", 1200, [0]], ["_op", objNull, [objNull]], ["_opMod", 0, [0]], ["_canta", objNull, [objNull]]];
+params [["_sn", "", [""]], ["_taraf", west, [west]], ["_poz", [0, 0, 0], [[]]], ["_turE", "", [""]], ["_yar", 300, [0]], ["_men", 3000, [0]], ["_tetik", 1200, [0]], ["_op", objNull, [objNull]], ["_opMod", 0, [0]], ["_canta", objNull, [objNull]], ["_sure", 0, [0]]];
 private _cantaAsker = !isNull _canta && {_canta isKindOf "CAManBase"};
 private _opVar = _opMod > 0 && {!isNull _op};
 private _opOldu = { _opVar && {isNull _op || {!alive _op}} };
@@ -94,8 +95,12 @@ if (!_hemen && {isNull _hedef} && {_serbest isEqualTo []}) exitWith {
     false
 };
 
-private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, 40], [], 0, "FLY"];
-_iha setPosATL [_poz select 0, _poz select 1, 40];
+// v8.363: UCAK tipi IHA (Greyhawk / Ababil / Falcon / Sentinel) 40 m'de ucamaz (durma hizi, yere carpar): ucus irtifasinda (CBA 'Ucak IHA irtifasi', varsayilan 400 m) ve ucus hiziyla baslar
+private _ucak = _sn isKindOf "Plane";
+private _irt = [40, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 400]] select _ucak;
+private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, _irt], [], 0, "FLY"];
+_iha setPosATL [_poz select 0, _poz select 1, _irt];
+if (_ucak) then { [_iha] call FUNC(ihaUcakHiz); };
 diag_log format ["[IHA-BEKLEME] %1 (%2) | FIRLATMA: %3 | tetik hedefi %4 (%5 m) | %6 sn bekledi%7", _sn, _tur, mapGridPosition _iha, if (isNull _hedef) then {"-"} else {typeOf _hedef}, if (isNull _hedef) then {0} else {round (_hedef distance2D _poz)}, round (time - _t0), ["", format [" | GOZLEMCI TALEBIYLE serbest: istasyon %1", mapGridPosition (_serbest select 0)]] select (_serbest isNotEqualTo [])];
 // v8.272: canta tuketilir
 if (!isNull _canta) then {
@@ -114,8 +119,8 @@ if (!isNull _canta) then {
 if (_serbest isNotEqualTo []) exitWith {
     // v8.339: dron gozlemcisi talebi: dron istasyonda GOZLEM devriyesi yapar (fnc_ihaGozlem ortak resme verir, fnc_dronTopcu gozlemci olarak kullanir)
     missionNamespace setVariable [format ["lambs_danger_dronGozIHA_%1", _taraf], _iha];
-    [_iha, "GOZLEM", "GOZLEM", _taraf, _serbest select 0, _serbest select 1, _men, _op, _opMod] call FUNC(ihaSorti);
+    [_iha, "GOZLEM", "GOZLEM", _taraf, _serbest select 0, _serbest select 1, _men, _op, _opMod, _sure] call FUNC(ihaSorti);
     true
 };
-[_iha, "SORTI", _turE, _taraf, _poz, _yar, _men, _op, _opMod] call FUNC(ihaSorti);
+[_iha, ["SORTI", "GOZLEM"] select (_turE isEqualTo "GOZLEM"), _turE, _taraf, _poz, _yar, _men, _op, _opMod, _sure] call FUNC(ihaSorti);
 true

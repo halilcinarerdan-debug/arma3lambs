@@ -40,6 +40,7 @@ if (!_activated || {!isServer}) exitWith {};
     private _men = round (["SAYI", [_logic, "lambs_danger_edIhaMenzil", 3000]] call FUNC(edenOrtak));
     private _yar = round (["SAYI", [_logic, "lambs_danger_edIhaYar", 300]] call FUNC(edenOrtak));
     private _opMod = ((round (["SAYI", [_logic, "lambs_danger_edIhaOp", 0]] call FUNC(edenOrtak))) max 0) min 2;
+    private _sureDk = (round (["SAYI", [_logic, "lambs_danger_edIhaSure", 0]] call FUNC(edenOrtak))) max 0;   // v8.363: gozlem suresi (dk); 0 = CBA ayari
     if (isNull _op) then { _opMod = 0; };
     private _tarafI = _tarafA - 1;
     if (_tarafA <= 0) then {
@@ -54,6 +55,6 @@ if (!_activated || {!isServer}) exitWith {};
     _tarafI = _tarafI max 0 min 2;
     private _mod = ["SORTI", "GOZLEM", "KALDIR"] select _gorev;
     private _turKod = ["", "FPV-AT", "FPV-AP", "BOMBA", "GOZLEM"] select _tur;
-    ["lambs_danger_ihaGorev", [netId _uav, _mod, _turKod, _tarafI, getPosATL _logic, _yar, _men, "", 0, ["", netId _op] select (!isNull _op), _opMod, ""]] call CBA_fnc_serverEvent;
-    diag_log format ["[EDEN] IHA (3DEN) | %1 | %2 | tur %3 | taraf %4 | operator %5 | menzil %6 m", typeOf _uav, _mod, [_turKod, "otomatik"] select (_turKod isEqualTo ""), ["BLUFOR", "OPFOR", "INDEP"] select _tarafI, ["yok", name _op] select (!isNull _op), _men];
+    ["lambs_danger_ihaGorev", [netId _uav, _mod, _turKod, _tarafI, getPosATL _logic, _yar, _men, "", 0, ["", netId _op] select (!isNull _op), _opMod, "", _sureDk * 60]] call CBA_fnc_serverEvent;
+    diag_log format ["[EDEN] IHA (3DEN) | %1 | %2 | tur %3 | taraf %4 | operator %5 | menzil %6 m | sure %7 dk", typeOf _uav, _mod, [_turKod, "otomatik"] select (_turKod isEqualTo ""), ["BLUFOR", "OPFOR", "INDEP"] select _tarafI, ["yok", name _op] select (!isNull _op), _men, _sureDk];
 };

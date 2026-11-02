@@ -27,7 +27,9 @@ lambs_danger_ihaEnvanterStarted = true;
     private _n = 0;
     {
         private _tip = [_x] call FUNC(ihaTip);
-        diag_log format ["[IHA-ENVANTER] %1 | ""%2"" | taraf %3 | silah %4 | model %5 | tip %6", _x, getText (configFile >> "CfgVehicles" >> _x >> "displayName"), getNumber (configFile >> "CfgVehicles" >> _x >> "side"), count (getArray (configFile >> "CfgVehicles" >> _x >> "weapons")), getText (configFile >> "CfgVehicles" >> _x >> "model"), _tip];
+        // v8.363: kategori = devriye bicimi (UCAK: daire, HELI: quad / helikopter noktalari, KARA: UGV / sabit torek)
+        private _kat = ["KARA", ["HELI", "UCAK"] select (_x isKindOf "Plane")] select (_x isKindOf "Air");
+        diag_log format ["[IHA-ENVANTER] %1 | ""%2"" | taraf %3 | silah %4 | model %5 | tip %6 | kategori %7", _x, getText (configFile >> "CfgVehicles" >> _x >> "displayName"), getNumber (configFile >> "CfgVehicles" >> _x >> "side"), count (getArray (configFile >> "CfgVehicles" >> _x >> "weapons")), getText (configFile >> "CfgVehicles" >> _x >> "model"), _tip, _kat];
         _n = _n + 1;
     } forEach _liste;
     // 2. gecis: isUav isaretsiz modlar (Crocus / Mavic helikopter simulasyonlu olabilir): ad / sinif anahtar kelimeyle ara
@@ -44,6 +46,7 @@ lambs_danger_ihaEnvanterStarted = true;
         };
     };
     diag_log format ["[IHA-ENVANTER] anahtar kelime taramasi: %1 ek sinif (isUav isaretsiz)", _m];
+    call FUNC(ihaSiniflar);   // v8.363: Zeus 'Dron yarat' listesi onbellegi + log satiri
     diag_log format ["[IHA-ENVANTER] toplam %1 IHA sinifi; FPV / bomba / gozlem turu otomatik tahmin edildi (yanlissa Zeus 'ELITE IHA Gorevi' modulunde turu elle sec)", _n];
 };
 true

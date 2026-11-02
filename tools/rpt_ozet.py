@@ -22,7 +22,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY"]
-BEKLENEN_SURUM = "v8.362"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.363"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -825,6 +825,11 @@ def tani(path):
     auo = [l for l in L if '"[ATIS-USTUNLUK-OZET]' in l]
     print("-- ATIS USTUNLUGU (v8.355): %d [ATIS-USTUNLUK] (grup bazli ilk emir) | %d ozet --" % (len(au), len(auo)))
     for v in (au[:6] + auo[-3:]): print("  ", v.split('" ', 1)[-1][:300])
+    iu = [l for l in L if '"[IHA-UCAK]' in l]
+    iek = [l for l in L if '"[IHA-ENVANTER]' in l and "kategori" in l]
+    isg = [l for l in L if '"[IHA-SORTI]' in l and ("UCAK gozlem" in l or "gozlem devriyesi bitti" in l or "kategori" in l)]
+    print("-- v8.363 VANILLA / MOD IHA: %d [IHA-UCAK] (ucak havadan baslatma / hiz) | %d [IHA-ENVANTER] kategorili sinif (UCAK %d / HELI %d / KARA %d) | %d gozlem satiri --" % (len(iu), len(iek), len([l for l in iek if "kategori UCAK" in l]), len([l for l in iek if "kategori HELI" in l]), len([l for l in iek if "kategori KARA" in l]), len(isg)))
+    for v in (iu[:4] + isg[:6]): print("  ", v.split('" ', 1)[-1][:300])
     ed = [l for l in L if '"[EDEN]' in l]
     print("-- v8.362 3DEN: %d [EDEN] satiri (modul calistirma / red nedeni) --" % len(ed))
     for v in ed[:12]: print("  ", v.split('" ', 1)[-1][:300])

@@ -122,7 +122,7 @@ lambs_danger_planKapiStarted = true;
 
 // v8.233: Zeus 'ELITE IHA Gorevi' -> fnc_ihaSorti (sunucu)
 ["lambs_danger_ihaGorev", {
-    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""], ["_tetik", 0], ["_opNid", ""], ["_opMod", 0], ["_cantaNid", ""]];
+    params ["_nid", "_mod", "_tur", "_tarafI", "_poz", "_yar", "_men", ["_yaratSn", ""], ["_tetik", 0], ["_opNid", ""], ["_opMod", 0], ["_cantaNid", ""], ["_sure", 0]];
     private _op = objectFromNetId _opNid;
     private _canta = objectFromNetId _cantaNid;
     if (!isServer) exitWith {};
@@ -137,10 +137,12 @@ lambs_danger_planKapiStarted = true;
         if (_cu isNotEqualTo []) then { [format ["[ELITE] IHA firlatma emri iptal: %1", _n]] remoteExec ["systemChat", _cu]; };
     };
     // v8.267 BILINCLI FIRLATMA: 'Dron yarat' dronu hemen degil, firlatma noktasinin tetik mesafesinde BILINEN dusman gorulunce yaratir (fnc_ihaBekle); tetik 0 = hemen (eski)
+    // v8.363: Gozlem devriyesi + 'Dron yarat' -> tur GOZLEM'e zorlanir (eskiden 'Otomatik' tur Crocus'ta FPV sortisi olurdu) ve firlatma BEKLEMEZ (gozlem dronu dusman bilinmeden, bilgi toplamak icin kalkar; tetik mesafesi dusman gerektirirdi)
+    if (_mod isEqualTo "GOZLEM") then { _tur = "GOZLEM"; _tetik = 0; };
     if (isNull _iha && {_yaratSn isNotEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> _yaratSn)}) exitWith {
-        [_yaratSn, _tf, _poz, _tur, _yar, _men, _tetik, _op, _opMod, _canta] call (missionNamespace getVariable ["lambs_danger_fnc_ihaBekle", {false}]);
+        [_yaratSn, _tf, _poz, _tur, _yar, _men, _tetik, _op, _opMod, _canta, _sure] call (missionNamespace getVariable ["lambs_danger_fnc_ihaBekle", {false}]);
     };
-    [_iha, _mod, _tur, _tf, _poz, _yar, _men, _op, _opMod] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
+    [_iha, _mod, _tur, _tf, _poz, _yar, _men, _op, _opMod, _sure] call (missionNamespace getVariable ["lambs_danger_fnc_ihaSorti", {false}]);
 }] call CBA_fnc_addEventHandler;
 
 // v8.214: Zeus 'ELITE Gozetleme Ata' -> grup secilen karakol / mevzi isaretinde nobet tutar (fnc_gozetleAta)

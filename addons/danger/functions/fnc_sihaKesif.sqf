@@ -33,7 +33,7 @@ private _tarafNo = [east, west, independent, civilian] find _taraf;
 sleep 8;
 private _adaylar = vehicles select {
     unitIsUAV _x && {alive _x} && {_x isKindOf "Air"} && {(([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM") || {(_x getVariable [QGVAR(ihaGorevTur), ""]) isEqualTo "GOZLEM"}}
-    && {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > 1800}}
+    && {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > (1800 max ((_x getVariable [QGVAR(ihaSureS), 0]) + 50))}}
     && {((getPosATL _x) select 2) > 30 || {_x isKindOf "Helicopter"}}
     && {(_x distance2D _obj) < 9000}
     && {

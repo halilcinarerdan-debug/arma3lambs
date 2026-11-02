@@ -562,3 +562,11 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 2. Karakol modulu + savunacak gruba SYNC (savunma = HEMEN) + Garnizon modulu karakolun icine: `[EDEN] Karakol`, `[KARAKOL]`, `[EDEN] Garnizon`.
 3. IHA modulu: FPV dronuna + operator askere SYNC (gorev = Sorti): `[EDEN] IHA (3DEN)` + `[IHA-SORTI]`.
 4. Gorev Ata modulu: bir gruba SYNC (RECON): `[GOREV-ATAMA]`.
+
+## T-GOZLEM-IHA (v8.363)
+1. Zeus: ELITE IHA Gorevi, Gorev = Gozlem devriyesi, Dron yarat = vanilla Darter (listeden), yaricap 300, sure 5 dk: dron hemen dogmali, rastgele noktalara 120 m'de ucmali; yakininda dusman varsa `[IHA-GOZLEM]` ve gruplara 'reveal'. 5 dk sonra konmali.
+2. Ayni modulle UCAK tipi (Greyhawk / Ababil / Falcon / Sentinel): `[IHA-UCAK]` + `[IHA-SORTI] ... UCAK gozlem: LOITER`; 400 m'de daire, dusmemeli; sure bitince daire surmeli.
+3. 3DEN: Greyhawk'i yere (pist) koy, IHA modulunu SYNC et, Gorev = Gozlem devriyesi: `[IHA-UCAK] yerdeydi ... havadan baslatildi`.
+4. UGV (Stomper) + IHA modulu gozlem: karada nokta nokta dolasir (suya girmez).
+5. CBA: Gozlem IHA suresi = 0 (sinirsiz), irtifa degistir; Zeus modulunde 'Gozlem suresi' girilince CBA'yi gecer.
+6. `[IHA-ENVANTER]` satirlarini (kategori / tip) rapora ekle.

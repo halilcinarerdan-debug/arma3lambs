@@ -153,7 +153,7 @@ lambs_danger_dtKod = {
                     // ---- 3) uzaktan gorunen dusman -> gozlemci talebi ----
                     private _aktifD = missionNamespace getVariable [format ["lambs_danger_dronGozIHA_%1", _taraf], objNull];
                     private _tK = format ["lambs_danger_dtTalepT_%1", _taraf];
-                    if ((isNull _aktifD || {!alive _aktifD} || {(diag_tickTime - (_aktifD getVariable [QGVAR(ihaTok), -999])) > 650}) && {(time - (missionNamespace getVariable [_tK, -999])) > 250}) then {
+                    if ((isNull _aktifD || {!alive _aktifD} || {(diag_tickTime - (_aktifD getVariable [QGVAR(ihaTok), -999])) > ((_aktifD getVariable [QGVAR(ihaSureS), 600]) + 50)}) && {(time - (missionNamespace getVariable [_tK, -999])) > 250}) then {
                         private _guncel = missionNamespace getVariable [format ["lambs_danger_dtGuncel_%1", _taraf], []];
                         private _istendi = false;
                         {

@@ -251,11 +251,12 @@ class GVAR(EdenIha): Module_F {
         E_COMBO(edIhaTur,"Tur","Otomatik: sinif adindan tahmin.","0",E_V(0,"Otomatik") E_V(1,"FPV-AT zirh avcisi") E_V(2,"FPV-AP personel") E_V(3,"BOMBA Mavic") E_V(4,"GOZLEM"))
         E_COMBO(edIhaTaraf,"Taraf","Otomatik: operatorun ya da arac sinifinin tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
         E_NUM(edIhaMenzil,"Menzil m","Kalkis noktasindan hedefe en fazla bu kadar.","3000")
-        E_NUM(edIhaYar,"Gozlem yaricapi m","Gozlem devriyesinde modul konumu etrafinda.","300")
+        E_NUM(edIhaYar,"Gozlem yaricapi m","Gozlem devriyesinde modul konumu etrafinda (ucak tipi: daire yaricapi, en az 500 m).","300")
+        E_NUM(edIhaSure,"Gozlem suresi dk","Yalniz Gozlem devriyesi. 0 = CBA ayari Gozlem IHA suresi (varsayilan 20 dk).","0")
         E_COMBO(edIhaOp,"Operator bagi","Baglanan asker operatordur. Operator olunce dron kontrolu kaybeder ve duser.","0",E_V(0,"Bagsiz") E_V(1,"Operator olunce dron duser") E_V(2,"Hedefe kilitliyse dalar"))
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "SYNC ile bir IHA (dron) ve istege bagli operator askere baglayin. Modul konumu gozlem merkezidir.";
+        description = "SYNC ile bir IHA (dron) ve istege bagli operator askere baglayin. Modul konumu gozlem merkezidir. Gozlem icin Gorev = Gozlem devriyesi: quad / helikopter tipi (Darter, Pelican) rastgele noktalara, ucak tipi (Greyhawk, Ababil, Falcon, Sentinel) daire cizerek ucar.";
     };
 };

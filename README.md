@@ -55,6 +55,26 @@ Not: `ELITE_COVER_RANGE` (main/script_component.hpp) 60 m — 30 m önerilir.
 - Araçlar: `tools/rpt_ozet.py` (`--karne / --form / --zeka / --kayip / --tani / --grup`, sürüm kontrolü), `tools/hemtt_kontrol.sh` (HEMTT sözdizimi / lint kontrolü), `tools/faction_export.sqf` (Arsenal'den fraksiyon config'i).
 - Kapatma anahtarları `lambs_danger_<ad>Off = true`; ayarlar CBA Addon Options > LAMBS Danger > ELITE ... kategorilerinde.
 
+## Gözlem İHA'sı — vanilla ve mod tüm uçucu İHA'lar (v8.363)
+Sistem İHA'ları **sınıf adına değil config ailesine** (`isUav`/`unitIsUAV`, `Air`) göre tanır: vanilla Darter, Pelican, Greyhawk, Ababil, Falcon, Sentinel ve RHS/CUP/Crocus gibi mod İHA'ları aynı yolu kullanır. ACE kendi dronunu getirmez; ACE'li oyunda da vanilla/mod İHA'lar aynen çalışır (ACE'e özel bir bağ yoktur).
+
+**Hiçbir modül olmadan:** AI mürettebatlı (oyuncusuz) herhangi bir İHA, gördüğü düşmanı tarafın ortak resmine verir (`[IHA-GOZLEM]`). Ancak İHA'yı **uçurmaz**; uçuş için aşağıdaki modül gerekir.
+
+**Gözlem İHA'sı kurmak (Zeus):** *ELITE İHA Görevi* modülü → **Görev = Gözlem devriyesi**.
+- Yerde/havada duran İHA'nın üstüne bırak (40 m içinde en yakın İHA kullanılır), ya da **Dron yarat** listesinden bir sınıf seç (liste yüklü tüm uçucu İHA'ları içerir; gözlem görevinde hemen yaratılır).
+- Gözlem yarıçapı ve **Gözlem süresi (dk)** ayarlanır (0 = CBA ayarı, 20 dk).
+
+**Gözlem İHA'sı kurmak (3DEN):** İHA'yı yerleştir → *ELITE İHA Görevi (3DEN)* modülünü gözlem merkezine koy, İHA'ya SYNC et → Görev = Gözlem devriyesi.
+
+| İHA tipi | Devriye biçimi |
+|---|---|
+| Quad/helikopter (Darter, Pelican, Crocus, Mavic) | Merkez etrafında rastgele noktalara, 120 m irtifada; süre dolunca konar |
+| Uçak (Greyhawk, Ababil, Falcon, Sentinel) | LOITER (daire) 400 m'de; yerdeyse havadan başlatılır (AI pistten kalkış yapmaz); süre dolunca daire sürer, yakıt azsa iner |
+| Kara (UGV) | Kara noktalarına sürer (su hariç) |
+
+Ayarlar (CBA > LAMBS Danger > ELITE dron savunması): *Gözlem İHA süresi*, *Gözlem İHA irtifası*, *Uçak İHA irtifası*, *Yerdeki uçak İHA'yı havadan başlat*. Silahlı İHA'lar (Greyhawk dinamik yük vb.) gözlem görevinde **ateş etmez**.
+**Durum:** oyunda test edilmedi (bkz. DOGRULANMAYANLAR.md); RPT'de `[IHA-SORTI] ... kategori`, `[IHA-UCAK]`, `[IHA-ENVANTER] ... kategori` satırlarına bak.
+
 ## 3DEN (Eden Editor) ile senaryo — Zeus gerekmez (v8.362)
 Editörde **Modüller → LAMBS ELITE (3DEN)** altında 8 modül vardır. Modüller sunucuda görev başında bir kez çalışır ve Zeus modüllerinin kullandığı **aynı sunucu olaylarını** tetikler (ELITE hazır olana dek bekler; RPT'de `[EDEN]`). Birimler/araçlar/dronlar modüle **SYNC (bağlantı)** ile bağlanır; ayarlar modülün çift tıkla açılan niteliklerindedir.
 
