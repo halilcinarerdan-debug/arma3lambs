@@ -556,3 +556,9 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 2. IFV/APC hedef: HEAT. Kamyon/cip: HE. Hedef yokken 1500 m'de dusman tank: on yukleme AP.
 3. AP/HE stogu tukenince siradaki tur seciliyor mu; 8 sn'den sik degistirmiyor mu.
 4. `[TANK-MUHIMMAT] ... DESTEKSIZ` cikarsa arac tipini ve yuklu mermiyi at.
+
+## T-3DEN (v8.362)
+1. Eden'de Modüller > LAMBS ELITE (3DEN): HQ modulu + 2 squad'a SYNC; Objektif modulu objektife + HQ'ya SYNC (ve istersen gruplara); Koordinasyon modulu. Senaryoyu baslat (Zeus'suz): ~10 sn sonra RPT `[EDEN] HQ (3DEN)`, `[EDEN] Objektif (3DEN) plan istegi gonderildi`, `[PLAN]` satirlari ve haritada plan isaretleri.
+2. Karakol modulu + savunacak gruba SYNC (savunma = HEMEN) + Garnizon modulu karakolun icine: `[EDEN] Karakol`, `[KARAKOL]`, `[EDEN] Garnizon`.
+3. IHA modulu: FPV dronuna + operator askere SYNC (gorev = Sorti): `[EDEN] IHA (3DEN)` + `[IHA-SORTI]`.
+4. Gorev Ata modulu: bir gruba SYNC (RECON): `[GOREV-ATAMA]`.

@@ -54,3 +54,19 @@ Not: `ELITE_COVER_RANGE` (main/script_component.hpp) 60 m — 30 m önerilir.
 - Bu depo üst LAMBS Danger deposunun **üzerine bindirilen** dosyaları içerir (`script_component.hpp`, `Cfg3DEN.hpp`, `CfgEventHandlers.hpp`, `ZEN_CfgContext.hpp` vb. yoktur). Yeni fonksiyonlar `addons/danger/XEH_PREP.hpp` içinde `PREP(...)` ile kayıtlıdır.
 - Araçlar: `tools/rpt_ozet.py` (`--karne / --form / --zeka / --kayip / --tani / --grup`, sürüm kontrolü), `tools/hemtt_kontrol.sh` (HEMTT sözdizimi / lint kontrolü), `tools/faction_export.sqf` (Arsenal'den fraksiyon config'i).
 - Kapatma anahtarları `lambs_danger_<ad>Off = true`; ayarlar CBA Addon Options > LAMBS Danger > ELITE ... kategorilerinde.
+
+## 3DEN (Eden Editor) ile senaryo — Zeus gerekmez (v8.362)
+Editörde **Modüller → LAMBS ELITE (3DEN)** altında 8 modül vardır. Modüller sunucuda görev başında bir kez çalışır ve Zeus modüllerinin kullandığı **aynı sunucu olaylarını** tetikler (ELITE hazır olana dek bekler; RPT'de `[EDEN]`). Birimler/araçlar/dronlar modüle **SYNC (bağlantı)** ile bağlanır; ayarlar modülün çift tıkla açılan niteliklerindedir.
+
+| Modül | Konum | SYNC ile bağlanan | Ne yapar |
+|---|---|---|---|
+| ELITE Koordinasyon | önemsiz | — | Gruplar arası telsiz ağı (istihbarat/takviye/kanat/feint/medevac) |
+| ELITE HQ / US Kur | HQ noktası | gruplar | Bağlanan gruplar bu HQ kategorisine atanır (HQ1/HQ2/HQ3/US) |
+| ELITE Objektif | objektif | HQ modülü + plan grupları | Komutan planı (ele geçir/savun): tüm Zeus plan ayarları nitelik olarak. "Grup seçimi = Bağlı gruplar" ise yalnız bağlanan gruplar plana girer; HQ bağlanmadıysa ve ele geçir + bağlı grup varsa otomatik HQ kurulur |
+| ELITE Görev Ata | önemsiz | asker/grup/araç | MANEVRA/DESTEK/YEDEK/HARIC/MEDEVAC/TOPCU/TASIMA/RECON/OYUNCU… |
+| ELITE Karakol / Mevzi | karakol | savunacak gruplar | Karakol kaydı + harita işareti; savunma = hemen ise bağlı gruplarla savunma planı |
+| ELITE Karakol Garnizon | karakol içi | — | Nöbetçi/devriye/üst kat/araç mevzisi (Karakol'dan sonra çalışır) |
+| ELITE Gözetleme Ata | karakol yakını | gruplar | Bağlı gruplar en yakın karakolda nöbet tutar |
+| ELITE IHA Görevi | gözlem merkezi | IHA (dron) + operatör asker | FPV/bomba/gözlem görevi (Zeus ile aynı) |
+
+Örnek senaryo: 1) bir HQ modülü koy, saldıracak squad'lara SYNC et; 2) objektife bir Objektif modülü koy, HQ modülüne SYNC et (isteğe bağlı: grup seç = bağlı gruplar ve gruplara da SYNC); 3) Koordinasyon modülünü koy; senaryoyu başlat — plan 10 sn sonra kurulur (Kurulum gecikmesi). Savunma için Karakol modülü + gruplara SYNC + (isteğe bağlı) Garnizon. Zeus modülleri çalışmaya devam eder; Zeus açık olmak zorunda değildir.

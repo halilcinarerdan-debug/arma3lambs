@@ -15,7 +15,17 @@ class CfgVehicles {
         fsmDanger = QUOTE(PATHTOF2_SYS(PREFIX,COMPONENT,scripts\lambs_dangerCivilian.fsm));
     };
 
-    class Module_F;
+    // ELITE fork (v8.362): 3DEN modulleri icin Module_F taban sinifi AttributesBase ile acilir (BI Eden modul deseni)
+    class Logic;
+    class Module_F: Logic {
+        class AttributesBase {
+            class Edit;
+            class Combo;
+            class Checkbox;
+            class ModuleDescription;
+        };
+        class ModuleDescription {};
+    };
 
     class GVAR(SetRadio) : Module_F {
         author = "LAMBS Dev Team";
@@ -289,4 +299,7 @@ class CfgVehicles {
             };
         };
     };
+
+    // ELITE fork (v8.362): 3DEN (Eden) modulleri
+    #include "CfgVehiclesEden.hpp"
 };

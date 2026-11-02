@@ -39,7 +39,9 @@ cp -r "$KOK/addons/danger/functions" "$P/addons/danger/functions"
 cp -r "$KOK/addons/main/functions" "$P/addons/main/functions"
 for d in $(find "$P/addons" -type d -path "*functions*"); do cp "$P/addons/danger/script_component.hpp" "$d/"; done
 # CfgVehicles.hpp: taban siniflar
-{ echo 'class Logic;'; sed 's/^    class Module_F;/    class Module_F: Logic {};/' "$KOK/addons/danger/CfgVehicles.hpp"; } > "$P/addons/danger/CfgVehicles.hpp"
+# v8.362: CfgVehicles.hpp artik Logic / Module_F (AttributesBase) tanimini kendisi yapar; 3DEN modulleri CfgVehiclesEden.hpp icinde
+cp "$KOK/addons/danger/CfgVehicles.hpp" "$P/addons/danger/CfgVehicles.hpp"
+cp "$KOK/addons/danger/CfgVehiclesEden.hpp" "$P/addons/danger/CfgVehiclesEden.hpp"
 printf '#include "script_component.hpp"\nclass CfgPatches { class ADDON { name = COMPONENT_NAME; units[] = {}; weapons[] = {}; requiredVersion = 2.22; requiredAddons[] = {}; VERSION_CONFIG; }; };\n#include "CfgVehicles.hpp"\n' > "$P/addons/danger/config.cpp"
 printf 'class CfgPatches { class lambs_main { units[]={}; weapons[]={}; requiredVersion=2.22; requiredAddons[]={}; }; };\n' > "$P/addons/main/config.cpp"
 for a in danger main; do printf 'prefix = "%s"\n' "$a" > "$P/addons/$a/addon.toml"; printf 'z\\lambs\\addons\\%s' "$a" > "$P/addons/$a/\$PBOPREFIX\$"; done

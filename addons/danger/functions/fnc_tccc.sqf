@@ -276,6 +276,8 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 6}) exitWith {
             // v8.358: iptal sonrasi ayni yarali icin hemen yeniden atama yapilmaz (geri don -> 3 sn sonra tekrar git dongusu); bekleme 12 sn x iptal sayisi (en cok 48 sn)
             if (alive _c) then { _c setVariable [QGVAR(tcccIptalT), time]; _c setVariable [QGVAR(tcccIptalN), (_c getVariable [QGVAR(tcccIptalN), 0]) + 1]; };
+            // v8.362 (RPT 02-11: ayni hekim ates altinda 15 sn arayla iki kez baska yaraliya kosup iptal etti): HEKIM basina da bekleme (baskisi yuksekse 20 sn)
+            _m setVariable [QGVAR(tcccHekimIptalT), time];
             // v8.80 IPTAL NEDENI (RPT f8015d87: 5 hekim atandi, 1 yaraliyi bitirdi; digerleri sessizce birakildi)
             diag_log format ["[TCCC] %1 | %2 -> %3 | IPTAL (yaklasma): %4 | mesafe %5 m | hekim baski %6 | %7 sn", groupId _g, name _m, name _c,
                 ([["hekim baski altinda (>0.6) / ates basladi", "sure doldu (yetisemedi)"] select (time > _bitis), "yarali oldu"] select (!alive _c)) + (["", " (hekim de oldu)"] select (!([_m] call lambs_danger_tcccMedikOk))),
@@ -461,6 +463,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
                     && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call _baygin)}
                     && {time > (_x getVariable [QGVAR(tcccBusy), 0])}
+                    && {(time - (_x getVariable [QGVAR(tcccHekimIptalT), -999])) > ([15, 20] select ((getSuppression _x) > 0.4))}
                     && {!(_x getVariable [QGVAR(forceMove), false]) || {([_x] call _rolFn) isEqualTo "MEDIC" || {_x getUnitTrait "Medic"}}}   // v8.102: gercek hekim bounding'in forceMove'u yuzunden elenmez (RPT 30f9155e: hekim 'fm' diye atlandi, tufekci hekim secildi)
                     && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
                 };
