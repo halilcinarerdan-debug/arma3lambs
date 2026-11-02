@@ -652,7 +652,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             private _hedefA = _zincirN select 0;
             _d doMove _hedefA;
             // v8.181: doMove'a EK olarak grup WAYPOINT'i (v8.180 kaydinda tek calisan yol); inis / is sonunda "ELITE NAKIL" adli waypoint'ler silinir
-            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
             private _wpS = _vg addWaypoint [_hedefA, 0];
             _wpS setWaypointType "MOVE";
             _wpS setWaypointName "ELITE NAKIL";
@@ -687,7 +687,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                     _zi = _zi + 1;
                     _hedefA = _zincirN select _zi;
                     _d doMove _hedefA;
-                    { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+                    { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
                     _wpS = _vg addWaypoint [_hedefA, 0];
                     _wpS setWaypointType "MOVE";
                     _wpS setWaypointName "ELITE NAKIL";
@@ -870,7 +870,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         // v8.180: 12 sn - doMove sonuc vermediyse WAYPOINT ile yurut (grup waypoint'i: bazi AI suruculer tekil doMove'u yok sayiyor)
                         if (_denemeN isEqualTo 1 && {_dg > 12} && {!(_v getVariable [QGVAR(wpDenendi), false])}) then {
                             _v setVariable [QGVAR(wpDenendi), true];
-                            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+                            { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
                             private _wpD = _vg addWaypoint [_hedefA, 0];
                             _wpD setWaypointName "ELITE NAKIL";
                             _wpD setWaypointType "MOVE";
@@ -1014,7 +1014,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             waitUntil { sleep 1; !alive _v || {!alive _d} || {!surfaceIsWater (getPosATL _v)} || {time > _wt} };
         };
         // (4) in
-        { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));   // v8.181: nakil waypoint'i inisten sonra arac dusurmesin
+        { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });   // v8.181: nakil waypoint'i inisten sonra arac dusurmesin
         _v setVariable [QGVAR(yolcuBirak), true];
         { if (alive _x) then { _x enableAI "PATH"; }; } forEach _binen;
         doStop _d;

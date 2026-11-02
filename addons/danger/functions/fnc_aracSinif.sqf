@@ -52,7 +52,15 @@ private _sinif = if ((getNumber (configOf _v >> "artilleryScanner")) > 0) then {
         }
     }
 }};
+// v8.364 ELLE DUZELTME (denetim: kargo >= 3 olan Tank-tabanli arac otomatik IFV/APC sayilir; kargolu ANA MUHAREBE TANKI (ornek Merkava, kargo 4-6) bu kuralla IFV olur ve ZIRH DESTEK / tankAtesKontrol/tankMuhimmat disinda kalir). Config'ten
+//   guvenilir ayirt edici yok (BMP-3 de 100 mm top + kargo tasir) -> tahmin yerine sinif adina ELLE gecersiz kilma: lambs_danger_aracSinifOverride = createHashMapFromArray [["sinif_adi", "TANK"]] (TANK / IFV / APC / KAMYON / DIGER).
+private _ov = missionNamespace getVariable ["lambs_danger_aracSinifOverride", createHashMap];
+private _ovAyar = _tip in _ov;
+if (_ovAyar) then { _sinif = _ov get _tip; };
 private _sonuc = [_sinif, _kargo, _top, _atgm];
 lambs_danger_aracSinifCache set [_tip, _sonuc];
-diag_log format ["[ARAC-SINIF] %1 (%2) -> %3 | kargo %4 | top %5 | atgm %6 | zirh %7", getText (configOf _v >> "displayName"), _tip, _sinif, _kargo, _top, _atgm, _zirh];
+diag_log format ["[ARAC-SINIF] %1 (%2) -> %3%8 | kargo %4 | top %5 | atgm %6 | zirh %7", getText (configOf _v >> "displayName"), _tip, _sinif, _kargo, _top, _atgm, _zirh, ["", " (ELLE GECERSIZ KILINDI)"] select _ovAyar];
+if (!_ovAyar && {_v isKindOf "Tank"} && {_kargo >= 3} && {_zirh >= 300}) then {
+    diag_log format ["[ARAC-SINIF] %1 (%2): Tank tabanli, kargo %3, zirh %4 -> IFV/APC sayildi; ANA MUHAREBE TANKI ise lambs_danger_aracSinifOverride ile TANK yapin", getText (configOf _v >> "displayName"), _tip, _kargo, _zirh];
+};
 _sonuc

@@ -29,22 +29,8 @@ if (_sk > 0) then {
     diag_log format ["[TANK-ATIS] %1 | ekip becerisi >= %2 yapildi (%3 kisi)", getText (configOf _v >> "displayName"), _sk, count (crew _v)];
 };
 
-// v8.280 TANK TOPU HASARI (kullanici: 'tanklari guclendir', 2 vs 3 duello 1 saat surmesin): bu tanka DUSMAN TANKI ana topu / fuzesi (shotShell / shotMissile) ile vurdugunda gelen hasar
-//   lambs_danger_tankTopHasar (varsayilan 1 = KAPALI; v8.281: gizli hasar carpani hile sayildi, kaldirildi) ile carpilir -> tank-tank cati engagement daha hizli sonuclanir. Piyade / AT / mayin hasari degismez. 1 = kapali.
-if ((missionNamespace getVariable ["lambs_danger_tankTopHasar", 1]) != 1) then {
-    _v addEventHandler ["HandleDamage", {
-        params ["_u", "_sel", "_dmg", "_src", "_proj", "_hi", "_inst"];
-        private _m = missionNamespace getVariable ["lambs_danger_tankTopHasar", 1];
-        if (_m == 1 || {_proj isEqualTo ""}) exitWith { _dmg };
-        private _kaynak = if (isNull _inst) then {_src} else {_inst};
-        if (isNull _kaynak || {!((vehicle _kaynak) isKindOf "Tank")}) exitWith { _dmg };
-        private _sim = toLower getText (configFile >> "CfgAmmo" >> _proj >> "simulation");
-        if !(_sim in ["shotshell", "shotmissile"]) exitWith { _dmg };
-        private _eski = if (_sel isEqualTo "") then { damage _u } else { _u getHitIndex _hi };
-        if (_dmg <= _eski) exitWith { _dmg };
-        (_eski + ((_dmg - _eski) * _m)) min 1
-    }];
-};
+// v8.364: v8.280'in gizli tank topu HASAR CARPANI (lambs_danger_tankTopHasar, HandleDamage) tamamen silindi. v8.281 onu "hile" sayip varsayilan 1 (kapali) yapmisti ama kod duruyor ve degisken elle 1 disina cekilirse
+//   hasari gizlice carpiyordu; hicbir CBA ayari / belge ona baglanmadigi icin (olu + hile) kaldirildi. Tanklarin gucu yalniz ekip becerisi (yukarida, "asla dusurulmez" tabani) ile artar.
 
 if (missionNamespace getVariable ["lambs_danger_tankIzleOff", false]) exitWith {};
 

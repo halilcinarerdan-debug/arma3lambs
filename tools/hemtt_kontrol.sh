@@ -53,3 +53,9 @@ if grep '^ERROR' "$P/cikti.txt" | grep -qv 'check for updates'; then echo "KONTR
 echo "HATA (error) sayisi: $(grep -c '^error' "$P/cikti.txt")"
 grep -A10 '^error' "$P/cikti.txt" | head -60
 echo "Tam cikti: $P/cikti.txt  (L-S29 'Undefined Function' uyarilari PREP'in test projesinde olmamasindan gelir, yok sayilir)"
+# v8.364: HEMTT 'error' disinda GERCEK HATA adayi uyarilar (eskiden gozden kaciyordu: L-S12 'reverse' deger dondurmez -> forEach (reverse ...) 8 yerde calismiyordu)
+n12=$(grep -c 'warning\[L-S12\]' "$P/cikti.txt" || true)
+echo "L-S12 (gecersiz arguman tipi) uyari sayisi: $n12  (0 olmali)"
+if [ "$n12" != "0" ]; then grep -A4 'warning\[L-S12\]' "$P/cikti.txt" | head -40; fi
+# v8.364: statik tutarlilik denetimi (PREP / olay / ayar / degisken / kapanis kapsami / surum)
+python3 "$KOK/tools/tutarlilik_denetimi.py" | tail -15

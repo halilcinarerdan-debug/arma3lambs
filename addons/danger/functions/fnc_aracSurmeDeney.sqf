@@ -59,7 +59,7 @@ _v setVariable [QGVAR(deneyCalisiyor), true];
     private _onlemler = [
         ["EFEKTIF-KOMUTAN", { params ["_v", "_d", "_h", "_vg"]; private _ec = effectiveCommander _v; if (!isNull _ec && {_ec isNotEqualTo _d}) then { _ec enableAI "PATH"; _ec doMove _h; }; _d doMove _h; }],
         ["LIDER-SURUCU", { params ["_v", "_d", "_h", "_vg"]; _vg selectLeader _d; _d doMove _h; }],
-        ["WAYPOINT", { params ["_v", "_d", "_h", "_vg"]; { deleteWaypoint _x; } forEach (reverse (waypoints _vg)); private _w = _vg addWaypoint [_h, 0]; _w setWaypointType "MOVE"; _w setWaypointSpeed "FULL"; _vg setCurrentWaypoint _w; }],
+        ["WAYPOINT", { params ["_v", "_d", "_h", "_vg"]; { deleteWaypoint _x; } forEach ((waypoints _vg) call { reverse _this; _this }); private _w = _vg addWaypoint [_h, 0]; _w setWaypointType "MOVE"; _w setWaypointSpeed "FULL"; _vg setCurrentWaypoint _w; }],
         ["DAVRANIS", { params ["_v", "_d", "_h", "_vg"]; _vg setBehaviour "AWARE"; _vg setSpeedMode "FULL"; _vg setCombatMode "YELLOW"; _d doMove _h; }],
         ["YOL-DUZ", { params ["_v", "_d", "_h", "_vg"]; _v setDriveOnPath [getPosATL _v, _h]; }],
         ["PATH-YENILE", { params ["_v", "_d", "_h", "_vg"]; _d disableAI "PATH"; sleep 0.3; _d enableAI "PATH"; _d doMove _h; }],

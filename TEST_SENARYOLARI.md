@@ -570,3 +570,9 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 4. UGV (Stomper) + IHA modulu gozlem: karada nokta nokta dolasir (suya girmez).
 5. CBA: Gozlem IHA suresi = 0 (sinirsiz), irtifa degistir; Zeus modulunde 'Gozlem suresi' girilince CBA'yi gecer.
 6. `[IHA-ENVANTER]` satirlarini (kategori / tip) rapora ekle.
+
+## T-DENETIM (v8.364)
+1. Nakil: bir mekanize grubu nakille indir; RPT'de `Error forEach` / `Type Nothing` olmamali; arac indirdikten sonra eski noktaya geri gitmemeli.
+2. Zeus Objektif: ayni noktaya (150 m icinde) ayni turde iki plan iste; ikincisi sohbette 'zaten ayni turde plan var' ile reddedilmeli ve `[PLAN] ... KURULDU` ikinci kez GORULMEMELI.
+3. Merkava (ya da kargolu bir MBT) koy; RPT `[ARAC-SINIF] ... ipucu` satirini oku; `lambs_danger_aracSinifOverride = createHashMapFromArray [["sinif_adi","TANK"]];` (init) ile TANK yap, `[TANK-ATES]` / `[TANK-MUHIMMAT]` satirlari gelmeli.
+4. `tools/hemtt_kontrol.sh` sonunda '0 HATA, 0 UYARI' (tutarlilik denetimi) ve 'L-S12 ... 0' gorulmeli.

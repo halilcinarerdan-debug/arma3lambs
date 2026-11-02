@@ -110,7 +110,7 @@ private _yeni = [];
 if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_tablo findIf {(_x select 0) isEqualTo "aimingAccuracy"}) >= 0}) then {
     private _optik = ((primaryWeaponItems _u) param [2, ""]) isNotEqualTo "";
     if (!_optik && {(primaryWeapon _u) isNotEqualTo ""}) then {
-        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.75];
+        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.90];
         private _aa = (_u skill "aimingAccuracy") * _oc;
         _u setSkill ["aimingAccuracy", _aa];
         _yeni pushBack format ["optiksiz x%1 -> %2", _oc, _aa toFixed 2];
@@ -121,9 +121,9 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
-private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.95];
-private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.15];
-private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.85];
+private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.97];
+private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.05];
+private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.90];
 private _acemi = (random 1) < _acemiOran;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];

@@ -44,6 +44,8 @@ if (count _zincirAna > 0) exitWith {
 };
 
 // v8.175 COKLU PLAN ENGELI (kullanici: "ayni yere birden fazla hq / mevzi koyamayalim"): ayni taraf + ayni tur icin 150 m icinde AKTIF plan ya da son 20 sn'de baslayan istek varsa yenisi kurulmaz
+// v8.364: eskiden 'if (_cift) exitWith {...false}' BU then-blogunun icindeydi -> exitWith yalniz bu blogu terk ediyordu, fonksiyon DEVAM edip plani yine kuruyordu (cift plan engeli islemiyordu); bayrakla fonksiyon seviyesinde cikilir
+private _ciftRed = false;
 if (_tip in [0, 1]) then {
     if (isNil "lambs_danger_planRezerv") then { lambs_danger_planRezerv = []; };
     lambs_danger_planRezerv = lambs_danger_planRezerv select {(time - (_x select 3)) < 20};
@@ -53,14 +55,16 @@ if (_tip in [0, 1]) then {
             (_x get "taraf") isEqualTo _taraf && {((_x get "obj") distance2D _obj) < 150} && {(_x getOrDefault ["tip", 0]) isEqualTo _tip} && {!((_x get "faz") in ["BITTI", "IPTAL"])}
         }) >= 0;
     };
-    if (_cift) exitWith {
+    if (_cift) then {
+        _ciftRed = true;
         diag_log format ["[PLAN] KURULAMADI: %1 icin ayni noktada (150 m) zaten %2 plani var / kuruluyor (cift plan engellendi)", _taraf, ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1)];
         missionNamespace setVariable ["lambs_danger_planRedNeden", format ["bu noktada (150 m) zaten bir %1 plani var - once ELITE Objektif -> IPTAL ile durdurun", ["ELE GECIR", "SAVUN"] select (_tip isEqualTo 1)]];
         systemChat "[ELITE] Bu noktada zaten ayni turde plan var - yenisi kurulmadi";
-        false
+    } else {
+        lambs_danger_planRezerv pushBack [_taraf, +_obj, _tip, time];
     };
-    lambs_danger_planRezerv pushBack [_taraf, +_obj, _tip, time];
 };
+if (_ciftRed) exitWith { false };
 
 // ---------------------------------------------------------------------------
 // IPTAL: bu taraftaki aktif planlari durdur

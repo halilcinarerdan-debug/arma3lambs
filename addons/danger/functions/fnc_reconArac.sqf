@@ -198,7 +198,7 @@ private _zi = 0;
 private _zGit = {
     params ["_pz"];
     _d doMove _pz;
-    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
     private _w2 = _vg addWaypoint [_pz, 0]; _w2 setWaypointType "MOVE"; _w2 setWaypointName "ELITE RECON-ARAC"; _w2 setWaypointBehaviour "SAFE"; _w2 setWaypointCombatMode "GREEN"; _w2 setWaypointSpeed "NORMAL"; _vg setCurrentWaypoint _w2;
 };
 [_zincir select 0] call _zGit;
@@ -365,7 +365,7 @@ if (_geriDon) then {
     diag_log format ["[RECON-ARAC] %1 | %2 | GERI DONUS: tasima %3 (OP'ye %4 m) -> recon yolda indirilmiyor, %5 noktasina (%6 m) donuluyor", _id, _ad, _bitis, round (_v distance2D _op), ["HQ", "RP"] select ((_plan getOrDefault ["hqPoz", []]) isEqualTo []), round (_v distance2D _hq)];
     _plan set ["reconIptal", true];
     _plan set ["reconG", []];
-    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
     _vg setBehaviour (["SAFE", "AWARE"] select (_bitis isEqualTo "temas")); _vg setCombatMode "YELLOW"; _vg setSpeedMode "FULL";
     _d forceSpeed -1;
     _d doMove _hq;
@@ -404,7 +404,7 @@ if (!_geriDon && {!surfaceIsWater _geri} && {alive _v} && {alive _d} && {canMove
 };
 _v setVariable [QGVAR(aracRezervT), time];
 if (!isNull _vg) then {
-    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach (reverse (waypoints _vg));
+    { if ((waypointName _x) find "ELITE RECON-ARAC" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
     _vg setVariable [QGVAR(isExecutingTactic), nil];
     _vg setBehaviour _eskiBeh;
     _vg setCombatMode _eskiMod;
