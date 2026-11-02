@@ -119,7 +119,7 @@ private _say = 0;
         private _d = _k distance _unit;
 
         // Zaten iyi biliyorsa dokunma
-        if ((_k knowsAbout _unit) < 1.5) then {
+        if ((_k knowsAbout _unit) < (["KESIN"] call FUNC(bilgiEsik))) then {
             private _duyuldu = _d < _menzil || {_catlama && {_d < 220}};
             private _gorulur = false;
             if (_d < _parlamaMenzil) then {

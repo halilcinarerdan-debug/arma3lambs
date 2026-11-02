@@ -338,7 +338,7 @@ if (EGVAR(main,debug_functions)) then {
         // Arac / zirh odak olursa baski olcumu (getSuppression) calismaz: bilinen en yakin PIYADEYI tercih et
         if (!isNull _e && {!(_e isKindOf "CAManBase")}) then {
             private _pl = (_l nearEntities ["CAManBase", 450]) select {
-                alive _x && {((side _l) getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_l knowsAbout _x) > 0.5}
+                alive _x && {((side _l) getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(_l knowsAbout _x) > (["SUPHE"] call FUNC(bilgiEsik))}
             };
             if (_pl isNotEqualTo []) then {
                 _e = ([_pl, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy) select 0;
@@ -385,7 +385,7 @@ if (EGVAR(main,debug_functions)) then {
                 private _atAtti = false;
                 if (!isNull _zirh && {[_x] call _atFn}) then {
                     private _d = _x distance2D _zirh;
-                    if (_d > 40 && {_d < 450} && {(_x knowsAbout _zirh) > 0.5}) then {
+                    if (_d > 40 && {_d < 450} && {(_x knowsAbout _zirh) > (["SUPHE"] call FUNC(bilgiEsik))}) then {
                         [_x, _zirh] call _atFireFn;
                         _atAtti = true;
                     };
@@ -398,7 +398,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
                     if (!isNull _odak && {alive _odak} && {(_x distance2D _odak) < 350}) then {
                         _x doTarget _odak;
-                        if ((_x knowsAbout _odak) > ([1, 0.5] select (_rol isEqualTo "MG"))) then {
+                        if ((_x knowsAbout _odak) > ([(["TESPIT"] call FUNC(bilgiEsik)), (["SUPHE"] call FUNC(bilgiEsik))] select (_rol isEqualTo "MG"))) then {
                             _x doFire _odak;
                         };
                         // UGL BOOST: piyade hedefe 40mm (hat kapali / binada / kume / %50; 5 sn cooldown)

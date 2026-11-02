@@ -97,7 +97,7 @@ private _enemies = _nearAll select {
     && {(_mySide getFriend (side _x)) < 0.6}
     && {(lifeState _x) isNotEqualTo "INCAPACITATED"}
     // 70 m icindeki dusman da ancak az da olsa BILINIYORSA sayilir (eskiden duvar arkasini / gormedigi dusmani da sayiyordu = hile)
-    && {((_group knowsAbout _x) >= 1.2) || {((_x distance2D _unit) < 70) && {(_group knowsAbout _x) >= 0.4}}}
+    && {((_group knowsAbout _x) >= (["KESIN"] call FUNC(bilgiEsik))) || {((_x distance2D _unit) < 70) && {(_group knowsAbout _x) >= (["SUPHE"] call FUNC(bilgiEsik))}}}
 };
 
 // Hedef objeyse ve listede yoksa ekle
@@ -163,7 +163,7 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {((side _x) != civilian)}
-    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
+    && {((_group knowsAbout _x) >= (["KESIN"] call FUNC(bilgiEsik))) || {(_x distance2D _unit) < 150}}
 };
 private _armorCount = count _armor;
 private _armorDist = 9999;

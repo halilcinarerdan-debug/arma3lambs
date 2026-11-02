@@ -126,7 +126,7 @@ private _calis = {
             if (_temas || {(time - (_g getVariable [QGVAR(contact), -999])) < 20}) then {
                 {
                     private _zo = _x select 4;
-                    if (!isNull _zo && {alive _zo} && {_zo isKindOf "Tank"} && {(getNumber (configOf _zo >> "armor")) >= 300} && {((side _g) getFriend (_x select 2)) < 0.6} && {[_zo] call FUNC(gercekHedef)} && {(_l knowsAbout _zo) >= 0.4}) then {
+                    if (!isNull _zo && {alive _zo} && {_zo isKindOf "Tank"} && {(getNumber (configOf _zo >> "armor")) >= 300} && {((side _g) getFriend (_x select 2)) < 0.6} && {[_zo] call FUNC(gercekHedef)} && {(_l knowsAbout _zo) >= (["SUPHE"] call FUNC(bilgiEsik))}) then {
                         _zirhS = _zirhS + 1;
                         _zirhY = _zirhY min (_l distance2D _zo);
                     };

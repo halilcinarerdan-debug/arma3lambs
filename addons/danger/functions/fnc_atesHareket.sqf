@@ -114,7 +114,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
             private _taraf = side _g;
             private _dus = (_l nearTargets 240) select {
                 private _o = _x select 4;
-                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 0.6}
+                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))}
             };
             if (_dus isEqualTo []) then { continue };
             private _en = ([_dus, [], {(_x select 4) distance _l}, "ASCEND"] call BIS_fnc_sortBy) select 0 select 4;

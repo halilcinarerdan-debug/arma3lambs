@@ -21,6 +21,6 @@ if (!alive _fo || {!((lifeState _fo) in ["HEALTHY", "INJURED"])}) exitWith {[-99
 private _goz = eyePos _fo;
 [time, ((_fo nearTargets 1800) select {
     private _o = _x select 4;
-    !isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_o distance2D _fo) >= 300} && {(_fo knowsAbout _o) >= 1.0}
+    !isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_o distance2D _fo) >= 300} && {(_fo knowsAbout _o) >= (["KESIN"] call FUNC(bilgiEsik))}
     && {private _hp = (getPosASL _o) vectorAdd [0, 0, 1.2]; !(terrainIntersectASL [_goz, _hp]) && {!(lineIntersects [_goz, _hp, _fo, _o])}}
 }) apply {_x select 4}]

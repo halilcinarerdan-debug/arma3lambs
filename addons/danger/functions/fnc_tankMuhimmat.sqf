@@ -224,7 +224,7 @@ lambs_danger_muhimmatDesteksiz = createHashMap;
                 _neden = "on yukleme";
                 private _en = (_gn nearTargets 2000) select {
                     private _o = _x select 4;
-                    !isNull _o && {alive _o} && {!(_o isKindOf "CAManBase")} && {(_tf getFriend (_x select 2)) < 0.6} && {(_gn knowsAbout _o) >= 0.3}
+                    !isNull _o && {alive _o} && {!(_o isKindOf "CAManBase")} && {(_tf getFriend (_x select 2)) < 0.6} && {(_gn knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
                 };
                 private _ak = "";
                 {

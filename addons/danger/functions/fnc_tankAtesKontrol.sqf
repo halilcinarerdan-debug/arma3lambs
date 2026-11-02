@@ -53,7 +53,7 @@ private _calis = {
             // aday listesi (B / C / D ortak)
             private _adaylar = (_l nearTargets 1500) select {
                 private _o = _x select 4;
-                !isNull _o && {alive _o} && {(_tf getFriend (_x select 2)) < 0.6} && {(_l knowsAbout _o) >= 0.3} && {[_o] call FUNC(gercekHedef)}
+                !isNull _o && {alive _o} && {(_tf getFriend (_x select 2)) < 0.6} && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))} && {[_o] call FUNC(gercekHedef)}
             };
 
             // B) koru

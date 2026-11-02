@@ -64,7 +64,7 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 700]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {((side _x) != civilian)}
-    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
+    && {((_group knowsAbout _x) >= (["KESIN"] call FUNC(bilgiEsik))) || {(_x distance2D _unit) < 150}}
 };
 
 // Zirh yoksa ve verilen hedef zirh degilse kacilmaz (piyadeden kacip ates kesmek YANLIS)

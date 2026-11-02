@@ -76,7 +76,7 @@ private _temaslar = createHashMap;
         _x params ["_pos", "_tip", "_ts", "_cost", "_obj"];
         if (isNull _obj || {!alive _obj} || {(side _obj) getFriend _taraf >= 0.6} || {(side _obj) isEqualTo civilian}) then { continue };
         private _k = _l knowsAbout _obj;
-        if (_k < 1.2) then { continue };
+        if (_k < (["KESIN"] call FUNC(bilgiEsik))) then { continue };
         private _tk = _l targetKnowledge _obj;
         if ((time - (_tk select 2)) > 20 || {(_tk select 5) > 40}) then { continue };
         private _anahtar = netId _obj;
@@ -108,7 +108,7 @@ private _yapilan = 0;
         private _aL = leader _a;
         private _mzr = _menzil * ((_muhbir getVariable ["lambs_danger_hqTelsizF", 1]) max 0.1);
         if ((_aL distance2D _muhbirL) > _mzr || {(behaviour _aL) isEqualTo "CARELESS"}) then { continue };
-        if ((_a knowsAbout _o) >= 0.8) then { continue };
+        if ((_a knowsAbout _o) >= (["TESPIT"] call FUNC(bilgiEsik))) then { continue };
         if (_sis && {!([_aL] call _telsizMi)}) then { ["alici telsiz yok"] call _say; continue };
         private _mesafe = _aL distance2D _muhbirL;
         // teslim guvenilirligi: 600 m'e kadar %100, menzil sinirinda %35

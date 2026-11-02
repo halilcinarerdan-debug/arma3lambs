@@ -79,7 +79,7 @@ private _calis = {
                 private _d = _l distance _v;
                 if (_d > (_taban * _env * 1.0)) then { continue };
                 if ((time - (_g getVariable [QGVAR(motorSesT), -999])) < ([20, 5] select (_tip isEqualTo "IHA"))) then { continue };
-                if ((_g knowsAbout _v) >= 0.5) then {
+                if ((_g knowsAbout _v) >= (["SUPHE"] call FUNC(bilgiEsik))) then {
                     // v8.291 TANI: zaten biliyorsa nedeni logla (dron tepkisi [HAVA-FARK] / [DRON-*] satirlarinda aranmali)
                     if (_tip isEqualTo "IHA" && {(time - (_g getVariable [QGVAR(motorSesBilT), -999])) > 30}) then {
                         _g setVariable [QGVAR(motorSesBilT), time];

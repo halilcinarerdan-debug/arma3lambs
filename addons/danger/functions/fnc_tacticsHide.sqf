@@ -59,7 +59,7 @@ if ((formation _group) isNotEqualTo "WEDGE") then { [_group, "WEDGE", "hide", 1]
 //   WHITE yalniz saklanma / pusu icin anlamli. Bilinen dusman 400 m icinde ve gruptan biri baski altindaysa siper al + KARSILIK VER (YELLOW).
 private _hEn = _unit findNearestEnemy _unit;
 private _hBask = ((units _group) findIf {alive _x && {(getSuppression _x) > 0.1}}) > -1;
-_group setCombatMode (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > 1.2}) || {_hBask}));
+_group setCombatMode (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > (["KESIN"] call FUNC(bilgiEsik))}) || {_hBask}));
 _group enableAttack false;
 
 _unit setVariable [QEGVAR(main,currentTarget), _target, EGVAR(main,debug_functions)];

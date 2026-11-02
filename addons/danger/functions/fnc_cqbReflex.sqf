@@ -65,7 +65,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                     private _bilgi = if (_d < 9999) then {_u knowsAbout _e} else {0};
 
                     // ---------------- A) CQB ----------------
-                    if (_d <= 28 && {_bilgi >= 1.0}) then {
+                    if (_d <= 28 && {_bilgi >= (["TESPIT"] call FUNC(bilgiEsik))}) then {
                         // kalibrasyon (orijinali sakla, yukseltilmis tabana cek)
                         if ((_u getVariable [QGVAR(cqbSkill), []]) isEqualTo []) then {
                             _u setVariable [QGVAR(cqbSkill), [_u skill "aimingSpeed", _u skill "aimingAccuracy"]];
@@ -141,7 +141,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
 
                         // ---------------- B) SIPER DISIPLINI ----------------
                         if (
-                            _d <= 220 && {_bilgi >= 1.0}
+                            _d <= 220 && {_bilgi >= (["TESPIT"] call FUNC(bilgiEsik))}
                             && {(getSuppression _u) >= 0.35}
                             && {(stance _u) isEqualTo "STAND"}
                             && {(speed _u) < 2}

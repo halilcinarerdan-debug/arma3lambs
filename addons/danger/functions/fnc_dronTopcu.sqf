@@ -94,7 +94,7 @@ lambs_danger_dtKod = {
                         private _l = leader (_grlar select ((_n0 + _i) mod (count _grlar)));
                         {
                             private _o = _x select 4;
-                            if (!isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_l knowsAbout _o) >= 1.2}) then { _gorulen pushBackUnique _o; };
+                            if (!isNull _o && {alive _o} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_l knowsAbout _o) >= (["KESIN"] call FUNC(bilgiEsik))}) then { _gorulen pushBackUnique _o; };
                         } forEach (_l nearTargets 1500);
                     };
                 };

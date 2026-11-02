@@ -36,7 +36,7 @@ if (!isNull _g) then {
         private _hd = (_l nearTargets 1300) select {
             (_taraf getFriend (_x select 2)) < 0.6
             && {alive (_x select 4)}
-            && {(_l knowsAbout (_x select 4)) > 0.4}
+            && {(_l knowsAbout (_x select 4)) > (["SUPHE"] call FUNC(bilgiEsik))}
             && {[_x select 4] call FUNC(gercekHedef)}
         };
         if (_hd isNotEqualTo []) then {

@@ -48,7 +48,7 @@ private _sayi = 0;
     if (_uyeler isEqualTo []) then { continue };
     // gruba yeterince yakin ve atici gorus / bilgi icinde mi
     private _yakin = _uyeler findIf {
-        (_x distance2D _aPos) < 180 || {(_x knowsAbout _atici) > 0.5}
+        (_x distance2D _aPos) < 180 || {(_x knowsAbout _atici) > (["SUPHE"] call FUNC(bilgiEsik))}
     };
     if (_yakin < 0) then { continue };
 

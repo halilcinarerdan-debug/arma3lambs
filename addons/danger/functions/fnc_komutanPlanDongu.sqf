@@ -58,7 +58,7 @@ private _gozlemRapor = {
     private _rolFn2 = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _bilinen = (_obj nearEntities [["CAManBase", "LandVehicle", "Air"], 450]) select {
         private _e = _x;
-        alive _e && {(_gozGruplar findIf {(_x knowsAbout _e) >= 0.8}) >= 0}
+        alive _e && {(_gozGruplar findIf {(_x knowsAbout _e) >= (["TESPIT"] call FUNC(bilgiEsik))}) >= 0}
     };
     private _hos = _bilinen select {(side _x) isNotEqualTo civilian && {_taraf getFriend (side _x) < 0.6}};
     private _siv = _bilinen select {(side _x) isEqualTo civilian && {_x isKindOf "CAManBase"}};
@@ -111,7 +111,7 @@ private _atisIzni = {
     {
         private _gl = leader _x;
         if (!isNull _gl && {alive _gl} && {(side _x) isEqualTo _tfC}) then {
-            { if (((_tfC getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objC) < 500} && {(_gl knowsAbout (_x select 4)) > 0.5} && {[_x select 4] call FUNC(gercekHedef)}) then { _canli = _canli + 1; }; } forEach (_gl nearTargets 900);
+            { if (((_tfC getFriend (_x select 2)) < 0.6) && {((_x select 0) distance2D _objC) < 500} && {(_gl knowsAbout (_x select 4)) > (["SUPHE"] call FUNC(bilgiEsik))} && {[_x select 4] call FUNC(gercekHedef)}) then { _canli = _canli + 1; }; } forEach (_gl nearTargets 900);
         };
     } forEach allGroups;
     if !(_plan getOrDefault ["raporHazir", false]) then {
@@ -361,7 +361,7 @@ private _gucOrani = {
         if (!isNull _gl && {alive _gl}) then {
             {
                 private _eo = _x select 4;
-                if (!isNull _eo && {alive _eo} && {(_tf getFriend (_x select 2)) < 0.6} && {[_eo] call FUNC(gercekHedef)} && {(_gl knowsAbout _eo) >= 0.3} && {((getPosATL _eo) distance2D _ob) <= 500}) then { _bil pushBackUnique _eo; };
+                if (!isNull _eo && {alive _eo} && {(_tf getFriend (_x select 2)) < 0.6} && {[_eo] call FUNC(gercekHedef)} && {(_gl knowsAbout _eo) >= (["SEZILDI"] call FUNC(bilgiEsik))} && {((getPosATL _eo) distance2D _ob) <= 500}) then { _bil pushBackUnique _eo; };
             } forEach (_gl nearTargets 900);
         };
     } forEach (_gruplar + (_plan getOrDefault ["reconG", []]));
@@ -865,7 +865,7 @@ while {true} do {
                         _plan set ["arkaYeniT", time];
                         // bilinen dusman agirlik merkezi (yalniz gercek dusman)
                         private _ep = [];
-                        private _bil = ((leader _ag) nearTargets 600) select {((_plan get "taraf") getFriend (_x select 2)) < 0.6 && {((leader _ag) knowsAbout (_x select 4)) > 0.3} && {[_x select 4] call FUNC(gercekHedef)}};
+                        private _bil = ((leader _ag) nearTargets 600) select {((_plan get "taraf") getFriend (_x select 2)) < 0.6 && {((leader _ag) knowsAbout (_x select 4)) > (["SEZILDI"] call FUNC(bilgiEsik))} && {[_x select 4] call FUNC(gercekHedef)}};
                         if (_bil isNotEqualTo []) then {
                             private _bx = 0; private _by = 0;
                             { _bx = _bx + ((_x select 0) select 0); _by = _by + ((_x select 0) select 1); } forEach _bil;
@@ -1199,7 +1199,7 @@ while {true} do {
                 if (_simdi isNotEqualTo []) then {
                     private _sayi = 0;
                     private _tr2 = _plan get "taraf";
-                    { private _u = _x; if (alive _u && {(_tr2 getFriend (side _u)) < 0.6} && {(_u distance2D (_simdi select 1)) < 250} && {(_rg findIf {_x knowsAbout _u > 0.3}) >= 0}) then { _sayi = _sayi + 1; }; } forEach (allUnits select {_x isKindOf "CAManBase"});
+                    { private _u = _x; if (alive _u && {(_tr2 getFriend (side _u)) < 0.6} && {(_u distance2D (_simdi select 1)) < 250} && {(_rg findIf {_x knowsAbout _u > (["SEZILDI"] call FUNC(bilgiEsik))}) >= 0}) then { _sayi = _sayi + 1; }; } forEach (allUnits select {_x isKindOf "CAManBase"});
                     (_plan get "reconEkSonuc") pushBack format ["%1 %2: %3 dusman bilindi", _simdi select 2, mapGridPosition (_simdi select 1), _sayi];
                     diag_log format ["[PLAN-RECON-EK] %1 | gozlem sonucu: %2", _id, (_plan get "reconEkSonuc") select (((count (_plan get "reconEkSonuc")) - 1) max 0)];
                     _plan deleteAt "reconEkSimdi";
@@ -1452,7 +1452,7 @@ while {true} do {
             private _dusmanVar = false;
             {
                 private _g = _x;
-                { if (alive _x && {((side _g) getFriend (side _x)) < 0.6} && {(_x distance2D _obj) < 80} && {(_g knowsAbout _x) >= 0.8}) then { _dusmanVar = true; }; } forEach (_obj nearEntities ["CAManBase", 80]);
+                { if (alive _x && {((side _g) getFriend (side _x)) < 0.6} && {(_x distance2D _obj) < 80} && {(_g knowsAbout _x) >= (["TESPIT"] call FUNC(bilgiEsik))}) then { _dusmanVar = true; }; } forEach (_obj nearEntities ["CAManBase", 80]);
             } forEach _gruplar;
             if (_dusmanVar) then { _plan set ["dusmanT", time]; };
             if (_dusmanVar && {(_plan getOrDefault ["topcu", 0]) in [2, 3]} && {_fazSure > 150} && {(time - (_plan getOrDefault ["cagriT", 0])) > 120}) then {
@@ -1578,7 +1578,7 @@ while {true} do {
                         {
                             private _hobj = _x select 4;
                             // v8.243: yalniz GERCEK dusman (yaya ya da murettebatli arac); bos arac / statik / nesne dusman sayilmaz (RPT c7592408: hic dusman yokken '6 dusman, objektife 19 m' sayildi ve YEDEK acikta kaldi)
-                            if (!isNull _hobj && {(_tfS getFriend (_x select 2)) < 0.6} && {alive _hobj} && {(_glS knowsAbout _hobj) > 0.4}
+                            if (!isNull _hobj && {(_tfS getFriend (_x select 2)) < 0.6} && {alive _hobj} && {(_glS knowsAbout _hobj) > (["SUPHE"] call FUNC(bilgiEsik))}
                                 && {(_hobj isKindOf "CAManBase") || {(({alive _x} count (crew _hobj)) > 0) && {_hobj isKindOf "AllVehicles"}}}) then {
                                 private _dOb = (getPosATL _hobj) distance2D _obj;
                                 if (_dOb < 400) then { _dusN pushBackUnique _hobj; };

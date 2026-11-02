@@ -215,7 +215,7 @@ lambs_danger_patlayiciDon = {
             private _tr = _l nearTargets 320;
             private _dusman = _tr select {
                 private _o = _x select 4;
-                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 0.6}   // v8.315: 1.0 -> 0.6 (kullanici: 'kosullari esnet')
+                !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))}   // v8.315: 1.0 -> 0.6 (kullanici: 'kosullari esnet')
             };
             // v8.314 TANI (kullanici: 'el bombasi kullanimi hala yok'; RPT 23-10 09:25: sayaclar 0 = hic aday bulunamadi; asker 'iceride' idi ve eski kod bina ici askeri eliyordu): grup basina 20 sn'de bir neden satiri (en cok 60)
             if ((time - (_g getVariable [QGVAR(patTaniT), -999])) > 20 && {(missionNamespace getVariable ["lambs_danger_patTaniN", 0]) < 60}) then {
@@ -228,7 +228,7 @@ lambs_danger_patlayiciDon = {
             if (_dusman isEqualTo []) then { continue };
             private _zirhli = (_l nearTargets 900) findIf {
                 private _o = _x select 4;
-                !isNull _o && {alive _o} && {(_o isKindOf "Tank") || {_o isKindOf "Tracked_APC_F"} || {_o isKindOf "Wheeled_APC_F"}} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= 0.8}
+                !isNull _o && {alive _o} && {(_o isKindOf "Tank") || {_o isKindOf "Tracked_APC_F"} || {_o isKindOf "Wheeled_APC_F"}} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= (["TESPIT"] call FUNC(bilgiEsik))}
             } >= 0;
 
             {

@@ -55,7 +55,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
 
             // gorunmeyen atici: bilinen dusmana gorus hatti yok
             private _en = _l findNearestEnemy _l;
-            private _gorunur = !isNull _en && {alive _en} && {(_l knowsAbout _en) >= 1.0} && {!(lineIntersects [eyePos _l, eyePos _en, _l, _en])};
+            private _gorunur = !isNull _en && {alive _en} && {(_l knowsAbout _en) >= (["TESPIT"] call FUNC(bilgiEsik))} && {!(lineIntersects [eyePos _l, eyePos _en, _l, _en])};
             if (_gorunur) then { continue };   // gorulen dusman: LAMBS / ELITE normal akisi
 
             _g setVariable [QGVAR(pusuT), time];

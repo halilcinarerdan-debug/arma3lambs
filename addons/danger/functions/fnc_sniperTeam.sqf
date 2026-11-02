@@ -282,7 +282,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
 
             // Yanma: baski / yakinda ve bizi biliyor -> pozisyon degistir
             private _yandik = ((getSuppression _s) >= 0.5)
-                || {(_dEn <= 150) && {(_dusman knowsAbout _s) >= 2}};
+                || {(_dEn <= 150) && {(_dusman knowsAbout _s) >= (["TAM"] call FUNC(bilgiEsik))}};
             private _kotu = _ng getVariable [QGVAR(snpKotu), []];
             if (_yandik && {_hold isNotEqualTo []}) then {
                 _kotu pushBack _hold;
@@ -340,7 +340,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                 };
 
                 // hedef secimi
-                private _hedefler = (_s targets [true, 700]) select {_x isKindOf "CAManBase" && {alive _x} && {(_s knowsAbout _x) >= 1.0}};
+                private _hedefler = (_s targets [true, 700]) select {_x isKindOf "CAManBase" && {alive _x} && {(_s knowsAbout _x) >= (["TESPIT"] call FUNC(bilgiEsik))}};
                 if (_hedefler isNotEqualTo []) then {
                     private _best = _hedefler select 0;
                     private _bestP = -99;

@@ -117,7 +117,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
             || {_uu getVariable [QGVAR(forceMove), false]}
             || {
                 private _e = _uu findNearestEnemy _uu;
-                !isNull _e && {alive _e} && {(_uu distance2D _e) < 35} && {(_uu knowsAbout _e) >= 1.0}
+                !isNull _e && {alive _e} && {(_uu distance2D _e) < 35} && {(_uu knowsAbout _e) >= (["TESPIT"] call FUNC(bilgiEsik))}
             }
         };
         private _birak = {
@@ -215,7 +215,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
             if (_temasT <= time) then {
                 private _ld = leader _g;
                 private _ed = if (isNull _ld || {!alive _ld}) then {objNull} else {_ld findNearestEnemy _ld};
-                if (isNull _ed || {!alive _ed} || {(_ld distance2D _ed) > 250} || {(_ld knowsAbout _ed) < 0.3}) then {
+                if (isNull _ed || {!alive _ed} || {(_ld distance2D _ed) > 250} || {(_ld knowsAbout _ed) < (["SEZILDI"] call FUNC(bilgiEsik))}) then {
                     if (isNull _ld || {(behaviour _ld) isNotEqualTo "COMBAT"}) then { continue };
                     _olcek = 0.6;
                 };
@@ -249,7 +249,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
 
                 // bilinen yakin dusman: kose temkini degil, normal savas (cqbReflex / coverHug)
                 private _en = _u findNearestEnemy _u;
-                if (!isNull _en && {alive _en} && {(_u distance2D _en) < 35} && {(_u knowsAbout _en) >= 1.0}) then { continue };
+                if (!isNull _en && {alive _en} && {(_u distance2D _en) < 35} && {(_u knowsAbout _en) >= (["TESPIT"] call FUNC(bilgiEsik))}) then { continue };
 
                 _butce = _butce - 1;
                 private _vel = velocity _u;

@@ -42,7 +42,7 @@ private _calis = {
             {
                 private _o = _x select 4;
                 if (!isNull _o && {alive _o} && {_o isKindOf "Tank"} && {(getNumber (configOf _o >> "armor")) >= 300} && {(_tf getFriend (_x select 2)) < 0.6}
-                    && {[_o] call FUNC(gercekHedef)} && {(_l knowsAbout _o) >= 0.3}) then {
+                    && {[_o] call FUNC(gercekHedef)} && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}) then {
                     private _dd = _v distance2D _o;
                     if (_dd < _tD && {_dd <= 1200}) then { _tD = _dd; _tank = _o; };
                 };

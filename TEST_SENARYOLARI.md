@@ -583,3 +583,9 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 3. PEEL: 6+ kisilik grubu 1.6x ustun dusmana karsi yaralayarak PEEL kararina sok: `[PEEL]` + `[GERI-CEKILME-*]`; retreat bitince grup normal formasyona donmeli.
 4. SIHA-LAZER: LG mermili top + gozlemci IHA + dusman tank (kumede arac): RPT `[SIHA-LAZER] LG ATIS` ... `BDA`. Dusman yalniz piyade ise `[SIHA-LAZER]` HIC cikmamali (standart ADJUST / FFE).
 5. `tools/hemtt_kontrol.sh` sonunda 0 HATA 0 UYARI.
+
+## T-BILGI-ESIK (v8.366)
+1. CBA > ELITE bilgi esikleri: 6 kaydirici gorunuyor, varsayilanlar 0.15 / 0.30 / 0.50 / 0.80 / 1.20 / 2.00. KESIN'i 1.2 -> 2.0 yap: dron gozlemli topcu atisi / pusu tetigi belirgin gec; geri 1.2 yapinca normal.
+2. Tabloyu BOZ (SUPHE'yi 0.1 yap): fnc_bilgiEsik monoton tutar (SUPHE >= SEZILDI), davranis bozulmaz.
+3. `tools/tutarlilik_denetimi.py`: '[BILGI-ESIK]' hatasi YOK; bir dosyaya `(_g knowsAbout _x) >= 0.5` yaz: HATA vermeli.
+4. Karsilastirma: ayni senaryoyu v8.365 ve v8.366 ile oynat; `[DRON-TOPCU]`, `[IHA-BEKLEME]`, `[CQB-KOSE]`, `[PUSU]` sayilarini kiyasla.

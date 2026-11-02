@@ -70,7 +70,7 @@ diag_log "[BINA-PENCERE] bina ici pencere / atis pozisyonu watchdog baslatildi (
                 private _en = _u findNearestEnemy _u;
                 if (isNull _en || {!alive _en}) then { continue };
                 private _ed = _u distance2D _en;
-                if (_ed < 8 || {_ed > 250} || {(_u knowsAbout _en) < 0.5}) then { continue };
+                if (_ed < 8 || {_ed > 250} || {(_u knowsAbout _en) < (["SUPHE"] call FUNC(bilgiEsik))}) then { continue };
                 private _rol = [_u] call _rolFn;
                 if (_rol isEqualTo "AT") then { continue };
 

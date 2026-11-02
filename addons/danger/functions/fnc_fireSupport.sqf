@@ -70,7 +70,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
                 private _u = selectRandom _glAtici;
                 private _adaylar = (_u targets [true, 320]) select {
                     _x isKindOf "CAManBase" && {alive _x} && {isNull objectParent _x} && {(_u distance2D _x) > 40}
-                    && {(_u knowsAbout _x) > 0.5}
+                    && {(_u knowsAbout _x) > (["SUPHE"] call FUNC(bilgiEsik))}
                 };
                 if (_adaylar isNotEqualTo []) then {
                     // en degerli hedef: binada > kapali hat > kume > acikta duran

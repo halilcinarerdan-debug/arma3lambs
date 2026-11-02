@@ -35,7 +35,7 @@ private _ets = (_l nearTargets 1600) select {
     (_taraf getFriend (_x select 2)) < 0.6
     && {alive (_x select 4)}
     && {(_x select 4) isKindOf "Tank"}
-    && {(_l knowsAbout (_x select 4)) > 0.5}
+    && {(_l knowsAbout (_x select 4)) > (["SUPHE"] call FUNC(bilgiEsik))}
     && {[_x select 4] call FUNC(gercekHedef)}
 };
 if (_ets isEqualTo []) exitWith {false};

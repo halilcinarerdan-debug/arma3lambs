@@ -57,7 +57,7 @@ private _armor = (_unit nearEntities [["Tank", "Wheeled_APC_F"], 450]) select {
     alive _x
     && {(_mySide getFriend (side _x)) < 0.6}
     && {((side _x) != civilian)}
-    && {((_group knowsAbout _x) >= 1.2) || {(_x distance2D _unit) < 150}}
+    && {((_group knowsAbout _x) >= (["KESIN"] call FUNC(bilgiEsik))) || {(_x distance2D _unit) < 150}}
 };
 if (_armor isEqualTo []) exitWith {false};
 _armor = [_armor, [], {_unit distance2D _x}, "ASCEND"] call BIS_fnc_sortBy;
@@ -129,7 +129,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
             alive _x
             && {(_taraf getFriend (side _x)) < 0.6}
             && {((side _x) != civilian)}
-            && {((_g knowsAbout _x) >= 0.5) || {(_x distance2D _merkez) < 70}}
+            && {((_g knowsAbout _x) >= (["SUPHE"] call FUNC(bilgiEsik))) || {(_x distance2D _merkez) < 70}}
         };
         [_liste, [], {_merkez distance2D _x}, "ASCEND"] call BIS_fnc_sortBy
     };
@@ -303,7 +303,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
                     _x doWatch _pHedef;
                     [_x, AGLToASL (getPosATL _pHedef)] call EFUNC(main,doSuppress);
                     _x doTarget _pHedef;
-                    if ((_x knowsAbout _pHedef) > 1) then {
+                    if ((_x knowsAbout _pHedef) > (["KESIN"] call FUNC(bilgiEsik))) then {
                         _x doFire _pHedef;
                     };
                     [_x, _pHedef] call _uglFn;

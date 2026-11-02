@@ -60,7 +60,7 @@ while {!_hemen && {!(_emir select 1)} && {(time - _t0) < 1800} && {isNull _hedef
     private _bilen = allGroups select {(side _x) isEqualTo _taraf && {!isNull (leader _x)}};
     private _bilinen = {
         params ["_t"];
-        (_bilen findIf {_x knowsAbout _t >= 0.4}) >= 0
+        (_bilen findIf {_x knowsAbout _t >= (["SUPHE"] call FUNC(bilgiEsik))}) >= 0
     };
     private _adaylar = if (_tur isEqualTo "FPV-AT") then {
         (_poz nearEntities [["LandVehicle"], _tetik]) select {alive _x && {(crew _x) findIf {alive _x} >= 0} && {(_taraf getFriend (side (group (driver _x)))) < 0.6} && {((getNumber (configOf _x >> "armor")) >= 100) || {_x isKindOf "Tank"} || {_x isKindOf "APC_Tracked_01_base_F"}}}

@@ -182,7 +182,7 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
     // ---- hedef secimi ----
     private _bilinen = {
         params ["_t"];
-        ((_uav knowsAbout _t) >= 0.3) || {((allGroups select {(side _x) isEqualTo _taraf && {!isNull leader _x}}) findIf {_x knowsAbout _t >= 0.4}) >= 0}
+        ((_uav knowsAbout _t) >= (["SEZILDI"] call FUNC(bilgiEsik))) || {((allGroups select {(side _x) isEqualTo _taraf && {!isNull leader _x}}) findIf {_x knowsAbout _t >= (["SUPHE"] call FUNC(bilgiEsik))}) >= 0}
     };
     // v8.327 DUMAN (kullanici: 'IHA AI lar smokedan etkilensin, spot time olarak'): kilit suresi dolmadan dalis yok; duman hattı kesiyorsa kilit sifirlanir, 22 sn'de kilitlenemezse hedef 45 sn yasaklanir
     private _yasak = [];

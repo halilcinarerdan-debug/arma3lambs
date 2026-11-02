@@ -391,7 +391,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 private _gn = if (!isNull (gunner _v) && {(gunner _v) isNotEqualTo _dr}) then {gunner _v} else {commander _v};
                 if (!isNull _gn && {alive _gn} && {_gn isNotEqualTo _dr} && {(lifeState _gn) in ["HEALTHY", "INJURED"]}) then {
                     private _hd = _gn findNearestEnemy (getPosATL _v);
-                    if (!isNull _hd && {alive _hd} && {(_v distance2D _hd) <= 900} && {(_gn knowsAbout _hd) > 0.3}) then {
+                    if (!isNull _hd && {alive _hd} && {(_v distance2D _hd) <= 900} && {(_gn knowsAbout _hd) > (["SEZILDI"] call FUNC(bilgiEsik))}) then {
                         _gn enableAI "TARGET"; _gn enableAI "AUTOTARGET";
                         _gn doTarget _hd;
                         _gn doFire _hd;
@@ -796,7 +796,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                             if (!isNull _gl && {alive _gl}) then {
                                 {
                                     private _eo = _x select 4;
-                                    if (!isNull _eo && {alive _eo} && {[_eo] call FUNC(gercekHedef)} && {((side (group _d)) getFriend (_x select 2)) < 0.6} && {(_gl knowsAbout _eo) > 0.2} && {(_v distance2D _eo) < _edm}) then { _en = _eo; _edm = _v distance2D _eo; };
+                                    if (!isNull _eo && {alive _eo} && {[_eo] call FUNC(gercekHedef)} && {((side (group _d)) getFriend (_x select 2)) < 0.6} && {(_gl knowsAbout _eo) > (["SEZILDI"] call FUNC(bilgiEsik))} && {(_v distance2D _eo) < _edm}) then { _en = _eo; _edm = _v distance2D _eo; };
                                 } forEach (_gl nearTargets 400);
                             };
                         } forEach ([effectiveCommander _v] + (_binen apply { leader (group _x) }));

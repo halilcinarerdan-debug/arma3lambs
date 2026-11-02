@@ -14,6 +14,7 @@ Oyunsuz, statik ve TEKRARLANABILIR kontroller (hepsi 244+ dosyanin TAMAMINI tara
   7. Surum tutarliligi: boot satiri <-> rpt_ozet BEKLENEN_SURUM <-> DEVIR_LOGU son girisi
   8. Belgelerde gecen lambs_danger_* adlari kodda var mi
   9. exitWith, if-then / else BLOGU icinde ve donus degeri (false/true/[]/sayi) veriyorsa: exitWith yalniz o blogu terk eder, fonksiyonu DEGIL (fonksiyon cikisi sanilan mantik hatasi)
+ 10. [BILGI-ESIK] knowsAbout'un SAYISAL esikle karsilastirilmasi YASAK (tek tablo: fnc_bilgiEsik); tablo varsayilanlari <-> CBA varsayilanlari; bilgiEsik cagrilarindaki asama adlari gecerli mi
 """
 import re, os, sys, glob, collections
 
@@ -171,7 +172,9 @@ for ad, (tur, spec, tip, satir) in sets.items():
     d0 = norm(varsayilan(tur, spec))
     for (fb, b, l) in okuma.get(ad, []):
         if tur != "LIST" and not fb.startswith("_") and norm(fb) != d0: UYARI.append("[AYAR] %s: kodda yedek deger %s <> ayar varsayilani %s (%s:%d)" % (ad, fb, d0, b, l))
+_dinOn = [d for d in re.findall(r'"(lambs_danger_\w*?)%\d', "".join(SQF.values())) if len(d) > 14]   # format ile kurulan degisken adlari (ornek lambs_danger_esik_%1)
 for ad in sets:
+    if any(ad.startswith(d) for d in _dinOn): continue
     if sum(len(re.findall(r"\b" + ad + r"\b", t)) for t in list(SQF.values()) + list(HPP.values())) <= 1: UYARI.append("[AYAR] kayitli ama kullanilmayan ayar: %s" % ad)
 BILGI.append("CBA ayari (tablo/addSetting): %d" % len(sets))
 
@@ -269,6 +272,39 @@ for p, raw in SQF.items():
         son = govde.split(";")[-1].strip()
         if re.fullmatch(r"(false|true|\[\]|nil|objNull|-?\d+(\.\d+)?)", son) and c[e:en_yakin[1]].strip(" ;\r\n\t"):
             HATA.append("[EXITWITH] %s:%d if-then/else blogu icinde donus degerli exitWith (fonksiyondan degil, yalniz o bloktan cikar; bayrak + fonksiyon seviyesinde exitWith kullanin)" % (goreli(p), c[:m.start()].count("\n") + 1))
+
+# ------------------------------------------------------------------ 10. bilgi esigi (tek tablo)
+_tbl = SQF.get(R + "/functions/fnc_bilgiEsik.sqf", "")
+_asamalar = {}
+_m = re.search(r"private _tablo = \[(.*?)\];", _tbl, re.S)
+if _m:
+    for ad, v in re.findall(r'\["(\w+)",\s*([\d.]+)\]', _m.group(1)): _asamalar[ad] = float(v)
+if not _asamalar: HATA.append("[BILGI-ESIK] fnc_bilgiEsik.sqf tablosu okunamadi")
+_onceki = -1
+for ad, v in _asamalar.items():
+    if v < _onceki: HATA.append("[BILGI-ESIK] tablo monoton degil: %s %.2f" % (ad, v))
+    _onceki = v
+    st = sets.get("lambs_danger_esik_" + ad)
+    if not st: HATA.append("[BILGI-ESIK] CBA ayari yok: lambs_danger_esik_%s" % ad)
+    else:
+        sm = re.match(r"\[\s*[-\d.]+\s*,\s*[-\d.]+\s*,\s*([-\d.]+)", st[1].strip())
+        if not sm or abs(float(sm.group(1)) - v) > 1e-9: HATA.append("[BILGI-ESIK] %s: tablo %.2f <> CBA varsayilan %s" % (ad, v, sm.group(1) if sm else "?"))
+for p, raw in SQF.items():
+    if p.endswith("fnc_bilgiEsik.sqf"): continue
+    c = temizle(raw)
+    for m in re.finditer(r"knowsAbout\s+", c):
+        pos = m.end()
+        if pos >= len(c): continue
+        if c[pos] == "(": e = match(c, pos)
+        else:
+            mm = re.match(r"\w+", c[pos:])
+            if not mm: continue
+            e = pos + mm.end()
+        r = re.match(r"\s*\)?\s*(?:>=|<=|>|<)\s*(-?\d|\(\[\s*-?\d)", c[e:])
+        if r: HATA.append("[BILGI-ESIK] %s:%d knowsAbout dogrudan sayiyla karsilastiriliyor (tek tablo: [\"ASAMA\"] call FUNC(bilgiEsik))" % (goreli(p), c[:m.start()].count("\n") + 1))
+    for m in re.finditer(r'\[\s*"(\w+)"\s*\]\s*call\s+FUNC\(bilgiEsik\)', raw):
+        if m.group(1) not in _asamalar: HATA.append("[BILGI-ESIK] %s: gecersiz asama '%s'" % (goreli(p), m.group(1)))
+BILGI.append("bilgi esigi: %d asama (%s); bilgiEsik cagrisi %d" % (len(_asamalar), ", ".join("%s %.2f" % kv for kv in _asamalar.items()), sum(len(re.findall(r"call\s+FUNC\(bilgiEsik\)", t)) for t in SQF.values())))
 
 # ------------------------------------------------------------------ cikti
 print("== TUTARLILIK DENETIMI ==")

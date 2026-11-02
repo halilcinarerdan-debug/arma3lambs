@@ -359,7 +359,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     private _e = _u findNearestEnemy _u;
                     if (!isNull _e) then {
                         private _d = _u distance2D _e;
-                        if (_d > 50 && {_d < 450} && {(_u knowsAbout _e) > 0.4}) then {
+                        if (_d > 50 && {_d < 450} && {(_u knowsAbout _e) > (["SUPHE"] call FUNC(bilgiEsik))}) then {
                             if (lineIntersects [eyePos _u, eyePos _e, _u, _e]) then {
                                 _u setVariable [QGVAR(mgSupLast), time];
                                 private _bp = getPosATL _e;
@@ -376,7 +376,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     private _adaylar = (_u targets [true, 600]) select {
                         _x isKindOf "CAManBase"
                         && {(_u distance2D _x) > 80}
-                        && {(_u knowsAbout _x) > 1}
+                        && {(_u knowsAbout _x) > (["TESPIT"] call FUNC(bilgiEsik))}
                     };
                     private _en = objNull;
                     private _enPuan = 0;

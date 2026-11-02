@@ -400,7 +400,7 @@ if (isServer) then {
                 private _sav_gr = allGroups select {(side _x) isEqualTo _taraf && {!isNull leader _x} && {((leader _x) distance2D _poz) < (_yar * 1.5)} && {!isPlayer (leader _x)}};
                 if (_sav_gr isEqualTo []) then { continue };
                 private _dus = (_poz nearEntities ["CAManBase", 800]) select {alive _x && {(_taraf getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian}};
-                private _bilinen = _dus select {private _d = _x; (_sav_gr findIf {(_x knowsAbout _d) >= 0.5}) >= 0};
+                private _bilinen = _dus select {private _d = _x; (_sav_gr findIf {(_x knowsAbout _d) >= (["SUPHE"] call FUNC(bilgiEsik))}) >= 0};
                 if (_bilinen isNotEqualTo []) then {
                     _k set [6, true];
                     diag_log format ["[KARAKOL] ALARM: %1 %2 | duşman %3 m icinde bilindi (%4 kisi) -> savunma plani", _taraf, _ad, round (_poz distance2D (_bilinen select 0)), count _bilinen];

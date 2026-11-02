@@ -153,7 +153,7 @@ private _calis = {
                 private _uav = unitIsUAV _v;
                 private _ho = _arm && {!_uav} && {(speed _v) < 15} && {((getPosATL _v) select 2) > 8};
                 private _ates = (time - (_v getVariable ["lambs_danger_havaAtesT", -999])) < 20;
-                private _esik = if (_ho || _ates) then {0.15} else {missionNamespace getVariable ["lambs_danger_havaBilgiEsik", 0.4]};
+                private _esik = if (_ho || _ates) then {(["ISARET"] call FUNC(bilgiEsik))} else {(["SUPHE"] call FUNC(bilgiEsik))};   // v8.366: tek tablo (eski: 0.15 / lambs_danger_havaBilgiEsik 0.4); ates alan / silahli havada asili arac en ufak ize tepki
                 if ((_g knowsAbout _v) < _esik) then { _ele pushBack format ["%1 %2 m: knowsAbout %3 < esik %4", typeOf _v, round _d, (_g knowsAbout _v) toFixed 2, _esik]; continue };
                 if (_d > 1200 && {!_ho}) then { _ele pushBack format ["%1 %2 m: menzil disi (>1200, hover degil)", typeOf _v, round _d]; continue };
                 if (_uav && {!_arm} && {_d > 700}) then { _ele pushBack format ["%1 %2 m: silahsiz dron >700", typeOf _v, round _d]; continue };

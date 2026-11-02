@@ -85,7 +85,7 @@ if (_mod isEqualTo "OPERATOR") then {
 if (_mod isEqualTo "KARSI") then {
     private _hedefler = vehicles select {
         private _h0 = _x;
-        alive _x && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {(_taraf getFriend (side (group (gunner _x)))) < 0.6} && {(allGroups findIf {(side _x) isEqualTo _taraf && {!isNull (leader _x)} && {(_x knowsAbout _h0) >= 1.0}}) >= 0}
+        alive _x && {(getNumber (configOf _x >> "artilleryScanner")) > 0} && {!isNull (gunner _x)} && {(_taraf getFriend (side (group (gunner _x)))) < 0.6} && {(allGroups findIf {(side _x) isEqualTo _taraf && {!isNull (leader _x)} && {(_x knowsAbout _h0) >= (["KESIN"] call FUNC(bilgiEsik))}}) >= 0}
         && {(time - (_x getVariable ["lambs_danger_karsiBatT", -999])) > 90}
     };
     {

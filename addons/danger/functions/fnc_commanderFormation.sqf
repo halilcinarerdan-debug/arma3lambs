@@ -86,7 +86,7 @@ diag_log "[KOMUTAN-FORM] komutan formasyon zekasi watchdog baslatildi (temasta C
                     // tehdit mesafesi: bilinen gercek dusmanin en yakini ya da (ele gecir planinda) objektife mesafe; hicbiri yoksa 9999 (uzak)
                     private _bilinenD = 9999;
                     {
-                        if (((side _g) getFriend (_x select 2)) < 0.6 && {_l knowsAbout (_x select 4) > 0.3} && {[_x select 4] call FUNC(gercekHedef)}) then { _bilinenD = _bilinenD min (_l distance2D (_x select 0)); };
+                        if (((side _g) getFriend (_x select 2)) < 0.6 && {_l knowsAbout (_x select 4) > (["SEZILDI"] call FUNC(bilgiEsik))} && {[_x select 4] call FUNC(gercekHedef)}) then { _bilinenD = _bilinenD min (_l distance2D (_x select 0)); };
                     } forEach (_l nearTargets 1500);
                     private _tehditD = _bilinenD;
                     if (!isNil "lambs_danger_planlar") then {
