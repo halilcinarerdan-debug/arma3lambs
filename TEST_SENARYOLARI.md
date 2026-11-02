@@ -576,3 +576,10 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 2. Zeus Objektif: ayni noktaya (150 m icinde) ayni turde iki plan iste; ikincisi sohbette 'zaten ayni turde plan var' ile reddedilmeli ve `[PLAN] ... KURULDU` ikinci kez GORULMEMELI.
 3. Merkava (ya da kargolu bir MBT) koy; RPT `[ARAC-SINIF] ... ipucu` satirini oku; `lambs_danger_aracSinifOverride = createHashMapFromArray [["sinif_adi","TANK"]];` (init) ile TANK yap, `[TANK-ATES]` / `[TANK-MUHIMMAT]` satirlari gelmeli.
 4. `tools/hemtt_kontrol.sh` sonunda '0 HATA, 0 UYARI' (tutarlilik denetimi) ve 'L-S12 ... 0' gorulmeli.
+
+## T-CANLANDIRMA (v8.365)
+1. ELIT-COVER: Zeus'ta acik arazide, askerin 8-15 m yaninda `Land_BagFence_Long_F` / `Land_HBarrier_*` / sandik yerlestir; 80-150 m'den dusman ver. RPT `[ELIT-COVER]` + asker nesnenin dusman tarafindaki arkasina gidiyor mu; 6 askerle ayni nesne: hepsi ayni noktaya DOLMAMALI.
+2. YETIM-TOPLA: 8 kisilik grubu SAFE'te yurut; bir askere uzak bir noktaya `doMove` ver sonra emri iptal et / yolda takilsin (>= 40 m). 16-24 sn sonra `[YETIM-TOPLA]` ve asker lidere donmeli. Ayni test: hekim / nobetci / `lambs_danger_gorev` atanmis grupta COK `[YETIM-TOPLA]` CIKMAMALI.
+3. PEEL: 6+ kisilik grubu 1.6x ustun dusmana karsi yaralayarak PEEL kararina sok: `[PEEL]` + `[GERI-CEKILME-*]`; retreat bitince grup normal formasyona donmeli.
+4. SIHA-LAZER: LG mermili top + gozlemci IHA + dusman tank (kumede arac): RPT `[SIHA-LAZER] LG ATIS` ... `BDA`. Dusman yalniz piyade ise `[SIHA-LAZER]` HIC cikmamali (standart ADJUST / FFE).
+5. `tools/hemtt_kontrol.sh` sonunda 0 HATA 0 UYARI.

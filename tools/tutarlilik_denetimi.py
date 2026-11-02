@@ -94,11 +94,14 @@ for p, t in list(SQF.items()) + list(HPP.items()):
     for m in re.finditer(r"lambs_danger_fnc_(\w+)", t): ref[m.group(1)].add(goreli(p))
 for n in sorted(ref):
     if n not in dosya and n not in UPSTREAM: HATA.append("[FUNC] cagrilan fonksiyon yok: %s (%s)" % (n, sorted(ref[n])[0]))
+# lambs_main (addons/main) de danger fonksiyonlarini DEGISKEN ADIYLA cagirir (ornek findCover -> lambs_danger_fnc_eliteCover)
+for _mp in glob.glob(os.path.join(KOK, "addons", "main", "**", "*.sqf"), recursive=True):
+    for m in re.finditer(r"lambs_danger_fnc_(\w+)", oku(_mp)): ref[m.group(1)].add("main/" + os.path.basename(_mp))
 dyn = set(re.findall(r'"(\w+)"', prep))
 for n in sorted(dosya):
-    if n not in ref and n not in dyn and n not in {"eliteCover", "orphanWatchdog", "tacticsPeel", "sihaLazer"}:
+    if n not in ref and n not in dyn:
         UYARI.append("[FUNC] hic cagrilmayan fonksiyon (olu kod?): %s" % n)
-BILGI.append("PREP %d, dosya %d, bilinen olu kod: eliteCover/orphanWatchdog/tacticsPeel(uyumluluk)/sihaLazer(kanca)" % (len(prepd), len(dosya)))
+BILGI.append("PREP %d, dosya %d (v8.365: olu kod kalmadi; hepsi canlandirildi)" % (len(prepd), len(dosya)))
 
 # ------------------------------------------------------------------ 2. CBA olaylari
 emit = collections.defaultdict(list); hand = {}

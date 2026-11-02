@@ -69,6 +69,47 @@ call {
     _T = +_c0;
     private _bas = _na0 + _nv0;
 
+    // ---- 1b) SIHA LAZER ISARETLEME + LAZER GUDUMLU MERMI (v8.365; fnc_sihaLazer + fnc_topcuLG canlandirildi) ----
+    //   NEDEN: nokta hedef (ZIRHLI / KARA ARACI) icin adjust + FFE (4-12 mermi, alan atesi) yerine ISARETLEYEN gozlemcinin lazeriyle TEK hassas mermi (kitapta kavram: precision-guided / lazer isaretleme —
+    //   hedef tespit eden IHA ayni zamanda atisi yonlendirir; ATP 7-100.1 'reconnaissance-fire complex' UAS + dolayli ates). Sayilar [T]. Personel kumesi icin (arac yok) alan atesi akisi AYNEN surer.
+    //   KOSUL: gozlemci GERCEK IHA (insansiz hava araci), kumede >= 1 dusman kara araci, taraf bataryasinda LG mermisi var + arac menzilde + guvenlik (RED / NFA) + butce.
+    //   AKIS: lazer (ucus suresi + 25 sn) -> tek LG mermi -> bekle -> BDA; hedef imha ise gorev biter, degilse standart ADJUST / FFE akisina GECILIR (eskalasyon).
+    //   Kapatma: lambs_danger_sihaLazerOff = true / CBA 'SIHA lazer isaretleme'. Log: [SIHA-LAZER].
+    if (_nv0 > 0 && {unitIsUAV _fo} && {!(_fo isKindOf "CAManBase")} && {missionNamespace getVariable ["lambs_danger_sihaLazerAktif", true]} && {!(missionNamespace getVariable ["lambs_danger_sihaLazerOff", false])}) then {
+        private _lgBat = [_taraf, _T] call FUNC(topcuLG);
+        private _araclar = ((([_fo, _taraf] call FUNC(topcuGoru)) select 1) select {alive _x && {_x isKindOf "LandVehicle"} && {(_x distance2D _T) < 120}});
+        if (_lgBat isNotEqualTo [] && {_araclar isNotEqualTo []}) then {
+            _lgBat = [_lgBat, [], {(_x select 0) distance2D _T}, "ASCEND"] call BIS_fnc_sortBy;
+            (_lgBat select 0) params ["_lgV", "_lgMg"];
+            private _hV = ([_araclar, [], {_x distance2D _T}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+            private _hP = getPosATL _hV;
+            ([_taraf, _hP, [_lgV, _lgMg] call FUNC(topcuRed)] call FUNC(topcuGuvenlik)) params ["_okL", "_nedenL", "_dFL", "_dcL"];
+            if (_okL && {!_dcL} && {_hP inRangeOfArtillery [[_lgV], _lgMg]} && {([_taraf] call FUNC(topcuButce)) < _butce}) then {
+                private _eta = (_lgV getArtilleryETA [_hP, _lgMg]) max 5;
+                private _lz = [_fo, _hV, round (_eta + 25)] call FUNC(sihaLazer);
+                if (!isNull _lz) then {
+                    [_lgV, _hP, _lgMg] call FUNC(topcuAtisHazirla);
+                    _lgV doArtilleryFire [_hP, _lgMg, 1];
+                    _atilan = _atilan + 1;
+                    [_taraf, 1] call FUNC(topcuButce);
+                    _sonA = +_hP;
+                    diag_log format ["[SIHA-LAZER] %1 | LG ATIS: isaretleyen %2 -> hedef %3 (%4 m, grid %5) | batarya %6 (%7) mermi %8 | ETA ~%9 sn | lazer %10 sn", _kimlik, typeOf _fo, typeOf _hV, round (_fo distance2D _hV), mapGridPosition _hP, typeOf _lgV, getText (configOf _lgV >> "displayName"), _lgMg, round _eta, round (_eta + 25)];
+                    sleep (_eta + 20);
+                    private _hasar = if (alive _hV) then {damage _hV} else {1};
+                    ([] call _yenile) params ["_tzL", "_cL", "_dL", "_naL", "_nvL"];
+                    diag_log format ["[SIHA-LAZER] %1 | BDA: %2 %3 (hasar %4) | kumede kalan %5 adam %6 arac%7", _kimlik, typeOf _hV, ["SAG", "IMHA / ETKISIZ"] select (!alive _hV || {_hasar >= 0.9}), _hasar toFixed 2, _naL, _nvL, ["", " (gozlemci gorus disi)"] select (!_tzL)];
+                    if (!alive _hV || {_hasar >= 0.9}) then { _sonuc = "LG: hedef imha"; _bekle = 150; _sonKalan = _naL + _nvL; breakOut "ana"; };
+                    if (_tzL && {_cL isNotEqualTo []}) then { _T = +_cL; };
+                    diag_log format ["[SIHA-LAZER] %1 | LG mermisi hedefi imha etmedi -> standart ADJUST / FFE akisina geciliyor", _kimlik];
+                } else {
+                    diag_log format ["[SIHA-LAZER] %1 | lazer nesnesi yaratilamadi (LaserTarget sinifi yok) -> standart akis", _kimlik];
+                };
+            } else {
+                diag_log format ["[SIHA-LAZER] %1 | LG atisi yapilmadi: %2", _kimlik, [format ["guvenlik: %1", _nedenL], ["menzil disi / mermi butcesi", format ["danger close (dost %1 m <= 600): LG atisi yok, standart gozlemli akis", round _dFL]] select _dcL] select _okL];
+            };
+        };
+    };
+
     // ---- 2) CAGRI (call for fire) ----
     private _yon = (getPosATL _fo) getDir _T;
     diag_log format ["[DRON-TOPCU] %1 | CAGRI (call for fire): gozlemci %2%14 | UYARI EMRI: ADJUST FIRE | HEDEF YERI: grid %3 (gozlemciden %4 m, yon %5 derece) | HEDEF TANIMI: %6 adam %7 arac, duragan, acik arazi (varsayilan) | YONTEM: alan atesi%8 | topcu: %9 arac menzilde (ilk: %10, %11 m) | en yakin dost %12 m, RED %13 m",

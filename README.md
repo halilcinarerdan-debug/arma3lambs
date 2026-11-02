@@ -13,8 +13,8 @@ Dosyalar orijinal proje yollarıyla aynı yerleşimde; ilgili `.sqf` dosyaların
 | `addons/danger/functions/fnc_tacticsRetreat.sqf` | **v13**: iki takım (ALPHA / BRAVO=FSE) 40 m'lik dönüşümlü sıçramalarla çekilir; hareket etmeyen takım ateş eder (kimse boş durmaz); hareket edenlerde `forceMove` + AUTOCOMBAT/COVER/TARGET kapalı + `allowFleeing 0` (rastgele koşma yok); 2'li çiftler halinde. Eski: 45 sn cooldown, `splitFireTeams` ile gerçek FSE, combatMode korunur, suya düşmeyen rally, güvenli valf |
 | `addons/danger/functions/fnc_tactics.sqf` | Debug kapalıyken log yok |
 | `addons/danger/functions/fnc_splitFireTeams.sqf` | **Rol bazlı dağıtım**: FSE = MG → nişancı → AT; Maneuver = lider + tüfekliler; Reserve = sağlıkçı + artanlar |
-| `addons/danger/functions/fnc_eliteCover.sqf` | Sıkı cover testi (4 m önünde engel), yaklaşma cezası, nil-güvenli global |
-| `addons/danger/functions/fnc_orphanWatchdog.sqf` | Temas / taze komutan kararında dokunmaz |
+| `addons/danger/functions/fnc_eliteCover.sqf` | Raycast siper YEDEĞİ (v8.365 canlandı): `findCover` boş dönerse halka taraması, FIRE-LOD engel testi, duruş, yığılma cezası, AI sayısına göre kalite |
+| `addons/danger/functions/fnc_orphanWatchdog.sqf` | Yetim asker toplama (v8.365 canlandı): görevi/mevzisi/hekim-forceMove bayrağı olmayan, liderden ≥ 40 m kopuk asker ~16 sn aynıysa `doFollow` |
 | `addons/danger/functions/fnc_selectFormation.sqf` | Retreat FILE kilidi, mükerrer blok silindi |
 | `addons/main/functions/fnc_findCover.sqf` | **v4**: FIRE-geometri ile MERMİ KORUNMASI (çalı gizler ama korumaz → −20), omuz testi, EVADE modu (sadece sert siper, bina +12). Eski v3: | **v3 puanlamalı siper**: koruma seviyesi, yan açılardan (±25°) ve diğer bilinen düşmanlardan gizlilik, arazi gizlemesi, mesafe/yaklaşma cezası, yumuşak obje (çalı) cezası, askerler arası rezerv (aynı ağaca yığılma yok). Modlar: DEFEND / ADVANCE / OVERWATCH |
 | `addons/main/functions/UnitAction/fnc_doCover.sqf` | Düşmana göre gerçek cover (findCover + 2 sn önbellek) |

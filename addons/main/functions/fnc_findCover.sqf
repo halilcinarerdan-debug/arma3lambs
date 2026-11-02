@@ -564,6 +564,19 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     };
 };
 
+// v8.365 ELITE RAYCAST YEDEGI (fnc_eliteCover canlandirildi): findCover bos dondu ise (Zeus / Eden'de konan sandik, kum torbasi, bariyer, enkaz gibi HARITA DISI nesneler nearestTerrainObjects / building / Car listelerinde olmayabilir)
+//   askerin cevresi gercek mermi geometrisi (FIRE LOD) isinlariyla taranir. EVADE haric (zirhtan >= 40 m SERT siper ister). Kapatma: lambs_main_eliteCoverYedek = false. Rezerv defteri ortak.
+if (_ret isEqualTo [] && {_mode isNotEqualTo "EVADE"} && {_enemyPos isNotEqualTo [0, 0, 0]} && {missionNamespace getVariable ["lambs_main_eliteCoverYedek", true]}) then {
+    private _ec = missionNamespace getVariable ["lambs_danger_fnc_eliteCover", {[]}];
+    _ret = [_unit, _enemy, ([_maxResults, 1] select (_maxResults isEqualTo -1)) max 1, _range] call _ec;
+    if (_ret isNotEqualTo []) then {
+        private _grp = group _unit;
+        private _cl = (_grp getVariable [QGVAR(coverClaims), []]) select {(time - (_x select 1)) < 8};
+        _cl pushBack [(_ret select 0) select 0, time, _unit];
+        _grp setVariable [QGVAR(coverClaims), _cl];
+    };
+};
+
 if (GVAR(debug_functions) && {(_ret isNotEqualTo [])}) then {
     ["Found %1 cover positions", count _ret] call FUNC(debugLog);
     {

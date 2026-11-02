@@ -163,9 +163,8 @@ if (
             [_group, _target] call FUNC(tacticsRetreat);
         };
                 case "PEEL": {
-            // Peel gecici olarak Retreat'e yonlendirildi
-            // (Peel dosyasi korunuyor, ileride geri acilabilir)
-            [_group, _target] call FUNC(tacticsRetreat);
+            // v8.365: PEEL karari fnc_tacticsPeel uzerinden (guvenli tacticsRetreat + isPeeling bayragi + [PEEL] logu); eski LAMBS-ezilen Peel kodu geri gelmedi
+            [_group, _target] call FUNC(tacticsPeel);
         };
         case "EVADE_ARMOR": {
             // AT'siz grup zirhtan sert siperlere kacar (fonksiyon kayitli degilse Retreat)

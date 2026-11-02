@@ -1,10 +1,12 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * SIHA LAZER ISARETLEME (v8.344, HOOK; kullanici: 'ileride ihalar lazer isaretlemede kullanilabilsin'): hedefin ustunde, ISARETLEYEN tarafin LaserTarget nesnesi (LaserTargetW / E / C) yaratir ve hedefe baglar;
- * lazer gudumlu mermi / bomba (vanilla Sh_155mm_AMOS_LG, Bomb_03_F LG vb.; RHS / CUP lazer gudumlu) bu nesneyi kendisi bulur. Isaretleme 'sure' sn surer, sonra silinir. Bu surumde HICBIR sistem otomatik cagirmaz;
- * fnc_topcuListe lazer-gudumlu mermileri bilerek disarida tutar (gelecek dilim: SIHA isaretler -> LG mermi).
+ * SIHA LAZER ISARETLEME (v8.344 kanca; v8.365'te CANLANDIRILDI): hedefin ustunde, ISARETLEYEN tarafin LaserTarget nesnesini (LaserTargetW / E / C) yaratir ve hedefe baglar;
+ * lazer gudumlu mermi (vanilla Sh_155mm_AMOS_LG, 82 mm LG; RHS / CUP lazer gudumlu) bu nesneyi kendisi bulur. Isaretleme 'sure' sn surer, sonra silinir.
+ * KULLANAN: fnc_dronTopcuMisyon 1b (dron gozlemli atis: gozlemci GERCEK IHA + kumede dusman arac + taraf bataryasinda LG mermisi -> isaretle, tek LG mermisi at; fnc_topcuLG bataryayi bulur).
+ * fnc_topcuListe lazer-gudumlu mermileri genel HE atisi icin bilerek disarida tutar. Kapatma: lambs_danger_sihaLazerOff / CBA 'SIHA lazer isaretleme'.
  *   Kayit: lambs_danger_sihaHedefler_<taraf> = [[hedef, bitis zamani], ...].
+ * DOGRULANMADI: LaserTarget nesnesinin createVehicle ile yaratilip LG mermiyi yonlendirmesi oyunda denenmedi ([SIHA-LAZER] BDA logu sonucu gosterir).
  *
  * Arguments:
  * 0: Isaretleyen IHA <OBJECT>
@@ -28,5 +30,5 @@ private _l = (missionNamespace getVariable [_k, []]) select {(_x select 1) > tim
 _l pushBack [_h, time + _sure];
 missionNamespace setVariable [_k, _l];
 [{ params ["_o"]; if (!isNull _o) then { detach _o; deleteVehicle _o; }; }, [_lz], _sure] call CBA_fnc_waitAndExecute;
-diag_log format ["[SIHA-KESIF] LAZER ISARETLEME: %1 -> %2 (%3) %4 sn", typeOf _uav, typeOf _h, mapGridPosition _h, _sure];
+diag_log format ["[SIHA-LAZER] ISARETLEME: %1 -> %2 (%3) %4 sn", typeOf _uav, typeOf _h, mapGridPosition _h, _sure];
 _lz
