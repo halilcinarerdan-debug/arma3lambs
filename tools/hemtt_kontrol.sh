@@ -37,7 +37,7 @@ HPP
 cp "$P/addons/danger/script_component.hpp" "$P/addons/main/script_component.hpp"
 cp -r "$KOK/addons/danger/functions" "$P/addons/danger/functions"
 cp -r "$KOK/addons/main/functions" "$P/addons/main/functions"
-for d in $(find "$P/addons" -type d -path "*functions*"); do cp "$P/addons/danger/script_component.hpp" "$d/"; done
+for d in $(find "$P/addons" -type d -path "*functions*"); do [ -e "$d/script_component.hpp" ] || cp "$P/addons/danger/script_component.hpp" "$d/"; done   # -n: depoda kendi script_component.hpp si olan klasorlere (Eden) dokunma
 # CfgVehicles.hpp: taban siniflar
 # v8.362: CfgVehicles.hpp artik Logic / Module_F (AttributesBase) tanimini kendisi yapar; 3DEN modulleri CfgVehiclesEden.hpp icinde
 cp "$KOK/addons/danger/CfgVehicles.hpp" "$P/addons/danger/CfgVehicles.hpp"
