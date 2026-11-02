@@ -143,6 +143,23 @@ lambs_danger_muhimmatDesteksiz = createHashMap;
             private _gn = gunner _v;
             private _d = driver _v;
             if (isNull _gn || {!alive _gn} || {isNull _d} || {isPlayer _gn} || {isPlayer _d} || {(crew _v) findIf {isPlayer _x} >= 0}) then { continue };
+            // v8.361 KANIT LOGU (kullanici: 'sanirim HE kullandi'): tankin GERCEKTEN hangi silah / mermiyle ates ettigi; ayni silah+mermi 20 sn'de bir, en cok 60 satir
+            if !(_v getVariable [QGVAR(muhAtisEH), false]) then {
+                _v setVariable [QGVAR(muhAtisEH), true];
+                _v addEventHandler ["Fired", {
+                    params ["_veh", "_wpn", "_muz", "_mode", "_ammo", "_mag"];
+                    private _n = missionNamespace getVariable ["lambs_danger_muhAtisN", 0];
+                    if (_n >= 60) exitWith {};
+                    private _k = format ["%1|%2", _wpn, _mag];
+                    if (_k isEqualTo (_veh getVariable [QGVAR(muhAtisSon), ""]) && {(time - (_veh getVariable [QGVAR(muhAtisT), -999])) < 20}) exitWith {};
+                    _veh setVariable [QGVAR(muhAtisSon), _k];
+                    _veh setVariable [QGVAR(muhAtisT), time];
+                    missionNamespace setVariable ["lambs_danger_muhAtisN", _n + 1];
+                    private _g = gunner _veh;
+                    private _en = if (isNull _g) then {objNull} else {_g findNearestEnemy _g};
+                    diag_log format ["[TANK-MUHIMMAT-ATIS] %1 | silah %2 | mermi %3 (%4) | tur %5 | en yakin dusman %6 (%7 m)", getText (configOf _veh >> "displayName"), _wpn, _mag, _ammo, lambs_danger_muhimmatSinif getOrDefault [toLower _mag, "-"], if (isNull _en) then {"-"} else {typeOf _en}, if (isNull _en) then {"-"} else {round (_veh distance2D _en)}];
+                }];
+            };
             if ((lambs_danger_muhimmatDesteksiz getOrDefault [typeOf _v, false])) then { continue };
             private _snf = ([_v] call FUNC(aracSinif)) select 0;
             if !(_snf in ["TANK", "IFV"]) then { continue };
