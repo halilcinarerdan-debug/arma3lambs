@@ -598,3 +598,12 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 5. Hekim: yaralinin yanina gelince ~1.1 m yaninda, yaraliya donuk, yarali yatiyorsa / egikse DIZ COKMUS; yarali ayaktaysa (temas yoksa) ayakta; tedavi bitince serbest (`[TCCC-DURUS]`, `[DURUM]` stance MIDDLE + anim *medicother).
 6. CBA 'ELITE siper > Yigilma nedeni + cozucu' kapaliyken `[YIGILMA-*]` HIC cikmamali.
 7. `tools/hemtt_kontrol.sh` + `tools/tutarlilik_denetimi.py`: 0 HATA 0 UYARI.
+
+## T-CQB-CEVIK (v8.368)
+1. 3-4 AI askere 15-30 m'den (bina arasi / acik) dal: `[CQB-CEVIK] ... YANAL ATILIM` satirlari; askerler yatip kalmamali (`[ANOMALI] YURUMUYOR` azalmali); biri ates ederken digeri yana atilmali; dostun ates hattinin onunden gecmemeli.
+2. Siperde (duvar / kaya arkasi) asker civilenmis SAYILMAMALI ve yerinden oynamamali.
+3. CBA 'CQB cevik' kapaliyken `[CQB-CEVIK]` hic cikmamali.
+4. Ozguven 0 / 0.5 / 1: `[OZGUVEN]` courage 0.50 -> 0.50 / 0.65 / 0.80; baski etkisi 0'da botun baski altinda isabeti degismemeli; 1'de belirgin kotulesmeli (courage yuksekse daha az).
+5. Bastirma yogunlugu 0 ve 1: `[ATIS-USTUNLUK-OZET]` bastirma emri sayisi artar; mermi israfi: `[MERMI]` TASARRUF / KRITIK sayisi belirgin artmamali.
+6. STEALTH grubu (Eden: davranis STEALTH, ates yasagi YOK) yakininda tufekle ates et: `[STEALTH-SES] STEALTH -> AWARE`; asker yatip ufuk disina kacmamali.
+7. Tank (T-14 / Merkava) AT ile vurup murettebat inerken: murettebat > 20 m sicrarsa `[ISINLANMA]` satiri + geri alinma; satirdaki lifeState / anim / hiz NEDENI aydinlatir.

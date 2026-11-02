@@ -147,6 +147,17 @@ private _say = 0;
                     _k doWatch _tahmin;
                     [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_k], 6] call CBA_fnc_waitAndExecute;
                     if (_lvl >= 0.8 && {(behaviour _k) in ["SAFE", "CARELESS"]}) then { _g setBehaviour "AWARE"; };
+                    // v8.368 STEALTH SESE TEPKI (kullanici: 'stealthdaki adamlar sese karsilik vermiyor ya da sesten kaciyorlar'): STEALTH yukaridaki listede YOKTU -> ates sesi / parlama yalniz doWatch'tan oteye gitmiyor,
+                    //   uzerine fnc_kamuflaj 'bilinen dusman >= 60 m' diye askeri YATIRIP ufuk disina TASIYORDU (sesten kacis). Simdi: yuksek seviyeli ses / parlama (>= 0.7) STEALTH'i AWARE'e cevirir
+                    //   (silah hazir, ates serbest, yone doner); hafif / uzak ses STEALTH'i korur ama kamuflaj kaciriligi 40 sn kapanir (QGVAR(sesSonZaman)).
+                    if (_lvl >= 0.7 && {(behaviour _k) isEqualTo "STEALTH"} && {missionNamespace getVariable ["lambs_danger_stealthSesTepki", true]}) then {
+                        _g setBehaviour "AWARE";
+                        if (isNil "lambs_danger_stealthSesLogN") then { lambs_danger_stealthSesLogN = 0; };
+                        if (lambs_danger_stealthSesLogN < 30) then {
+                            lambs_danger_stealthSesLogN = lambs_danger_stealthSesLogN + 1;
+                            diag_log format ["[STEALTH-SES] %1 | STEALTH -> AWARE | ses seviyesi %2 | %3 m | %4 | yon tahmini kullanildi (doWatch)", groupId _g, _lvl toFixed 2, round _d, ["ses", "parlama / duman"] select _gorulur];
+                        };
+                    };
                 };
 
                 _g setVariable [QGVAR(sesSonZaman), time];

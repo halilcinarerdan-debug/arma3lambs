@@ -80,7 +80,10 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 _sayac set ["grup", (_sayac get "grup") + 1];
             };
             _g setVariable [QGVAR(atisSonT), time];
-            private _patlama = (time - (_g getVariable [QGVAR(atisBasT), -999])) < 12;
+            // v8.368 BASTIRMA YOGUNLUGU (CBA lambs_danger_bastirmaYogunluk 0..1, varsayilan 0.5; kullanici: 'biraz daha fazla suppress atsinlar, silah sesleri artsin ama mermiyi bosa harcamasinlar'):
+            //   ilk temas patlamasi 12 sn -> 12 + 14 x yogunluk sn; yogunluk >= 0.7 iken tufekliler 8 sn dilimi beklemeden hep birlikte atar. Mermi kapisi (>= 3 sarjor / yuklu > 8) DEGISMEZ.
+            private _yog = (missionNamespace getVariable ["lambs_danger_bastirmaYogunluk", 0.5]) max 0 min 1;
+            private _patlama = (time - (_g getVariable [QGVAR(atisBasT), -999])) < (12 + (14 * _yog));
             private _dilim = (floor (time / 8)) mod 2;
 
             {
@@ -100,7 +103,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 private _rol = [_u] call _rolFn;
                 if (_rol in ["AT", "MARKSMAN"]) then { continue };
                 // sira: MG her zaman; tufekliler patlamada hepsi, sonra yarisi 8 sn dilimlerinde
-                if (_rol isNotEqualTo "MG" && {!_patlama} && {((_forEachIndex mod 2) isNotEqualTo _dilim)}) then { continue };
+                if (_rol isNotEqualTo "MG" && {!_patlama} && {_yog < 0.7} && {((_forEachIndex mod 2) isNotEqualTo _dilim)}) then { continue };
                 // mermi
                 private _w = primaryWeapon _u;
                 private _uyum = (compatibleMagazines _w) apply {toLower _x};

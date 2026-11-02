@@ -90,6 +90,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
             // --- STEALTH gizlenme ---
             if (
                 (behaviour _u) isEqualTo "STEALTH" && {_enVar} && {(_u distance2D _en) >= 60}
+                && {(time - (_g getVariable [QGVAR(sesSonZaman), -999])) > 40}   // v8.368: yakin zamanda SES duyulduysa yatip kacmaz (fnc_soundAwareness tepki verir)
                 && {(_g getVariable [QGVAR(contact), 0]) < time}
                 && {!(_u getVariable [QGVAR(forceMove), false])} && {(_u getVariable [QGVAR(taktikKilit), 0]) < time}
                 && {_hizKmh < 1.5}
