@@ -160,7 +160,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                 if ((time - (_u getVariable [QGVAR(fhBofT), -999])) > 3) then {
                     _u setVariable [QGVAR(fhBofT), time];
                     if ((speed _u) > 1.5 || {!(lineIntersects [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 1.1], _en, _u])}) then { [_u, _en] call FUNC(acikSiper); };
-                    if (((primaryWeapon _u) isNotEqualTo "") && {(_u ammo (primaryWeapon _u)) > 0} && {!(_u getVariable [QGVAR(fhAIBit), -1] > 0)}) then {
+                    if (((primaryWeapon _u) isNotEqualTo "") && {(_u ammo (primaryWeapon _u)) > 0} && {!(_u getVariable [QGVAR(fhAIBit), -1] > 0)} && {[_u, _en] call FUNC(atesHatiAcik)}) then {
                         _u doSuppressiveFire _en;
                         _say set ["bof_ates", (_say get "bof_ates") + 1];
                     };
@@ -197,7 +197,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                         private _tk = time + 6;
                         _u setVariable [QGVAR(taktikKilit), _tk];
                         _u setVariable [QGVAR(fhTK), _tk];
-                        if (_dire) then {
+                        if (_dire && {[_u, _en] call FUNC(atesHatiAcik)}) then {
                             _u doSuppressiveFire _en;
                             _bN = _bN + 1;
                             _say set ["b_mod", (_say get "b_mod") + 1];

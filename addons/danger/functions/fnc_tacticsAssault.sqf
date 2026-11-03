@@ -67,8 +67,10 @@ if (_hazirYap) exitWith {
         private _u = _x;
         if (_u isNotEqualTo _unit && {alive _u} && {isNull objectParent _u} && {(primaryWeapon _u) isNotEqualTo ""}) then {
             _u doWatch _target;
-            _u doSuppressiveFire _target;
-            _nAtes = _nAtes + 1;
+            if ([_u, _target] call FUNC(atesHatiAcik)) then {
+                _u doSuppressiveFire _target;
+                _nAtes = _nAtes + 1;
+            };
             if (!isNull _eObj && {_eObj isKindOf "CAManBase"} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}])) isNotEqualTo ""}) then {
                 if ([_u, _eObj, true, 2] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalUGL", {false}])) then { _nUgl = _nUgl + 1; };
             };

@@ -2997,3 +2997,7 @@ v8.371 SEKTOR BAKISI (kullanici: 'botlar CQB'de dusman yonune bakmiyordu; dusman
  - Yeni fnc_sektorBakis: temasta / dusman < 60 m ates etmeyen her asker ayri sektore doWatch (tehdit yonu, +-45, +-90, arka); kapali yon (duvar) kayar; 3 sn'de bir tazelenir.
  - Ses: yalniz sektoru sese en yakin 1 (>= 6 kisi 2) asker doner. CBA lambs_danger_sektorBakisAktif. Log [SEKTOR-BAKIS] / [SEKTOR-BAKIS-OZET].
  - 03:00 RPT bulgulari: cqbCevik "civilenmis 1 | yanal 0" (yeni kosul az tetiklendi, kisa dovus); OZGUVEN baski cezasi 20 tur (ort 0.06) = calisiyor; "Destroy waypoint not linked" RPT spami (misyon WP'si, mod degil).
+
+v8.372 DUVAR ARKASINA BASTIRMA (kullanici: 'askerler duvar arkasini supressliyor, mermi son bilinen konuma gidiyor'). Oyunda DENENMEDI.
+ - Neden: atisUstunlugu LAMBS shouldSuppressPosition'i hedefin 4 m USTUNE bakarak cagiriyordu (3-4 m duvar hatti kapatmiyordu); ates-hareket taban atesi, hucum hazirligi, kumanda destegi, pusu tepkisi hic hat kontrolu yapmiyordu.
+ - Yeni fnc_atesHatiAcik: govdeden hedefin 1 m ustune FIRE LOD isini + arazi; atici yakini 2.5 m ve insan vurusu sayilmaz; nesne (duvar / bina / enkaz) vurursa bastirma EMRI VERILMEZ. 5 yerde kullanildi.

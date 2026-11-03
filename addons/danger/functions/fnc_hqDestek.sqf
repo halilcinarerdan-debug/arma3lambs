@@ -119,7 +119,7 @@ private _kaldir = [];
             _sira = _sira + 1;
             // tufekliler dagitik (+-6 m), 2'de 1'i dinlenir (mermi / sicaklik): MG ve MARKSMAN her tikte
             if (_rol in ["MG", "MARKSMAN"] || {(_sira mod 2) isEqualTo (floor (time / 8) mod 2)}) then {
-                _u doSuppressiveFire (_hedef getPos [random 6, random 360]);
+                private _hp = _hedef getPos [random 6, random 360]; if ([_u, _hp] call FUNC(atesHatiAcik)) then { _u doSuppressiveFire _hp; };
             };
         } forEach (units _bG);
     };

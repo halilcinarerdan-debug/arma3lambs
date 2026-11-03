@@ -73,7 +73,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
                 private _mesafe = _l distance2D _est;
                 if (_mesafe >= 25) then {
                     private _atici = ([_uye select {(primaryWeapon _x) isNotEqualTo "" && {(_x ammo (primaryWeapon _x)) > 0}}, [], {_x distance2D _est}, "ASCEND"] call BIS_fnc_sortBy) select [0, 2];
-                    { _x doSuppressiveFire _est; } forEach _atici;
+                    { if ([_x, _est] call FUNC(atesHatiAcik)) then { _x doSuppressiveFire _est; }; } forEach _atici;
                 };
             };
 
