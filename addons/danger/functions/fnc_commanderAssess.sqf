@@ -96,6 +96,8 @@ private _enemies = _nearAll select {
     && {((side _x) != civilian)}
     && {(_mySide getFriend (side _x)) < 0.6}
     && {(lifeState _x) isNotEqualTo "INCAPACITATED"}
+    && {(lifeState _x) isNotEqualTo "UNCONSCIOUS"}
+    && {!(_x getVariable ["ACE_isUnconscious", false])}   // v8.380: baygin dusman 'dusman sayisi'na girmez (RPT 05:04: 9 dusman sayiliyor, cogu yerde yatiyordu -> PEEL)
     // 70 m icindeki dusman da ancak az da olsa BILINIYORSA sayilir (eskiden duvar arkasini / gormedigi dusmani da sayiyordu = hile)
     && {((_group knowsAbout _x) >= (["KESIN"] call FUNC(bilgiEsik))) || {((_x distance2D _unit) < 70) && {(_group knowsAbout _x) >= (["SUPHE"] call FUNC(bilgiEsik))}}}
 };
@@ -392,8 +394,11 @@ private _result = call {
         && {_closest >= 25}) exitWith {
         ["PEEL", format ["%1x guc dezavantaji + kayip %2%%", _pwrRatio toFixed 1, round (_lossRatio * 100)]]
     };
+    // v8.380: tek kayip (%25 / 8 kisi) ve hafif ustunluk PEEL sebebi degil (RPT 05:07: oran 1.25 + kayip %25 -> PEEL -> 'engage atmiyorlar, geri donuyorlar'): >= 2 kayip VE belirgin guc dezavantaji (>= 1.4x) sart
     if (_lossRatio >= 0.15 && {_lossRatio < 0.4}
-        && {_closest >= 25} && {_closest <= 250}
+        && {(_initialCount - _ownCount) >= 2}
+        && {_pwrRatio >= 1.4}
+        && {_closest >= 25} && {_closest <= 200}
         && {_enemyCount > 0}) exitWith {
         ["PEEL", format ["kayip %1%% temas %2m", round (_lossRatio * 100), round _closest]]
     };

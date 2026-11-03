@@ -134,6 +134,7 @@ private _wps = [_wp1, _wp2, _wp3, _wp3];
 
 private _baslangic = time;
 _group setVariable [QGVAR(isRetreating), true];
+_group setVariable [QGVAR(retSifirArd), 0];
 // LAMBS taban "sympathetic assault / Advance" tepkileri retreat emrini eziyordu (RPT: RET sirasinda "TACTICS ASSAULT (... with 2 units)").
 // Retreat boyunca grup LAMBS reaksiyonlarina kapatilir (disableGroupAI); bitisinde / valfte ESKI degere donulur.
 _group setVariable [QGVAR(retreatEskiDGA), _group getVariable [QGVAR(disableGroupAI), false]];
@@ -487,6 +488,14 @@ if (EGVAR(main,debug_functions)) then {
             sleep 1;
         };
 
+        // v8.380 ILERLEME TAKIBI (RPT 05:02: Alpha 1-1 PEEL ile 4 dk / 8 sicrama, her sicramada vardi 0/6; dusman 300 m'de, grup yerinde -> 'engage atmiyorlar'): art arda 2 sicramada varan < %20 ise cekilme birakilir
+        private _vardiSay = count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}});
+        if ((_vardiSay * 5) < (count _varis)) then {
+            _grup setVariable [QGVAR(retSifirArd), (_grup getVariable [QGVAR(retSifirArd), 0]) + 1];
+        } else {
+            _grup setVariable [QGVAR(retSifirArd), 0];
+        };
+
         // Sicrama sonucu (diagnostik): kac asker gercekten vardi
         diag_log format [
             "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5",
@@ -583,6 +592,7 @@ if (EGVAR(main,debug_functions)) then {
         _x params ["_hareket", "_kapsama", "_wpIdx"];
         if (isNull _group) exitWith {};
         if ((_hareket select {alive _x}) isEqualTo []) then { continue };
+        if ((_group getVariable [QGVAR(retSifirArd), 0]) >= 2) exitWith {};   // v8.380: ilerleme yok -> kalan sicramalar atlanir
         [
             _group,
             _hareket select {alive _x},
@@ -612,7 +622,8 @@ if (EGVAR(main,debug_functions)) then {
         private _tp = [getPosATL _dus, _targetPos] select (isNull _dus);
         private _d = (getPosATL _ld) distance2D _tp;
         if (_d >= _ekGuvenM) exitWith { _ekNeden = "guvenli mesafe"; };
-        if ((_group getVariable [QGVAR(contact), 0]) <= time && {_d >= (_ekGozM * 0.7)}) then { _ekNeden = "temas kesildi"; };
+        if ((_group getVariable [QGVAR(retSifirArd), 0]) >= 2) then { _ekNeden = "ilerleme yok (2 sicrama 0 varis)"; };
+        if ((_group getVariable [QGVAR(contact), 0]) <= time && {_d >= (_ekGozM * 0.7)}) then { if (_ekNeden isEqualTo "") then { _ekNeden = "temas kesildi"; }; };
         // v8.34 DOKTRIN (TC 3-21.76 Break Contact standardi, s. 8-11: "continues to move until the enemy cannot observe or place fire on them"):
         //   bitis kriteri GORUS: dusman biliniyor, >= 100 m (TASARIM: tufek etkili atis alt siniri) ve askerlerin >= %80'i dusmandan siperli (arazi / nesne) ise dur.
         //   Maliyet: ek sicrama basina asker sayisi kadar 2 isin sorgusu (~12-20), ihmal edilebilir.
@@ -674,6 +685,7 @@ if (EGVAR(main,debug_functions)) then {
         //   sonra eski degere doner (gercekte temas kesildikten sonra toparlanma: yeniden duzen, kayip / cephane sayimi)
         private _eskiDGAk = _group getVariable [QGVAR(retreatEskiDGA), false];
         private _konsS = [_group, "konsolidasyonS", 90] call FUNC(dk);
+        if ((_ekNeden select [0, 9]) isEqualTo "ilerleme ") then { _konsS = _konsS min 15; };   // v8.380: cekilme ilerlemedi -> 90 sn hucumsuz bekleme yerine 15 sn
         if (_konsS > 0 && {({alive _x} count (units _group)) >= 2}) then {
             _group setVariable [QGVAR(disableGroupAI), true];
             diag_log format ["[GERI-CEKILME-TOPLAN] %1 | %2 sn toparlanma: LAMBS grup taktigi kapali (hemen geri hucum yok)", groupId _group, _konsS];

@@ -55,12 +55,14 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
                 if (!(_sivilMi || _dostMu || _etkisiz)) then { continue };
                 // mesru mudafaa: hedef son 6 sn'de ates etti
                 if ((time - (_t getVariable [QGVAR(sonAtisT), -99])) < 6) then { continue };
-                _ihlal = _ihlal + 1;
+                // v8.380: etkisiz dusmana mermi harcamamak ROE IHLALI degil (log / ihlal sayaci sismesin); yalniz hedef birakilir
+                private _gercekIhlal = _sivilMi || _dostMu;
+                if (_gercekIhlal) then { _ihlal = _ihlal + 1; };
                 if (_tSide isEqualTo civilian) then { _sivil = _sivil + 1; };
                 _u forgetTarget _t;
                 (group _u) forgetTarget _t;
                 _u doWatch objNull;
-                if (_logN < 60) then {
+                if (_gercekIhlal && {_logN < 60}) then {
                     _logN = _logN + 1;
                     diag_log format ["[ROE-IHLAL] %1 (%2) -> %3 (%4) | iliski:%5 | captive:%6 | mesafe:%7 m | silahli:%8 | gorev:%9 | beh:%10 -> hedef UNUTTURULDU", name _u, side group _u, name _t, _tSide, _fr toFixed 1, captive _t, round (_u distance2D _t), (weapons _t) isNotEqualTo [], _u getVariable [QEGVAR(main,currentTask), "-"], behaviour _u];
                 };
