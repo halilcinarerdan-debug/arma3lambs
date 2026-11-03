@@ -328,7 +328,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             // v8.190: yaklasiyorsa (3 m+ ilerleme) sure uzar (toplam 150 sn'ye kadar); RPT 2a205c2b: 8-39 m'de "sure doldu" iptalleri
             if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) < (_enYakin - 3)}) then { _enYakin = _m distance2D _c; _bitis = (_bitis max (time + 12)) min (_t0 + 150); };
             !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 4.5} || {time > _bitis}
-            || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
+            || {!_strict && {!([_g] call _guvenliFn)} && {(getSuppression _m) > 0.6}}   // v8.375: kati modda grup temas bayragina (AllClear'a kadar +600 sn) BAKILMAZ (RPT 04:05: hekim baski 0.00 iken 'IPTAL yaklasma')
             || {_strict && {(call _gd) < 1}}
         };
         if (_daiAc) then { _m setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI]; };

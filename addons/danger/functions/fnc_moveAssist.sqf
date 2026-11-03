@@ -109,17 +109,25 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                             _prev vectorAdd [0, 0, 1.1], _now vectorAdd [0, 0, 1.1],
                             _u, objNull, true, 1, "GEOM", "NONE"
                         ];
+                        // v8.375 TITREME / GERI-SARMA (RPT 04:04-05: Land_House_L_7_EP1 / L_3_EP1 yaninda ayni asker saniyede birkac kez geri alindi = gorunur stutter + 'YURUMUYOR'): tek yukseklikteki isin kapi cercevesi / pencere / mobilyaya da carpar.
+                        //   Gercek duvar her yukseklikte keser: ayak (0.5 m) ya da bas (1.7 m) isini da engele carpmali; ayni asker 1 sn'de en cok bir kez geri alinir.
+                        if (_hit isNotEqualTo []) then {
+                            private _ek = [0.5, 1.7] findIf {
+                                (lineIntersectsSurfaces [_prev vectorAdd [0, 0, _x], _now vectorAdd [0, 0, _x], _u, objNull, true, 1, "GEOM", "NONE"]) isNotEqualTo []
+                            };
+                            if (_ek < 0 || {(time - (_u getVariable [QGVAR(mvFixT), -99])) < 1}) then { _hit = []; };
+                        };
                         if (_hit isNotEqualTo []) then {
                             private _o = (_hit select 0) select 2;
                             if (!isNull _o && {!(_o isKindOf "AllVehicles")} && {!(_o isKindOf "Man")}) then {
                                 _u setPosASL _prev;
                                 _u setVariable [QGVAR(mvSlowUntil), time + 3];
                                 private _n = (_u getVariable [QGVAR(mvFix), 0]) + 1;
-                                if ((time - (_u getVariable [QGVAR(mvFixT), -99])) > 2) then { _n = 1; };
+                                if ((time - (_u getVariable [QGVAR(mvFixT), -99])) > 4) then { _n = 1; };
                                 _u setVariable [QGVAR(mvFix), _n];
                                 _u setVariable [QGVAR(mvFixT), time];
                                 // 3 duzeltmeden sonra 15 sn dokunma: bina kapisi / sorunlu navmesh'te asker surekli geri alinip takiliyordu (RPT: retreat lideri bina yaninda 40 sn kipirdamadi)
-                                if (_n >= 3) then { _u setVariable [QGVAR(mvGrace), time + 15]; _u setVariable [QGVAR(mvFix), 0]; };
+                                if (_n >= 2) then { _u setVariable [QGVAR(mvGrace), time + 20]; _u setVariable [QGVAR(mvFix), 0]; };   // v8.375: 3 -> 2 duzeltme, 15 -> 20 sn (ev kenarinda salinim bitsin)
                                 if (lambs_danger_mvLogN < 25) then {
                                     lambs_danger_mvLogN = lambs_danger_mvLogN + 1;
                                     diag_log format ["[DUVAR-KORUMA] %1 | %2 | %3 icinden gecmeye calisti -> geri alindi (%4)", groupId (group _u), name _u, typeOf _o, round (_mv * 100) / 100];

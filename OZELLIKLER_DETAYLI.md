@@ -48,7 +48,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - **EOD**: buddy olmaz (tek elemanlı çift), cihaza tek kişi yaklaşır, DefusalKit şart.
 - **RTO**: ≥ 4 kişilik grupta telsiz sırt çantalı (yoksa ≥ 6 kişide liderin yanındaki nominal RTO); canlıysa grup telsiz gücü 1, ölürse lider telsizi menzil ×0.4.
 - **İleri gözcü**: dürbünlü / nişancı rolünde asker; temas yokken 8 sn'de bir tehdit yönünün ±35° ve 150 m ilerisini tarar, spot becerisi ×1.25 (AWARE'de bile).
-- **Nokta elemanı** (`noktaEleman`, traveling overwatch): grup ≥ 6, lider hareketli, temas muhtemelse 2 tüfekçi ana gövdenin 55 m önüne gider.
+- **Nokta elemanı / ileri gözcü** (`noktaEleman`, traveling overwatch; v8.375): grup ≥ 4 (4–5 kişi: 1, ≥ 6: 2 tüfekçi), lider hareketliyken (gerçek ateş / bastırma / 80 m düşman yoksa) ana gövdenin 55 m (yerleşimde 25 m) önüne gider; dürbünlü ileri gözcü önce seçilir. Lider önde gitmez.
 - **Yan koruma + arka emniyet** (`yanGuvenlik`): grup ≥ 5, hareketli; sağ kanat, sol kanat, arka asker dışa doğru 60 m bakar (`lookAt`).
 - **Arka güvenlik** (`rearGuard`): CQB / yoğun urbanda ≥ 6 asker ve ≥ 3 sade tüfekçi varsa biri liderin 9 m arkasında 30 m geriye bakar.
 

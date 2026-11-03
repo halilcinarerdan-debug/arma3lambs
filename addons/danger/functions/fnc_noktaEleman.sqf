@@ -1,6 +1,11 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
+ * v8.375 ILERI GOZCU / NOKTA ELEMANI GERCEKTEN ONDE (kullanici: 'takim liderleri en onden gidiyor bunu istemiyorum, eskiden ileri gozlemci vardi'): eski kosullar (>= 6 asker + 'temas muhtemel' [son temas < 240 sn / 700 m dusman]
+ *   + lider > 4 km/s + her durusta SERBEST + 20 sn bekleme) pratikte hic saglanmiyordu (RPT 04:05 ozet: 'lider durdu / yavas:21, temas:6, KURULDU:0' = 90 sn'de hic nokta elemani kurulmadi, [DOKTRIN] komutan_onde:true).
+ *   Yeni: >= 4 asker (4-5 kisi: 1, >= 6 kisi: 2 nokta elemani), temas muhtemel kosulu YOK (kitapta point man her zaman onde gider), 'temas' = son 25 sn gercek ates / baski / 80 m'de bilinen dusman
+ *   (grup temas bayragi AllClear'a kadar +600 sn tutuldugu icin kullanilmaz), lider kisa duraklamalarinda (< 10 sn) nokta elemani yerinde kalir, serbest birakma sonrasi bekleme 20 -> 8 sn,
+ *   lider hedefine (expectedDestination) < 55 m kaldiysa nokta elemani hedefe gider (asmaz), yerlesim yerinde (>= 3 bina / 25 m) onde mesafe 25 m, ileri gozcu (fnc_gozcuRto, durbunlu) once secilir.
  * NOKTA ELEMANI — TRAVELING OVERWATCH (v8.66): temas muhtemelken hareket halindeki squad'in onunde 2 askerlik gozetleme / nokta elemani.
  *
  * Doktrin ilkesi (genel; sayisal esik kaynakta yok — MCWP 3-11.2 / TC 3-21.76'da ayrintisi alintilanmadi): traveling overwatch = on takim ana govdenin ONUNDE gider, ana govde destek mesafesinde izler;
@@ -36,20 +41,31 @@ private _calis = {
         if (missionNamespace getVariable ["lambs_danger_noktaOff", false]) then { continue };
         private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
         private _uglFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
+        private _sezildi = ["SEZILDI"] call FUNC(bilgiEsik);
         {
             private _g = _x;
             private _l = leader _g;
             if (isNull _l || {isPlayer _l} || {!local _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             missionNamespace setVariable ["lambs_danger_noktaAdim", format ["grup %1", groupId _g]];
 
-            private _canli = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x}};
+            private _canli = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+            private _hedefN = if ((count _canli) >= 6) then {2} else {if ((count _canli) >= 4) then {1} else {0}};
+            if ((speed _l) > 4) then { _g setVariable [QGVAR(noktaHareketT), time]; };
             private _eski = (_g getVariable [QGVAR(noktaListe), []]) select {!isNull _x && {alive _x}};
 
             // serbest birakma / baslamama nedeni
             private _neden = "";
-            if ((count _canli) < 6) then { _neden = "asker < 6"; };
-            if (_neden isEqualTo "" && {(speed _l) <= 4}) then { _neden = "lider durdu / yavas"; };
-            if (_neden isEqualTo "" && {(_g getVariable [QGVAR(contact), 0]) > time}) then { _neden = "temas"; };
+            if (_hedefN < 1) then { _neden = "asker < 4"; };
+            if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaHareketT), -999])) > 10}) then { _neden = "lider durdu / yavas"; };
+            if (_neden isEqualTo "") then {
+                // GERCEK TEMAS sinyali (grup temas bayragi AllClear'a kadar +600 sn: kullanilmaz)
+                private _sonAtis = selectMax ([-999] + (_canli apply {_x getVariable [QGVAR(sonAtisT), -999]}));
+                private _enYk = _l findNearestEnemy _l;
+                if (
+                    (time - _sonAtis) < 25 || {(getSuppression _l) > 0.2}
+                    || {!isNull _enYk && {alive _enYk} && {(_l distance2D _enYk) < 80} && {(_l knowsAbout _enYk) >= _sezildi}}
+                ) then { _neden = "temas"; };
+            };
             if (_neden isEqualTo "" && {
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(sniperTeam), false]}
@@ -65,8 +81,8 @@ private _calis = {
                     private _nt = (_l nearTargets 700) findIf {(((_x select 2) getFriend (side _g)) < 0.6) && {(_x select 2) isNotEqualTo civilian} && {(_x select 2) isNotEqualTo sideUnknown}};
                     if (_nt >= 0) then { _muhtemel = "700 m icinde bilinen dusman"; };
                 };
-                if (_muhtemel isEqualTo "") then { _neden = "temas muhtemel degil"; };
-                if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaGecT), -999])) < 20}) then { _neden = "serbest birakma bekleme (20 sn)"; };
+                if (_muhtemel isEqualTo "") then { _muhtemel = "genel ilerleme (point man)"; };   // v8.375: temas muhtemel kosulu kaldirildi
+                if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaGecT), -999])) < 8}) then { _neden = "serbest birakma bekleme (8 sn)"; };
             };
 
             private _nk = [_neden, "KURULDU"] select (_neden isEqualTo "");
@@ -90,33 +106,43 @@ private _calis = {
             private _dir = if (((_v select 0) ^ 2 + (_v select 1) ^ 2) > 0.5) then { (_v select 0) atan2 (_v select 1) } else { getDir _l };
             private _lp = getPosATL _l;
             private _ileri = 55;
+            if ((count (nearestTerrainObjects [_lp, ["BUILDING", "HOUSE"], 25, false, true])) >= 3) then { _ileri = 25; };   // yerlesim: yakin onde
+            private _hedefEd = (expectedDestination _l) select 0;
+            if (_hedefEd isNotEqualTo [0, 0, 0] && {(_lp distance2D _hedefEd) < _ileri} && {(_lp distance2D _hedefEd) > 8}) then { _ileri = (_lp distance2D _hedefEd); _dir = _lp getDir _hedefEd; };
             private _P = _lp getPos [_ileri, _dir];
             if (surfaceIsWater _P) then { _ileri = 30; _P = _lp getPos [_ileri, _dir]; };
             if (surfaceIsWater _P) then { continue };
 
             // eleman secimi (yoksa / biri oldu ise tamamla)
-            if ((count _eski) < 2) then {
+            if ((count _eski) > _hedefN) then {
+                // grup kuculdu (ornek 6 -> 5): fazla nokta elemani serbest
+                private _fazla = _eski select [_hedefN, count _eski];
+                { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; _x doFollow _l; } forEach _fazla;
+                _eski = _eski select [0, _hedefN];
+            };
+            if ((count _eski) < _hedefN) then {
                 private _aday = _canli select {
-                    _x isNotEqualTo _l && {([_x, true] call _rolFn) isEqualTo "RIFLE"} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
+                    _x isNotEqualTo _l && {([_x, true] call _rolFn) in ["RIFLE", "MARKSMAN"]} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
                     && {!(_x getVariable [QGVAR(baskiTuf), false])} && {([_x] call _uglFn) isEqualTo ""} && {isNil {_x getVariable QGVAR(yanGuv)}}
                     && {!(_x getVariable [QGVAR(iedGuv), false])} && {!(_x getVariable [QGVAR(iedIsci), false])} && {!(_x in _eski)}
                     && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(forceMove), false])}
                 };
                 // hareket yonunde en onde olanlar
-                private _sir = _aday apply { [((_lp distance2D _x) * (cos ((_lp getDir _x) - _dir))), _x] };
+                private _gozcu = _g getVariable [QGVAR(gozcu), objNull];
+                private _sir = _aday apply { [((_lp distance2D _x) * (cos ((_lp getDir _x) - _dir))) + ([0, 200] select (_x isEqualTo _gozcu)), _x] };   // ileri gozcu (durbunlu) once
                 _sir sort false;
-                private _eksik = 2 - (count _eski);
+                private _eksik = _hedefN - (count _eski);
                 {
                     if (_forEachIndex < _eksik) then { _eski pushBack (_x select 1); };
                 } forEach _sir;
-                if ((count _eski) < 2 && {_eski isEqualTo []}) then { continue };
+                if (_eski isEqualTo []) then { continue };
             };
 
             // her eleman kendi noktasina (yanal +-7 m): 10 m'den uzaksa doMove
             private _hareket = 0;
             {
                 private _u = _x;
-                private _Pi = _P getPos [7, _dir + ([90, -90] select (_forEachIndex mod 2))];
+                private _Pi = if ((count _eski) < 2) then { _P } else { _P getPos [7, _dir + ([90, -90] select (_forEachIndex mod 2))] };
                 _u setVariable [QGVAR(noktaEk), true];
                 _u setVariable [QGVAR(taktikKilit), time + 8];
                 // lidere 95 m'den uzaga kacmasin
@@ -132,8 +158,8 @@ private _calis = {
                 _g setVariable [QGVAR(noktaLogT), time];
                 if (_logN < 100) then {
                     _logN = _logN + 1;
-                    diag_log format ["[ZEKA-NOKTA] %1 | NOKTA ELEMANI: %2 | temas muhtemel: %3 | ana govdenin %4 m onunde (gercek: %5 m ve %6 m) | hareket yonu:%7 | lider hiz:%8 km/s | yeni emir:%9",
-                        groupId _g, _imza joinString ", ", _muhtemel, _ileri, round ((_eski select 0) distance2D _l), round ((_eski param [1, _l]) distance2D _l), round _dir, round (speed _l), _hareket];
+                    diag_log format ["[ZEKA-NOKTA] %1 | NOKTA ELEMANI: %2 | temas muhtemel: %3 | ana govdenin %4 m onunde (gercek: %5 m ve %6 m; hedef eleman %10) | hareket yonu:%7 | lider hiz:%8 km/s | yeni emir:%9",
+                        groupId _g, _imza joinString ", ", _muhtemel, _ileri, round ((_eski select 0) distance2D _l), round ((_eski param [1, _l]) distance2D _l), round _dir, round (speed _l), _hareket, _hedefN];
                 };
             };
         } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});

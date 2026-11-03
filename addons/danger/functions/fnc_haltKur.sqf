@@ -4,7 +4,7 @@
  * HALT / SLOT KOVALAMAYI KES (v8.83) — kullanici: "komutan sabitken formasyon oturmuyor, AWARE'de cok adam varsa formasyonu bulamiyorlar".
  * RPT (v8.82, 26 BOSTA-HAREKET): yuruyen askerlerin beklenen hedef MODU 'LEADER PLANNED' / 'FORMATION PLANNED' = Arma'nin KENDI formasyon slot motoru (script emri degil); hedef 1-26 m.
  *   Lider durunca bile 13 kisilik grup slotlarini surekli yeniden hesaplayip kucuk mesafeler yuruyor (STAG COLUMN / WEDGE).
- * COZUM: lider >= 8 sn duruyorsa (hiz < 1 km/s), temas yok (>= 20 sn), taktik / retreat / bounding / IED isi yok, grup >= 6 piyade: SLOTA yakin (<= 20 m) yuruyen askerlere doStop (olduklari yerde DUR, halt);
+ * COZUM: lider >= 8 sn duruyorsa (hiz < 1 km/s), temas yok (>= 90 sn; v8.375) ve davranis COMBAT / STEALTH degil, son 45 sn atis / baski yok, taktik / retreat / bounding / IED isi yok, grup >= 6 piyade: SLOTA yakin (<= 20 m) yuruyen askerlere doStop (olduklari yerde DUR, halt);
  *   cok uzak (> 20 m) kalanlar slota yurumeye devam eder (spawn / dagilmadan sonra toplanma). Lider yurumeye baslayinca / temas / taktik baslayinca durdurulanlar doFollow ile serbest birakilir.
  * ATLANIR: oyuncu, arac, forceMove, taktikKilit, EOD, IED isci / guvenlik, nokta elemani, yan guvenlik gozcusu, hekim (TCCC mesgul), yaralilar.
  * Kapatma: lambs_danger_haltOff = true.   Log: [HALT] (ilk 60) + [HALT-OZET] 90 sn
@@ -38,7 +38,10 @@ private _calis = {
             if ((speed _l) > 1) then { _g setVariable [QGVAR(haltHareketT), time]; };
 
             private _engel =
-                ((_g getVariable [QGVAR(contact), 0]) > (time - 20))
+                ((_g getVariable [QGVAR(contact), 0]) > (time - 90))   // v8.375: 20 -> 90 sn (RPT 04:03: temas bitisinden hemen sonra, beh COMBAT iken 4 asker acikta doStop ile durduruldu)
+                || {(behaviour _l) in ["COMBAT", "STEALTH"]}
+                || {(time - (selectMax ([-999] + (_us apply {_x getVariable [QGVAR(sonAtisT), -999]})))) < 45}
+                || {(getSuppression _l) > 0.2}
                 || {(count _us) < 6}
                 || {({_g getVariable [_x, false]} count [QGVAR(isRetreating), QGVAR(isEvading), QGVAR(isBounding), QGVAR(isExecutingTactic), QGVAR(isBreakingContact), QGVAR(isAmbushing), QGVAR(sniperTeam), QGVAR(isSonDirenis), QGVAR(disableGroupAI)]) > 0}
                 || {(time - (_g getVariable [QGVAR(haltHareketT), -999])) < 8}

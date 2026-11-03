@@ -6,7 +6,7 @@
  * Catisma / taktik halindeki gruplarda (3 sn'de bir) komutanin hareket yonune gore
  * "arkada kalan" askerleri olcer. Komutan kosarken timin buyuk kismi >12 m geride ise:
  *   - KADEME 1 (yavasla): komutan yuruyus hizina duser (forceSpeed 1.8)
- *   - KADEME 2 (bekle)  : takim >30 m geride ise komutanin PATH'i max 20 sn kapatilir
+ *   - KADEME 2 (bekle)  : takim >30 m geride ise komutanin PATH'i max 12 sn kapatilir (v8.375: yalniz ortu yakininda; acikta durmaz, yavas yurur)
  *     (emri iptal olmaz; tim yetisince PATH acilir ve ayni hedefe devam eder)
  *   - birakma: tim yetisti / komutan baskida veya dusman <40 m / sure doldu
  *   - bekleme sonrasi 25 sn cooldown (komutan sonsuza kadar donmasin)
@@ -87,6 +87,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
                 && {(_x distance2D _l) < 300}
                 && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
+                && {!(_x getVariable [QGVAR(noktaEk), false])}   // v8.375: nokta elemani bilerek onde gider, 'geride' sayilmaz
             };
             if (_takim isEqualTo []) then { continue };
 
@@ -101,6 +102,9 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 if (_arka > 12) then { _gerideSayi = _gerideSayi + 1; _gerideMesafe pushBack _arka; };
             } forEach _takim;
             private _oran = _gerideSayi / (count _takim);
+            // v8.375 ACIKTA DONMA (kullanici: 'botlar bazen acikta durdu'; RPT 04:03: lider PATH kapali, takim 67 m geride): komutan yalniz ORTU yakinindayken (12 m'de agac / duvar / kaya / bina) tamamen durur;
+            //   acikta ise durmaz, yuruyus hizinin altinda (1.0 m/s) yavas ilerler (YAVASLA kademesi)
+            private _ortuVar = (nearestTerrainObjects [_pL, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE", "FENCE", "HIDE"], 12, false, true]) isNotEqualTo [];
             private _enGeri = if (_gerideMesafe isEqualTo []) then {0} else {selectMax _gerideMesafe};
 
             // --- birakma kosullari (zaten tutuyorsa) ---
@@ -108,14 +112,14 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 private _bitis = (_oran < 0.2)
                     || {(getSuppression _l) > 0.4}
                     || {private _en = _l findNearestEnemy _l; !isNull _en && {(_en distance2D _l) < 40}}
-                    || {(_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 20}};
+                    || {(_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 12}};
                 if (_bitis) then {
-                    private _sureDoldu = (_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 20};
+                    private _sureDoldu = (_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 12};
                     [_g, _l, format ["oran:%1 enGeri:%2m", _oran toFixed 2, round _enGeri]] call _birak;
                     if (_sureDoldu) then { _g setVariable [QGVAR(syncSoguma), time + 60]; };
                 } else {
                     // yavastan beklemeye yukselt
-                    if ((_oran >= 0.5) && {_enGeri > 30} && {!(_g getVariable [QGVAR(syncHold), false])} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
+                    if ((_oran >= 0.5) && {_enGeri > 30} && {!(_g getVariable [QGVAR(syncHold), false])} && {time > (_g getVariable [QGVAR(syncSoguma), 0])} && {_ortuVar}) then {
                         _l disableAI "PATH";
                         _g setVariable [QGVAR(syncHold), true];
                         _g setVariable [QGVAR(syncBasla), time];
@@ -128,13 +132,13 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
             // --- tetik ---
             if (_hiz > 0.8 && {_oran >= 0.4} && {time > (_g getVariable [QGVAR(syncSoguma), 0])}) then {
                 _g setVariable [QGVAR(syncLeader), _l];
-                if ((_oran >= 0.5) && {_enGeri > 30}) then {
+                if ((_oran >= 0.5) && {_enGeri > 30} && {_ortuVar}) then {
                     _l disableAI "PATH";
                     _g setVariable [QGVAR(syncHold), true];
                     _g setVariable [QGVAR(syncBasla), time];
                     diag_log format ["[KOMUTAN-BEKLE] %1 | BEKLE (PATH kapali) | geride:%2/%3 enGeri:%4m", groupId _g, _gerideSayi, count _takim, round _enGeri];
                 } else {
-                    _l forceSpeed 1.8;
+                    _l forceSpeed ([1.8, 1.0] select (_enGeri > 30));   // v8.375: takim > 30 m geride ise daha da yavas
                     _g setVariable [QGVAR(syncSlow), true];
                     diag_log format ["[KOMUTAN-BEKLE] %1 | YAVASLA | geride:%2/%3 enGeri:%4m", groupId _g, _gerideSayi, count _takim, round _enGeri];
                 };
