@@ -2992,3 +2992,8 @@ YAPILAN: (1) fnc_modUyum: [LAMBS-MOD] logu (yukleme + yukaridaki config degerler
 v8.370 CQB CEVIK DUZELTMESI (RPT 22:43-22:58: "civilenmis tespit 7 | yanal hareket 0"). Oyunda DENENMEDI.
  - fnc_cqbCevik: ates unsuru olmayan ama >= 6 sn yerinde civilenmis asker TEK BASINA yanal atilim yapar; dusmani goremeyen civilenmis asker MIDDLE'a kalkar + dusmana doner.
  - Bilinen acik: "Throwing smoke grenade" gorevinde 15 sn duran asker (LAMBS FSM kaynakli, bu repoda etiket yok) henuz ele alinmadi.
+
+v8.371 SEKTOR BAKISI (kullanici: 'botlar CQB'de dusman yonune bakmiyordu; dusmanin gelebilecegi bolgelere baksinlar, herkes silah sesine bakmasin'). Oyunda DENENMEDI.
+ - Yeni fnc_sektorBakis: temasta / dusman < 60 m ates etmeyen her asker ayri sektore doWatch (tehdit yonu, +-45, +-90, arka); kapali yon (duvar) kayar; 3 sn'de bir tazelenir.
+ - Ses: yalniz sektoru sese en yakin 1 (>= 6 kisi 2) asker doner. CBA lambs_danger_sektorBakisAktif. Log [SEKTOR-BAKIS] / [SEKTOR-BAKIS-OZET].
+ - 03:00 RPT bulgulari: cqbCevik "civilenmis 1 | yanal 0" (yeni kosul az tetiklendi, kisa dovus); OZGUVEN baski cezasi 20 tur (ort 0.06) = calisiyor; "Destroy waypoint not linked" RPT spami (misyon WP'si, mod degil).
