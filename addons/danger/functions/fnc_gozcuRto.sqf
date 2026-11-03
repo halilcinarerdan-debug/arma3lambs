@@ -116,7 +116,13 @@ private _calis = {
                     private _taban = getDir _l;
                     if (_sit isNotEqualTo [] && {(time - (_sit select 0)) < 300} && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then { _taban = (getPosATL _l) getDir (_sit select 7); };
                     private _yon = _taban + (selectRandom [-35, -15, 0, 15, 35]);
-                    _gz doWatch ((getPosATL _gz) getPos [150, _yon]);
+                    // v8.376: duvara bakmasin - secilen yon 30 m icinde engelliyse digerleri denenir, hicbiri acik degilse bakis degismez
+                    private _eyeG = eyePos _gz;
+                    private _aday = [_yon, _taban, _taban + 35, _taban - 35, _taban + 70, _taban - 70] select {
+                        private _pG = _eyeG vectorAdd [(sin _x) * 30, (cos _x) * 30, 0];
+                        !(lineIntersects [_eyeG, _pG, _gz, objNull]) && {!(terrainIntersectASL [_eyeG, _pG])}
+                    };
+                    if (_aday isNotEqualTo []) then { _gz doWatch ((getPosATL _gz) getPos [150, _aday select 0]); };
                 };
             };
         } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});

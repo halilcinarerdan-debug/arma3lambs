@@ -97,6 +97,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                     && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
                     && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
                     && {(getSuppression _x) < 0.5}
+                    && {!(_x getVariable [QGVAR(noktaEk), false])}   // v8.376: nokta elemani arka guvenlik olmaz
                 };
                 if ((count _adaylar) >= 3) then {
                     // lidere en uzak (zaten arkada olan) aday

@@ -57,7 +57,8 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
             // temas ya da yakin dusman
             private _en = _l findNearestEnemy _l;
             private _enYakin = !isNull _en && {alive _en} && {(_l distance2D _en) < 60} && {(_l knowsAbout _en) >= (["SEZILDI"] call FUNC(bilgiEsik))};
-            private _temas = ((_g getVariable [QGVAR(contact), 0]) + 90) > time;
+            private _temasT = _g getVariable [QGVAR(contact), 0];
+            private _temas = _temasT > 0 && {(_temasT + 90) > time};   // v8.376: contact=0 (hic temas olmadi) 'temas' sayilmaz (oyun basinda ilk 90 sn herkes sektor atiyordu)
             if (!_temas && {!_enYakin}) then { continue };
 
             // tehdit yonu
@@ -81,7 +82,8 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
             // ates unsurlari hariç sektor adaylari
             private _adaylar = _us select {
                 private _u = _x;
-                !(_u getVariable [QGVAR(forceMove), false]) && {(_u getVariable [QGVAR(taktikKilit), 0]) <= time} && {time >= (_u getVariable [QGVAR(tcccBusy), 0])}
+                (speed _u) < 6   // v8.376: yuruyen / kosan asker yana bakmaz (yan yurume animasyonu = titreme, yavaslama); yalniz duran / yavas asker sektor alir
+                && {!(_u getVariable [QGVAR(forceMove), false])} && {(_u getVariable [QGVAR(taktikKilit), 0]) <= time} && {time >= (_u getVariable [QGVAR(tcccBusy), 0])}
                 && {(_u getVariable [QGVAR(grState), []]) isEqualTo []} && {(_u getVariable [QGVAR(reloadState), []]) isEqualTo []}
                 && {time >= (_u getVariable [QGVAR(panikBitis), 0])} && {!(_u getVariable [QGVAR(disableAI), false])}
                 && {isNull (assignedTarget _u)}
@@ -106,11 +108,16 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
                 private _ofs = if (_n >= 4 && {_i == _n - 1} && {_i >= 5}) then {180} else {_sektorOfs select (_i mod 5)};
                 private _eye = eyePos _u;
                 private _secildi = -999;
+                // v8.376 KOR DUVARA BAKMA (kullanici: 'botlar mal mal duvara bakiyor'): eskiden yalniz 8 m acik olmasi yetiyordu (9 m'deki duvara bakilirdi). Simdi once 40 m, olmazsa 20 m gorus acik yon aranir; hicbiri yoksa asker dokunulmaz
                 {
-                    private _b = _yon + _ofs + _x;
-                    private _p = _eye vectorAdd [(sin _b) * 8, (cos _b) * 8, 0];
-                    if (!(lineIntersects [_eye, _p, _u, objNull]) && {!(terrainIntersectASL [_eye, _p])}) exitWith { _secildi = _b; };
-                } forEach [0, 25, -25, 50, -50, 75, -75];
+                    private _mesafe = _x;
+                    {
+                        private _b = _yon + _ofs + _x;
+                        private _p = _eye vectorAdd [(sin _b) * _mesafe, (cos _b) * _mesafe, 0];
+                        if (!(lineIntersects [_eye, _p, _u, objNull]) && {!(terrainIntersectASL [_eye, _p])}) exitWith { _secildi = _b; };
+                    } forEach [0, 25, -25, 50, -50, 75, -75];
+                    if (_secildi > -900) exitWith {};
+                } forEach [40, 20];
                 _dirler pushBack _secildi;
             } forEach _adaylar;
 
@@ -138,7 +145,12 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
                 private _sese = _u in _sesliler;
                 if ((time - (_u getVariable [QGVAR(sektorT), -999])) < 3 && {!_sese}) then { continue };
                 _u setVariable [QGVAR(sektorT), time];
-                private _hedefYon = if (_sese) then { _sesYon } else { _b };
+                private _sesAcik = _sese && {
+                    private _eyeS = eyePos _u;
+                    private _pS = _eyeS vectorAdd [(sin _sesYon) * 20, (cos _sesYon) * 20, 0];
+                    !(lineIntersects [_eyeS, _pS, _u, objNull]) && {!(terrainIntersectASL [_eyeS, _pS])}
+                };   // v8.376: ses yonunde 20 m icinde duvar varsa sese donulmez (duvara bakmak anlamsiz)
+                private _hedefYon = if (_sesAcik) then { _sesYon } else { _b };
                 _u doWatch ((eyePos _u) getPos [100, _hedefYon]);
                 private _eskiYon = _u getVariable [QGVAR(sektorYon), -999];
                 _u setVariable [QGVAR(sektorYon), _hedefYon];

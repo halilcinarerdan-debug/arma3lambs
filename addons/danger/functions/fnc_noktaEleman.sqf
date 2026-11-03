@@ -32,7 +32,7 @@ private _calis = {
     private _nedenSay = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep 5;
+        sleep 3;
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _nedenSay > 0) then { diag_log format ["[ZEKA-NOKTA] OZET (son 90 sn grup-tur sayaci) %1", (keys _nedenSay) apply {format ["%1:%2", _x, _nedenSay get _x]}]; };
@@ -56,7 +56,7 @@ private _calis = {
             // serbest birakma / baslamama nedeni
             private _neden = "";
             if (_hedefN < 1) then { _neden = "asker < 4"; };
-            if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaHareketT), -999])) > 10}) then { _neden = "lider durdu / yavas"; };
+            if (_neden isEqualTo "" && {(time - (_g getVariable [QGVAR(noktaHareketT), -999])) > 30}) then { _neden = "lider durdu / yavas"; };   // v8.376: 10 -> 30 sn (nokta elemani kisa duraklamada geri kosmaz, onde bekler)
             if (_neden isEqualTo "") then {
                 // GERCEK TEMAS sinyali (grup temas bayragi AllClear'a kadar +600 sn: kullanilmaz)
                 private _sonAtis = selectMax ([-999] + (_canli apply {_x getVariable [QGVAR(sonAtisT), -999]}));
@@ -101,6 +101,17 @@ private _calis = {
                 continue;
             };
 
+            // v8.376 YERLESIM / BINA ICI: nokta elemani duz hatta bina / duvara gonderilir ('botlar duvara sikiyor') -> yerlesimde ve binadaki liderde nokta elemani YOK (CQB sistemleri yonetir)
+            if (_neden isEqualTo "" && {(count (nearestTerrainObjects [getPosATL _l, ["BUILDING", "HOUSE", "WALL"], 30, false, true])) >= 3}) then {
+                _neden = "yerlesim / bina yakini";
+                if (_eski isNotEqualTo []) then {
+                    { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; _x doFollow _l; } forEach _eski;
+                    _g setVariable [QGVAR(noktaListe), []];
+                    _g setVariable [QGVAR(noktaGecT), time];
+                };
+                _nedenSay set [_neden, (_nedenSay getOrDefault [_neden, 0]) + 1];
+                continue;
+            };
             // hareket yonu + nokta
             private _v = velocity _l;
             private _dir = if (((_v select 0) ^ 2 + (_v select 1) ^ 2) > 0.5) then { (_v select 0) atan2 (_v select 1) } else { getDir _l };
@@ -110,8 +121,13 @@ private _calis = {
             private _hedefEd = (expectedDestination _l) select 0;
             if (_hedefEd isNotEqualTo [0, 0, 0] && {(_lp distance2D _hedefEd) < _ileri} && {(_lp distance2D _hedefEd) > 8}) then { _ileri = (_lp distance2D _hedefEd); _dir = _lp getDir _hedefEd; };
             private _P = _lp getPos [_ileri, _dir];
-            if (surfaceIsWater _P) then { _ileri = 30; _P = _lp getPos [_ileri, _dir]; };
-            if (surfaceIsWater _P) then { continue };
+            // v8.376: hedef nokta su / bina / duvar / kaya icine ya da yakinina dusmesin: 55 m'den baslayip 15 m'ye kadar geriye dogru uygun nokta aranir
+            private _Pok = false;
+            for "_dd" from _ileri to 15 step -10 do {
+                _P = _lp getPos [_dd, _dir];
+                if (!surfaceIsWater _P && {(nearestTerrainObjects [_P, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "ROCKS"], 6, false, true]) isEqualTo []}) exitWith { _Pok = true; _ileri = _dd; };
+            };
+            if (!_Pok) then { continue };
 
             // eleman secimi (yoksa / biri oldu ise tamamla)
             if ((count _eski) > _hedefN) then {
@@ -125,6 +141,7 @@ private _calis = {
                     _x isNotEqualTo _l && {([_x, true] call _rolFn) in ["RIFLE", "MARKSMAN"]} && {!(_x getUnitTrait "medic")} && {!(_x getUnitTrait "explosiveSpecialist")}
                     && {!(_x getVariable [QGVAR(baskiTuf), false])} && {([_x] call _uglFn) isEqualTo ""} && {isNil {_x getVariable QGVAR(yanGuv)}}
                     && {!(_x getVariable [QGVAR(iedGuv), false])} && {!(_x getVariable [QGVAR(iedIsci), false])} && {!(_x in _eski)}
+                    && {(_g getVariable [QGVAR(rearGuardU), objNull]) isNotEqualTo _x} && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}   // v8.376: arka guvenlik / rol istasyonundaki asker nokta elemani olmaz (RPT 04:26: Colin Nelson hem arka hem nokta -> 15 sn YURUMUYOR)
                     && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(forceMove), false])}
                 };
                 // hareket yonunde en onde olanlar
