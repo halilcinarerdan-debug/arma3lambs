@@ -12,6 +12,7 @@
  *   TAKAS: hareket eden tamamen vardiktan ve faz >= 8 sn sonra roller degisir (taban <-> hareket).
  *   'b' SIKKI (hareket halinde ates): yalniz ZOR DURUM (rush eden askerde baski > 0.5 ya da grup kaybi >= %40) + CBA orani (lambs_danger_atesHareketOran, varsayilan 0.10): kosarken hedefe bastirma atesi, AI kapatilmaz.
  * Guvenlik: AI kapatma <= 6 sn, her rush'ta CBA bekleme + her tick kurtarma taramasi (sure dolunca TARGET / AUTOTARGET / PATH yeniden acilir); teslim / captive askere dokunulmaz.
+ * v8.378: KALICI ATES TAKIMI (>= 4 asker: buddy ciftleri dengeli A / B takimina bolunur; bir takim taban ates, digeri hareket, takasta doner) + BUDDY ATILIMI (hareket takiminda her cift icinde ayni anda yalniz BIR es atilir, es kapsama atesi verir; en eski atilan sirada; lider atilmaz). Log: [ATES-TAKIM]
  * CBA 'ELITE siper': lambs_danger_atesHareketAktif, lambs_danger_atesHareketOran.   Kapatma: lambs_danger_atesHareketOff = true.   Log: [ATES-HAREKET] / [ATES-HAREKET-OZET]
  *
  * Return Value: Baslatildi mi <BOOL>
@@ -35,6 +36,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
 
 [] spawn {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+    private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
     private _logN = 0;
     private _sonOzet = time + 60;
 
@@ -127,7 +129,38 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
             // ---- roller ----
             private _bof = (_g getVariable [QGVAR(fhBof), []]) select {_x in _uyeler};
             private _mov = _uyeler select {!(_x in _bof)};
-            if (_bof isEqualTo [] || {_mov isEqualTo []} || {(time - (_g getVariable [QGVAR(fhT), -999])) > 40}) then {
+            // v8.378 KALICI ATES TAKIMI (TC 3-21.76: 'squad leader bir ates takimini digerinin hareketini ates ile desteklemesi icin gorevlendirir'): >= 4 askerli grup, buddy ciftleri dengeli dagitilarak
+            //   iki KALICI takima (A / B) bolunur; takim uyeligi olum / yeni katilimdan baska degismez. Bir takim taban ates, digeri hareket; takasta roller doner.
+            private _takimModu = false;
+            if ((count _uyeler) >= 4) then {
+                private _takim = _g getVariable [QGVAR(fhTakim), []];
+                private _yenile = _takim isEqualTo [] || {(_uyeler findIf {!(_x in (_takim select 0)) && {!(_x in (_takim select 1))}}) >= 0}
+                    || {((_takim select 0) findIf {_x in _uyeler}) < 0} || {((_takim select 1) findIf {_x in _uyeler}) < 0};
+                if (_yenile) then {
+                    private _ciftler = [_uyeler] call _pairFn;
+                    private _a = [];
+                    private _b = [];
+                    { if ((_forEachIndex % 2) isEqualTo 0) then { _a append _x; } else { _b append _x; }; } forEach _ciftler;
+                    if (_b isEqualTo []) then { _b = [_a deleteAt ((count _a) - 1)]; };
+                    _takim = [_a, _b];
+                    _g setVariable [QGVAR(fhTakim), _takim];
+                    // taban ates ilk: MG'si olan (yoksa A)
+                    private _mgSay = _takim apply { ({([_x] call _rolFn) isEqualTo "MG"} count _x) };
+                    _g setVariable [QGVAR(fhBofIdx), [0, 1] select ((_mgSay select 1) > (_mgSay select 0))];
+                    _g setVariable [QGVAR(fhFazT), time];
+                    if (_logN < 80) then { _logN = _logN + 1; diag_log format ["[ATES-TAKIM] %1 | TAKIM A: %2 | TAKIM B: %3 | taban ates: %4", groupId _g, (_takim select 0) apply {name _x}, (_takim select 1) apply {name _x}, ["A", "B"] select (_g getVariable [QGVAR(fhBofIdx), 0])]; };
+                };
+                private _tA = (_takim select 0) select {_x in _uyeler};
+                private _tB = (_takim select 1) select {_x in _uyeler};
+                if (_tA isNotEqualTo [] && {_tB isNotEqualTo []}) then {
+                    _takimModu = true;
+                    private _bi = _g getVariable [QGVAR(fhBofIdx), 0];
+                    _bof = [_tA, _tB] select _bi;
+                    _mov = [_tA, _tB] select (1 - _bi);
+                    _g setVariable [QGVAR(fhBof), _bof];
+                };
+            };
+            if (!_takimModu && {_bof isEqualTo [] || {_mov isEqualTo []} || {(time - (_g getVariable [QGVAR(fhT), -999])) > 40}}) then {
                 private _sirali = [_uyeler, [], {
                     private _r = ([_x] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isEqualTo "MG";
                     ([0, 1000] select _r) - (speed _x)
@@ -146,6 +179,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                 private _eskiBof = _bof;
                 _bof = _mov;
                 _mov = _eskiBof;
+                if (_takimModu) then { _g setVariable [QGVAR(fhBofIdx), 1 - (_g getVariable [QGVAR(fhBofIdx), 0])]; };
                 _g setVariable [QGVAR(fhBof), _bof];
                 _g setVariable [QGVAR(fhFazT), time];
                 { _x setVariable [QGVAR(fhVardi), nil]; } forEach _uyeler;
@@ -153,11 +187,10 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                 _say set ["takas", (_say get "takas") + 1];
             };
 
-            // ---- TABAN ATES ----
-            {
-                private _u = _x;
-                if (_butce <= 0) exitWith {};
-                if ((time - (_u getVariable [QGVAR(fhBofT), -999])) > 3) then {
+            // ---- TABAN ATES (ortak eylem: taban ates takimi + hareket takimindaki KAPSAMA eslari) ----
+            private _bofEylem = {
+                params ["_u"];
+                if (_butce > 0 && {(time - (_u getVariable [QGVAR(fhBofT), -999])) > 3}) then {
                     _u setVariable [QGVAR(fhBofT), time];
                     if ((speed _u) > 1.5 || {!(lineIntersects [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 1.1], _en, _u])}) then { [_u, _en] call FUNC(acikSiper); };
                     if (((primaryWeapon _u) isNotEqualTo "") && {(_u ammo (primaryWeapon _u)) > 0} && {!(_u getVariable [QGVAR(fhAIBit), -1] > 0)} && {[_u, _en] call FUNC(atesHatiAcik)}) then {
@@ -166,7 +199,10 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                     };
                     _butce = _butce - 1;
                 };
-            } forEach _bof;
+            };
+            { [_x] call _bofEylem; } forEach _bof;
+            // v8.378 BUDDY ATILIMI: hareket takimindaki her cift icinde ayni anda YALNIZ BIR es atilir (en eski atilan sirada); es kapsama atesi verir. Lider atilmaz (kapsama).
+            private _ciftMov = if (_takimModu) then { [_mov] call _pairFn } else { [] };
 
             // ---- HAREKET: taban ates kuruldu mu? ----
             private _bofKurulu = _fazYas >= 3.5 || {(_bof findIf {(speed _x) < 1}) >= 0 && {_fazYas >= 2.5}};
@@ -178,7 +214,21 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
             {
                 private _u = _x;
                 if (_butce <= 0) exitWith {};
-                if ((time >= (_u getVariable [QGVAR(fhRushBit), -1])) && {time >= (_u getVariable [QGVAR(fhNextT), -1])} && {!(_u getVariable [QGVAR(fhVardi), false])}) then {
+                private _siraBende = true;
+                if (_takimModu) then {
+                    private _ci = _ciftMov findIf {_u in _x};
+                    private _c = if (_ci >= 0) then { _ciftMov select _ci } else { [_u] };
+                    private _uyelerC = _c select {alive _x};
+                    private _sirali = [_uyelerC, [], {(_x getVariable [QGVAR(fhSonRush), -999]) + ((_uyelerC find _x) * 0.001)}, "ASCEND"] call BIS_fnc_sortBy;
+                    private _esKosuyor = (_uyelerC findIf {_x isNotEqualTo _u && {time < (_x getVariable [QGVAR(fhRushBit), -1])}}) >= 0;
+                    _siraBende = (_u isNotEqualTo _l) && {(count _uyelerC) < 2 || {((_sirali select 0) isEqualTo _u) && {!_esKosuyor}}};
+                    if (!_siraBende) then {
+                        // eslerin atilimi sirasinda / lider: kapsama ateşi
+                        if (time >= (_u getVariable [QGVAR(fhRushBit), -1])) then { [_u] call _bofEylem; };
+                    };
+                };
+                if (_siraBende && {time >= (_u getVariable [QGVAR(fhRushBit), -1])} && {time >= (_u getVariable [QGVAR(fhNextT), -1])} && {!(_u getVariable [QGVAR(fhVardi), false])}) then {
+                    _u setVariable [QGVAR(fhSonRush), time];
                     private _nokta = [_u, _en] call _siperBul;
                     if (_nokta isEqualTo []) then {
                         // siperli nokta yok: ilerlemez, yatar (acikta yurume yok)

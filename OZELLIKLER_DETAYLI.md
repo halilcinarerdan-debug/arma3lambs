@@ -68,6 +68,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 
 **Buddy'nin yaptıkları**
 - **Reload koruması**: eş reload ederken diğeri düşmana odak ateş + alana baskı (3 sn'de bir tazeler).
+- **Hücumda ateş takımı + buddy atılımı** (`atesHareket`, v8.378): ≥ 4 askerde buddy çiftleri kalıcı A / B takımına bölünür; biri taban ateşi, diğeri hareket eder; hareket takımında her çiftten yalnız bir eş atılır, diğeri kapsama ateşi verir (TC 3-21.76). Log `[ATES-TAKIM]`.
 - **Bounding**: buddy çiftleri 2'li (en güçlü + en zayıf), MG koşmaz; koşucu varınca eş 2–8 m yanına gelir (BND-YAKIN); tek kalan ilerler.
 - **Retreat / temas kesme**: 2'li çiftler halinde en yakın sert siper (`findCover SURVIVE`) veya 60 m dik uzaklaşma.
 - **Cephane / bomba paslama (T)** (`cephanePaylas`): önce eşler; temasta yalnızca ≤ 6 m eşler arası; sakinde verici alıcıya yürür (≤ 40 m). Fiziksel: verici "PutDown" ile yere bırakır, alıcı gidip alır (50 sn; alınamazsa 120 sn yerde).
