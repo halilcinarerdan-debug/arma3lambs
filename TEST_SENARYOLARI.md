@@ -607,3 +607,11 @@ Her oturum sonunda: `python tools/rpt_ozet.py --karne <rpt>` ve `python tools/rp
 5. Bastirma yogunlugu 0 ve 1: `[ATIS-USTUNLUK-OZET]` bastirma emri sayisi artar; mermi israfi: `[MERMI]` TASARRUF / KRITIK sayisi belirgin artmamali.
 6. STEALTH grubu (Eden: davranis STEALTH, ates yasagi YOK) yakininda tufekle ates et: `[STEALTH-SES] STEALTH -> AWARE`; asker yatip ufuk disina kacmamali.
 7. Tank (T-14 / Merkava) AT ile vurup murettebat inerken: murettebat > 20 m sicrarsa `[ISINLANMA]` satiri + geri alinma; satirdaki lifeState / anim / hiz NEDENI aydinlatir.
+
+## T-POZISYON (v8.385)
+1. Eden: acik arazide (cali/agac yok) 3-4 `ELITE Catisma Pozisyonu` modulu (tip Siper, puan 8) yerlestir, hepsinin yonunu dusmana cevir; 2 mil. arkadasi + 1 dusman squad. Calistir: RPT `[EDEN-POZISYON] ... tip SIPER | puan 8` satirlari; temasta `[POZISYON-SEC] #n ... mod:DEFEND` ve askerler modul noktalarina gitmeli (CBA 'ELITE Catisma Pozisyonu modulleri' kapaliyken gitmemeli).
+2. Bina ici: bir evin penceresine tip 'Bina ici' (puan 7, yon pencere disina, sektor 90), cati/ust kata tip 'Cati ust kat' (puan 9, rol Nisanci), disarida tip 'Ates mevzii' (rol MG): dusman evin onunde belirince MG ates mevziine, nisanci catiya, tufekciler pencereye ([POZISYON-SEC] tip/rol uyumu). Sektor disinda kalan dusmanda modul aday olmamali.
+3. Gecis: arazide (batakli / kayalik) dusmana dogru 40-60 m arayla 4-5 tip 'Gecis' (puan 6) zinciri: bounding atilimlari bu noktalara dusmeli (`[BND]` sicrama hedefi ~ modul konumu); tip Gecis DEFEND / OVERWATCH'ta aday olmamali.
+4. Kapasite: kapasite 1 modul + ayni anda 3 asker temasta: ikinci/ucuncu asker -45 puan alir, baska siper/modul secer (yigilma olmaz). Rol tercihi: MG modulune tufekci gonder: -14 puan, MG gelince +16.
+5. Karakol: Karakol modulu + Garnizon modulu (nobetci 3) + karakol yaricapinda tip 'Cati ust kat' (puan 10) ve 'Ates mevzii' (rol MG, durus Yatarak): `[KARAKOL-GARNIZON] ... AYAR ... pozisyon: MODUL ...` en basta; nobetci modul durusunda (setUnitPos) ve modul yonune bakmali; modul 'Karakol ve mevzi plani kullansin' kapaliysa kullanilmamali.
+6. Mevzi: Objektif modulu (tip Savun) + dusman yonune bakan 4 Catisma Pozisyonu (150 m icinde): `[MEVZI-POZ] grup | asker -> POZn ...` onem puani sirasiyla; kalan askerler bina/halka dagitimina gider; `[MEVZI] ... pozisyon modulu N`.

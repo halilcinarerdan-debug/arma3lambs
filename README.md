@@ -76,7 +76,7 @@ Ayarlar (CBA > LAMBS Danger > ELITE dron savunması): *Gözlem İHA süresi*, *G
 **Durum:** oyunda test edilmedi (bkz. DOGRULANMAYANLAR.md); RPT'de `[IHA-SORTI] ... kategori`, `[IHA-UCAK]`, `[IHA-ENVANTER] ... kategori` satırlarına bak.
 
 ## 3DEN (Eden Editor) ile senaryo — Zeus gerekmez (v8.362)
-Editörde **Modüller → LAMBS ELITE (3DEN)** altında 8 modül vardır. Modüller sunucuda görev başında bir kez çalışır ve Zeus modüllerinin kullandığı **aynı sunucu olaylarını** tetikler (ELITE hazır olana dek bekler; RPT'de `[EDEN]`). Birimler/araçlar/dronlar modüle **SYNC (bağlantı)** ile bağlanır; ayarlar modülün çift tıkla açılan niteliklerindedir.
+Editörde **Modüller → LAMBS ELITE (3DEN)** altında 9 modül vardır. Modüller sunucuda görev başında bir kez çalışır ve Zeus modüllerinin kullandığı **aynı sunucu olaylarını** tetikler (ELITE hazır olana dek bekler; RPT'de `[EDEN]`). Birimler/araçlar/dronlar modüle **SYNC (bağlantı)** ile bağlanır; ayarlar modülün çift tıkla açılan niteliklerindedir.
 
 | Modül | Konum | SYNC ile bağlanan | Ne yapar |
 |---|---|---|---|
@@ -88,5 +88,6 @@ Editörde **Modüller → LAMBS ELITE (3DEN)** altında 8 modül vardır. Modül
 | ELITE Karakol Garnizon | karakol içi | — | Nöbetçi/devriye/üst kat/araç mevzisi (Karakol'dan sonra çalışır) |
 | ELITE Gözetleme Ata | karakol yakını | gruplar | Bağlı gruplar en yakın karakolda nöbet tutar |
 | ELITE IHA Görevi | gözlem merkezi | IHA (dron) + operatör asker | FPV/bomba/gözlem görevi (Zeus ile aynı) |
+| ELITE Çatışma Pozisyonu (v8.385) | pozisyonun kendisi (modül yönü = ateş/ilerleme yönü) | — (bağlantı gerekmez) | Elle yerleştirilen **siper / bina içi / çatı-üst kat / ateş mevzii / geçiş yol noktası**. Tip + **önem puanı (1-10)** + duruş + kapasite + sektör + rol tercihi + taraf: botlar siper seçerken (cover, bounding, geri çekilme), karakol nöbetinde ve SAVUN mevzisinde bu pozisyonları puana göre kullanır. Kötü arazide "Geçiş" tipini 40-60 m arayla zincir dizin (yalnız ilerlerken aday). RPT: `[EDEN-POZISYON]`, `[POZISYON-SEC]`, `[MEVZI-POZ]`; CBA "ELITE Çatışma Pozisyonu modülleri" ile kapatılır |
 
 Örnek senaryo: 1) bir HQ modülü koy, saldıracak squad'lara SYNC et; 2) objektife bir Objektif modülü koy, HQ modülüne SYNC et (isteğe bağlı: grup seç = bağlı gruplar ve gruplara da SYNC); 3) Koordinasyon modülünü koy; senaryoyu başlat — plan 10 sn sonra kurulur (Kurulum gecikmesi). Savunma için Karakol modülü + gruplara SYNC + (isteğe bağlı) Garnizon. Zeus modülleri çalışmaya devam eder; Zeus açık olmak zorunda değildir.

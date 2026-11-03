@@ -260,3 +260,38 @@ class GVAR(EdenIha): Module_F {
         description = "SYNC ile bir IHA (dron) ve istege bagli operator askere baglayin. Modul konumu gozlem merkezidir. Gozlem icin Gorev = Gozlem devriyesi: quad / helikopter tipi (Darter, Pelican) rastgele noktalara, ucak tipi (Greyhawk, Ababil, Falcon, Sentinel) daire cizerek ucar.";
     };
 };
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+// 9) CATISMA POZISYONU (v8.385) - senaryoda ELLE yerlestirilen cover / mevzi / bina ici / cati / gecis noktasi; bagimsiz (SYNC YOK)
+//    Modul konumu = pozisyon, modul YONU (rotasyon oku) = ates / ilerleme yonu. Botlar siper secerken (findCover: cover, bounding, geri cekilme), karakol nobetinde ve SAVUN mevzisinde
+//    bu pozisyonlari ONEM PUANINA ve TIPINE gore degerlendirir (fnc_cpAday). Tip: pozisyonun ne ise yaradigi (ev ici, cati, ates mevzii, kotu arazide gecis rotasi).
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+class GVAR(EdenPozisyon): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenPozisyon);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE Catisma Pozisyonu (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\defend_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenPozisyon);
+    functionPriority = 1;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        E_COMBO(edPozTip,"Pozisyon tipi","Pozisyonun NE ISE YARADIGI. Siper: genel koruma. Bina ici: pencere kapi oda mevzisi. Cati ust kat: gozetleme ve nisanci. Ates mevzii: MG nisanci icin hedefi gorur ve korunur. Gecis: kotu arazide ilerleme rotasi yol noktasi - yalniz ilerlerken adaydir.","0",E_V(0,"Siper genel") E_V(1,"Bina ici pencere kapi oda") E_V(2,"Cati ust kat gozetleme") E_V(3,"Ates mevzii MG nisanci") E_V(4,"Gecis yol noktasi kotu arazi"))
+        E_COMBO(edPozPuan,"Onem puani","Yuksek puan = bot bu pozisyonu dogal siperlere tercih eder. Taban skor 20 + puan x 6 - dogal siperler tipik olarak 50-100 alir. 1-3 yedek 4-6 iyi 7-8 cok onemli 9-10 kritik tercih.","5",E_V(1,"1 dusuk") E_V(2,"2") E_V(3,"3") E_V(4,"4") E_V(5,"5 orta") E_V(6,"6") E_V(7,"7") E_V(8,"8") E_V(9,"9") E_V(10,"10 kritik"))
+        E_COMBO(edPozTaraf,"Taraf","Hangi tarafin askeri kullanabilir. Hepsi: her taraf.","0",E_V(0,"Hepsi") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
+        E_COMBO(edPozDurus,"Durus","Otomatik: dusmandan gizli kalinan en yuksek durus. Sabit: pozisyonda bu durus zorlanir.","0",E_V(0,"Otomatik") E_V(1,"Yatarak") E_V(2,"Comelerek") E_V(3,"Ayakta"))
+        E_NUM(edPozKap,"Kapasite asker","Ayni anda pozisyonu kullanabilecek asker 1-8. Dolu pozisyon -45 puan alir. Karakol nobetinde pozisyon basina tek nobetci.","2")
+        E_NUM(edPozSektor,"Sektor genisligi derece","Ates ilerleme sektoru 20-360. Merkez = modul yonu. Dusman sektor disindaysa pozisyon aday olmaz. 360 = her yon.","360")
+        E_COMBO(edPozRol,"Rol tercihi","Tercih edilen rol eslesirse +16 eslesmezse -14 puan. Karakol nobetinde eslesen rol onceliklidir. Herkes: tercih yok.","0",E_V(0,"Herkes") E_V(1,"Nisanci") E_V(2,"MG") E_V(3,"AT roketatar") E_V(4,"Tufekci"))
+        E_BOOL(edPozGarnizon,"Karakol ve mevzi plani kullansin","Karakol nobeti ve SAVUN mevzi plani bu pozisyonu (bina ici cati ates mevzii ve siper tipleri) oncelikli kullanir. Gecis tipi hic kullanilmaz.","true")
+        E_BOOL(edPozIsaret,"Oyunda harita isareti","Hata ayiklama: pozisyon tipi ve puani haritada isaretlenir.","false")
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "Modul konumu bir catisma pozisyonudur; modul yonu ates veya ilerleme yonudur. Baglanti GEREKMEZ. Tip ve onem puani botlara pozisyonun ne ise yaradigini soyler: cover secimi - bounding - geri cekilme - karakol nobeti - SAVUN mevzisi bu pozisyonlari puana gore kullanir. Gecis tipini kotu arazide 40-60 m arayla zincir olarak dizin.";
+    };
+};

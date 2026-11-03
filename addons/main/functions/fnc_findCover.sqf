@@ -376,6 +376,20 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
         } forEach [6, 14];
     };
     // ---------------------------------------------------------------------
+    // v8.385 3DEN CATISMA POZISYONU modulleri (kullanici: 'cover icin ... onem puanlanabilsin, botlar modulun ne ise yaradigini bilsin, kotu terrainlerde yol gostersin'):
+    //   'ELITE Catisma Pozisyonu' modulleri (lambs_danger_cpListe) ek aday olarak eklenir; puanlama lambs_danger_fnc_cpAday'da (tip / onem puani / sektor / rol / kapasite + ayni mermi geometrisi).
+    //   Faz 2 (konum kaydirma / peek) modul adaylarina UYGULANMAZ: yerlestiren kisi pozisyonu kendisi secti. Modul yoksa / danger eklentisi yoksa hicbir sey yapmaz.
+    // ---------------------------------------------------------------------
+    private _cpPoslar = [];
+    if ((missionNamespace getVariable ["lambs_danger_cpListe", []]) isNotEqualTo []) then {
+        private _cpAd = [_unit, _enemyPos, _dangerPos, _range, _mode, _minDist, _claims, _unitEnemyDist] call (missionNamespace getVariable ["lambs_danger_fnc_cpAday", {[]}]);
+        if (_cpAd isNotEqualTo []) then {
+            _adaylar append _cpAd;
+            _cpPoslar = _cpAd apply {_x select 1};
+        };
+    };
+
+    // ---------------------------------------------------------------------
     // En iyiler (skora gore) + rezerv
     // ---------------------------------------------------------------------
     if (_adaylar isNotEqualTo []) then {
@@ -400,6 +414,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
             {
                 private _a = _x;
                 private _pos = _a select 1;
+                if (_pos in _cpPoslar) then { continue };   // v8.385: modul pozisyonu Faz 2'ye girmez (konum kaydirilmaz)
                 private _posASL = AGLToASL _pos;
                 private _eDir = _pos getDir _enemyPos;
                 private _eDist = _pos distance2D _enemyPos;
@@ -557,6 +572,17 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
         for "_i" from 0 to (_adet - 1) do {
             private _a = _adaylar select _i;
             _ret pushBack [_a select 1, _a select 2];
+        };
+
+        // v8.385 tani: ilk secim bir modul pozisyonuysa log (ilk 60, sonra her 25.)
+        if (_cpPoslar isNotEqualTo [] && {_ret isNotEqualTo []} && {((_ret select 0) select 0) in _cpPoslar}) then {
+            if (isNil "lambs_main_cpLogN") then { lambs_main_cpLogN = 0; };
+            lambs_main_cpLogN = lambs_main_cpLogN + 1;
+            if (lambs_main_cpLogN <= 60 || {(lambs_main_cpLogN % 25) isEqualTo 0}) then {
+                private _cpP = (_ret select 0) select 0;
+                private _cpK = (missionNamespace getVariable ["lambs_danger_cpListe", []]) select {(_x select 0) isEqualTo _cpP};
+                diag_log format ["[POZISYON-SEC] #%1 %2 (%3) | mod:%4 | %5 | %6 m | dusman %7 m | durus %8 | %9 modul adayi / %10 aday", lambs_main_cpLogN, name _unit, groupId _group, _mode, (_cpK param [0, []]) param [10, "?"], round (_unit distance2D _cpP), round _unitEnemyDist, (_ret select 0) select 1, count _cpPoslar, count _adaylar];
+            };
         };
 
         _claims pushBack [(_ret select 0) select 0, _simdi, _unit];

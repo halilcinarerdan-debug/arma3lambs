@@ -14,6 +14,7 @@
  *   Nobetci pozisyona gider (doMove), 3 m icinde PATH kapatilir (yerinde kalir), dis yone doWatch; 120 sn'de varamazsa pozisyona isinlanir (merdiven takilmasi).
  * DEVRIYE: alt gruplar (devriye boyu 2-6), karakolun %60 yaricapinda halka rotasi (CYCLE), AWARE / LIMITED / STAG COLUMN; temas / alarm olunca (grup temasi < 30 sn) rota kesilir, en yakin cevre noktasina savunmaya gecer, 120 sn temassizsa devam.
  * ARACLAR: karakol icindeki AI surucu + yerel kara araclari (APC / IFV / kamyon) cevrede %75 yaricapta ates mevzisine gider (tehdit yonu bilinmiyorsa esit dagilir), PATH kapatilir, mürettebat icinde kalir; gorev 'KARAKOL_ARAC'.
+ * v8.385: 3DEN 'ELITE Catisma Pozisyonu' modulleri (bina ici / cati / ates mevzii; garnizon bayragi acik) karakol yaricapi x1.2 icinde NOBET ADAYI olur ve dogal adaylara oncelikli (skor 120 + puan x 12; modulun sabit durusu ve rol tercihi nobette uygulanir).
  * Altgruplar: grup degiskeni lambs_danger_garnizonAlt (NOBET / DEVRIYE) -> plan / taksi / tasima onlari almaz. Birim degiskeni lambs_danger_garnizonOrijin = eski grup (kaldirinca geri doner).
  * Kapatma: lambs_danger_garnizonOff = true.  Log: [KARAKOL-GARNIZON] (+ 60 sn ozet).
  *
@@ -45,9 +46,21 @@ private _kapsama = {
 };
 
 private _pozisyonlar = {
-    params ["_poz", "_yar", "_n", "_ustKat"];
+    params ["_poz", "_yar", "_n", "_ustKat", ["_tarafK", sideUnknown]];
     private _kapsama = missionNamespace getVariable "lambs_danger_garnizonKapsamaFn";
     private _aday = [];
+    // v8.385 3DEN CATISMA POZISYONU modulleri (kullanici: 'mevzi ve karakol sistemi ile entegre olsun'): karakol yaricapi x1.2 icindeki bina ici / cati / ates mevzii (tip 1-3) modulleri
+    //   NOBET ADAYI olur ve dogal adaylara (ust kat / arazi halkasi) ONCELIKLIDIR (skor 120 + puan x 12; cati +10). Aday bicimi: [poz, yon, "MODUL", skor, ad, durus, rol] (6. = sabit durus ya da "", 7. = rol tercihi ya da "").
+    //   Modul pozisyonlari arasi min aralik 3 m (dogal adaylarda 18 m). Kapatma: CBA 'ELITE catisma pozisyonu modulleri' (lambs_danger_cpAktif).
+    if (missionNamespace getVariable ["lambs_danger_cpAktif", true]) then {
+        {
+            _x params ["_mp", "_md", "_mt", "_mpu", "_mtr", "_mdu", "", "", "_mrl", "_mgz", "_mad"];
+            if (!_mgz || {!(_mt in [1, 2, 3])} || {(_mp distance2D _poz) > (_yar * 1.2)} || {surfaceIsWater _mp}) then { continue };
+            private _msd = [sideUnknown, west, east, independent] select ((round _mtr) max 0 min 3);
+            if (_msd isNotEqualTo sideUnknown && {_tarafK isNotEqualTo sideUnknown} && {_msd isNotEqualTo _tarafK}) then { continue };
+            _aday pushBack [_mp, _md, "MODUL", 120 + (_mpu * 12) + ([0, 10] select (_mt isEqualTo 2)), _mad, ["", "DOWN", "MIDDLE", "UP"] select ((round _mdu) max 0 min 3), ["", "MARKSMAN", "MG", "AT", "RIFLE"] select ((round _mrl) max 0 min 4)];
+        } forEach (missionNamespace getVariable ["lambs_danger_cpListe", []]);
+    };
     if (_ustKat) then {
         private _bl = (nearestObjects [_poz, ["House", "Building"], _yar]) select {(count (_x buildingPos -1)) > 0};
         private _kara = missionNamespace getVariable ["lambs_danger_ustKatKara", []];
@@ -86,7 +99,7 @@ private _pozisyonlar = {
             private _a = _x;
             private _md = 200;
             { _md = _md min ((_a select 0) distance2D (_x select 0)); } forEach _secilen;
-            if (_md < 18) then { continue };
+            if (_md < ([18, 3] select ((_a select 2) isEqualTo "MODUL"))) then { continue };
             private _s = (_a select 3) + ([0, (_md min 60) * 0.6] select (_secilen isNotEqualTo []));
             if (_s > _enS) then { _enS = _s; _en = _a; };
         } forEach _aday;
@@ -150,7 +163,7 @@ private _calis = {
                 [_mn] call _serbestFn;
                 _durum = createHashMap;
                 _durum set ["surum", _surum];
-                _durum set ["pozlar", [_poz, _yar, _nobetN, _ustKat] call _pozFn];
+                _durum set ["pozlar", [_poz, _yar, _nobetN, _ustKat, _taraf] call _pozFn];
                 _durum set ["birimler", []];
                 _durum set ["devriyeG", []];
                 _durum set ["aracG", []];
@@ -194,6 +207,7 @@ private _calis = {
             {
                 private _i = _forEachIndex;
                 private _p = _x select 0;
+                private _girdi = _x;
                 private _u = _atama getOrDefault [str _i, objNull];
                 if (alive _u && {_u in (units _nobetG)}) then {
                     // v8.138: nobetci ates altinda / yaraliysa PATH serbest (siper alsin); 90 sn sonra pozisyonuna doner (donup kalmasin / yerinde olu ordek olmasin)
@@ -210,7 +224,7 @@ private _calis = {
                             _u setVariable ["lambs_danger_nobet", true, true];
                             doStop _u;
                             _u disableAI "PATH";
-                            _u setUnitPos (["MIDDLE", "UP"] select ((_x select 2) isEqualTo "USTKAT"));
+                            _u setUnitPos (if ((count _x) > 5 && {(_x select 5) isNotEqualTo ""}) then {_x select 5} else {["MIDDLE", "UP"] select ((_x select 2) isEqualTo "USTKAT")});
                             _u doWatch (_p getPos [150, _x select 1]);
                             _u setBehaviour "AWARE";
                             diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET pozisyonda: %2 (%3 %4)", _ad, name _u, _x select 2, mapGridPosition _p];
@@ -237,7 +251,7 @@ private _calis = {
                             _u setVariable ["lambs_danger_nobet", true, true];
                             doStop _u;
                             _u disableAI "PATH";
-                            _u setUnitPos (["MIDDLE", "UP"] select ((_x select 2) isEqualTo "USTKAT"));
+                            _u setUnitPos (if ((count _x) > 5 && {(_x select 5) isNotEqualTo ""}) then {_x select 5} else {["MIDDLE", "UP"] select ((_x select 2) isEqualTo "USTKAT")});
                             _u doWatch (_p getPos [150, _x select 1]);
                             diag_log format ["[KARAKOL-GARNIZON] %1 | NOBET %2 pozisyona 120 sn'de varamadi -> isinlandi", _ad, name _u];
                         };
@@ -246,7 +260,7 @@ private _calis = {
                     // bos / olu nobet: havuzdan en uygun
                     private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {(_x distance2D _poz) <= (_yar * 1.5)}};
                     if (_adaylar isEqualTo []) then { continue };
-                    private _s = [_adaylar, [], { private _r = [_x] call _rolFn; (([0, 200, 400, 600, 900] select ((["RIFLE", "MARKSMAN", "RTO", "MEDIC", "MG"] find _r) max 0)) max ([0, 800] select (_r isEqualTo "AT"))) + ([0, 1500] select (_x isEqualTo (leader (group _x)))) + ((_x distance2D _p) / 5) }, "ASCEND"] call BIS_fnc_sortBy;
+                    private _s = [_adaylar, [], { private _r = [_x] call _rolFn; (([0, 200, 400, 600, 900] select ((["RIFLE", "MARKSMAN", "RTO", "MEDIC", "MG"] find _r) max 0)) max ([0, 800] select (_r isEqualTo "AT"))) + ([0, 1500] select (_x isEqualTo (leader (group _x)))) + ((_x distance2D _p) / 5) - ([0, 1600] select (((count _girdi) > 6) && {(_girdi select 6) isNotEqualTo ""} && {_r isEqualTo (_girdi select 6)})) }, "ASCEND"] call BIS_fnc_sortBy;
                     private _sec = _s select 0;
                     _sec setVariable ["lambs_danger_garnizonOrijin", group _sec];
                     [_sec] joinSilent _nobetG;
