@@ -3005,3 +3005,8 @@ v8.372 DUVAR ARKASINA BASTIRMA (kullanici: 'askerler duvar arkasini supressliyor
 v8.373 TCCC KATI GUVENLIK (kullanici: 'catismadayken ilk yardim olmasin, area safe olduktan sonra ya da bir nebze guvenliyse yapilsin ama sis bombasina falan tek basina guvenilmesin'). Oyunda DENENMEDI.
  - fnc_tccc: lambs_danger_tcccGuvenDerece 0 catisma (temas suruyor / bitis < 6 sn / hekim baski >= 0.4 / 60 m dusman / yaraliya acik gorus hatti) -> bakim YOK, suren yaklasma / M iptal; 1 kismen guvenli -> yalniz baygin / kanayan: M + cekme; 2 tam guvenli (temas >= 20 sn once bitti, 150 m'de taze dusman yok, baski < 0.2) -> tam MARCH.
  - Sis / duman dereceyi yukseltmez (yalniz temas, bilgi, baski, nesne gorus hatti). Eski 90 sn 'yine de git' istisnasi katiyken yok. CBA: lambs_danger_tcccKatiGuvenlik, lambs_danger_tcccTamGuvenSn. Log: [TCCC] ... guvenlik derecesi.
+
+v8.374 TCCC GECIKME DUZELTMESI (kullanici: 'medic cok gec kaldi'; RPT 03:41: [ARAC-MEDEVAC] baygin yaralilar 40 / 145 / 160 sn tedavisiz). Oyunda DENENMEDI.
+ - Neden: v8.373 guvenlik derecesi grup 'contact' bayragina bakiyordu; fnc_contact bunu temas basinda time+600'e kurar, yalniz AllClear'da dusurur -> bayrak tutuldukca hekim hic gitmiyordu.
+ - Simdi: grup temas bayragi KULLANILMAZ. Derece 0: grup son 5 sn icinde ates etti (firedHub sonAtisT) / hekim baski >= 0.5 / grup baski >= 0.6 / 60 m taze dusman / acik gorus hatti. Derece 2: son ates >= 12 sn (CBA tcccTamGuvenSn, varsayilan 12) ve 150 m'de taze dusman yok. Sis/duman hala guvenlik sayilmaz.
+ - Log: [TCCC-BEKLE] (yarali bekliyorsa 20 sn'de bir neden). NOT: bu RPT istemci logudur, grup sunucuya devredilmis (yerel AI grup 0) -> [TCCC] satirlari sunucu logunda.

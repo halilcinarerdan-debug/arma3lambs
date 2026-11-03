@@ -62,18 +62,24 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
     // v8.373 GUVENLIK DERECESI (kullanici: 'catismadayken ilk yardim olmasin, area safe olduktan sonra ya da bir nebze guvenliyse yapilsin ama sis bombasina falan tek basina guvenilmesin'):
-    //   0 = CATISMA (ilk yardim YOK): grup temasi suruyor / temas bitis < 6 sn / hekim baskisi >= 0.4 / 60 m icinde bilinen dusman / yarali bilinen dusmana (<= 300 m) ACIK gorus hattinda
-    //   1 = KISMEN GUVENLI (yalniz kanama kontrolu M + guvenli yere cekme): temas >= 6 sn once bitti, ama tam guvenli degil
-    //   2 = TAM GUVENLI (area safe; tam MARCH): temas >= 20 sn once bitti (CBA lambs_danger_tcccTamGuvenSn), 150 m icinde 25 sn icinde GORULMUS bilinen dusman yok, hekim baskisi < 0.2
+    //   0 = CATISMA (ilk yardim YOK): grup son 5 sn icinde ates etti / hekim baskisi >= 0.5 (grup >= 0.6) / 60 m icinde bilinen dusman / yarali bilinen dusmana (<= 300 m) ACIK gorus hattinda
+    //   1 = KISMEN GUVENLI (yalniz kanama kontrolu M + guvenli yere cekme): 5-12 sn sessiz ya da 150 m icinde taze dusman var
+    //   2 = TAM GUVENLI (area safe; tam MARCH): son ates >= 12 sn once (CBA lambs_danger_tcccTamGuvenSn), 150 m icinde 25 sn icinde GORULMUS bilinen dusman yok, hekim baskisi < 0.2
     //   SIS / DUMAN GUVENLIK SAYILMAZ: derece yalniz temas / bilgi / baski / gorus hattina bakar; duman perdesi ya da kendi sis bombamiz dereceyi YUKSELTMEZ (gorus hatti kontrolu nesnelere bakar, dumana degil).
     lambs_danger_tcccGuvenDerece = {
         params ["_g", "_m", "_c"];
         private _onb = _c getVariable [QGVAR(tcccGdOnb), [-99, 0]];
         if ((time - (_onb select 0)) < 1.5) exitWith {_onb select 1};
-        private _kes = time - (_g getVariable [QGVAR(contact), 0]);
+        // v8.374 (RPT 03:41: baygin yaralilar 40 / 145 / 160 sn bekledi; neden: grup 'contact' bayragi temas basinda time+600'e kurulur ve yalniz AllClear olayinda sonar -> bayrak tutulu kaldikca hekim hic gitmiyordu).
+        //   Artik GRUP TEMAS BAYRAGINA BAKILMAZ; gercek sinyaller: grup uyelerinin son atisi (firedHub sonAtisT), baski, taze bilinen dusman, gorus hatti.
+        private _sonAtis = -999;
+        private _supMax = 0;
+        { _sonAtis = _sonAtis max (_x getVariable [QGVAR(sonAtisT), -999]); _supMax = _supMax max (getSuppression _x); } forEach ((units _g) select {alive _x});
+        private _kes = time - _sonAtis;
+        _c setVariable [QGVAR(tcccKes), _kes];
         private _d = 2;
         private _sup = getSuppression _m;
-        if ((_g getVariable [QGVAR(contact), 0]) > time || {_kes < 6} || {_sup >= 0.4}) then { _d = 0; };
+        if (_kes < 5 || {_sup >= 0.5} || {_supMax >= 0.6}) then { _d = 0; };
         if (_d > 0) then {
             private _esik = ["SUPHE"] call FUNC(bilgiEsik);
             private _yakin = false;
@@ -90,7 +96,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 };
             } forEach (_m nearTargets 300);
             if (_yakin || {_acik}) then { _d = 0; } else {
-                if (_tehdit150 || {_kes < (missionNamespace getVariable ["lambs_danger_tcccTamGuvenSn", 20])} || {_sup >= 0.2}) then { _d = 1; };
+                if (_tehdit150 || {_kes < (missionNamespace getVariable ["lambs_danger_tcccTamGuvenSn", 12])} || {_sup >= 0.25}) then { _d = 1; };
             };
         };
         _c setVariable [QGVAR(tcccGdOnb), [time, _d]];
@@ -534,7 +540,6 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 // ates altinda: sadece baygin yarali
                 if (!_strict && {!_guvenli} && {!([_c] call _baygin)}) then { continue };
                 // v8.373: catismada hic gitme (yakin tarama yaralidan once ucuz eleme)
-                if (_strict && {_contact}) then { continue };
 
                 private _adaylar = (units _g) select {
                     (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
@@ -564,7 +569,13 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 // v8.373 KATI GUVENLIK: derece 0 = bekle; derece 1 (kismen guvenli) = yalniz baygin / kanayan yarali (M + cekme); derece 2 = tam bakim
                 if (_strict) then {
                     private _gdn = [_g, _m, _c] call lambs_danger_tcccGuvenDerece;
-                    if (_gdn < 1) then { continue };
+                    if (_gdn < 1) then {
+                        if ((time - (_c getVariable [QGVAR(tcccBekleLog), -999])) > 20) then {
+                            _c setVariable [QGVAR(tcccBekleLog), time];
+                            diag_log format ["[TCCC-BEKLE] %1 | yarali %2 | hekim %3 | guvenlik 0 (catisma) | son ates %4 sn once | hekim baski %5 | bekliyor %6 sn", groupId _g, name _c, name _m, round (_c getVariable [QGVAR(tcccKes), -1]), (getSuppression _m) toFixed 2, round (time - (_c getVariable [QGVAR(tcccGorulduT), time]))];
+                        };
+                        continue
+                    };
                     if (_gdn < 2 && {!([_c] call _baygin)} && {([_c] call _kanKaybi) < 0.001}) then { continue };
                 };
                 // ates altinda: hekim baskida degil ve dusman uzak olmali (eski mod: KATI GUVENLIK kapaliyken)
