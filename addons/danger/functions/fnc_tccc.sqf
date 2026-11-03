@@ -61,6 +61,42 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
 [] spawn {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
+    // v8.373 GUVENLIK DERECESI (kullanici: 'catismadayken ilk yardim olmasin, area safe olduktan sonra ya da bir nebze guvenliyse yapilsin ama sis bombasina falan tek basina guvenilmesin'):
+    //   0 = CATISMA (ilk yardim YOK): grup temasi suruyor / temas bitis < 6 sn / hekim baskisi >= 0.4 / 60 m icinde bilinen dusman / yarali bilinen dusmana (<= 300 m) ACIK gorus hattinda
+    //   1 = KISMEN GUVENLI (yalniz kanama kontrolu M + guvenli yere cekme): temas >= 6 sn once bitti, ama tam guvenli degil
+    //   2 = TAM GUVENLI (area safe; tam MARCH): temas >= 20 sn once bitti (CBA lambs_danger_tcccTamGuvenSn), 150 m icinde 25 sn icinde GORULMUS bilinen dusman yok, hekim baskisi < 0.2
+    //   SIS / DUMAN GUVENLIK SAYILMAZ: derece yalniz temas / bilgi / baski / gorus hattina bakar; duman perdesi ya da kendi sis bombamiz dereceyi YUKSELTMEZ (gorus hatti kontrolu nesnelere bakar, dumana degil).
+    lambs_danger_tcccGuvenDerece = {
+        params ["_g", "_m", "_c"];
+        private _onb = _c getVariable [QGVAR(tcccGdOnb), [-99, 0]];
+        if ((time - (_onb select 0)) < 1.5) exitWith {_onb select 1};
+        private _kes = time - (_g getVariable [QGVAR(contact), 0]);
+        private _d = 2;
+        private _sup = getSuppression _m;
+        if ((_g getVariable [QGVAR(contact), 0]) > time || {_kes < 6} || {_sup >= 0.4}) then { _d = 0; };
+        if (_d > 0) then {
+            private _esik = ["SUPHE"] call FUNC(bilgiEsik);
+            private _yakin = false;
+            private _tehdit150 = false;
+            private _acik = false;
+            {
+                private _o = _x select 4;
+                if (!isNull _o && {alive _o} && {(_o isKindOf "CAManBase") || {_o isKindOf "LandVehicle"}} && {((side _m) getFriend (side (group _o))) < 0.6} && {(side (group _o)) isNotEqualTo civilian}
+                    && {(_m knowsAbout _o) >= _esik} && {((_m targetKnowledge _o) select 2) > (time - 25)}) then {
+                    private _dm = _m distance2D _o;
+                    if (_dm < 60) then { _yakin = true; };
+                    if (_dm < 150) then { _tehdit150 = true; };
+                    if ((_c distance2D _o) <= 300 && {!(lineIntersects [eyePos _o, (getPosASL _c) vectorAdd [0, 0, 0.6], _o, _c])}) then { _acik = true; };
+                };
+            } forEach (_m nearTargets 300);
+            if (_yakin || {_acik}) then { _d = 0; } else {
+                if (_tehdit150 || {_kes < (missionNamespace getVariable ["lambs_danger_tcccTamGuvenSn", 20])} || {_sup >= 0.2}) then { _d = 1; };
+            };
+        };
+        _c setVariable [QGVAR(tcccGdOnb), [time, _d]];
+        _d
+    };
+
     private _yarali = {
         params ["_u"];
         alive _u && {
@@ -216,7 +252,9 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         _m setVariable [QGVAR(tcccFM), true];
         _c setVariable [QGVAR(tcccBy), _m];
         private _guvenliFn = { (((_this select 0) getVariable [QGVAR(contact), 0]) < time) };
-        diag_log format ["[TCCC] %1 | hekim %2 -> yarali %3 | baygin:%4 | %5", groupId _g, name _m, name _c, [_c] call _baygin, ["ATES ALTINDA", "GUVENLI"] select ([_g] call _guvenliFn)];
+        private _strict = missionNamespace getVariable ["lambs_danger_tcccKatiGuvenlik", true];
+        private _gd = { if (_strict) then {[_g, _m, _c] call lambs_danger_tcccGuvenDerece} else {[0, 2] select ([_g] call _guvenliFn)} };
+        diag_log format ["[TCCC] %1 | hekim %2 -> yarali %3 | baygin:%4 | guvenlik derecesi %5 (%6)", groupId _g, name _m, name _c, [_c] call _baygin, call _gd, ["CATISMA / ATES ALTINDA", "KISMEN GUVENLI", "TAM GUVENLI"] select (call _gd)];
 
         // 1) yaralıya git
         // uzaktan gelen hekim (kumanda medevac): yuruyus suresi mesafeye gore (25 sn sabit uzak yaraliya yetmiyordu)
@@ -285,6 +323,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) < (_enYakin - 3)}) then { _enYakin = _m distance2D _c; _bitis = (_bitis max (time + 12)) min (_t0 + 150); };
             !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 4.5} || {time > _bitis}
             || {!([_g] call _guvenliFn) && {(getSuppression _m) > 0.6}}
+            || {_strict && {(call _gd) < 1}}
         };
         if (_daiAc) then { _m setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI]; };
         if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) >= 6}) exitWith {
@@ -397,10 +436,10 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c}) exitWith { [_m, _c] call _birak; };
 
         // 3) M — kanama: sarma / paketleme / elastik; durmazsa turnike
-        private _guvenli = [_g] call _guvenliFn;
+        private _guvenli = (call _gd) >= 2;
         private _parcalar = ["Body", "LeftLeg", "RightLeg", "LeftArm", "RightArm"];
         private _tur = 0;
-        while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {([_c] call _kanKaybi) > 0.001} && {_tur < 3} && {time < (_t0 + 140)}} do {
+        while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {([_c] call _kanKaybi) > 0.001} && {_tur < 3} && {time < (_t0 + 140)} && {(call _gd) >= 1}} do {
             if (_tur >= 1) then {
                 { [_m, _c, _x, "ApplyTourniquet"] call _tx; } forEach ["LeftLeg", "RightLeg", "LeftArm", "RightArm"];
             } else {
@@ -417,7 +456,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         };
 
         // ates altinda sadece M; ilerisi guvenli olunca
-        if ([_g] call _guvenliFn) then {
+        if ((call _gd) >= 2) then {
             // A/R: kalp durmasi -> CPR + epinefrin (ACM'ye ozgu hava yolu / pnomotoraks yapilacak)
             if (_c getVariable ["ace_medical_inCardiacArrest", false]) then {
                 for "_i" from 1 to 5 do {
@@ -455,6 +494,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             if (isNull _l || {isPlayer _l} || {!local _l}) then { continue };
             if (_g getVariable [QGVAR(isRetreating), false] || {_g getVariable [QGVAR(isEvading), false]}) then { continue };
 
+            private _strict = missionNamespace getVariable ["lambs_danger_tcccKatiGuvenlik", true];
             private _contact = (_g getVariable [QGVAR(contact), 0]) > time;
             private _sonKes = time - (_g getVariable [QGVAR(contact), 0]);
             private _guvenli = !_contact && {_sonKes > 6};
@@ -492,7 +532,9 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             {
                 private _c = _x;
                 // ates altinda: sadece baygin yarali
-                if (!_guvenli && {!([_c] call _baygin)}) then { continue };
+                if (!_strict && {!_guvenli} && {!([_c] call _baygin)}) then { continue };
+                // v8.373: catismada hic gitme (yakin tarama yaralidan once ucuz eleme)
+                if (_strict && {_contact}) then { continue };
 
                 private _adaylar = (units _g) select {
                     (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
@@ -519,8 +561,14 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 _hekim = [_hekim, [], {_x distance2D _c}, "ASCEND"] call BIS_fnc_sortBy;
                 private _m = _hekim select 0;
 
-                // ates altinda: hekim baskida degil ve dusman uzak olmali
-                if (!_guvenli) then {
+                // v8.373 KATI GUVENLIK: derece 0 = bekle; derece 1 (kismen guvenli) = yalniz baygin / kanayan yarali (M + cekme); derece 2 = tam bakim
+                if (_strict) then {
+                    private _gdn = [_g, _m, _c] call lambs_danger_tcccGuvenDerece;
+                    if (_gdn < 1) then { continue };
+                    if (_gdn < 2 && {!([_c] call _baygin)} && {([_c] call _kanKaybi) < 0.001}) then { continue };
+                };
+                // ates altinda: hekim baskida degil ve dusman uzak olmali (eski mod: KATI GUVENLIK kapaliyken)
+                if (!_strict && {!_guvenli}) then {
                     private _en = _m findNearestEnemy _m;
                     if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 35}}) then { continue };   // v8.82: 50 -> 35 m (medevac guclendirme)
                     // v8.303 ATES ALTINDA BAKIM (kullanici: 'yaralıya catisma ortasinda gitmek ... goze batiyor'; TCCC care under fire: once ates ustunlugu / siper, acikta tedavi YOK): yaralinin bulundugu nokta bilinen bir dusmana

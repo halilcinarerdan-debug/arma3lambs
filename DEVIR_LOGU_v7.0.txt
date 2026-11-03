@@ -3001,3 +3001,7 @@ v8.371 SEKTOR BAKISI (kullanici: 'botlar CQB'de dusman yonune bakmiyordu; dusman
 v8.372 DUVAR ARKASINA BASTIRMA (kullanici: 'askerler duvar arkasini supressliyor, mermi son bilinen konuma gidiyor'). Oyunda DENENMEDI.
  - Neden: atisUstunlugu LAMBS shouldSuppressPosition'i hedefin 4 m USTUNE bakarak cagiriyordu (3-4 m duvar hatti kapatmiyordu); ates-hareket taban atesi, hucum hazirligi, kumanda destegi, pusu tepkisi hic hat kontrolu yapmiyordu.
  - Yeni fnc_atesHatiAcik: govdeden hedefin 1 m ustune FIRE LOD isini + arazi; atici yakini 2.5 m ve insan vurusu sayilmaz; nesne (duvar / bina / enkaz) vurursa bastirma EMRI VERILMEZ. 5 yerde kullanildi.
+
+v8.373 TCCC KATI GUVENLIK (kullanici: 'catismadayken ilk yardim olmasin, area safe olduktan sonra ya da bir nebze guvenliyse yapilsin ama sis bombasina falan tek basina guvenilmesin'). Oyunda DENENMEDI.
+ - fnc_tccc: lambs_danger_tcccGuvenDerece 0 catisma (temas suruyor / bitis < 6 sn / hekim baski >= 0.4 / 60 m dusman / yaraliya acik gorus hatti) -> bakim YOK, suren yaklasma / M iptal; 1 kismen guvenli -> yalniz baygin / kanayan: M + cekme; 2 tam guvenli (temas >= 20 sn once bitti, 150 m'de taze dusman yok, baski < 0.2) -> tam MARCH.
+ - Sis / duman dereceyi yukseltmez (yalniz temas, bilgi, baski, nesne gorus hatti). Eski 90 sn 'yine de git' istisnasi katiyken yok. CBA: lambs_danger_tcccKatiGuvenlik, lambs_danger_tcccTamGuvenSn. Log: [TCCC] ... guvenlik derecesi.
