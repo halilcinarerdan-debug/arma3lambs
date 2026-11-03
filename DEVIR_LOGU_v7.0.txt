@@ -3027,3 +3027,7 @@ v8.376 REGRESYON DUZELTMESI (kullanici: 'herkes bir anda aptala dondu, botlar du
  - KOR DUVARA BAKMA: sektor bakisi yon secimi 8 m yerine 40 m (olmazsa 20 m) gorus acikligi ister, hicbiri yoksa asker dokunulmaz; ses yonunde 20 m'de duvar varsa sese donulmez; ileri gozcu bakisi da 30 m acik yon secer.
  - BUDDY: RPT'de buddy bagi (fnc_buddyBond) yalniz 'yetim yeniden eslesti' logu veriyor, kopma / cohesion logu yok; kopma esikleri sakin halde lider 45 sn hareketsizse calisiyor. Bu oturumda kanit olmadigi icin kod DEGISTIRILMEDI - buddy ayrilma durumunda [BUDDY] satirlari ve [DURUM] mesafeleri ile ayrica bakilacak.
 
+v8.377 ACIKTA BEKLEME (kullanici: 'bazen squad leaderler acikta mal mal bekliyor'). Oyunda DENENMEDI.
+ - Yeni fnc_acikBekleme: 8 sn'den uzun suredir duran, AYAKTA, acikta (3 m'de sert nesne yok), davranis AWARE / COMBAT / STEALTH olan asker (lider dahil) icin: tehdit yonune gore 18 m icindeki agac / kaya / duvar arkasina gider ve comelir; siper yoksa oldugu yerde comelir (15 sn). Tel / direk siper sayilmaz, rezerv defteri paylasilir. Muaf: bounding / retreat / evade / temas kes / mevzi / nokta elemani / hekim / bomba / yeniden doldurma vb. CBA'siz kapatma: lambs_danger_acikBeklemeOff = true. Log: [ACIK-BEKLE], [ACIK-BEKLE-OZET].
+ - BUDDY HAREKETI nerede: yalniz fnc_tacticsBounding (cift ciftle sicrama), tacticsBreakContact, tacticsRetreat, tacticsEvadeArmor (buddyPairs); kalici es (fnc_buddyBond) yalniz kopma / yakinlastirma yapar. Hucum fazinda (fnc_atesHareket: taban ates + hareket) cift mantigi YOK.
+
