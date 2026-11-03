@@ -45,7 +45,7 @@ _group setVariable [QEGVAR(main,currentTactic), "Attacking", EGVAR(main,debug_fu
         if (!isNull _group) then {
             _group setVariable [QGVAR(isExecutingTactic), nil];
             _group setVariable [QEGVAR(main,currentTactic), nil];
-            _group setCombatMode _combatMode;
+            [_group, _combatMode, "attack-geri"] call FUNC(cmSet);
             // v8.61 FORMASYON FELCI KOK NEDENI: zamanlayici, taktik cagrildigi andaki formasyonu geri yaziyordu; taktik her ~10 sn'de yeniden cagrilinca (ASSAULT) bir onceki cagrinin
             //   LINE'i yerine eski zamanlayici ilk formasyonu (ECH RIGHT) geri yaziyor -> LINE <-> ECH RIGHT dongusu (RPT bc9dd1d6: Alpha 1-5, 3 dk, 5-10 sn aralikla).
             //   Artik geri yazma YOK: taktik bitince formasyonu fnc_commanderFormation / selectFormation belirler (tacticsHold ile ayni cozum).

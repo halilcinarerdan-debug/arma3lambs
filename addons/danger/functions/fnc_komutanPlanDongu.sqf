@@ -1441,7 +1441,8 @@ while {true} do {
                             if (alive _u && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(time < (_u getVariable [QGVAR(tcccBusy), 0]))}) then {
                                 private _rol = [_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}]);
                                 if (!(_u getVariable [QGVAR(mermiTasarruf), false]) || {_rol isEqualTo "MG"}) then {
-                                    _u doSuppressiveFire (_hedefAtes getPos [random 7, random 360]);
+                                    private _hpA = _hedefAtes getPos [random 7, random 360];
+                                    if ([_u, _hpA] call FUNC(atesHatiAcik)) then { _u doSuppressiveFire _hpA; };   // v8.386: duvar / bina hatti kesiyorsa destek atesi emri yok
                                 };
                             };
                         } forEach (units _g);

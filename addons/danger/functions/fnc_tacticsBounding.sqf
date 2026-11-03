@@ -101,7 +101,7 @@ _group setVariable [QGVAR(bndToken), _bndToken];
         if (!isNull _group && {(_group getVariable [QGVAR(bndToken), ""]) isEqualTo _token}) then {
             _group setVariable [QGVAR(bndToken), nil];
             _group enableAttack true;
-            _group setCombatMode (_group getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
+            [_group, _group getVariable [QGVAR(bndOrigCombat), "YELLOW"], "bounding-token-son"] call FUNC(cmSet);
             (units _group) allowGetIn true;
             _group setVariable [QGVAR(isExecutingTactic), nil];
             _group setVariable [QGVAR(isBounding), nil];
@@ -202,7 +202,7 @@ _group setVariable [QGVAR(dangerFormation), _formation];
 _group enableAttack false;
 // Olumculuk: serbest ates (combatMode RED); bitince orijinal geri yuklenir
 _group setVariable [QGVAR(bndOrigCombat), combatMode _group];
-_group setCombatMode "RED";
+[_group, "RED", "bounding-basla"] call FUNC(cmSet);
 (_units select {isNull objectParent _x}) allowGetIn false;   // aractakiler (surucu / nisanci) araci terk etmesin
 _units doWatch _target;
 
@@ -236,7 +236,7 @@ if (_fse isEqualTo [] || _maneuver isEqualTo []) exitWith {
     _group setVariable ["lambs_danger_isBounding", nil];
     _group setVariable ["lambs_danger_isExecutingTactic", nil];
     // combatMode / enableAttack / allowGetIn burada zaten degistirilmisti -> geri ver
-    _group setCombatMode (_group getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
+    [_group, _group getVariable [QGVAR(bndOrigCombat), "YELLOW"], "bounding-iptal"] call FUNC(cmSet);
     _group enableAttack (_group getVariable [QGVAR(bndOrigAtk), true]);
     (units _group) allowGetIn true;
     false
@@ -295,7 +295,7 @@ if (EGVAR(main,debug_functions)) then {
         _g setVariable [QEGVAR(main,currentTactic), nil];
         _g enableAttack (_g getVariable [QGVAR(bndOrigAtk), true]);
         _g setSpeedMode (_g getVariable [QGVAR(bndOrigSpeed), "NORMAL"]);
-        _g setCombatMode (_g getVariable [QGVAR(bndOrigCombat), "YELLOW"]);
+        [_g, _g getVariable [QGVAR(bndOrigCombat), "YELLOW"], "bounding-bitti"] call FUNC(cmSet);
         private _of = _g getVariable [QGVAR(bndOrigForm), ""];
         if (_of isNotEqualTo "") then { [_g, _of, "bounding-son", 0] call FUNC(formSet); };
         _g setVariable [QGVAR(dangerFormation), nil];
@@ -386,7 +386,7 @@ if (EGVAR(main,debug_functions)) then {
 
                 _x setVariable [QEGVAR(main,currentTask), _gorev, EGVAR(main,debug_functions)];
                 _x doWatch _sekPos;
-                [_x, AGLToASL _sekPos] call EFUNC(main,doSuppress);
+                if ([_x, _sekPos] call FUNC(atesHatiAcik)) then { [_x, AGLToASL _sekPos] call EFUNC(main,doSuppress); };   // v8.386: duvar / bina hatti kesiyorsa bastirma emri yok
 
                 // AT: zirha roket
                 private _atAtti = false;

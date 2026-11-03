@@ -90,7 +90,7 @@ if (_ad isEqualTo "SALDIRI") then {
 if (_ad isEqualTo "ATES_KAYDIR") then {
     _veri params [["_poz", [0, 0, 0], [[]]]];
     if (_poz isNotEqualTo [0, 0, 0]) then {
-        { if (alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}) then { _x doSuppressiveFire _poz; }; } forEach (units _g);
+        { if (alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {[_x, _poz] call FUNC(atesHatiAcik)}) then { _x doSuppressiveFire _poz; }; } forEach (units _g);   // v8.386: hat acikken
         _ok = true;
     };
 };

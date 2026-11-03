@@ -41,7 +41,7 @@ _target = _target call CBA_fnc_getPos;
         if (!isNull _group && {!(_group getVariable [QGVAR(isBounding), false]) && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}}) then {
             _group setVariable [QGVAR(isExecutingTactic), nil];
             _group setVariable [QEGVAR(main,currentTactic), nil];
-            _group setCombatMode _combatMode;
+            [_group, _combatMode, "hide-geri"] call FUNC(cmSet);
             _group enableAttack _enableAttack;
             // v8.61: formasyon geri yazma kaldirildi (stale zamanlayici LINE <-> eski formasyon dongusu); formasyonu commanderFormation belirler
             (units _group) doFollow (leader _group)
@@ -59,7 +59,7 @@ if ((formation _group) isNotEqualTo "WEDGE") then { [_group, "WEDGE", "hide", 1]
 //   WHITE yalniz saklanma / pusu icin anlamli. Bilinen dusman 400 m icinde ve gruptan biri baski altindaysa siper al + KARSILIK VER (YELLOW).
 private _hEn = _unit findNearestEnemy _unit;
 private _hBask = ((units _group) findIf {alive _x && {(getSuppression _x) > 0.1}}) > -1;
-_group setCombatMode (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > (["KESIN"] call FUNC(bilgiEsik))}) || {_hBask}));
+[_group, (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > (["KESIN"] call FUNC(bilgiEsik))}) || {_hBask})), "hide"] call FUNC(cmSet);
 _group enableAttack false;
 
 _unit setVariable [QEGVAR(main,currentTarget), _target, EGVAR(main,debug_functions)];

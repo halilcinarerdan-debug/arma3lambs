@@ -56,7 +56,7 @@ private _bolum = {
             _u disableAI "MOVE";
             _u disableAI "PATH";
             _u setSkill ["aimingAccuracy", (_eskiAcc * 0.3) max 0.02];
-            if (_tehditPos isNotEqualTo [0,0,0]) then { _u doSuppressiveFire (_tehditPos vectorAdd [(random 20) - 10, (random 20) - 10, 0]); };
+            if (_tehditPos isNotEqualTo [0,0,0]) then { private _pp = _tehditPos vectorAdd [(random 20) - 10, (random 20) - 10, 0]; if ([_u, _pp] call FUNC(atesHatiAcik)) then { _u doSuppressiveFire _pp; }; };   // v8.386: duvara panik atesi yok
         };
         case "KACIS": {
             _u enableAI "MOVE";

@@ -365,8 +365,11 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                                 _u setVariable [QGVAR(mgSupLast), time];
                                 private _bp = getPosATL _e;
                                 _bp set [2, 0.5];
-                                [_u, AGLToASL _bp] call _supFn;
-                                diag_log format ["[ROL-GOREV] %1 | %2 | MG alana baski (hat kapali, %3m)", groupId _g, name _u, round _d];
+                                // v8.386: 'hat kapali' VIEW geometrisiyle olculur (calı / yaprak da kapatir); bastirma yalniz FIRE LOD hatti ACIKSA (duvar / bina / kaya degil) verilir: duvara mermi bosaltma yok
+                                if ([_u, _bp] call FUNC(atesHatiAcik)) then {
+                                    [_u, AGLToASL _bp] call _supFn;
+                                    diag_log format ["[ROL-GOREV] %1 | %2 | MG alana baski (hat kapali, %3m)", groupId _g, name _u, round _d];
+                                };
                             };
                         };
                     };

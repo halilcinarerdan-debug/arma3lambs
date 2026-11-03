@@ -90,7 +90,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                 private _eskiCM = combatMode _g;
                 private _eskiBeh = behaviour (leader _g);
                 _g setVariable [QGVAR(disableGroupAI), true];
-                _g setCombatMode "GREEN";
+                [_g, "GREEN", "pusu-GREEN"] call FUNC(cmSet);
                 _g setVariable [QGVAR(atesPolitikasi), "TUTULU"];
                 {
                     _x setVariable [QGVAR(pusuEskiDAI), _x getVariable [QGVAR(disableAI), false]];
@@ -233,7 +233,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                 private _atesEt = (_neden select [0, 4]) isEqualTo "ATES";
                 if (!isNull _g) then {
                     if (_atesEt) then {
-                        _g setCombatMode "RED";
+                        [_g, "RED", "pusu-RED"] call FUNC(cmSet);
                         _g setBehaviour "COMBAT";
                         _g setVariable [QGVAR(atesPolitikasi), "SERBEST"];
                         private _l = leader _g;
@@ -265,7 +265,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                             };
                         };
                     } else {
-                        _g setCombatMode _eskiCM;
+                        [_g, _eskiCM, "pusu-geri-1"] call FUNC(cmSet);
                         _g setBehaviour _eskiBeh;
                         diag_log format ["[PUSU] %1 | %2 | sure:%3 sn", groupId _g, _neden, round (time - _t0)];
                     };
@@ -275,7 +275,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                     _g setVariable [QGVAR(isAmbushing), nil];
                     _g setVariable [QGVAR(isExecutingTactic), nil];
                     _g setVariable [QGVAR(pusuSon), time];
-                    _g setCombatMode _eskiCM;
+                    [_g, _eskiCM, "pusu-geri-2"] call FUNC(cmSet);
                     _g setVariable [QGVAR(atesPolitikasi), nil];
                     {
                         if (alive _x) then {

@@ -53,7 +53,7 @@ private _askN = 0;
             if (!_zirhli || {[_u] call FUNC(isATUnit)}) then { _u doTarget _atici; _u doFire _atici; };
         } else {
             _u doWatch _poz;
-            _u doSuppressiveFire _poz;
+            if ([_u, _poz] call FUNC(atesHatiAcik)) then { _u doSuppressiveFire _poz; };   // v8.386
         };
     } forEach _uy;
     [{ params ["_us"]; { if (alive _x) then { _x doWatch objNull; }; } forEach _us; }, [_uy], 8] call CBA_fnc_waitAndExecute;

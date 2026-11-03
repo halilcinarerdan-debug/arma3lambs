@@ -124,7 +124,7 @@ _group setVariable [QGVAR(bcStartTime), _baslangic];
             _g setVariable [QGVAR(bcEndTime), time];
             _g setSpeedMode "NORMAL";
             _g enableAttack true;
-            _g setCombatMode (_g getVariable [QGVAR(bcOrigCombat), "YELLOW"]);
+            [_g, _g getVariable [QGVAR(bcOrigCombat), "YELLOW"], "temas-kes-valf"] call FUNC(cmSet);
             {
                 if (alive _x) then {
                     _x enableAI "PATH";
@@ -337,7 +337,7 @@ diag_log format [
     private _tek = (count ((units _group) select {alive _x})) isEqualTo 1;
     private _yakinMesafe = [25, 20] select _tek;
     if (_tek) then {
-        _group setCombatMode "GREEN";
+        [_group, "GREEN", "temas-kes-GREEN"] call FUNC(cmSet);
         {
             if (alive _x) then {
                 _x setBehaviour "STEALTH";
@@ -345,7 +345,7 @@ diag_log format [
             };
         } forEach (units _group);
     } else {
-        _group setCombatMode "YELLOW";
+        [_group, "YELLOW", "temas-kes-YELLOW"] call FUNC(cmSet);
     };
 
     diag_log format ["[TEMAS-KES] %1 sipere vardi, %2 sn bekleniyor%3", groupId _group, [25, 60] select _tek, ["", " (tek kalan: saklaniyor, ates yok)"] select _tek];
@@ -376,7 +376,7 @@ diag_log format [
         _group setVariable [QGVAR(bcEndTime), time];
         _group setSpeedMode "NORMAL";
         _group enableAttack true;
-        _group setCombatMode _origCombat;
+        [_group, _origCombat, "temas-kes-bitti"] call FUNC(cmSet);
 
         {
             if (alive _x) then {

@@ -21,6 +21,9 @@
  *   - Her asker kendi varis noktasina (waypoint etrafinda 7m) gider -> yigilma yok.
  *   - 45 sn cooldown, orijinal combatMode geri yuklenir, guvenlik valfi sadece KENDI cekilmesini temizler.
  *   - BASLA / sicrama / TAMAM satirlari debug kapaliyken de RPT'ye yazilir (tani icin).
+ * v8.386 (kullanici: 'geri cekilirken silahlarini indirmesinler, karsilik vermeyecek duruma dusuyorlar'; RPT 17:34-17:35): kosan asker artik COMBAT (tufek yukarda) + TARGET / AUTOTARGET ACIK (kosarken gordugunu vurur);
+ *   AUTOCOMBAT / COVER kapali kalir. Yakin temasta (< cekilTopluM) kosu NORMAL hiz (sprint tufegi indirir), uzakta FULL. 4 askerde 2 + 2 kapsama takimi (eskiden herkes birlikte, kapsama 0).
+ *   Bastirma atesi yalniz hat acikken (fnc_atesHatiAcik: duvar / bina hatti kesiyorsa emir yok). 'EZME' tespiti COMBAT'i ve ates ederken ATTACK komutunu ezme saymaz.
 */
 
 params [
@@ -256,7 +259,9 @@ if (EGVAR(main,debug_functions)) then {
     if (_topluKosu) then {
         diag_log format ["[GERI-CEKILME] %1 toplu kosu | dusman:%2 m >= %3 m | kapsama takimi yok, %4 kisi birlikte", groupId _group, round (_unit distance2D _targetPos), _topluM, _nCek];
     };
-    if (_nCek <= 4 || {_topluKosu}) then {
+    // v8.386: 4 askerde de kapsama takimi (2 + 2); eskiden <= 4 askerde HERKES birlikte kosuyor, kapsama 0 + TARGET kapali = kimse karsilik vermiyordu (RPT 17:34:25 ALPHA:4 BRAVO:0)
+    private _hizMod = ["NORMAL", "FULL"] select _topluKosu;   // yakin temasta (< cekilTopluM) NORMAL (tufek yukarda kosu), uzakta FULL (sprint)
+    if (_nCek <= 3 || {_topluKosu}) then {
         _alpha = +_tumBirimler;
         _bravo = [];
     } else {
@@ -280,6 +285,12 @@ if (EGVAR(main,debug_functions)) then {
         _x setAnimSpeedCoef 1.15;
         _x forceSpeed -1;
     } forEach _tumBirimler;
+
+    // v8.386: bastirma atesi YALNIZ hat acikken (duvar / bina / kaya FIRE LOD hatti kesiyorsa emir verilmez; kapsama askeri yine COMBAT + TARGET acik, gordugunu vurur)
+    private _bastir = {
+        params ["_u", "_asl"];
+        if ([_u, ASLToAGL _asl] call FUNC(atesHatiAcik)) then { [_u, _asl] call EFUNC(main,doSuppress); };
+    };
 
     // Buddy ciftleri (2'li, en guclu + en zayif); fonksiyon yoksa takim tek grup sayilir
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
@@ -315,7 +326,7 @@ if (EGVAR(main,debug_functions)) then {
                 _x enableAI "AUTOTARGET";
                 _x setBehaviour "COMBAT";
                 _x setUnitPosWeak "MIDDLE";
-                [_x, _hedefASL] call EFUNC(main,doSuppress);
+                [_x, _hedefASL] call _bastir;
             };
         } forEach _kapsama;
 
@@ -332,14 +343,16 @@ if (EGVAR(main,debug_functions)) then {
             {
                 if (alive _x && {isNull objectParent _x}) then {
                     _x forceSpeed -1;      // v8.29: LAMBS doAssaultSpeed (brainForced: ATTACK komutunda) lider icin forceSpeed 2-3 m/s birakir; her sicramada sifirla
-                    _x setSpeedMode "FULL";
+                    _x setSpeedMode _hizMod;
                     _x enableAI "PATH";    // baska watchdog (komutan bekle vb.) PATH / MOVE kapatmis olabilir -> kosamazdi
                     _x enableAI "MOVE";
-                    _x disableAI "TARGET";
-                    _x disableAI "AUTOTARGET";
+                    // v8.386 (kullanici: 'geri cekilirken silahlarini indirmesinler, karsilik vermeyecek duruma dusuyorlar'): eskiden TARGET / AUTOTARGET kapali + AWARE (indirilmis tufek) = kosarken hic ates yok.
+                    //   Simdi TARGET / AUTOTARGET ACIK + COMBAT (tufek yukarda); AUTOCOMBAT / COVER kapali kalir (LAMBS / FSM siper-kacma reaksiyonu emri bozmasin).
+                    _x enableAI "TARGET";
+                    _x enableAI "AUTOTARGET";
                     _x disableAI "AUTOCOMBAT";
                     _x disableAI "COVER";
-                    _x setBehaviour "AWARE";   // sadece kosarken
+                    _x setBehaviour "COMBAT";
                     _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPos "UP";   // v8.22: SERT durus (zayif "UP" yetmedi: RPT 17:30 lider 2 dk boyunca PRONE surunerek ilerledi)
@@ -380,11 +393,11 @@ if (EGVAR(main,debug_functions)) then {
                 private _b = _x select 0;
                 if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.5}) then {
                     _pinned = _pinned - [_b];
-                    _b disableAI "TARGET";
-                    _b disableAI "AUTOTARGET";
+                    _b enableAI "TARGET";
+                    _b enableAI "AUTOTARGET";
                     _b disableAI "AUTOCOMBAT";
                     _b disableAI "COVER";
-                    _b setBehaviour "AWARE";
+                    _b setBehaviour "COMBAT";
                     _b setVariable [QGVAR(forceMove), true];
                     _b setUnitPos "UP";
                     _b doMove (_x select 1);
@@ -406,7 +419,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b setBehaviour "COMBAT";
                     _b setUnitPos "AUTO"; _b setUnitPosWeak "MIDDLE";
                     doStop _b;
-                    [_b, _hedefASL] call EFUNC(main,doSuppress);
+                    [_b, _hedefASL] call _bastir;
                 };
             } forEach _varis;
 
@@ -417,19 +430,20 @@ if (EGVAR(main,debug_functions)) then {
                 private _b = _x select 0;
                 if (alive _b && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5} && {(time - _t0) > 1.5}) then {
                     private _kmt = currentCommand _b;
-                    if (_kmt isNotEqualTo "MOVE" || {(behaviour _b) isEqualTo "COMBAT"}) then {
+                    // v8.386: COMBAT artik bizim kendi davranisimiz (ezme sayilmaz); TARGET acikken motor ates ederken komutu ATTACK gosterebilir -> yalniz DURUYORSA (< 1 m/sn) ezme say
+                    if (_kmt isNotEqualTo "MOVE" && {(_kmt isNotEqualTo "ATTACK") || {(speed _b) < 1}}) then {
                         _b setVariable [QGVAR(retEzmeT), time];
                         if (isNil "lambs_danger_retEzmeN") then { lambs_danger_retEzmeN = 0; };
                         if (lambs_danger_retEzmeN < 30) then {
                             lambs_danger_retEzmeN = lambs_danger_retEzmeN + 1;
                             diag_log format ["[GERI-CEKILME-EZME] %1 | %2 | komut:%3 beh:%4 | hedefe %5 m | TARGET:%6 AUTOTARGET:%7 -> yeniden MOVE", groupId _grup, name _b, _kmt, behaviour _b, round (_b distance2D (_x select 1)), _b checkAIFeature "TARGET", _b checkAIFeature "AUTOTARGET"];
                         };
-                        _b disableAI "TARGET";
-                        _b disableAI "AUTOTARGET";
+                        _b enableAI "TARGET";
+                        _b enableAI "AUTOTARGET";
                         _b disableAI "AUTOCOMBAT";
                         _b enableAI "PATH";
                         _b enableAI "MOVE";
-                        _b setBehaviour "AWARE";
+                        _b setBehaviour "COMBAT";
                         _b setUnitPos "UP";
                         _b forceSpeed -1;
                         doStop _b;
@@ -459,7 +473,7 @@ if (EGVAR(main,debug_functions)) then {
                             _b enableAI "MOVE";
                             _b enableAI "ANIM";
                             _b setUnitPos "UP";
-                            _b setSpeedMode "FULL";
+                            _b setSpeedMode _hizMod;
                             _b forceSpeed -1;
                             if ((_x select 4) >= 2) then {
                                 // 2. takilma: dusmandan uzaga yeni nokta (18-26 m); once DOSTOP ile komut sifirlanir
@@ -518,7 +532,7 @@ if (EGVAR(main,debug_functions)) then {
                 // DOSTOP: varan asker kendi sicrama noktasinda KALIR (aksi halde formasyon slotuna, yani liderin eski konumuna,
                 // geri yuruyordu = "geri git ileri git, ayni yolu tekrar gidiyorlar")
                 if ((_b distance2D (_x select 1)) <= 12) then { doStop _b; };   // SADECE varanlar: varamayan durdurulursa hic ilerlemez (RPT: vardi 0/N, 40 sn'de lider kipirdamadi)
-                [_b, _hedefASL] call EFUNC(main,doSuppress);
+                [_b, _hedefASL] call _bastir;
             };
         } forEach _varis;
     };
@@ -561,7 +575,7 @@ if (EGVAR(main,debug_functions)) then {
                         _x doMove _cp;
                     };
                 };
-                [_x, _targetASL] call EFUNC(main,doSuppress);
+                [_x, _targetASL] call _bastir;
             };
         } forEach _tumBirimler;
         private _bk0 = time;
@@ -710,7 +724,7 @@ if (EGVAR(main,debug_functions)) then {
         _group setVariable [QGVAR(retreatEndTime), time];
         _group setSpeedMode "NORMAL";
         _group enableAttack true;
-        _group setCombatMode _origCombat;
+        [_group, _origCombat, "geri-cekilme-bitti"] call FUNC(cmSet);
 
         {
             if (alive _x) then {
