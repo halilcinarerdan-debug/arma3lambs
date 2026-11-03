@@ -741,10 +741,12 @@ if (EGVAR(main,debug_functions)) then {
         // KOMUTAN ONDE KOSMAZ: lider sicramaya katilmaz, kapsama ekibinde (geriden) ates eder ve yonetir;
         // yalnizca baska kosacak kimse kalmadiysa kosar
         private _ldrB = leader _group;
+        private _ldrCikti = false;
         if ((_ldrB in _hareketEdecek) && {(count _hareketEdecek) > 1}) then {
             _hareketEdecek = _hareketEdecek - [_ldrB];
             _ciftYakinla = _ciftYakinla select {(_x select 0) isNotEqualTo _ldrB};
             _kapsama pushBackUnique _ldrB;
+            _ldrCikti = true;
         };
 
         // v8.379 BUDDY ATILIMI (kullanici: 'ikisi ayni anda hareket ediyor, senkron degil'): hareket takiminda her buddy cifti icinde ayni anda YALNIZ BIR es kosar, es kapsama ateşi verir;
@@ -768,7 +770,22 @@ if (EGVAR(main,debug_functions)) then {
                 _hareketEdecek = _kosacak;
             };
         };
+        // v8.382 LIDER ES: lider kosu takiminda ise (4 kisilik grupta yarisi) tek kosucu kalir ve ciftsiz kaliyordu (RPT 05:43: hareket:1 kapsama:3, [BND-YAKIN] hic yok) -> lider kosucunun siperine yetisir
+        if (_ldrCikti && {_hareketEdecek isNotEqualTo []}) then {
+            private _r0 = _hareketEdecek select 0;
+            private _ei = _ciftYakinla findIf {(_x select 0) isEqualTo _r0};
+            if (_ei > -1) then {
+                (_ciftYakinla select _ei) set [1, ((_ciftYakinla select _ei) select 1) + [_ldrB]];
+            } else {
+                _ciftYakinla pushBack [_r0, [_ldrB]];
+            };
+        };
         { _x setVariable [QGVAR(bndSonKos), time]; } forEach _hareketEdecek;
+        diag_log format [
+            "[BND-CIFT] %1 | cycle:%2 | kosucu:%3 | esler:%4 | lider disarda:%5 | takim:%6",
+            groupId _group, _cycleCount, _hareketEdecek apply {name _x},
+            _ciftYakinla apply {(_x select 1) apply {name _x}}, _ldrCikti, count _hareketEdecek
+        ];
 
         // Kosacak kimse yoksa (manevra ekibi eridi / cift kurulamadi) FSE + rezerv sicrar; donga durmasin
         if (_hareketEdecek isEqualTo [] && {(_fse + _reserve) isNotEqualTo []}) then {
@@ -1007,7 +1024,11 @@ if (EGVAR(main,debug_functions)) then {
             private _hi = _hareketler findIf {(_x select 0) isEqualTo _kosan};
             if (alive _kosan && {_hi > -1}) then {
                 private _cp = (_hareketler select _hi) select 1;
-                if ((_kosan distance2D _cp) < 12) then {
+                // v8.382: kosucu planli siperine varamadiysa (baski / engel) bulundugu yer referans alinir; es oraya yetisir (eskiden 12 m kosulu yuzunden hic tetiklenmiyordu)
+                if ((_kosan distance2D _cp) >= 12) then { _cp = getPosATL _kosan; };
+                if ((getSuppression _kosan) >= 0.6) then {
+                    diag_log format ["[BND-YAKIN-ATLA] %1 | cycle:%2 | kosucu %3 bastirilmis (%4)", groupId _group, _cycleCount, name _kosan, (getSuppression _kosan) toFixed 2];
+                } else {
                     {
                         private _d = _x;
                         if (
@@ -1043,6 +1064,8 @@ if (EGVAR(main,debug_functions)) then {
                         };
                     } forEach _destekler;
                 };
+            } else {
+                diag_log format ["[BND-YAKIN-ATLA] %1 | cycle:%2 | kosucu yok / olu", groupId _group, _cycleCount];
             };
         } forEach _ciftYakinla;
 
