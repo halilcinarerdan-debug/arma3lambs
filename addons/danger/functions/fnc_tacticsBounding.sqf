@@ -643,9 +643,11 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         // Canli birlikleri yeniden ayir
-        _fse      = _fse select {alive _x};
-        _maneuver = _maneuver select {alive _x};
-        _reserve  = _reserve select {alive _x};
+        // v8.383 BAYGIN (INCAPACITATED / ACE_isUnconscious) ASKER KOSUCU / ES / KAPSAMA OLMAZ (RPT 12:07-12:08: baygin al-Ghumari 49 m 'atilim' kosucusu secildi, baygin Dorgan kosucu, esler baygin gövdenin yanina gitti)
+        private _aktifMi = { alive _this && {(lifeState _this) in ["HEALTHY", "INJURED"]} && {!(_this getVariable ["ACE_isUnconscious", false])} };
+        _fse      = _fse select {_x call _aktifMi};
+        _maneuver = _maneuver select {_x call _aktifMi};
+        _reserve  = _reserve select {_x call _aktifMi};
 
         if (count _fse < 2 && {_reserve isNotEqualTo []}) then {
             _fse pushBack (_reserve deleteAt 0);
@@ -789,8 +791,8 @@ if (EGVAR(main,debug_functions)) then {
 
         // Kosacak kimse yoksa (manevra ekibi eridi / cift kurulamadi) FSE + rezerv sicrar; donga durmasin
         if (_hareketEdecek isEqualTo [] && {(_fse + _reserve) isNotEqualTo []}) then {
-            _hareketEdecek = (_fse + _reserve) select {alive _x};
-            _kapsama = _maneuver select {alive _x};
+            _hareketEdecek = (_fse + _reserve) select {_x call _aktifMi};
+            _kapsama = _maneuver select {_x call _aktifMi};
             _fseSicrama = true;
         };
 

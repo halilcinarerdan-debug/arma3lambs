@@ -165,6 +165,7 @@ _group setVariable [QEGVAR(main,currentTactic), "Assaulting", EGVAR(main,debug_f
 if (!GVAR(disableAutonomousSmokeGrenades) && {[_group, "DIGER"] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])}) then {
 
     // leader smoke
+    _unit setVariable [QGVAR(sisIzin), time + 15];   // v8.383
     [_unit, _target] call EFUNC(main,doSmoke);
 
     // grenadier smoke

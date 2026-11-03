@@ -221,7 +221,7 @@ if (EGVAR(main,debug_functions)) then {
     _group setSpeedMode "FULL";
     _group enableAttack false;
 
-    private _tumBirimler = (units _group) select {alive _x && {isNull objectParent _x}};
+    private _tumBirimler = (units _group) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.383: baygin asker geri cekilme takiminda sayilmaz
 
     // -----------------------------------------------------------------------
     // TAKIMLAR — ALPHA = maneuver + reserve (once sicrar), BRAVO = FSE (MG'ler, ortu atesi)
@@ -537,7 +537,7 @@ if (EGVAR(main,debug_functions)) then {
     private _baskiEsik = [_group, "baskiKirmaEsik", 0.5] call FUNC(dk);
     private _baskiMaxS = [_group, "baskiKirmaMaxS", 14] call FUNC(dk);
     private _baskiOrt = {
-        private _u = (units _group) select {alive _x && {isNull objectParent _x}};
+        private _u = (units _group) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.383: baygin asker geri cekilme takiminda sayilmaz
         if (_u isEqualTo []) exitWith {0};
         private _t = 0;
         { _t = _t + (getSuppression _x); } forEach _u;
@@ -615,7 +615,7 @@ if (EGVAR(main,debug_functions)) then {
     private _ekNo = 0;
     private _ekNeden = "";
     while {!isNull _group && {_ekNo < _ekMax} && {time < (_baslangic + _ekMaxS)}} do {
-        private _canli = (units _group) select {alive _x && {isNull objectParent _x}};
+        private _canli = (units _group) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.383: baygin asker geri cekilme takiminda sayilmaz
         if (_canli isEqualTo []) exitWith {};
         private _ld = [leader _group, _canli select 0] select (isNull (leader _group) || {!alive (leader _group)});
         private _dus = _ld findNearestEnemy _ld;
@@ -659,7 +659,7 @@ if (EGVAR(main,debug_functions)) then {
     // v8.34 DOKTRIN (TC 3-21.76 s. 8-14, adim 10: "consider changing the unit's direction of movement once contact is broken"; dusmanin izi surmesini / etkili dolayli ates getirmesini zorlastirir):
     //   temas koptu / dusman gozlem yapamiyor ise TEK BIR toplu ek sicrama, geri eksenden +-55 derece (TASARIM) sapma ile (en gizli aday _wpSec ile secilir).
     if (!isNull _group && {_ekNeden in ["temas kesildi", "gozlem yok"]} && {time < (_baslangic + _ekMaxS - 10)}) then {
-        private _canliY = (units _group) select {alive _x && {isNull objectParent _x}};
+        private _canliY = (units _group) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.383: baygin asker geri cekilme takiminda sayilmaz
         if ((count _canliY) >= 3) then {
             private _arkaY = _canliY select 0;
             { if ((_x distance2D _targetPos) > (_arkaY distance2D _targetPos)) then { _arkaY = _x; }; } forEach _canliY;

@@ -97,6 +97,55 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 0c) v8.383 EL BOMBASI MESAFE KAPISI (kullanici: 'mesafe kontrolu olsun, cok uzaga el bombasi atmaya calisti'; RPT 12:08:29: Faulkner'in bombasi MOTOR atisiydi - [PATLAYICI] kapisindan gecmedi, hedefi bilinmiyordu).
+        //   Script atislari (fnc_patlayici) createVehicle ile gelir ve 'Fired' olayi UretMEZ; Fired ile gelen 'Throw' el bombasi motorun kendi kararidir. Dusus noktasi azami mesafeyi (varsayilan 40 m +8) ya da bilinen hedef 55 m'yi asarsa
+        //   mermi silinir + bomba envantere geri verilir; atici 20 sn bu tur bombayi elinde tutmaz (motor ayni uzak hedefe tekrar tekrar atmaya calismasin). Kapatma: lambs_danger_elBombasiMesafeOff = true.
+        if (!isNull _proj && {_weapon isEqualTo "Throw"} && {_simTani isEqualTo "shotgrenade"} && {!isPlayer _unit} && {!(missionNamespace getVariable ["lambs_danger_elBombasiMesafeOff", false])}) then {
+            private _bMax = missionNamespace getVariable ["lambs_danger_elBombasiMaxMesafe", 40];
+            private _gv = velocity _proj;
+            private _gp = getPosASL _proj;
+            private _gh = (_gp select 2) - (getTerrainHeightASL [_gp select 0, _gp select 1]);
+            private _gt = (((_gv select 2) + sqrt (((_gv select 2) ^ 2) + 19.62 * (_gh max 0))) / 9.81) max 0;
+            private _gland = [(_gp select 0) + (_gv select 0) * _gt, (_gp select 1) + (_gv select 1) * _gt, 0];
+            private _gUzak = (getPosASL _unit) distance2D _gland;
+            private _gHedef = getAttackTarget _unit;
+            if (isNull _gHedef) then { _gHedef = assignedTarget _unit; };
+            private _gHM = if (isNull _gHedef) then { -1 } else { _unit distance2D _gHedef };
+            if (_gUzak > (_bMax + 8) || {_gHM > 55}) then {
+                deleteVehicle _proj;
+                _unit addMagazine _mag;
+                private _gN = {_x isEqualTo _mag} count (magazines _unit);
+                _unit removeMagazines _mag;
+                [{ params ["_uu", "_mm", "_nn"]; if (alive _uu) then { _uu addMagazines [_mm, _nn]; }; }, [_unit, _mag, _gN], 20] call CBA_fnc_waitAndExecute;
+                lambs_danger_bombaMesafeN = (missionNamespace getVariable ["lambs_danger_bombaMesafeN", 0]) + 1;
+                if (lambs_danger_bombaMesafeN <= 40) then {
+                    diag_log format ["[EL-BOMBASI-MESAFE] %1 | %2 | motor atisi IPTAL: dusus %3 m (limit %4+8) | bilinen hedef %5 m (limit 55) | bomba 20 sn elde tutulmaz | toplam %6", groupId (group _unit), name _unit, round _gUzak, _bMax, if (_gHM < 0) then {"yok"} else {round _gHM}, lambs_danger_bombaMesafeN];
+                };
+            };
+        };
+
+        // 0d) v8.383 MOTOR SISI KAPISI (kullanici: 'sis cooldownunu test et, sis atip duruyorlar'): fnc_sisButce yalniz mod atislarini (tacticalSmoke / saldiri / kanat) sayar; motorun kendi (ates altinda) el dumani bu butceyi ATLIYORDU
+        //   (RPT 12:07: Dorgan 8 sn arayla iki sis, [SIS-BUTCE] kaydi yok). Mod sis atmadan 'sisIzin' koyar (15 sn); izinsiz standart (beyaz) el dumani silinir + geri verilir. Kapatma: lambs_danger_sisMotorOff = true.
+        if (!isNull _proj && {_weapon isEqualTo "Throw"} && {_simTani isEqualTo "shotsmoke"} && {!isPlayer _unit} && {!(missionNamespace getVariable ["lambs_danger_sisMotorOff", false])}) then {
+            private _an = toLower _ammo;
+            private _standart = (["red", "green", "blue", "yellow", "purple", "orange"] findIf {(_an find _x) >= 0}) < 0;
+            if (_standart) then {
+                if (time <= (_unit getVariable [QGVAR(sisIzin), -1])) then {
+                    lambs_danger_sisAtisN = (missionNamespace getVariable ["lambs_danger_sisAtisN", 0]) + 1;
+                    if (lambs_danger_sisAtisN <= 60) then {
+                        diag_log format ["[SIS-ATIS] %1 | %2 | izinli sis atildi (butce kaydi var) | toplam izinli %3", groupId (group _unit), name _unit, lambs_danger_sisAtisN];
+                    };
+                } else {
+                    deleteVehicle _proj;
+                    _unit addMagazine _mag;
+                    lambs_danger_sisEngelN = (missionNamespace getVariable ["lambs_danger_sisEngelN", 0]) + 1;
+                    if (lambs_danger_sisEngelN <= 40) then {
+                        diag_log format ["[SIS-ENGEL] %1 | %2 | MOTOR sisi iptal (sis butcesi kaydi / izni yok) | beh %3 | baski %4 | toplam engel %5", groupId (group _unit), name _unit, behaviour _unit, (getSuppression _unit) toFixed 2, lambs_danger_sisEngelN];
+                    };
+                };
+            };
+        };
+
         // 1) El bombasi listesi
         // RHS el bombalari (rhs_ammo_rgd5 / m67...) GrenadeCore'un ALTINDA DEGIL (RPT: GrenadeCore:false, sim:shotgrenade) -> simulation ile de yakala
         if (!isNull _proj && {(_ammo isKindOf ["GrenadeCore", configFile >> "CfgAmmo"]) || {_simTani isEqualTo "shotgrenade"}}) then {

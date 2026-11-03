@@ -4,7 +4,7 @@
  * DISIPLINLI PATLAYICI KULLANIMI (v8.310; kullanici: 'patlayici kullanimini arttir el bombasi roket ama disiplinli' + 've ugl'). Yeni taktik degil: mevcut temasta olan askerin elindeki patlayiciyi DAHA SIK ve DOGRU hedefe kullandirir.
  * Izleyici 2.5 sn'de bir, yerel oyuncusuz, TEMASTA (contact) olan gruplarda; tick basina en cok 4 atis. Hedef: bilinen (knowsAbout >= 1.0) dusman PIYADE. 'Deger' sartlari (bos yere atilmaz):
  *   KUME (hedefin 8 m icinde baska bilinen dusman) | BINADA | KAPALI HAT (tufege gorus hatti kesik: siper / duvar) | BASKI (grupta >= 2 asker baski > 0.4)
- *   EL BOMBASI (frag; duman / isik / sok haric): 10-60 m, ESNEK deger sarti (v8.316: kume 12 m / binada / kapali hat / alcak durus / duragan >= 20 m / baski > 0.3 / pusu; v8.315 sarti kaldirmisti; v8.313: guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
+ *   EL BOMBASI (frag; duman / isik / sok haric): 10-40 m (v8.383; lambs_danger_elBombasiMaxMesafe), ESNEK deger sarti (v8.316: kume 12 m / binada / kapali hat / alcak durus / duragan >= 20 m / baski > 0.3 / pusu; v8.315 sarti kaldirmisti; v8.313: guvenli min = olum yaricapi x 1.8, >= 12 m), hedef 12 m icinde dost YOK, birim basina 30 sn, grup 6 sn, 60 sn'de en cok 2; son bomba YEDEK (kume >= 3 degilse atilmaz)
  *   ROKET (omuz roketatari, yuklu): 60-280 m, hedef 20 m icinde dost YOK, arkasinda (8 m, 120-240 derece) dost YOK, BINADA / KUME >= 3 / KAPALI HAT (>= 60 m); 60 sn / birim, 20 sn / grup;
  *        dusman ZIRHLI (tank / APC) 900 m icinde biliniyorsa ATILMAZ (AT rezervi)
  *   UGL ek mermi: UGL'li askere CBA 'lambs_danger_uglEkMermi' (varsayilan 4) kadar HE 40mm eklenir (bir kez; envanter doluysa eklenmez) - UGL darbogazi 'mermi_yok' idi.
@@ -252,13 +252,14 @@ lambs_danger_patlayiciDon = {
                 // v8.316 DEGER SARTI VAR AMA ESNEK (kullanici: 'deger sarti olsun ama esnetilsin'; v8.315 sarti tamamen kaldirmisti): el bombasi hedefi 10-60 m, temasta bilinen dusman piyade ve ASAGIDAKILERDEN EN AZ BIRI:
     //   KUME (12 m icinde baska dusman) | BINADA | KAPALI HAT (bas ya da gogus hizasinda gorus hatti kesik) | ALCAK DURUS (CROUCH / PRONE) | DURAGAN (hiz < 1.5 m/sn, >= 20 m) | grupta EN AZ 1 askerde baski > 0.3 | pusu alarmi (son 30 sn).
     //   Yalniz acikta, ayakta KOSAN / yuruyen ve baski olmayan dusmana atilmaz (bos yere bomba harcanmaz). Diger disiplin: asker 20 sn, grup 4 sn, 60 sn'de <= 3, yay temizligi, dost 12 m, guvenli min mesafe.
+                private _bombaMax = missionNamespace getVariable ["lambs_danger_elBombasiMaxMesafe", 40];   // v8.383: el bombasi azami atis mesafesi (kullanici: 'cok uzaga el bombasi atmaya calisti'); eskiden 60 m
                 private _bH = objNull;
                 private _bM = 1e9;
                 private _bAday = false;
                 {
                     private _o = _x select 4;
                     private _m = _u distance _o;
-                    if (_m >= 10 && {_m <= 60} && {_m < _bM}) then {
+                    if (_m >= 10 && {_m <= _bombaMax} && {_m < _bM}) then {
                         _bAday = true;
                         private _kk = ({ (_x select 4) isNotEqualTo _o && {((_x select 4) distance _o) < 12} } count _dusman) + 1;
                         private _deger = _kk >= 2 || {(insideBuilding _o) > 0.5} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
@@ -268,14 +269,14 @@ lambs_danger_patlayiciDon = {
                 } forEach _dusman;
                 if (_bAday && {isNull _bH}) then { _sayac set ["g_deger", (_sayac getOrDefault ["g_deger", 0]) + 1]; };
                 if (isNull _enIyi && {isNull _bH}) then { continue };
-                private _bT = if (!isNull _enIyi && {_enM <= 60}) then { _enIyi } else { _bH };
+                private _bT = if (!isNull _enIyi && {_enM <= _bombaMax}) then { _enIyi } else { _bH };
                 private _bTM = if (isNull _bT) then { 1e9 } else { _u distance _bT };
                 private _bKume = if (!isNull _enIyi && {_bT isEqualTo _enIyi}) then { _kumeN } else { 1 };
 
                 // --- EL BOMBASI ---
                 if (missionNamespace getVariable ["lambs_danger_elBombasiAktif", true]) then {
                     if (isNull _bT) then { _sayac set ["g_mesafe", (_sayac getOrDefault ["g_mesafe", 0]) + 1]; };
-                    if (!isNull _bT && {_bTM >= 10} && {_bTM <= 60} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > 20} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > 4}) then {
+                    if (!isNull _bT && {_bTM >= 10} && {_bTM <= _bombaMax} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > 20} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > 4}) then {
                         private _fraglar = (magazines _u) select {[_x] call _fragMi};
                         if (_fraglar isEqualTo []) then { _sayac set ["g_frag_yok", (_sayac getOrDefault ["g_frag_yok", 0]) + 1]; };
                         private _gecmis = (_u getVariable [QGVAR(bombaListe), []]) select {(time - _x) < 60};

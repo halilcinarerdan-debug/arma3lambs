@@ -24,7 +24,7 @@ if (isNull _group) exitWith {[[], [], []]};
 // Fonksiyon kayitli degilse (XEH_PREP eksik) hata vermeden her asker TUFEKLI sayilir
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
-private _units = (units _group) select {alive _x && {isNull objectParent _x}};
+private _units = (units _group) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};   // v8.383: baygin (INCAPACITATED) asker takima girmez
 private _count = count _units;
 if (_count < 4) exitWith {[_units, [], []]};
 

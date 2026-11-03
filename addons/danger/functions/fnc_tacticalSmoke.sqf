@@ -159,6 +159,7 @@ private _mod = _mode;
         };
         if (!surfaceIsWater _sisPos) then {
             lambs_danger_sisListe pushBack [_sisPos, time];
+            _atici setVariable [QGVAR(sisIzin), time + 15];   // v8.383: firedHub motor sisi kapisi bu atisi tanir
             [_atici, _sisPos] call EFUNC(main,doSmoke);
 
             if (EGVAR(main,debug_functions)) then {
