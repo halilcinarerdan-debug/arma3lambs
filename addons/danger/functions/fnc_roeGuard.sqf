@@ -28,6 +28,8 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
     private _sivil = 0;
     private _logN = 0;
     private _sonOzet = time;
+    private _bayN = 0;
+    private _bayLogN = 0;
     while {true} do {
         sleep 1.5;
         if (!(missionNamespace getVariable ["lambs_danger_roeGuardV1", true])) then { continue };
@@ -36,7 +38,34 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
             private _g = _x;
             if (isNull _g || {!local _g} || {(side _g) isEqualTo civilian}) then { continue };
             if ((units _g) findIf {isPlayer _x} > -1) then { continue };
-            { if (alive _x && {local _x} && {isNull objectParent _x}) then { _askerler pushBack _x; }; } forEach (units _g);
+            {
+                if (alive _x && {local _x} && {isNull objectParent _x}) then {
+                    _askerler pushBack _x;
+                    // v8.384 BAYGIN KORUMA (kullanici: 'tum mermilerini olu bir adama bosalttilar ve el bombasi salladilar yerde yatan adama'; RPT 12:37-12:41: 3 baygin EAST askerine 4 dk mermi / UGL / el bombasi harcandi,
+                    //   Alpha 1-3 sarjorlari 0-8 mermiye indi; forgetTarget motorda 1 sn icinde geri geliyordu - baygin asker 5 m'de gorunuyor). Kalici cozum: baygin (INCAPACITATED / ACE_isUnconscious) asker setCaptive -> motor AI onu HEDEF ALMAZ;
+                    //   uyaninca (HEALTHY / INJURED) bayrak bizdeyse captive geri alinir. Bu bayrak yalniz BU modulun koydugu captive icin gecerli (teslim / esir captive'ine dokunulmaz). Kapatma: lambs_danger_bayginKoruOff = true.
+                    if (!(missionNamespace getVariable ["lambs_danger_bayginKoruOff", false]) && {!isPlayer _x}) then {
+                        private _bay = ((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_x getVariable ["ACE_isUnconscious", false]};
+                        if (_bay) then {
+                            if (!(captive _x)) then {
+                                _x setCaptive true;
+                                _x setVariable [QGVAR(bayginCaptive), true];
+                                _bayN = _bayN + 1;
+                                if (_bayLogN < 40) then {
+                                    _bayLogN = _bayLogN + 1;
+                                    diag_log format ["[BAYGIN-KORU] %1 | %2 | baygin -> hedef alinmaz (setCaptive) | toplam %3", groupId (group _x), name _x, _bayN];
+                                };
+                            };
+                        } else {
+                            if (_x getVariable [QGVAR(bayginCaptive), false]) then {
+                                _x setCaptive false;
+                                _x setVariable [QGVAR(bayginCaptive), nil];
+                                if (_bayLogN < 40) then { _bayLogN = _bayLogN + 1; diag_log format ["[BAYGIN-KORU] %1 | %2 | uyandi -> captive geri alindi", groupId (group _x), name _x]; };
+                            };
+                        };
+                    };
+                };
+            } forEach (units _g);
         } forEach allGroups;
         private _n = count _askerler;
         if (_n > 0) then {
@@ -48,7 +77,7 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
                 _kontrol = _kontrol + 1;
                 private _tSide = side group _t;
                 private _fr = (side group _u) getFriend _tSide;
-                private _sivilMi = (_tSide isEqualTo civilian) || {captive _t};
+                private _sivilMi = (_tSide isEqualTo civilian) || {captive _t && {!(_t getVariable [QGVAR(bayginCaptive), false])}};
                 private _dostMu = _fr >= 0.6;
                 // v8.379 ETKISIZ DUSMAN (kullanici: 'dusmani bitirmelerine ragmen mermi harcamaya devam ettiler'): baygin / yere serilmis dusmana (silahi ateslemiyor) hedef surdurulmez
                 private _etkisiz = (_fr < 0.6) && {!_sivilMi} && {((lifeState _t) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_t getVariable ["ACE_isUnconscious", false]}} && {(_u distance2D _t) > 6};

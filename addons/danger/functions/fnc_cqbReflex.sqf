@@ -70,7 +70,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                         if ((_u getVariable [QGVAR(cqbSkill), []]) isEqualTo []) then {
                             _u setVariable [QGVAR(cqbSkill), [_u skill "aimingSpeed", _u skill "aimingAccuracy"]];
                             _u setSkill ["aimingSpeed", ((_u skill "aimingSpeed") max 0.65)];
-                            _u setSkill ["aimingAccuracy", ((_u skill "aimingAccuracy") max 0.55)];
+                            // v8.384 GERCEKCI ISABET: CQB'de nisan HIZI artar ama ISABET (aimingAccuracy) yapay yukseltilmez (eskiden >= 0.55)
                         };
                         _u setVariable [QGVAR(cqbSon), time];
 

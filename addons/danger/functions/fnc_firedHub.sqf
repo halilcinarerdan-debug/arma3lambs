@@ -111,7 +111,11 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             private _gHedef = getAttackTarget _unit;
             if (isNull _gHedef) then { _gHedef = assignedTarget _unit; };
             private _gHM = if (isNull _gHedef) then { -1 } else { _unit distance2D _gHedef };
-            if (_gUzak > (_bMax + 8) || {_gHM > 55}) then {
+            // v8.384: dusus noktasinin 12 m'sinde yalniz BAYGIN dusman var (35 m'de saglam dusman yok) -> bomba israfi / infaz: iptal
+            private _gTaraf = side (group _unit);
+            private _gBay = (_gland nearEntities ["CAManBase", 12]) select {alive _x && {(_gTaraf getFriend (side (group _x))) < 0.6} && {((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_x getVariable ["ACE_isUnconscious", false]}}};
+            private _gBaygin = _gBay isNotEqualTo [] && {((_gland nearEntities ["CAManBase", 35]) findIf {alive _x && {(_gTaraf getFriend (side (group _x))) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]}}) isEqualTo -1};
+            if (_gUzak > (_bMax + 8) || {_gHM > 55} || {_gBaygin}) then {
                 deleteVehicle _proj;
                 _unit addMagazine _mag;
                 private _gN = {_x isEqualTo _mag} count (magazines _unit);
@@ -119,7 +123,7 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
                 [{ params ["_uu", "_mm", "_nn"]; if (alive _uu) then { _uu addMagazines [_mm, _nn]; }; }, [_unit, _mag, _gN], 20] call CBA_fnc_waitAndExecute;
                 lambs_danger_bombaMesafeN = (missionNamespace getVariable ["lambs_danger_bombaMesafeN", 0]) + 1;
                 if (lambs_danger_bombaMesafeN <= 40) then {
-                    diag_log format ["[EL-BOMBASI-MESAFE] %1 | %2 | motor atisi IPTAL: dusus %3 m (limit %4+8) | bilinen hedef %5 m (limit 55) | bomba 20 sn elde tutulmaz | toplam %6", groupId (group _unit), name _unit, round _gUzak, _bMax, if (_gHM < 0) then {"yok"} else {round _gHM}, lambs_danger_bombaMesafeN];
+                    diag_log format ["[EL-BOMBASI-MESAFE] %1 | %2 | motor atisi IPTAL: dusus %3 m (limit %4+8) | bilinen hedef %5 m (limit 55) | baygin hedef:%7 | bomba 20 sn elde tutulmaz | toplam %6", groupId (group _unit), name _unit, round _gUzak, _bMax, if (_gHM < 0) then {"yok"} else {round _gHM}, lambs_danger_bombaMesafeN, _gBaygin];
                 };
             };
         };

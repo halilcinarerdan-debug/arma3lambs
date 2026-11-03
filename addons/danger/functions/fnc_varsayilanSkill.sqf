@@ -32,7 +32,7 @@ if (isNull _u) exitWith {
     if (!isNil "lambs_danger_skillVarsayilanStarted") exitWith {false};
     lambs_danger_skillVarsayilanStarted = true;
     if (isNil "lambs_danger_skillVarsayilan") then {
-        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.95], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.85, 0.95], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]];
+        lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.20, 0.40], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.35, 0.55], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]];
     };
     lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]];
     diag_log format ["[SKILL-VARSAYILAN] varsayilan beceri sistemi baslatildi | tablo:%1", lambs_danger_skillVarsayilan];
@@ -80,7 +80,22 @@ if (!(missionNamespace getVariable ["lambs_danger_skillMigV309", false])) then {
     } forEach _gec;
     diag_log format ["[SKILL-VARSAYILAN] v8.309 vurucu / hizli varsayilanlara gecis (kayitli deger eski varsayilanla ayniysa): %1", if (_gecen isEqualTo []) then {"yok (elle degistirilmis ya da zaten yeni)"} else {_gecen joinString " | "}];
 };
-private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.80, 0.95], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.85, 0.95], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]]];
+// v8.384 GERCEKCI ISABET GOCU (kullanici: 'cba ayarlarindaki accuracyi tamamen gercekci bir seviyeye cek, default hali'): kayitli deger v8.309 varsayilanlariyla BIREBIR aynıysa (elle degistirilmemis) gercekci varsayilana tasinir; elle degisen KORUNUR.
+if (!(missionNamespace getVariable ["lambs_danger_skillMigV384", false])) then {
+    missionNamespace setVariable ["lambs_danger_skillMigV384", true];
+    private _gec384 = [
+        ["lambs_danger_skillIsabetMin", 0.80, 0.20], ["lambs_danger_skillIsabetMax", 0.95, 0.40], ["lambs_danger_skillIsabetCarpan", 1.26, 1.00], ["lambs_danger_skillTavanIsabet", 0.97, 0.45],
+        ["lambs_danger_skillOptiksizCarpan", 0.90, 0.75], ["lambs_danger_skillAcemiOran", 0.05, 0.15], ["lambs_danger_skillAcemiCarpan", 0.90, 0.75]
+    ];
+    private _gecen384 = [];
+    {
+        _x params ["_ad", "_eski", "_yeni"];
+        private _mevcut = missionNamespace getVariable [_ad, _eski];
+        if ((abs (_mevcut - _eski)) < 0.005) then { missionNamespace setVariable [_ad, _yeni]; _gecen384 pushBack format ["%1 %2->%3", _ad select [19], _eski, _yeni]; };
+    } forEach _gec384;
+    diag_log format ["[SKILL-VARSAYILAN] v8.384 GERCEKCI isabet varsayilanlarina gecis (kayitli deger v8.309 varsayilaniyla ayniysa): %1", if (_gecen384 isEqualTo []) then {"yok (elle degistirilmis ya da zaten yeni)"} else {_gecen384 joinString " | "}];
+};
+private _tablo = missionNamespace getVariable ["lambs_danger_skillVarsayilan", [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.20, 0.40], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.35, 0.55], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]]];
 private _onceki = [];
 private _yeni = [];
 {
@@ -89,6 +104,10 @@ private _yeni = [];
     if (_ad isEqualTo "aimingAccuracy") then {
         _min = missionNamespace getVariable ["lambs_danger_skillIsabetMin", _min];
         _max = (missionNamespace getVariable ["lambs_danger_skillIsabetMax", _max]) max _min;
+    };
+    if (_ad isEqualTo "aimingShake") then {
+        _min = missionNamespace getVariable ["lambs_danger_skillTitremeMin", _min];
+        _max = (missionNamespace getVariable ["lambs_danger_skillTitremeMax", _max]) max _min;
     };
     if (_ad isEqualTo "aimingSpeed") then {
         _min = missionNamespace getVariable ["lambs_danger_skillHizMin", _min];
@@ -110,7 +129,7 @@ private _yeni = [];
 if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_tablo findIf {(_x select 0) isEqualTo "aimingAccuracy"}) >= 0}) then {
     private _optik = ((primaryWeaponItems _u) param [2, ""]) isNotEqualTo "";
     if (!_optik && {(primaryWeapon _u) isNotEqualTo ""}) then {
-        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.90];
+        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.75];
         private _aa = (_u skill "aimingAccuracy") * _oc;
         _u setSkill ["aimingAccuracy", _aa];
         _yeni pushBack format ["optiksiz x%1 -> %2", _oc, _aa toFixed 2];
@@ -121,16 +140,16 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
-private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.97];
-private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.05];
-private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.90];
+private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.45];
+private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.15];
+private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.75];
 private _acemi = (random 1) < _acemiOran;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];
     _yeni pushBack format ["TECRUBESIZ x%1 (isabet / titreme)", _acemiK];
 };
 // v8.289: isabet carpani (varsayilan 1.26 = eski 1.2 x 1.05) ve nisan hizi carpani (1.2) CBA'dan ayri ayarlanir
-private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 1.26];
+private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 1.0];
 {
     private _o = _u skill _x;
     private _kat = if (_x isEqualTo "aimingAccuracy") then {_katI} else {_cpn};
