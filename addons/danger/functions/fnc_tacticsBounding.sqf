@@ -344,6 +344,13 @@ if (EGVAR(main,debug_functions)) then {
                 _e = ([_pl, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy) select 0;
             };
         };
+        // v8.379: baygin / etkisiz dusman odak OLMAZ (kapsama ateşi bosuna mermi harcamasin)
+        if (!isNull _e && {(lifeState _e) in ["INCAPACITATED", "UNCONSCIOUS"] || {_e getVariable ["ACE_isUnconscious", false]}}) then {
+            private _pl2 = (_l nearEntities ["CAManBase", 450]) select {
+                alive _x && {((side _l) getFriend (side _x)) < 0.6} && {(side _x) isNotEqualTo civilian} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_l knowsAbout _x) > (["SUPHE"] call FUNC(bilgiEsik))}
+            };
+            _e = if (_pl2 isEqualTo []) then {objNull} else {([_pl2, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy) select 0};
+        };
         if (isNull _e || {!alive _e} || {(_l distance2D _e) > 450}) then {objNull} else {_e}
     };
 
@@ -740,6 +747,27 @@ if (EGVAR(main,debug_functions)) then {
             _kapsama pushBackUnique _ldrB;
         };
 
+        // v8.379 BUDDY ATILIMI (kullanici: 'ikisi ayni anda hareket ediyor, senkron degil'): hareket takiminda her buddy cifti icinde ayni anda YALNIZ BIR es kosar, es kapsama ateşi verir;
+        //   en eski kosan sirada (bndSonKos) -> sonraki sicramada es kosar (cift ici leapfrog)
+        if ((count _hareketEdecek) >= 2) then {
+            private _bciftler = [_hareketEdecek] call _pairFn;
+            private _kosacak = [];
+            {
+                private _bc = _x select {alive _x};
+                if ((count _bc) >= 2) then {
+                    private _bs = [_bc, [], {(_x getVariable [QGVAR(bndSonKos), -999]) + ((_bc find _x) * 0.001)}, "ASCEND"] call BIS_fnc_sortBy;
+                    _kosacak pushBack (_bs select 0);
+                } else {
+                    _kosacak append _bc;
+                };
+            } forEach _bciftler;
+            if (_kosacak isNotEqualTo []) then {
+                _kapsama = _kapsama + (_hareketEdecek - _kosacak);
+                _hareketEdecek = _kosacak;
+            };
+        };
+        { _x setVariable [QGVAR(bndSonKos), time]; } forEach _hareketEdecek;
+
         // Kosacak kimse yoksa (manevra ekibi eridi / cift kurulamadi) FSE + rezerv sicrar; donga durmasin
         if (_hareketEdecek isEqualTo [] && {(_fse + _reserve) isNotEqualTo []}) then {
             _hareketEdecek = (_fse + _reserve) select {alive _x};
@@ -847,7 +875,7 @@ if (EGVAR(main,debug_functions)) then {
             !(call _hala)
             || {(time - _atesBasi) >= 5}
             || {
-                ((time - _atesBasi) >= 1.5)
+                ((time - _atesBasi) >= 3)   // v8.379: 1.5 -> 3 sn (kapsama ates dususu kurulmadan kosucu kalkmasin)
                 && {isNull _odak || {!alive _odak} || {(getSuppression _odak) >= 0.25}}
             }
             // v8.355: odak UZAK makinede (oyuncu / baska makine) ise getSuppression -1 doner -> kapi hic 'bastirildi' demiyor ve 5 sn'in tamamini bekliyordu (RPT 30-10: kapi 5.3-5.9 sn); bu durumda 3 sn

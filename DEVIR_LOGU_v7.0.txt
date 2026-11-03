@@ -3036,3 +3036,9 @@ v8.378 HUCUMDA KALICI ATES TAKIMI + BUDDY ATILIMI (kullanici: 'dokrtin ne diyor 
  - Hareket takiminda her buddy cifti icinde ayni anda YALNIZ BIR es 5 sn'lik atilim yapar (en eski atilan sirada, fhSonRush); es atilim sirasinda kapsama atesi verir (taban ates ile ayni eylem). Lider atilmaz, kapsama atesi verir. < 4 askerli grupta eski davranis (yari yariya bolme).
  - Log: [ATES-TAKIM] (takim kurulunca) + mevcut [ATES-HAREKET].
 
+v8.379 BOUNDING BUDDY SENKRONU + ETKISIZ DUSMANA MERMI YOK (kullanici: 'lider engage diyip durdu, dusmani bitirmelerine ragmen mermi harcamaya devam ettiler; atlama isi sikintili: ikisi ayni anda hareket ediyor, cok kisa, senkron degil'; RPT 04:51-04:56, v8.378). Oyunda DENENMEDI.
+ - Teshis: v8.378'in ates-hareket buddy atilimi bu RPT'de HIC calismadi ([ATES-TAKIM] yok, rush 0) cunku grup temasin tamaminda BOUNDING'deydi (ates-hareket bounding grubunu atlar). Gorulen davranis fnc_tacticsBounding'e aitti: hareket takiminin TUMU (3-4 kisi, cift ici dahil) ayni anda kaliyor (TeamBound/Move Jackson + Faulkner ayni saniye).
+ - fnc_tacticsBounding: hareket takiminda her buddy cifti icinde ayni anda YALNIZ BIR es kosar (en eski kosan sirada, bndSonKos), es kapsama takimina gecip ates verir; sonraki sicramada es kosar. Kapsama ates fazi minimum 1.5 -> 3 sn (ates dususu kurulmadan kosucu kalkmasin).
+ - Etkisiz dusman: baygin / yere serilmis (lifeState INCAPACITATED / UNCONSCIOUS, ACE_isUnconscious) dusman bounding odagi olmaz (bir sonraki saglam dusman secilir), UGL atmaz (tacticalUGL), ates-hareket hedef saymaz, ROE korumasi yaklasik 6 m'den uzak etkisiz dusmandan hedefi unutturur (forgetTarget; ihlal sayacina girer).
+ - NOT 'dusman karsilik gelmedi': EAST grubu (Alpha 1-1) 15-20 sn icinde 4/8 baygin kaldi (UGL + bounding odagi baygin askerlere de atiyordu); kalanlarin pusu politikasi TUTULU. Davranis hatasi degil, kayip hizi; dusman tarafi daha uzun dayanmali ise ayri ayar gerekir.
+

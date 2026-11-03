@@ -50,7 +50,9 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
                 private _fr = (side group _u) getFriend _tSide;
                 private _sivilMi = (_tSide isEqualTo civilian) || {captive _t};
                 private _dostMu = _fr >= 0.6;
-                if (!(_sivilMi || _dostMu)) then { continue };
+                // v8.379 ETKISIZ DUSMAN (kullanici: 'dusmani bitirmelerine ragmen mermi harcamaya devam ettiler'): baygin / yere serilmis dusmana (silahi ateslemiyor) hedef surdurulmez
+                private _etkisiz = (_fr < 0.6) && {!_sivilMi} && {((lifeState _t) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_t getVariable ["ACE_isUnconscious", false]}} && {(_u distance2D _t) > 6};
+                if (!(_sivilMi || _dostMu || _etkisiz)) then { continue };
                 // mesru mudafaa: hedef son 6 sn'de ates etti
                 if ((time - (_t getVariable [QGVAR(sonAtisT), -99])) < 6) then { continue };
                 _ihlal = _ihlal + 1;
