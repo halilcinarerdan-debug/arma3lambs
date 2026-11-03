@@ -757,6 +757,8 @@ if (EGVAR(main,debug_functions)) then {
                 if ((count _bc) >= 2) then {
                     private _bs = [_bc, [], {(_x getVariable [QGVAR(bndSonKos), -999]) + ((_bc find _x) * 0.001)}, "ASCEND"] call BIS_fnc_sortBy;
                     _kosacak pushBack (_bs select 0);
+                    // v8.381 ES YETISIR: kosucu siperine varinca esi 2-8 m yanina atilir (2b); kosucu kapsama verir (RPT 05:26: 'birisi tutarken digeri sicramiyor' - es 2 cevrim eski yerde kaliyor, cift ayrisiyor)
+                    _ciftYakinla pushBack [_bs select 0, _bc - [_bs select 0]];
                 } else {
                     _kosacak append _bc;
                 };
@@ -1012,7 +1014,7 @@ if (EGVAR(main,debug_functions)) then {
                             alive _d && {isNull objectParent _d}
                             && {(getSuppression _d) < 0.6}
                             && {(_d distance2D _cp) > 8}
-                            && {(_d distance2D _cp) < 30}
+                            && {(_d distance2D _cp) < 60}
                         ) then {
                             private _dPos = [];
                             private _dStance = "MIDDLE";

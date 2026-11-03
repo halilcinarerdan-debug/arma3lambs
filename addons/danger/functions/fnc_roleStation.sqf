@@ -103,6 +103,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                         alive _gu && {local _gu} && {!isPlayer _gu} && {isNull objectParent _gu}
                         && {(speed _gu) < 1.5} && {(getSuppression _gu) < 0.5}
                         && {!(_gu getVariable [QGVAR(forceMove), false])}
+                        && {(time - (_gu getVariable [QGVAR(bndSonKos), -999])) > 10}   // v8.381: kosucu olarak secilen / yeni kosan bombaatar sicrama sirasinda 40 mm yuklemeye durmaz
                         && {([_gu] call _glFn) isNotEqualTo ""}
                     ) then {
                         private _ge = _gu findNearestEnemy _gu;
