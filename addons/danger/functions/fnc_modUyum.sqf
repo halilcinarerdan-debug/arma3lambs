@@ -27,6 +27,7 @@ lambs_danger_modUyumStarted = true;
         ["ACE", ["ace_main"]], ["ACE Medical", ["ace_medical"]], ["ACRE2", ["acre_main"]], ["TFAR", ["task_force_radio"]], ["CBA", ["cba_main"]], ["Zeus Enhanced", ["zen_main"]],
         ["Crocus FPV", ["ArmaFPV", "Crocus_FPV"]], ["FPV_AI_Drones", ["FPV_AI_Drones"]]
     ];
+    [] call FUNC(lambsRpgMi);   // v8.387: LAMBS RPG tanisi ([LAMBS-RPG] satiri)
     private _yuklu = [];
     private _yok = [];
     { if ([_x select 1] call _yama) then { _yuklu pushBack (_x select 0); } else { _yok pushBack (_x select 0); }; } forEach _modlar;

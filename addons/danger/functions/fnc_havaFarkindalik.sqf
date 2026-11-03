@@ -178,6 +178,15 @@ private _calis = {
             // v8.288: grup dronSakla ile dagilip saklandiysa (25 sn) eski toplu HIDE / GARRISON ile cakismasin
             if (_dron && {(time - (_g getVariable [QGVAR(dronSaklaT), -99])) < 90}) then { continue };
 
+            // v8.387 HAVA NOBETCISI / ERKEN UYARI (ATP 3-01.8 3-17, 3-29: 'earlier an aerial threat is detected, the more time your unit will have to react'): gorulen silahli heli 700 m icindeki yerel dost gruplara
+            //   bildirilir (reveal 1.5; yalniz henuz bilmiyorlarsa), grup basina 6 sn'de bir.
+            if (!_dron && {_silahli} && {time > (_g getVariable [QGVAR(havaUyariT), 0])}) then {
+                _g setVariable [QGVAR(havaUyariT), time + 6];
+                { if (_x isNotEqualTo _g && {local _x} && {side _x isEqualTo _taraf} && {!isNull (leader _x)} && {((leader _x) distance2D _lp) < 700} && {(_x knowsAbout _hedef) < (["TESPIT"] call FUNC(bilgiEsik))}) then { _x reveal [_hedef, 1.5]; }; } forEach allGroups;
+            };
+            // v8.387 HELIKOPTERE KARSI KATMAN (fnc_havaAA): AA ekibi + alcak / asili heliye roketatar; her tur (3 sn), birim basina 12 sn cooldown
+            if (!_dron && {_silahli}) then { [_g, _hedef, _hd, _hover, _saldiri, _silahli] call FUNC(havaAA); };
+
             // v8.54: kucuk silah zarfi = EGIK mesafe (3B) <= 600 m (heli 300 m yukseklikte 114 m yataydayken eski kural 'alt<=300' sinirda kaciyordu)
             private _egik = _l distance _hedef;
             private _zarf = _egik <= 600;
@@ -224,7 +233,9 @@ private _calis = {
             // 2) SALDIRMIYOR (veya zarf disinda): Weapons-Hold - ates ederek konum verme (3-4). Gruba heli hedefini unutturur (motor tekrar fark edebilir, 4 sn'de bir)
             if (!_saldiri && {_silahli} && {time > _disT}) then {
                 _disT = time + 4;
-                _g forgetTarget _hedef;
+                // v8.387 LAMBS RPG uyumu: mod yukluyse ve grupta hava yetenekli roketatar (aiAmmoUsageFlags HAVA) varsa heli <= 900 m'de UNUTTURULMAZ (AI kendi kurallariyla ates edebilsin)
+                private _lrpgAtla = ([] call FUNC(lambsRpgMi)) && {_hd <= 900} && {([units _g, AI_AMMO_USAGE_FLAG_AIR, true] call EFUNC(main,getLauncherUnits)) isNotEqualTo []};
+                if (!_lrpgAtla) then { _g forgetTarget _hedef; };
             };
 
             // 2b) UZERIMIZDEN GECIYOR (saldirmayan silahli heli <= 250 m) ve grup bounding / taktik yurutuyor: duran askerler 8 sn yere yatar (gizlenme; yurumeye devam edenler bozulmaz)
@@ -306,7 +317,7 @@ private _calis = {
                 if (_yontem isEqualTo "HIDE") then { [_g, _hedef, false, _sure] call FUNC(tacticsHide); };
             };
             // hava savunma: AA'li asker kimligi belli dusman silahli araca ates eder (Weapons-Tight)
-            if ([_g, _hedef, (leader _g) distance _hedef] call FUNC(dronAtesIzin)) then {   // v8.345: sessizlik / CBA dronAtesModu kapisi
+            if (!(missionNamespace getVariable ["lambs_danger_havaAAAktif", true]) && {[_g, _hedef, (leader _g) distance _hedef] call FUNC(dronAtesIzin)}) then {   // v8.345: sessizlik / CBA dronAtesModu kapisi; v8.387: yeni katman (fnc_havaAA) aciksa o yonetir
             {
                 _g reveal [_hedef, 4];
                 _x doTarget _hedef;

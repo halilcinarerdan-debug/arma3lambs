@@ -306,7 +306,8 @@ lambs_danger_patlayiciDon = {
                 };
 
                 // --- ROKET (omuz roketatari) ---
-                if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli}) then {
+                // v8.387 LAMBS RPG uyumu: mod yukluyken (config: AI roketi piyadeye bosa atmaz, helikopter / arac icin kullanir) script roketi piyadeye atilmaz (CBA lambs_danger_lambsRpgUyum)
+                if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli} && {!(([] call FUNC(lambsRpgMi)) && {missionNamespace getVariable ["lambs_danger_lambsRpgUyum", true]})}) then {
                     private _ls = secondaryWeapon _u;
                     if (!isNull _enIyi && {_ls isNotEqualTo ""} && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
                         && {_enM >= 50} && {_enM <= 300} && {_binada || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu}}

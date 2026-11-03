@@ -37,3 +37,17 @@ FM 3-34 muhendis operasyonlari kitabidir; IED taktik drill'i icermez, FM 3-34.21
 
 ## MCWP 3-11.1 (onceki ozet)
 "IED or possible IED" immediate action drill listesindedir (satir ~8809), bolum icerigi alintilanmamis. 5 dk'dan uzun duraklarda indirilmis piyade tarama yapar (satir ~8670).
+
+## v8.387 — helikoptere karsi katman: uygulanan / onerilen (ATP 3-01.8)
+**Uygulanan (v8.387, `fnc_havaAA`):** hava nobetcisi / erken uyari (3-17, 3-29; komsu gruba reveal), ates kontrol durumu Tight / Hold (2-13), AA ekibi (aiAmmoUsageFlags HAVA) + ates sonrasi alternatif pozisyon [T], alcak / asili heliye YALNIZ kilitsiz roketatar (RPG-7 sinifi) [T], LAMBS RPG uyumu.
+**Oneri / backlog (siralama = deger / maliyet):**
+1. *Referans noktasi tekniği (4-40) + futbol sahasi ucus onu (Tablo 4-1)*: komut-baslatmali toplu ates; hover: govdenin biraz ustu, dogrudan gelen: burnun yarim saha onu, iha grup 1 yarim / grup 2-3 bir buçuk saha. Su an tek gercek-balistik onculuk noktasi var; hacme dagitilmis nisan eklenebilir.
+2. *MG ates disiplini (4-35, 4-37)*: surekli 20-25 (stryker 50-100) mermilik seri; ZIRHLI heliye (Hind sinifi) MG ETKISIZ -> mermi harcanmaz (armor degerinden ayir).
+3. *Hava savunma uyarisi (ADW kirmizi / sari / beyaz, 2-xx) + HQ erken uyari agi*: komuta modulu tum gruplara 'hava saldirisi yakin' durumu; kirmizida dagilma + AA hazir.
+4. *Cati / yuksek yer AA pozisyonu*: v8.385 Catisma Pozisyonu modulune rol 'AA' ve tip 'hava savunma' (tum yone sektor, arka-patlama temiz); karakol / mevzi planinda AA nobeti.
+5. *Nokta savunma (defended asset list)*: HQ, havan hatti, kopru, karakol gibi onemli varliklarin yakinina AA ekibi atamasi.
+6. *LZ pusu / hava indirme karsiligi*: olasi inis bolgelerine (heli inis noktasi tahmini) onceden MG + roketatar; helikopter 400 m'de INERKEN (alcak, yavas) tum silahlarla ates + inenlere ates.
+7. *Heli roket / ATGM atis tepkisi*: heli Fired (roket / fuze) sonrasi gruba burun hattindan dik kacis + gorus kesme (fnc_rpgReaction benzeri).
+8. *Tank / IFV topu & koaksiyel helikoptere (4-29, 4-36)*: tankDron'un helikopter surumu (<= 3 km, HE / koaksiyel).
+9. *AA mühimmat paylasimi*: fnc_atPasla benzeri Stinger / Titan AA aktarimi.
+10. *Ses isaretiyle kilit hazirligi*: motor sesi yonu (fnc_motorSes) AA askerini sektore doWatch eder, goruntu gelmeden hazir.

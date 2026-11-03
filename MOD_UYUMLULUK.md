@@ -33,3 +33,13 @@ ELITE sinif ADINA degil **config ailesine** dayanir; bu yuzden RHS, CUP ve vanil
 - CUP + RHS birlikte: ayni namlu icin birden cok magazin ailesi (yabanci mermi temizligi bunu kapsar ama CUP'ta test edilmedi).
 - Bazi CUP / RHS araclari `scope=1` ya da gizli siniflar; Zeus'ta gorunmeyen araclar `[MOD-UYUM]` sayimina girmez.
 - Termal / gorus katsayisi (`fnc_ihaGorus`) mod UAV'lerinin gercek kamera ozelliklerini OKUMAZ; ad ile tahmin eder.
+
+## LAMBS RPG (v8.387)
+LAMBS RPG, LAMBS ailesinin **config tabanli** (SQF icermeyen) modudur: omuz roketatarlarinin (RPG-7 vb.) mermi / magazin ozelliklerini (`aiAmmoUsageFlags`) degistirerek AI'nin roketi helikopter / arac icin kullanmasini, piyadeye bosa atmamasini saglar (RHS / CUP / SOG icin ayri paketler). **Ic yapisi dogrulanmadi** (Steam sayfasi bu ortamdan acilamadi; arama ozetleri + mod turu cikarimi).
+| Konu | ELITE'te nasil | Uyum |
+|---|---|---|
+| Roketatar secimi | LAMBS `getLauncherUnits` + `aiAmmoUsageFlags` (HAVA / arac / zirh) — sinif adina bakmaz | Mod RPG-7'yi 'hava yetenekli' yaparsa AA listesine girer; ek is yok |
+| Script roketi piyadeye (`fnc_patlayici`) | Mod yukluyken KAPALI (CBA 'LAMBS RPG uyumu', varsayilan acik) | Modun 'piyadeye roket atma' amaciyla cakismaz |
+| Saldirmayan helikoptere `forgetTarget` (Weapons-Hold) | Mod yuklu + grupta HAVA yetenekli roketatar + heli <= 900 m ise uygulanmaz | AI kendi kurallariyla ates edebilir |
+| Aktif hava savunmasi (`fnc_havaAA`) | AA ekibi (flags HAVA) + kilitsiz roketatar alcak / asili heliye; LAMBS RPG ile cift ates yok (birim 12 sn cooldown) | EK komut katmani |
+Tani: `[LAMBS-RPG] LAMBS RPG YUKLU / YOK | CfgPatches: [...]` (acilista bir kez) ve `[HAVA-AA]` satirlari.
