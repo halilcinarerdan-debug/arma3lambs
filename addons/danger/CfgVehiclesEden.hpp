@@ -167,7 +167,7 @@ class GVAR(EdenKarakol): Module_F {
     class Attributes: AttributesBase {
         E_COMBO(edKarTaraf,"Taraf savunan sahip","Otomatik: baglanan ilk grubun tarafi; grup yoksa BLUFOR.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
         E_COMBO(edKarAd,"Ad tur","Harita isaretindeki ad.","0",E_V(0,"Karakol") E_V(1,"Mevzi") E_V(2,"Gozetleme noktasi"))
-        E_NUM(edKarYar,"Yaricap m","Karakol cevre yaricapi.","120")
+        E_NUM(edKarYar,"Yaricap m","Karakol cevre yaricapi (garnizon alani da bu yaricap; 30-1500 m onerilir).","120")
         E_COMBO(edKarSav,"Savunma","Hemen: baglanan gruplarla savunma plani kurulur; grup baglanmazsa yaricap x1.5 icindeki savunan gruplar alinir. Alarm: dusman 800 m icinde bilinince plan kurulur.","1",E_V(0,"Yok yalniz isaret") E_V(1,"Savunma plani HEMEN") E_V(2,"Alarm dusman yaklasinca"))
         class ModuleDescription: ModuleDescription {};
     };
@@ -201,7 +201,7 @@ class GVAR(EdenGarnizon): Module_F {
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "Karakolun yaricapi + 150 m icine yerlestirin. Karakol modulunden SONRA calisir.";
+        description = "Karakolun yaricapi + CBA Garnizon ek mesafesi (varsayilan 500 m) icine yerlestirin; garnizon alani karakolun yaricapidir (genis alan icin Karakol yaricapini buyutun, Eden yaricap sinirsiz). Karakol modulunden SONRA calisir.";
     };
 };
 

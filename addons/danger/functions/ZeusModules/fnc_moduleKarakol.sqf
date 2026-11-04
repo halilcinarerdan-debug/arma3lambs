@@ -2,7 +2,7 @@
 
 // ELITE fork (v8.128): "ELITE Karakol / Mevzi (savunma noktasi)" Zeus modulu — HARITADA (modulun birakildigi noktada) bir karakol / mevzi / komuta noktasi tanimlar.
 // Tarihsel canlandirma (ornegin bir karakol baskini): savunan taraf icin karakol; saldiran icin ELITE Objektif ile (Baskin = vur-cek) hedef.
-//   Tanim: taraf, ad (hazir liste), yaricap (30-300 m), savunma sekli.
+//   Tanim: taraf, ad (hazir liste), yaricap (30-1500 m; v8.393: eskiden 300), savunma sekli.
 //   Savunma: 'Yok' yalniz isaret + kayit; 'Hemen' yaricap x1.5 icindeki savunan AI gruplari icin SAVUN plani (sektor + garrison) kurulur;
 //            'Alarm' duşman karakolun 800 m icinde savunan gruplarca BILINIRSE (knowsAbout >= 0.5) savunma plani otomatik kurulur (hile yok: gercek bilgi);
 //            'KALDIR' bu noktadaki karakol kaydi + isareti siler.
@@ -18,7 +18,7 @@ if (_activated && local _logic) then {
         [
             ["Taraf (savunan / sahip)", "LIST", "Karakolun ait oldugu taraf.", ["BLUFOR", "OPFOR", "INDEP"], 0],
             ["Ad / tur", "LIST", "Harita isaretindeki ad.", ["Karakol", "Mevzi", "Gozetleme noktasi"], 0],
-            ["Yaricap (m)", "SLIDER", "Karakolun cevre yaricapi; savunma sektorleri ve 'icindeki gruplar' buna gore.", [30, 300], [10, 50], 120, 0],
+            ["Yaricap (m)", "SLIDER", "Karakolun cevre yaricapi; savunma sektorleri, garnizon (nobet / devriye / arac mevzisi) alani ve 'icindeki gruplar' buna gore. v8.393: ust sinir 300 -> 1500 m (genis garnizon bolgesi).", [30, 1500], [10, 50], 120, 0],
             ["Savunma", "LIST", "Yok: yalniz isaret. Hemen: yaricap x1.5 icindeki savunan AI gruplari icin savunma plani. Alarm: duşman 800 m icinde savunanlarca bilinince plan otomatik kurulur.", ["Yok (yalniz isaret)", "Savunma plani HEMEN", "Alarm (duşman yaklasinca)"], 0],
             ["Grup secimi (yalniz 'HEMEN' icin)", "LIST", "Otomatik: yaricap x1.5 icindeki savunan gruplar kendiliginden alinir (yanlis grup girebilir). Elle: istek gonderildikten sonra squad listesi acilir, mevziye atanacaklari siz isaretlersiniz.", ["Otomatik (yaricap x1.5)", "Elle sec (liste)"], 1]
         ],

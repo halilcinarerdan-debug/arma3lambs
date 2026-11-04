@@ -361,10 +361,11 @@ if (isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar = createHa
 ["lambs_danger_garnizonIstegi", {
     params ["_poz", "_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac"];
     if (!isServer) exitWith {};
-    private _ad = lambs_danger_karakollar select {((_x select 1) distance2D _poz) <= ((_x select 2) + 150)};
+    // v8.393: garnizon modulu karakolun yaricapi + CBA garnizonEk (varsayilan 500 m; eskiden sabit 150) icine birakilabilir; en yakin karakol secilir
+    private _ad = lambs_danger_karakollar select {((_x select 1) distance2D _poz) <= ((_x select 2) + (missionNamespace getVariable ["lambs_danger_garnizonEk", 500]))};
     if (_ad isEqualTo []) exitWith {
         diag_log format ["[KARAKOL-GARNIZON] istek reddedildi: %1 yakininda karakol yok (once ELITE Karakol / HQ modulunu koyun)", mapGridPosition _poz];
-        ["lambs_danger_garnizonYanit", ["Garnizon: yakinda karakol yok - once 'ELITE Karakol / HQ' modulu koyun (yaricap + 150 m icine)"]] call CBA_fnc_globalEvent;
+        ["lambs_danger_garnizonYanit", ["Garnizon: yakinda karakol yok - once 'ELITE Karakol / HQ' modulu koyun (yaricap + CBA 'Garnizon modulu ek mesafe' icine; varsayilan 500 m)"]] call CBA_fnc_globalEvent;
     };
     _ad = [_ad, [], {(_x select 1) distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
     private _k = _ad select 0;

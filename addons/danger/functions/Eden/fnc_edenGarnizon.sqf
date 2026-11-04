@@ -1,7 +1,7 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * 3DEN: ELITE Karakol Garnizon modulu (v8.362). Karakol yaricapi + 150 m icine yerlestirilir; nobetci / devriye / ust kat / arac mevzisi ayarlari (Zeus lambs_danger_garnizonIstegi). Karakol modulunden SONRA calisir (6 sn gecikme).
+ * 3DEN: ELITE Karakol Garnizon modulu (v8.362). Karakol yaricapi + CBA garnizonEk (v8.393: varsayilan 500 m) icine yerlestirilir (garnizon alani karakolun yaricapidir); nobetci / devriye / ust kat / arac mevzisi ayarlari (Zeus lambs_danger_garnizonIstegi). Karakol modulunden SONRA calisir (6 sn gecikme).
  * Arguments: 0: modul <OBJECT>, 1: baglananlar (kullanilmaz), 2: etkin <BOOL>
  * Return Value: None
  * Public: No
