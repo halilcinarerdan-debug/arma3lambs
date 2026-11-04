@@ -12,6 +12,7 @@
  * NOBET POZISYONLARI (komutan karar verir; LAMBS rastgele garrison'u degil): (1) ust kat: karakol yaricapindaki binalarin >= 2.5 m yuksekteki en yuksek ic pozisyonu (buildingPos); skor = yukseklik x3 + dis cephe gorusu (8 isin 120 m) x4;
  *   (2) arazi: yaricapin %50-%80'inde 30 derecelik halka, yukseklik x2 + gorus x4. Secim: en yuksek skor + onceki pozisyonlardan uzaklik (en fazla 60 m x 0.6) - her yone dagilir; min aralik 18 m.
  *   Nobetci pozisyona gider (doMove), 3 m icinde PATH kapatilir (yerinde kalir), dis yone doWatch; 120 sn'de varamazsa pozisyona isinlanir (merdiven takilmasi).
+ * v8.397: TAKIM SECIMI (ayar gruplar; Zeus panel fnc_garnizonTakimSec / 3DEN 'Secim modu = takim'): yalniz secilen takimlar garnizona asker verir (yaricap kurali yok; kaynak takimda en az 3 asker kalir).
  * v8.394: ELLE ASKER SECIMI (ayar uyeler; Zeus panel fnc_garnizonAskerSec / 3DEN SYNC) havuzu yalniz secilen askerlere indirir; DEVRIYE MESAFESI (ayar devMes, 0 = karakol yaricapinin %60i) devriye halkasinin merkezden uzakligidir.
  * DEVRIYE: alt gruplar (devriye boyu 2-6), karakolun %60 yaricapinda (v8.394: devMes ile ayarlanir) halka rotasi (CYCLE), AWARE / LIMITED / STAG COLUMN; temas / alarm olunca (grup temasi < 30 sn) rota kesilir, en yakin cevre noktasina savunmaya gecer, 120 sn temassizsa devam.
  * ARACLAR: karakol icindeki AI surucu + yerel kara araclari (APC / IFV / kamyon) cevrede %75 yaricapta ates mevzisine gider (tehdit yonu bilinmiyorsa esit dagilir), PATH kapatilir, mürettebat icinde kalir; gorev 'KARAKOL_ARAC'.
@@ -177,6 +178,11 @@ private _calis = {
             // v8.394: elle secilen askerler (ayar 'uyeler': netId) -> havuz YALNIZ onlar (yaricap / 'kaynakta en az 3 asker' kurali yok); devriye mesafesi 'devMes' (0 = yaricap %60)
             private _uyeNid = _ay getOrDefault ["uyeler", []];
             private _uyeMod = _uyeNid isNotEqualTo [];
+            // v8.397: TAKIM (grup) secimi: ayar 'gruplar' (grup netId) - hangi takimlar garnizon askeri verebilir (yaricap kurali yok; kaynak takimda en az 3 asker kalir, hekim korumasi sureer). 'uyeler' doluysa o oncelikli.
+            private _grupNid = _ay getOrDefault ["gruplar", []];
+            private _grpSecili = (_grupNid apply {groupFromNetId _x}) select {!isNull _x};
+            private _grpMod = !_uyeMod && {_grupNid isNotEqualTo []};
+            private _uzakOk = _uyeMod || _grpMod;
             private _devMes = _ay getOrDefault ["devMes", 0];
             private _devBaz = if (_devMes > 0) then {_devMes} else {_yar * 0.6};
             // ---- havuz ----
@@ -186,7 +192,7 @@ private _calis = {
                 private _g = _x;
                 if ((side _g) isNotEqualTo _taraf || {isNull (leader _g)} || {isPlayer (leader _g)}) then { continue };
                 if (({isPlayer _x} count (units _g)) > 0) then { continue };
-                if ((leader _g) distance2D _poz > (_yar * 1.5)) then { continue };
+                if (!_grpMod && {(leader _g) distance2D _poz > (_yar * 1.5)}) then { continue };
                 // v8.136: kaynak gruptan EN AZ 3 asker (lider dahil) grupta kalir; aksi halde savunma plani / grup bosalir (RPT 013ca3b7: plan 24 sn'de "grup kalmadi" ile bitti)
                 private _us = (units _g) select {alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}};
                 private _ayril = ((count (units _g select {alive _x})) - 3) max 0;
@@ -197,7 +203,7 @@ private _calis = {
                 if (!_medGrup) then { _aday = _aday select {([_x] call _rolFn) isNotEqualTo "MEDIC"}; };
                 reverse _aday;
                 { _havuz pushBack _x; } forEach (_aday select [0, _ayril min (count _aday)]);
-            } forEach ([allGroups select {!(call _altGrupAd)}, []] select _uyeMod);
+            } forEach ([[allGroups select {!(call _altGrupAd)}, _grpSecili select {!(call _altGrupAd)}] select _grpMod, []] select _uyeMod);
             if (_uyeMod) then {
                 _havuz = (_uyeNid apply {objectFromNetId _x}) select {
                     !isNull _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}
@@ -270,7 +276,7 @@ private _calis = {
                     };
                 } else {
                     // bos / olu nobet: havuzdan en uygun
-                    private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {_uyeMod || {(_x distance2D _poz) <= (_yar * 1.5)}}};
+                    private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {_uzakOk || {(_x distance2D _poz) <= (_yar * 1.5)}}};
                     if (_adaylar isEqualTo []) then { continue };
                     private _s = [_adaylar, [], { private _r = [_x] call _rolFn; (([0, 200, 400, 600, 900] select ((["RIFLE", "MARKSMAN", "RTO", "MEDIC", "MG"] find _r) max 0)) max ([0, 800] select (_r isEqualTo "AT"))) + ([0, 1500] select (_x isEqualTo (leader (group _x)))) + ((_x distance2D _p) / 5) - ([0, 1600] select (((count _girdi) > 6) && {(_girdi select 6) isNotEqualTo ""} && {_r isEqualTo (_girdi select 6)})) }, "ASCEND"] call BIS_fnc_sortBy;
                     private _sec = _s select 0;

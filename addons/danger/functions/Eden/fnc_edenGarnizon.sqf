@@ -25,6 +25,13 @@ if (!_activated || {!isServer}) exitWith {};
     private _devMes = ["edGarDevMes", 0] call _n;
     // v8.394: module SYNC ile baglanan AI askerler garnizon havuzu olur (yaricap kurali yok); hic asker baglanmazsa yaricap havuzu
     private _uyeler = ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {(_x isKindOf "CAManBase") && {alive _x} && {!isPlayer _x}}) apply {netId _x};
-    ["lambs_danger_garnizonIstegi", [_poz, 0, _nobet, _dev, _devBoy, _ust, _arac, _uyeler, _devMes]] call CBA_fnc_serverEvent;
-    diag_log format ["[EDEN] Garnizon (3DEN) | %1 | nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | baglanan asker %7 | devriye mesafesi %8", mapGridPosition _poz, _nobet, _dev, _devBoy, _ust, _arac, count _uyeler, _devMes];
+    // v8.397: 'Secim modu' = 1 (takim): baglanan askerlerin TAKIMLARI (grup) garnizon askeri verebilir; 0 = yalniz baglanan askerler (v8.394)
+    private _secimModu = ["edGarSecim", 0] call _n;
+    private _gruplar = [];
+    if (_secimModu isEqualTo 1 && {_uyeler isNotEqualTo []}) then {
+        { _gruplar pushBackUnique (netId (group (objectFromNetId _x))); } forEach _uyeler;
+        _uyeler = [];
+    };
+    ["lambs_danger_garnizonIstegi", [_poz, 0, _nobet, _dev, _devBoy, _ust, _arac, _uyeler, _devMes, _gruplar]] call CBA_fnc_serverEvent;
+    diag_log format ["[EDEN] Garnizon (3DEN) | %1 | nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | baglanan asker %7 | baglanan takim %9 | devriye mesafesi %8", mapGridPosition _poz, _nobet, _dev, _devBoy, _ust, _arac, count _uyeler, _devMes, count _gruplar];
 };

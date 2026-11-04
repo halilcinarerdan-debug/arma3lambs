@@ -198,6 +198,7 @@ class GVAR(EdenGarnizon): Module_F {
         E_NUM(edGarDevBoy,"Devriye boyu asker","Her devriye grubundaki asker sayisi.","3")
         E_BOOL(edGarUst,"Ust kat cati nobet pozisyonlari","Binalarin yuksek ic pozisyonlari nobet adayi olur.","true")
         E_BOOL(edGarArac,"Araclar mevzi olsun","Karakol icindeki AI suruculu kara araclari cevrede ates mevzisine gider.","true")
+        E_COMBO(edGarSecim,"Secim modu SYNC","Modulle SYNC edilen askerler: Yalniz kendileri = yalniz o askerler garnizon olur. Takimlari = SYNC edilen askerlerin TAKIMI (grup) garnizona asker verebilir (kaynak takimda en az 3 asker kalir). Hic asker SYNC edilmezse karakol yaricapi havuzu.","0",E_V(0,"Yalniz baglanan askerler") E_V(1,"Baglanan askerlerin takimlari"))
         E_NUM(edGarDevMes,"Devriye mesafesi m","Devriye rotasinin karakol MERKEZINE uzakligi (halka). 0 = karakol yaricapinin yuzde 60i (yaricap kucukse devriye merkezin dibinde doner). Uzak devriye icin buyuk deger (ornek 600).","0")
         class ModuleDescription: ModuleDescription {};
     };
