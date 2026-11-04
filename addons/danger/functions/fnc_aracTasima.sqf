@@ -470,7 +470,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             } else {
                 diag_log format ["[TASIMA] %1 | %2 | piyadeye gidiyor: %3 m | surucu %4", groupId _vg, _ad, round (_v distance2D _pk), name _d];
                 _d doMove _pk;
-                private _t = time + (150 max (((_v distance2D _pk) / 6) min 420));
+                private _t = time + (150 max (((_v distance2D _pk) / 6) min (missionNamespace getVariable ["lambs_danger_nakilBekleMaks", 1200])));
                 private _sonMove = time;
                 private _durT = -1;
                 private _kurt = 0;
@@ -659,7 +659,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             _wpS setWaypointSpeed "FULL";
             _wpS setWaypointBehaviour "SAFE";
             _vg setCurrentWaypoint _wpS;
-            private _st = time + ((240 max ((_v distance2D _drop) / 3.5)) min 600);
+            private _st = time + ((240 max ((_v distance2D _drop) / 3.5)) min (missionNamespace getVariable ["lambs_danger_nakilSurusMaks", 1800]));
             private _yavasladi = false;
             // v8.135: ilerleme izleme + TAKILMA tespiti (RPT 36a51c57: bir Stryker 2+ dk 0 km/s MOVE komutuyla kaldi; digeri inis noktasini gecip 40 m kuralini hic saglamadi)
             private _durgunT = -1;

@@ -106,7 +106,7 @@ if (_tip isEqualTo 3) exitWith {
 };
 
 // ---------------------------------------------------------------------------
-// KATILAN GRUPLAR: taraf, yerel, AI lider, >= 3 asker, baska plana bagli degil, objektife <= 4000 m; en yuksek rutbe + buyuk grup + yakin
+// KATILAN GRUPLAR: taraf, yerel, AI lider, >= 3 asker, baska plana bagli degil, objektife <= CBA planMesafe (v8.395: varsayilan 12000 m, eskiden 4000); en yuksek rutbe + buyuk grup + yakin
 // ---------------------------------------------------------------------------
 // v8.178 HQ / US: ELE GECIR bir komuta noktasindan baslar; katilacak gruplar o kategoriye atananlardir
 private _hqId = _ayar getOrDefault ["hqId", ""];
@@ -198,7 +198,7 @@ if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planO
             && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
             && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
             && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
-            && {_hqKayit isNotEqualTo [] || {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}}   // v8.325: HQ'ya bagli tank mesafe sinirina takilmaz (piyade ile ayni kural; RPT 5372f629: T-80BV objektife 4.8 km, sinir 4 km -> plana hic alinmadi)
+            && {_hqKayit isNotEqualTo [] || {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])}}   // v8.325: HQ'ya bagli tank mesafe sinirina takilmaz (piyade ile ayni kural; RPT 5372f629: T-80BV objektife 4.8 km, sinir 4 km -> plana hic alinmadi)
             && {(([_tv] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then {
             _zirhG pushBack _x;
             diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi (objektife %3 m)", groupId _x, getText (configOf _tv >> "displayName"), round (_tl distance2D _obj)];
@@ -212,7 +212,7 @@ if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planO
                 if (_x getVariable ["lambs_danger_planAktif", false]) then { _ned pushBack "baska planda"; };
                 if ((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"]) then { _ned pushBack format ["gorev %1", _x getVariable ["lambs_danger_gorev", ""]]; };
                 if (_hqKayit isNotEqualTo [] && {(_x getVariable ["lambs_danger_hqId", ""]) isNotEqualTo _hqId}) then { _ned pushBack format ["baska HQ (%1)", _x getVariable ["lambs_danger_hqId", "-"]]; };
-                if (_hqKayit isEqualTo [] && {(_tl distance2D _obj) > (_ayar getOrDefault ["grupMesafe", 4000])}) then { _ned pushBack format ["mesafe %1 m > sinir", round (_tl distance2D _obj)]; };
+                if (_hqKayit isEqualTo [] && {(_tl distance2D _obj) > (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])}) then { _ned pushBack format ["mesafe %1 m > sinir", round (_tl distance2D _obj)]; };
                 diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] plana ALINMADI: %3", groupId _x, getText (configOf _tv >> "displayName"), _ned joinString ", "];
             };
         };
@@ -227,7 +227,7 @@ private _aday = allGroups select {
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
     && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
-    && {isNull objectParent _l} && {(_secili isEqualTo [] && {_hqKayit isNotEqualTo [] || {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}}) || {(netId _x) in _secili}}
+    && {isNull objectParent _l} && {(_secili isEqualTo [] && {_hqKayit isNotEqualTo [] || {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])}}) || {(netId _x) in _secili}}
 };
 if (_aday isEqualTo []) exitWith {
     // v8.161 TANI (elle secim): secilen her grubun neden elendigi tek tek
@@ -261,7 +261,7 @@ if (_aday isEqualTo []) exitWith {
             else {if (_x getVariable ["lambs_danger_planAktif", false]) then {"baska planda"}
             else {if (_x getVariable ["lambs_danger_oyuncuKomuta", false]) then {"oyuncu komutasinda (C2 emri; SERBEST birakin)"}
             else {if (!isNull objectParent _l) then {"lider aracta"}
-            else {if ((_l distance2D _obj) > 4000) then {"objektife > 4000 m"} else {"?"}}}}}}}}}};
+            else {if ((_l distance2D _obj) > (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])) then {format ["objektife > %1 m (CBA planMesafe)", round (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])]} else {"?"}}}}}}}}}};
         _red set [_neden, (_red getOrDefault [_neden, 0]) + 1];
         if (!isNull _l) then { _enYakin = _enYakin min (_l distance2D _obj); };
     } forEach _tum;
@@ -288,7 +288,7 @@ private _reconG = allGroups select {
     private _l = leader _x;
     (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _l} && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _l}
-    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
+    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
 };
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.

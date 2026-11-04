@@ -13,6 +13,18 @@
 
 missionNamespace setVariable ["lambs_danger_planAdim", "basladi"];
 
+// v8.395 UZUN OPERASYON (kullanici: 'pmc tactical 140x140 harita, uzun operasyonlari desteklesin'): faz zaman siniri SABIT degil, hedefe KALAN mesafeye gore: taban + kalan / yurume hizi (CBA planYurumeHizi 0.9 m/sn), CBA planYurumeMaks ile ust sinirli
+private _yuruS = {
+    params ["_taban", "_kalanM"];
+    ((_taban + (_kalanM / (missionNamespace getVariable ["lambs_danger_planYurumeHizi", 0.9]))) min ((missionNamespace getVariable ["lambs_danger_planYurumeMaks", 7200]) max _taban))
+};
+// gruplarin liderlerinin hedefe en uzak mesafesi
+private _kalanEn = {
+    params ["_gr", "_p"];
+    private _m = [0];
+    { if (!isNull (leader _x)) then { _m pushBack ((leader _x) distance2D _p); }; } forEach _gr;
+    selectMax _m
+};
 private _temasta = {
     params ["_g"];
     private _sit = _g getVariable [QGVAR(cmdSit), []];
@@ -644,7 +656,7 @@ while {true} do {
             };
             private _esik = ((_plan getOrDefault ["hqYar", 100]) * 0.7) max 80;
             private _vardiD = {(leader _x) distance2D _hqP < _esik} count _gruplar;
-            if (_vardiD >= (count _gruplar) || {_fazSure > 900}) then { [_plan, "BITTI", format ["HQ'ya donuldu (%1/%2 grup)", _vardiD, count _gruplar]] call _fazGec; };
+            if (_vardiD >= (count _gruplar) || {_fazSure > ([900, [_gruplar, _hqP] call _kalanEn] call _yuruS)}) then { [_plan, "BITTI", format ["HQ'ya donuldu (%1/%2 grup)", _vardiD, count _gruplar]] call _fazGec; };
             continue
         };
 
@@ -784,7 +796,7 @@ while {true} do {
                 _plan set ["tasimaCtl", [false, !_bekleKos, 0, 0, 0, [], true]];
                 _plan set ["hazirBekle", _bekleKos];
                 if (_bekleKos) then { diag_log format ["[PLAN] %1 SENKRON: nakil araclari piyadeyi alip bekleyecek (gozlem: %2 | tank / zirh: %3) - serbest birakma kosullari: gozlem tamam + tanklar mevzisine yakin (en cok 420 sn)", _id, (_plan getOrDefault ["reconG", []]) isNotEqualTo [], (_plan getOrDefault ["zirhG", []]) isNotEqualTo []]; };
-                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
             };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
             continue
@@ -894,7 +906,7 @@ while {true} do {
                     private _rl = leader _x;
                     (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _rl} && {alive _rl} && {!isPlayer _rl} && {(side _x) isEqualTo (_plan get "taraf")}
                     && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _rl}
-                    && {(_rl distance2D _obj) <= 4000} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+                    && {(_rl distance2D _obj) <= (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
                 };
                 if (_yeniR isNotEqualTo []) then {
                     private _opY = _obj getPos [520, _B];
@@ -924,7 +936,7 @@ while {true} do {
             private _hazir = {((leader _x) distance2D _rp) < 80 || {[_x] call _temasta}} count _gruplar;
             // v8.187: kesif unsuru varsa TOPLAN'in 300 sn zaman asimini beklemeden HEMEN gozleme gonderilir (once recon, sonra digerleri)
             private _reconOnce = (_tip isNotEqualTo 1) && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])} && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2};
-            if (_reconOnce || {_tip isEqualTo 1 && {missionNamespace getVariable ["lambs_danger_savunmaRpAtla", true]}} || {_hazir >= (ceil ((count _gruplar) * 0.75))} || {_fazSure > 300} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
+            if (_reconOnce || {_tip isEqualTo 1 && {missionNamespace getVariable ["lambs_danger_savunmaRpAtla", true]}} || {_hazir >= (ceil ((count _gruplar) * 0.75))} || {_fazSure > ([300, [_gruplar, _rp] call _kalanEn] call _yuruS)} || {_plan getOrDefault ["tasimaTamam", false]} || {_plan getOrDefault ["reconTamam", false]} || {("tasimaH" in _plan) && {scriptDone (_plan get "tasimaH")} && {_fazSure > 20} && {((_plan getOrDefault ["tasimaCtl", [false, true, 0]]) param [2, 0]) > 0}}) then {
                 // v8.131 RECON: gozlem noktasina gizlice (STEALTH + GREEN = ates gelene kadar ates yok) gidip bilgi toplar; raporu plan gruplarina isler
                 if (_tip isNotEqualTo 1 && {(_plan getOrDefault ["dogrulama", 0]) isNotEqualTo 2} && {(_plan getOrDefault ["reconG", []]) isNotEqualTo []} && {!(_plan getOrDefault ["reconYapildi", false])}) then {
                     _plan set ["reconYapildi", true];
@@ -977,7 +989,7 @@ while {true} do {
                     _plan set ["tasimaYapildi", true];
                     if (!("tasimaH" in _plan) || {isNull (_plan get "tasimaH")}) then {
                         _plan set ["tasimaCtl", [false, true, 0, 0, 0, [], true]];
-                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
                     } else {
                         (_plan get "tasimaCtl") set [1, true];
                     };
@@ -1255,9 +1267,9 @@ while {true} do {
                 (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
                 diag_log format ["[PLAN] %1 TASIMA: plan grubu temasta -> nakil iptal (binenler oldugu yerde iner)", _id];
             };
-            if (_fazSure > 420 && {!scriptDone _th}) then {
+            if (_fazSure > (missionNamespace getVariable ["lambs_danger_nakilFazMaks", 2400]) && {!scriptDone _th}) then {
                 (_plan getOrDefault ["tasimaCtl", [false]]) set [0, true];
-                diag_log format ["[PLAN] %1 TASIMA zaman asimi (420 sn): nakil iptal, gruplar oldugu yerden devam", _plan get "id"];
+                diag_log format ["[PLAN] %1 TASIMA zaman asimi (%2 sn, CBA nakilFazMaks): nakil iptal, gruplar oldugu yerden devam", _plan get "id", missionNamespace getVariable ["lambs_danger_nakilFazMaks", 2400]];
                 _plan set ["tasimaTamam", true];
                 _plan set ["tasimaH", scriptNull];
                 [_plan, "TOPLAN", "arac nakli zaman asimi"] call _fazGec;
@@ -1266,7 +1278,7 @@ while {true} do {
             // v8.137 SEFER (v8.163: ERKEN): ilk seferde araca sigmayan uzaktaki askerler icin ek sefer; artik TUM araclar bindirmeyi bitirir bitirmez (nakil isi bitmeyi beklemeden) ve bos arac varsa baslar
             private _ctlS = _plan getOrDefault ["tasimaCtl", [false, true, 0]];
             private _bindiHepsi = ((_ctlS param [4, 0]) > 0) && {(_ctlS param [3, 0]) >= (_ctlS param [4, 0])};
-            if ((scriptDone _th || {_bindiHepsi && {_fazSure > 25}}) && {(_plan getOrDefault ["sefer", 1]) < 3} && {_fazSure < 400} && {(_ctlS param [2, 0]) > 0} && {(time - (_plan getOrDefault ["seferT", -999])) > 45}) then {
+            if ((scriptDone _th || {_bindiHepsi && {_fazSure > 25}}) && {(_plan getOrDefault ["sefer", 1]) < 3} && {_fazSure < ((missionNamespace getVariable ["lambs_danger_nakilFazMaks", 2400]) - 20)} && {(_ctlS param [2, 0]) > 0} && {(time - (_plan getOrDefault ["seferT", -999])) > 45}) then {
                 private _dropMS = (500 max (((_plan get "ayar") getOrDefault ["orpM", 300]) + 150));
                 private _kalan = 0;
                 private _kalanBirim = [];
@@ -1280,7 +1292,7 @@ while {true} do {
                     private _bosArac = vehicles select {
                         alive _x && {_x isKindOf "LandVehicle"} && {canMove _x} && {(_x emptyPositions "cargo") >= 1} && {!(_x getVariable ["lambs_danger_tasimaMesgul", false])}
                         && {(getNumber (configOf _x >> "attendant")) isEqualTo 0} && {!(_x getVariable ["lambs_danger_gorev", ""] in ["MEDEVAC", "HARIC", "KARAKOL_ARAC"])} && {!((group (driver _x)) getVariable ["lambs_danger_gorev", ""] in ["MEDEVAC", "HARIC", "KARAKOL_ARAC"])}
-                        && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")} && {(_x distance2D _kp) < 6000}
+                        && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {(side (group (driver _x))) isEqualTo (_plan get "taraf")} && {(_x distance2D _kp) < (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000])}
                         && {!((group (driver _x)) getVariable ["lambs_danger_planAktif", false])}
                     };
                     // v8.276 GUVENLI SEFER (FM 3-90 14-41: 'surekli gidis-donusle shuttle'; MCWP 3-11.1: inis noktalari dusman dogrudan / dolayli atesinde olabilir): aracin ORP'ye gidip gelmesi YALNIZ temas yokken
@@ -1295,7 +1307,7 @@ while {true} do {
                     if (_bosArac isNotEqualTo []) then {
                         _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
                         _plan set ["seferT", time];
-                        private _yh = [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], 6000, _ctlS] spawn FUNC(aracTasima);
+                        private _yh = [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _ctlS] spawn FUNC(aracTasima);
                         _plan set ["tasimaYardim", (_plan getOrDefault ["tasimaYardim", []]) + [_yh]];
                         diag_log format ["[PLAN] %1 TASIMA %2. SEFER: geride kalan %3 asker (inis noktasindan > 400 m uzakta) | bos arac %4", _id, _plan get "sefer", _kalan, count _bosArac];
                         continue
@@ -1338,7 +1350,15 @@ while {true} do {
                     [_g, [[_h, "MOVE", format ["%1 -> %2", _roller getOrDefault [groupId _g, "?"], "hedef"], "AWARE", "NORMAL", 40]]] call _wpYaz;
                 };
             } forEach _gruplar;
-            if (_vardi >= (count _gruplar) || {_fazSure > 280}) then {
+            private _kalanO = 0;
+            {
+                if (!isNull (leader _x)) then {
+                    private _hn = _notlar getOrDefault [groupId _x, [_obj, 0]];
+                    private _hp = if ((_hn select 0) isEqualType []) then {_hn select 0} else {_hn};
+                    _kalanO = _kalanO max ((leader _x) distance2D _hp);
+                };
+            } forEach _gruplar;
+            if (_vardi >= (count _gruplar) || {_fazSure > ([280, _kalanO] call _yuruS)}) then {
                 { _x setBehaviour "AWARE"; _x setSpeedMode "LIMITED"; } forEach _gruplar;
                 [_plan, "KESIF", "ORP'de guvenlik / kesif (40 sn)"] call _fazGec;
             };

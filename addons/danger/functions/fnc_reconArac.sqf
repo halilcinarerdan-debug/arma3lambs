@@ -31,7 +31,7 @@ if (_mod isEqualTo "SEC") exitWith {
         private _d = driver _v;
         alive _v && {_v isKindOf "LandVehicle"} && {canMove _v} && {(fuel _v) > 0.1} && {(([_v] call FUNC(aracDuzBos))) >= (count _birimler)}
         && {!isNull _d} && {!isPlayer _d} && {local _d} && {(side (group _d)) isEqualTo _taraf}
-        && {(_v distance2D _mrk) <= 4000}
+        && {(_v distance2D _mrk) <= (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])}
         && {!(_v getVariable [QGVAR(tasimaMesgul), false])} && {!(_v getVariable [QGVAR(reconArac), false])}
         && {!((group _d) getVariable [QGVAR(planAktif), false])}
         && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
