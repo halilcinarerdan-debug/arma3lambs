@@ -374,12 +374,14 @@ if (EGVAR(main,debug_functions)) then {
             _zirh = ([_zirhlar, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy) select 0;
         };
 
+        // v8.388 MG ONCELIGI: MG listenin basinda (ilk hedef / ilk ates emri) ve sektor yelpazesine girmez (odak hattini surekli doger); digerleri -12 / 0 / +12 yelpaze
+        private _mgSira = (_birimler select {alive _x && {([_x] call _rolFn) isEqualTo "MG"}}) + (_birimler select {!alive _x || {([_x] call _rolFn) isNotEqualTo "MG"}});
         {
             if (alive _x && {isNull objectParent _x}) then {
                 private _rol = [_x] call _rolFn;
 
-                // Sektor: -12 / 0 / +12 derece
-                private _ofs = [-12, 0, 12] select (_forEachIndex % 3);
+                // Sektor: -12 / 0 / +12 derece (MG: 0)
+                private _ofs = if (_rol isEqualTo "MG") then {0} else {[-12, 0, 12] select (_forEachIndex % 3)};
                 private _mes = (_x distance2D _hedef) max 20;
                 private _sekPos = (getPosATL _x) getPos [_mes, ((_x getDir _hedef) + _ofs)];
                 _sekPos set [2, 0.5];
@@ -415,7 +417,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
                 };
             };
-        } forEach _birimler;
+        } forEach _mgSira;
     };
 
     // Kosucu hareketi: ADVANCE modunda ILERI siperli sicrama. SIPER SECIMI mesafe + YOL ACIKLIGI hesabi:
@@ -446,7 +448,11 @@ if (EGVAR(main,debug_functions)) then {
         private _anR = _kosan getVariable ["ace_advanced_fatigue_anReserve", -1];
         if (_anR >= 0) then { _yorgunluk = 1 - ((_anR / 2300) min 1); } else { _yorgunluk = (getFatigue _kosan) min 1; };
         private _yorgCarpan = 1 - (0.5 * ([group _kosan, "yorgunlukEtki", 1] call FUNC(dk)) * _yorgunluk);
-        private _atMax = ((_bnd select 1) * _yorgCarpan) max 12;
+        // v8.388 DOKTRINE GORE UZUN SICRAMA (kullanici: 'sicrama mesafesini doktrine gore arttir, 2-3 m'de dur kalk'): bant atilimlari CBA carpanla (varsayilan 1.6) buyur; kazanc esigi yariya kadar buyur.
+        //   Ust sinirlar: (1) gozetleyen silahin etkili menzilinin 2/3'u (asagida _owCap: tufek 307 m, MG 400 m; M111 8708-8710), (2) dusmana kalan mesafe: hucum menzili (bndBitisM) oncesi dur (kalan x 0.85),
+        //   yorgunluk tabani 12 -> 18 m.
+        private _bndCarpan = (missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 1.6]) max 0.5 min 3;
+        private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
             if (lambs_danger_yorgLogN < 40) then {
@@ -455,7 +461,7 @@ if (EGVAR(main,debug_functions)) then {
             };
         };
 
-        private _kazMin = _bnd select 2;
+        private _kazMin = (_bnd select 2) * (1 + (0.5 * (_bndCarpan - 1)));
         _siperMenzil = _siperMenzil min (_atMax + 10);
         private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
         private _movePos = [];
@@ -474,6 +480,10 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         private _enIyi = -999999;
+        // gozetleyen silah etkili menzilinin 2/3'u: tufek 460 -> 307 m, MG (ekipte yasayan MG varsa) 600 -> 400 m (M111 8708-8710)
+        private _owCap = [307, 400] select (((_fse select {alive _x && {_x isNotEqualTo _kosan}}) findIf {([_x] call _rolFn) isEqualTo "MG"}) > -1);
+        private _secFn = {
+        params ["_liste"];
         {
             private _cp = _x select 0;
             private _atilim = _kPos distance2D _cp;
@@ -482,7 +492,7 @@ if (EGVAR(main,debug_functions)) then {
             // Kosucu su an zaten menzildeyse uygulanir (menzil disindaysa kilitlenmesin diye filtre atlanir).
             private _fseYakin = (_fse select {alive _x && {_x isNotEqualTo _kosan}}) apply {_x distance2D _kosan};
             private _ozMin = if (_fseYakin isEqualTo []) then {-1} else {selectMin _fseYakin};
-            private _menzilOk = (_ozMin < 0) || {_ozMin > 307} || {(selectMin ((_fse select {alive _x && {_x isNotEqualTo _kosan}}) apply {_x distance2D _cp})) <= 307};
+            private _menzilOk = (_ozMin < 0) || {_ozMin > _owCap} || {(selectMin ((_fse select {alive _x && {_x isNotEqualTo _kosan}}) apply {_x distance2D _cp})) <= _owCap};
             if (_menzilOk && {(_mesafe - (_cp distance2D _hedef)) >= _kazMin} && {_atilim <= _atMax}) then {
                 private _n = (floor (_atilim / 5)) max 1;
                 private _a = 0;
@@ -503,7 +513,17 @@ if (EGVAR(main,debug_functions)) then {
                     _acik = _a;
                 };
             };
-        } forEach _cover;
+        } forEach _liste;
+        };
+        [_cover] call _secFn;
+        // v8.388 UZAK ADAY: yakin nesneler findCover'in 30 nesnelik sinirini doldurur, ilerideki siper hic aday olmaz -> hop kisa kalir. Hop < atMax x 0.5 ise hedefe dogru atMax x 0.7 ilerideki NOKTA merkezli ikinci arama.
+        if (_atMax >= 40 && {_hop < (_atMax * 0.5)}) then {
+            private _fMerkez = _kPos getPos [_atMax * 0.7, ((_kosan getDir _hedef) + _aci)];
+            if (!surfaceIsWater _fMerkez) then {
+                private _far = [_kosan, _hedef, (_atMax * 0.4) max 25, "ASCEND", 6, "ADVANCE", _fMerkez] call EFUNC(main,findCover);
+                if (_far isNotEqualTo []) then { [_far] call _secFn; };
+            };
+        };
 
         if (_movePos isEqualTo []) then {
             private _kayma = if (_aci isNotEqualTo 0) then {_aci} else {[-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2)};
@@ -549,12 +569,20 @@ if (EGVAR(main,debug_functions)) then {
     // FORMASYON ZORLAMA
     [_group, _bndToken] spawn {
         params ["_g", "_tok"];
+        private _zorlaN = 0;
+        private _zorlaT0 = time;
+        private _zorlaDur = 0;
         while {!isNull _g && {_g getVariable ["lambs_danger_isBounding", false]} && {(_g getVariable [QGVAR(bndToken), ""]) isEqualTo _tok}} do {
             private _df = _g getVariable ["lambs_danger_dangerFormation", ""];
             // Baski altinda (>= 0.4) formasyon ZORLANMAZ: gercek catismada esner, siper icin bozulur
             private _baskida = ((units _g) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
-            if (!_baskida && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df} && {(time - (_g getVariable ["lambs_danger_taktikFormT", -999])) > 25}) then {
-                [_g, _df, "bounding-zorla", 0, 6] call FUNC(formSet);
+            // v8.388 SALINIM SINIRI (RPT 17:30-17:33: motor / baska yazar formasyonu 6 sn'de bir WEDGE'e geri aliyor, 'bounding-zorla' STAG COLUMN'a geri atiyordu = askerler slot degistire degistire 2-3 m dur-kalk):
+            //   90 sn'de 3 zorlamadan sonra 60 sn zorlama birakilir (motorun formasyonu kabul edilir); aralik 6 -> 20 sn.
+            if (time > _zorlaDur && {(time - _zorlaT0) > 90}) then { _zorlaT0 = time; _zorlaN = 0; };
+            if (time > _zorlaDur && {!_baskida} && {_df isNotEqualTo ""} && {formation _g isNotEqualTo _df} && {(time - (_g getVariable ["lambs_danger_taktikFormT", -999])) > 25}) then {
+                [_g, _df, "bounding-zorla", 0, 20] call FUNC(formSet);
+                _zorlaN = _zorlaN + 1;
+                if (_zorlaN >= 3) then { _zorlaDur = time + 60; diag_log format ["[BND-FORM-SALINIM] %1 | formasyon 3 kez zorlandi (hedef %2, motor %3) -> 60 sn zorlama birakildi", groupId _g, _df, formation _g]; };
             };
             sleep 0.5;
         };
@@ -909,6 +937,7 @@ if (EGVAR(main,debug_functions)) then {
         // 2) HAREKET FAZI — kosanlar siperli ileri sicrama
         // -------------------------------------------------------------------
         private _hareketler = [];
+        { _x setVariable [QGVAR(bndBaskiYon), nil]; _x setVariable [QGVAR(bndBaskiDevam), nil]; } forEach _hareketEdecek;   // v8.388: hop basi baski yonlendirme bayraklari
         // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
         private _rotaAci = [_group, _target] call FUNC(rotaPlan);
         {
@@ -991,11 +1020,33 @@ if (EGVAR(main,debug_functions)) then {
                     _b setVariable [QGVAR(forceMove), nil];
                     _b setUnitPosWeak _s;
                 } else {
-                    // Baski >= 0.85: kosucu ezildi -> forceMove birakilir, FSM siper alir
-                    if (alive _b && {!(_b in _inen)} && {(getSuppression _b) >= 0.85}) then {
-                        _inen pushBack _b;
-                        _b setVariable [QGVAR(forceMove), nil];
-                        _b setUnitPosWeak "DOWN";
+                    // Baski >= 0.9: kosucu ezildi. v8.388 (kullanici: 'dur kalk yogun ates altinda cok oluyor'): eskiden 0.85'te HEMEN yerinde yatiyordu (hop'un 2-3 m'sinde, her cevrimde tekrar).
+                    //   Simdi: hedefe <= 15 m kaldiysa KOSMAYA DEVAM (forceMove kalir); uzaksa en yakin siper (18 m, SURVIVE) YENI hedef olur ve oraya kosar (atilim kisalir, durmaz);
+                    //   siper yoksa eskisi gibi yatar. Her kosucu icin hop basina en cok 1 yonlendirme.
+                    if (alive _b && {!(_b in _inen)} && {(getSuppression _b) >= 0.9}) then {
+                        if ((_b distance2D _p) <= 15) then {
+                            // kosmaya devam: yalniz bir kez bildir, ezilme sayilmaz
+                            if !(_b getVariable [QGVAR(bndBaskiDevam), false]) then { _b setVariable [QGVAR(bndBaskiDevam), true]; };
+                        } else {
+                            if (_b getVariable [QGVAR(bndBaskiYon), false]) then {
+                                _inen pushBack _b;
+                                _b setVariable [QGVAR(forceMove), nil];
+                                _b setUnitPosWeak "DOWN";
+                            } else {
+                                _b setVariable [QGVAR(bndBaskiYon), true];
+                                private _cvB = [_b, _target, 18, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
+                                if (_cvB isNotEqualTo [] && {((_cvB select 0) select 0) distance2D _b > 2.5}) then {
+                                    _x set [1, (_cvB select 0) select 0];
+                                    _x set [2, (_cvB select 0) select 1];
+                                    _b moveTo ((_cvB select 0) select 0);
+                                    diag_log format ["[BND-BASKI-YON] %1 | %2 | baski %3 -> %4 m'deki siper yeni hedef (hedefe %5 m kalmisti)", groupId _group, name _b, (getSuppression _b) toFixed 2, round (_b distance2D ((_cvB select 0) select 0)), round (_b distance2D _p)];
+                                } else {
+                                    _inen pushBack _b;
+                                    _b setVariable [QGVAR(forceMove), nil];
+                                    _b setUnitPosWeak "DOWN";
+                                };
+                            };
+                        };
                     };
                 };
             } forEach _hareketler;

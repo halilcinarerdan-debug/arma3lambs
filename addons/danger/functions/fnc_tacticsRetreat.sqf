@@ -97,7 +97,8 @@ private _suKontrol = {
 // MESAFEYE GORE SICRAMA BOYU (doktrin: yakin temasta kisa/hizli sicrama + sis, uzakta daha uzun):
 //   tehdit < 100 m : 20 m | 100-200 m : 30 m | > 200 m : 50 m  (kisa, hizli atilim; acikta uzun kosu olum)
 private _retAdim = [_group, "retreatAdim", [20, 30, 50]] call FUNC(dk);
-private _adimBoy = _retAdim select ([2, [1, 0] select (_cqbMesafe < 100)] select (_cqbMesafe < 200));
+// v8.388: geri cekilme adimi da CBA atilim carpaniyla uzar (en cok x1.5; baski altinda cok uzun kosu istenmez)
+private _adimBoy = (_retAdim select ([2, [1, 0] select (_cqbMesafe < 100)] select (_cqbMesafe < 200))) * ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 1.6]) max 1 min 1.5);
 // SIPER HEDEFLI SICRAMA (v7.38): her sicrama noktasi artik rastgele "acik nokta" degil, dusmandan GIZLI / dogal siperli (agac, kaya, cali, duvar) aday;
 //   - dusman -> nokta gorus hatti kesiliyorsa (+35)  : gercekten siper arkasi
 //   - 3 m'de agac / kaya / cali / duvar / siper varsa (+10)
@@ -378,7 +379,7 @@ if (EGVAR(main,debug_functions)) then {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
             {
                 private _b = _x select 0;
-                if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= 0.85}) then {
+                if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= 0.95}) then {
                     _pinned pushBack _b;
                     _b setVariable [QGVAR(forceMove), nil];
                     _b enableAI "AUTOCOMBAT";
@@ -391,7 +392,7 @@ if (EGVAR(main,debug_functions)) then {
             // Ezilen asker baski dusunce (< 0.5) kosuya geri doner
             {
                 private _b = _x select 0;
-                if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.5}) then {
+                if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.6}) then {
                     _pinned = _pinned - [_b];
                     _b enableAI "TARGET";
                     _b enableAI "AUTOTARGET";

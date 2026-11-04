@@ -1,23 +1,22 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * ATES HATTI KONTROLU — dost unsur ates hattindaysa aci degistir, capraz atesta kalma.
+ * ATES HATTI KONTROLU (v8.388 yeniden yazildi; kullanici: 'arkadasinin ates hattindan cekilsin botlar, kendilerine zarar verebiliyorlar, saga sola kaysinlar, MG oncelikli olsun; calisiyor mu, yeterince etkili mi')
  *
- * Yerel AI piyadeler icin 0.5 sn'de bir: hedefi olan (assignedTarget, yoksa 300 m'deki en yakin dusman) asker ile
- * hedef arasindaki 2B dogruya 1.6 m'den yakin, atici ile hedef arasinda (2 m .. mesafe-2 m) duran DOST varsa:
+ * TESPIT (v8.387 ve oncesi): fonksiyon VARSAYILAN KAPALIYDI (lambs_danger_fireLineOn = false; eski surum her hedefi olan askerde surekli yan adima yol aciyordu) VE bounding / geri cekilme / herhangi taktikte,
+ *   komutanda, baskidaki ya da hareket edendeki askerde hic calismiyordu -> asil carpisma aninda (bounding kapsama atesi) dost ates hattinda kalma KONTROLU YOKTU.
+ * YENI KURAL:
+ *   - TETIK: yalniz GERCEKTEN ates eden asker (son 1.5 sn'de ates etti: firedHub sonAtisT) -> yan adim yalniz tehlike varken (eskiden 'hedefi var' yeterliydi, bu yuzden felc oldu).
+ *   - TEHLIKE: atici ile hedef arasinda (2 m .. mesafe - 2 m) ates hattina 1.6 m'den yakin, +-40 derece icinde DOST var.
+ *   - KIM KAYAR: varsayilan HATTIN ICINDEKI DOST (ates edenin onunde duran) yana kayar (kendini kurtarir). ONCELIK: MG 3 > nisanci 2 > AT / tufekci / diger 0-1 — oncelik dusuk olan kayar:
+ *     engelleyen MG ise ya da atici MG'den dusuk oncelikliyse ATICI kayar; MG hic kimse icin yerini bozmaz, ama MG'nin hattindaki herkes kayar. Kayacak uygun degilse (kosucu forceMove, oyuncu, arac, bayginlik) digerine gecilir.
+ *   - ADIM: hatta DIK 3.5 m (olmazsa 5.5 m), bos / engelsiz nokta (1.3 m'de asker yok, hat gorus engeli yok, 0.9 m'de agac / duvar yok); komutan da kayabilir (atici ondan dusuk oncelikliyse atici kayar).
+ *     Kayan 20 sn tekrar kaymaz; ates edenin kendisi kayiyorsa yolda 2.5 sn ates kesilir (TARGET / AUTOTARGET kapali).
+ *   - BOUNDING / GERI CEKILME: kosucular (forceMove) hic kaydirilmaz; kapsama (duran) askerleri kayar. Baskidaki (>= 0.6) asker kaymaz (siperinde kalir).
+ * Kapatma: CBA 'Dost ates hatti' (lambs_danger_fireLineOn = false). Log: [ATES-HATTI] (ilk 60) + 60 sn ozeti [ATES-HATTI-OZET].
  *
- *   - Hareket eden = atici (MG / nisanci ise ENGELLEYEN dost; engelleyen kosuda ise atici).
- *   - Hareket eden, hatti ARTIK kesmeyen (yeni hatta dost yok) bos / engelsiz bir noktaya 4.5 m (olmazsa 7 m)
- *     hatta DIK yone adim atar; yolda ates kesilir (TARGET / AUTOTARGET kapali), 2.5 sn sonra geri acilir.
- *   - 4 sn bekleme suresi (titreme yok); forceMove'lu (baska taktigin kosucusu), el bombasi tepkisindeki,
- *     arac ve oyuncu atlanir.
- *
- * Arguments:
- * None
- *
- * Return Value:
- * Baslatildi mi <BOOL>
- *
+ * Arguments: None
+ * Return Value: Baslatildi mi <BOOL>
  * Public: No
 */
 
@@ -25,12 +24,19 @@ if (!isNil "lambs_danger_fireLineStarted") exitWith {false};
 lambs_danger_fireLineStarted = true;
 lambs_danger_flLogN = 0;
 
-diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degistir)";
+diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (v8.388: gercek atista tetik, hattin icindeki dost kayar, MG oncelikli, bounding kapsamasi dahil)";
 
 [] spawn {
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+    private _sayac = createHashMapFromArray [["tetik", 0], ["tehlike", 0], ["kayan_dost", 0], ["kayan_atici", 0], ["yer_yok", 0]];
+    private _ozetT = time + 60;
+    // oncelik: MG 3, MARKSMAN 2, diger 0
+    private _oncelik = {
+        params ["_u"];
+        switch ([_u] call _rolFn) do { case "MG": {3}; case "MARKSMAN": {2}; default {0} }
+    };
 
-    // Hat uzerinde dost var mi? [atici pozisyon, hedef pozisyon, atici, yoksayilan]
+    // Hat uzerinde dost var mi? [atici pozisyon, hedef pozisyon, atici]
     private _hatDost = {
         params ["_a", "_t", "_shooter"];
         private _d = _a distance2D _t;
@@ -52,6 +58,14 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
         _res
     };
 
+    // kayabilir mi?
+    private _kayabilir = {
+        params ["_u"];
+        alive _u && {local _u} && {!isPlayer _u} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])}
+        && {!(_u getVariable [QGVAR(forceMove), false])} && {time >= (_u getVariable [QGVAR(flLast), 0])} && {(getSuppression _u) < 0.6}
+        && {time >= (_u getVariable [QGVAR(tcccBusy), 0])} && {(_u getVariable [QGVAR(grState), []]) isEqualTo []}
+    };
+
     while {true} do {
         sleep 0.5;
 
@@ -64,28 +78,25 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
             };
         } forEach (allUnits select {local _x && {(_x getVariable [QGVAR(flUntil), 0]) > 0}});
 
+        if (time > _ozetT) then {
+            _ozetT = time + 60;
+            if ((_sayac get "tetik") > 0) then {
+                diag_log format ["[ATES-HATTI-OZET] 60 sn: atis tetigi %1 | tehlike (hatta dost) %2 | kayan DOST %3 | kayan ATICI %4 | yer bulunamadi %5", _sayac get "tetik", _sayac get "tehlike", _sayac get "kayan_dost", _sayac get "kayan_atici", _sayac get "yer_yok"];
+            };
+            { _sayac set [_x, 0]; } forEach (keys _sayac);
+        };
+        if !(missionNamespace getVariable ["lambs_danger_fireLineOn", true]) then { continue };
+
         {
             private _u = _x;
-            // VARSAYILAN KAPALI: RPT'de 13 kisilik grubun hemen herkesi temasta surekli yan adim atiyordu (formasyon / taktik felci). Motor zaten
-            // dost atesinden kacinir. Acmak icin: lambs_danger_fireLineOn = true
-            if (!(missionNamespace getVariable ["lambs_danger_fireLineOn", false])) then { continue };
-            if (time < (_u getVariable [QGVAR(flLast), 0])) then { continue };
-            if (_u getVariable [QGVAR(forceMove), false]) then { continue };
-            if ((_u getVariable [QGVAR(grState), []]) isNotEqualTo []) then { continue };
-            if (((group _u) getVariable [QGVAR(contact), 0]) < time) then { continue };
-            // FELC ONLEME: taktik (bounding / cekilme / temas kesme / herhangi taktik), komutan, baskida olan veya hareket halindeki asker
-            // yan adim ATMAZ (yan adim asil emri eziyor, takimi durduruyordu)
-            private _fg = group _u;
-            if (
-                (_fg getVariable [QGVAR(isBounding), false]) || {_fg getVariable [QGVAR(isExecutingTactic), false]}
-                || {_fg getVariable [QGVAR(isRetreating), false]} || {_fg getVariable [QGVAR(isBreakingContact), false]}
-                || {_u isEqualTo (leader _u)} || {(getSuppression _u) >= 0.25} || {(speed _u) > 2}
-            ) then { continue };
+            if (time < (_u getVariable [QGVAR(flBak), 0])) then { continue };
+            _u setVariable [QGVAR(flBak), time + 1];
+            _sayac set ["tetik", (_sayac get "tetik") + 1];
 
             private _t = assignedTarget _u;
             if (isNull _t || {!alive _t}) then {
                 _t = _u findNearestEnemy _u;
-                if (isNull _t || {(_u distance2D _t) > 300}) then { continue };
+                if (isNull _t || {(_u distance2D _t) > 400}) then { continue };
             };
             if ((_u distance2D _t) < 8) then { continue };
 
@@ -93,14 +104,18 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
             private _tPos = getPosATL _t;
             private _blk = [_aPos, _tPos, _u] call _hatDost;
             if (isNull _blk) then { continue };
+            _sayac set ["tehlike", (_sayac get "tehlike") + 1];
 
-            // kim hareket eder?
-            private _mover = _u;
-            private _rol = [_u] call _rolFn;
-            if (
-                (_rol in ["MG", "MARKSMAN"]) && {isNull objectParent _blk} && {isNull (_blk getVariable [QGVAR(flBlk), objNull])}
-                && {!(_blk getVariable [QGVAR(forceMove), false])} && {local _blk} && {!isPlayer _blk}
-            ) then { _mover = _blk; };
+            // KIM KAYAR: dusuk oncelikli (esitlikte hattin icindeki dost); uygun degilse digeri
+            private _pa = [_u] call _oncelik;
+            private _pb = [_blk] call _oncelik;
+            private _mover = if (_pa > _pb) then {_blk} else { if (_pb > _pa) then {_u} else {_blk} };
+            // komutan: MG olmayan atici komutanin onunden kayar; komutan dost ise atici kayar (formasyon bozulmasin)
+            if (_blk isEqualTo (leader _blk) && {_pa <= _pb}) then { _mover = _u; };
+            if !([_mover] call _kayabilir) then {
+                _mover = if (_mover isEqualTo _u) then {_blk} else {_u};
+                if !([_mover] call _kayabilir) then { continue };
+            };
 
             private _mPos = getPosATL _mover;
             private _dir = _aPos getDir _tPos;
@@ -116,35 +131,43 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (dost hatta ise aci degist
                         && {!(lineIntersects [AGLToASL (_mPos vectorAdd [0, 0, 0.9]), AGLToASL (_c vectorAdd [0, 0, 0.9]), _mover])}
                         && {(nearestTerrainObjects [_c, ["TREE", "WALL", "FENCE", "BUILDING", "HOUSE", "ROCK"], 0.9, false, true]) isEqualTo []}
                     ) then {
-                        // hareket eden atici ise yeni hatta dost kalmamali; engelleyen ise artik atici hattinda olmamali
+                        // yeni konum ates hattinin disinda olmali (dik adim 3.5 m > 1.6 m koridor)
                         private _temiz = if (_mover isEqualTo _u) then {
                             isNull ([_c, _tPos, _u] call _hatDost)
-                        } else {
-                            isNull ([_aPos, _tPos, _u] call _hatDost) || {true}
-                        };
+                        } else { true };
                         if (_temiz) then { _secildi = _c; };
                     };
                 } forEach (selectRandom [[90, -90], [-90, 90]]);
                 if (_secildi isNotEqualTo []) exitWith {};
-            } forEach [4.5, 7];
+            } forEach [3.5, 5.5];
 
             if (_secildi isNotEqualTo []) then {
-                _u setVariable [QGVAR(flLast), time + 20];
                 _mover setVariable [QGVAR(flLast), time + 20];
-                _mover setVariable [QGVAR(flUntil), time + 2.5];
+                _mover setVariable [QGVAR(taktikKilit), time + 5];
+                if (_mover isEqualTo _u) then {
+                    _mover setVariable [QGVAR(flUntil), time + 2.5];
+                    _mover disableAI "TARGET";
+                    _mover disableAI "AUTOTARGET";
+                    _sayac set ["kayan_atici", (_sayac get "kayan_atici") + 1];
+                } else {
+                    _sayac set ["kayan_dost", (_sayac get "kayan_dost") + 1];
+                };
                 _mover doMove _secildi;
-                if (lambs_danger_flLogN < 30) then {
+                if (lambs_danger_flLogN < 60) then {
                     lambs_danger_flLogN = lambs_danger_flLogN + 1;
                     diag_log format [
-                        "[ATES-HATTI] %1 | %2 -> hedef %3 m | hatta dost: %4 | hareket eden: %5 (%6 m yana)",
-                        groupId (group _u), name _u, round (_aPos distance2D _tPos), name _blk, name _mover, round (_mPos distance2D _secildi)
+                        "[ATES-HATTI] %1 | %2 (%3, oncelik %9) -> hedef %4 m | hatta dost: %5 (oncelik %10) | KAYAN: %6 (%7 m yana) | grup bounding:%8",
+                        groupId (group _u), name _u, [_u] call _rolFn, round (_aPos distance2D _tPos), name _blk, name _mover, round (_mPos distance2D _secildi),
+                        (group _u) getVariable [QGVAR(isBounding), false], _pa, _pb
                     ];
                 };
             } else {
-                _u setVariable [QGVAR(flLast), time + 8];
+                _sayac set ["yer_yok", (_sayac get "yer_yok") + 1];
+                _u setVariable [QGVAR(flBak), time + 6];
             };
         } forEach (allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            && {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 1.5}
         });
     };
 };

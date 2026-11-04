@@ -46,6 +46,8 @@
  * 3: Sort mode <STRING>, default "ASCEND" (aday toplama sirasi): ASCEND, DESCEND, RANDOM
  * 4: Max Results <Number>, default ELITE_COVER_MAX_RESULTS, -1 for all
  * 5: Mode <STRING>, default "DEFEND": "DEFEND" | "ADVANCE" | "OVERWATCH" | "EVADE" | "SURVIVE"
+ * 6: Arama MERKEZI (ATL pozisyon) <ARRAY>, default [] = askerin kendi konumu (v8.388: bounding UZAK ADAY araması: 'sicrama cok kisa, 2-3 m'de dur kalk' — yakin nesneler 30'luk siniri dolduruyordu, ilerideki siper hic aday olmuyordu).
+ *    Verilirse aday toplama, uzaklik maliyeti ve arazi kivrimi bu merkeze gore yapilir; modul pozisyonu, raycast yedegi ve rezerv defteri YAZILMAZ (yalniz oneri).
  *    SURVIVE: EN YAKIN sert siper (en az 1 yukseklikte mermi durduran engel), mesafe 0.9/m, uzaklasma bonusu / yaklasma cezasi 0.5/m (tek kalan asker / temas kesme)
  *
  * Return Value:
@@ -63,7 +65,8 @@ params [
     ["_range", ELITE_COVER_RANGE],
     ["_sortMode", "ASCEND", [""]],
     ["_maxResults", ELITE_COVER_MAX_RESULTS],
-    ["_mode", "DEFEND", [""]]
+    ["_mode", "DEFEND", [""]],
+    ["_orijin", [], [[]]]
 ];
 
 _maxResults = floor _maxResults;
@@ -77,7 +80,8 @@ private _dangerPos = _enemyPos vectorAdd [0, 0, 1.8];
 if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     _dangerPos = AGLToASL _dangerPos;
 
-    private _unitEnemyDist = _unit distance2D _enemyPos;
+    private _orijinPos = if (_orijin isEqualTo []) then { getPosATL _unit } else { +_orijin };   // v8.388
+    private _unitEnemyDist = _orijinPos distance2D _enemyPos;
     private _group = group _unit;
     private _simdi = time;
     private _evade = _mode isEqualTo "EVADE";
@@ -101,15 +105,15 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     // ---------------------------------------------------------------------
     // Mesafeye gore SIRALI; sert / yumusak AYRI kesilir (yogun bitkide en yakin 40 obje hep cali olup
     // arkadaki sert siperi (agac / bina / kaya / duvar) disarida birakmasin)
-    private _sert = nearestTerrainObjects [_unit, ["TREE", "HIDE", "BUILDING", "ROCK", "WALL"], _range, true, true];
-    private _yumusak = nearestTerrainObjects [_unit, ["BUSH", "SMALL TREE"], _range, true, true];
+    private _sert = nearestTerrainObjects [_orijinPos, ["TREE", "HIDE", "BUILDING", "ROCK", "WALL"], _range, true, true];
+    private _yumusak = nearestTerrainObjects [_orijinPos, ["BUSH", "SMALL TREE"], _range, true, true];
     _sert = _sert select [0, 30];
     _yumusak = _yumusak select [0, 10];
     private _terrainObjects = _sert + _yumusak;
-    private _uz = (getPosASL _unit) select 2;
+    private _uz = if (_orijin isEqualTo []) then { (getPosASL _unit) select 2 } else { (AGLToASL _orijinPos) select 2 };
 
     // Murettebatli (hareketli / dost) arac siper sayilmaz; "building" cift sayilmaz
-    private _vehicles = (nearestObjects [_unit, ["building", "Car"], _range]) select {
+    private _vehicles = (nearestObjects [_orijinPos, ["building", "Car"], _range]) select {
         !(_x in _terrainObjects)
         && {((crew _x) findIf {alive _x}) isEqualTo -1}
         && {alive _x} && {!(isBurning _x)}   // v8.182: enkaz / yanan arac siper sayilmaz
@@ -117,7 +121,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
 
     private _allObjs = [];
     if (_sortMode in ["ASCEND", "DESCEND"]) then {
-        _allObjs = [_terrainObjects + _vehicles, [], {_unit distance2D _x}, _sortMode] call BIS_fnc_sortBy;
+        _allObjs = [_terrainObjects + _vehicles, [], {_orijinPos distance2D _x}, _sortMode] call BIS_fnc_sortBy;
     } else {
         _allObjs = (_terrainObjects + _vehicles) call BIS_fnc_arrayShuffle;
     };
@@ -286,7 +290,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         } forEach _digerTehditler;
 
                         // Uzaklik maliyeti
-                        _skor = _skor - ((_unit distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}));
+                        _skor = _skor - ((_orijinPos distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}));
 
                         // Dusmana yaklasma: ADVANCE bonus, EVADE uzaklasma bonusu, digerleri ceza
                         private _yaklasma = _unitEnemyDist - _enemyDist;
@@ -353,7 +357,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     // Nesne siperinden belirgin ustun degilse nesne kazanir (taban 20, nesneler genelde daha yuksek).
     // ---------------------------------------------------------------------
     if (!_evade && {_unitEnemyDist >= 70} && {missionNamespace getVariable ["lambs_main_coverMikro", true]}) then {
-        private _upos = getPosATL _unit;
+        private _upos = _orijinPos;
         private _egoz = AGLToASL (_enemyPos vectorAdd [0, 0, 1.6]);
         private _atisM = _mode in ["DEFEND", "OVERWATCH", "ADVANCE"];
         {
@@ -381,7 +385,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
     //   Faz 2 (konum kaydirma / peek) modul adaylarina UYGULANMAZ: yerlestiren kisi pozisyonu kendisi secti. Modul yoksa / danger eklentisi yoksa hicbir sey yapmaz.
     // ---------------------------------------------------------------------
     private _cpPoslar = [];
-    if ((missionNamespace getVariable ["lambs_danger_cpListe", []]) isNotEqualTo []) then {
+    if (_orijin isEqualTo [] && {(missionNamespace getVariable ["lambs_danger_cpListe", []]) isNotEqualTo []}) then {
         private _cpAd = [_unit, _enemyPos, _dangerPos, _range, _mode, _minDist, _claims, _unitEnemyDist] call (missionNamespace getVariable ["lambs_danger_fnc_cpAday", {[]}]);
         if (_cpAd isNotEqualTo []) then {
             _adaylar append _cpAd;
@@ -585,14 +589,16 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
             };
         };
 
-        _claims pushBack [(_ret select 0) select 0, _simdi, _unit];
-        _group setVariable [QGVAR(coverClaims), _claims];
+        if (_orijin isEqualTo []) then {   // v8.388: uzak aday aramasi rezerv defterine yazmaz (secilmemis nokta baskasini itmesin)
+            _claims pushBack [(_ret select 0) select 0, _simdi, _unit];
+            _group setVariable [QGVAR(coverClaims), _claims];
+        };
     };
 };
 
 // v8.365 ELITE RAYCAST YEDEGI (fnc_eliteCover canlandirildi): findCover bos dondu ise (Zeus / Eden'de konan sandik, kum torbasi, bariyer, enkaz gibi HARITA DISI nesneler nearestTerrainObjects / building / Car listelerinde olmayabilir)
 //   askerin cevresi gercek mermi geometrisi (FIRE LOD) isinlariyla taranir. EVADE haric (zirhtan >= 40 m SERT siper ister). Kapatma: lambs_main_eliteCoverYedek = false. Rezerv defteri ortak.
-if (_ret isEqualTo [] && {_mode isNotEqualTo "EVADE"} && {_enemyPos isNotEqualTo [0, 0, 0]} && {missionNamespace getVariable ["lambs_main_eliteCoverYedek", true]}) then {
+if (_ret isEqualTo [] && {_orijin isEqualTo []} && {_mode isNotEqualTo "EVADE"} && {_enemyPos isNotEqualTo [0, 0, 0]} && {missionNamespace getVariable ["lambs_main_eliteCoverYedek", true]}) then {
     private _ec = missionNamespace getVariable ["lambs_danger_fnc_eliteCover", {[]}];
     _ret = [_unit, _enemy, ([_maxResults, 1] select (_maxResults isEqualTo -1)) max 1, _range] call _ec;
     if (_ret isNotEqualTo []) then {
