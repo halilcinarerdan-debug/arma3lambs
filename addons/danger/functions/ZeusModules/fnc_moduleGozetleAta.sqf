@@ -14,7 +14,7 @@ if (_activated && local _logic) then {
     private _isaretler = allMapMarkers select {(_x find "ELITE_KARAKOL_") isEqualTo 0};
     _isaretler = [_isaretler, [], {(markerPos _x) distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
     if (_isaretler isEqualTo []) exitWith { systemChat "[ELITE] Gozetleme Ata: haritada karakol / mevzi yok (once 'ELITE Karakol / Mevzi' modulu koyun)"; };
-    private _adlar = ["Atamayi KALDIR (nobeti bitir)"] + (_isaretler apply { format ["%1 [%2] (%3 m)", markerText _x, mapGridPosition (markerPos _x), round ((markerPos _x) distance2D _poz)] });
+    private _adlar = ["Atamayi KALDIR (nobeti bitir)"] + (_isaretler apply { format ["%1 [%2] (%3 m)", ([_x] call (missionNamespace getVariable ["lambs_danger_isaretAdi", {markerText (_this select 0)}])), mapGridPosition (markerPos _x), round ((markerPos _x) distance2D _poz)] });
     [
         "ELITE Gozetleme Ata",
         [

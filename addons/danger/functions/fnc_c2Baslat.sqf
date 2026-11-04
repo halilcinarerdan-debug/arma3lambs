@@ -29,6 +29,7 @@ diag_log format ["[C2-BOOT] ELITE C2 baslatildi (v8.391) | isServer=%1 hasInterf
 if (isServer) then {
     [] spawn {
         private _mrk = createHashMap;   // grup netId -> [isaret, son bildirim zamani]
+        private _mrkY = createHashMap;  // arac netId -> [isaret, son bildirim zamani] (v8.396 yakit talebi)
         while {true} do {
             sleep 20;
             if (!(missionNamespace getVariable ["lambs_danger_c2Aktif", true])) then { continue };
@@ -87,6 +88,47 @@ if (isServer) then {
                     };
                 } forEach allGroups;
             };
+            // v8.396 YAKIT TALEBI: AI surucu kara araci yakiti < CBA c2YakitEsik (varsayilan 0.25) ise 'C2_YAKIT_*' isareti + havadaki oyunculara bildirim (180 sn'de bir)
+            private _yakitAktif = [];
+            if (_taraflar isNotEqualTo [] && {missionNamespace getVariable ["lambs_danger_c2IkmalTalep", true]}) then {
+                private _yEsik = missionNamespace getVariable ["lambs_danger_c2YakitEsik", 0.25];
+                {
+                    private _av = _x;
+                    private _dr = driver _av;
+                    if (_av isKindOf "LandVehicle" && {alive _av} && {(fuel _av) < _yEsik} && {!isNull _dr} && {alive _dr} && {!isPlayer _dr} && {(side (group _dr)) in _taraflar}) then {
+                        private _vid = netId _av;
+                        _yakitAktif pushBack _vid;
+                        private _ky = _mrkY getOrDefault [_vid, []];
+                        private _ym = "";
+                        private _yson = -999;
+                        if (_ky isEqualTo []) then {
+                            _ym = createMarker [format ["C2_YAKIT_%1", (_vid splitString ":") joinString "_"], getPosATL _av];
+                            _ym setMarkerType "mil_box";
+                            _ym setMarkerColor "ColorYellow";
+                        } else {
+                            _ym = _ky select 0;
+                            _yson = _ky select 1;
+                        };
+                        _ym setMarkerPos (getPosATL _av);
+                        _ym setMarkerText format ["YAKIT %1%%: %2", round ((fuel _av) * 100), getText (configOf _av >> "displayName")];
+                        if ((time - _yson) > 180) then {
+                            _yson = time;
+                            private _yp = allPlayers select {(side (group _x)) isEqualTo (side (group _dr)) && {(vehicle _x) isKindOf "Air"}};
+                            if (_yp isNotEqualTo []) then {
+                                [format ["[C2] YAKIT TALEBI: %1 (%2%%) | GRID %3", getText (configOf _av >> "displayName"), round ((fuel _av) * 100), mapGridPosition _av]] remoteExecCall ["systemChat", _yp];
+                            };
+                            diag_log format ["[C2-IKMAL] yakit talebi | %1 | %2%% | GRID %3", getText (configOf _av >> "displayName"), round ((fuel _av) * 100), mapGridPosition _av];
+                        };
+                        _mrkY set [_vid, [_ym, _yson]];
+                    };
+                } forEach vehicles;
+            };
+            {
+                if !(_x in _yakitAktif) then {
+                    deleteMarker ((_mrkY get _x) select 0);
+                    _mrkY deleteAt _x;
+                };
+            } forEach (keys _mrkY);
             // artik talep etmeyen gruplarin isareti silinir
             {
                 if !(_x in _aktif) then {

@@ -2,7 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * ARAC TAKSISI (v8.129) — kullanici: "apc transport olsun ama genel kullanima acik olsun, taksi gibi; doktrin ne diyorsa".
- * Sunucuda 10 sn'de bir: yaya AI grubu uzak bir hedefe gidiyorsa (aktif waypoint > 1200 m) ve 600 m icinde bos bir kara araci varsa (APC / IFV / kamyon; aracin AI grubu tamamen icinde),
+ * Sunucuda 10 sn'de bir: yaya AI grubu uzak bir hedefe gidiyorsa (aktif waypoint > CBA taksiEsik, varsayilan 1200 m) ve CBA taksiMenzil (varsayilan 600 m) icinde bos bir kara araci varsa (APC / IFV / kamyon; aracin AI grubu tamamen icinde),
  * grup araca biner, arac hedefin 500 m oncesinde (M16 etkili menzili 460 m + pay; kitapta inis mesafesi sayisi YOK -> TASARIM) iner, grup yuruyerek hedefine devam eder; arac biniş noktasina doner.
  * Alinmaz: temasta (son 60 sn), taktik / geri cekilme / medevac / plan icindeki, <2 asker, oyuncu iceren, plan waypoint'i ("ELITE PLAN:"), hedef 1200 m'den yakin, 180 sn icinde tasinmis gruplar.
  * Sinirlama: ayni anda en fazla 2 taksi gorevi (sunucu yuku). Kapatma: lambs_danger_taksiOff = true.  Log: [TAKSI] (+ [TASIMA]).
@@ -93,15 +93,15 @@ private _calis = {
             if (((waypointName _w) find "ELITE PLAN:") isEqualTo 0) then { continue };
             if !((waypointType _w) in ["MOVE", "SAD", "SCRIPTED", "GUARD", "DESTROY", "GETOUT"]) then { continue };
             private _wp = waypointPosition _w;
-            if (_wp isEqualTo [0,0,0] || {(_l distance2D _wp) < 1200}) then { continue };
+            if (_wp isEqualTo [0,0,0] || {(_l distance2D _wp) < (missionNamespace getVariable ["lambs_danger_taksiEsik", 1200])}) then { continue };
             _g setVariable [QGVAR(taksiT), time];
             private _B = _wp getDir (getPosATL _l);
             if (_logN < 60) then {
                 _logN = _logN + 1;
-                diag_log format ["[TAKSI] %1 (%2 asker) | hedefe %3 m -> arac araniyor (600 m icinde)", groupId _g, count _us, round (_l distance2D _wp)];
+                diag_log format ["[TAKSI] %1 (%2 asker) | hedefe %3 m -> arac araniyor (%4 m icinde)", groupId _g, count _us, round (_l distance2D _wp), missionNamespace getVariable ["lambs_danger_taksiMenzil", 600]];
             };
             missionNamespace setVariable ["lambs_danger_taksiAdim", format ["grup %1", groupId _g]];
-            _isler pushBack ([side _g, [_g], getPosATL _l, _wp, _B, 0, 600] spawn _tasFn);
+            _isler pushBack ([side _g, [_g], getPosATL _l, _wp, _B, 0, (missionNamespace getVariable ["lambs_danger_taksiMenzil", 600])] spawn _tasFn);
         } forEach allGroups;
     };
 };

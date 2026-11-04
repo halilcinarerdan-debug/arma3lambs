@@ -15,6 +15,32 @@
 if (!isNil "lambs_danger_planKapiStarted") exitWith {false};
 lambs_danger_planKapiStarted = true;
 
+// v8.396 ISARET YAZISI CAKISMASI (kullanici: 'karakol yazisi ust uste biniyor'): otomatik garnizon bolgeleri (KARAKOL / MEVZI / GOZLETME) ve HQ isaretleri birbirine 100-300 m yakin; her birinin
+//   'KARAKOL (120 m)' gibi uzun yazisi haritada binisiyordu. Artik yazi KISA (yaricap yazilmaz: KALDIR paneli / Zeus listesi gosterir) ve 150 m icinde yazili baska bir ELITE karakol / mevzi / HQ isareti varsa
+//   yeni isaret YAZISIZ (yalniz ikon: bayrak = karakol, ucgen = mevzi, nokta = gozletme, HQ simgesi) olur. Zeus listeleri yazisiz isaretin adini ikon turunden turetir (lambs_danger_isaretAdi).
+lambs_danger_isaretMetin = {
+    params ["_mn", "_metin"];
+    private _p = markerPos _mn;
+    private _yakinVar = (allMapMarkers findIf {
+        _x isNotEqualTo _mn && {((_x find "ELITE_KARAKOL_") isEqualTo 0) || {(_x find "ELITE_HQ_") isEqualTo 0} || {(_x find "ELITE_MEVZI_") isEqualTo 0}}
+        && {(markerText _x) isNotEqualTo ""} && {((markerPos _x) distance2D _p) < 150}
+    }) >= 0;
+    if (_yakinVar) then {""} else {_metin}
+};
+lambs_danger_isaretAdi = {
+    params ["_m"];
+    private _t = markerText _m;
+    if (_t isNotEqualTo "") then {_t} else {
+        switch (markerType _m) do {
+            case "mil_flag": {"KARAKOL"};
+            case "mil_triangle": {"MEVZI"};
+            case "mil_dot": {"GOZETLEME"};
+            case "b_hq": {"HQ"};
+            default {_m};
+        }
+    }
+};
+
 ["lambs_danger_planIstegi", {
     params ["_taraf", "_obj", "_ayarCiftler"];
     if (!isServer) exitWith {};
@@ -79,7 +105,7 @@ lambs_danger_planKapiStarted = true;
             createMarker [_mn, _poz];
             _mn setMarkerType "mil_triangle";
             _mn setMarkerColor (switch (_taraf) do { case west: {"ColorBLUFOR"}; case east: {"ColorOPFOR"}; default {"ColorIndependent"} });
-            _mn setMarkerText format ["MEVZI %1", count _liste + 1];
+            _mn setMarkerText ([_mn, "MEVZI"] call lambs_danger_isaretMetin);
             if (_yon >= 0) then { _mn setMarkerDir _yon; };
             _liste pushBack [+_poz, _yon, _mn];
         };
@@ -170,7 +196,7 @@ if (isNil "lambs_danger_karakollar") then { lambs_danger_karakollar = []; };
     createMarker [_mn, _poz];
     _mn setMarkerType (["mil_flag", "mil_triangle", "mil_dot"] select (_adI max 0 min 2));
     _mn setMarkerColor (switch (_taraf) do { case west: {"ColorBLUFOR"}; case east: {"ColorOPFOR"}; default {"ColorIndependent"} });
-    _mn setMarkerText format ["%1 (%2 m)", _ad, _yar];
+    _mn setMarkerText ([_mn, _ad] call lambs_danger_isaretMetin);
     private _kayit = [_taraf, _poz, _yar, _ad, _sav, _mn, false];
     lambs_danger_karakollar pushBack _kayit;
     diag_log format ["[KARAKOL] %1 | %2 | %3 | yaricap %4 m | savunma %5", _taraf, _ad, mapGridPosition _poz, _yar, ["YOK", "HEMEN", "ALARM"] select (_sav min 2)];
@@ -208,7 +234,7 @@ lambs_danger_hqYayinla = {
     createMarker [_mn, _poz];
     _mn setMarkerType (["b_hq", "b_hq", "b_hq", "mil_flag"] select (_katI max 0 min 3));
     _mn setMarkerColor (switch (_taraf) do { case west: {"ColorBLUFOR"}; case east: {"ColorOPFOR"}; default {"ColorIndependent"} });
-    _mn setMarkerText format ["%1 (%2 m)", _kat, _yar];
+    _mn setMarkerText ([_mn, _kat] call lambs_danger_isaretMetin);
     lambs_danger_hqlar pushBack [_id, _taraf, +_poz, _kat, round _yar, _mn];
     call lambs_danger_hqYayinla;
     diag_log format ["[HQ-NOKTA] %1 KURULDU / GUNCELLENDI | %2 | %3 | yaricap %4 m | atanmis squad %5", _id, _taraf, mapGridPosition _poz, round _yar, {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _id} count allGroups];
