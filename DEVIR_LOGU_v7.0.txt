@@ -3197,3 +3197,8 @@ v8.400 AKILLI / PLANLI DEVRIYE + DEVRIYE AGI + IHA NEDENI + MODUL SADELESTIRME (
  - HATA DUZELTME (v8.398-399 Zeus): garnizon panelinde _data parametre sirasi liste sirasiyla uyusmuyordu (devriye mesafesi / AA / IHA ayarlari kayiyordu: panel sirasi secim, AA, IHA, IHA yaricap, IHA sure, devriye mesafesi; kod secim, devriye mesafesi, AA, IHA ...). fnc_garnizonPanel dogru sirayla okur. 3DEN yolu etkilenmemisti.
  - Hazir ayarlar: Hafif 2 nobetci + 1x2 devriye; Standart 4 + 2x3 + arac; Guclu 6 + 3x3 + arac + AA + IHA alarmda.
  - NOT: oyun icinde dogrulanmadi. Aranacaklar: [KARAKOL-DEVRIYE] 'PLANA ALINDI' / 'TUR BASLADI sektor N ... diger devriyeler' / 'TUR BITTI', [KARAKOL-DEVRIYE-HABER] 'temas bildirdi' / 'DESTEGE gonderildi', [KARAKOL-GARNIZON] 'OTOMATIK karakol kuruldu', IHA 'BASLADI' ya da 'IHA durumu: ...[neden]'.
+
+v8.401 KARAKOL MODULUNE SYNC (kullanici: 'ihayi ve garnizon ekibini karakola sync ediyorum'). Oyunda DENENMEDI.
+ - Oncesi: 3DEN 'ELITE Karakol / Mevzi' modulune SYNC edilen IHA yok sayiliyordu ve IHA murettebati 'baglanan grup' olarak SAVUNMA planina girebiliyordu; SYNC'li askerler yalniz savunma squad'i olurdu.
+ - Simdi: IHA savunma grubu sayilmaz. 'Garnizon hazir ayar' (Hafif / Standart / Guclu) secilmisse SYNC'li IHA garnizonun IHA'si olur (mod 'Yok' ise Surekli); Savunma 'HEMEN' DEGILSE SYNC'li askerlerin takimlari garnizon havuzu olur (HEMEN'de takimlar savunma squad'i, garnizon yaricap havuzundan). Log: '[EDEN] Karakol (3DEN) hazir garnizon ... baglanan IHA N | garnizon takimi M'.
+ - SINIR: yalniz IHA SYNC'li ve taraf 'Otomatik' ise taraf BLUFOR varsayilir (taraf elle secilmeli).

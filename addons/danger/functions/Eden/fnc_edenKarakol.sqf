@@ -15,6 +15,10 @@ if (!_activated || {!isServer}) exitWith {};
     params ["_logic"];
     if !(["BEKLE"] call FUNC(edenOrtak)) exitWith { diag_log "[EDEN] Karakol: ELITE hazir olmadi (180 sn)" };
     private _gruplar = ["GRUPLAR", [_logic]] call FUNC(edenOrtak);
+    // v8.401: SYNC'li IHA'lar savunma grubu sayilmaz (IHA murettebati plana girmesin); hazir garnizon secilmisse garnizonun IHA'si olur
+    private _ihaObj = (["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x};
+    private _ihaGrp = _ihaObj apply {group (effectiveCommander _x)};
+    _gruplar = _gruplar select {!(_x in _ihaGrp)};
     private _taraf = ["TARAF", [_logic, "lambs_danger_edKarTaraf", _gruplar]] call FUNC(edenOrtak);
     private _adI = (round (["SAYI", [_logic, "lambs_danger_edKarAd", 0]] call FUNC(edenOrtak))) max 0 min 2;
     private _yar = round (["SAYI", [_logic, "lambs_danger_edKarYar", 120]] call FUNC(edenOrtak));
@@ -32,8 +36,12 @@ if (!_activated || {!isServer}) exitWith {};
     private _gh = [_garHazir] call FUNC(garnizonHazir);
     if (_gh isNotEqualTo []) then {
         _gh params ["_gN", "_gD", "_gB", "_gU", "_gA", "_gAA", "_gI"];
-        ["lambs_danger_garnizonIstegi", [_poz, 0, _gN, _gD, _gB, _gU, _gA, [], 0, [], [_gI, 0, 0, []], _gAA]] call CBA_fnc_serverEvent;
-        diag_log format ["[EDEN] Karakol (3DEN) hazir garnizon %1: nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | AA %7 | IHA mod %8", ["", "hafif", "standart", "guclu"] select _garHazir, _gN, _gD, _gB, _gU, _gA, _gAA, _gI];
+        // v8.401: hazir garnizon SYNC'li IHA'yi (mod 'Yok' ise Surekli) ve - Savunma 'HEMEN' DEGILSE - SYNC'li askerlerin takimlarini garnizon havuzu yapar (HEMEN'de takimlar savunma plani squad'i olur)
+        private _gT = [];
+        if (_sav isNotEqualTo 1) then { _gT = _secili; };
+        if (_ihaObj isNotEqualTo [] && {_gI isEqualTo 0}) then { _gI = 1; };
+        ["lambs_danger_garnizonIstegi", [_poz, 0, _gN, _gD, _gB, _gU, _gA, [], 0, _gT, [_gI, 0, 0, _ihaObj apply {netId _x}], _gAA]] call CBA_fnc_serverEvent;
+        diag_log format ["[EDEN] Karakol (3DEN) hazir garnizon %1: nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | AA %7 | IHA mod %8 (baglanan IHA %9) | garnizon takimi %10", ["", "hafif", "standart", "guclu"] select _garHazir, _gN, _gD, _gB, _gU, _gA, _gAA, _gI, count _ihaObj, count _gT];
     };
     diag_log format ["[EDEN] Karakol (3DEN) | %1 | %2 | %3 m | savunma %4 | baglanan grup %5 (%6)", _taraf, mapGridPosition _poz, _yar, ["YOK", "HEMEN", "ALARM"] select _sav, count _secili, ["otomatik grup", "elle secilmis"] select _elle];
 };
