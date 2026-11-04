@@ -227,6 +227,25 @@ class CfgVehicles {
         };
     };
 
+    // ELITE fork (v8.404): fazli harekat kontrolu (Basla / Sonraki faz / Durdur / Durum)
+    class GVAR(HarekatKontrol) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(HarekatKontrol);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Harekat Kontrol (basla / faz / durdur)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\map_ca.paa";
+        function = QFUNC(moduleHarekatKontrol);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     // ELITE fork (v8.239): AI surucu A/B testi - ayni arac sinifi, temiz murettebat, ELITE kapali / acik, doMove / waypoint, yolcusuz / yolcuyla
     class GVAR(SurusAB) : Module_F {
         author = "ELITE fork";

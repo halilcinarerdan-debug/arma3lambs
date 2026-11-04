@@ -302,3 +302,5 @@ Konu özeti (kapatma anahtarı / CBA ayarı ilgili maddede):
 - Oda / bina temizleme + el bombası kullanımı yeniden yazımı (en sona bırakıldı).
 - Kalıcı senaryo ("Bakhmut-lite": kayıt / yükleme, bot kimliği, performans ölçekleme, komutan zekâsı).
 - Mekanize taktikleri (araç ateş desteği, ineceği nokta), moral → davranış katmanı.
+
+- **v8.404 HAREKAT KATMANI** (3DEN 'ELITE Harekat' + Objektif 'Harekat fazi'; Zeus 'ELITE Harekat Kontrol'): fazli harekat (H-saati, faz gecisi, toparlanma, sure siniri); oyuncuya ARMA GOREVI + taslak OPORD + rol gorevi; bot komutasinda oynayis (lideri bot olan oyunculu grup ELITE altinda). ELITE C2 oyuncu komuta menusu kaldirildi (oyuncu tarafi TC2). Ayrinti: DEVIR_LOGU_v7.0.txt v8.404.

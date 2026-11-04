@@ -45,8 +45,11 @@ lambs_danger_ihaGozlemStarted = true;
             private _mur = (crew _u) select {alive _x && {!isPlayer _x}};
             if (_mur isEqualTo [] || {({isPlayer _x} count (crew _u)) > 0}) then { continue };
             private _taraf = side (group (_mur select 0));
-            private _tg = (_u nearTargets 1500) select {
-                (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_u distance (_x select 4)) <= (1500 * ([_u, _x select 4] call lambs_danger_fnc_ihaGorus))} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
+            // v8.404 IRTIFA DUZELTMESI (v8.402 regresyonu: Ucak IHA irtifasi 400 -> 1200 m yapilinca 3B mesafe 1200 m'yi hep asiyor, dron hic hedef gormuyordu -> dron gozlemli topcu / FO / ortak resim bos kalirdi):
+            //   yer yaricapi YATAY mesafe (distance2D) ile olculur; nearTargets yaricapi irtifa kadar genisletilir (3B). Boylece kapsama alani irtifadan bagimsiz (eskisi gibi 1500 / 1200 m yatay).
+            private _alt = (getPosATL _u) select 2;
+            private _tg = (_u nearTargets (1500 + _alt)) select {
+                (_x select 4) isNotEqualTo objNull && {alive (_x select 4)} && {(_x select 5) >= 0.3} && {(_taraf getFriend (_x select 2)) < 0.6} && {(_u distance2D (_x select 4)) <= (1500 * ([_u, _x select 4] call lambs_danger_fnc_ihaGorus))} && {((_x select 4) isKindOf "CAManBase" || {(_x select 4) isKindOf "LandVehicle"})}
             };
             // v8.345 KAMERA TARAMASI (kullanici: 'dron hic iyi spotlayamiyor'; RPT 01-19: gozlem dronu 3 dk boyunca hep '1 hedef goruldu'): AI IHA muretttebatinin kendi algisi (nearTargets) zayif. Dronun kamerasi gibi,
             //   1200 m icindeki DUSMANI gorus hatti (arazi + nesne) ACIKSA ve fnc_ihaGorus katsayili menzil icindeyse (gunduz 1200 m, gece termalsiz ~300 m, sis / yagmur / kamuflaj / yatik azaltir) tarama basina %60 ihtimalle gorur.
@@ -68,7 +71,7 @@ lambs_danger_ihaGozlemStarted = true;
                 {
                     if ((count _tg) < 24 && {random 1 < 0.6}) then {
                         private _hp = (getPosASL _x) vectorAdd [0, 0, 1.2];
-                        if ((_u distance _x) <= (1200 * ([_u, _x] call lambs_danger_fnc_ihaGorus)) && {!(terrainIntersectASL [_gozU, _hp])} && {!(lineIntersects [_gozU, _hp, _u, _x])}) then {
+                        if ((_u distance2D _x) <= (1200 * ([_u, _x] call lambs_danger_fnc_ihaGorus)) && {!(terrainIntersectASL [_gozU, _hp])} && {!(lineIntersects [_gozU, _hp, _u, _x])}) then {
                             _tg pushBack [getPosATL _x, "", _taraf, 0, _x, 1];
                         };
                     };

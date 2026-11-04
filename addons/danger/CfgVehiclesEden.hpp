@@ -6,6 +6,7 @@
 #define E_COMBO(ADI,DISP,TIP,DEF,VALS) class ADI: Combo { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "NUMBER"; defaultValue = DEF; class Values { VALS }; };
 #define E_V(N,AD) class V##N { name = AD; value = N; };
 #define E_NUM(ADI,DISP,TIP,DEF) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "NUMBER"; defaultValue = DEF; validate = "number"; };
+#define E_TXT(ADI,DISP,TIP) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "STRING"; defaultValue = """"""; };
 #define E_BOOL(ADI,DISP,TIP,DEF) class ADI: Checkbox { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "BOOL"; defaultValue = DEF; };
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,6 +116,8 @@ class GVAR(EdenObjektif): Module_F {
         E_COMBO(edObRecon,"Recon ek gozlem","Evet: recon dusman noktalarini da gizlice gozlemler. Gorev Ata ile RECON grubu gerekir.","0",E_V(0,"Hayir") E_V(1,"Evet gizlice incele"))
         E_COMBO(edObTut,"Ele gecirileni tut zincir","Zincirde ele gecirilen objektifte squad birakilir.","1",E_V(0,"Hayir hepsi ilerler") E_V(1,"Evet 1 squad birak") E_V(2,"Evet 2 squad birak"))
         E_COMBO(edObDron,"Dron operatoru avi","Dusman dronu cok kez gorulunce operator bolgesine devriye.","0",E_V(0,"CBA ayarina uy") E_V(1,"Hayir") E_V(2,"3 kisi yaya") E_V(3,"4 kisi yaya") E_V(4,"3 kisi hafif arac") E_V(5,"4 kisi hafif arac"))
+        E_COMBO(edObFaz,"Harekat fazi","v8.404: yalniz bu modul bir ELITE Harekat modulune SYNC'liyse anlamli. Ayni fazin objektifleri birlikte baslar; faz bitince (planlar BITTI) siradaki faz. Harekat modulu yoksa etkisiz (plan hemen kurulur).","1",E_V(1,"Faz 1") E_V(2,"Faz 2") E_V(3,"Faz 3") E_V(4,"Faz 4") E_V(5,"Faz 5") E_V(6,"Faz 6"))
+        E_TXT(edObAd,"Objektif adi (harekat gorevi)","Gorevlerde ve haritada gorunen ad (bos = grid).")
         E_COMBO(edObOtoGar,"Otomatik mevzi garnizon bolgeleri","Arazi analizi ile karakol mevzi gozletme bolgeleri.","0",E_V(0,"Hayir") E_V(1,"Evet") E_V(2,"Evet guclu"))
         class ModuleDescription: ModuleDescription {};
     };
@@ -126,6 +129,42 @@ class GVAR(EdenObjektif): Module_F {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 // 4) GOREV ATA - baglanan grup / arac / askere gorev yazar
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
+class GVAR(EdenHarekat): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenHarekat);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE Harekat - fazli harekat (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\map_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenHarekat);
+    functionPriority = 0;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        class edHrAd: Edit { property = QGVAR(edHrAd); displayName = "Harekat adi"; tooltip = "Gorevde ve OPORD'da gorunur."; expression = "_this setVariable ['%s',_value];"; typeName = "STRING"; defaultValue = """Harekat"""; };
+        E_COMBO(edHrTaraf,"Taraf","Otomatik: baglanan Objektif modullerinin / gruplarinin tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
+        E_TXT(edHrNiyet,"Komutanin niyeti","OPORD 3. paragraf: ne icin, nasil bir son durum (kisa).")
+        E_TXT(edHrDusman,"Dusman durumu (istihbarat)","OPORD 1. paragraf: oyunculara bildirilen dusman bilgisi (yalniz yazdiginiz kadari gosterilir).")
+        E_COMBO(edHrBasla,"H-saati","Harekat bildiriminden (OPORD) sonra otomatik baslama; Elle = Zeus ELITE Harekat Kontrol modulu.","0",E_V(0,"Hemen (25 sn)") E_V(1,"5 dk") E_V(2,"10 dk") E_V(3,"15 dk") E_V(4,"30 dk") E_V(5,"Elle (Zeus)"))
+        E_COMBO(edHrBekle,"Faz arasi toparlanma","Bir faz bitince siradaki fazdan once beklenecek sure (toparlanma / yeniden tertiplenme).","0",E_V(0,"Yok") E_V(1,"2 dk") E_V(2,"5 dk") E_V(3,"10 dk"))
+        E_COMBO(edHrFazSure,"Faz sure siniri","Faz bu surede bitmezse bitmeyen objektifler SURE sayilir.","0",E_V(0,"Sinirsiz") E_V(1,"15 dk") E_V(2,"30 dk") E_V(3,"45 dk") E_V(4,"1 saat") E_V(5,"2 saat"))
+        E_COMBO(edHrSureAsimi,"Sure asilirsa","Faz sure siniri asilinca ne olsun.","0",E_V(0,"Sonraki faza gec") E_V(1,"Harekat basarisiz biter"))
+        E_COMBO(edHrBasarisiz,"Basarisiz faz sonrasi","Fazin hic objektifi alinamazsa.","1",E_V(0,"Harekat sonlansin") E_V(1,"Sonraki faza devam"))
+        E_TXT(edHrFaz1,"Faz 1 adi","Bos = Faz 1.")
+        E_TXT(edHrFaz2,"Faz 2 adi","")
+        E_TXT(edHrFaz3,"Faz 3 adi","")
+        E_TXT(edHrFaz4,"Faz 4 adi","")
+        E_TXT(edHrFaz5,"Faz 5 adi","")
+        E_TXT(edHrFaz6,"Faz 6 adi","")
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "Fazli harekat (Zeytin Dali / Firat Kalkani tarzi). ELITE Objektif modullerini bu module SYNC edin ve her birinde Harekat fazi secin. Harekat OPORD'u oyunculara ARMA GOREVI olarak duser; oyunculu gruplara rol gorevi yazilir. Oyuncu katilimi zorunlu degil.";
+    };
+};
+
 class GVAR(EdenGorevAta): Module_F {
     author = "ELITE fork";
     _generalMacro = QGVAR(EdenGorevAta);

@@ -9,7 +9,7 @@
  * KOMUTAN: katilan gruplar arasinda en yuksek rutbeli lider (esitlikte buyuk grup); >= 3 grupta komutan destek noktasinda (gorus). Roller: DESTEK (MG / AT / nisanci puani en yuksek), MANEVRA, YEDEK.
  * DUSMAN BILGISI (Zeus): piyade / zirh / AT / MG / nisanci / bina + sayi. Kullanim: destek puani (MG, AT [zirh varsa x3]), kanat gerekliligi (MG, bina veya sayi >= 8), loglanan uyarilar (zirh var + AT'li grup yok). HILE YOK: gizli konum okunmaz.
  * CIKTI: gercek waypoint (addWaypoint; "ELITE PLAN: ..." adli; Zeus'ta gorunur ve degistirilebilir) + harita isaretleri (ELITE_PLAN_*). Zeus'un elle koydugu waypoint SILINMEZ (yalniz kendi waypoint'lerimiz).
- * v8.392: oyuncu komutasindaki (lambs_danger_oyuncuKomuta = true: Zeus 'OYUNCU' / ELITE C2 emri) gruplar plana ALINMAZ (tek sahip: ya plan ya oyuncu); C2 menusunden 'Objektif' bu fonksiyonu cagirir (fnc_c2Objektif).
+ * v8.392: oyuncu komutasindaki (lambs_danger_oyuncuKomuta = true: Zeus 'OYUNCU') gruplar plana ALINMAZ (tek sahip: ya plan ya oyuncu). v8.404: ELITE C2 menusu kaldirildi (oyuncu tarafi TC2); lideri BOT olan oyunculu grup plana ALINIR (bot komutasinda oynayis).
  * Temas: grup temastaysa plan o grubu zorlamaz (LAMBS / komutan beyni yonetir); temas kesilince plan devam eder.
  * Kapatma: lambs_danger_komutanPlanOff = true.  Log: [PLAN] (KURULDU / FAZ / ROL / BITTI / IPTAL).
  *
@@ -259,7 +259,7 @@ if (_aday isEqualTo []) exitWith {
             else {if (_n < 3) then {"3'ten az saglam asker"}
             else {if (_x getVariable ["lambs_danger_tarafKapali", false]) then {"ELITE bu taraf icin kapali"}
             else {if (_x getVariable ["lambs_danger_planAktif", false]) then {"baska planda"}
-            else {if (_x getVariable ["lambs_danger_oyuncuKomuta", false]) then {"oyuncu komutasinda (C2 emri; SERBEST birakin)"}
+            else {if (_x getVariable ["lambs_danger_oyuncuKomuta", false]) then {"oyuncu komutasinda (Zeus OYUNCU; serbest birakin)"}
             else {if (!isNull objectParent _l) then {"lider aracta"}
             else {if ((_l distance2D _obj) > (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])) then {format ["objektife > %1 m (CBA planMesafe)", round (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])]} else {"?"}}}}}}}}}};
         _red set [_neden, (_red getOrDefault [_neden, 0]) + 1];

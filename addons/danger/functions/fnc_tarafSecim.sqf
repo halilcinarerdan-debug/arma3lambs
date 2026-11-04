@@ -46,7 +46,13 @@ private _calis = {
             // v8.151 OYUNCU KOMUTASI: grupta oyuncu varsa (otomatik, lambs_danger_oyuncuKomutaOtomatik=false ile kapanir) ya da Zeus 'OYUNCU KOMUTASI' dediyse grup
             // taraf kapali gibi LAMBS FSM + karar izleyicilerinden cikar (ELITE'in taktik beyni oyuncunun AI'sina kontrol vermez); TCCC / cephane / IED / ezme / murettebat acik kalir
             private _om = _g getVariable QGVAR(oyuncuKomuta);
-            private _oyuncuK = if (isNil "_om") then { (missionNamespace getVariable ["lambs_danger_oyuncuKomutaOtomatik", true]) && {((units _g) findIf {isPlayer _x}) >= 0} } else { _om };
+            // v8.404 BOT KOMUTASINDA OYNAYIS (kullanici: 'bot komutasinda oynayis istiyorum'): otomatik oyuncu komutasi YALNIZ grup LIDERI oyuncuysa; lideri BOT olan grupta oyuncu ast olarak oynar,
+            //   ELITE taktik beyni + komutan plani grubu yonetmeye devam eder (oyuncunun kendi birimi zaten betiklerce yonetilmez). Eski davranis (grupta herhangi oyuncu): lambs_danger_oyuncuKomutaHerOyuncu = true.
+            private _oyuncuK = if (isNil "_om") then {
+                (missionNamespace getVariable ["lambs_danger_oyuncuKomutaOtomatik", true]) && {
+                    if (missionNamespace getVariable ["lambs_danger_oyuncuKomutaHerOyuncu", false]) then { ((units _g) findIf {isPlayer _x}) >= 0 } else { isPlayer (leader _g) }
+                }
+            } else { _om };
             _g setVariable [QGVAR(oyuncuKomutaAktif), _oyuncuK && _aktif];
             if (_oyuncuK isNotEqualTo (_g getVariable [QGVAR(oyuncuLog), false])) then {
                 _g setVariable [QGVAR(oyuncuLog), _oyuncuK];

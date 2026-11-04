@@ -5,6 +5,7 @@
  *   SYNC: (1) ELITE HQ / US (3DEN) modulu -> plan o HQ dan baslar (ele gecir icin zorunlu); (2) gruplar / askerler / araclar -> 'Grup secimi = Bagli gruplar' ise plan YALNIZ bunlari kullanir (elle secim, mesafe siniri yok).
  *   HQ modulu baglanmamis, ele gecir ve bagli grup varsa: bagli gruplar icin otomatik bir HQ kurulur (ilk bos kategori HQ1..HQ3, ilk grubun konumu). Tum HQ modlari icin HQ modulu gerekir.
  *   Mission basladiktan sonra 'Kurulum gecikmesi' sn bekler (varsayilan 10). Red nedeni RPT [PLAN-KAPI] / [PLAN] ve [EDEN] satirlarinda.
+ * v8.404: 'ELITE Harekat' modulune SYNC'liyse plan harekat fazina kaydedilir ('Harekat fazi' niteligi), hemen kurulmaz.
  * Arguments: 0: modul <OBJECT>, 1: baglananlar (kullanilmaz), 2: etkin <BOOL>
  * Return Value: None
  * Public: No
@@ -105,6 +106,17 @@ if (!_activated || {!isServer}) exitWith {};
     if (_secimModu isEqualTo 1) then {
         _ayar set ["secili", _secili];
         _ayar set ["grupN", count _secili];
+    };
+    // v8.404 HAREKAT: bu modul bir 'ELITE Harekat' modulune SYNC'liyse plan HEMEN kurulmaz; faz numarasiyla harekata kaydedilir (harekat fazi baslayinca plan istenir)
+    private _harM = ["MODUL", [_logic, QGVAR(EdenHarekat)]] call FUNC(edenOrtak);
+    if (_harM isNotEqualTo []) exitWith {
+        private _hm = _harM select 0;
+        private _tH = diag_tickTime + 60;
+        waitUntil { sleep 0.5; ((_hm getVariable ["lambs_danger_harekatId", ""]) isNotEqualTo "") || {diag_tickTime > _tH} };
+        private _hid = _hm getVariable ["lambs_danger_harekatId", ""];
+        private _fazNo = ((round (["edObFaz", 0] call _n)) max 1) min 6;
+        private _ok = ["KAYIT", [_hid, _fazNo, _taraf, _obj, _ayar toArray false, [format ["OBJ %1", mapGridPosition _obj], _logic getVariable ["lambs_danger_edObAd", ""]] select ((_logic getVariable ["lambs_danger_edObAd", ""]) isEqualType "" && {(_logic getVariable ["lambs_danger_edObAd", ""]) isNotEqualTo ""})]] call lambs_danger_fnc_harekat;
+        diag_log format ["[EDEN] Objektif (3DEN) %1 | HAREKAT '%2' faz %3'e kaydedildi: %4 (plan harekat fazi baslayinca kurulur)", mapGridPosition _obj, _hid, _fazNo, _ok];
     };
     // 'tut' / 'dronAvi' / 'otoGarnizon' Zeus ile ayni degerleri bekler (indeks)
     ["lambs_danger_planIstegi", [_taraf, _obj, _ayar toArray false]] call CBA_fnc_serverEvent;
