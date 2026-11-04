@@ -8,6 +8,7 @@
  *   - ILK YUKLEME KAYDI: sunucuda gorulen her bot askerin getUnitLoadout'u bir kez saklanir (QGVAR(c2Yukleme)) — fnc_c2IkmalVer pilotun ikmali bu yuklemeye geri doner.
  *   - IKMAL TALEBI (CBA c2IkmalTalep): oyuncu bulunan taraflarda, bot askerlerinin yarisi ya da fazlasinin ana silah sarjoru azsa (yedek < CBA c2IkmalEsik) o grup harita isareti alir
  *     'C2_IKMAL_*' (turuncu ucgen, 'IKMAL: grup (az/toplam)') ve havadaki ayni taraf oyunculara 120 sn'de bir sohbet bildirimi gider. Isaret global (coop varsayimi: oyuncular ayni tarafta).
+ * v8.392: menuye ROTA (birden cok waypoint) ve OBJEKTIF (ele gecir / savun / secili grup / iptal / durum; fnc_c2Objektif -> komutanPlan) eklendi; waypoint / grup / objektif cakismasi kurallari fnc_c2Emir + fnc_c2PlanCakisma + fnc_komutanPlan.
  * ISTEMCI (hasInterface):
  *   - ACE self menusu 'ELITE C2' (ACE varsa; yoksa addAction yedegi): Topcu ates destegi (HE / Duman / Aydinlatma / Iptal), Bot gruplarina emir (Hareket / Saldir / Tut / Serbest), Ikmal dagit.
  *   - MapSingleClick olayi -> fnc_c2Tikla (harita tiklamasi ile hedef / grup secimi).
@@ -111,8 +112,15 @@ if (hasInterface) then {
             ["top", "iptal", "Gorevi iptal et", "TOPCU_IPTAL", []],
             ["emir", "move", "Hareket (bot grubu + hedef nokta)", "EMIR", ["MOVE"]],
             ["emir", "sad", "Saldir / ara ve imha et (bot grubu + hedef)", "EMIR", ["SAD"]],
+            ["emir", "rota", "Rota - birden cok waypoint (bot grubu + noktalar)", "EMIR", ["ROTA"]],
+            ["emir", "rotabitir", "Rotayi bitir", "ROTA_BITIR", []],
             ["emir", "tut", "Yerinde tut (bot grubu)", "EMIR", ["TUT"]],
             ["emir", "serbest", "Serbest birak - ELITE komutan karar versin", "EMIR", ["SERBEST"]],
+            ["obj", "ele", "Ele gecir (HQ'ya atanmis gruplar, haritadan objektif)", "OBJ", ["ELE"]],
+            ["obj", "savun", "Savun / mevzilen (otomatik gruplar, haritadan objektif)", "OBJ", ["SAVUN"]],
+            ["obj", "secili", "Secili bot grubu objektifi savunsun", "OBJ", ["SECILI_SAVUN"]],
+            ["obj", "iptal", "Objektifleri iptal et (aktif planlar)", "OBJ", ["IPTAL"]],
+            ["obj", "durum", "Aktif objektif durumu", "OBJ", ["DURUM"]],
             ["ikmal", "ver", "Yakindaki botlara ikmal dagit", "IKMAL", []]
         ];
 
@@ -123,7 +131,7 @@ if (hasInterface) then {
                 _x params ["_pid", "_pbaslik"];
                 private _a = [format ["lambs_c2_%1", _pid], _pbaslik, "", {}, {[player, false] call lambs_danger_fnc_c2Yetkili}] call ace_interact_menu_fnc_createAction;
                 ["CAManBase", 1, ["ACE_SelfActions", "lambs_c2"], _a, true] call ace_interact_menu_fnc_addActionToClass;
-            } forEach [["top", "Topcu ates destegi"], ["emir", "Bot gruplarina emir"]];
+            } forEach [["top", "Topcu ates destegi"], ["emir", "Bot gruplarina emir / waypoint"], ["obj", "Objektif"]];
             {
                 _x params ["_pid", "_id", "_baslik", "_amac", "_veri"];
                 private _yol = ["ACE_SelfActions", "lambs_c2"];

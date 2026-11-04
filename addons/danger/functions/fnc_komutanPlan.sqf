@@ -9,6 +9,7 @@
  * KOMUTAN: katilan gruplar arasinda en yuksek rutbeli lider (esitlikte buyuk grup); >= 3 grupta komutan destek noktasinda (gorus). Roller: DESTEK (MG / AT / nisanci puani en yuksek), MANEVRA, YEDEK.
  * DUSMAN BILGISI (Zeus): piyade / zirh / AT / MG / nisanci / bina + sayi. Kullanim: destek puani (MG, AT [zirh varsa x3]), kanat gerekliligi (MG, bina veya sayi >= 8), loglanan uyarilar (zirh var + AT'li grup yok). HILE YOK: gizli konum okunmaz.
  * CIKTI: gercek waypoint (addWaypoint; "ELITE PLAN: ..." adli; Zeus'ta gorunur ve degistirilebilir) + harita isaretleri (ELITE_PLAN_*). Zeus'un elle koydugu waypoint SILINMEZ (yalniz kendi waypoint'lerimiz).
+ * v8.392: oyuncu komutasindaki (lambs_danger_oyuncuKomuta = true: Zeus 'OYUNCU' / ELITE C2 emri) gruplar plana ALINMAZ (tek sahip: ya plan ya oyuncu); C2 menusunden 'Objektif' bu fonksiyonu cagirir (fnc_c2Objektif).
  * Temas: grup temastaysa plan o grubu zorlamaz (LAMBS / komutan beyni yonetir); temas kesilince plan devam eder.
  * Kapatma: lambs_danger_komutanPlanOff = true.  Log: [PLAN] (KURULDU / FAZ / ROL / BITTI / IPTAL).
  *
@@ -194,7 +195,7 @@ if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planO
         private _tl = leader _x;
         private _tv = if (isNull _tl) then {objNull} else {objectParent _tl};
         if (!isNull _tv && {alive _tl} && {!isPlayer _tl} && {(side _x) isEqualTo _taraf} && {_tv isKindOf "LandVehicle"} && {alive _tv} && {(crew _tv) findIf {isPlayer _x} < 0}
-            && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+            && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
             && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
             && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
             && {_hqKayit isNotEqualTo [] || {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])}}   // v8.325: HQ'ya bagli tank mesafe sinirina takilmaz (piyade ile ayni kural; RPT 5372f629: T-80BV objektife 4.8 km, sinir 4 km -> plana hic alinmadi)
@@ -222,7 +223,7 @@ private _aday = allGroups select {
     !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0}
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
-    && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+    && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
     && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
@@ -258,8 +259,9 @@ if (_aday isEqualTo []) exitWith {
             else {if (_n < 3) then {"3'ten az saglam asker"}
             else {if (_x getVariable ["lambs_danger_tarafKapali", false]) then {"ELITE bu taraf icin kapali"}
             else {if (_x getVariable ["lambs_danger_planAktif", false]) then {"baska planda"}
+            else {if (_x getVariable ["lambs_danger_oyuncuKomuta", false]) then {"oyuncu komutasinda (C2 emri; SERBEST birakin)"}
             else {if (!isNull objectParent _l) then {"lider aracta"}
-            else {if ((_l distance2D _obj) > 4000) then {"objektife > 4000 m"} else {"?"}}}}}}}}};
+            else {if ((_l distance2D _obj) > 4000) then {"objektife > 4000 m"} else {"?"}}}}}}}}}};
         _red set [_neden, (_red getOrDefault [_neden, 0]) + 1];
         if (!isNull _l) then { _enYakin = _enYakin min (_l distance2D _obj); };
     } forEach _tum;
@@ -286,7 +288,7 @@ private _reconG = allGroups select {
     private _l = leader _x;
     (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _l} && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _l}
-    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])} && {!(_x getVariable ["lambs_danger_planAktif", false])}
+    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", 4000])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
 };
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
