@@ -12,6 +12,7 @@
  * NOBET POZISYONLARI (komutan karar verir; LAMBS rastgele garrison'u degil): (1) ust kat: karakol yaricapindaki binalarin >= 2.5 m yuksekteki en yuksek ic pozisyonu (buildingPos); skor = yukseklik x3 + dis cephe gorusu (8 isin 120 m) x4;
  *   (2) arazi: yaricapin %50-%80'inde 30 derecelik halka, yukseklik x2 + gorus x4. Secim: en yuksek skor + onceki pozisyonlardan uzaklik (en fazla 60 m x 0.6) - her yone dagilir; min aralik 18 m.
  *   Nobetci pozisyona gider (doMove), 3 m icinde PATH kapatilir (yerinde kalir), dis yone doWatch; 120 sn'de varamazsa pozisyona isinlanir (merdiven takilmasi).
+ * v8.399: ANTI-AIR (ayar aa; fnc_aaSinif): MANPADS tasiyan askerler ayri AA nobet noktalarina (acik gokyuzu + yukseklik + 55 m aralik, en cok 3), SPAAG araclari ic halkaya (yaricap %50), STATIK AA (ZU-23 vb.) yerinde kalir.
  * v8.398: IHA GOZLEM (ayar ihaMod / ihaYar / ihaSure / ihalar): karakolun merkezinde gozlem devriyesi atan bosta IHA (surekli ya da yalniz alarmda).
  * v8.397: TAKIM SECIMI (ayar gruplar; Zeus panel fnc_garnizonTakimSec / 3DEN 'Secim modu = takim'): yalniz secilen takimlar garnizona asker verir (yaricap kurali yok; kaynak takimda en az 3 asker kalir).
  * v8.394: ELLE ASKER SECIMI (ayar uyeler; Zeus panel fnc_garnizonAskerSec / 3DEN SYNC) havuzu yalniz secilen askerlere indirir; DEVRIYE MESAFESI (ayar devMes, 0 = karakol yaricapinin %60i) devriye halkasinin merkezden uzakligidir.
@@ -112,6 +113,40 @@ private _pozisyonlar = {
     _secilen
 };
 
+// v8.399 AA POZISYONLARI: acik gokyuzu (45 m dikey isin engelsiz) + yukseklik + 55 m asgari aralik; karakol merkezinden 0.45 / 0.65 / 0.85 yaricapta 20 derece adimli adaylar; doner: nobet girdisi [poz, yon, "AA", skor, "AA", "MIDDLE"]
+private _aaPozFn = {
+    params ["_poz", "_yar", "_n"];
+    if (_n <= 0) exitWith {[]};
+    private _ad = [];
+    {
+        private _r = _yar * _x;
+        private _kat = _x;
+        for "_a" from 0 to 340 step 20 do {
+            private _p = _poz getPos [_r, _a];
+            if (!surfaceIsWater _p) then {
+                private _pA = AGLToASL (_p vectorAdd [0, 0, 1.6]);
+                private _acik = !(lineIntersects [_pA, _pA vectorAdd [0, 0, 45], objNull, objNull]);
+                private _yuk = (((getTerrainHeightASL _p) - (getTerrainHeightASL _poz)) max -8) min 25;
+                _ad pushBack [_p, (_yuk * 1.5) + ([0, 18] select _acik) + ([0, 6] select (_kat isEqualTo 0.65)), _a];
+            };
+        };
+    } forEach [0.45, 0.65, 0.85];
+    private _secilen = [];
+    for "_i" from 1 to _n do {
+        private _en = [];
+        private _enS = -1e9;
+        {
+            private _c = _x;
+            private _md = 999;
+            { _md = _md min ((_c select 0) distance2D (_x select 0)); } forEach _secilen;
+            if (_md >= 55 && {(_c select 1) > _enS}) then { _enS = _c select 1; _en = _c; };
+        } forEach _ad;
+        if (_en isEqualTo []) exitWith {};
+        _secilen pushBack _en;
+    };
+    _secilen apply { [_x select 0, _x select 2, "AA", _x select 1, "AA", "MIDDLE"] }
+};
+
 private _serbest = {
     // karakol altgruplarini dagit: nobetciler / devriyeler orijinal gruplarina doner
     params ["_id"];
@@ -139,6 +174,7 @@ private _calis = {
     missionNamespace setVariable ["lambs_danger_garnizonAdim", "basladi"];
     private _pozFn = missionNamespace getVariable "lambs_danger_garnizonPozFn";
     private _serbestFn = missionNamespace getVariable "lambs_danger_garnizonSerbestFn";
+    private _aaPozFnC = missionNamespace getVariable "lambs_danger_garnizonAAPozFn";
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _ozetT = time + 60;
     while {true} do {
@@ -162,6 +198,7 @@ private _calis = {
             private _devBoy = _ay getOrDefault ["devBoy", 3];
             private _ustKat = _ay getOrDefault ["ustKat", true];
             private _arac = _ay getOrDefault ["arac", true];
+            private _aaMod = _ay getOrDefault ["aa", 0];   // v8.399: 1 = anti-air konumlandirma (MANPADS nobetcileri ayri acik noktalarda, SPAAG ic halkada, statik AA yerinde)
             private _surum = _ay getOrDefault ["surum", 0];
 
             // ayar degisti: eskiyi bosalt, pozisyonlari yeniden hesapla
@@ -170,6 +207,16 @@ private _calis = {
                 _durum = createHashMap;
                 _durum set ["surum", _surum];
                 _durum set ["pozlar", [_poz, _yar, _nobetN, _ustKat, _taraf] call _pozFn];
+                if (_aaMod > 0) then {
+                    // MANPADS tasiyan ayni taraf piyade (karakol yaricapi x1.5): en cok 3 AA nobet noktasi
+                    private _aaN = (count (allUnits select {alive _x && {!isPlayer _x} && {isNull objectParent _x} && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _poz) <= (_yar * 1.5)} && {([_x] call FUNC(aaSinif)) isEqualTo "MANPADS"}})) min 3;
+                    private _aaP = [_poz, _yar, _aaN] call _aaPozFnC;
+                    (_durum get "pozlar") append _aaP;
+                    // statik AA (ZU-23 vb.): yerinde kalir, isaretlenir
+                    private _stAA = ((_poz nearEntities [["StaticWeapon"], _yar * 1.2]) select {alive _x && {([_x] call FUNC(aaSinif)) isEqualTo "STATIK"}});
+                    { _x setVariable ["lambs_danger_aaStatik", true, true]; } forEach _stAA;
+                    diag_log format ["[KARAKOL-GARNIZON] %1 | AA konumlandirma: %2 MANPADS nobet noktasi, %3 statik AA YERINDE (tasinmaz)", _ad, count _aaP, count _stAA];
+                };
                 _durum set ["birimler", []];
                 _durum set ["devriyeG", []];
                 _durum set ["aracG", []];
@@ -281,6 +328,12 @@ private _calis = {
                 } else {
                     // bos / olu nobet: havuzdan en uygun
                     private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {_uzakOk || {(_x distance2D _poz) <= (_yar * 1.5)}}};
+                    // v8.399: AA girdisi YALNIZ MANPADS tasiyiciya; AA girdisi varsa MANPADS tasiyicilar normal nobete alinmaz
+                    if ((_x select 2) isEqualTo "AA") then {
+                        _adaylar = _adaylar select {([_x] call FUNC(aaSinif)) isEqualTo "MANPADS"};
+                    } else {
+                        if ((_pozlar findIf {(_x select 2) isEqualTo "AA"}) >= 0) then { _adaylar = _adaylar select {([_x] call FUNC(aaSinif)) isNotEqualTo "MANPADS"}; };
+                    };
                     if (_adaylar isEqualTo []) then { continue };
                     private _s = [_adaylar, [], { private _r = [_x] call _rolFn; (([0, 200, 400, 600, 900] select ((["RIFLE", "MARKSMAN", "RTO", "MEDIC", "MG"] find _r) max 0)) max ([0, 800] select (_r isEqualTo "AT"))) + ([0, 1500] select (_x isEqualTo (leader (group _x)))) + ((_x distance2D _p) / 5) - ([0, 1600] select (((count _girdi) > 6) && {(_girdi select 6) isNotEqualTo ""} && {_r isEqualTo (_girdi select 6)})) }, "ASCEND"] call BIS_fnc_sortBy;
                     private _sec = _s select 0;
@@ -394,10 +447,10 @@ private _calis = {
 
             // ---- ARAC MEVZILERI ----
             private _aracG = _durum getOrDefault ["aracG", []];
-            if (_arac) then {
+            if (_arac || {_aaMod > 0}) then {
                 private _vl = (_poz nearEntities [["LandVehicle"], _yar * 1.2]) select {
-                    alive _x && {canMove _x} && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {local (driver _x)} && {(side (group (driver _x))) isEqualTo _taraf}
-                    && {(_x emptyPositions "cargo") >= 2 || {(getNumber (configOf _x >> "armor")) >= 100}}
+                    alive _x && {!(_x isKindOf "StaticWeapon")} && {canMove _x} && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {local (driver _x)} && {(side (group (driver _x))) isEqualTo _taraf}
+                    && {(_arac && {(_x emptyPositions "cargo") >= 2 || {(getNumber (configOf _x >> "armor")) >= 100}}) || {_aaMod > 0 && {([_x] call FUNC(aaSinif)) isEqualTo "SPAAG"}}}
                     && {!(((group (driver _x)) getVariable ["lambs_danger_garnizonAlt", ""]) isNotEqualTo "")}
                 };
                 {
@@ -407,7 +460,8 @@ private _calis = {
                     if ((_v getVariable ["lambs_danger_gorev", ""]) in ["MEDEVAC", "TASIMA", "TOPCU", "HARIC"] || {_v getVariable [QGVAR(tasimaMesgul), false]}) then { continue };
                     private _n = count _aracG;
                     private _a = (_poz getDir (getPosATL _v)) + 30 * _n;
-                    private _vp = _poz getPos [_yar * 0.75, (_n * (360 / ((count _vl) max 1))) + 20];
+                    private _aaV = _aaMod > 0 && {([_v] call FUNC(aaSinif)) isEqualTo "SPAAG"};   // v8.399: SPAAG ic halkada (merkeze yakin, karakolu korur)
+                    private _vp = _poz getPos [_yar * ([0.75, 0.5] select _aaV), (_n * (360 / ((count _vl) max 1))) + 20];
                     if (surfaceIsWater _vp) then { _vp = _poz getPos [_yar * 0.5, (_n * 90)]; };
                     _dg2 setVariable ["lambs_danger_gorev", "KARAKOL_ARAC", true];
                     _v setVariable ["lambs_danger_gorev", "KARAKOL_ARAC", true];
@@ -457,6 +511,7 @@ private _calis = {
 missionNamespace setVariable ["lambs_danger_garnizonKapsamaFn", _kapsama];
 missionNamespace setVariable ["lambs_danger_garnizonPozFn", _pozisyonlar];
 missionNamespace setVariable ["lambs_danger_garnizonSerbestFn", _serbest];
+missionNamespace setVariable ["lambs_danger_garnizonAAPozFn", _aaPozFn];
 
 [_calis] spawn {
     params ["_fn"];

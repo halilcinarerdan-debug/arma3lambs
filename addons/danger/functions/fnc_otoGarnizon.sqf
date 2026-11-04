@@ -105,6 +105,6 @@ private _dev = [[1, 0, 0], [2, 0, 0]] select ((_guc - 1) max 0 min 1);
 {
     _x params ["_p", "_ad"];
     private _idx = ["KARAKOL", "MEVZI", "GOZLETME"] find _ad;
-    ["lambs_danger_garnizonIstegi", [_p, 0, _nobet select _idx, _dev select _idx, 3, _ad isEqualTo "KARAKOL", false]] call CBA_fnc_serverEvent;
+    ["lambs_danger_garnizonIstegi", [_p, 0, _nobet select _idx, _dev select _idx, 3, _ad isEqualTo "KARAKOL", false, [], 0, [], [], [0, 1] select (_ad isEqualTo "KARAKOL")]] call CBA_fnc_serverEvent;   // v8.399: karakol bolgesinde anti-air konumlandirma (MANPADS nobet / SPAAG ic halka / statik yerinde)
 } forEach _secilen;
 _say

@@ -19,6 +19,7 @@ if (_activated && local _logic) then {
             ["Ust kat / cati nobet pozisyonlari", "BOOLEAN", "Binalarin >= 2.5 m yuksekteki ic pozisyonlari nobet icin aday olur (hakim, dis cepheyi goren). Kapali: yalniz yuksek arazi.", true, ""],
             ["Araclar mevzi olsun (APC / kamyon)", "BOOLEAN", "Karakol icindeki AI suruculu kara araclari cevrede ates mevzisine gider, muretteat icinde kalir.", true, ""],
             ["Asker secimi", "LIST", "Otomatik: karakol yaricapinin x1.5 icindeki gruplardan asker alinir. Asker listesi: modulun 800 m cevresindeki AI askerler listelenir; isaretlediklerin garnizon havuzu olur (yaricap kurali yok). Takim listesi: 800 m cevresindeki AI takimlar (grup) listelenir; yalniz isaretlediklerin garnizona asker verir (her takimda en az 3 asker kalir).", ["Otomatik (yaricap havuzu)", "Elle sec: asker listesi", "Elle sec: takim (grup) listesi"], 0],
+            ["Anti-air konumlandirma", "LIST", "Otomatik: MANPADS (Stinger / Igla / Zipkin ...) tasiyan askerler ayri acik / yuksek AA nobet noktalarina (en cok 3, 55 m aralikla); kendiyurur AA araclari (SPAAG: ZSU-23-4 / Tunguska ...) karakolun ic halkasina; STATIK AA (ZU-23 vb.) YERINDE KALIR. Elle tanim: nesne init this setVariable [lambs_danger_aa, SPAAG, true] (MANPADS / SPAAG / STATIK / NONE).", ["Yok", "Otomatik"], 0],
             ["IHA gozlem (karakola bagli)", "LIST", "Surekli: karakol merkezinde gozlem devriyesi atan bosta IHA (ayni taraf, ucan, GOZLEM tipi: FPV / bomba degil; karakol yaricapinin x1.5 icinde, yakit > %30). Alarmda: yalniz grup temasinda kalkar. IHA gorevi bitince / dusunce 90 sn sonra yenisi secilir; karakol kaldirilinca gorev kaldirilir. Belirli IHA icin 3DEN modulu (SYNC) kullanilir.", ["Yok", "Surekli gozlem devriyesi", "Alarmda gozlem"], 0],
             ["IHA devriye yaricapi (m)", "SLIDER", "0 = karakol yaricapi (100-800 m). IHA bu yaricapta karakol merkezi etrafinda devriye atar.", [0, 800], [10, 100], 0, 0],
             ["IHA gozlem suresi (dk)", "SLIDER", "0 = CBA 'Gozlem IHA suresi' (varsayilan 20 dk). Sure dolunca 90 sn sonra yeni IHA / sorti.", [0, 60], [1, 5], 0, 0],
@@ -27,22 +28,22 @@ if (_activated && local _logic) then {
         {
             params ["_data", "_args"];
             _args params ["_poz"];
-            _data params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", ["_secim", 0], ["_devMes", 0], ["_ihaMod", 0], ["_ihaYar", 0], ["_ihaSure", 0]];
+            _data params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", ["_secim", 0], ["_devMes", 0], ["_aa", 0], ["_ihaMod", 0], ["_ihaYar", 0], ["_ihaSure", 0]];
             if (_secim isEqualTo 2 && {_islem isEqualTo 0}) exitWith {
                 // v8.397: takim (grup) secimi paneli (sonraki karede)
                 [{
                     params ["_poz", "_ayarD"];
                     [_poz, _ayarD] call (missionNamespace getVariable ["lambs_danger_fnc_garnizonTakimSec", {systemChat "[ELITE] garnizonTakimSec bu istemcide yuklu degil (eski mod surumu?)"}]);
-                }, [_poz, [_islem, _nobet, _dev, _devBoy, _ust, _arac, _devMes, [_ihaMod, round _ihaYar, round _ihaSure, []]]]] call CBA_fnc_execNextFrame;
+                }, [_poz, [_islem, _nobet, _dev, _devBoy, _ust, _arac, _devMes, [_ihaMod, round _ihaYar, round _ihaSure, []], _aa]]] call CBA_fnc_execNextFrame;
             };
             if (_secim isEqualTo 1 && {_islem isEqualTo 0}) exitWith {
                 // v8.394: elle asker secimi paneli (sonraki karede)
                 [{
                     params ["_poz", "_ayarD"];
                     [_poz, _ayarD] call (missionNamespace getVariable ["lambs_danger_fnc_garnizonAskerSec", {systemChat "[ELITE] garnizonAskerSec bu istemcide yuklu degil (eski mod surumu?)"}]);
-                }, [_poz, [_islem, _nobet, _dev, _devBoy, _ust, _arac, _devMes, [_ihaMod, round _ihaYar, round _ihaSure, []]]]] call CBA_fnc_execNextFrame;
+                }, [_poz, [_islem, _nobet, _dev, _devBoy, _ust, _arac, _devMes, [_ihaMod, round _ihaYar, round _ihaSure, []], _aa]]] call CBA_fnc_execNextFrame;
             };
-            ["lambs_danger_garnizonIstegi", [_poz, _islem, round _nobet, round _dev, round _devBoy, _ust, _arac, [], round _devMes, [], [_ihaMod, round _ihaYar, round _ihaSure, []]]] call CBA_fnc_serverEvent;
+            ["lambs_danger_garnizonIstegi", [_poz, _islem, round _nobet, round _dev, round _devBoy, _ust, _arac, [], round _devMes, [], [_ihaMod, round _ihaYar, round _ihaSure, []], _aa]] call CBA_fnc_serverEvent;
             diag_log format ["[KARAKOL-ISTEK] garnizon istegi sunucuya gonderildi: islem %1 | nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | devriye mesafesi %7", _islem, round _nobet, round _dev, round _devBoy, _ust, _arac, round _devMes];
             systemChat "[ELITE] Karakol garnizon istegi sunucuya gonderildi";
         }, {}, {}, [_poz]

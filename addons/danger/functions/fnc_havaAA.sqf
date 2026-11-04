@@ -40,7 +40,7 @@ private _lrpg = [] call FUNC(lambsRpgMi);
 private _aaFlag = [units _g, AI_AMMO_USAGE_FLAG_AIR, true] call EFUNC(main,getLauncherUnits);
 if !(_aaFlag isEqualType []) then { _aaFlag = []; };
 // ad tabanli yedek (eski liste): flags'i bos olan modlar icin
-private _aaAd = (units _g) select {alive _x && {(magazines _x) findIf {private _m = toLower _x; (_m find "stinger") >= 0 || {(_m find "strela") >= 0} || {(_m find "igla") >= 0} || {(_m find "fim92") >= 0} || {(_m find "_aa") >= 0}} >= 0}};
+private _aaAd = (units _g) select {alive _x && {(magazines _x) findIf {private _m = toLower _x; (_m find "stinger") >= 0 || {(_m find "strela") >= 0} || {(_m find "igla") >= 0} || {(_m find "fim92") >= 0} || {(_m find "zipkin") >= 0} || {(_m find "zıpkın") >= 0} || {(_m find "_aa") >= 0}} >= 0}};
 private _aaTum = _aaFlag + (_aaAd select {!(_x in _aaFlag)});
 private _atTum = [];
 if (missionNamespace getVariable ["lambs_danger_havaATAktif", true]) then {

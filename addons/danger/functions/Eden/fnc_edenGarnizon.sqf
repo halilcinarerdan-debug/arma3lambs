@@ -36,6 +36,6 @@ if (!_activated || {!isServer}) exitWith {};
     private _ihaMod = ["edGarIha", 0] call _n;
     private _ihaNid = ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x}) apply {netId _x};
     private _iha = [_ihaMod, ["edGarIhaYar", 0] call _n, ["edGarIhaSure", 0] call _n, _ihaNid];
-    ["lambs_danger_garnizonIstegi", [_poz, 0, _nobet, _dev, _devBoy, _ust, _arac, _uyeler, _devMes, _gruplar, _iha]] call CBA_fnc_serverEvent;
+    ["lambs_danger_garnizonIstegi", [_poz, 0, _nobet, _dev, _devBoy, _ust, _arac, _uyeler, _devMes, _gruplar, _iha, ["edGarAA", 0] call _n]] call CBA_fnc_serverEvent;
     diag_log format ["[EDEN] Garnizon (3DEN) | %1 | nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | baglanan asker %7 | baglanan takim %9 | iha mod %10 (baglanan IHA %11) | devriye mesafesi %8", mapGridPosition _poz, _nobet, _dev, _devBoy, _ust, _arac, count _uyeler, _devMes, count _gruplar, _ihaMod, count _ihaNid];
 };

@@ -36,8 +36,8 @@ if (_adaylar isEqualTo []) exitWith {};
 private _parca = _adaylar select [_bas, 8];
 if (_parca isEqualTo []) exitWith {
     if (_secili isEqualTo []) exitWith { systemChat "[ELITE] Garnizon: hic asker secilmedi - istek gonderilmedi"; };
-    _ayarD params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", "_devMes", ["_iha", []]];
-    ["lambs_danger_garnizonIstegi", [_poz, _islem, round _nobet, round _dev, round _devBoy, _ust, _arac, _secili, round _devMes, [], _iha]] call CBA_fnc_serverEvent;
+    _ayarD params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", "_devMes", ["_iha", []], ["_aa", 0]];
+    ["lambs_danger_garnizonIstegi", [_poz, _islem, round _nobet, round _dev, round _devBoy, _ust, _arac, _secili, round _devMes, [], _iha, _aa]] call CBA_fnc_serverEvent;
     diag_log format ["[KARAKOL-ISTEK] garnizon istegi (elle asker secimi %1) sunucuya gonderildi: nobet %2 | devriye %3 x %4 | devriye mesafesi %5", count _secili, round _nobet, round _dev, round _devBoy, round _devMes];
     systemChat format ["[ELITE] Karakol garnizon istegi gonderildi: %1 asker secildi", count _secili];
 };
