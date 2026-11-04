@@ -13,7 +13,15 @@
  *   (3) TAKIM B gecer; en son gozetleyiciler
  *   (4) serbest: doFollow + stance AUTO + mevcut waypoint yeniden (setCurrentWaypoint)
  * Kapatma: lambs_danger_tehlikeAlaniOff = true.   Log: [TEHLIKE-ALANI] (ilk 60) + [TEHLIKE-ALANI-OZET] 90 sn
- * SINIR: yalniz YOL (roadAt); tepe sirti / acik tarla gecisi yok. Waypoint olmayan (expectedDestination bos) grup tetiklenmez.
+ * v8.390 ACIK ALAN GECISI (ATP 3-21.8 / Ranger Handbook 'danger area': buyuk acik alan, karsi taraf gozlenebilir ve <= 250 m ise ONCE GOZETLEME + ONCU ELEMAN):
+ *   TESPIT: lider ortu kenarinda (15 m'de agac / bina / kaya / duvar var), rotasi (expectedDestination yonu) <= 50 m ileride ORTUSUZ acik alana giriyor, acik serit >= 60 m ve karsi kenar <= 250 m (CBA menzil),
+ *     karsi kenar gorus hattinda (terrainIntersect yok), su yok, hedef karsi kenarin otesinde. Yol gecisi bulunamazsa (yol onceligi) bu taranir; 9 sn'de bir, grup basina.
+ *   (1) DUR + GOZETLE: lider + MG + nisanci (en az grubun 1/3'u) GOZETLEME ekibi: yatar, karsi kenari izler; digerleri comelir, karsi yonu izler
+ *   (2) ONCU ELEMAN (gozcu / tufekli; 7+ kisilikte 2): karsi kenara kosar, orada 8 sn guvenlik (yatay izleme) - temas olursa HEMEN serbest (bounding / retreat devralir)
+ *   (3) ANA GOVDE iki yarida (A sonra B) KARSI KENARA ~7 m YANAL ARALIKLA yayilarak gecer (dagilma)
+ *   (4) GOZETLEME ekibi (lider dahil) EN SON gecer; serbest: doFollow + waypoint yeniden
+ *   Kapatma: CBA 'tehlikeAcikAktif' / lambs_danger_tehlikeAcikOff = true.   Log: [TEHLIKE-ACIK] (ilk 60).
+ * SINIR: karsi kenar > 250 m ise (cok genis alan) bu akis calismaz (uzun mesafe: bounding overwatch). Waypoint olmayan (expectedDestination bos) grup tetiklenmez.
  *
  * Arguments: None
  * Return Value: Baslatildi mi <BOOL>
@@ -88,9 +96,149 @@ private _gecis = {
 };
 missionNamespace setVariable ["lambs_danger_tehlikeAlaniGecisFn", _gecis];
 
+// ---- v8.390: ACIK ALAN GECISI (gozetle + oncu eleman + yayilarak gec) ----
+private _acikGecis = {
+    params ["_g", "_kenar", "_karsi", "_yon", "_gen"];
+    private _t0 = time;
+    private _l = leader _g;
+    private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+    private _bitir = {
+        params ["_g", "_neden"];
+        if (isNull _g) exitWith {};
+        _g setVariable [QGVAR(isExecutingTactic), nil];
+        _g setVariable [QGVAR(tehlikeAlaniT), time];
+        {
+            if (alive _x) then {
+                _x setVariable [QGVAR(taktikKilit), nil];
+                _x setVariable [QGVAR(forceMove), nil];
+                _x setUnitPos "AUTO";
+                _x doWatch objNull;
+                _x doFollow (leader _g);
+            };
+        } forEach (units _g);
+        if (!isNull (leader _g) && {currentWaypoint _g > 0 || {(count (waypoints _g)) > 0}}) then { _g setCurrentWaypoint [_g, currentWaypoint _g]; };
+        diag_log format ["[TEHLIKE-ACIK] %1 | SERBEST: %2", groupId _g, _neden];
+    };
+    private _iptalMi = { params ["_g"]; isNull _g || {(_g getVariable [QGVAR(contact), 0]) > time} || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} };
+    // yanal yayilma: merkez noktaya yon + 90 eksende ofs (m, +/-) kayik nokta
+    private _yanNokta = {
+        params ["_c", "_yon", "_ofs"];
+        _c getPos [abs _ofs, _yon + ([90, -90] select (_ofs < 0))]
+    };
+    // takimi noktalara yollar, hepsi varana ya da sure bitene kadar bekler; false = iptal
+    private _gecir = {
+        params ["_g", "_takim", "_karsi", "_yon", "_sure", "_dur"];
+        private _n = count _takim;
+        {
+            private _nokta = [_karsi getPos [random 3, random 360], _yon, (_forEachIndex - ((_n - 1) / 2)) * 7] call _yanNokta;
+            _x setVariable [QGVAR(taktikKilit), time + _sure + 30];
+            _x setUnitPos "UP";
+            _x forceSpeed -1;
+            _x setSpeedMode "FULL";
+            _x doMove _nokta;
+            _x setVariable [QGVAR(acikHedef), _nokta];
+        } forEach _takim;
+        private _bitis = time + _sure;
+        waitUntil {
+            sleep 0.5;
+            time > _bitis || {[_g] call (missionNamespace getVariable "lambs_danger_tehlikeAcikIptalFn")}
+            || {(_takim findIf {alive _x && {(_x distance2D (_x getVariable [QGVAR(acikHedef), _karsi])) > 12}}) < 0}
+        };
+        if ([_g] call (missionNamespace getVariable "lambs_danger_tehlikeAcikIptalFn")) exitWith {false};
+        { _x setUnitPos _dur; _x doWatch (_karsi getPos [120, _yon]); } forEach (_takim select {alive _x});
+        true
+    };
+    missionNamespace setVariable ["lambs_danger_tehlikeAcikIptalFn", _iptalMi];
+
+    private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+    if ((count _us) < 5) exitWith {};
+    private _sure = 20 + (_gen + (_kenar distance2D _karsi)) / 4;
+    _g setVariable [QGVAR(isExecutingTactic), true];
+
+    // takimlar: gozetleme (lider + MG + nisanci, en az 1/3), oncu (gozcu / tufekli, 7+ kisi = 2), ana govde (kalan)
+    private _digerler = _us select {_x isNotEqualTo _l};
+    private _ozel = _digerler select {([_x] call _rolFn) in ["MG", "MARKSMAN"]};
+    private _ow = [_l] + (_ozel select [0, 2 min (count _ozel)]);
+    private _owMin = ceil ((count _us) / 3);
+    if ((count _ow) < _owMin) then {
+        private _ek = [_digerler - _ow, [], {_x distance2D _l}, "ASCEND"] call BIS_fnc_sortBy;
+        _ow = _ow + (_ek select [0, _owMin - (count _ow)]);
+    };
+    private _kalan = _digerler - _ow;
+    private _oncuAdet = [1, 2] select ((count _us) >= 7);
+    private _gozcu = _kalan select {(_x getVariable [QGVAR(gozcu), false]) || {_x isEqualTo (_g getVariable [QGVAR(gozcu), objNull])}};
+    private _tufekli = _kalan select {([_x] call _rolFn) isEqualTo "RIFLE"};
+    private _oncu = ((_gozcu + _tufekli + _kalan) arrayIntersect _kalan) select [0, _oncuAdet min (count _kalan)];
+    private _ana = _kalan - _oncu;
+    private _nA = ceil ((count _ana) / 2);
+    private _A = _ana select [0, _nA];
+    private _B = _ana select [_nA, count _ana];
+    diag_log format ["[TEHLIKE-ACIK] %1 | ACIK ALAN GECISI basladi | acik serit %2 m, karsi kenar %3 m | gozetleme:%4 oncu:%5 (%6) ana govde A:%7 B:%8",
+        groupId _g, round _gen, round (_l distance2D _karsi), count _ow, count _oncu, _oncu apply {name _x}, count _A, count _B];
+
+    // (1) dur + gozetle
+    { _x setVariable [QGVAR(taktikKilit), time + _sure * 4 + 40]; doStop _x; } forEach _us;
+    { _x setUnitPos "DOWN"; _x doWatch _karsi; } forEach _ow;
+    { _x setUnitPos "MIDDLE"; _x doWatch _karsi; } forEach (_us - _ow);
+    private _bek = time + 8;
+    waitUntil { sleep 0.5; time > _bek || {[_g] call _iptalMi} };
+    if ([_g] call _iptalMi) exitWith { [_g, "temas / retreat (gozetleme)"] call _bitir; };
+
+    // (2) oncu eleman karsi kenara
+    if (_oncu isNotEqualTo []) then {
+        private _ok = [_g, _oncu, _karsi, _yon, _sure, "MIDDLE"] call _gecir;
+        if (!_ok) exitWith { [_g, "temas / retreat (oncu gecerken)"] call _bitir; };
+        private _guv = time + 8;
+        waitUntil { sleep 0.5; time > _guv || {[_g] call _iptalMi} };
+        if ([_g] call _iptalMi) exitWith { [_g, "temas (karsi kenar guvenligi)"] call _bitir; };
+        diag_log format ["[TEHLIKE-ACIK] %1 | oncu eleman karsi kenarda, temiz (%2 sn)", groupId _g, round (time - _t0)];
+    };
+    if (isNull _g || {!(_g getVariable [QGVAR(isExecutingTactic), false])}) exitWith {};
+
+    // (3) ana govde iki yari, yayilarak
+    private _devam = true;
+    {
+        if (_devam && {_x isNotEqualTo []}) then {
+            private _ok = [_g, _x, _karsi, _yon, _sure, "MIDDLE"] call _gecir;
+            if (!_ok) then { _devam = false; };
+        };
+    } forEach [_A, _B];
+    if (!_devam) exitWith { [_g, "temas / retreat (ana govde gecerken)"] call _bitir; };
+
+    // (4) gozetleme ekibi en son
+    private _ok4 = [_g, _ow select {alive _x}, _karsi, _yon, _sure, "MIDDLE"] call _gecir;
+    [_g, ["TAMAM (" + str (round (time - _t0)) + " sn)", "temas / retreat (gozetleme ekibi gecerken)"] select (!_ok4)] call _bitir;
+};
+
+missionNamespace setVariable ["lambs_danger_tehlikeAcikGecisFn", _acikGecis];
+
 private _calis = {
     missionNamespace setVariable ["lambs_danger_tehlikeAdim", "basladi"];
     private _gecisFn = missionNamespace getVariable "lambs_danger_tehlikeAlaniGecisFn";
+    private _acikFn = missionNamespace getVariable "lambs_danger_tehlikeAcikGecisFn";
+    // v8.390: lider ortu kenarinda mi + rota <= 50 m ileride >= 60 m acik serit + karsi kenar <= menzil. Doner: [neden, karsi, serit] (neden "" = uygun)
+    private _ortuVar = {
+        params ["_p"];
+        surfaceIsWater _p || {(count (nearestTerrainObjects [_p, ["TREE", "BUILDING", "HOUSE", "ROCK", "WALL", "HIDE", "FOREST"], 15, false, true])) > 0}
+    };
+    private _acikTara = {
+        params ["_lp", "_yon", "_menzil", "_hedefD"];
+        if !([_lp] call _ortuVar) exitWith {["lider ortusuz", [], 0]};
+        private _liste = [];
+        for "_d" from 10 to _menzil step 10 do { _liste pushBack ([_lp getPos [_d, _yon]] call _ortuVar); };
+        private _i1 = _liste findIf {!_x};
+        if (_i1 < 0 || {_i1 > 4}) exitWith {["acik serit yok", [], 0]};
+        private _k = (_liste select [_i1]) findIf {_x};
+        if (_k < 0) exitWith {["karsi kenar menzil disi", [], 0]};
+        private _gen = _k * 10;
+        if (_gen < 60) exitWith {["serit dar", [], 0]};
+        private _d2 = (_i1 + _k + 1) * 10;
+        if (_hedefD < (_d2 + 20)) exitWith {["hedef serit icinde", [], 0]};
+        private _karsi = _lp getPos [_d2, _yon];
+        if (surfaceIsWater _karsi) exitWith {["karsi kenar su", [], 0]};
+        if (terrainIntersectASL [AGLToASL (_lp vectorAdd [0, 0, 1.6]), AGLToASL (_karsi vectorAdd [0, 0, 1.6])]) exitWith {["karsi kenar gorulmuyor", [], 0]};
+        ["", _karsi, _gen]
+    };
     private _say = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
@@ -119,7 +267,21 @@ private _calis = {
                 private _yol = roadAt _p;
                 if (!isNull _yol) exitWith { _bulunan = [_p, _yol, _d]; };
             };
-            if (_bulunan isEqualTo []) then { continue };
+            if (_bulunan isEqualTo []) then {
+                // v8.390: yol yok -> ACIK ALAN taramasi (9 sn'de bir)
+                if (!(missionNamespace getVariable ["lambs_danger_tehlikeAcikAktif", true]) || {missionNamespace getVariable ["lambs_danger_tehlikeAcikOff", false]}) then { continue };
+                if ((time - (_g getVariable [QGVAR(tehlikeAcikBakT), -999])) < 9) then { continue };
+                _g setVariable [QGVAR(tehlikeAcikBakT), time];
+                private _ac = [_lp, _yon, missionNamespace getVariable ["lambs_danger_tehlikeAcikMenzil", 250], _l distance2D _hedef] call _acikTara;
+                if ((_ac select 0) isNotEqualTo "") then {
+                    if ((_ac select 0) in ["karsi kenar menzil disi", "karsi kenar gorulmuyor", "hedef serit icinde"]) then { _say set [_ac select 0, (_say getOrDefault [_ac select 0, 0]) + 1]; };
+                    continue
+                };
+                _g setVariable [QGVAR(tehlikeAlaniT), time];
+                _say set ["acik alan gecisi", (_say getOrDefault ["acik alan gecisi", 0]) + 1];
+                [_g, _lp, _ac select 1, _yon, _ac select 2] spawn _acikFn;
+                continue
+            };
             _bulunan params ["_c", "_yolObj", "_d"];
             // cevre ACIK mi
             private _bina = count (nearestTerrainObjects [_c, ["BUILDING", "HOUSE"], 80, false, true]);

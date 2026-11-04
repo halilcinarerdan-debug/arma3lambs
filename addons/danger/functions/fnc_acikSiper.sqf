@@ -38,7 +38,7 @@ _dolu = _dolu select {(time - (_x select 1)) < 30};
 //   (a) rezerv defteri yalniz 1.5 m'de cakisan noktayi eliyordu; ayni nesnenin 3 m yanindaki ikinci nokta 'bos' sayiliyordu -> asgari aralik 4 m (CBA yigilmaAralik),
 //   (b) o anda ORADA DURAN dost (ya da grubun findCover / eliteCover / bounding rezervi, coverClaims) hic hesaba katilmiyordu -> canli dost 3 m + ortak defter,
 //   (c) sert yuzey testi tek isinla yapiliyordu: ince direk / tel de 'siper' sayiliyordu -> govde genisligi icin +-0.25 m yan isinlar da kapali olmali (asagida).
-private _aralik = missionNamespace getVariable ["lambs_danger_yigilmaAralik", 4];
+private _aralik = missionNamespace getVariable ["lambs_danger_yigilmaAralik", 6];
 private _talepler = ((_g getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 8 && {(_x select 2) isNotEqualTo _u}}) apply {_x select 0};
 private _dostPoz = ((_u nearEntities ["CAManBase", _yar + 14]) select {_x isNotEqualTo _u && {alive _x} && {(side group _x) isEqualTo (side group _u)}}) apply {getPosATL _x};
 private _doluMu = {

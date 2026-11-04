@@ -17,7 +17,7 @@
  *      yolu duvara carpmayan; dusmanin yonunde engel varsa +8; dusmana yaklasmaz). doMove kalici emirdir: asker orada KALIR. Asker basina 15 sn, grup basina tik 4 sn.
  *      MUAF (tasinmaz, yalniz loglanir): hekim, bomba, istasyon, forceMove, binada. BOUNDING kapsama ekibi (forceMove'suz) tasinabilir - dispersion'in atladigi bosluk budur.
  *   Grup duzeyi muafiyet: oyuncu lideri, retreat / evade / temas kes / peel / sweep (bina temizleme) / AT taarruz, mevzi / hendek, keskin nisanci takimi, ELITE kapali.
- * Kapatma: CBA 'ELITE yigilma cozucu' (lambs_danger_yigilmaAktif). Yaricap lambs_danger_yigilmaYaricap (2.5 m), siper noktalari arasi asgari aralik lambs_danger_yigilmaAralik (4 m; fnc_acikSiper kullanir).
+ * Kapatma: CBA 'ELITE yigilma cozucu' (lambs_danger_yigilmaAktif). Yaricap lambs_danger_yigilmaYaricap (v8.390: 4 m; eskiden 2.5), siper noktalari arasi asgari aralik lambs_danger_yigilmaAralik (v8.390: 6 m; eskiden 4; fnc_acikSiper kullanir).
  * Log: [YIGILMA-NEDEN] / [YIGILMA-COZ] / [YIGILMA-BAYGIN] (ilk 60'ar) + 120 sn [YIGILMA-OZET].
  *
  * Arguments: None
@@ -50,7 +50,7 @@ lambs_danger_yigilmaNeden = {
     }
 };
 
-// ---- bos nokta: askerin 4-8 m yani; digerlerinden >= 3.5 m; [] = bulunamadi ----
+// ---- bos nokta (v8.390: aralik artti): askerin 6-10 m yani; digerlerinden >= 5 m; [] = bulunamadi ----
 lambs_danger_yigilmaYer = {
     params ["_u", "_ekRezerv"];
     private _p = getPosATL _u;
@@ -72,7 +72,7 @@ lambs_danger_yigilmaYer = {
             if (!surfaceIsWater _c && {(abs ((getTerrainHeightASL _c) - _eH)) <= 2}) then {
                 private _min = 99;
                 { _min = _min min (_x distance2D _c); } forEach _hepsi;
-                if (_min >= 3.5 && {!(lineIntersects [AGLToASL (_p vectorAdd [0, 0, 0.9]), AGLToASL (_c vectorAdd [0, 0, 0.9]), _u, objNull])}) then {
+                if (_min >= 5 && {!(lineIntersects [AGLToASL (_p vectorAdd [0, 0, 0.9]), AGLToASL (_c vectorAdd [0, 0, 0.9]), _u, objNull])}) then {
                     private _yaklas = if (_enP isEqualTo []) then {0} else {((_p distance2D _enP) - (_c distance2D _enP)) max 0};
                     private _s = ((_min min 9) * 3) - (_r * 0.8) - (_yaklas * 2);
                     // dusman yonunde 2.5 m onde mermi durduran engel = hafif siper
@@ -83,7 +83,7 @@ lambs_danger_yigilmaYer = {
                     if (_s > _enS) then { _enS = _s; _enIyi = _c; };
                 };
             };
-        } forEach [4, 6, 8];
+        } forEach [6, 8, 10];
     } forEach [90, -90, 135, -135, 60, -60, 180, 0];
     _enIyi
 };
@@ -100,7 +100,7 @@ lambs_danger_yigilmaYer = {
     while {true} do {
         sleep 4;
         if (!(missionNamespace getVariable ["lambs_danger_yigilmaAktif", true])) then { continue };
-        private _yar = missionNamespace getVariable ["lambs_danger_yigilmaYaricap", 2.5];
+        private _yar = missionNamespace getVariable ["lambs_danger_yigilmaYaricap", 4];
         private _butce = 6;
         {
             private _g = _x;
