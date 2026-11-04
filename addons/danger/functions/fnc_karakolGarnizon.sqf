@@ -12,7 +12,8 @@
  * NOBET POZISYONLARI (komutan karar verir; LAMBS rastgele garrison'u degil): (1) ust kat: karakol yaricapindaki binalarin >= 2.5 m yuksekteki en yuksek ic pozisyonu (buildingPos); skor = yukseklik x3 + dis cephe gorusu (8 isin 120 m) x4;
  *   (2) arazi: yaricapin %50-%80'inde 30 derecelik halka, yukseklik x2 + gorus x4. Secim: en yuksek skor + onceki pozisyonlardan uzaklik (en fazla 60 m x 0.6) - her yone dagilir; min aralik 18 m.
  *   Nobetci pozisyona gider (doMove), 3 m icinde PATH kapatilir (yerinde kalir), dis yone doWatch; 120 sn'de varamazsa pozisyona isinlanir (merdiven takilmasi).
- * DEVRIYE: alt gruplar (devriye boyu 2-6), karakolun %60 yaricapinda halka rotasi (CYCLE), AWARE / LIMITED / STAG COLUMN; temas / alarm olunca (grup temasi < 30 sn) rota kesilir, en yakin cevre noktasina savunmaya gecer, 120 sn temassizsa devam.
+ * v8.394: ELLE ASKER SECIMI (ayar uyeler; Zeus panel fnc_garnizonAskerSec / 3DEN SYNC) havuzu yalniz secilen askerlere indirir; DEVRIYE MESAFESI (ayar devMes, 0 = karakol yaricapinin %60i) devriye halkasinin merkezden uzakligidir.
+ * DEVRIYE: alt gruplar (devriye boyu 2-6), karakolun %60 yaricapinda (v8.394: devMes ile ayarlanir) halka rotasi (CYCLE), AWARE / LIMITED / STAG COLUMN; temas / alarm olunca (grup temasi < 30 sn) rota kesilir, en yakin cevre noktasina savunmaya gecer, 120 sn temassizsa devam.
  * ARACLAR: karakol icindeki AI surucu + yerel kara araclari (APC / IFV / kamyon) cevrede %75 yaricapta ates mevzisine gider (tehdit yonu bilinmiyorsa esit dagilir), PATH kapatilir, mürettebat icinde kalir; gorev 'KARAKOL_ARAC'.
  * v8.385: 3DEN 'ELITE Catisma Pozisyonu' modulleri (bina ici / cati / ates mevzii; garnizon bayragi acik) karakol yaricapi x1.2 icinde NOBET ADAYI olur ve dogal adaylara oncelikli (skor 120 + puan x 12; modulun sabit durusu ve rol tercihi nobette uygulanir).
  * Altgruplar: grup degiskeni lambs_danger_garnizonAlt (NOBET / DEVRIYE) -> plan / taksi / tasima onlari almaz. Birim degiskeni lambs_danger_garnizonOrijin = eski grup (kaldirinca geri doner).
@@ -173,6 +174,11 @@ private _calis = {
                     (_durum get "pozlar") apply {format ["%1 %2 (%3 m, skor %4%5)", _x select 2, mapGridPosition (_x select 0), round ((_x select 0) distance2D _poz), round (_x select 3), ["", " " + (_x select 4)] select ((_x select 4) isNotEqualTo "")]}];
             };
 
+            // v8.394: elle secilen askerler (ayar 'uyeler': netId) -> havuz YALNIZ onlar (yaricap / 'kaynakta en az 3 asker' kurali yok); devriye mesafesi 'devMes' (0 = yaricap %60)
+            private _uyeNid = _ay getOrDefault ["uyeler", []];
+            private _uyeMod = _uyeNid isNotEqualTo [];
+            private _devMes = _ay getOrDefault ["devMes", 0];
+            private _devBaz = if (_devMes > 0) then {_devMes} else {_yar * 0.6};
             // ---- havuz ----
             private _altGrupAd = {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isNotEqualTo ""};
             private _havuz = [];
@@ -191,7 +197,13 @@ private _calis = {
                 if (!_medGrup) then { _aday = _aday select {([_x] call _rolFn) isNotEqualTo "MEDIC"}; };
                 reverse _aday;
                 { _havuz pushBack _x; } forEach (_aday select [0, _ayril min (count _aday)]);
-            } forEach (allGroups select {!(call _altGrupAd)});
+            } forEach ([allGroups select {!(call _altGrupAd)}, []] select _uyeMod);
+            if (_uyeMod) then {
+                _havuz = (_uyeNid apply {objectFromNetId _x}) select {
+                    !isNull _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}
+                    && {(side (group _x)) isEqualTo _taraf} && {((group _x) getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
+                };
+            };
             // nobetci / devriye icin zaten kullanilanlar havuzda sayilmaz (altgrup disinda)
             private _atama = _durum getOrDefault ["atama", createHashMap];
             private _pozlar = _durum getOrDefault ["pozlar", []];
@@ -258,7 +270,7 @@ private _calis = {
                     };
                 } else {
                     // bos / olu nobet: havuzdan en uygun
-                    private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {(_x distance2D _poz) <= (_yar * 1.5)}};
+                    private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {_uyeMod || {(_x distance2D _poz) <= (_yar * 1.5)}}};
                     if (_adaylar isEqualTo []) then { continue };
                     private _s = [_adaylar, [], { private _r = [_x] call _rolFn; (([0, 200, 400, 600, 900] select ((["RIFLE", "MARKSMAN", "RTO", "MEDIC", "MG"] find _r) max 0)) max ([0, 800] select (_r isEqualTo "AT"))) + ([0, 1500] select (_x isEqualTo (leader (group _x)))) + ((_x distance2D _p) / 5) - ([0, 1600] select (((count _girdi) > 6) && {(_girdi select 6) isNotEqualTo ""} && {_r isEqualTo (_girdi select 6)})) }, "ASCEND"] call BIS_fnc_sortBy;
                     private _sec = _s select 0;
@@ -318,10 +330,10 @@ private _calis = {
                             private _wpPos = [];
                             {
                                 if (_wpPos isEqualTo []) then {
-                                    private _rr = _yar * _x;
+                                    private _rr = _devBaz * _x;
                                     { private _cp = _poz getPos [_rr, _a0 + _j * 72 + _x]; if (_wpPos isEqualTo [] && {!surfaceIsWater _cp} && {(count ([0, 90, 180, 270] select {surfaceIsWater (_cp getPos [12, _x])})) isEqualTo 0}) then { _wpPos = _cp; }; } forEach [0, 20, -20];
                                 };
-                            } forEach [0.6, 0.45, 0.3];
+                            } forEach [1, 0.75, 0.5];
                             if (_wpPos isEqualTo []) then { continue };
                             private _wp = _dg addWaypoint [_wpPos, 8];
                             _wp setWaypointType "MOVE";
