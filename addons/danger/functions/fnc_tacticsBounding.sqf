@@ -1166,7 +1166,45 @@ if (EGVAR(main,debug_functions)) then {
         // -------------------------------------------------------------------
         private _siperde = (_hareketler + _yakinlasan) select {alive (_x select 0)};
         { _maxSupp = _maxSupp max (getSuppression (_x select 0)); } forEach _siperde;   // yola cikmadan onceki deger bayat
+        // v8.389 MG YER DEGISTIRME (doktrin: MG kosucuyla sicramaz ama destek ekibi ilerleyince yeni ates mevziine KAYAR; ayni anda yalniz 1 MG, digerleri atesi surdurur):
+        //   kosanlar siperde, MG liderden 55 m+ geride VEYA hedefe 45 m+ daha uzak, baski < 0.4, MG basina 40 sn aralik -> findCover OVERWATCH (lider cevresi 35 m) ile ileri mevzi
+        private _mgGidis = [];
+        if (missionNamespace getVariable ["lambs_danger_mgYerDegistir", true] && {_cycleCount >= 2}) then {
+            private _ldrM = leader _group;
+            private _mgAdaylar = _kapsama select {
+                alive _x && {isNull objectParent _x} && {([_x] call _rolFn) isEqualTo "MG"}
+                && {(getSuppression _x) < 0.4} && {(time - (_x getVariable [QGVAR(mgYerT), -999])) > 40}
+                && {(((_x distance2D _ldrM) > 55) || {((_x distance2D _target) - (_ldrM distance2D _target)) > 45})}
+            };
+            if (_mgAdaylar isNotEqualTo []) then {
+                private _mgB = _mgAdaylar select 0;
+                private _mgOw = [_mgB, _target, 35, "ASCEND", 1, "OVERWATCH", getPosATL _ldrM] call EFUNC(main,findCover);
+                if (_mgOw isNotEqualTo []) then {
+                    private _mgPos = (_mgOw select 0) select 0;
+                    private _mgSt = (_mgOw select 0) select 1;
+                    if (
+                        !surfaceIsWater _mgPos && {(_mgB distance2D _mgPos) > 12} && {(_mgB distance2D _mgPos) < 90}
+                        && {((_mgPos distance2D _target) + 10) < (_mgB distance2D _target)}
+                    ) then {
+                        _mgB setVariable [QGVAR(mgYerT), time];
+                        _mgB setVariable [QGVAR(forceMove), true];
+                        _mgB setUnitPosWeak "UP";
+                        _mgB moveTo _mgPos;
+                        _mgB doWatch _target;
+                        _mgB forceSpeed -1;
+                        _mgGidis = [_mgB, _mgPos, _mgSt];
+                        diag_log format [
+                            "[BND-MG-YER] %1 | cycle:%2 | %3 | atilim:%4 m | liderden:%5 m | hedefe:%6 -> %7 m",
+                            groupId _group, _cycleCount, name _mgB, round (_mgB distance2D _mgPos), round (_mgB distance2D _ldrM),
+                            round (_mgB distance2D _target), round (_mgPos distance2D _target)
+                        ];
+                    };
+                };
+            };
+        };
+
         private _omurBitis = time + _BND_CYCLE_BASE + 1.5 + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL);
+        if (_mgGidis isNotEqualTo []) then { _omurBitis = _omurBitis + 4; };   // MG nin varmasi icin kisa uzatma
         private _uzatildi = false;
         private _peekte = false;
         private _siperGeri = {
@@ -1179,6 +1217,21 @@ if (EGVAR(main,debug_functions)) then {
             && {_group getVariable [QGVAR(isBounding), false]}
         } do {
             sleep 0.5;
+            // MG vardiysa (ya da yolda baski >= 0.7 aldiysa) durus uygula, kilidi birak
+            if (_mgGidis isNotEqualTo []) then {
+                private _mgU = _mgGidis select 0;
+                if (!alive _mgU) then {
+                    _mgGidis = [];
+                } else {
+                    if (((_mgU distance2D (_mgGidis select 1)) < 3) || {(getSuppression _mgU) >= 0.7}) then {
+                        _mgU setVariable [QGVAR(forceMove), nil];
+                        _mgU setUnitPosWeak (["DOWN", (_mgGidis select 2)] select ((getSuppression _mgU) < 0.85));
+                        doStop _mgU;
+                        _mgU doWatch _target;
+                        _mgGidis = [];
+                    };
+                };
+            };
             private _baskiMax = 0;
             { _baskiMax = _baskiMax max (getSuppression (_x select 0)); } forEach (_siperde select {alive (_x select 0)});
             { _baskiMax = _baskiMax max (getSuppression _x); } forEach (_kapsama select {alive _x});
@@ -1206,6 +1259,11 @@ if (EGVAR(main,debug_functions)) then {
             };
         };
         _siperde call _siperGeri;
+        if (_mgGidis isNotEqualTo [] && {alive (_mgGidis select 0)}) then {
+            // MG sure bitmeden varamadi: kilidi birak, bulundugu yerde durus al (sonraki sicramada gruba doner)
+            (_mgGidis select 0) setVariable [QGVAR(forceMove), nil];
+            (_mgGidis select 0) setUnitPosWeak (_mgGidis select 2);
+        };
     };
 
     if (!isNull _group) then {

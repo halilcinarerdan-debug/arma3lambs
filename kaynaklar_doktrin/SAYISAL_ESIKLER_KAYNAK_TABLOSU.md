@@ -12,7 +12,7 @@ Tarama bir alt ajanla yapıldı; **satır numaraları ajan raporundandır**. Ben
 | RED (%0.1 Pi) | 60 mm ~145, 81/82 mm ~195, 120 mm ~430, 105 mm ~455 m (azami şarj, ayakta). OCR bozuk: RH 2748-2860'ı elle doğrulayın | RH Tablo 3-3 | **Kullanıldı** (topçu min. dost mesafesi) |
 | Security halt | Short halt 1-2 dk; long halt > 2 dk | RH 4457-4459 | **Kullanıldı** (v8.118): keşif 60 / 90 / 30 sn |
 | M16 etkili menzil | 460 m (tüfek ateşi açma sınırı) | M112 409 | **Kullanıldı** (SBF uyarı eşiği 460 m) |
-| Bound uzunluğu | Gözetleyen silahın etkili menzilinin ⅔'ünü geçmemeli | M111 8708-8710 | Kodda henüz yok (öneri) |
+| Bound uzunluğu | Gözetleyen silahın etkili menzilinin ⅔'ünü geçmemeli | M111 8708-8710 | Kullanıldı (v8.388: tüfek 307 m, MG 400 m üst sınır; v8.389: MG yer değiştirme) |
 | Hareket aralıkları | Traveling 10 m (kişi) / 20 m (manga); traveling overwatch 20 m / 50 m (takım); öndeki manga 50-100 m önde; bounding ~20 m | RH 4266-4305 | Arma formasyon motoru belirler |
 | Dağılma | 3-5 m gündüz, 1-3 m gece | RH 4378 | `dispersion` yığılma eşiği 2.5 m, RPG yarıçapı 9-16 m (tasarım) |
 | Ateş timi kaması | Normalde 10 m aralık | A21 31-33 | Formasyon motoru |
