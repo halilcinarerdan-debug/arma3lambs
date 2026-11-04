@@ -199,6 +199,9 @@ class GVAR(EdenGarnizon): Module_F {
         E_BOOL(edGarUst,"Ust kat cati nobet pozisyonlari","Binalarin yuksek ic pozisyonlari nobet adayi olur.","true")
         E_BOOL(edGarArac,"Araclar mevzi olsun","Karakol icindeki AI suruculu kara araclari cevrede ates mevzisine gider.","true")
         E_COMBO(edGarSecim,"Secim modu SYNC","Modulle SYNC edilen askerler: Yalniz kendileri = yalniz o askerler garnizon olur. Takimlari = SYNC edilen askerlerin TAKIMI (grup) garnizona asker verebilir (kaynak takimda en az 3 asker kalir). Hic asker SYNC edilmezse karakol yaricapi havuzu.","0",E_V(0,"Yalniz baglanan askerler") E_V(1,"Baglanan askerlerin takimlari"))
+        E_COMBO(edGarIha,"IHA gozlem","Karakola bagli gozlem IHA: Surekli = karakol merkezinde gozlem devriyesi, Alarmda = yalniz grup temasinda. Modulle SYNC edilen IHA kullanilir; baglanmazsa karakol yaricapinin x1.5 icindeki bosta, ayni taraf, GOZLEM tipi IHA (FPV / bomba degil).","0",E_V(0,"Yok") E_V(1,"Surekli gozlem devriyesi") E_V(2,"Alarmda gozlem"))
+        E_NUM(edGarIhaYar,"IHA devriye yaricapi m","IHA gozlem devriyesi yaricapi (karakol merkezi etrafinda). 0 = karakol yaricapi (100-800 m).","0")
+        E_NUM(edGarIhaSure,"IHA gozlem suresi dk","0 = CBA Gozlem IHA suresi (varsayilan 20 dk).","0")
         E_NUM(edGarDevMes,"Devriye mesafesi m","Devriye rotasinin karakol MERKEZINE uzakligi (halka). 0 = karakol yaricapinin yuzde 60i (yaricap kucukse devriye merkezin dibinde doner). Uzak devriye icin buyuk deger (ornek 600).","0")
         class ModuleDescription: ModuleDescription {};
     };

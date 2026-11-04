@@ -12,6 +12,7 @@
  * NOBET POZISYONLARI (komutan karar verir; LAMBS rastgele garrison'u degil): (1) ust kat: karakol yaricapindaki binalarin >= 2.5 m yuksekteki en yuksek ic pozisyonu (buildingPos); skor = yukseklik x3 + dis cephe gorusu (8 isin 120 m) x4;
  *   (2) arazi: yaricapin %50-%80'inde 30 derecelik halka, yukseklik x2 + gorus x4. Secim: en yuksek skor + onceki pozisyonlardan uzaklik (en fazla 60 m x 0.6) - her yone dagilir; min aralik 18 m.
  *   Nobetci pozisyona gider (doMove), 3 m icinde PATH kapatilir (yerinde kalir), dis yone doWatch; 120 sn'de varamazsa pozisyona isinlanir (merdiven takilmasi).
+ * v8.398: IHA GOZLEM (ayar ihaMod / ihaYar / ihaSure / ihalar): karakolun merkezinde gozlem devriyesi atan bosta IHA (surekli ya da yalniz alarmda).
  * v8.397: TAKIM SECIMI (ayar gruplar; Zeus panel fnc_garnizonTakimSec / 3DEN 'Secim modu = takim'): yalniz secilen takimlar garnizona asker verir (yaricap kurali yok; kaynak takimda en az 3 asker kalir).
  * v8.394: ELLE ASKER SECIMI (ayar uyeler; Zeus panel fnc_garnizonAskerSec / 3DEN SYNC) havuzu yalniz secilen askerlere indirir; DEVRIYE MESAFESI (ayar devMes, 0 = karakol yaricapinin %60i) devriye halkasinin merkezden uzakligidir.
  * DEVRIYE: alt gruplar (devriye boyu 2-6), karakolun %60 yaricapinda (v8.394: devMes ile ayarlanir) halka rotasi (CYCLE), AWARE / LIMITED / STAG COLUMN; temas / alarm olunca (grup temasi < 30 sn) rota kesilir, en yakin cevre noktasina savunmaya gecer, 120 sn temassizsa devam.
@@ -115,6 +116,9 @@ private _serbest = {
     // karakol altgruplarini dagit: nobetciler / devriyeler orijinal gruplarina doner
     params ["_id"];
     private _d = lambs_danger_garnizonDurum getOrDefault [_id, createHashMap];
+    // v8.398: karakola bagli gozlem IHA'sinin gorevi kaldirilir
+    private _ihaK = _d getOrDefault ["iha", objNull];
+    if (!isNull _ihaK) then { [_ihaK, "KALDIR"] call FUNC(ihaSorti); };
     {
         private _u = _x;
         if (alive _u) then {
@@ -354,6 +358,39 @@ private _calis = {
                 };
             } forEach _devG;
             _durum set ["devriyeG", _devG];
+
+            // ---- v8.398 IHA GOZLEM (kullanici: 'karakola ihayi ekle'): ayar ihaMod 1 = surekli gozlem devriyesi, 2 = yalniz ALARMDA (grup temasi < 30 sn). Aday: ayni taraf, ucan, GOZLEM tipi (FPV / bomba degil), bosta
+            //   (gorevi yok, operatoru yok), yakiti > %30 IHA - 3DEN'de baglanmis ('ihalar') varsa yalniz onlar, yoksa karakol yaricapinin x1.5 (en az 300 m) icindeki en yakin. fnc_ihaSorti GOZLEM: karakol merkezi etrafinda
+            //   devriye (yaricap: ihaYar, 0 = karakol yaricapi 100-800 m), sure ihaSure dk (0 = CBA 'Gozlem IHA suresi'); gorev bitince / dusunce 90 sn sonra yeni aday secilir. Karakol kaldirilinca gorev kaldirilir.
+            private _ihaMod = _ay getOrDefault ["ihaMod", 0];
+            if (_ihaMod > 0) then {
+                private _ihaU = _durum getOrDefault ["iha", objNull];
+                private _ihaAktif = !isNull _ihaU && {alive _ihaU} && {(_ihaU getVariable [QGVAR(ihaTok), -1]) >= 0};
+                if (!_ihaAktif && {_ihaMod isEqualTo 1 || {_alarm}} && {(time - (_durum getOrDefault ["ihaT", -999])) > 90}) then {
+                    _durum set ["ihaT", time];
+                    private _ihaNid = _ay getOrDefault ["ihalar", []];
+                    private _ihaAday = vehicles select {
+                        unitIsUAV _x && {alive _x} && {_x isKindOf "Air"} && {(fuel _x) > 0.3}
+                        && {([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM"} && {(_x getVariable [QGVAR(ihaTok), -1]) < 0}
+                        && {((count (UAVControl _x)) isEqualTo 0) || {isNull ((UAVControl _x) select 0)}}
+                        && {(if ((crew _x) isNotEqualTo []) then {side (group ((crew _x) select 0))} else {[east, west, independent, civilian] select (((getNumber (configOf _x >> "side")) max 0) min 3)}) isEqualTo _taraf}
+                        && {if (_ihaNid isEqualTo []) then {(_x distance2D _poz) <= ((_yar * 1.5) max 300)} else {(netId _x) in _ihaNid}}
+                    };
+                    if (_ihaAday isEqualTo []) then {
+                        if ((time - (_durum getOrDefault ["ihaYokLogT", -999])) > 300) then {
+                            _durum set ["ihaYokLogT", time];
+                            diag_log format ["[KARAKOL-GARNIZON] %1 | IHA gozlem: uygun IHA yok (ayni taraf, ucan, GOZLEM tipi, bosta, yakit > %%30; %2)", _ad, ["karakol yaricapinin x1.5 icinde", "3DEN baglantili"] select (_ihaNid isNotEqualTo [])];
+                        };
+                    } else {
+                        _ihaAday = [_ihaAday, [], {_x distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
+                        private _ihaC = _ihaAday select 0;
+                        private _ihaR = if ((_ay getOrDefault ["ihaYar", 0]) > 0) then {_ay getOrDefault ["ihaYar", 0]} else {(_yar max 100) min 800};
+                        _durum set ["iha", _ihaC];
+                        [_ihaC, "GOZLEM", "GOZLEM", _taraf, _poz, _ihaR, 3000, objNull, 0, (_ay getOrDefault ["ihaSure", 0]) * 60] spawn FUNC(ihaSorti);
+                        diag_log format ["[KARAKOL-GARNIZON] %1 | IHA gozlem BASLADI: %2 | merkez %3 | yaricap %4 m | mod %5%6", _ad, getText (configOf _ihaC >> "displayName"), mapGridPosition _poz, round _ihaR, ["", "surekli", "alarmda"] select (_ihaMod min 2), ["", " (ALARM)"] select _alarm];
+                    };
+                };
+            };
 
             // ---- ARAC MEVZILERI ----
             private _aracG = _durum getOrDefault ["aracG", []];
