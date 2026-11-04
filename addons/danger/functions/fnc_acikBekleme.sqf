@@ -77,6 +77,11 @@ diag_log "[ACIK-BEKLE] acikta bekleme denetimi baslatildi (v8.377): duran + ayak
 
                 // acikta mi: 3 m'de sert nesne yok
                 if ((nearestTerrainObjects [_u, _sert, 3, false, true]) isNotEqualTo []) then { continue };
+                // v8.402: turu tanimsiz / simple object sert nesne de 'siper yaninda' sayilir (yukseklik >= 0.9 m)
+                if (!(missionNamespace getVariable ["lambs_danger_siperYedekOff", false]) && {((nearestObjects [_u, [], 3]) findIf {
+                    !(_x isKindOf "Man") && {!(_x isKindOf "AllVehicles")} && {!(_x isKindOf "Logic")} && {((typeOf _x) select [0, 1]) isNotEqualTo "#"} && {((getModelInfo _x) select 0) isNotEqualTo ""}
+                    && {private _bq = boundingBoxReal _x; (((_bq select 1) select 2) - ((_bq select 0) select 2)) >= 0.9}
+                }) >= 0}) then { continue };
 
                 // yakin dusman varsa dovusur
                 private _en = _u findNearestEnemy _u;
@@ -113,7 +118,23 @@ diag_log "[ACIK-BEKLE] acikta bekleme denetimi baslatildi (v8.377): duran + ayak
                             if (_sk < _enS) then { _enS = _sk; _en2 = _p; };
                         };
                     };
-                } forEach (nearestTerrainObjects [_u, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL"], 18, false, true]);
+                } forEach ((nearestTerrainObjects [_u, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL"], 18, false, true])
+                    // v8.402 TUR-BAGIMSIZ YEDEK (kullanici: 'pmc terrain kendi objelerini kullandim, simple object olabilir'; RPT: cok sayida '18 m'de siper yok -> comeldi'): turu tanimsiz / simple object nesneler de adaydir (ayni yukseklik >= 0.9 sarti)
+                    + (if (missionNamespace getVariable ["lambs_danger_siperYedekOff", false]) then {[]} else { ((nearestObjects [_u, [], 18]) select {
+    !(_x isKindOf "Man") && {!(_x isKindOf "AllVehicles")} && {!(_x isKindOf "House")} && {!(_x isKindOf "Logic")} && {!isObjectHidden _x}
+    && {((typeOf _x) select [0, 1]) isNotEqualTo "#"} && {((getModelInfo _x) select 0) isNotEqualTo ""}
+}) }));
+                // v8.402 TANI (siper bulunamadiysa, oyun basina en cok 8 kez): cevredeki nesne turleri ve tur-bagimsiz nesne adlari -> arazi nesnesi 'simple object' mi / hangi tur, RPT'den okunur
+                if (_en2 isEqualTo [] && {(missionNamespace getVariable ["lambs_danger_siperTaniN", 0]) < 8} && {(time - (missionNamespace getVariable ["lambs_danger_siperTaniT", -999])) > 20}) then {
+                    missionNamespace setVariable ["lambs_danger_siperTaniN", (missionNamespace getVariable ["lambs_danger_siperTaniN", 0]) + 1];
+                    missionNamespace setVariable ["lambs_danger_siperTaniT", time];
+                    private _tt = ["TREE", "SMALL TREE", "BUSH", "ROCK", "ROCKS", "WALL", "FENCE", "HIDE", "BUNKER", "RUIN", "BUILDING", "HOUSE"] apply {format ["%1:%2", _x, count (nearestTerrainObjects [_u, [_x], 18, false, true])]};
+                    private _no = ((nearestObjects [_u, [], 18]) select {!(_x isKindOf "Man") && {((typeOf _x) select [0, 1]) isNotEqualTo "#"}}) apply {
+                        private _bbT = boundingBoxReal _x;
+                        format ["%1[%2 m%3]", [typeOf _x, (getModelInfo _x) select 0] select ((typeOf _x) isEqualTo ""), (((_bbT select 1) select 2) - ((_bbT select 0) select 2)) toFixed 1, ["", ", simple"] select (isSimpleObject _x)]
+                    };
+                    diag_log format ["[SIPER-TANI] %1 | %2 | arazi nesne turleri (18 m): %3 | tur-bagimsiz nesneler (ilk 14 / %4): %5 | arazi %6", groupId _g, name _u, _tt joinString " ", count _no, (_no select [0, 14]) joinString " ; ", worldName];
+                };
 
                 if (_en2 isNotEqualTo []) then {
                     _dolu pushBack [_en2, time];

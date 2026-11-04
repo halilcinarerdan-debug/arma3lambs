@@ -739,7 +739,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                     if (!isNull _en && {_enD < _emniyet} && {_yaklasma > 1.5 || {_enD < 9}} && {(_frenBas < 0) || {(time - _frenBas) < 8}}) then {
                         if (_frenBas < 0) then { _frenBas = time; };
                         _frenli = true;
-                        private _hedefHz = if (_enD < 10) then {0} else {((speed _en) max 0) / 3.6 * 0.8};
+                        private _hedefHz = if (_enD < 8) then {0} else {((speed _en) max 0) / 3.6 * 0.8};   // v8.402: 10 -> 8 m
                         _d forceSpeed (_hedefHz min (_hz max 0));
                         _durgunT = -1;
                         if ((time - _frenLogT) > 15) then {
@@ -754,16 +754,18 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 // v8.171 KONVOY SENKRONU (MCWP 3-11.1 s. 6-36: tank / piyade araclari karsilikli destek mesafesinde birlikte ilerler; inis noktasinda kontrol kurulup birlikte saldirilir): hizli arac, ardindaki arac(lar)i > 250 m geride birakmasin
                 if (_bitis isEqualTo "" && {!_frenli} && {_dm > 350} && {alive _v} && {alive _d}) then {
+                    // v8.402 DUR-KALK (RPT 2026-11: takilmis / emir bekleyen ('komut STOP') bir arac yuzunden onculer 18 km/sa'ya dusuruluyor, 58-83 sn toplam): esik 250 -> 350 m; 4 sn'den uzun duran (takilmis / kurtarma bekleyen) arac BEKLENMEZ;
+                    //   taban hiz 5 -> 9 m/sn (32 km/sa); geride kalanin hizi 3 m/sn altindaysa onculer 'hizi 0'a degil taban hiza iner
                     private _geri = (_senk select 2) select {
-                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false} && {(_x distance2D _drop) > (_dm + 250)} && {(_x getVariable [QGVAR(durgunSn), 0]) < 10}
+                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false} && {(_x distance2D _drop) > (_dm + ([250, 350] select (!_senkli)))} && {(_x getVariable [QGVAR(durgunSn), 0]) < 4}
                     };
                     if (_geri isNotEqualTo [] && {_senkT < 90}) then {
                         private _en = 9999;
                         { _en = _en min ((speed _x) / 3.6); } forEach _geri;
-                        _d forceSpeed ((_en * 1.15) max 5);
+                        _d forceSpeed ((_en * 1.15) max 9);
                         _senkT = _senkT + 1;
                         _senkli = true;
-                        if ((time - _senkLogT) > 20) then { _senkLogT = time; diag_log format ["[TASIMA] %1 | KONVOY SENKRONU: %2 arac > 250 m geride -> hiz %3 km/s'ya dusuruldu (toplam %4 sn)", groupId _vg, count _geri, round (((_en * 1.15) max 5) * 3.6), _senkT]; };
+                        if ((time - _senkLogT) > 20) then { _senkLogT = time; diag_log format ["[TASIMA] %1 | KONVOY SENKRONU: %2 arac > 250 m geride -> hiz %3 km/s'ya dusuruldu (toplam %4 sn)", groupId _vg, count _geri, round (((_en * 1.15) max 9) * 3.6), _senkT]; };
                     } else {
                         if (_senkli) then { _senkli = false; _d forceSpeed -1; };
                     };

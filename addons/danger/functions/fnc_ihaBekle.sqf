@@ -95,9 +95,9 @@ if (!_hemen && {isNull _hedef} && {_serbest isEqualTo []}) exitWith {
     false
 };
 
-// v8.363: UCAK tipi IHA (Greyhawk / Ababil / Falcon / Sentinel) 40 m'de ucamaz (durma hizi, yere carpar): ucus irtifasinda (CBA 'Ucak IHA irtifasi', varsayilan 400 m) ve ucus hiziyla baslar
+// v8.363: UCAK tipi IHA (Greyhawk / Ababil / Falcon / Sentinel) 40 m'de ucamaz (durma hizi, yere carpar): ucus irtifasinda (CBA 'Ucak IHA irtifasi', varsayilan 1200 m) ve ucus hiziyla baslar
 private _ucak = _sn isKindOf "Plane";
-private _irt = [40, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 400]] select _ucak;
+private _irt = [40, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200]] select _ucak;
 private _iha = createVehicle [_sn, [_poz select 0, _poz select 1, _irt], [], 0, "FLY"];
 _iha setPosATL [_poz select 0, _poz select 1, _irt];
 if (_ucak) then { [_iha] call FUNC(ihaUcakHiz); };

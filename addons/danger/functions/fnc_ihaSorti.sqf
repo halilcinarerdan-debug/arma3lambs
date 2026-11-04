@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * IHA GOREVI (v8.233; kullanici: FPV Drone Crocus (Workshop 3045129955), Mavic 3 + drop mod (3112310403), RHS IHA'lari) — AI IHA'yi betikle ucurur:
  *   GOZLEM : gozlem noktasi etrafinda (yaricap) devriye; gorulen dusman fnc_ihaGozlem ile ortak resme verilir. v8.363 TIP DUYARLI: quad / helikopter tipi rastgele noktalara 120 m'de (CBA 'Gozlem IHA irtifasi'),
- *            UCAK tipi (Greyhawk / Ababil / Falcon / Sentinel) LOITER (daire) 400 m'de (CBA 'Ucak IHA irtifasi'; yerdeyse havadan baslatilir), kara IHA'si (UGV) kara noktalarina surer. Sure: modul 'Gozlem suresi' ya da CBA 'Gozlem IHA suresi' (20 dk).
+ *            UCAK tipi (Greyhawk / Ababil / Falcon / Sentinel) LOITER (daire) 1200 m'de (v8.402: 400 -> 1200; TB2 400 m'de 57 sn icinde ZSU-23-4 ile dustu; SILAHLI IHA'lar yere atis yapar: fnc_ihaSilahliVur) (CBA 'Ucak IHA irtifasi'; yerdeyse havadan baslatilir), kara IHA'si (UGV) kara noktalarina surer. Sure: modul 'Gozlem suresi' ya da CBA 'Gozlem IHA suresi' (20 dk).
  *   FPV-AT : kamikaze — zirhli (zirh >= 100 / Tank / APC) bilinen en yakin hedefe kadar alcak ucar (40 m), 220 m kala DALIS (28 m/sn, 0.1 sn adim), <= 4 m'de patlar (RPG-7 benzeri R_PG32V_F).
  *   FPV-AP : kamikaze — personel kumesi (15 m icinde en cok dusman); termobarik benzeri R_TBG32V_F.
  *   BOMBA  : Mavic benzeri — hedefin 10 m ustune gelir (30 m irtifa), 3 el bombasi (GrenadeHand) 6 sn arayla birakir, sonra kalkis noktasina doner. (Mod drop sistemi gerekmez; bombayi betik yaratir.)
@@ -69,6 +69,15 @@ if !(_uav getVariable [QGVAR(ihaKilledEH), false]) then {
 
 private _tur = if (_turE isNotEqualTo "") then {_turE} else { [_uav] call FUNC(ihaTip) };
 if (_mod isEqualTo "GOZLEM") then { _tur = "GOZLEM"; };
+// v8.402 SILAHLI IHA (kullanici: 'dusman dronu araclara fuze yollamadi'): ucan, yere atabilen mühimmati olan (fnc_ihaSilah; calisma aninda pilon / dinamik yuk dahil) IHA gozlem devriyesine ek olarak
+//   bilinen dusman araca / kumeye fuze atar (fnc_ihaSilahliVur). Yalniz Eden / Zeus 'IHA Gorevi' (SORTI) + tur Otomatik / 'SILAHLI'; karakol gozlemi (mod GOZLEM) ve elle GOZLEM turu YALNIZ gozler. Kapatma: CBA ihaSilahliSaldiri.
+private _silahB = false;
+if (_tur isEqualTo "SILAHLI") then { _tur = "GOZLEM"; _silahB = true; };
+if (!_silahB && {_tur isEqualTo "GOZLEM"} && {_mod isEqualTo "SORTI"} && {_turE isEqualTo ""} && {_uav isKindOf "Air"}) then { _silahB = ([_uav] call FUNC(ihaSilah)) isNotEqualTo []; };
+if (_silahB && {!(missionNamespace getVariable ["lambs_danger_ihaSilahliSaldiri", true])}) then { _silahB = false; };
+if (_silahB) then {
+    diag_log format ["[IHA-SILAH] %1 | SILAHLI IHA: gozlem + yere atis gorevi (mühimmat: %2)", typeOf _uav, ([_uav] call FUNC(ihaSilah)) apply {format ["%1 %2 (%3, hit %4)", _x select 0, _x select 2, _x select 4, _x select 5]}];
+};
 _uav setVariable [QGVAR(ihaGorevTur), _tur];   // v8.343: gozlemli topcu (fnc_dronTopcu) B_Crocus_AP gibi sinifi FPV gorunen ama GOZLEM gorevinde olan dronu da gozlemci sayar
 if (isNull (driver _uav)) then {
     createVehicleCrew _uav;
@@ -80,7 +89,7 @@ if (isNull (driver _uav)) then {
 // v8.363 UCAK tipi IHA yerdeyse (Eden'de pistte / Zeus'ta yere konmus): AI pistten kalkis yapmaz -> ucus irtifasinda ve hizinda havadan baslatilir (kapatma: lambs_danger_ihaUcakHavadan = false)
 if (_uav isKindOf "Plane" && {((getPosATL _uav) select 2) < 25} && {missionNamespace getVariable ["lambs_danger_ihaUcakHavadan", true]}) then {
     private _pz = getPosATL _uav;
-    _uav setPosATL [_pz select 0, _pz select 1, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 400]];
+    _uav setPosATL [_pz select 0, _pz select 1, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200]];
     [_uav] call FUNC(ihaUcakHiz);
     diag_log format ["[IHA-UCAK] %1 | yerdeydi (%2 m): havadan baslatildi %3 m (AI pistten kalkis yapmaz)", typeOf _uav, round (_pz select 2), round ((getPosATL _uav) select 2)];
 };
@@ -107,8 +116,8 @@ _uav setVariable ["lambs_danger_gorev", "HARIC", true];
 _uav engineOn true;
 diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m | gozlem yaricap %7 m | kategori %8 | sure %9 sn", typeOf _uav, getText (configOf _uav >> "displayName"), _mod, _tur, _taraf, round _men, round _yar, ["KARA", ["HELI", "UCAK"] select (_uav isKindOf "Plane")] select (_uav isKindOf "Air"), round _sureS];
 
-[_uav, _tok, _tur, _taraf, _merkez, _yar, _men, _op, _opMod, _sureS] spawn {
-    params ["_uav", "_tok", "_tur", "_taraf", "_merkez", "_yar", "_men", "_op", "_opMod", "_sureS"];
+[_uav, _tok, _tur, _taraf, _merkez, _yar, _men, _op, _opMod, _sureS, _silahB] spawn {
+    params ["_uav", "_tok", "_tur", "_taraf", "_merkez", "_yar", "_men", "_op", "_opMod", "_sureS", "_silahB"];
     private _d = driver _uav;
     private _bas = getPosATL _uav;
     private _t0 = time;
@@ -142,21 +151,23 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
         private _ucak = _uav isKindOf "Plane";
         private _havada = _uav isKindOf "Air";
         if (_ucak) then {
-            private _irtU = missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 400];
+            private _irtU = missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200];
             private _gr = group _d;
             while {(waypoints _gr) isNotEqualTo []} do { deleteWaypoint ((waypoints _gr) select 0); };
             _uav flyInHeight _irtU;
             private _wp = _gr addWaypoint [_merk, 0];
             _wp setWaypointType "LOITER";
             _wp setWaypointLoiterType "CIRCLE_L";
-            _wp setWaypointLoiterRadius (((_yar max 500) min 1500));
+            _wp setWaypointLoiterRadius (((_yar max 900) min 2000));   // v8.402: 500 -> 900 m (genis daire, ayni noktanin ustunde kalmaz)
             _wp setWaypointSpeed "NORMAL";
             _wp setWaypointBehaviour "CARELESS";
             _gr setCurrentWaypoint _wp;
-            diag_log format ["[IHA-SORTI] %1 | UCAK gozlem: LOITER %2 yaricap %3 m, irtifa %4 m, sure %5 sn", typeOf _uav, mapGridPosition _merk, round ((_yar max 500) min 1500), round _irtU, round _sureS];
+            diag_log format ["[IHA-SORTI] %1 | UCAK gozlem: LOITER %2 yaricap %3 m, irtifa %4 m, sure %5 sn", typeOf _uav, mapGridPosition _merk, round ((_yar max 900) min 2000), round _irtU, round _sureS];
+            if (_silahB) then { [_uav, _taraf, _merk, _men, _tok, _sureS, _irtU] spawn FUNC(ihaSilahliVur); };
             waitUntil { sleep 3; !(call _aktif) };
         } else {
             if (_havada) then { _uav flyInHeight (missionNamespace getVariable ["lambs_danger_ihaGozlemIrtifa", 120]); };
+            if (_silahB && {_havada}) then { [_uav, _taraf, _merk, _men, _tok, _sureS, missionNamespace getVariable ["lambs_danger_ihaGozlemIrtifa", 120]] spawn FUNC(ihaSilahliVur); };
             while _aktif do {
                 private _pt = _merk getPos [random _yar, random 360];
                 if (!_havada && {surfaceIsWater _pt}) then { sleep 1; continue };

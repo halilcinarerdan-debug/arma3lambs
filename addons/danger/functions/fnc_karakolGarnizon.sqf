@@ -242,6 +242,21 @@ private _calis = {
             // ---- havuz ----
             private _altGrupAd = {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isNotEqualTo ""};
             private _havuz = [];
+            // v8.402 (RPT 2026-11: 3DEN'de 1 asker SYNC'liydi, nobet 3 + devriye 1x3 istenmisti -> 8 dk 'nobet 1/3, devriye 0/1', devriye HIC kurulmadi): secili asker sayisi gereken (nobet + devriye x boy)
+            //   sayisindan azsa havuz yaricap havuzuyla TAMAMLANIR (secililer once kullanilir); hala yetmezse OZET satirinda 'havuz X / gerek Y' yazilir.
+            private _uyeHavuz = [];
+            if (_uyeMod) then {
+                _uyeHavuz = (_uyeNid apply {objectFromNetId _x}) select {
+                    !isNull _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}
+                    && {(side (group _x)) isEqualTo _taraf} && {((group _x) getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
+                };
+            };
+            private _gerekAsker = _nobetN + _devN * _devBoy;
+            private _uyeYetmez = _uyeMod && {(count _uyeHavuz) < _gerekAsker};
+            if (_uyeYetmez && {(_durum getOrDefault ["yetmezLog", -1]) isNotEqualTo _surum}) then {
+                _durum set ["yetmezLog", _surum];
+                diag_log format ["[KARAKOL-GARNIZON] %1 | SECILI ASKER YETERSIZ: %2 asker secili < gereken %3 (nobet %4 + devriye %5 x %6) -> havuz karakol yaricapindaki (x1.5) takim askerleriyle TAMAMLANIYOR", _ad, count _uyeHavuz, _gerekAsker, _nobetN, _devN, _devBoy];
+            };
             {
                 private _g = _x;
                 if ((side _g) isNotEqualTo _taraf || {isNull (leader _g)} || {isPlayer (leader _g)}) then { continue };
@@ -257,13 +272,13 @@ private _calis = {
                 if (!_medGrup) then { _aday = _aday select {([_x] call _rolFn) isNotEqualTo "MEDIC"}; };
                 reverse _aday;
                 { _havuz pushBack _x; } forEach (_aday select [0, _ayril min (count _aday)]);
-            } forEach ([[allGroups select {!(call _altGrupAd)}, _grpSecili select {!(call _altGrupAd)}] select _grpMod, []] select _uyeMod);
+            } forEach ([[allGroups select {!(call _altGrupAd)}, _grpSecili select {!(call _altGrupAd)}] select _grpMod, []] select (_uyeMod && {!_uyeYetmez}));
             if (_uyeMod) then {
-                _havuz = (_uyeNid apply {objectFromNetId _x}) select {
-                    !isNull _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {local _x}
-                    && {(side (group _x)) isEqualTo _taraf} && {((group _x) getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
-                };
+                // secililer basta, yaricap havuzu (yalniz secili yetmediyse dolu) arkada
+                _havuz = _uyeHavuz + (_havuz - _uyeHavuz);
             };
+            _durum set ["havuzN", count _havuz];
+            _durum set ["gerekN", _gerekAsker];
             // nobetci / devriye icin zaten kullanilanlar havuzda sayilmaz (altgrup disinda)
             private _atama = _durum getOrDefault ["atama", createHashMap];
             private _pozlar = _durum getOrDefault ["pozlar", []];
@@ -361,7 +376,13 @@ private _calis = {
             } forEach ((allGroups select {(side _x) isEqualTo _taraf && {!isNull (leader _x)} && {((leader _x) distance2D _poz) < (_yar * 2)}}));
             while {count _devG < _devN} do {
                 private _adaylar = _havuz select {!(_x in _birimler) && {!(_x in (units _nobetG))} && {((group _x) getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}};
-                if (count _adaylar < _devBoy) exitWith {};
+                if (count _adaylar < _devBoy) exitWith {
+                    // v8.402: devriye neden kurulmadi (RPT 2026-11: sessizce 0/1 kaliyordu) - 60 sn'de bir
+                    if ((time - (_durum getOrDefault ["devYetmezT", -999])) > 60) then {
+                        _durum set ["devYetmezT", time];
+                        diag_log format ["[KARAKOL-GARNIZON] %1 | DEVRIYE kurulamadi: bosta aday %2 < devriye boyu %3 (havuz %4, nobetciler dusuldukten sonra) - garnizona daha cok asker SYNC'le / takim modunu sec / karakol yaricapina asker koy", _ad, count _adaylar, _devBoy, count _havuz];
+                    };
+                };
                 private _s = [_adaylar, [], {(rankId _x) * -10 + (_x distance2D _poz) / 20}, "ASCEND"] call BIS_fnc_sortBy;
                 private _uyeler = _s select [0, _devBoy];
                 private _dg = createGroup [_taraf, true];
@@ -472,8 +493,9 @@ private _calis = {
             // ---- ARAC MEVZILERI ----
             private _aracG = _durum getOrDefault ["aracG", []];
             if (_arac || {_aaMod > 0}) then {
-                private _vl = (_poz nearEntities [["LandVehicle"], _yar * 1.2]) select {
-                    alive _x && {!(_x isKindOf "StaticWeapon")} && {canMove _x} && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {local (driver _x)} && {(side (group (driver _x))) isEqualTo _taraf}
+                // v8.402: SPAAG icin tarama yaricapi en az 250 m (ZSU karakol disinda park halindeyse da ic halkaya cekilir); diger araclar eski yaricap (yar x 1.2)
+                private _vl = (_poz nearEntities [["LandVehicle"], (_yar * 1.2) max ([0, 250] select (_aaMod > 0))]) select {
+                    alive _x && {!(_x isKindOf "StaticWeapon")} && {((_x distance2D _poz) <= (_yar * 1.2)) || {_aaMod > 0 && {([_x] call FUNC(aaSinif)) isEqualTo "SPAAG"}}} && {canMove _x} && {!isNull (driver _x)} && {!isPlayer (driver _x)} && {local (driver _x)} && {(side (group (driver _x))) isEqualTo _taraf}
                     && {(_arac && {(_x emptyPositions "cargo") >= 2 || {(getNumber (configOf _x >> "armor")) >= 100}}) || {_aaMod > 0 && {([_x] call FUNC(aaSinif)) isEqualTo "SPAAG"}}}
                     && {!(((group (driver _x)) getVariable ["lambs_danger_garnizonAlt", ""]) isNotEqualTo "")}
                 };
@@ -524,10 +546,10 @@ private _calis = {
                 private _ay = lambs_danger_karakolAyar getOrDefault [_id, createHashMap];
                 private _atama = _d getOrDefault ["atama", createHashMap];
                 private _nb = {alive (_atama get _x)} count (keys _atama);
-                diag_log format ["[KARAKOL-GARNIZON-OZET] %1 | nobet %2/%3 (pozisyonda %4) | devriye %5/%6 | arac %7 | alarm:%8 | devriye durumu: %9",
+                diag_log format ["[KARAKOL-GARNIZON-OZET] %1 | nobet %2/%3 (pozisyonda %4) | devriye %5/%6 | arac %7 | alarm:%8 | havuz %10 / gerek %11 | devriye durumu: %9",
                     _id, _nb, _ay getOrDefault ["nobet", 0], {(_atama get _x) getVariable ["lambs_danger_nobet", false]} count (keys _atama),
                     count (_d getOrDefault ["devriyeG", []]), _ay getOrDefault ["devriye", 0], count (_d getOrDefault ["aracG", []]), _d getOrDefault ["alarm", false],
-                    (_d getOrDefault ["devriyeG", []]) apply {format ["%1:%2 S%3", groupId _x, _x getVariable ["lambs_danger_devDurum", "klasik"], _x getVariable ["lambs_danger_devSektor", "-"]]}];
+                    (_d getOrDefault ["devriyeG", []]) apply {format ["%1:%2 S%3", groupId _x, _x getVariable ["lambs_danger_devDurum", "klasik"], _x getVariable ["lambs_danger_devSektor", "-"]]}, _d getOrDefault ["havuzN", 0], _d getOrDefault ["gerekN", 0]];
             } forEach lambs_danger_garnizonDurum;
         };
         missionNamespace setVariable ["lambs_danger_garnizonAdim", "tur bitti"];

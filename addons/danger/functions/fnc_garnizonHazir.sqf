@@ -18,8 +18,8 @@
 params [["_i", 0, [0]]];
 
 switch (round _i) do {
-    case 1: { [2, 1, 2, true, false, 0, 0] };
-    case 2: { [4, 2, 3, true, true, 0, 0] };
+    case 1: { [2, 1, 2, true, false, 1, 0] };
+    case 2: { [4, 2, 3, true, true, 1, 0] };
     case 3: { [6, 3, 3, true, true, 1, 2] };
     default { [] };
 };

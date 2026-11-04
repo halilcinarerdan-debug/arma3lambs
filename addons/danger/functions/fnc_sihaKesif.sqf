@@ -31,18 +31,31 @@ private _id = _plan getOrDefault ["id", "?"];
 private _tarafNo = [east, west, independent, civilian] find _taraf;
 
 sleep 8;
-private _adaylar = vehicles select {
-    unitIsUAV _x && {alive _x} && {_x isKindOf "Air"} && {(([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM") || {(_x getVariable [QGVAR(ihaGorevTur), ""]) isEqualTo "GOZLEM"}}
-    && {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > (1800 max ((_x getVariable [QGVAR(ihaSureS), 0]) + 50))}}
-    && {((getPosATL _x) select 2) > 30 || {_x isKindOf "Helicopter"}}
-    && {(_x distance2D _obj) < 9000}
-    && {
-        private _mur = (crew _x) select {alive _x};
-        if (_mur isEqualTo []) then { (getNumber (configOf _x >> "side")) isEqualTo _tarafNo } else { (side (group (_mur select 0))) isEqualTo _taraf }
+// v8.402 (RPT 2026-11: 'recon calismadi' - iki IHA da baska gozlem gorevinde (IHA Gorevi modulu) oldugu icin 'serbest IHA yok'): once SERBEST aday; yoksa ayni taraftan, KARAKOL'a ait olmayan MESGUL gozlem IHA'si goreve alinir
+//   (onceki gorev tok degisince sonlanir; recon bitince IHA serbest birakilir, 'IHA Gorevi' yeniden verilebilir). Ucak tipi IHA'lar da (LOITER) zaten adaydir.
+private _adayFiltre = {
+    params ["_mesgulOk"];
+    vehicles select {
+        unitIsUAV _x && {alive _x} && {_x isKindOf "Air"} && {(([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM") || {(_x getVariable [QGVAR(ihaGorevTur), ""]) isEqualTo "GOZLEM"}}
+        && {_mesgulOk || {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > (1800 max ((_x getVariable [QGVAR(ihaSureS), 0]) + 50))}}}
+        && {((getPosATL _x) select 2) > 30 || {_x isKindOf "Helicopter"}}
+        && {(_x distance2D _obj) < 9000}
+        && {
+            private _mur = (crew _x) select {alive _x};
+            if (_mur isEqualTo []) then { (getNumber (configOf _x >> "side")) isEqualTo _tarafNo } else { (side (group (_mur select 0))) isEqualTo _taraf }
+        }
     }
 };
+private _adaylar = [false] call _adayFiltre;
+if (_adaylar isEqualTo []) then {
+    private _karakolIha = (values (missionNamespace getVariable ["lambs_danger_garnizonDurum", createHashMap])) apply { _x getOrDefault ["iha", objNull] };
+    _adaylar = ([true] call _adayFiltre) select { !(_x in _karakolIha) && {!(_x getVariable [QGVAR(sihaKesifte), false])} };
+    if (_adaylar isNotEqualTo []) then {
+        diag_log format ["[SIHA-KESIF] %1 | %2 | serbest IHA yok -> MESGUL gozlem IHA'si goreve alindi: %3", _id, _taraf, (_adaylar apply {typeOf _x}) joinString ", "];
+    };
+};
 if (_adaylar isEqualTo []) exitWith {
-    diag_log format ["[SIHA-KESIF] %1 | %2 | kesif IHA / SIHA bulunamadi (ucuyor / helikopter tipi, GOZLEM turu, 9 km icinde, serbest) - sortie yok", _id, _taraf];
+    diag_log format ["[SIHA-KESIF] %1 | %2 | kesif IHA / SIHA bulunamadi (ucuyor / ucak ya da helikopter tipi, GOZLEM turu, 9 km icinde, ayni taraf; serbest ya da karakol disi mesgul) - sortie yok. Taraf '%2' icin IHA (sinif adi + murettebat tarafi) var mi? (TB2 vb. 'taraf UNKNOWN' ise murettebat yok)", _id, _taraf];
     false
 };
 private _uav = ([_adaylar, [], {_x distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy) select 0;
@@ -51,6 +64,7 @@ if (!local _uav) exitWith { diag_log format ["[SIHA-KESIF] %1 | %2 sunucuda yere
 
 private _tok = diag_tickTime;
 _uav setVariable [QGVAR(ihaTok), _tok];
+_uav setVariable [QGVAR(sihaKesifte), true];   // v8.402: ikinci plan ayni IHA'yi ellemesin
 _uav setVariable [QGVAR(ihaGorevTur), "GOZLEM"];
 if (isNull (driver _uav)) then { createVehicleCrew _uav; };
 private _d = driver _uav;
@@ -60,7 +74,7 @@ if (isNull _d) exitWith { diag_log format ["[SIHA-KESIF] %1 | %2 murettebat olus
 (group _d) setSpeedMode "NORMAL";
 { _d disableAI _x; } forEach ["AUTOTARGET", "TARGET"];
 { _x disableAI "AUTOTARGET"; _x disableAI "TARGET"; } forEach ((crew _uav) select {alive _x});
-private _yuks = [300, 150] select (_uav isKindOf "Helicopter");
+private _yuks = if (_uav isKindOf "Helicopter") then {150} else { (missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200]) max 300 };   // v8.402: ucak tipi kesif IHA'si CBA 'Ucak IHA irtifasi'nda (eskiden 300 m: AA'ya kolay hedef)
 _uav flyInHeight _yuks;
 private _bas = getPosATL _uav;
 private _t0 = time;
@@ -167,6 +181,7 @@ if (alive _uav && {alive _d}) then {
     _d doMove _bas;
     if (_uav isKindOf "Helicopter") then { _uav land "LAND"; };
     _uav setVariable [QGVAR(ihaTok), -1];
+    _uav setVariable [QGVAR(sihaKesifte), nil];
 };
 diag_log format ["[SIHA-KESIF] %1 | %2 | sortie bitti (%3 sn) | sektor puanlari %4 | son tehdit cikarimi %5", _id, _taraf, round (time - _t0), _sek, _plan getOrDefault ["sihaTehdit", "yok"]];
 true

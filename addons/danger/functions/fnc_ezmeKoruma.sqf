@@ -88,7 +88,8 @@ private _calis = {
                 // 30 sn kesintisiz fren (yoldaki dost yaya kimildamiyor): 5 km/s siner (kilitlenme onlemi)
                 if (!_frenli) then { _v setVariable [QGVAR(ezmeBaslaT), time]; };
                 private _surekli = time - (_v getVariable [QGVAR(ezmeBaslaT), time]);
-                _d forceSpeed ([0, 1.4] select (_surekli > 30));
+                // v8.402 ORANTILI FREN (RPT 2026-11: yol kenarindaki dost piyade 22-26 m onde iken konvoy tam durup kalkiyordu): mesafe uzaksa (> 14 m) hiz mesafeye gore azalir (~ (mesafe - 6) / 2.2 m/sn, en az 1.4); yakinda tam fren
+                _d forceSpeed (if (_surekli > 30) then {1.4} else { if (_enYakin > 14) then { (((_enYakin - 6) / 2.2) max 1.4) } else {0} });
                 // v8.195 YOL AC (kullanici: "askerler hala apcyi blokluyor, apc yakininda asker varsa kafayi yiyor"; RPT f82d65d0: durmus APC'nin 5 m onunde dost yaya, fren 16+ sn surdu): arac duruyor ve 2 sn'den uzun suredir seritte dost yaya varsa AI yaya yana (arac yonune dik, 12 m) kacirilir
                 if (abs _hiz < 1 && {_surekli > 2}) then {
                     {

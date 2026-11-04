@@ -24,7 +24,7 @@ params [["_poz", [0, 0, 0], [[]]]];
         ["Ust kat / cati nobet pozisyonlari", "BOOLEAN", "Binalarin >= 2.5 m yuksekteki ic pozisyonlari nobet icin aday olur (hakim, dis cepheyi goren). Kapali: yalniz yuksek arazi.", true, ""],
         ["Araclar mevzi olsun (APC / kamyon)", "BOOLEAN", "Karakol icindeki AI suruculu kara araclari cevrede ates mevzisine gider, muretteat icinde kalir.", true, ""],
         ["Asker secimi", "LIST", "Otomatik: karakol yaricapinin x1.5 icindeki gruplardan asker alinir. Asker listesi: modulun 800 m cevresindeki AI askerler listelenir; isaretlediklerin garnizon havuzu olur (yaricap kurali yok). Takim listesi: 800 m cevresindeki AI takimlar (grup) listelenir; yalniz isaretlediklerin garnizona asker verir (her takimda en az 3 asker kalir).", ["Otomatik (yaricap havuzu)", "Elle sec: asker listesi", "Elle sec: takim (grup) listesi"], 0],
-        ["Anti-air konumlandirma", "LIST", "Otomatik: MANPADS (Stinger / Igla / Zipkin ...) tasiyan askerler ayri acik / yuksek AA nobet noktalarina (en cok 3, 55 m aralikla); kendiyurur AA araclari (SPAAG: ZSU-23-4 / Tunguska ...) karakolun ic halkasina; STATIK AA (ZU-23 vb.) YERINDE KALIR. Elle tanim: nesne init this setVariable [lambs_danger_aa, SPAAG, true] (MANPADS / SPAAG / STATIK / NONE).", ["Yok", "Otomatik"], 0],
+        ["Anti-air konumlandirma", "LIST", "Otomatik: MANPADS (Stinger / Igla / Zipkin ...) tasiyan askerler ayri acik / yuksek AA nobet noktalarina (en cok 3, 55 m aralikla); kendiyurur AA araclari (SPAAG: ZSU-23-4 / Tunguska ...) karakolun ic halkasina; STATIK AA (ZU-23 vb.) YERINDE KALIR. Elle tanim: nesne init this setVariable [lambs_danger_aa, SPAAG, true] (MANPADS / SPAAG / STATIK / NONE).", ["Yok", "Otomatik"], 1],
         ["IHA gozlem (karakola bagli)", "LIST", "Surekli: karakol merkezinde gozlem devriyesi atan bosta IHA (ayni taraf, ucan, GOZLEM tipi: FPV / bomba degil; karakol yaricapinin x1.5 icinde, yakit > %30). Alarmda: yalniz grup temasinda kalkar. IHA gorevi bitince / dusunce 90 sn sonra yenisi secilir; karakol kaldirilinca gorev kaldirilir. Belirli IHA icin 3DEN modulu (SYNC) kullanilir (SYNC'li IHA varsa 'Yok' secilse bile Surekli sayilir).", ["Yok", "Surekli gozlem devriyesi", "Alarmda gozlem"], 0],
         ["IHA devriye yaricapi (m)", "SLIDER", "0 = karakol yaricapi (100-800 m). IHA bu yaricapta karakol merkezi etrafinda devriye atar.", [0, 800], [10, 100], 0, 0],
         ["IHA gozlem suresi (dk)", "SLIDER", "0 = CBA 'Gozlem IHA suresi' (varsayilan 20 dk). Sure dolunca 90 sn sonra yeni IHA / sorti.", [0, 60], [1, 5], 0, 0],
@@ -33,7 +33,7 @@ params [["_poz", [0, 0, 0], [[]]]];
     {
         params ["_data", "_args"];
         _args params ["_poz"];
-        _data params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", ["_secim", 0], ["_aa", 0], ["_ihaMod", 0], ["_ihaYar", 0], ["_ihaSure", 0], ["_devMes", 0]];
+        _data params ["_islem", "_nobet", "_dev", "_devBoy", "_ust", "_arac", ["_secim", 0], ["_aa", 1], ["_ihaMod", 0], ["_ihaYar", 0], ["_ihaSure", 0], ["_devMes", 0]];
         if (_secim isEqualTo 2 && {_islem isEqualTo 0}) exitWith {
             // v8.397: takim (grup) secimi paneli (sonraki karede)
             [{

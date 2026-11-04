@@ -4,7 +4,7 @@
  * ZIRH ARALIGI (v8.348; kullanici: 'tanklar bazen 2 ya da daha fazla iken birbirlerinin ustune biniyorlar'). Sunucu bekcisi, 3 sn'de bir; AI suruculu, yerel, motoru acik tank / IFV / APC ciftlerini denetler.
  * Kitap: MCWP 3-11.1 satir 8742-8766 (arac ARALIGI arazi ve duruma gore; birbirini gorecek kadar yakin; sinirli gorusta daralir) + ATP 3-20.15 / genel zirh ilkesi: dagilma (tek atisla iki arac kaybedilmesin, karsilikli destek); sayilar [T].
  * ONLEM / KURTARMA (kademeler):
- *   1) YAKLASIYOR (hareketli, merkezler < 22 m, biri digerine dogru gidiyor): arkadan gelen / yavas arac 4 sn durdurulur (doStop + forceSpeed 0), sonra serbest birakilir.
+ *   1) YAKLASIYOR (hareketli, merkezler < 22 m, KAPANMA hizi > 1.5 m/sn - v8.402: konvoy ayni hizda giderken tetiklenmez): arkadan gelen / yavas arac yavaslatilir (onde gidenin %80'i) ya da cok yakin / hizli yaklasmada 3 sn durdurulur (forceSpeed; doStop YOK - hareket emri silinmez).
  *   2) PARK ARALIGI (ikisi de duruyor, merkezler < 26 m): SONRA duran arac digerinden uzaklasan 40 m'lik bos noktaya kayar (grup mevzi noktasi da guncellenir). Kitap: dagilma.
  *   3) UST USTE / IC ICE (merkezler < 10 m ya da yukseklik farki > 1.2 m ve yatay < 13 m): geri al + uzaklas (setVelocityModelSpace -3 m/sn 2 sn + 45 m ara nokta); 10 sn sonra hala ic icesiyse en yakin bos konuma setVehiclePosition.
  * Ayni arac icin 25 sn kilit. Atlanir: oyuncu surucu, motor kapali, hareket edemeyen arac, nakil sirasinda yolcu indirme. Kapatma: CBA tankAralikAktif / lambs_danger_tankAralikOff = true. Log: [TANK-ARALIK].
@@ -40,16 +40,21 @@ lambs_danger_tankAralikStarted = true;
                 private _ha = (speed _a) > 3;
                 private _hb = (speed _b) > 3;
                 private _tur = "";
+                // v8.402 YAKLASMA HIZI (RPT 2026-11: ayni hizda giden konvoy araclari 12-17 m aralikta 'YAKLASIYOR' sayilip 4 sn durduruluyordu -> dur-kalk): a'dan b'ye bakis ekseninde KAPANMA hizi (m/sn); konvoyda ~0
+                private _ab = (getPosASL _b) vectorDiff (getPosASL _a);
+                _ab set [2, 0];
+                private _abM = vectorMagnitude _ab;
+                private _kapan = if (_abM < 0.5) then {0} else { ((velocity _a) vectorDiff (velocity _b)) vectorDotProduct (_ab vectorMultiply (1 / _abM)) };
                 if (_d2 < 10 || {_dz > 1.2 && {_d2 < 13}}) then { _tur = "USTUSTE"; } else {
-                    if ((_ha || _hb) && {_d2 < 22}) then { _tur = "YAKLASIYOR"; } else {
+                    if ((_ha || _hb) && {_d2 < 22}) then { if (_kapan > 1.5) then { _tur = "YAKLASIYOR"; }; } else {
                         if (!_ha && {!_hb}) then { _tur = "PARK"; };
                     };
                 };
-                if (_tur isNotEqualTo "") then { _isleme pushBack [_a, _b, _tur, _d2]; };
+                if (_tur isNotEqualTo "") then { _isleme pushBack [_a, _b, _tur, _d2, _kapan]; };
             };
         };
         {
-            _x params ["_a", "_b", "_tur", "_d2"];
+            _x params ["_a", "_b", "_tur", "_d2", ["_kapan", 0]];
             // hareket edecek arac: park / ust uste -> SONRA duran (aralikDurT buyuk olan); yaklasma -> yavas olan
             private _tA = _a getVariable [QGVAR(aralikDurT), 0];
             private _tB = _b getVariable [QGVAR(aralikDurT), 0];
@@ -65,10 +70,13 @@ lambs_danger_tankAralikStarted = true;
             private _g = group _dr;
             if (_tur isEqualTo "YAKLASIYOR") then {
                 _say set [0, (_say select 0) + 1];
-                doStop _dr;
-                _dr forceSpeed 0;
-                [{ params ["_dd"]; if (!isNull _dd) then { _dd forceSpeed -1; }; }, [_dr], 4] call CBA_fnc_waitAndExecute;
-                diag_log format ["[TANK-ARALIK] YAKLASIYOR: %1 -> %2 (%3 m): %1 4 sn durduruldu (carpisma onlemi)", getText (configOf _mv >> "displayName"), getText (configOf _di >> "displayName"), round _d2];
+                // v8.402: doStop KALDIRILDI - hareket emrini (doMove) siliyordu, forceSpeed serbest kalinca arac emirsiz duruyor, 8+ sn sonra TAKILMA kurtarmasi ('komut STOP') yeniden gonderiyordu = dur-kalk.
+                //   Kademe: cok yakin (< 13 m) ya da hizli yaklasma (> 5 m/sn) = 3 sn tam fren; digerinde onde giden aracin hizinin %80'ine yavaslat (min 1.5 m/sn), 4 sn sonra serbest.
+                private _sert = (_d2 < 13) || {_kapan > 5};
+                private _onHiz = ((speed _di) max 0) / 3.6;
+                _dr forceSpeed ([((_onHiz * 0.8) max 1.5), 0] select _sert);
+                [{ params ["_dd"]; if (!isNull _dd) then { _dd forceSpeed -1; }; }, [_dr], [4, 3] select _sert] call CBA_fnc_waitAndExecute;
+                diag_log format ["[TANK-ARALIK] YAKLASIYOR: %1 -> %2 (%3 m, kapanma %4 m/sn): %1 %5 (carpisma onlemi, emir silinmedi)", getText (configOf _mv >> "displayName"), getText (configOf _di >> "displayName"), round _d2, _kapan toFixed 1, ["yavaslatildi (4 sn)", "3 sn durduruldu"] select _sert];
             } else {
                 private _uzak = (getPosATL _di) getDir (getPosATL _mv);
                 private _hedef = (getPosATL _di) getPos [([40, 48] select (_tur isEqualTo "USTUSTE")), _uzak + ((random 30) - 15)];

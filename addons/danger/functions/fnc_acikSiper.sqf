@@ -95,7 +95,13 @@ private _objAd = "";
             };
         };
     };
-} forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "HIDE"], _yar, false, true]);
+} forEach ((nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "HIDE"], _yar, false, true])
+    // v8.402 TUR-BAGIMSIZ YEDEK (kullanici: 'pmc terrain kendi objelerini kullandim, simple object falan olabilir'): arazi nesnesi turu ('TREE' / 'WALL' ...) tanimsiz / simple object / harita'ya yerlestirilmis nesneler nearestTerrainObjects'te gorunmez ->
+    //   nesne turune BAKMADAN (nearestObjects, insan / arac / ev / iz haric) ayni geometri testi (yukseklik >= 0.7, FIRE LOD isin testi) uygulanir. Kapatma: lambs_danger_siperYedekOff = true.
+    + (if (missionNamespace getVariable ["lambs_danger_siperYedekOff", false]) then {[]} else { ((nearestObjects [_p, [], _yar]) select {
+    !(_x isKindOf "Man") && {!(_x isKindOf "AllVehicles")} && {!(_x isKindOf "House")} && {!(_x isKindOf "Logic")} && {!isObjectHidden _x}
+    && {((typeOf _x) select [0, 1]) isNotEqualTo "#"} && {((getModelInfo _x) select 0) isNotEqualTo ""}
+}) }));
 
 if (_obj isNotEqualTo []) exitWith {
     _dolu pushBack [_obj, time];
