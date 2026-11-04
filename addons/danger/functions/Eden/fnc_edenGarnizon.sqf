@@ -1,7 +1,7 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * 3DEN: ELITE Karakol Garnizon modulu (v8.362). Karakol yaricapi + CBA garnizonEk (v8.393: varsayilan 500 m) icine yerlestirilir (garnizon alani karakolun yaricapidir); nobetci / devriye / ust kat / arac mevzisi ayarlari (Zeus lambs_danger_garnizonIstegi). Karakol modulunden SONRA calisir (6 sn gecikme).
+ * 3DEN: ELITE Karakol Garnizon modulu (v8.362; v8.400: karakol yoksa OTOMATIK karakol kurulur, SYNC'li IHA = surekli gozlem). Karakol yaricapi + CBA garnizonEk (v8.393: varsayilan 500 m) icine yerlestirilir (garnizon alani karakolun yaricapidir); nobetci / devriye / ust kat / arac mevzisi ayarlari (Zeus lambs_danger_garnizonIstegi). Karakol modulunden SONRA calisir (6 sn gecikme).
  * Arguments: 0: modul <OBJECT>, 1: baglananlar (kullanilmaz), 2: etkin <BOOL>
  * Return Value: None
  * Public: No
@@ -35,6 +35,11 @@ if (!_activated || {!isServer}) exitWith {};
     // v8.398: IHA gozlem (karakola bagli): 0 yok / 1 surekli / 2 alarmda; modulle SYNC edilen IHA'lar (unitIsUAV) yalniz onlar kullanilir, baglanmazsa karakol cevresindeki bosta IHA
     private _ihaMod = ["edGarIha", 0] call _n;
     private _ihaNid = ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x}) apply {netId _x};
+    // v8.400 (RPT 2026: SYNC'li IHA vardi ama 'IHA gozlem = Yok' kalmisti, IHA hic kalkmadi): modulle IHA SYNC edildiyse mod 'Yok' olsa bile SUREKLI sayilir
+    if (_ihaMod isEqualTo 0 && {_ihaNid isNotEqualTo []}) then {
+        _ihaMod = 1;
+        diag_log format ["[EDEN] Garnizon (3DEN) %1: %2 IHA SYNC'li ama 'IHA gozlem = Yok' -> Surekli gozlem olarak uygulandi", mapGridPosition _poz, count _ihaNid];
+    };
     private _iha = [_ihaMod, ["edGarIhaYar", 0] call _n, ["edGarIhaSure", 0] call _n, _ihaNid];
     ["lambs_danger_garnizonIstegi", [_poz, 0, _nobet, _dev, _devBoy, _ust, _arac, _uyeler, _devMes, _gruplar, _iha, ["edGarAA", 0] call _n]] call CBA_fnc_serverEvent;
     diag_log format ["[EDEN] Garnizon (3DEN) | %1 | nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | baglanan asker %7 | baglanan takim %9 | iha mod %10 (baglanan IHA %11) | devriye mesafesi %8", mapGridPosition _poz, _nobet, _dev, _devBoy, _ust, _arac, count _uyeler, _devMes, count _gruplar, _ihaMod, count _ihaNid];

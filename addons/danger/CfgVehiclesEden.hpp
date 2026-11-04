@@ -156,7 +156,7 @@ class GVAR(EdenKarakol): Module_F {
     _generalMacro = QGVAR(EdenKarakol);
     scope = 2;
     scopeCurator = 0;
-    displayName = "ELITE Karakol / Mevzi (3DEN)";
+    displayName = "ELITE Karakol / Mevzi (3DEN) - kur + hazir garnizon";
     icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
     category = "lambs_danger_elite_cat";
     function = QFUNC(edenKarakol);
@@ -169,6 +169,7 @@ class GVAR(EdenKarakol): Module_F {
         E_COMBO(edKarAd,"Ad tur","Harita isaretindeki ad.","0",E_V(0,"Karakol") E_V(1,"Mevzi") E_V(2,"Gozetleme noktasi"))
         E_NUM(edKarYar,"Yaricap m","Karakol cevre yaricapi (garnizon alani da bu yaricap; 30-1500 m onerilir).","120")
         E_COMBO(edKarSav,"Savunma","Hemen: baglanan gruplarla savunma plani kurulur; grup baglanmazsa yaricap x1.5 icindeki savunan gruplar alinir. Alarm: dusman 800 m icinde bilinince plan kurulur.","1",E_V(0,"Yok yalniz isaret") E_V(1,"Savunma plani HEMEN") E_V(2,"Alarm dusman yaklasinca"))
+        E_COMBO(edKarGar,"Garnizon hazir ayar","Tek modulle karakol + garnizon: Hafif = 2 nobetci + 1 devriye x 2. Standart = 4 nobetci + 2 devriye x 3 + arac mevzisi. Guclu = 6 nobetci + 3 devriye x 3 + arac + anti-air + IHA alarmda gozlem. Ozel ayar (asker takim secimi IHA SYNC devriye mesafesi) icin ayrica Karakol Garnizon modulu koyun.","0",E_V(0,"Yok") E_V(1,"Hafif") E_V(2,"Standart") E_V(3,"Guclu"))
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
@@ -184,7 +185,7 @@ class GVAR(EdenGarnizon): Module_F {
     _generalMacro = QGVAR(EdenGarnizon);
     scope = 2;
     scopeCurator = 0;
-    displayName = "ELITE Karakol Garnizon (3DEN)";
+    displayName = "ELITE Karakol Garnizon (3DEN) - ozel ayar / IHA / asker sec";
     icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
     category = "lambs_danger_elite_cat";
     function = QFUNC(edenGarnizon);
@@ -207,7 +208,7 @@ class GVAR(EdenGarnizon): Module_F {
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "Karakolun yaricapi + CBA Garnizon ek mesafesi (varsayilan 500 m) icine yerlestirin; garnizon alani karakolun yaricapidir (genis alan icin Karakol yaricapini buyutun, Eden yaricap sinirsiz). Karakol modulunden SONRA calisir. Modulle SYNC edilen AI askerler garnizon havuzu olur (nobetci / devriye yalniz onlardan, yaricap kurali yok); hic asker baglanmazsa karakol yaricapinin x1.5 icindeki gruplardan asker alinir.";
+        description = "Yakinda karakol yoksa karakol OTOMATIK kurulur (taraf: SYNC askerin / takimin / en yakin AI askerin tarafi; yaricap 150 m). Karakol varsa: karakolun yaricapi + CBA Garnizon ek mesafesi (varsayilan 500 m) icine yerlestirin; garnizon alani karakolun yaricapidir (genis alan icin Karakol yaricapini buyutun, Eden yaricap sinirsiz). Karakol modulunden SONRA calisir. Modulle SYNC edilen AI askerler garnizon havuzu olur (nobetci / devriye yalniz onlardan, yaricap kurali yok); hic asker baglanmazsa karakol yaricapinin x1.5 icindeki gruplardan asker alinir.";
     };
 };
 
@@ -219,7 +220,7 @@ class GVAR(EdenGozetle): Module_F {
     _generalMacro = QGVAR(EdenGozetle);
     scope = 2;
     scopeCurator = 0;
-    displayName = "ELITE Gozetleme Ata (3DEN)";
+    displayName = "ELITE Gozetleme Ata (3DEN) - squad ekle";
     icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
     category = "lambs_danger_elite_cat";
     function = QFUNC(edenGozetle);

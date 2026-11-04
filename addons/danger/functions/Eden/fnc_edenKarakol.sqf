@@ -27,5 +27,13 @@ if (!_activated || {!isServer}) exitWith {};
         private _ayar = createHashMapFromArray [["tip", 1], ["grupN", count _secili], ["grupMesafe", _yar * 1.5], ["bina", true], ["piyade", true], ["rallyM", 250], ["orpM", 150], ["basla", 0], ["secili", _secili]];
         ["lambs_danger_planIstegi", [_taraf, _poz, _ayar toArray false]] call CBA_fnc_serverEvent;
     };
+    // v8.400 SADELESTIRME: 'Garnizon hazir ayar' (Yok / Hafif / Standart / Guclu) ayni modulle garnizon da kurar (fnc_garnizonHazir); ozel ayar icin 'ELITE Karakol Garnizon' modulu
+    private _garHazir = (round (["SAYI", [_logic, "lambs_danger_edKarGar", 0]] call FUNC(edenOrtak))) max 0 min 3;
+    private _gh = [_garHazir] call FUNC(garnizonHazir);
+    if (_gh isNotEqualTo []) then {
+        _gh params ["_gN", "_gD", "_gB", "_gU", "_gA", "_gAA", "_gI"];
+        ["lambs_danger_garnizonIstegi", [_poz, 0, _gN, _gD, _gB, _gU, _gA, [], 0, [], [_gI, 0, 0, []], _gAA]] call CBA_fnc_serverEvent;
+        diag_log format ["[EDEN] Karakol (3DEN) hazir garnizon %1: nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | AA %7 | IHA mod %8", ["", "hafif", "standart", "guclu"] select _garHazir, _gN, _gD, _gB, _gU, _gA, _gAA, _gI];
+    };
     diag_log format ["[EDEN] Karakol (3DEN) | %1 | %2 | %3 m | savunma %4 | baglanan grup %5 (%6)", _taraf, mapGridPosition _poz, _yar, ["YOK", "HEMEN", "ALARM"] select _sav, count _secili, ["otomatik grup", "elle secilmis"] select _elle];
 };

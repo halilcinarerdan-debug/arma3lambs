@@ -160,7 +160,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(Karakol);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Karakol / Mevzi (savunma noktasi)";
+        displayName = "ELITE Karakol / Mevzi (kur + hazir garnizon)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
@@ -251,7 +251,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(GozetleAta);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Gozetleme Ata (squad -> karakol / mevzi nobeti)";
+        displayName = "ELITE Gozetleme Ata (mevcut karakola squad ekle)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
@@ -287,7 +287,7 @@ class CfgVehicles {
         _generalMacro = QGVAR(KarakolGarnizon);
         scope = 1;
         scopeCurator = 2;
-        displayName = "ELITE Karakol Garnizon (nobet / devriye / arac)";
+        displayName = "ELITE Karakol Garnizon (ozel ayar: nobet / devriye / arac / IHA / AA)";
         isGlobal = 0;
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";

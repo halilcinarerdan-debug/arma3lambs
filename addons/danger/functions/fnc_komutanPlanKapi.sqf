@@ -389,9 +389,36 @@ if (isNil "lambs_danger_karakolAyar") then { lambs_danger_karakolAyar = createHa
     if (!isServer) exitWith {};
     // v8.393: garnizon modulu karakolun yaricapi + CBA garnizonEk (varsayilan 500 m; eskiden sabit 150) icine birakilabilir; en yakin karakol secilir
     private _ad = lambs_danger_karakollar select {((_x select 1) distance2D _poz) <= ((_x select 2) + (missionNamespace getVariable ["lambs_danger_garnizonEk", 500]))};
+    // v8.400 SADELESTIRME (kullanici: 'ayni isi yapan modulleri sadelestir'; RPT: iki garnizon modulu 'yakinda karakol yok' diye reddedilmisti): yakinda karakol YOKSA modul konumunda OTOMATIK karakol kurulur.
+    //   Taraf: SYNC / secili askerin, secili takimin, SYNC'li IHA'nin ya da module en yakin AI askerin tarafi; hicbiri yoksa reddedilir. Yaricap 150 m (genis alan icin karakol modulunu kullan). Kaldirma islemi karakol kaydina dokunmaz.
+    if (_ad isEqualTo [] && {_islem isEqualTo 0}) then {
+        private _tOto = sideUnknown;
+        private _ilkA = (_uyeler apply {objectFromNetId _x}) select {!isNull _x};
+        if (_ilkA isNotEqualTo []) then { _tOto = side (group (_ilkA select 0)); };
+        if (_tOto isEqualTo sideUnknown) then {
+            private _ilkG = (_gruplar apply {groupFromNetId _x}) select {!isNull _x};
+            if (_ilkG isNotEqualTo []) then { _tOto = side (_ilkG select 0); };
+        };
+        if (_tOto isEqualTo sideUnknown) then {
+            private _ilkI = ((_iha param [3, []]) apply {objectFromNetId _x}) select {!isNull _x};
+            if (_ilkI isNotEqualTo []) then {
+                private _iv = _ilkI select 0;
+                _tOto = if ((crew _iv) isNotEqualTo []) then {side (group ((crew _iv) select 0))} else {[east, west, independent, civilian] select (((getNumber (configOf _iv >> "side")) max 0) min 3)};
+            };
+        };
+        if (_tOto isEqualTo sideUnknown) then {
+            private _yk = (nearestObjects [_poz, ["CAManBase"], 400]) select {alive _x && {!isPlayer _x} && {(side (group _x)) in [west, east, independent]}};
+            if (_yk isNotEqualTo []) then { _tOto = side (group (_yk select 0)); };
+        };
+        if (_tOto in [west, east, independent]) then {
+            ["lambs_danger_karakolIstegi", [_tOto, _poz, 0, 150, 0, false]] call CBA_fnc_serverEvent;
+            _ad = lambs_danger_karakollar select {((_x select 1) distance2D _poz) <= ((_x select 2) + (missionNamespace getVariable ["lambs_danger_garnizonEk", 500]))};
+            diag_log format ["[KARAKOL-GARNIZON] %1 yakininda karakol yoktu: OTOMATIK karakol kuruldu (%2, yaricap 150 m)", mapGridPosition _poz, _tOto];
+        };
+    };
     if (_ad isEqualTo []) exitWith {
-        diag_log format ["[KARAKOL-GARNIZON] istek reddedildi: %1 yakininda karakol yok (once ELITE Karakol / HQ modulunu koyun)", mapGridPosition _poz];
-        ["lambs_danger_garnizonYanit", ["Garnizon: yakinda karakol yok - once 'ELITE Karakol / HQ' modulu koyun (yaricap + CBA 'Garnizon modulu ek mesafe' icine; varsayilan 500 m)"]] call CBA_fnc_globalEvent;
+        diag_log format ["[KARAKOL-GARNIZON] istek reddedildi: %1 yakininda karakol yok ve taraf belirlenemedi (yakinda AI asker / baglanan asker-takim-IHA yok)", mapGridPosition _poz];
+        ["lambs_danger_garnizonYanit", ["Garnizon: yakinda karakol yok ve taraf belirlenemedi - modulun yakinina AI asker koyun / SYNC edin ya da once 'ELITE Karakol / Mevzi' modulu koyun (yaricap + CBA 'Garnizon modulu ek mesafe' icine; varsayilan 500 m)"]] call CBA_fnc_globalEvent;
     };
     _ad = [_ad, [], {(_x select 1) distance2D _poz}, "ASCEND"] call BIS_fnc_sortBy;
     private _k = _ad select 0;
