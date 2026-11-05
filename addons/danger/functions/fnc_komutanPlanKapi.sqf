@@ -132,7 +132,7 @@ lambs_danger_isaretAdi = {
     private _g = if (_hedef isEqualType grpNull) then {_hedef} else {group (effectiveCommander _hedef)};
     private _nesneler = [];
     if (!(_hedef isEqualType grpNull) && {!(_hedef isKindOf "CAManBase")}) then { _nesneler pushBack _hedef; };
-    if (_hedef isKindOf "CAManBase" && {!isNull objectParent _hedef}) then { _nesneler pushBack (vehicle _hedef); };
+    if (!(_hedef isEqualType grpNull) && {_hedef isKindOf "CAManBase"} && {!isNull objectParent _hedef}) then { _nesneler pushBack (vehicle _hedef); };   // v8.407: grup nesnesinde isKindOf hata veriyordu (RPT b95a6bae: Type Group, expected String,Object)
     if (!isNull _g) then { _nesneler pushBack _g; };
     // v8.151: oyuncu komutasi bayragi (gorev degiskenine yazilmaz): OYUNCU = true, ELITE_TAM = false, Otomatik = silinir (oyunculu grup otomatik)
     if (_kod in ["OYUNCU", "ELITE_TAM"]) exitWith {
