@@ -3247,3 +3247,4 @@ v8.500 (dal nakil-v2; v8.406 - v8.407 dahil) NAKIL V2 + GRUP / RECON / FAZ DUZEL
  - ARAC / MEDEVAC: oyuncu yolcu ise arac kalir, DOLU ARAC (oncen yuklu arac oldugu gibi gider), ambulans ekibi plana girmez, tank piyade bagi tek plan sahipli.
  - ARAC: tools/rpt_ozet.py --harekat (kabul karnesi), tools/hemtt_kontrol.sh cikis kodu + .github/workflows/kontrol.yml (HEMTT + tutarlilik denetimi).
  - NOT: oyun icinde tam dogrulanmadi. Aranacaklar: tools/rpt_ozet.py --harekat <rpt>.
+ - HAKEM (v8.500): fnc_uzuvKirala / fnc_uzuvBirak / fnc_uzuvIzin (uzuv basina tek sahip: oncelik + sure; ezme 90 > nakil 60 > tank-aralik 40 > mekanize 20); nakilV2, ezmeKoruma, tankAralik, mekanizeIzle baglandi; tools/uyum_denetimi.py + UYUM_DENETIMI.md (48 dosya forceSpeed / 82 dosya doMove yaziyor). Log: [UYUM] RET.

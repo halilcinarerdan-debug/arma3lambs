@@ -33,3 +33,10 @@ Sözleşme eskisiyle aynı (`tasimaCtl`: [iptal, kapı, binen asker, yüklenen a
 1. Her push'ta GitHub Actions `kontrol` iş akışı `tools/hemtt_kontrol.sh` çalıştırır: HEMTT sözdizimi (error = 0), L-S12 uyarısı = 0 ve statik tutarlılık (PREP / olay / ayar / sürüm). Elle: `bash tools/hemtt_kontrol.sh` (HEMTT yoksa indirilir).
 2. Oyundan sonra: `python tools/rpt_ozet.py --harekat <rpt>` → faz kaydı / sırası, aynı grup iki planda mı, recon varış, plan kapısı (TAVAN?), nakil yükleme / toplu kalkış / iniş, oyuncu nakli, HQ sayısı, 3DEN nitelik okunuyor mu (OK / KONTROL / YOK).
 3. Küçük senaryo önerisi: 1 saldırı Objektif'i (2–3 km), 1 recon grubu (adında `recon`), 3–4 nakil aracı, 2 piyade grubu, oyuncu yaya. `--harekat` çıktısında KONTROL satırı kalmamalı.
+
+## Hakem (uzuv kiralama) — "ses yönlendirmesi" (v8.500)
+Sorun: 48 dosya aynı sürücünün `forceSpeed`'ine, 82 dosya `doMove`'a yazıyor (`UYUM_DENETIMI.md`, `tools/uyum_denetimi.py`). RPT'lerde görülen konvoy geçme, durup kalkma ve ping-pong bunlardan.
+Çözüm (yeni katman değil, ince bir ilkel): `fnc_uzuvKirala` / `fnc_uzuvBirak` / `fnc_uzuvIzin`. Bir uzva aynı anda tek sahip yazar; öncelik + süre; reddedilen istek `[UYUM] RET` olarak sayılır.
+Öncelik tablosu: **90 güvenlik** (ezme freni) › **60 nakil** (yükleme + konvoy) › **40 tank-aralık** (park / dağılma) › **20 mekanize** (hız sıfırlama). Eşit öncelikte yeni gelen reddedilir.
+Bağlananlar: `nakilV2` (kira + birak), `ezmeKoruma`, `tankAralik`, `mekanizeIzle`. Sıradakiler (denetim listesinden): `aracSenkron`, `aracUnstuck`, `aracKinSurus`, `komutanPlanDongu` (10 hız yazımı), `planZirh`, `taksi`, `aracMedevac`.
+Ölçüt: `rpt_ozet --harekat` → "UYUM (HAKEM) RETLERI" (hata değil; hakemin çalıştığını gösterir). Kapatma yok: kiralama süresi dolunca sahip kendiliğinden düşer.

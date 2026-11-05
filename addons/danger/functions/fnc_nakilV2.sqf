@@ -178,8 +178,14 @@ private _serbest = {
     params ["_ul"];
     { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; }; } forEach _ul;
 };
+private _kira = {
+    // v8.500 HAKEM: surucunun hizi + hareketi nakil sahipligindedir (oncelik 60; ezme 90 ustte, tank-aralik 40 / mekanize 20 altta)
+    params ["_dk"];
+    if (!isNull _dk) then { [_dk, "HAREKET", "nakil", 60, 8] call FUNC(uzuvKirala); [_dk, "HIZ", "nakil", 60, 8] call FUNC(uzuvKirala); };
+};
 private _bitirAraclar = {
     // arac bayraklarini birak
+    { [_x select 1, "HAREKET", "nakil"] call FUNC(uzuvBirak); [_x select 1, "HIZ", "nakil"] call FUNC(uzuvBirak); } forEach _kayit;
     { private _v = _x select 0; _v setVariable [QGVAR(tasimaMesgul), false]; _v setVariable [QGVAR(yolcuBirak), nil]; (_x select 2) setVariable [QGVAR(tasimaSonT), time]; } forEach _kayit;
 };
 
@@ -198,6 +204,7 @@ waitUntil {
     {
         _x params ["_v", "_d", "_vg", "_ul", "_durum", "_t0", "_binen", "_gk", "_oyuncular"];
         private _idx = _forEachIndex;
+        if (_durum in ["GEL", "BIN"]) then { [_d] call _kira; };
         if (_durum in ["GEL", "BIN"]) then {
             if (!alive _v || {!alive _d} || {!canMove _v}) then {
                 (_kayit select _idx) set [4, "IPTAL"];
@@ -320,6 +327,7 @@ if !(_ctl select 1) then {
     [format ["NAKIL-YUKLENDI %1", count _yukluKayit], format ["%1 asker | kapi bekliyor (en fazla %2 sn)", _tasinan, _tutS]] call FUNC(planZaman);
     waitUntil {
         sleep 1;
+        { [_x select 1] call _kira; } forEach _yukluKayit;
         if (time > _logK) then { _logK = time + 20; [format ["kapi hala kapali: %1 sn", round (time - _tKapi)]] call _log; };
         (_ctl select 1) || {_ctl select 0} || {(time - _tKapi) > _tutS} || {(_yukluKayit findIf {alive (_x select 0)}) < 0}
     };
@@ -381,6 +389,7 @@ waitUntil {
         private _hz = (speed _v) / 3.6;
         if (!alive _v || {!alive _d}) then { _c set [4, "OLDU"]; }
         else {
+            [_d] call _kira;
             // ara nokta ilerlet
             private _nokta = _zn select (_yi min ((count _zn) - 1));
             if ((_v distance2D _nokta) < ([60, 40] select (_yi >= ((count _zn) - 1))) && {_yi < ((count _zn) - 1)}) then { _yi = _yi + 1; _c set [0, _yi]; _nokta = _zn select _yi; _sonMoveT = -99; };

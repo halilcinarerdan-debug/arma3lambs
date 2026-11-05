@@ -453,6 +453,12 @@ def harekat_kabul(path):
     ob = [l for l in L if "OYUNCU BINMEDI" in l]
     if on or ob or any("DOLU ARAC" in l for l in L):
         ekle("OYUNCU NAKLI", "KONTROL" if ob else "OK", "nakle alindi:%d, binmedi:%d, dolu arac:%d" % (len(on), len(ob), len([1 for l in L if "DOLU ARAC" in l])))
+    # hakem (uzuv kiralama) retleri: hata degil, cakisma onleme kaniti; cok yuksekse yazicilar arasi cakisma var demek
+    ur = [re.search(r"\[UYUM\] RET \| .*? \| uzuv (\w+) \| istek: (\S+) .*? mevcut sahip: (\S+)", l) for l in L if "[UYUM] RET" in l]
+    ur = [m for m in ur if m]
+    if ur:
+        cift = collections.Counter("%s:%s>%s" % (m.group(1), m.group(2), m.group(3)) for m in ur)
+        ekle("UYUM (HAKEM) RETLERI", "OK", "%d kayitli ret (ilk 60 loglanir) | %s" % (len(ur), dict(cift.most_common(4))))
     # HQ
     hq = set(re.search(r"\[HQ-NOKTA\] (HQ\d_\w+) KURULDU", l).group(1) for l in L if re.search(r"\[HQ-NOKTA\] (HQ\d_\w+) KURULDU", l))
     if hq:

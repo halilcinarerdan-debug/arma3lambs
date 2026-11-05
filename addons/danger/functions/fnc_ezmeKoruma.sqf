@@ -46,7 +46,7 @@ private _calis = {
             private _frenli = _v getVariable [QGVAR(ezmeFren), false];
             if (!local _v || {isNull _d} || {!alive _d} || {isPlayer _d} || {!local _d}) then {
                 _atlaSay = _atlaSay + 1;
-                if (_frenli && {!isNull _d} && {local _d}) then { _d forceSpeed -1; _v setVariable [QGVAR(ezmeFren), nil]; };
+                if (_frenli && {!isNull _d} && {local _d}) then { _d forceSpeed -1; [_d, "HIZ", "ezme"] call FUNC(uzuvBirak); _v setVariable [QGVAR(ezmeFren), nil]; };
                 continue
             };
             private _hiz = (speed _v) / 3.6;
@@ -89,6 +89,7 @@ private _calis = {
                 if (!_frenli) then { _v setVariable [QGVAR(ezmeBaslaT), time]; };
                 private _surekli = time - (_v getVariable [QGVAR(ezmeBaslaT), time]);
                 // v8.402 ORANTILI FREN (RPT 2026-11: yol kenarindaki dost piyade 22-26 m onde iken konvoy tam durup kalkiyordu): mesafe uzaksa (> 14 m) hiz mesafeye gore azalir (~ (mesafe - 6) / 2.2 m/sn, en az 1.4); yakinda tam fren
+                [_d, "HIZ", "ezme", 90, 2.5] call FUNC(uzuvKirala);   // v8.500: guvenlik fren en yuksek oncelik
                 _d forceSpeed (if (_surekli > 30) then {1.4} else { if (_enYakin > 14) then { (((_enYakin - 6) / 2.2) max 1.4) } else {0} });
                 // v8.195 YOL AC (kullanici: "askerler hala apcyi blokluyor, apc yakininda asker varsa kafayi yiyor"; RPT f82d65d0: durmus APC'nin 5 m onunde dost yaya, fren 16+ sn surdu): arac duruyor ve 2 sn'den uzun suredir seritte dost yaya varsa AI yaya yana (arac yonune dik, 12 m) kacirilir
                 if (abs _hiz < 1 && {_surekli > 2}) then {
@@ -120,6 +121,7 @@ private _calis = {
             } else {
                 if (_frenli && {(time - (_v getVariable [QGVAR(ezmeSonT), 0])) > 1.5}) then {
                     _d forceSpeed -1;
+                    [_d, "HIZ", "ezme"] call FUNC(uzuvBirak);
                     _v setVariable [QGVAR(ezmeFren), nil];
                     _v setVariable [QGVAR(ezmeBaslaT), nil];
                 };

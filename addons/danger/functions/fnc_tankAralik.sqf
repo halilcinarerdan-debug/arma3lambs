@@ -74,8 +74,10 @@ lambs_danger_tankAralikStarted = true;
                 //   Kademe: cok yakin (< 13 m) ya da hizli yaklasma (> 5 m/sn) = 3 sn tam fren; digerinde onde giden aracin hizinin %80'ine yavaslat (min 1.5 m/sn), 4 sn sonra serbest.
                 private _sert = (_d2 < 13) || {_kapan > 5};
                 private _onHiz = ((speed _di) max 0) / 3.6;
-                _dr forceSpeed ([((_onHiz * 0.8) max 1.5), 0] select _sert);
-                [{ params ["_dd"]; if (!isNull _dd) then { _dd forceSpeed -1; }; }, [_dr], [4, 3] select _sert] call CBA_fnc_waitAndExecute;
+                if ([_dr, "HIZ", "tankAralik", 40, 5] call FUNC(uzuvKirala)) then {   // v8.500: nakil (60) hizi tutuyorsa dokunma
+                    _dr forceSpeed ([((_onHiz * 0.8) max 1.5), 0] select _sert);
+                    [{ params ["_dd"]; if (!isNull _dd) then { _dd forceSpeed -1; [_dd, "HIZ", "tankAralik"] call lambs_danger_fnc_uzuvBirak; }; }, [_dr], [4, 3] select _sert] call CBA_fnc_waitAndExecute;
+                };
                 diag_log format ["[TANK-ARALIK] YAKLASIYOR: %1 -> %2 (%3 m, kapanma %4 m/sn): %1 %5 (carpisma onlemi, emir silinmedi)", getText (configOf _mv >> "displayName"), getText (configOf _di >> "displayName"), round _d2, _kapan toFixed 1, ["yavaslatildi (4 sn)", "3 sn durduruldu"] select _sert];
             } else {
                 private _uzak = (getPosATL _di) getDir (getPosATL _mv);
@@ -100,9 +102,11 @@ lambs_danger_tankAralikStarted = true;
                         };
                     }, [_mv, _dr, _di], 10] call CBA_fnc_waitAndExecute;
                 } else { _say set [1, (_say select 1) + 1]; };
-                (group _dr) setBehaviour "AWARE";
-                _dr enableAI "PATH"; _dr enableAI "MOVE"; _dr forceSpeed -1;
-                _dr doMove _hedef;
+                if ([_dr, "HAREKET", "tankAralik", 40, 20] call FUNC(uzuvKirala)) then {   // v8.500: nakil yukleme / konvoy araci park kurtarmasiyla oynatilmaz
+                    (group _dr) setBehaviour "AWARE";
+                    _dr enableAI "PATH"; _dr enableAI "MOVE"; _dr forceSpeed -1;
+                    _dr doMove _hedef;
+                };
                 // plan mevzi noktasi: lider arac MEVZIDEYSE (planZirhVardi) guncelle (planZirh geri cekmesin).
                 // v8.405 (RPT 2026-11-05 03:42:36, Firat_Kalkani_Harekati: P3 'tank mevzide (40 m kalan) | objektife 16183 m', tank 3 dk 0 km/s kaldi): eskiden mevzi noktasi VARIS SARTI ARANMADAN ezilirdi; tank daha yoldayken
                 //   (ya da yeni hareket emri almisken) ust uste / park kurtarmasi 15.8 km'lik ates pozisyonunu 40-48 m'lik park noktasiyla degistirdi -> planZirh '< 40 m = mevzide' sayip surucunun MOVE'unu KAPATTI, plan kapisi 'tanklar mevzide' diye acildi (nakil kalkti, tank kalmadi).
