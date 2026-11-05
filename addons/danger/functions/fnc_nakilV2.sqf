@@ -76,6 +76,13 @@ private _kapFn = {
     private _koltuk = count (fullCrew [_v, "cargo", true]);
     if (_ogr > 0) then { _ogr min _koltuk } else { _koltuk }
 };
+// su an BOS yolcu koltugu (icinde onceden yolcu varsa dusulur; ogrenilmis gercek kapasite tavandir)
+private _bosFn = {
+    params ["_v"];
+    private _top = [_v] call _kapFn;
+    private _dolu = (count (fullCrew [_v, "cargo", true])) - ([_v] call FUNC(aracDuzBos));
+    ((_top - (_dolu max 0)) max 0) min ([_v] call FUNC(aracDuzBos))
+};
 private _otomatik = missionNamespace getVariable ["lambs_danger_tasimaOtomatik", true];
 private _aday = vehicles select {
     private _v = _x;
@@ -104,7 +111,7 @@ if (_araclar isEqualTo []) exitWith { [format ["arac YOK (aday %1, atanmis %2, b
 _araclar = [_araclar, [], {_x distance2D _pickRef}, "ASCEND"] call BIS_fnc_sortBy;
 
 // ===================================================================== 2 MANIFEST
-private _kalan = _araclar apply { [_x, [_x] call _kapFn] };   // [arac, bos koltuk]
+private _kalan = _araclar apply { [_x, [_x] call _bosFn] };   // [arac, bos koltuk]
 private _manifest = _araclar apply { [_x, []] };            // [arac, [birimler]]
 private _yerle = {
     params ["_ul"];   // grubu BUTUN olarak en uygun (sigan en az bos koltuklu) araca
@@ -137,6 +144,13 @@ private _yaya = [];
         } else { _yaya pushBack groupId _x; };
     };
 } forEach _tum;
+// onceden aracta olan yolcular (oyuncunun bindirdigi dahil) manifeste eklenir: arac bunlarla birlikte gider (>= 2 yolcu varsa manifestsiz de gider)
+{
+    private _vv = _x select 0;
+    private _vgg = group (driver _vv);
+    private _yol = (crew _vv) select {alive _x && {(group _x) isNotEqualTo _vgg} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+    if (_yol isNotEqualTo [] && {((_x select 1) isNotEqualTo []) || {count _yol >= 2}}) then { (_x select 1) append (_yol - (_x select 1)); };
+} forEach _manifest;
 _manifest = _manifest select {(_x select 1) isNotEqualTo []};
 if (_manifest isEqualTo []) exitWith { ["manifest bos (hicbir grup sigmadi)"] call _log; 0 };
 private _nM = 0;
@@ -203,6 +217,7 @@ waitUntil {
                         if ((time - (_vg getVariable [QGVAR(nk2MoveT), -99])) > 4) then {
                             _vg setVariable [QGVAR(nk2MoveT), time];
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _vg setBehaviour "SAFE"; _vg setSpeedMode "FULL";
+                            if !(isEngineOn _v) then { _d action ["EngineOn", _v]; _v engineOn true; };   // RPT dd9a9b85: motor kapaliyken arac MOVE emriyle de kipirdamadi
                             _d doMove _pk;
                         };
                     };
