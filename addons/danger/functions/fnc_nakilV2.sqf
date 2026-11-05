@@ -207,6 +207,7 @@ waitUntil {
                     if (_pk isEqualTo [] || {(_v distance2D _pk) < 60}) then {
                         (_kayit select _idx) set [4, "BIN"];
                         (_kayit select _idx) set [5, time];
+                        { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
                         doStop _d;
                         [_ul] call _serbest;
                         { _x assignAsCargo _v; } forEach (_ul select {!isPlayer _x});
@@ -219,6 +220,13 @@ waitUntil {
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _vg setBehaviour "SAFE"; _vg setSpeedMode "FULL";
                             if !(isEngineOn _v) then { _d action ["EngineOn", _v]; _v engineOn true; };   // RPT dd9a9b85: motor kapaliyken arac MOVE emriyle de kipirdamadi
                             _d doMove _pk;
+                            // RPT 2521b53c: Unimog 60 sn 'komut MOVE, hiz 0'; eski kodda 'doMove'a EK olarak grup WAYPOINT'i tek calisan yol' (v8.181): ayni waypoint tek kez kurulur, sonra konumu guncellenir
+                            private _nw = (waypoints _vg) select {(waypointName _x) find "ELITE NAKIL" isEqualTo 0};
+                            if (_nw isEqualTo []) then {
+                                private _w = _vg addWaypoint [_pk, 0];
+                                _w setWaypointType "MOVE"; _w setWaypointName "ELITE NAKIL"; _w setWaypointSpeed "FULL"; _w setWaypointBehaviour "SAFE";
+                                _vg setCurrentWaypoint _w;
+                            } else { (_nw select 0) setWPPos _pk; };
                         };
                     };
                 } else {
@@ -236,9 +244,10 @@ waitUntil {
                         || {_gecen > 120}
                         || {_ic isNotEqualTo [] && {([_v] call FUNC(aracDuzBos)) <= 0} && {_oyBekle isEqualTo [] || {_gecen > 90}}};
                     // arac gercekten doldu ama disarida kalan var -> kapasite ogren (emptyPositions / cargo sayisi yalan soyledi)
-                    if (_bitti && {_bekleyen isNotEqualTo []} && {([_v] call FUNC(aracDuzBos)) <= 0} && {_ic isNotEqualTo []}) then {
-                        missionNamespace setVariable [format ["lambs_danger_tasimaKap_%1", typeOf _v], count _ic];
-                        [format ["%1 | KAPASITE OGRENILDI: %2 gercek %3 koltuk", groupId _vg, typeOf _v, count _ic]] call _log;
+                    private _doluKoltuk = count (fullCrew [_v, "cargo", false]);   // gercekten oturan sayisi (taze)
+                    if (_bitti && {_bekleyen isNotEqualTo []} && {([_v] call FUNC(aracDuzBos)) <= 0} && {_doluKoltuk >= 3}) then {
+                        missionNamespace setVariable [format ["lambs_danger_tasimaKap_%1", typeOf _v], _doluKoltuk];
+                        [format ["%1 | KAPASITE OGRENILDI: %2 gercek %3 koltuk", groupId _vg, typeOf _v, _doluKoltuk]] call _log;
                     };
                     if (_bitti) then {
                         private _bn = _ul select {alive _x && {(vehicle _x) isEqualTo _v}};
