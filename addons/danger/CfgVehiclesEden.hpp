@@ -179,7 +179,7 @@ class GVAR(EdenGorevAta): Module_F {
     isTriggerActivated = 0;
     isDisposable = 0;
     class Attributes: AttributesBase {
-        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: atama silinir.","0",E_V(0,"Otomatik atamayi sil") E_V(1,"Plan MANEVRA") E_V(2,"Plan DESTEK baski SBF") E_V(3,"Plan YEDEK") E_V(4,"Plan disi HARIC") E_V(5,"MEDEVAC ekibi araci") E_V(6,"TOPCU ates destegi") E_V(7,"Topcu DEGIL") E_V(9,"TASIMA araci APC kamyon") E_V(10,"RECON gozlem gizli") E_V(11,"OYUNCU KOMUTASI") E_V(12,"ELITE TAM ACIK") E_V(13,"RECON ARACI"))
+        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: mevcut gorev korunur (RECON / RECON ARACI silinmez); silmek icin Zorla sil.","0",E_V(0,"Otomatik (mevcut gorevi koru)") E_V(1,"Plan MANEVRA") E_V(2,"Plan DESTEK baski SBF") E_V(3,"Plan YEDEK") E_V(4,"Plan disi HARIC") E_V(5,"MEDEVAC ekibi araci") E_V(6,"TOPCU ates destegi") E_V(7,"Topcu DEGIL") E_V(9,"TASIMA araci APC kamyon") E_V(10,"RECON gozlem gizli") E_V(11,"OYUNCU KOMUTASI") E_V(12,"ELITE TAM ACIK") E_V(13,"RECON ARACI") E_V(14,"Zorla sil atamayi kaldir"))
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
