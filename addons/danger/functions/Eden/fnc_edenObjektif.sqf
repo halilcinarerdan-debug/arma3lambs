@@ -23,6 +23,7 @@ if (!_activated || {!isServer}) exitWith {};
     sleep (_gecikme max 0);
 
     private _obj = getPosATL _logic;
+    ["DEGISKENLER", [_logic]] call FUNC(edenOrtak);
     private _gruplar = ["GRUPLAR", [_logic]] call FUNC(edenOrtak);
     private _hqM = ["MODUL", [_logic, QGVAR(EdenHQ)]] call FUNC(edenOrtak);
 

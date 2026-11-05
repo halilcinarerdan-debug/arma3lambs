@@ -17,6 +17,7 @@ if (!_activated || {!isServer}) exitWith {};
     private _kodlar = ["", "MANEVRA", "DESTEK", "YEDEK", "HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "", "TASIMA", "RECON", "OYUNCU", "ELITE_TAM", "RECON_ARAC", ""];
     private _k = (round (["SAYI", [_logic, "lambs_danger_edGorKod", 0]] call FUNC(edenOrtak))) max 0 min 14;
     private _kod = _kodlar select _k;
+    ["DEGISKENLER", [_logic]] call FUNC(edenOrtak);
     private _bagli = ["BAGLI", [_logic]] call FUNC(edenOrtak);
     if (_bagli isEqualTo []) exitWith { diag_log format ["[EDEN] Gorev Ata (3DEN) %1: module bagli birim yok", mapGridPosition _logic] };
     // v8.406: 'Otomatik' (0) artik mevcut gorevi SILMEZ (RPT: 'recon' / 'recon araci' modulleri varsayilan Otomatik'te kaldi -> RECON / RECON_ARAC etiketi silindi -> recon normal asker sayildi, kesif kapisi kurulmadi). Silmek icin 14 'Zorla sil'.

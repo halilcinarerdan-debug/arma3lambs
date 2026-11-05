@@ -35,6 +35,13 @@ switch (_mod) do {
         private _v = _m getVariable [_ad, _vars];
         if (_v isEqualType true) then {_v} else { if (_v isEqualType 0) then {_v > 0} else { if (_v isEqualType "") then { (toLower _v) in ["true", "1"] } else {_vars} } }
     };
+    case "DEGISKENLER": {
+        // v8.407 TANI (kullanici: 'objektifler faz 2 ama faz 1 gorunuyor'; tum Gorev Ata modulleri Otomatik okundu): modulun 3DEN nitelik degiskenleri (lambs_danger_ed*) RPT'ye yazilir; BOS ise 3DEN nitelik ifadeleri hic calismamistir
+        _a params ["_m"];
+        private _l = ((allVariables _m) select {(_x find "lambs_danger_ed") isEqualTo 0}) apply {format ["%1=%2", _x, _m getVariable _x]};
+        diag_log format ["[EDEN-NITELIK] %1 %2 | %3 nitelik degiskeni: %4", typeOf _m, mapGridPosition _m, count _l, if (_l isEqualTo []) then {"HIC YOK (3DEN nitelik ifadeleri calismadi / senaryoda kayitli deger yok)"} else {_l joinString " ; "}];
+        _l
+    };
     case "BAGLI": {
         _a params ["_m"];
         (synchronizedObjects _m) select {!isNull _x && {!(_x isKindOf "Logic")}}
