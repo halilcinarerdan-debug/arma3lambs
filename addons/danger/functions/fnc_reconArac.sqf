@@ -230,7 +230,8 @@ while {_bitis isEqualTo ""} do {
         if ((time - _sonTekrar) > 20 && {(speed _v) < 4} && {_kurtN isEqualTo 0}) then { _sonTekrar = time; _d doMove (_zincir select _zi); };
     };
     // ilerleme tavani: 240 sn'de baslangic mesafesinin %15'ini bile kapatmadiysa (agaclik / dolambac) vazgec, recon yaya devam eder
-    if (_bitis isEqualTo "" && {(time - _basT) > 240} && {_dm > (_basD * 0.85)}) then { _bitis = "ilerlemedi"; };
+    // v8.500c (RPT 5c754ebb: yolda 28 km/sa giderken 240 sn'de 'ilerlemedi' sayildi, recon 1.5 km'de indi, 8 km yaya): duz mesafe yol dolambacinda azalmaz; tavan yol uzunluguna gore (240 + mesafe / 5 sn); gercek takilmayi asagidaki 'takildi' (80 sn hareketsiz) yakalar
+if (_bitis isEqualTo "" && {(time - _basT) > (240 + (_basD / 5))} && {_dm > (_basD * 0.85)}) then { _bitis = "ilerlemedi"; };
     if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
     else { if ((_rg findIf {(time - ((_x) getVariable [QGVAR(contact), -999])) < 5}) >= 0) then { _bitis = "temas"; }
     else { if (_dm < 45) then { _bitis = "vardi"; }
@@ -394,13 +395,19 @@ sleep 2;
 _plan set ["reconAracInis", true];
 
 // ---- 5) arac sessizce 250 m geri cekilir, orada bekler (recon alma / destek icin); isiklar kapali
+// v8.500c (kullanici: 'recon araci reconu indirdigi yerde dursun'): varsayilan artik GERI CEKILMEZ, indirdigi yerde bekler (lambs_danger_reconAracGeriCekil = true ile eski davranis)
 private _geri = _dur getPos [250, (_plan get "rp") getDir _dur];
+if (!(missionNamespace getVariable ["lambs_danger_reconAracGeriCekil", false])) then {
+    if (alive _d) then { doStop _d; };
+    diag_log format ["[RECON-ARAC] %1 | %2 | recon indirildi, arac indirdigi yerde bekliyor", _id, _ad];
+} else {
 if (!_geriDon && {!surfaceIsWater _geri} && {alive _v} && {alive _d} && {canMove _v}) then {
     _d forceSpeed 9;
     _d doMove _geri;
     private _tg = time + 120;
     waitUntil { sleep 2; !alive _v || {(_v distance2D _geri) < 40} || {time > _tg} };
     if (alive _d) then { doStop _d; };
+};
 };
 _v setVariable [QGVAR(aracRezervT), time];
 if (!isNull _vg) then {
