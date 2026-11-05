@@ -103,9 +103,20 @@ lambs_danger_tankAralikStarted = true;
                 (group _dr) setBehaviour "AWARE";
                 _dr enableAI "PATH"; _dr enableAI "MOVE"; _dr forceSpeed -1;
                 _dr doMove _hedef;
-                // plan mevzi noktasi: lider aracsa guncelle (planZirh geri cekmesin)
-                if ((_g getVariable ["lambs_danger_planZirhPoz", []]) isNotEqualTo [] && {vehicle (leader _g) isEqualTo _mv}) then { _g setVariable ["lambs_danger_planZirhPoz", _hedef]; };
-                diag_log format ["[TANK-ARALIK] %1: %2 / %3 (%4 m) -> %2 %5 uzaklasiyor (%6)", _tur, getText (configOf _mv >> "displayName"), getText (configOf _di >> "displayName"), round _d2, mapGridPosition _hedef, ["kitap: dagilma (MCWP 3-11.1 arac araligi)", "ic ice / ust uste: geri al + uzaklas"] select (_tur isEqualTo "USTUSTE")];
+                // plan mevzi noktasi: lider arac MEVZIDEYSE (planZirhVardi) guncelle (planZirh geri cekmesin).
+                // v8.405 (RPT 2026-11-05 03:42:36, Firat_Kalkani_Harekati: P3 'tank mevzide (40 m kalan) | objektife 16183 m', tank 3 dk 0 km/s kaldi): eskiden mevzi noktasi VARIS SARTI ARANMADAN ezilirdi; tank daha yoldayken
+                //   (ya da yeni hareket emri almisken) ust uste / park kurtarmasi 15.8 km'lik ates pozisyonunu 40-48 m'lik park noktasiyla degistirdi -> planZirh '< 40 m = mevzide' sayip surucunun MOVE'unu KAPATTI, plan kapisi 'tanklar mevzide' diye acildi (nakil kalkti, tank kalmadi).
+                //   Yoldaki tankta mevzi noktasi KORUNUR: park / kurtarma hareketi gecici sapmadir, planZirh hedefi (expectedDestination > 40 m saparsa) yeniden verir.
+                private _mevziNot = "plan mevzisi yok";
+                if ((_g getVariable ["lambs_danger_planZirhPoz", []]) isNotEqualTo [] && {vehicle (leader _g) isEqualTo _mv}) then {
+                    if (_g getVariable ["lambs_danger_planZirhVardi", false]) then {
+                        _g setVariable ["lambs_danger_planZirhPoz", _hedef];
+                        _mevziNot = "mevzi noktasi guncellendi";
+                    } else {
+                        _mevziNot = "mevzi noktasi KORUNDU (tank yolda)";
+                    };
+                };
+                diag_log format ["[TANK-ARALIK] %1: %2 / %3 (%4 m) -> %2 %5 uzaklasiyor (%6) | %7", _tur, getText (configOf _mv >> "displayName"), getText (configOf _di >> "displayName"), round _d2, mapGridPosition _hedef, ["kitap: dagilma (MCWP 3-11.1 arac araligi)", "ic ice / ust uste: geri al + uzaklas"] select (_tur isEqualTo "USTUSTE"), _mevziNot];
             };
         } forEach _isleme;
         if (time > _ozetT) then {
