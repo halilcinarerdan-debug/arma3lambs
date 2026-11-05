@@ -195,12 +195,13 @@ if (_secili isEqualTo [] && {!(missionNamespace getVariable ["lambs_danger_planO
         private _tl = leader _x;
         private _tv = if (isNull _tl) then {objNull} else {objectParent _tl};
         if (!isNull _tv && {alive _tl} && {!isPlayer _tl} && {(side _x) isEqualTo _taraf} && {_tv isKindOf "LandVehicle"} && {alive _tv} && {(crew _tv) findIf {isPlayer _x} < 0}
-            && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
+            && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {(time - (_x getVariable ["lambs_danger_planRezT", -999])) > 25} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
             && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
             && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
             && {_hqKayit isNotEqualTo [] || {(_tl distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])}}   // v8.325: HQ'ya bagli tank mesafe sinirina takilmaz (piyade ile ayni kural; RPT 5372f629: T-80BV objektife 4.8 km, sinir 4 km -> plana hic alinmadi)
             && {(([_tv] call FUNC(aracSinif)) select 0) isEqualTo "TANK"}) then {
             _zirhG pushBack _x;
+            _x setVariable ["lambs_danger_planRezT", time];
             diag_log format ["[PLAN-ARAC] %1 | %2 [TANK] ZIRH DESTEK unsuru olarak OTOMATIK alindi (objektife %3 m)", groupId _x, getText (configOf _tv >> "displayName"), round (_tl distance2D _obj)];
         } else {
             // v8.325 TANI: tank neden plana alinmadi (sessizce elenmesin)
@@ -223,7 +224,7 @@ private _aday = allGroups select {
     !isNull _l && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0}
     && {({alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _x)) >= 3}
-    && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
+    && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {(time - (_x getVariable ["lambs_danger_planRezT", -999])) > 25} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
     && {((units _x) findIf {alive _x && {!isNull objectParent _x} && {(getNumber (configOf (objectParent _x) >> "attendant")) isEqualTo 1}}) < 0}   // v8.407: AMBULANS ekibi (grupta ambulansta oturan uye var) plana / nakile girmez = otomatik MEDEVAC (RPT 079fed04: medic grubu Unimog'a bindirildi, ambulansi bos birakti, alt gruplara dagildi)
@@ -281,6 +282,8 @@ if (_tumHQ && {_ayar getOrDefault ["tumHQGuvenlik", false]} && {(count _aday) > 
     diag_log format ["[PLAN-HQ-TUM] %1 | guvenlik: %2 (%3 asker) HQ'da birakildi", _hqId, groupId _zayif, {alive _x} count (units _zayif)];
 };
 private _gruplar = _aday select [0, (_grupN max 1) max (count _atanmis)];
+// v8.407 REZERVASYON (RPT 762ea80a: ayni saniyede kurulan P3 / P4 ayni recon grubunu ve tanki aldi, recon ikiye bolundu; planAktif ancak uzak grup devri beklemesinden sonra yaziliyordu): secilen gruplar HEMEN 25 sn rezerve edilir, baska plan secmez
+{ _x setVariable ["lambs_danger_planRezT", time]; } forEach _gruplar;
 if (_atanmis isNotEqualTo []) then {
     diag_log format ["[PLAN-ATAMA] Zeus atamali gruplar plana alindi: %1", _atanmis apply {format ["%1=%2", groupId _x, _x getVariable ["lambs_danger_gorev", ""]]}];
 };
@@ -289,8 +292,9 @@ private _reconG = allGroups select {
     private _l = leader _x;
     (_x getVariable ["lambs_danger_gorev", ""]) isEqualTo "RECON" && {!isNull _l} && {alive _l} && {!isPlayer _l} && {(side _x) isEqualTo _taraf}
     && {({isPlayer _x} count (units _x)) isEqualTo 0} && {({alive _x} count (units _x)) >= 2} && {isNull objectParent _l}
-    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
+    && {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {(time - (_x getVariable ["lambs_danger_planRezT", -999])) > 25} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
 };
+{ _x setVariable ["lambs_danger_planRezT", time]; } forEach _reconG;
 // v8.123: baska makinede (Zeus istemcisi / HC) duran AI gruplari sunucuya devredilir (RPT a5d90e6e: 4 grup yerel degil). Plan komutlari yerel grup ister.
 // Oyuncu iceren grup zaten secilmez. Devir 6 sn icinde olmazsa o grup plandan cikar.
 if (isServer) then {

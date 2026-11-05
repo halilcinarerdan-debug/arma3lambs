@@ -396,7 +396,7 @@ private _gucOrani = {
     private _wH = _wYok + (_wTam - _wYok) * _kal;
     _dus = _gozO + ((_iddiaC - _gozO) max 0) * _wH;
     private _hazir = (_plan getOrDefault ["bina", false]) || {((["LISTE"] call FUNC(hendekAlani)) findIf {((_x select 0) distance2D _ob) <= 400}) >= 0};
-    [_dost, _dus, [(_dost / _dus), 99] select (_dus <= 0), _hazir, _gozO, _iddiaC, _kal, _wH]
+    [_dost, _dus, ([99, _dost / (_dus max 0.0001)] select (_dus > 0)), _hazir, _gozO, _iddiaC, _kal, _wH]
 };
 
 // v8.261 ORAN KONTROLU (erken: recon raporu gelince TOPLAN'da; gec: KESIF sonunda): "GEC" / "BEKLE" / "IPTAL". Ayni sonuc 15 sn onbellekte. BEKLE'de oranTut = true: tanklar ilerlemez (planZirh), nakil araclari piyadeyi almadan / goturmeden bekler (SENKRON kapisi).
