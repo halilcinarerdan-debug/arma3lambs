@@ -70,7 +70,13 @@ if (!_activated || {!isServer}) exitWith {};
     // ---- HQ yoksa: ele gecir + bagli gruplar -> otomatik HQ ----
     private _tamam = true;
     if (_hqId isEqualTo "" && {_tip isEqualTo 0}) then {
-        if (_secimModu isEqualTo 1 && {_secili isNotEqualTo []}) then {
+        // v8.407 (kullanici: 'mapte 3 farkli HQ markeri var'; RPT: 1 HQ modulu + her Objektif icin otomatik HQ2 / HQ3): SYNC'siz Objektif once ayni taraftaki haritada VAR OLAN HQ modulunu kullanir; yoksa otomatik HQ kurulur
+        private _mevHQ = (allMissionObjects QGVAR(EdenHQ)) select {((_x getVariable ["lambs_danger_edenHqId", ""]) find format ["_%1", _taraf]) > 0};
+        if (_mevHQ isNotEqualTo []) then {
+            _hqId = (_mevHQ select 0) getVariable ["lambs_danger_edenHqId", ""];
+            diag_log format ["[EDEN] Objektif (3DEN) %1 | HQ modulune SYNC yok - haritadaki %2 HQ modulu kullanildi: %3 (yeni HQ kurulmadi)", mapGridPosition _obj, _taraf, _hqId];
+        };
+        if (_hqId isEqualTo "" && {_secimModu isEqualTo 1} && {_secili isNotEqualTo []}) then {
             private _kat = -1;
             {
                 private _id = format ["%1_%2", _x, _taraf];
