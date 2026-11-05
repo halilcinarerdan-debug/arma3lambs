@@ -322,7 +322,9 @@ switch (_islem) do {
                 if (_s isEqualTo 0) then {
                     // v8.406 (RPT 5be59146: ayni fazin iki objektifi, biri tum gruplari aldi, digeri 'baska planda' ile 3 denemede BASARISIZ sayildi): grup yokluk nedeni baska planin mesgul etmesiyse bu BASARISIZ DENEMESI SAYILMAZ; gruplar bosalana kadar 45 sn'de bir beklenir (en cok 60 bekleme = 45 dk)
                     private _q = toString [34];
-                    private _mesgul = ((toLower (str (_h getOrDefault ["neden", ""]))) find (_q + "baska planda" + _q + ",")) >= 0;   // yalniz elenme listesindeki [""baska planda"",N] (sabit aciklama metni sayilmaz)
+                    private _nedS = _h getOrDefault ["neden", ""];
+                    if !(_nedS isEqualType "") then { _nedS = str _nedS; };   // str DUZ metni tirnakla CIFTLER (RPT 8b463edf: eslesme hic olmadi); bu yuzden metin dogrudan aranir
+                    private _mesgul = ((toLower _nedS) find (_q + "baska planda" + _q + ",")) >= 0;   // yalniz elenme listesindeki [""baska planda"",N] (sabit aciklama metni sayilmaz)
                     if (_mesgul && {(_h getOrDefault ["mesgulBekle", 0]) < 60}) then {
                         _h set ["mesgulBekle", (_h getOrDefault ["mesgulBekle", 0]) + 1];
                         _h set ["deneme", ((_h get "deneme") - 1) max 0];
