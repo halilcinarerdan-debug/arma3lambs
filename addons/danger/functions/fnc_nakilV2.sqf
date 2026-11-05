@@ -406,6 +406,13 @@ waitUntil {
                     if (((_sv distance2D _drop) - _dm) > 350 && {((_sv getVariable [QGVAR(durgunSn), 0]) < 4)}) then { _d forceSpeed (((speed _sv) / 3.6 * 1.15) max 9); } else { _d forceSpeed -1; };
                 } else { _d forceSpeed -1; };
             };
+            // RECON ONDE KALSIN: yolda hareket eden recon araci 500 m icindeyse ve ben objektife ondan yakinsam hizim recon'a sinirlanir, 40 m'den yaklasmam (kesif ana kolun onunde gider, gecilmez)
+            private _rvl = vehicles select {alive _x && {_x getVariable [QGVAR(reconArac), false]} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(durgunSn), 0]) < 4} && {(_x distance2D _v) < 500}};
+            if (_rvl isNotEqualTo [] && {((_v distance2D _obj) < (((_rvl select 0) distance2D _obj) + 30))}) then {
+                private _rvv = _rvl select 0;
+                _fren = true;
+                _d forceSpeed (if ((_v distance2D _rvv) < 40) then {0} else {(((speed _rvv) max 0) / 3.6) max 3});
+            };
             // takilma izleme (kasitli fren degilse)
             if (_hz < 1 && {!_fren} && {_dm > 60}) then {
                 if (_durgunT < 0) then { _c set [2, time]; _durgunT = time; _c set [3, 0]; };
