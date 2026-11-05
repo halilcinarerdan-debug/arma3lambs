@@ -261,6 +261,17 @@ if (!(missionNamespace getVariable ["lambs_danger_tasimaOncelikOff", false]) && 
     };
     _gSirali = ([_cift, [], {_x select 0}, "DESCEND"] call BIS_fnc_sortBy) apply {_x select 1};
 };
+// v8.407 OYUNCU NAKLI (kullanici: 'oyuncuyu yani beni almadan gitti'; RPT 69c6496c: plan grubu olmayan oyuncu grubu eslesmeye girmedi, 48 askerin 8 araci doldu): piyade (yaya) oyuncu + AI ekibi plan grubu olmasa da nakile ALINIR (en oncelikli), oyuncu binene kadar arac bekler (en cok 90 sn).
+//   Oyuncu binmezse ekibi de araca binmez / iner (ekip oyuncudan ayrilmaz). Kapatma: lambs_danger_tasimaOyuncuOff = true
+if (!(missionNamespace getVariable ["lambs_danger_tasimaOyuncuOff", false])) then {
+    private _oyG = [];
+    { if (alive _x && {isNull objectParent _x} && {(side (group _x)) isEqualTo _taraf} && {(_x distance2D _pickRef) < 500} && {(_x distance2D _obj) > (_dropM + 150)}) then { _oyG pushBackUnique (group _x); }; } forEach allPlayers;
+    _oyG = _oyG select {!(_x in _gSirali)};
+    if (_oyG isNotEqualTo []) then {
+        _gSirali = _oyG + _gSirali;
+        diag_log format ["[TASIMA] OYUNCU NAKLI: oyuncu grubu nakile alindi: %1 (oyuncu binene kadar arac en cok 90 sn bekler)", _oyG apply {groupId _x}];
+    };
+};
 private _esle = {
     for "_tur" from 0 to 1 do {
         // tur 0: arac basina yumusak tavan (dengeli dagilim); sigmayan olursa tur 1: gercek kapasite
@@ -356,7 +367,7 @@ diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen
 } forEach _araclar;
 
 // v8.165 BEKLE: eslesen askerler oldugu yerde DURUR ve arac gelene kadar yurumez (RPT c4f70534: piyade RP'ye kosuyor, arac peşinden 90-120 sn kovaliyordu)
-{ { { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
+{ { { if (alive _x && {!isPlayer _x}) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
 
 // ---- v8.131 YIGILMA ONLEME: araclar ayni noktaya gitmesin; alma / inis noktasi yanal 24 m aralikla dagitilir ----
 private _noktaYay = {
@@ -374,7 +385,9 @@ private _isler = [];
 _ctl set [3, 0];
 _ctl set [4, count _eslesme];
 // v8.171 SENKRON: [inen arac sayisi, toplam arac, araclar] - konvoy hiz eslemesi ve inis sonrasi toplanma bu diziyi kullanir
-private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: rezerv noktalari (araclar rezervde de dagilsin)
+private _asBirim = [];
+{ private _vv = _x select 0; { { _asBirim pushBack _x; _x setVariable [QGVAR(atananArac), _vv]; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
+private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, [], _asBirim];   // 3: rezerv noktalari (araclar rezervde de dagilsin); 4: eslesen tum birimler (v8.407: acikta kalan askeri baska araca alma)
 {
     _x params ["_v", "_gl"];
     private _d = driver _v;
@@ -387,6 +400,30 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         private _senkBitti = { if (!_senkSay) then { _senkSay = true; _senk set [0, (_senk select 0) + 1]; }; };
         _v setVariable [QGVAR(tasimaMesgul), true];
         _v setVariable [QGVAR(aracMedevacT), time];
+        _v setVariable [QGVAR(yuklendi), false];
+        _v setVariable [QGVAR(ekYolcu), nil];
+        // v8.407 ACIKTA KALAN ASKER (kullanici: 'bazen 1-2 kisi aciktta kaliyor'): kendi araci yuklemeyi bitirmis ama hala disarida olan eslesen asker, kalkmamis (bos koltuklu) en yakin konvoy aracina oturtulur
+        private _sweep = {
+            params ["_v", "_senk"];
+            private _n = 0;
+            if (!alive _v || {(([_v] call FUNC(aracDuzBos))) <= 0}) exitWith {0};
+            {
+                private _u = _x;
+                if (alive _u && {!isPlayer _u} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {(_u distance2D _v) < 250} && {!(_u getVariable [QGVAR(tasimaBekle), false])}) then {
+                    private _av = _u getVariable [QGVAR(atananArac), objNull];
+                    if ((isNull _av) || {!alive _av} || {_av getVariable [QGVAR(yuklendi), false]}) then {
+                        if ((([_v] call FUNC(aracDuzBos))) > 0 && {[_u, _v] call FUNC(aracYolcuKoy)}) then {
+                            _n = _n + 1;
+                            private _ek = _v getVariable [QGVAR(ekYolcu), []];
+                            _ek pushBackUnique _u;
+                            _v setVariable [QGVAR(ekYolcu), _ek];
+                            diag_log format ["[TASIMA] %1 | ACIKTA KALAN ALINDI: %2 (%3 m) -> bos koltuklu %4", groupId (group (driver _v)), name _u, round (_u distance2D _v), getText (configOf _v >> "displayName")];
+                        };
+                    };
+                };
+            } forEach (_senk param [4, []]);
+            _n
+        };
         if !(_v getVariable [QGVAR(atesEH), false]) then {
             _v setVariable [QGVAR(atesEH), true];
             _v setVariable [QGVAR(atesSay), 0];
@@ -541,8 +578,9 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
             if (_dolu) then { _hepsi = (crew _v) select {alive _x && {(group _x) isNotEqualTo _vg} && {!isPlayer _x}}; };
             [_gl] call _birak;
-            { _x assignAsCargo _v; } forEach _hepsi;
-            _hepsi orderGetIn true;
+            { if (!isPlayer _x) then { _x assignAsCargo _v; }; } forEach _hepsi;
+            (_hepsi select {!isPlayer _x}) orderGetIn true;
+            { if (isPlayer _x && {alive _x}) then { [format ["[ELITE] %1 seni bekliyor: araca bin (en fazla 90 sn)", getText (configOf _v >> "displayName")]] remoteExec ["systemChat", _x]; }; } forEach _hepsi;
             private _bt = time + 90;
             // v8.163: arac DOLDUYSA ya da son 12 sn'de kimse binmediyse (en az 1 binen varken) bekleme biter (eski: 75 sn bos bekleme, RPT 69d7f8f5)
             private _bn = 0;
@@ -554,7 +592,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {[_hepsi, _d] call _temasVar}
                 || {_n > 0 && {(([_v] call FUNC(aracDuzBos))) isEqualTo 0}}
-                || {_n > 0 && {(time - _bTT) > (15 + ((selectMax (((_hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}}) apply {_x distance2D _v}) + [0])) / 3) min 45)}}   // v8.407 (RPT 5be59146: 106-113 m uzaktaki 3 asker yururken 15 sn dolunca arac 1 askerle kalkti): uzaktaki asker yetissin diye bekleme mesafeye gore uzar (en cok +45 sn)
+                || {_n > 0 && {(_hepsi findIf {isPlayer _x && {alive _x} && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} && {(time - _bTT) > (15 + ((selectMax (((_hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}}) apply {_x distance2D _v}) + [0])) / 3) min 45)}}   // v8.407 (RPT 5be59146: 106-113 m uzaktaki 3 asker yururken 15 sn dolunca arac 1 askerle kalkti): uzaktaki asker yetissin diye bekleme mesafeye gore uzar (en cok +45 sn)
             };
             // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
             private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};
@@ -578,8 +616,17 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             // gecikenler: 40 m icindeyse arac icine al
             { if (_iptal isEqualTo "" && {alive _x} && {(vehicle _x) isNotEqualTo _v} && {(_x distance2D _v) < 100} && {(([_v] call FUNC(aracDuzBos))) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); }; } forEach _hepsi;
             _binen = if (_iptal isEqualTo "") then {_hepsi select {alive _x && {(vehicle _x) isEqualTo _v}}} else {[]};
+            // v8.407: oyuncu binmediyse (90 sn) ekibi oyuncudan ayrilmasin: ayni gruptaki AI binenler iner
+            private _oyYok = _hepsi select {isPlayer _x && {alive _x} && {(vehicle _x) isNotEqualTo _v}};
+            if (_oyYok isNotEqualTo []) then {
+                private _pg = _oyYok apply {group _x};
+                { if (alive _x && {(group _x) in _pg}) then { unassignVehicle _x; moveOut _x; _x enableAI "PATH"; }; } forEach _binen;
+                _binen = _binen select {!((group _x) in _pg)};
+                diag_log format ["[TASIMA] %1 | OYUNCU BINMEDI: %2 -> ekibi araca alinmadi", groupId _vg, _oyYok apply {name _x}];
+            };
             if (_iptal isEqualTo "" && {_binen isEqualTo []}) then { _iptal = "kimse binmedi"; };
         };
+        _v setVariable [QGVAR(yuklendi), true];
         // plan: kac arac binmeyi bitirdi (v8.163: sefer bu sayac tamamlaninca BASLAR, nakil isi bitmeyi beklemez)
         _ctl set [3, (_ctl param [3, 0]) + 1];
         // v8.225 KALKIS KAPISI (SP zamani): kesif unsuru onde gider, ana kol YUKLU bekler (en fazla lambs_danger_nakilTutmaS = 240 sn; tasarim degeri, kitapta sayi YOK); kapi: recon gozlemi tamam / tank mevzide / 420 sn (komuta dongusu)
@@ -593,12 +640,30 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             waitUntil {
                 sleep 1;
                 if (time > _logT) then { _logT = time + 20; diag_log format ["[TASIMA] %1 | kalkis kapisi hala kapali: %2 sn bekledi (tavan %3 sn)", groupId _vg, round (time - _bt0), _tutS]; };
+                [_v, _senk] call _sweep;
                 !alive _v || {_ctl select 1} || {_ctl select 0} || {time > _tt}
             };
             private _kn = if (_ctl select 0) then {"plan iptal"} else { if (_ctl select 1) then {"kapi ACILDI"} else { if (time > _tt) then {"TAVAN doldu (kapi hala kapali)"} else {"arac oldu"} } };
             [format ["NAKIL-KALKTI %1", groupId _vg], format ["%1 sn bekledi | neden: %2", round (time - _bt0), _kn]] call FUNC(planZaman);
         } else {
             [format ["NAKIL-KALKTI %1", groupId _vg], "beklemedi (kapi acik)"] call FUNC(planZaman);
+        };
+
+        // v8.407 SON CAGRI: acikta kalan eslesen asker yakindaysa (150 m) ve bos koltuk varsa en cok 20 sn beklenip arac icine alinir; ek yolcular binen listesine eklenir (inis noktasinda inerler)
+        if (_iptal isEqualTo "" && {alive _v}) then {
+            private _tSon = time + 20;
+            waitUntil {
+                sleep 1;
+                private _bkl = (_senk param [4, []]) select {
+                    alive _x && {!isPlayer _x} && {isNull objectParent _x} && {(_x distance2D _v) < 150} && {!(_x getVariable [QGVAR(tasimaBekle), false])}
+                    && {private _av = _x getVariable [QGVAR(atananArac), objNull]; (isNull _av) || {!alive _av} || {_av getVariable [QGVAR(yuklendi), false]}}
+                };
+                [_v, _senk] call _sweep;
+                !alive _v || {_bkl isEqualTo []} || {time > _tSon} || {(([_v] call FUNC(aracDuzBos))) <= 0} || {_ctl select 0}
+            };
+            private _ekY = (_v getVariable [QGVAR(ekYolcu), []]) select {alive _x && {(vehicle _x) isEqualTo _v} && {!(_x in _binen)}};
+            if (_ekY isNotEqualTo []) then { _binen append _ekY; };
+            _v setVariable [QGVAR(ekYolcu), nil];
         };
 
         // (3) inis noktasina sur
