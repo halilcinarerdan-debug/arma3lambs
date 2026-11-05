@@ -208,7 +208,7 @@ private _geriSay = 0;
 private _sonTekrar = time;
 private _basT = time;
 private _basD = _v distance2D _dur;
-private _ts = time + 600;
+private _ts = time + (600 max (300 + (_basD / 5)));   // v8.500d: sabit 600 sn 9 km rota icin kisaydi (RPT 217d8569: recon 6 km kala indi); mesafeye gore
 private _ilerD = 1e6; private _ilerT = time; private _kurtN = 0; private _logT = time + 20; private _pozEski = getPosATL _v;
 private _hrT = time;   // v8.264: ilk 60 sn AI surusunun kaydi ([RECON-ARAC-HAREKET])
 private _bitis = "";

@@ -868,6 +868,14 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, [], _asBirim];
                             _takip = true;
                         };
                     };
+                    // v8.500d RECON ONDE KALSIN (kullanici: 'recon aracini gecmeye calisip onden gittiler'; doktrin: kesif ana kolun onunde): yolda hareket eden recon araci 500 m icindeyse ve ben objektife ondan YAKINSAM hizim recon'a (+0) sinirlanir, 40 m'den yaklasmam
+                    private _rvl = vehicles select {alive _x && {_x getVariable [QGVAR(reconArac), false]} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(durgunSn), 0]) < 4} && {(_x distance2D _v) < 500}};
+                    if (_rvl isNotEqualTo [] && {((_v distance2D _obj) < (((_rvl select 0) distance2D _obj) + 30))}) then {
+                        private _rvv = _rvl select 0;
+                        _tk = true;
+                        _takip = true;
+                        _d forceSpeed (if ((_v distance2D _rvv) < 40) then {0} else {(((speed _rvv) max 0) / 3.6) max 3});
+                    };
                     if (!_tk && {_takip} && {!_senkli}) then { _takip = false; _d forceSpeed -1; };
                 };
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
