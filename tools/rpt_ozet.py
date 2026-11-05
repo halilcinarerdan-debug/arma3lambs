@@ -405,15 +405,29 @@ def harekat_kabul(path):
     if fb:
         ekle("FAZ BASLADI", "OK", " -> ".join("%s F%s(%s obj)" % (z, m.group(1), m.group(3)) for z, m in fb))
     # ayni grup iki planda mi
-    gp = collections.defaultdict(set)
+    # AYNI ANDA aktif iki planda bulunan grup = cakisma. Faz faz ilerleyen plan (P1 BITTI -> P2 KURULDU) CAKISMA DEGIL (ayni gruplarin objektif objektif ilerlemesi istenen davranis).
+    aktif = collections.defaultdict(set)
+    cift_tum = {}
+    gp_say = 0
     for l in L:
+        if "[HAREKAT] Harekat (" in l and "kuruldu" in l:   # yeni oturum (mission yeniden baslatildi)
+            aktif = collections.defaultdict(set)
+        mb = re.search(r'\[PLAN\] (P\d+) FAZ \S+ -> (BITTI|IPTAL)', l)
+        if mb:
+            for g in list(aktif):
+                aktif[g].discard(mb.group(1))
+            continue
         m = re.search(r'\[PLAN\] (P\d+) KURULDU .*? grup: \[(.*?)\] \|', l)
         if m:
             for g in re.findall(r'""([^"=]+)=', m.group(2)):
-                gp[g].add(m.group(1))
-    cift = {g: sorted(p) for g, p in gp.items() if len(p) > 1}
-    if gp:
-        ekle("GRUP / PLAN CAKISMASI", "OK" if not cift else "KONTROL", "plan grubu:%d, birden fazla planda:%s" % (len(gp), cift if cift else "yok"))
+                gp_say += 1
+                diger = aktif[g] - {m.group(1)}
+                if diger:
+                    cift_tum[g] = sorted(diger | {m.group(1)})
+                aktif[g].add(m.group(1))
+    cift = cift_tum
+    if gp_say or cift:
+        ekle("GRUP / PLAN CAKISMASI", "OK" if not cift else "KONTROL", "plan grubu kaydi:%d, AYNI ANDA birden fazla planda:%s" % (gp_say, cift if cift else "yok"))
     # kapi
     ka = [re.sub(r'^\s*\d+:\d\d:\d\d\s*"?', "", l)[:150] for l in L if "KAPI-ACILDI" in l]
     if ka:

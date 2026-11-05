@@ -164,6 +164,7 @@ _ctl set [2, _nM];   // plan: nakil gercekten yapiliyor (> 0)
 
 // birimler araclar gelene kadar bekler (oyuncu haric)
 { { if (alive _x && {!isPlayer _x}) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach (_x select 1); } forEach _manifest;
+{ (_x select 0) setVariable [QGVAR(nk2Zincir), []]; (_x select 0) setVariable [QGVAR(nk2ZincirDene), false]; (_x select 0) setVariable [QGVAR(nk2DurT), -1]; } forEach _manifest;
 { (_x select 0) setVariable [QGVAR(tasimaMesgul), true]; (group (driver (_x select 0))) setVariable [QGVAR(aracMedevacT), time]; (_x select 0) setVariable [QGVAR(aracMedevacT), time]; } forEach _manifest;
 
 // kayit: [arac, surucu, grup, birimler, durum, t0, binen, gercekKoltuk, yolcuOyuncular]
@@ -217,7 +218,7 @@ waitUntil {
                 private _pk = [_ul select {alive _x && {isNull objectParent _x}}] call _merkez;
                 if (_durum isEqualTo "GEL") then {
                     // v8.500b: piyade <= 250 m ise arac YERINDE kalir, piyade araca yurur (eski sistemdeki gibi; RPT b79add31: park halindeki 4 arac 5 dk piyadeye gidemedi, konvoy tek aracla kalkti); 20 sn sonra kalan oturtulur
-                    if (_pk isEqualTo [] || {(_v distance2D _pk) < 250}) then {
+                    if (_pk isEqualTo [] || {(_v distance2D _pk) < 400}) then {
                         (_kayit select _idx) set [4, "BIN"];
                         (_kayit select _idx) set [5, time];
                         { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
@@ -228,18 +229,49 @@ waitUntil {
                         { if (isPlayer _x) then { [format ["[ELITE] %1 seni bekliyor: araca bin (en fazla 90 sn)", getText (configOf _v >> "displayName")]] remoteExec ["systemChat", _x]; }; } forEach _oyuncular;
                         [format ["%1 | arac yuklemeye hazir (%2 asker bekliyor)", groupId _vg, count _bekleyen]] call _log;
                     } else {
+                        // RPT 4e09cbf6: 1134 / 490 / 271 / 253 m uzaktaki araclar dakikalarca 'hiz 0' (tek doMove uzak hedefte basarisiz; v8.245 yol zinciri bilgisi) -> 700 m'den uzakta 300 m'lik ara nokta zinciri + takilma kurtarma (surus ile ayni basamaklar)
+                        private _gz = _v getVariable [QGVAR(nk2Zincir), []];
+                        if (_gz isEqualTo [] && {(_v distance2D _pk) > 700} && {!(_v getVariable [QGVAR(nk2ZincirDene), false])}) then {
+                            _v setVariable [QGVAR(nk2ZincirDene), true];
+                            _gz = [_v, _pk, 300] call FUNC(yolZinciri);
+                            _v setVariable [QGVAR(nk2Zincir), _gz];
+                            _v setVariable [QGVAR(nk2ZI), 0];
+                        };
+                        private _hedefG = _pk;
+                        if (_gz isNotEqualTo []) then {
+                            private _zi = (_v getVariable [QGVAR(nk2ZI), 0]) min ((count _gz) - 1);
+                            if ((_v distance2D (_gz select _zi)) < 60 && {_zi < ((count _gz) - 1)}) then { _zi = _zi + 1; _v setVariable [QGVAR(nk2ZI), _zi]; _vg setVariable [QGVAR(nk2MoveT), -99]; };
+                            _hedefG = _gz select _zi;
+                        };
+                        // takilma izleme (arac hedefe gitmesi gerekirken < 1 km/sa)
+                        if ((speed _v) < 1) then {
+                            if ((_v getVariable [QGVAR(nk2DurT), -1]) < 0) then { _v setVariable [QGVAR(nk2DurT), time]; _v setVariable [QGVAR(nk2Adim), 0]; };
+                            private _dg = time - (_v getVariable [QGVAR(nk2DurT), time]);
+                            private _ad = _v getVariable [QGVAR(nk2Adim), 0];
+                            if (_dg > 10 && {_ad < 1}) then { _v setVariable [QGVAR(nk2Adim), 1]; _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; doStop _d; _vg setVariable [QGVAR(nk2MoveT), -99]; [format ["%1 | YUKLEME TAKILMA 1: 10 sn hareket yok -> emir yenilendi (piyadeye %2 m)", groupId _vg, round (_v distance2D _pk)]] call _log; };
+                            if (_dg > 20 && {_ad < 2}) then { _v setVariable [QGVAR(nk2Adim), 2]; _v setVelocityModelSpace [0, 4, 0]; _vg setVariable [QGVAR(nk2MoveT), -99]; [format ["%1 | YUKLEME TAKILMA 2: itme", groupId _vg]] call _log; };
+                            if (_dg > 40 && {_ad < 3}) then {
+                                _v setVariable [QGVAR(nk2Adim), 3];
+                                private _ip = (getPosATL _v) getPos [25, _v getDir _hedefG];
+                                private _yr = _ip nearRoads 30;
+                                if (_yr isNotEqualTo []) then { _ip = getPosATL (_yr select 0); };
+                                if !(surfaceIsWater _ip) then { _v setVehiclePosition [_ip, [], 0, "NONE"]; _v setDir (_v getDir _hedefG); _v engineOn true; };
+                                _vg setVariable [QGVAR(nk2MoveT), -99];
+                                [format ["%1 | YUKLEME TAKILMA 3: 25 m ileri tasindi (piyadeye %2 m)", groupId _vg, round (_v distance2D _pk)]] call _log;
+                            };
+                        } else { _v setVariable [QGVAR(nk2DurT), -1]; };
                         if ((time - (_vg getVariable [QGVAR(nk2MoveT), -99])) > 4) then {
                             _vg setVariable [QGVAR(nk2MoveT), time];
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _vg setBehaviour "SAFE"; _vg setSpeedMode "FULL";
                             if !(isEngineOn _v) then { _d action ["EngineOn", _v]; _v engineOn true; };   // RPT dd9a9b85: motor kapaliyken arac MOVE emriyle de kipirdamadi
-                            _d doMove _pk;
-                            // RPT 2521b53c: Unimog 60 sn 'komut MOVE, hiz 0'; eski kodda 'doMove'a EK olarak grup WAYPOINT'i tek calisan yol' (v8.181): ayni waypoint tek kez kurulur, sonra konumu guncellenir
+                            _d doMove _hedefG;
+                            // RPT 2521b53c: eski kodda 'doMove'a EK olarak grup WAYPOINT'i tek calisan yol' (v8.181): ayni waypoint tek kez kurulur, sonra konumu guncellenir
                             private _nw = (waypoints _vg) select {(waypointName _x) find "ELITE NAKIL" isEqualTo 0};
                             if (_nw isEqualTo []) then {
-                                private _w = _vg addWaypoint [_pk, 0];
+                                private _w = _vg addWaypoint [_hedefG, 0];
                                 _w setWaypointType "MOVE"; _w setWaypointName "ELITE NAKIL"; _w setWaypointSpeed "FULL"; _w setWaypointBehaviour "SAFE";
                                 _vg setCurrentWaypoint _w;
-                            } else { (_nw select 0) setWPPos _pk; };
+                            } else { (_nw select 0) setWPPos _hedefG; };
                         };
                     };
                 } else {
@@ -247,7 +279,7 @@ waitUntil {
                     // 20 sn sonra (ve her 3 sn'de bir) kalan askeri duz koltuga otur (<= 300 m)
                     if (_gecen > 20 && {(round _gecen) mod 3 isEqualTo 0}) then {
                         {
-                            if ((_x distance2D _v) < 300 && {([_v] call FUNC(aracDuzBos)) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); };
+                            if ((_x distance2D _v) < 450 && {([_v] call FUNC(aracDuzBos)) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); };
                         } forEach _bekleyen;
                     };
                     // yakindaki asker binmeye devam: her 5 sn orderGetIn tekrar
