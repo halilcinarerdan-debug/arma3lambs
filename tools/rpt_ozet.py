@@ -3,6 +3,7 @@
 """
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
+           --harekat            HAREKAT / NAKIL / RECON KABUL KARNESI (v8.500): faz sirasi, ayni grup iki planda mi, recon varis, nakil V2 yukleme / inis, HQ sayisi, 3DEN nitelik (OK / KONTROL / YOK)
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
            --tani               NET TANI (v8.255): [OLUM-TANI] [HENDEK-DURUM] [ARAC-TERK] [ARAC-HAREKET] [TANI-TOPCU] [KAYIP-DEGERLENDIRME] [ARAC-DUMAN] ozeti + otomatik cikarim
@@ -22,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.405"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.500"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -366,6 +367,101 @@ def karne(path):
     for ad, d, k in sat:
         print("  [%-7s] %-18s %s" % (d, ad, k))
     print("  OK:%d  KONTROL:%d  YOK:%d" % tuple(len([1 for _, d, _ in sat if d == x]) for x in ("OK", "KONTROL", "YOK")))
+
+
+def harekat_kabul(path):
+    """HAREKAT / NAKIL / RECON KABUL KARNESI (v8.500): bu oturumda eklenen etiketlerden gecti / kaldi ozeti."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    t = "\n".join(L)
+    sat = []
+    def ekle(ad, durum, kanit): sat.append((ad, durum, kanit))
+    def al(rx): return [m for l in L for m in [re.search(rx, l)] if m]
+    b = re.search(r"build (v[0-9.]+[A-Z0-9-]*)", t)
+    ekle("SURUM", "OK" if b and b.group(1).startswith(BEKLENEN_SURUM) else "KONTROL", ("%s (beklenen %s)" % (b.group(1), BEKLENEN_SURUM)) if b else "boot satiri yok")
+    # lambs script hatalari (mod gurultusu ve ACE / CBA hatalari haric)
+    lh = []
+    for i, l in enumerate(L):
+        if "Error in expression" in l or "Error position" in l or "Error Undefined" in l or "Error Type" in l or "Error Zero" in l:
+            ctx = " ".join(L[i:i + 5])
+            if "/z/lambs" in ctx and not any(n in ctx for n in NOISE):
+                lh.append(re.sub(r"^\s*\d+:\d\d:\d\d\s*", "", l)[:100])
+    ekle("LAMBS SCRIPT HATASI", "OK" if not lh else "KONTROL", "%d satir %s" % (len(lh), ("| ilk: " + lh[0]) if lh else ""))
+    # 3DEN nitelik okunuyor mu
+    en = [l for l in L if "[EDEN-NITELIK]" in l]
+    bos = [l for l in en if "HIC YOK" in l]
+    ekle("3DEN NITELIK", "YOK" if not en else ("OK" if not bos else "KONTROL"), "modul:%d, nitelik okunmayan:%d%s" % (len(en), len(bos), " (faz / gorev ayari OYUNA ULASMIYOR: degisken adi / grup adi yedegi gerekli)" if bos else ""))
+    go = [l for l in L if "[GOREV-OTO]" in l]
+    ekle("GOREV (GRUP ADINDAN)", "OK" if go else "YOK", "%d atama %s" % (len(go), "| " + ", ".join(re.search(r"grup '([^']+)' -> (\w+)", l).group(1) + ":" + re.search(r"grup '([^']+)' -> (\w+)", l).group(2) for l in go if re.search(r"grup '([^']+)' -> (\w+)", l))[:150] if go else ""))
+    # faz kaydi / sirasi
+    kayit = [(int(m.group(2)), m.group(1)) for m in al(r"Objektif \(3DEN\) (\d+) \| HAREKAT '[^']*' faz (\d)'e kaydedildi")]
+    fazlar = sorted(set(f for f, _ in kayit))
+    if kayit:
+        ayni = len(kayit) > 1 and len(fazlar) == 1
+        ekle("FAZ KAYDI", "KONTROL" if ayni else "OK", "objektif:%d faz:%s%s" % (len(kayit), fazlar, " | HEPSI AYNI FAZDA (faz ayari okunmadi mi?)" if ayni else ""))
+    else:
+        ekle("FAZ KAYDI", "YOK", "harekat kaydi yok")
+    fb = [(l.split()[0], re.search(r"FAZ (\d+) '([^']*)' basladi \((\d+) objektif\)", l)) for l in L if "FAZ " in l and "basladi (" in l and "[HAREKAT] Harekat:" in l]
+    fb = [(z, m) for z, m in fb if m]
+    if fb:
+        ekle("FAZ BASLADI", "OK", " -> ".join("%s F%s(%s obj)" % (z, m.group(1), m.group(3)) for z, m in fb))
+    # ayni grup iki planda mi
+    gp = collections.defaultdict(set)
+    for l in L:
+        m = re.search(r'\[PLAN\] (P\d+) KURULDU .*? grup: \[(.*?)\] \|', l)
+        if m:
+            for g in re.findall(r'""([^"=]+)=', m.group(2)):
+                gp[g].add(m.group(1))
+    cift = {g: sorted(p) for g, p in gp.items() if len(p) > 1}
+    if gp:
+        ekle("GRUP / PLAN CAKISMASI", "OK" if not cift else "KONTROL", "plan grubu:%d, birden fazla planda:%s" % (len(gp), cift if cift else "yok"))
+    # kapi
+    ka = [re.sub(r'^\s*\d+:\d\d:\d\d\s*"?', "", l)[:150] for l in L if "KAPI-ACILDI" in l]
+    if ka:
+        tavan = [k for k in ka if "TAVAN" in k]
+        ekle("PLAN KAPISI", "KONTROL" if tavan else "OK", "%d acilis%s" % (len(ka), (" | TAVANDA acilan:%d (recon / tank beklenenden gec)" % len(tavan)) if tavan else ""))
+    # recon
+    rs = [l for l in L if "[RECON-ARAC]" in l and "secildi" in l]
+    rb = al(r"sessiz surus bitti \((\w+)\)")
+    rv = [l for l in L if "[PLAN-RECON]" in l and "OP'ye vardi" in l]
+    if rs or rb or rv:
+        neden = [m.group(1) for m in rb]
+        iyi = bool(rv) and all(n in ("vardi",) for n in neden)
+        ekle("RECON", "OK" if iyi else "KONTROL", "arac secildi:%d, surus bitis nedenleri:%s, OP'ye varan recon:%d" % (len(rs), neden, len(rv)))
+    else:
+        ekle("RECON", "YOK", "recon calismadi")
+    ekle("RECON ARAC BEKLEME", "OK" if any("indirdigi yerde bekliyor" in l for l in L) else ("YOK" if not rs else "KONTROL"), "reconu indirdigi yerde bekleyen arac:%d" % len([1 for l in L if "indirdigi yerde bekliyor" in l]))
+    # nakil V2
+    mf = [l for l in L if "[NAKIL2]" in l and "MANIFEST:" in l]
+    if mf:
+        mfa = [(int(re.search(r"MANIFEST: (\d+) arac / (\d+) asker", l).group(1)), int(re.search(r"MANIFEST: (\d+) arac / (\d+) asker", l).group(2))) for l in mf if re.search(r"MANIFEST: (\d+) arac / (\d+) asker", l)]
+        yk = [l for l in L if "[NAKIL2]" in l and "YUKLENDI" in l and "asker" in l]
+        acik = [int(m.group(1)) for m in al(r"disarida kalan (\d+)")]
+        zam = [l for l in L if "[NAKIL2]" in l and "zaman asimi" in l]
+        kv = al(r"KONVOY YUKLU: (\d+) arac / (\d+) asker")
+        it = al(r"INIS TAMAM: (\d+) / (\d+) asker indi")
+        tk = len([1 for l in L if "[NAKIL2]" in l and "TAKILMA" in l])
+        ekle("NAKIL V2 MANIFEST", "OK", "%d konvoy: %s" % (len(mfa), [("%d arac/%d asker" % a) for a in mfa]))
+        ekle("NAKIL V2 YUKLEME", "OK" if yk and not zam and not any(acik) else "KONTROL", "yuklenen arac:%d, zaman asimi:%d, disarida kalan toplam:%d" % (len(yk), len(zam), sum(acik)))
+        if kv:
+            ekle("NAKIL V2 TOPLU KALKIS", "OK" if all(int(m.group(1)) >= mfa[i][0] for i, m in enumerate(kv) if i < len(mfa)) else "KONTROL", "kalkan konvoy: %s" % [("%s arac/%s asker" % (m.group(1), m.group(2))) for m in kv])
+        ekle("NAKIL V2 INIS", "OK" if it and all(int(m.group(1)) >= int(m.group(2)) for m in it) else ("KONTROL" if it else "YOK"), "inis: %s | takilma kurtarma:%d" % ([("%s/%s" % (m.group(1), m.group(2))) for m in it], tk))
+    else:
+        old = len([1 for l in L if "[TASIMA]" in l and "BINDI" in l])
+        ekle("NAKIL (ESKI SISTEM)", "OK" if old else "YOK", "BINDI:%d, BINMEYEN:%d, ACIKTA KALAN ALINDI:%d" % (old, len([1 for l in L if "[TASIMA]" in l and "BINMEYEN" in l]), len([1 for l in L if "ACIKTA KALAN ALINDI" in l])))
+    # oyuncu
+    on = [l for l in L if "OYUNCU NAKLI" in l]
+    ob = [l for l in L if "OYUNCU BINMEDI" in l]
+    if on or ob or any("DOLU ARAC" in l for l in L):
+        ekle("OYUNCU NAKLI", "KONTROL" if ob else "OK", "nakle alindi:%d, binmedi:%d, dolu arac:%d" % (len(on), len(ob), len([1 for l in L if "DOLU ARAC" in l])))
+    # HQ
+    hq = set(re.search(r"\[HQ-NOKTA\] (HQ\d_\w+) KURULDU", l).group(1) for l in L if re.search(r"\[HQ-NOKTA\] (HQ\d_\w+) KURULDU", l))
+    if hq:
+        ekle("HQ SAYISI", "OK" if len(hq) <= 2 else "KONTROL", "%d HQ: %s" % (len(hq), sorted(hq)))
+    print("=" * 78); print("HAREKAT / NAKIL / RECON KABUL KARNESI |", path)
+    for ad, d, k in sat:
+        print("  [%-7s] %-24s %s" % (d, ad, k))
+    print("  OK:%d  KONTROL:%d  YOK:%d" % tuple(len([1 for _, d, _ in sat if d == x]) for x in ("OK", "KONTROL", "YOK")))
+    return len([1 for _, d, _ in sat if d == "KONTROL"])
 
 
 def hava_ied(path):
@@ -983,6 +1079,7 @@ if __name__ == "__main__":
     grup = aralik = None
     sadece_anomali = False
     karne_modu = False
+    harekat_modu = False
     hava_ied_modu = False
     zeka_modu = False
     form_modu = False
@@ -997,6 +1094,8 @@ if __name__ == "__main__":
             aralik = args[i + 1]; i += 2
         elif args[i] == "--karne":
             karne_modu = True; i += 1
+        elif args[i] == "--harekat":
+            harekat_modu = True; i += 1
         elif args[i] == "--anomali":
             sadece_anomali = True; i += 1
         elif args[i] == "--hava-ied":
@@ -1025,6 +1124,8 @@ if __name__ == "__main__":
             zeka(p)
         elif hava_ied_modu:
             hava_ied(p)
+        elif harekat_modu:
+            harekat_kabul(p)
         elif karne_modu:
             karne(p)
         elif grup:

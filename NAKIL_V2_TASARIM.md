@@ -28,3 +28,8 @@ Sözleşme eskisiyle aynı (`tasimaCtl`: [iptal, kapı, binen asker, yüklenen a
 4. `KONVOY YUKLU … plan kapisi bekleniyor` → kapı açılınca tüm araçlar birlikte kalkar; `SURUS` satırları.
 5. `TAKILMA 1/2/3` satırları (varsa) ve `INIS TAMAM: n / m asker indi`.
 6. Plan tarafı: `[PLAN] … TASIMA -> …` geçişi, `tasimaTamam`.
+
+## Hızlı doğrulama (v8.500 araçları)
+1. Her push'ta GitHub Actions `kontrol` iş akışı `tools/hemtt_kontrol.sh` çalıştırır: HEMTT sözdizimi (error = 0), L-S12 uyarısı = 0 ve statik tutarlılık (PREP / olay / ayar / sürüm). Elle: `bash tools/hemtt_kontrol.sh` (HEMTT yoksa indirilir).
+2. Oyundan sonra: `python tools/rpt_ozet.py --harekat <rpt>` → faz kaydı / sırası, aynı grup iki planda mı, recon varış, plan kapısı (TAVAN?), nakil yükleme / toplu kalkış / iniş, oyuncu nakli, HQ sayısı, 3DEN nitelik okunuyor mu (OK / KONTROL / YOK).
+3. Küçük senaryo önerisi: 1 saldırı Objektif'i (2–3 km), 1 recon grubu (adında `recon`), 3–4 nakil aracı, 2 piyade grubu, oyuncu yaya. `--harekat` çıktısında KONTROL satırı kalmamalı.

@@ -1,0 +1,12 @@
+name: kontrol
+# Her push / PR'de: HEMTT sozdizimi + lint (hata = 0 olmali) ve statik tutarlilik denetimi (PREP / olay / ayar / surum).
+on:
+  push:
+  pull_request:
+jobs:
+  hemtt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: HEMTT + tutarlilik kontrolu
+        run: bash tools/hemtt_kontrol.sh
