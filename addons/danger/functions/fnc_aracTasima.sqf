@@ -121,7 +121,7 @@ private _uygun = _tumAraclar select {
     && {((units _vg) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
     && {!(_vg getVariable [QGVAR(planAktif), false])} && {(time - (_vg getVariable [QGVAR(tasimaSonT), -999])) > 15}
     && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON_ARAC"]) || {((_vg getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC", "RECON_ARAC"])})}
-    && {(({isPlayer _x} count (crew _v)) isEqualTo 0)} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}
+    && {((crew _v) findIf {isPlayer _x && {((toLower ((assignedVehicleRole _x) param [0, "cargo"])) isNotEqualTo "cargo")}}) isEqualTo -1} && {!(_v getVariable [QGVAR(tasimaMesgul), false])}   // v8.407: oyuncu YOLCU (cargo) ise arac yine nakil araci olabilir (eskiden oyuncunun bindigi arac elenir, bota yer kalmaz / arac kalkmazdi); surucu / nisanci / komutan oyuncuysa elenir
 };
 // v8.139 TANI: Zeus TASIMA atadigi halde uygun gorulmeyen araclar icin NEDEN (RPT 045f5750: iki atanmis arac "atanmis arac: 0" olarak elendi, neden bilinmiyordu)
 {
@@ -143,7 +143,7 @@ private _uygun = _tumAraclar select {
             if (_vg getVariable [QGVAR(planAktif), false]) then {"arac grubu planda"} else {
             if ((time - (_vg getVariable [QGVAR(tasimaSonT), -999])) <= 15) then {"son nakilden < 15 sn"} else {
             if (_v getVariable [QGVAR(tasimaMesgul), false]) then {"zaten nakilde (mesgul)"} else {
-            if (({isPlayer _x} count (crew _v)) > 0) then {"icinde oyuncu var"} else {"gorev etiketi disinda bir filtre (HARIC / MEDEVAC / KARAKOL_ARAC ...)"}}}}}}}}}}}}}};
+            if (((crew _v) findIf {isPlayer _x && {((toLower ((assignedVehicleRole _x) param [0, "cargo"])) isNotEqualTo "cargo")}}) >= 0) then {"oyuncu surucu / nisanci / komutan koltugunda"} else {"gorev etiketi disinda bir filtre (HARIC / MEDEVAC / KARAKOL_ARAC ...)"}}}}}}}}}}}}}};
         diag_log format ["[TASIMA] ATANMIS ARAC UYGUN DEGIL: %1 | %2", getText (configOf _v >> "displayName"), _neden];
     };
 } forEach (vehicles select {alive _x && {_x isKindOf "LandVehicle"}} select {
@@ -531,7 +531,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                 !alive _v || {_ctl select 0} || {(_hepsi findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1} || {time > _bt}
                 || {[_hepsi, _d] call _temasVar}
                 || {_n > 0 && {(([_v] call FUNC(aracDuzBos))) isEqualTo 0}}
-                || {_n > 0 && {(time - _bTT) > 15}}
+                || {_n > 0 && {(time - _bTT) > (15 + ((selectMax (((_hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}}) apply {_x distance2D _v}) + [0])) / 3) min 45)}}   // v8.407 (RPT 5be59146: 106-113 m uzaktaki 3 asker yururken 15 sn dolunca arac 1 askerle kalkti): uzaktaki asker yetissin diye bekleme mesafeye gore uzar (en cok +45 sn)
             };
             // kapasite ogrenme: arac dolu ve disarida kalan var -> gercek koltuk = binen sayisi
             private _disarida = _hepsi select {alive _x && {(vehicle _x) isNotEqualTo _v}};
