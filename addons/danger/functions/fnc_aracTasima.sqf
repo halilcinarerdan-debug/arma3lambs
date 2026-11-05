@@ -328,6 +328,18 @@ if (_yollar isNotEqualTo []) then {
     diag_log format ["[TASIMA] %1 | inis noktasi korunak puani: %2 (aday %3)", _taraf, round _eniS, count _yollar];
     diag_log format ["[TASIMA] %1 | inis noktasi yola cekildi: %2 (yol, hedeften %3 m)", _taraf, mapGridPosition _drop, round (_drop distance2D _obj)];
 };
+// v8.407 DOLU ARAC (kullanici: 'ben bindirdim'; RPT 079fed04: oyuncu kamyonu 8 asker ile doldurdu, bos koltuk 0 -> eslesmeye girmedi -> arac hic kalkmadi): icinde >= 2 AI yolcu (arac ekibi disi) olan, eslesmemis arac oldugu gibi inise gonderilir
+{
+    private _vk = _x;
+    if ((_eslesme findIf {(_x select 0) isEqualTo _vk}) < 0) then {
+        private _dg = group (driver _vk);
+        private _yol = (crew _vk) select {alive _x && {(group _x) isNotEqualTo _dg} && {!isPlayer _x} && {(side _x) isEqualTo _taraf} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+        if (count _yol >= 2) then {
+            _eslesme pushBack [_vk, []];
+            diag_log format ["[TASIMA] DOLU ARAC: %1 | icinde %2 yolcu (%3) | oyuncu var: %4 -> oldugu gibi inise gidecek", getText (configOf _vk >> "displayName"), count _yol, (_yol apply {groupId (group _x)}) arrayIntersect (_yol apply {groupId (group _x)}), ((crew _vk) findIf {isPlayer _x}) >= 0];
+        };
+    };
+} forEach _araclar;
 private _nB = 0;
 { { _nB = _nB + count _x; } forEach (_x select 1); } forEach _eslesme;
 _ctl set [2, _nB];   // plan: gercekten nakil yapiliyor (> 0) -> is bitince TOPLAN hazir sayilir
@@ -471,7 +483,8 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         };
         private _pk = [_gl] call _pickFn;
         private _yayaGelsin = false;   // v8.168: arac piyadeye varamazsa / piyade yakinsa piyade araca YURUR
-        if (_pk isEqualTo []) then { _iptal = "tasinacak asker kalmadi"; } else {
+        private _dolu = _gl isEqualTo [];   // v8.407: onceden yuklu arac (alma / binme adimi atlanir)
+        if (_pk isEqualTo []) then { if (!_dolu) then { _iptal = "tasinacak asker kalmadi"; }; } else {
             if ((_v distance2D _pk) < 250) then {
                 // v8.168: piyade zaten 250 m icinde: arac HAREKET ETMEZ, piyade araca biner (RPT 5792af8a: 61 / 77 m'deki araclar 0 km/s MOVE ile hic kipirdamadi)
                 _yayaGelsin = true;
@@ -517,7 +530,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
         if (!alive _v || {!alive _d}) then { _iptal = "arac / surucu oldu"; };
         if (_iptal isEqualTo "" && {_ctl select 0}) then { _iptal = "plan zaman asimi (iptal)"; };
         if (_iptal isEqualTo "" && {(_gl findIf {(_x findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0}) >= 0}) then { _iptal = "alma noktasinda piyade ates altinda (arac yaklasmadi)"; };
-        if (_iptal isEqualTo "" && {!_yayaGelsin} && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
+        if (_iptal isEqualTo "" && {!_dolu} && {!_yayaGelsin} && {_pk isEqualTo [] || {(_v distance2D _pk) >= 60}}) then { _iptal = format ["piyadeye varilamadi (kalan %1 m)", [round (_v distance2D _pk), -1] select (_pk isEqualTo [])]; };
 
         // (2) bin
         private _binen = [];
@@ -526,6 +539,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             // v8.225 YUKLE-VE-BEKLE (kullanici: "her sey kitaba gore olmali"; ATP 4-01.45 / FM 3-98: piyade toplanma bolgesinde ARACA YUKLENIR, hareket baslangic noktasini (SP) zamaninda gecer; yuklenmeden beklemek doktrinde yok): binme ARTIK kapiyi beklemez; kapi (tasimaCtl[1]) yalnizca KALKISI tutar (asagida)
             private _hepsi = [];
             { _hepsi append (_x select {alive _x && {isNull objectParent _x}}); } forEach _gl;
+            if (_dolu) then { _hepsi = (crew _v) select {alive _x && {(group _x) isNotEqualTo _vg} && {!isPlayer _x}}; };
             [_gl] call _birak;
             { _x assignAsCargo _v; } forEach _hepsi;
             _hepsi orderGetIn true;
