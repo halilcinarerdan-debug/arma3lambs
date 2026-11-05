@@ -333,6 +333,15 @@ private _nB = 0;
 _ctl set [2, _nB];   // plan: gercekten nakil yapiliyor (> 0) -> is bitince TOPLAN hazir sayilir
 diag_log format ["[TASIMA] %1 | %2 arac / %3 asker eslesti | takim bazli bolunen: %4 | yaya kalan birim: %5 | inis noktasi %6 (hedeften %7 m) | atanmis arac: %8",
     _taraf, count _eslesme, _nB, _bolunen, count _yaya, mapGridPosition _drop, round _dropM, count _atanan];
+// v8.407 TANI (RPT 079fed04: oyuncunun kamyonu 8 asker + oyuncu ile DOLU, eslesmeye hic girmedi, kalkmadi): eslesmeyen aday araclar ve icindeki yolcular
+{
+    private _eV = (_eslesme apply {_x select 0}) select {_x isEqualType objNull};
+    private _vk = _x;
+    if !(_vk in _eV) then {
+        private _yol = (crew _vk) select {alive _x && {_x isNotEqualTo (driver _vk)}};
+        diag_log format ["[TASIMA] ESLESMEDI: %1 | bos duz koltuk %2 | icindeki yolcu %3 (%4) | oyuncu var: %5", getText (configOf _vk >> "displayName"), [_vk] call FUNC(aracDuzBos), count _yol, (_yol apply {groupId (group _x)}) arrayIntersect (_yol apply {groupId (group _x)}), ((_yol findIf {isPlayer _x}) >= 0)];
+    };
+} forEach _araclar;
 
 // v8.165 BEKLE: eslesen askerler oldugu yerde DURUR ve arac gelene kadar yurumez (RPT c4f70534: piyade RP'ye kosuyor, arac peşinden 90-120 sn kovaliyordu)
 { { { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach _x; } forEach (_x select 1); } forEach _eslesme;
@@ -673,6 +682,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
             private _ilerD = 1e6;
             private _ilerT = time;
             private _frenli = false;
+            private _takip = false;   // v8.407 KONVOY TAKIBI bayragi
             private _frenBas = -1;
             private _sonKuru = getPosATL _v;
             private _suN = 0;
@@ -750,6 +760,25 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, []];   // 3: r
                         if (_frenli) then { _frenli = false; _d forceSpeed -1; _d doMove _hedefA; };
                         if (isNull _en && {_frenBas >= 0}) then { _frenBas = -1; };
                     };
+                };
+                // v8.407 KONVOY TAKIBI (kullanici: 'konvoy sirasi stabil degil, herkes birbirini gecmeye calisiyor'; RPT 079fed04): her arac FULL hizla ayni inise gidiyordu, yalniz 40 m / +-25 derece onunu gorup frenliyordu -> yol / virajda yandan gecme yarisi.
+                //   Simdi: inise daha yakin olan (yani onde) en yakin konvoy araci 70 m icindeyse arac hizi onun hizina (+1.5 m/sn) sinirlanir = kuyruk takibi; onde giden durgunsa (>= 4 sn) takip yok. Kapatma: lambs_danger_konvoyTakipOff = true
+                if (_bitis isEqualTo "" && {!_frenli} && {alive _v} && {alive _d} && {!(missionNamespace getVariable ["lambs_danger_konvoyTakipOff", false])}) then {
+                    private _onK = (_senk select 2) select {
+                        _x isNotEqualTo _v && {alive _x} && {_x getVariable [QGVAR(tasimaMesgul), false]} && {(_x getVariable [QGVAR(yolcuBirak), false]) isEqualTo false}
+                        && {(_x distance2D _v) < 70} && {(_x distance2D _drop) < _dm} && {(_x getVariable [QGVAR(durgunSn), 0]) < 4}
+                    };
+                    private _tk = false;
+                    if (_onK isNotEqualTo []) then {
+                        private _lk = ([_onK, [], {_x distance2D _v}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+                        private _lh = ((speed _lk) max 0) / 3.6;
+                        if (_hz > (_lh + 1.5)) then {
+                            _tk = true;
+                            _d forceSpeed ((_lh + 1.5) max 4);
+                            _takip = true;
+                        };
+                    };
+                    if (!_tk && {_takip} && {!_senkli}) then { _takip = false; _d forceSpeed -1; };
                 };
                 if (!_yavasladi && {_dm < 220}) then { _yavasladi = true; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 // v8.171 KONVOY SENKRONU (MCWP 3-11.1 s. 6-36: tank / piyade araclari karsilikli destek mesafesinde birlikte ilerler; inis noktasinda kontrol kurulup birlikte saldirilir): hizli arac, ardindaki arac(lar)i > 250 m geride birakmasin

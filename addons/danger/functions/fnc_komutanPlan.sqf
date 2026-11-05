@@ -226,6 +226,7 @@ private _aday = allGroups select {
     && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!(_x getVariable ["lambs_danger_planAktif", false])} && {!(_x getVariable ["lambs_danger_oyuncuKomuta", false])}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "TASIMA", "KARAKOL_ARAC", "RECON", "RECON_ARAC"])}
     && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
+    && {((units _x) findIf {alive _x && {!isNull objectParent _x} && {(getNumber (configOf (objectParent _x) >> "attendant")) isEqualTo 1}}) < 0}   // v8.407: AMBULANS ekibi (grupta ambulansta oturan uye var) plana / nakile girmez = otomatik MEDEVAC (RPT 079fed04: medic grubu Unimog'a bindirildi, ambulansi bos birakti, alt gruplara dagildi)
     && {_hqKayit isEqualTo [] || {(_x getVariable ["lambs_danger_hqId", ""]) isEqualTo _hqId}}
     && {isNull objectParent _l} && {(_secili isEqualTo [] && {_hqKayit isNotEqualTo [] || {(_l distance2D _obj) <= (_ayar getOrDefault ["grupMesafe", (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])])}}) || {(netId _x) in _secili}}
 };
