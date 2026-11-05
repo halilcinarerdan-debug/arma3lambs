@@ -33,6 +33,7 @@ if (_faz in ["BITTI", "IPTAL"]) exitWith {
             _g setVariable ["lambs_danger_planZirh", nil];
             _g setVariable ["lambs_danger_planZirhPoz", nil];
             _g setVariable ["lambs_danger_planZirhVardi", nil];
+            if ((_g getVariable ["lambs_danger_planZirhPiyadeSahip", _id]) isEqualTo _id) then { _g setVariable ["lambs_danger_planZirhPiyadeTut", nil]; _g setVariable ["lambs_danger_planZirhPiyadeSahip", nil]; };
             _g setVariable ["lambs_danger_planZirhHide", nil];
             _g setVariable ["lambs_danger_planAktif", nil, true];
             _g setBehaviour "AWARE";
@@ -155,22 +156,27 @@ private _nZ = count _zg;
     };
 
     // v8.265 PIYADE BAGI: tank piyadenin cok onune gecmesin
-    if (_piyMed >= 0 && {!(_g getVariable ["lambs_danger_planZirhVardi", false])} && {canMove _v} && {time > (_g getVariable ["lambs_danger_planZirhPiyadeSerbest", 0])} && {(_v distance2D _obj) < (_piyMed - (missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400]))}) then {
+    // v8.406 PIYADE BAGI SAHIBI (RPT 04-48: ayni 'tank' grubu P3 + P4 planinda; P4 bayragi koyuyor, P3 her 3 sn siliyordu -> tank dur-kalk, kapi 'tank mevzide false' ile ~420 sn kapali, arac / tank cok gec kalkti): bag yalniz ilk plan tarafindan yonetilir
+    private _piySahip = _g getVariable ["lambs_danger_planZirhPiyadeSahip", ""];
+    if (_piyMed >= 0 && {_piySahip in ["", _id]} && {!(_g getVariable ["lambs_danger_planZirhVardi", false])} && {canMove _v} && {time > (_g getVariable ["lambs_danger_planZirhPiyadeSerbest", 0])} && {(_v distance2D _obj) < (_piyMed - (missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400]))}) then {
         if !(_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) then {
             _g setVariable ["lambs_danger_planZirhPiyadeTut", true];
+            _g setVariable ["lambs_danger_planZirhPiyadeSahip", _id];
             _g setVariable ["lambs_danger_planZirhPiyadeT0", time];
             doStop _d;
             diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI: tank piyadenin %3 m onunde (tank objektife %4 m, piyade medyani %5 m, sinir %6 m) -> piyade yetisene kadar BEKLIYOR | faz %7", _id, groupId _g, round (_piyMed - (_v distance2D _obj)), round (_v distance2D _obj), round _piyMed, missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400], _faz];
         };
         if ((time - (_g getVariable ["lambs_danger_planZirhPiyadeT0", time])) > 300) then {
             _g setVariable ["lambs_danger_planZirhPiyadeTut", nil];
+            _g setVariable ["lambs_danger_planZirhPiyadeSahip", nil];
             _g setVariable ["lambs_danger_planZirhPiyadeSerbest", time + 300];
             _g setVariable ["lambs_danger_planZirhMoveT", -999];
             diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI ZAMAN ASIMI (300 sn): piyade yetismedi, tank 300 sn serbest", _id, groupId _g];
         } else { continue };
     } else {
-        if (_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) then {
+        if ((_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) && {_piySahip in ["", _id]}) then {
             _g setVariable ["lambs_danger_planZirhPiyadeTut", nil];
+            _g setVariable ["lambs_danger_planZirhPiyadeSahip", nil];
             _g setVariable ["lambs_danger_planZirhMoveT", -999];
             diag_log format ["[PLAN-ZIRH] %1 | %2 PIYADE BAGI bitti: piyade yetisti (medyan %3 m) / faz degisti (%4) -> tank ilerliyor (%5 sn bekledi)", _id, groupId _g, round _piyMed, _faz, round (time - (_g getVariable ["lambs_danger_planZirhPiyadeT0", time]))];
         };
