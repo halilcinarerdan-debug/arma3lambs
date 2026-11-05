@@ -629,6 +629,17 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, [], _asBirim];
         _v setVariable [QGVAR(yuklendi), true];
         // plan: kac arac binmeyi bitirdi (v8.163: sefer bu sayac tamamlaninca BASLAR, nakil isi bitmeyi beklemez)
         _ctl set [3, (_ctl param [3, 0]) + 1];
+        // v8.407 TOPLU KALKIS (kullanici: 'erken binen takim once gitmesin, herkes binsin, oyle yola cikilsin'; ATP 4-01.45: konvoy toplanma bolgesinde yuklenip birlikte SP'yi gecer): bu arac yuklenmeyi bitirdi; TUM araclar yuklenene (ya da iptal olana) kadar en cok 120 sn bekler. Kapatma: lambs_danger_tasimaTopluKalkisOff = true
+        if (_iptal isEqualTo "" && {alive _v} && {!(missionNamespace getVariable ["lambs_danger_tasimaTopluKalkisOff", false])}) then {
+            private _tTop = time + 120;
+            private _logTop = time;
+            waitUntil {
+                sleep 1;
+                [_v, _senk] call _sweep;
+                if ((time - _logTop) > 20) then { _logTop = time; diag_log format ["[TASIMA] %1 | TOPLU KALKIS: yuklenen %2 / %3 arac - digerleri bekleniyor", groupId _vg, _ctl param [3, 0], _ctl param [4, 0]]; };
+                !alive _v || {_ctl select 0} || {(_ctl param [3, 0]) >= (_ctl param [4, 0])} || {time > _tTop}
+            };
+        };
         // v8.225 KALKIS KAPISI (SP zamani): kesif unsuru onde gider, ana kol YUKLU bekler (en fazla lambs_danger_nakilTutmaS = 240 sn; tasarim degeri, kitapta sayi YOK); kapi: recon gozlemi tamam / tank mevzide / 420 sn (komuta dongusu)
         if (_iptal isEqualTo "" && {alive _v} && {!(_ctl select 1)}) then {
             private _tutS = missionNamespace getVariable ["lambs_danger_nakilTutmaS", 240];

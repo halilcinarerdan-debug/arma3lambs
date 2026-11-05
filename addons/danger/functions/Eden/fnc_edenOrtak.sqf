@@ -23,6 +23,32 @@ switch (_mod) do {
     case "BEKLE": {
         private _t = diag_tickTime + 180;
         waitUntil { sleep 0.5; ((!isNil "lambs_danger_planKapiStarted") && {!isNil "lambs_danger_fnc_komutanPlan"} && {time > 4}) || {diag_tickTime > _t} };
+        // v8.407 GRUP ADINDAN OTOMATIK GOREV (RPT 3b142eec: 3DEN nitelik degiskenleri HIC YOK -> Gorev Ata modulleri secimi okuyamadi, 'recon' / 'recon araci' / 'medic' / 'topcu' gorevsiz kaldi, recon hic calismadi):
+        //   gorevi bos grubun adi (groupId) 'recon' iceriyorsa RECON ('arac' / 'apc' de varsa RECON_ARAC), 'medic' / 'medevac' MEDEVAC, 'topcu' TOPCU olarak atanir (grubun araclarina da). Gorev Ata modulu 'Otomatik' ise bunu SILMEZ. Kapatma: lambs_danger_gorevAdOtomatikOff = true
+        if (isServer && {!isNil "lambs_danger_planKapiStarted"} && {!(missionNamespace getVariable ["lambs_danger_gorevOtoYapildi", false])} && {!(missionNamespace getVariable ["lambs_danger_gorevAdOtomatikOff", false])}) then {
+            missionNamespace setVariable ["lambs_danger_gorevOtoYapildi", true];
+            {
+                private _g = _x;
+                if ((_g getVariable ["lambs_danger_gorev", ""]) isEqualTo "" && {(side _g) in [west, east, independent]} && {({isPlayer _x} count (units _g)) isEqualTo 0}) then {
+                    private _ad = toLower (groupId _g);
+                    private _kod = "";
+                    if ((_ad find "recon") >= 0) then {
+                        _kod = if (((_ad find "arac") >= 0) || {(_ad find "apc") >= 0}) then {"RECON_ARAC"} else {"RECON"};
+                    } else {
+                        if (((_ad find "medic") >= 0) || {(_ad find "medevac") >= 0}) then { _kod = "MEDEVAC"; } else {
+                            if (((_ad find "topcu") >= 0) && {(_ad find "topcu_yok") < 0}) then { _kod = "TOPCU"; };
+                        };
+                    };
+                    if (_kod isNotEqualTo "") then {
+                        ["lambs_danger_gorevAta", [_g, _kod]] call CBA_fnc_serverEvent;
+                        if (_kod isNotEqualTo "RECON") then {
+                            { ["lambs_danger_gorevAta", [_x, _kod]] call CBA_fnc_serverEvent; } forEach (((units _g) apply {objectParent _x}) select {!isNull _x} arrayIntersect ((units _g) apply {objectParent _x}));
+                        };
+                        diag_log format ["[GOREV-OTO] grup '%1' -> %2 (grup adindan; 3DEN nitelik okunmadi / gorev bos)", groupId _g, _kod];
+                    };
+                };
+            } forEach allGroups;
+        };
         !isNil "lambs_danger_planKapiStarted"
     };
     case "SAYI": {

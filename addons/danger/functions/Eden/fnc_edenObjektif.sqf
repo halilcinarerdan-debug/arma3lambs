@@ -120,6 +120,15 @@ if (!_activated || {!isServer}) exitWith {};
         waitUntil { sleep 0.5; ((_hm getVariable ["lambs_danger_harekatId", ""]) isNotEqualTo "") || {diag_tickTime > _tH} };
         private _hid = _hm getVariable ["lambs_danger_harekatId", ""];
         private _fazNo = ((round (["edObFaz", 0] call _n)) max 1) min 6;
+        // v8.407: 3DEN nitelik okunamiyorsa (RPT: HIC YOK) modulun DEGISKEN ADINDAki 'faz2' / 'faz3' ... fazi belirler (3DEN: modul > Degisken adi, ornek: faz2_hedef)
+        if (isNil {_logic getVariable "lambs_danger_edObFaz"}) then {
+            private _vn = toLower (vehicleVarName _logic);
+            private _fi = _vn find "faz";
+            if (_fi >= 0) then {
+                private _fd = parseNumber (_vn select [_fi + 3, 1]);
+                if (_fd >= 1 && {_fd <= 6}) then { _fazNo = _fd; diag_log format ["[EDEN] Objektif (3DEN) %1 | faz modul degisken adindan alindi ('%2' -> faz %3)", mapGridPosition _obj, vehicleVarName _logic, _fd]; };
+            };
+        };
         private _ok = ["KAYIT", [_hid, _fazNo, _taraf, _obj, _ayar toArray false, [format ["OBJ %1", mapGridPosition _obj], _logic getVariable ["lambs_danger_edObAd", ""]] select ((_logic getVariable ["lambs_danger_edObAd", ""]) isEqualType "" && {(_logic getVariable ["lambs_danger_edObAd", ""]) isNotEqualTo ""})]] call lambs_danger_fnc_harekat;
         diag_log format ["[EDEN] Objektif (3DEN) %1 | HAREKAT '%2' faz %3'e kaydedildi: %4 (plan harekat fazi baslayinca kurulur)", mapGridPosition _obj, _hid, _fazNo, _ok];
     };
