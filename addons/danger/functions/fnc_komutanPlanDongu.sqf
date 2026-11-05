@@ -811,7 +811,7 @@ while {true} do {
                 _plan set ["tasimaCtl", [false, !_bekleKos, 0, 0, 0, [], true]];
                 _plan set ["hazirBekle", _bekleKos];
                 if (_bekleKos) then { diag_log format ["[PLAN] %1 SENKRON: nakil araclari piyadeyi alip bekleyecek (gozlem: %2 | tank / zirh: %3) - serbest birakma kosullari: gozlem tamam + tanklar mevzisine yakin (en cok 420 sn)", _id, (_plan getOrDefault ["reconG", []]) isNotEqualTo [], (_plan getOrDefault ["zirhG", []]) isNotEqualTo []]; };
-                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn (if (missionNamespace getVariable ["lambs_danger_nakilV2", true]) then {FUNC(nakilV2)} else {FUNC(aracTasima)})];
             };
             [_plan, "TOPLAN", format ["RP %1", mapGridPosition _rp]] call _fazGec;
             continue
@@ -1004,7 +1004,7 @@ while {true} do {
                     _plan set ["tasimaYapildi", true];
                     if (!("tasimaH" in _plan) || {isNull (_plan get "tasimaH")}) then {
                         _plan set ["tasimaCtl", [false, true, 0, 0, 0, [], true]];
-                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn FUNC(aracTasima)];
+                        _plan set ["tasimaH", [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _plan get "tasimaCtl"] spawn (if (missionNamespace getVariable ["lambs_danger_nakilV2", true]) then {FUNC(nakilV2)} else {FUNC(aracTasima)})];
                     } else {
                         (_plan get "tasimaCtl") set [1, true];
                     };
@@ -1322,7 +1322,7 @@ while {true} do {
                     if (_bosArac isNotEqualTo []) then {
                         _plan set ["sefer", (_plan getOrDefault ["sefer", 1]) + 1];
                         _plan set ["seferT", time];
-                        private _yh = [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _ctlS] spawn FUNC(aracTasima);
+                        private _yh = [_plan get "taraf", _gruplar, _rp, _obj, _B, (_plan get "ayar") getOrDefault ["orpM", 300], (missionNamespace getVariable ["lambs_danger_nakilMenzil", 12000]), _ctlS] spawn (if (missionNamespace getVariable ["lambs_danger_nakilV2", true]) then {FUNC(nakilV2)} else {FUNC(aracTasima)});
                         _plan set ["tasimaYardim", (_plan getOrDefault ["tasimaYardim", []]) + [_yh]];
                         diag_log format ["[PLAN] %1 TASIMA %2. SEFER: geride kalan %3 asker (inis noktasindan > 400 m uzakta) | bos arac %4", _id, _plan get "sefer", _kalan, count _bosArac];
                         continue
