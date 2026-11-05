@@ -780,6 +780,21 @@ while {true} do {
             private _ilkSay = createHashMap;
             { _ilkSay set [groupId _x, {alive _x} count (units _x)]; } forEach _gruplar;
             _plan set ["ilkSayi", _ilkSay];
+            // v8.407 IHA DESTEGI (Objektif'e SYNC'li dronlar, ayar 'IHA destegi'): plan BASLAYINCA (harekat fazinda faz baslayinca) gozlem / sorti gorevi verilir. 1 = hepsi objektif uzerinde gozlem; 2 = FPV / bomba sorti, digerleri (Bayraktar vb.) gozlem
+            private _ihaL = (_plan getOrDefault ["ayar", createHashMap]) getOrDefault ["ihaListe", []];
+            if (_ihaL isNotEqualTo [] && {((_plan get "ayar") getOrDefault ["ihaMod", 0]) > 0}) then {
+                private _ihaM = (_plan get "ayar") getOrDefault ["ihaMod", 0];
+                private _tI = ([west, east, independent] find (_plan get "taraf")) max 0;
+                {
+                    private _u = objectFromNetId _x;
+                    if (!isNull _u && {alive _u}) then {
+                        private _tur = [_u] call FUNC(ihaTip);
+                        private _gm = if (_ihaM isEqualTo 2 && {_tur in ["FPV-AT", "FPV-AP", "BOMBA"]}) then {"SORTI"} else {"GOZLEM"};
+                        ["lambs_danger_ihaGorev", [netId _u, _gm, ["", "GOZLEM"] select (_gm isEqualTo "GOZLEM"), _tI, _plan get "obj", 400, 3000, "", 0, "", 0, "", 0]] call CBA_fnc_serverEvent;
+                        diag_log format ["[PLAN-IHA] %1 | %2 | %3 -> %4 (objektif uzerinde, tur %5)", _id, typeOf _u, ["", "gozlem", "destek"] select _ihaM, _gm, _tur];
+                    };
+                } forEach _ihaL;
+            };
             // v8.205: SAVUNMA planinda gruplar zaten objektifte (Zeus'un koydugu yerde); RP'ye toplanmak onlari yerinden ederdi (kullanici: "objektifte kendisi waypoint atiyor, degisik") -> RP waypoint'i yazilmaz, TOPLAN atlanir
             if (_tip isNotEqualTo 1 || {!(missionNamespace getVariable ["lambs_danger_savunmaRpAtla", true])}) then { { [_x, [[_rp, "MOVE", "RP (toplan)", "AWARE", "NORMAL", 50]]] call _wpYaz; } forEach _gruplar; };
             // v8.132: nakil araclari plan baslayinca RP'ye yola cikar (piyade toplanirken); bindirme TOPLAN hazir olunca

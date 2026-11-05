@@ -53,6 +53,9 @@ if (!_activated || {!isServer}) exitWith {};
     };
 
     private _tip = ((round (["edObTip", 0] call _n)) max 0) min 1;
+    // v8.407: sade modul turleri tipi kendisi belirler (Saldiri = ele gecir, Savunma = savun); eski 'ELITE Objektif' modulu 'Gorev tipi' ayarini kullanir
+    if ((typeOf _logic) isEqualTo QGVAR(EdenSaldiri)) then { _tip = 0; };
+    if ((typeOf _logic) isEqualTo QGVAR(EdenSavunma)) then { _tip = 1; };
     private _secimModu = (round (["edObGrupSec", 1] call _n)) max 0 min 3;
     private _secili = [];
     if (_secimModu isEqualTo 1) then {
@@ -101,6 +104,7 @@ if (!_activated || {!isServer}) exitWith {};
         ["sivil", ["edObSivil", false] call _b], ["agirYasak", ["edObAgir", false] call _b], ["topcu", round (["edObTopcu", 0] call _n)],
         ["topcuN", round (["edObTopcuN", 4] call _n)], ["topcuBasit", round (["edObTopcuBasit", 0] call _n)], ["zincir", (round (["edObZincir", 0] call _n)) isEqualTo 1],
         ["reconEk", (round (["edObRecon", 0] call _n)) isEqualTo 1], ["tut", round (["edObTut", 1] call _n)], ["dronAvi", round (["edObDron", 0] call _n)],
+        ["ihaListe", ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x}) apply {netId _x}], ["ihaMod", round (["edObIha", 0] call _n)],
         ["otoGarnizon", round (["edObOtoGar", 0] call _n)], ["rpIsaret", ""], ["mevziYar", round (["edObMevziYar", 500] call _n)], ["oranEsik", ["edObOran", 2] call _n]
     ];
     if (_secimModu isEqualTo 1) then {

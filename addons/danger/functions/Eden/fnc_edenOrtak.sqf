@@ -49,6 +49,8 @@ switch (_mod) do {
         {
             private _o = _x;
             private _grp = grpNull;
+            // v8.407: SYNC'li IHA (dron) ve ekibi plan grubu degildir (Objektif'e IHA destegi olarak baglanir)
+            if (unitIsUAV _o || {_o isKindOf "CAManBase" && {!isNull objectParent _o} && {unitIsUAV (objectParent _o)}}) then { continue };
             if (_o isKindOf "CAManBase") then {
                 _grp = group _o;
             } else {

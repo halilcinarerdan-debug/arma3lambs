@@ -24,7 +24,7 @@ if (!_activated || {!isServer}) exitWith {};
     private _tarafA = ["edHrTaraf", 0] call _n;
     private _taraf = [west, east, independent] select (((_tarafA - 1) max 0) min 2);
     if (_tarafA <= 0) then {
-        private _ob = ["MODUL", [_logic, QGVAR(EdenObjektif)]] call FUNC(edenOrtak);
+        private _ob = (["MODUL", [_logic, QGVAR(EdenObjektif)]] call FUNC(edenOrtak)) + (["MODUL", [_logic, QGVAR(EdenSaldiri)]] call FUNC(edenOrtak)) + (["MODUL", [_logic, QGVAR(EdenSavunma)]] call FUNC(edenOrtak));
         { private _ta = round (["SAYI", [_x, "lambs_danger_edObTaraf", 0]] call FUNC(edenOrtak)); if (_ta > 0) exitWith { _taraf = [west, east, independent] select ((_ta - 1) min 2); }; } forEach _ob;
         { private _g = ["GRUPLAR", [_x]] call FUNC(edenOrtak); if (_g isNotEqualTo []) exitWith { _taraf = side (_g select 0); }; } forEach (_ob select {round (["SAYI", [_x, "lambs_danger_edObTaraf", 0]] call FUNC(edenOrtak)) <= 0});
     };

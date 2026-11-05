@@ -75,7 +75,7 @@ class GVAR(EdenObjektif): Module_F {
     _generalMacro = QGVAR(EdenObjektif);
     scope = 2;
     scopeCurator = 0;
-    displayName = "ELITE Objektif - komutan plani (3DEN)";
+    displayName = "ELITE Objektif (ESKI - tum ayarlar)";
     icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\attack_ca.paa";
     category = "lambs_danger_elite_cat";
     function = QFUNC(edenObjektif);
@@ -113,6 +113,7 @@ class GVAR(EdenObjektif): Module_F {
         E_NUM(edObTopcuN,"Topcu atis sayisi mermi","Atis seansi basina mermi.","4")
         E_COMBO(edObTopcuBasit,"Topcu modu","Basit: dogrulama beklenmez.","0",E_V(0,"Standart dogrulamali") E_V(1,"BASIT dogrulamasiz"))
         E_COMBO(edObRecon,"Recon ek gozlem","Evet: recon dusman noktalarini da gizlice gozlemler. Gorev Ata ile RECON grubu gerekir.","0",E_V(0,"Hayir") E_V(1,"Evet gizlice incele"))
+        E_COMBO(edObIha,"IHA destegi","Objektife SYNC ile bagli dronlar plan baslayinca gorev alir. Gozlem: hepsi objektif uzerinde gozlem devriyesi. Destek: FPV / bomba sorti (zirh ve personel avi), Bayraktar gibi digerleri gozlem.","0",E_V(0,"Yok") E_V(1,"Gozlem") E_V(2,"Destek FPV sorti + gozlem"))
         E_COMBO(edObDron,"Dron operatoru avi","Dusman dronu cok kez gorulunce operator bolgesine devriye.","0",E_V(0,"CBA ayarina uy") E_V(1,"Hayir") E_V(2,"3 kisi yaya") E_V(3,"4 kisi yaya") E_V(4,"3 kisi hafif arac") E_V(5,"4 kisi hafif arac"))
         E_COMBO(edObFaz,"Harekat fazi","v8.404: yalniz bu modul bir ELITE Harekat modulune SYNC'liyse anlamli. Ayni fazin objektifleri birlikte baslar; faz bitince (planlar BITTI) siradaki faz. Harekat modulu yoksa etkisiz (plan hemen kurulur).","1",E_V(1,"Faz 1") E_V(2,"Faz 2") E_V(3,"Faz 3") E_V(4,"Faz 4") E_V(5,"Faz 5") E_V(6,"Faz 6"))
         E_TXT(edObAd,"Objektif adi (harekat gorevi)","Gorevlerde ve haritada gorunen ad (bos = grid).")
@@ -121,6 +122,77 @@ class GVAR(EdenObjektif): Module_F {
     };
     class ModuleDescription: ModuleDescription {
         description = "Modul konumu OBJEKTIF. ELITE HQ modulune ve plan gruplarina SYNC ile baglayin. Ele gecir plani icin HQ gerekir; grup baglamazsaniz otomatik secim yapilir.";
+    };
+};
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+// v8.407 SADE OBJEKTIF MODULLERI: 'Saldiri' (ele gecir) ve 'Savunma' (savun). Gorunen ayar az; gelismis ayarlar (guven, dogrulama, kuvvet orani, rally / ORP, sivil kisitlari, zincir) KONUMA GORE OTOMATIK varsayilanlarda kalir.
+// Eski 'ELITE Objektif (ESKI - tum ayarlar)' modulu ayni islevle durur (eski senaryolar bozulmaz). Ayni fonksiyon (fnc_edenObjektif) tipi modul sinifindan belirler.
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+class GVAR(EdenSaldiri): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenSaldiri);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE Saldiri Objektifi (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\attack_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenObjektif);
+    functionPriority = 2;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        E_COMBO(edObTaraf,"Taraf","Otomatik: baglanan HQ nun ya da ilk grubun tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
+        E_COMBO(edObGrupSec,"Grup secimi","Bagli gruplar: modul e SYNC edilen gruplar plana alinir. Otomatik: HQ ya atananlardan sayiya gore secilir. HQ tamami: HQ ya bagli tum squadlar.","1",E_V(0,"Otomatik sayi") E_V(1,"Bagli gruplar") E_V(2,"HQ tamami guvenlik birakilir") E_V(3,"HQ tamami hepsi"))
+        E_NUM(edObGrupN,"Katilacak grup sayisi","Yalniz Otomatik secimde.","4")
+        E_COMBO(edObTempo,"Tempo","Sessiz: AWARE-STEALTH ve ates disiplini. Hizli: tam hiz kisa kesif.","0",E_V(0,"Dengeli") E_V(1,"Sessiz gizli") E_V(2,"Hizli agresif"))
+        E_COMBO(edObBasla,"Baslama H-saati","Plan kurulduktan sonra harekete gecme zamani.","0",E_V(0,"Hemen") E_V(1,"30 sn") E_V(2,"60 sn") E_V(3,"120 sn") E_V(4,"300 sn"))
+        E_BOOL(edObPiy,"Dusman: piyade var","Objektifte dusman piyadesi var.","true")
+        E_BOOL(edObZirh,"Dusman: zirh arac var","Tank APC teknik var.","false")
+        E_BOOL(edObAt,"Dusman: AT RPG var","Roketatar fuze tasiyan dusman var.","false")
+        E_BOOL(edObMg,"Dusman: MG var","Makineli tufek var - kanat manevrasi.","false")
+        E_BOOL(edObBina,"Dusman: binalarda mevzili","CQB bina temizleme beklenir.","false")
+        E_COMBO(edObTopcu,"Ates destegi topcu havan","Tarafin topcu havan araclari kullanilir.","0",E_V(0,"Yok") E_V(1,"Hazirlik atesi") E_V(2,"Cagri atesi") E_V(3,"Hazirlik ve cagri"))
+        E_COMBO(edObRecon,"Recon ek gozlem","Evet: recon dusman noktalarini da gizlice gozlemler. Gorev Ata ile RECON grubu gerekir.","0",E_V(0,"Hayir") E_V(1,"Evet gizlice incele"))
+        E_COMBO(edObIha,"IHA destegi","Objektife SYNC ile bagli dronlar plan baslayinca gorev alir. Gozlem: hepsi objektif uzerinde gozlem devriyesi. Destek: FPV / bomba sorti, Bayraktar gibi digerleri gozlem.","0",E_V(0,"Yok") E_V(1,"Gozlem") E_V(2,"Destek FPV sorti + gozlem"))
+        E_COMBO(edObFaz,"Harekat fazi","Yalniz bu modul bir ELITE Harekat modulune SYNC'liyse anlamli. Ayni fazin objektifleri birlikte baslar; faz bitince siradaki faz.","1",E_V(1,"Faz 1") E_V(2,"Faz 2") E_V(3,"Faz 3") E_V(4,"Faz 4") E_V(5,"Faz 5") E_V(6,"Faz 6"))
+        E_TXT(edObAd,"Objektif adi (harekat gorevi)","Gorevlerde ve haritada gorunen ad (bos = grid).")
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "SALDIRI: plan toplan - ORP - kesif - saldiri akisini yurutur. SYNC: HQ modulu, plana girecek gruplar, istege bagli IHA (dron). Fazli harekatta ELITE Harekat modulune de SYNC edin.";
+    };
+};
+
+class GVAR(EdenSavunma): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenSavunma);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE Savunma Objektifi (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\defend_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenObjektif);
+    functionPriority = 2;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        E_COMBO(edObTaraf,"Taraf","Otomatik: baglanan HQ nun ya da ilk grubun tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
+        E_COMBO(edObGrupSec,"Grup secimi","Bagli gruplar: modul e SYNC edilen gruplar plana alinir. Otomatik: HQ ya atananlardan sayiya gore secilir.","1",E_V(0,"Otomatik sayi") E_V(1,"Bagli gruplar") E_V(2,"HQ tamami guvenlik birakilir") E_V(3,"HQ tamami hepsi"))
+        E_NUM(edObGrupN,"Katilacak grup sayisi","Yalniz Otomatik secimde.","4")
+        E_COMBO(edObTehdit,"Tehdit yonu","Dusmanin objektife geldigi yon.","0",E_V(0,"Bilinmiyor") E_V(1,"Kuzey") E_V(2,"Kuzeydogu") E_V(3,"Dogu") E_V(4,"Guneydogu") E_V(5,"Guney") E_V(6,"Guneybati") E_V(7,"Bati") E_V(8,"Kuzeybati"))
+        E_NUM(edObMevziYar,"Mevzi arama yaricapi m","Savunma icin hendek ve karakol arama yaricapi.","500")
+        E_COMBO(edObSure,"Sure siniri","Savunma: temassiz sure.","0",E_V(0,"Sinirsiz") E_V(1,"10 dk") E_V(2,"20 dk") E_V(3,"30 dk") E_V(4,"45 dk") E_V(5,"1 saat") E_V(6,"2 saat") E_V(7,"4 saat") E_V(8,"10 saat"))
+        E_COMBO(edObOtoGar,"Otomatik mevzi garnizon bolgeleri","Arazi analizi ile karakol mevzi gozletme bolgeleri.","0",E_V(0,"Hayir") E_V(1,"Evet") E_V(2,"Evet guclu"))
+        E_COMBO(edObIha,"IHA destegi","Objektife SYNC ile bagli dronlar plan baslayinca gorev alir. Gozlem: hepsi objektif uzerinde gozlem devriyesi. Destek: FPV / bomba sorti, Bayraktar gibi digerleri gozlem.","0",E_V(0,"Yok") E_V(1,"Gozlem") E_V(2,"Destek FPV sorti + gozlem"))
+        E_COMBO(edObFaz,"Harekat fazi","Yalniz bu modul bir ELITE Harekat modulune SYNC'liyse anlamli.","1",E_V(1,"Faz 1") E_V(2,"Faz 2") E_V(3,"Faz 3") E_V(4,"Faz 4") E_V(5,"Faz 5") E_V(6,"Faz 6"))
+        E_TXT(edObAd,"Objektif adi (harekat gorevi)","Gorevlerde ve haritada gorunen ad (bos = grid).")
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "SAVUNMA: objektif cevresinde sektorlu mevzi. SYNC: savunacak gruplar, istege bagli IHA (dron). Karakol / garnizon icin ayrica Karakol modulunu kullanin.";
     };
 };
 
@@ -177,7 +249,7 @@ class GVAR(EdenGorevAta): Module_F {
     isTriggerActivated = 0;
     isDisposable = 0;
     class Attributes: AttributesBase {
-        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: mevcut gorev korunur (RECON / RECON ARACI silinmez); silmek icin Zorla sil.","0",E_V(0,"Otomatik (mevcut gorevi koru)") E_V(1,"Plan MANEVRA") E_V(2,"Plan DESTEK baski SBF") E_V(3,"Plan YEDEK") E_V(4,"Plan disi HARIC") E_V(5,"MEDEVAC ekibi araci") E_V(6,"TOPCU ates destegi") E_V(7,"Topcu DEGIL") E_V(9,"TASIMA araci APC kamyon") E_V(10,"RECON gozlem gizli") E_V(11,"OYUNCU KOMUTASI") E_V(12,"ELITE TAM ACIK") E_V(13,"RECON ARACI") E_V(14,"Zorla sil atamayi kaldir"))
+        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: mevcut gorev korunur (RECON / RECON ARACI silinmez); silmek icin Zorla sil.","0",E_V(0,"Otomatik (mevcut gorevi koru)") E_V(1,"PLAN: Manevra") E_V(2,"PLAN: Destek baski") E_V(3,"PLAN: Yedek") E_V(4,"PLAN: Plan disi HARIC") E_V(5,"OZEL: Medevac ekibi araci") E_V(6,"OZEL: Topcu ates destegi") E_V(7,"OZEL: Topcu DEGIL") E_V(9,"OZEL: Tasima araci APC kamyon") E_V(10,"OZEL: RECON gozlem ekibi") E_V(11,"KOMUTA: Oyuncu komutasi") E_V(12,"KOMUTA: ELITE tam acik") E_V(13,"OZEL: RECON ARACI") E_V(14,"Zorla sil atamayi kaldir"))
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
