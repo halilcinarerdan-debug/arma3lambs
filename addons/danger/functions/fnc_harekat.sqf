@@ -320,6 +320,16 @@ switch (_islem) do {
                     };
                 };
                 if (_s isEqualTo 0) then {
+                    // v8.406 (RPT 5be59146: ayni fazin iki objektifi, biri tum gruplari aldi, digeri 'baska planda' ile 3 denemede BASARISIZ sayildi): grup yokluk nedeni baska planin mesgul etmesiyse bu BASARISIZ DENEMESI SAYILMAZ; gruplar bosalana kadar 45 sn'de bir beklenir (en cok 60 bekleme = 45 dk)
+                    private _mesgul = ((toLower (str (_h getOrDefault ["neden", ""]))) find "baska planda") >= 0;
+                    if (_mesgul && {(_h getOrDefault ["mesgulBekle", 0]) < 60}) then {
+                        _h set ["mesgulBekle", (_h getOrDefault ["mesgulBekle", 0]) + 1];
+                        _h set ["deneme", ((_h get "deneme") - 1) max 0];
+                        _h set ["durum", "BEKLE"];
+                        _h set ["bekleT", time + 45];
+                        if ((_h get "mesgulBekle") isEqualTo 1) then { [_taraf, format ["%1 / F%2 %3: gruplar baska planda mesgul - bosalana kadar beklenecek", _op get "ad", _fno, _h get "ad"]] call _mesaj; };
+                        diag_log format ["[HAREKAT] %1 / F%2 %3: gruplar baska planda mesgul (%4) - bekleniyor (%5/60)", _op get "ad", _fno, _h get "ad", _h get "neden", _h get "mesgulBekle"];
+                    } else {
                     if ((_h get "deneme") < 3) then {
                         _h set ["durum", "BEKLE"];
                         _h set ["bekleT", time + 45];
@@ -327,6 +337,7 @@ switch (_islem) do {
                     } else {
                         ["BASARISIZ", format ["plan kurulamadi (3 deneme): %1", _h get "neden"]] call _bitir;
                         _acik = _acik - 1;
+                    };
                     };
                 };
                 if (_s isEqualTo -1 && {(time - (_h get "istekT")) > 60}) then { ["BASARISIZ", "plan istegi zaman asimi"] call _bitir; _acik = _acik - 1; };
