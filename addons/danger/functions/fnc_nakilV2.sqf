@@ -184,6 +184,11 @@ private _bitirAraclar = {
 };
 
 // ===================================================================== 3 YUKLEME
+private _piyDist = {
+    params ["_r"];
+    private _p = [(_r select 3) select {alive _x && {isNull objectParent _x}}] call _merkez;
+    if (_p isEqualTo []) then {0} else { round ((_r select 0) distance2D _p) }
+};
 private _tYuk = time;
 private _logT = time + 20;
 private _hazirSay = 0;
@@ -204,7 +209,8 @@ waitUntil {
                 private _ic = _ul select {alive _x && {(vehicle _x) isEqualTo _v}};
                 private _pk = [_ul select {alive _x && {isNull objectParent _x}}] call _merkez;
                 if (_durum isEqualTo "GEL") then {
-                    if (_pk isEqualTo [] || {(_v distance2D _pk) < 60}) then {
+                    // v8.500b: piyade <= 250 m ise arac YERINDE kalir, piyade araca yurur (eski sistemdeki gibi; RPT b79add31: park halindeki 4 arac 5 dk piyadeye gidemedi, konvoy tek aracla kalkti); 20 sn sonra kalan oturtulur
+                    if (_pk isEqualTo [] || {(_v distance2D _pk) < 250}) then {
                         (_kayit select _idx) set [4, "BIN"];
                         (_kayit select _idx) set [5, time];
                         { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints _vg) call { reverse _this; _this });
@@ -272,7 +278,10 @@ waitUntil {
         };
         if ((_kayit select _idx) select 4 in ["GEL", "BIN"]) then { _hepsiHazir = false; };
     } forEach _kayit;
-    if (time > _logT) then { _logT = time + 20; [format ["YUKLEME surerken: hazir %1 / %2 arac", _ctl select 3, count _kayit]] call _log; };
+    if (time > _logT) then {
+        _logT = time + 20;
+        [format ["YUKLEME surerken: hazir %1 / %2 arac | durum: %3", _ctl select 3, count _kayit, _kayit apply { format ["%1:%2 piyadeye %3 m hiz %4 motor %5", groupId (_x select 2), _x select 4, [_x] call _piyDist, round (speed (_x select 0)), isEngineOn (_x select 0)] }]] call _log;
+    };
     (_ctl select 0) || {_hepsiHazir} || {(time - _tYuk) > _yukMax}
 };
 
