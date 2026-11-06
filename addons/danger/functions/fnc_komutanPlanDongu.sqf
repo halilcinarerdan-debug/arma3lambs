@@ -1043,7 +1043,8 @@ while {true} do {
                     private _mevziAta = createHashMap;
                     if (_mevziler isNotEqualTo []) then {
                         private _mKul = _mevziler apply {0};
-                        private _mOnc = [_mevziler apply {_forEachIndex}, [], {
+                        private _mIdx = []; for "_mi" from 0 to ((count _mevziler) - 1) do { _mIdx pushBack _mi; };
+                        private _mOnc = [_mIdx, [], {
                             if (_th >= 0) then { abs ((((_obj getDir ((_mevziler select _x) select 0)) - _th + 540) mod 360) - 180) } else { _x }
                         }, "ASCEND"] call BIS_fnc_sortBy;
                         private _kalanG = +_sirali;

@@ -178,11 +178,12 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
             };
         };
         if (alive _uav && {_opMod > 0} && {call _opOldu}) then { call _kontrolKaybi; } else {
-            if (alive _uav) then {
+            // v8.500h: yalniz GERCEK sure bitiminde ve sorti hala bizimse (SIHA-KESIF devralinca / jeton degisince erken 'bitti' dali pist inisine zorlayip dusuruyordu)
+            if (alive _uav && {(time - _t0) >= _sureS} && {(_uav getVariable [QGVAR(ihaTok), -1]) isEqualTo _tok}) then {
                 if (_ucak) then {
                     // v8.500g (kullanici: 'Bayraktar gibi IHAlar 20 dk dolunca yere cakilmasin, geri inis yapsin'): ucak PIST VARSA (harita ilsPosition) oraya doner ve iner; pist yoksa yakit biterken dusmesin diye yakit ikmali (benzetim) ve daire cizmeye devam
                     private _ils = getArray (configFile >> "CfgWorlds" >> worldName >> "ilsPosition");
-                    if (count _ils >= 2 && {(_uav distance2D [_ils select 0, _ils select 1, 0]) < 25000}) then {
+                    if (count _ils >= 2 && {(_uav distance2D [_ils select 0, _ils select 1, 0]) < 25000} && {((getPosATL _uav) select 2) > 150}) then {
                         _d doMove [_ils select 0, _ils select 1, 0];
                         _uav landAt 0;
                         diag_log format ["[IHA-SORTI] %1 | sure doldu: pistte inise donuyor (ilsPosition %2, %3 m)", typeOf _uav, mapGridPosition [_ils select 0, _ils select 1, 0], round (_uav distance2D [_ils select 0, _ils select 1, 0])];
