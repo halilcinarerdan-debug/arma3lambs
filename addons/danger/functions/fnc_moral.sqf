@@ -44,7 +44,8 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             private _g = _x;
             if (isNull _g || {!local _g} || {(side _g) isEqualTo civilian}) then { continue };
             if ((units _g) findIf {isPlayer _x} > -1) then { continue };
-            private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])} && {!(_x getVariable [QGVAR(teslim), false]) || {_g getVariable [QGVAR(teslimOldu), false]}}};   // v8.308: bireysel teslim olan etkin guc sayilmaz   // v8.91: bayilanlar etkin guc degil (kayip orani / moral)
+            // v8.500e (RPT fd85e28a: nakil / iniste piyade2 "kalan 3/8 (kayip yuzde 63)", Manevra1 "kalan 1/4 (%75)": aracta tasinan YOLCU kayip sayiliyordu -> moral cokmesi): yolcu (surucu / nisanci / komutan haric) etkin guctur
+            private _us = (units _g) select {alive _x && {isNull objectParent _x || {private _pv = objectParent _x; _x isNotEqualTo (driver _pv) && {_x isNotEqualTo (gunner _pv)} && {_x isNotEqualTo (commander _pv)}}} && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])} && {!(_x getVariable [QGVAR(teslim), false]) || {_g getVariable [QGVAR(teslimOldu), false]}}};   // v8.308: bireysel teslim olan etkin guc sayilmaz   // v8.91: bayilanlar etkin guc degil (kayip orani / moral)
             if (_us isEqualTo []) then { continue };
             if (_g getVariable [QGVAR(teslimOldu), false]) then {
                 // v8.277 ESIR BAKIMI (kullanici RPT 21-10: 'captiveler hareket etmesin; bazi captiveler geri silah aldi'; [ROE-IHLAL] captive:true silahli:true = AT askeri roketatarini tutuyordu, DropWeapon yalniz ana silahi birakir):
