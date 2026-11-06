@@ -512,13 +512,22 @@ private _inen = 0;
     _x params ["_v", "_d", "_vg", "_ul", "_durum", "_t0", "_binen"];
     { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; _x doFollow (leader (group _x)); if ((vehicle _x) isEqualTo _x) then { _inen = _inen + 1; }; }; } forEach _binen;
     if (alive _v && {_durum isEqualTo "HAZIR"}) then {
-        // IFV: indirdikten sonra ates destegi
-        if ((([_v] call FUNC(aracSinif)) select 0) isEqualTo "IFV" && {count _ctl > 5}) then {
+        // IFV: indirdikten sonra ates destegi (planZirh; piyadenin 40 m'den fazla onune gecmez) - gerisi "savas taksisi": GERIDE REZERV
+        private _ifvMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "IFV" && {count _ctl > 5};
+        if (_ifvMi) then {
             private _ifvL = _ctl select 5;
             if (_ifvL isEqualType []) then { _ifvL pushBackUnique _vg; };
+        } else {
+            // v8.500f (kullanici: 'askerler geride iniyor, savunmasiz araclar one geciyor'): eskiden _rp'ye (objektife 500 m = inis noktasinin ONU) donuyordu; artik inis noktasindan 700 m GERIDE (objektiften uzaga) rezerv noktasina, aracin kendi yan kaymasiyla
+            private _gYon = _obj getDir _drop;
+            private _geri = _obj getPos [((_obj distance2D _drop) + 700), _gYon];
+            private _gYol = (_geri nearRoads 250) select {!surfaceIsWater (getPosATL _x) && {((getPosATL _x) distance2D _obj) >= ((_obj distance2D _drop) + 450)}};
+            if (_gYol isNotEqualTo []) then { _geri = getPosATL (([_gYol, [], {_x distance2D _geri}, "ASCEND"] call BIS_fnc_sortBy) select 0); } else { if (surfaceIsWater _geri) then { _geri = _drop getPos [300, _gYon]; }; };
+            _geri = _geri getPos [40 * _forEachIndex, _gYon + 90];
+            if (surfaceIsWater _geri) then { _geri = _drop getPos [300, _gYon]; };
+            _v setVariable [QGVAR(rezervNokta), _geri];
+            if (alive _d) then { _d enableAI "PATH"; _d forceSpeed -1; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; _d doMove _geri; };
         };
-        // arac RP'ye doner
-        if (alive _d) then { _d enableAI "PATH"; _d forceSpeed -1; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; _d doMove _rp; };
     };
 } forEach _kayit;
 call _bitirAraclar;
