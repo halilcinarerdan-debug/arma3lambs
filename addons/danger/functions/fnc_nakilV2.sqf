@@ -526,6 +526,7 @@ private _inen = 0;
             _geri = _geri getPos [40 * _forEachIndex, _gYon + 90];
             if (surfaceIsWater _geri) then { _geri = _drop getPos [300, _gYon]; };
             _v setVariable [QGVAR(rezervNokta), _geri];
+            [format ["%1 | inis sonrasi GERIDE rezerv: objektiften %2 m (inis noktasi %3 m)", groupId _vg, round (_geri distance2D _obj), round (_drop distance2D _obj)]] call _log;
             if (alive _d) then { _d enableAI "PATH"; _d forceSpeed -1; _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; _d doMove _geri; };
         };
     };

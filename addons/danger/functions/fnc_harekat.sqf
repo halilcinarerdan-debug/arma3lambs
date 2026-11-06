@@ -49,7 +49,8 @@ private _gSahip = {
 };
 private _gorevKur = {
     params ["_sahip", "_kimlik", "_ust", "_baslik", "_acik", "_poz", "_tip"];
-    if (_sahip isEqualType [] && {_sahip isEqualTo []}) exitWith {};
+    if (_sahip isEqualType [] && {_sahip isEqualTo []}) exitWith { diag_log format ["[HAREKAT] gorev KURULMADI (HQ'ya bagli oyuncu grubu yok): %1", _baslik]; };
+    if (_sahip isEqualType []) then { diag_log format ["[HAREKAT] gorev kuruldu: %1 | sahip oyuncu grubu: %2", _baslik, _sahip apply {groupId _x}]; };
     private _tid = if (_ust isEqualTo "") then {_kimlik} else {[_kimlik, _ust]};
     [_sahip, _tid, [_acik, _baslik, ""], _poz, "ASSIGNED", 1, true, _tip, false] call BIS_fnc_taskCreate;
 };

@@ -467,6 +467,28 @@ def harekat_kabul(path):
     ob = [l for l in L if "OYUNCU BINMEDI" in l]
     if on or ob or any("DOLU ARAC" in l for l in L):
         ekle("OYUNCU NAKLI", "KONTROL" if ob else "OK", "nakle alindi:%d, binmedi:%d, dolu arac:%d" % (len(on), len(ob), len([1 for l in L if "DOLU ARAC" in l])))
+    # plan kapisi nedenleri + recon on-hat
+    kn = [re.search(r"KAPI-ACILDI \| neden: ([^|]+?) \|", l) for l in L if "KAPI-ACILDI" in l]
+    kn = [m.group(1).strip() for m in kn if m]
+    if kn:
+        ekle("KAPI NEDENLERI", "OK" if kn and not all("TAVAN" in k for k in kn) else "KONTROL", str(dict(collections.Counter(kn))))
+    # recon bindi -> kapi acildi gecikmesi (recon onde mi: pozitif = konvoy recon'dan sonra kalkti)
+    rbz = [(l.split()[0]) for l in L if "[RECON-ARAC]" in l and "askeri bindi" in l]
+    kaz = [(l.split()[0]) for l in L if "KAPI-ACILDI" in l]
+    def _sn(t):
+        h, m, s_ = t.split(":"); return int(h) * 3600 + int(m) * 60 + int(s_)
+    if rbz and kaz:
+        d = _sn(kaz[0]) - _sn(rbz[0])
+        ekle("RECON ONCE (gercek sn)", "OK" if d >= 20 else "KONTROL", "recon bindi %s, kapi acildi %s (fark %d sn gercek zaman)" % (rbz[0], kaz[0], d))
+    tk = len([1 for l in L if "VARIS (TIKALI)" in l])
+    rz = len([1 for l in L if "inis sonrasi GERIDE rezerv" in l])
+    if tk or rz:
+        ekle("INIS / REZERV", "OK", "tikali varis:%d, geride rezerve giden arac:%d" % (tk, rz))
+    gk = len([1 for l in L if "[HAREKAT] gorev KURULMADI" in l]); gv = len([1 for l in L if "[HAREKAT] gorev kuruldu" in l])
+    if gk or gv:
+        ekle("GOREV SAHIPLIGI", "OK", "oyuncuya verilen gorev:%d, HQ'ya bagli oyuncu yok diye kurulmayan:%d" % (gv, gk))
+    sahte = [l for l in L if "[MORAL]" in l and re.search(r"kayip yuzde (\d+)\)", l) and int(re.search(r"kayip yuzde (\d+)\)", l).group(1)) >= 40 and "temas yok:true" in l]
+    ekle("MORAL (SAHTE KAYIP)", "OK" if len(sahte) < 3 else "KONTROL", "temassiz iken kayip >= %%40 gorunen moral satiri: %d" % len(sahte))
     # hakem (uzuv kiralama) retleri: hata degil, cakisma onleme kaniti; cok yuksekse yazicilar arasi cakisma var demek
     ur = [re.search(r"\[UYUM\] RET \| .*? \| uzuv (\w+) \| istek: (\S+) .*? mevcut sahip: (\S+)", l) for l in L if "[UYUM] RET" in l]
     ur = [m for m in ur if m]
