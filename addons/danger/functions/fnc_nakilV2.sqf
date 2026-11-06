@@ -385,7 +385,8 @@ if (_ctl select 0) exitWith {
 // ===================================================================== 5 SURUS (konvoy birlikte)
 // yol zinciri (uzak hedefte ~300 m ara noktalar)
 // v8.500g KADEMELI VARIS NOKTALARI (kullanici: 'hepsi milimetrik ayni yere gitmeye calisiyor, ORP'ye yakinsa oldugu yerde dursun'; RPT 0bef7b5e: ayni noktaya varan araclar carpisti): konvoy sirasina gore (inise en yakin once) her arac inis noktasindan 26 m x sira GERIDE (objektiften uzaga), yola oturtulmus ayri nokta alir
-private _siraV = [_kayit apply {_forEachIndex}, [], {((_kayit select _x) select 0) distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
+private _idxV = []; for "_iv" from 0 to ((count _kayit) - 1) do { _idxV pushBack _iv; };
+private _siraV = [_idxV, [], {((_kayit select _x) select 0) distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
 private _dropVs = _kayit apply { _drop };
 {
     private _pt = _drop getPos [26 * _forEachIndex, _B];
