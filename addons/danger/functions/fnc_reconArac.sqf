@@ -230,7 +230,9 @@ while {_bitis isEqualTo ""} do {
         if ((time - _sonTekrar) > 20 && {(speed _v) < 4} && {_kurtN isEqualTo 0}) then { _sonTekrar = time; _d doMove (_zincir select _zi); };
     };
     // ilerleme tavani: 240 sn'de baslangic mesafesinin %15'ini bile kapatmadiysa (agaclik / dolambac) vazgec, recon yaya devam eder
-    // v8.500c (RPT 5c754ebb: yolda 28 km/sa giderken 240 sn'de 'ilerlemedi' sayildi, recon 1.5 km'de indi, 8 km yaya): duz mesafe yol dolambacinda azalmaz; tavan yol uzunluguna gore (240 + mesafe / 5 sn); gercek takilmayi asagidaki 'takildi' (80 sn hareketsiz) yakalar
+    // v8.500f HIZ PROFILI + HAKEM (kullanici: 'recon yavas, yolu kilitliyor'): OP'ye 3 km'den uzakta transit hizi (17 m/sn ~ 60 km/sa), 3 km icinde sessiz hiz (9 m/sn ~ 32 km/sa); surucu hizi hakemde 'recon' (60) tutar (mekanize sifirlamasi reddedilir)
+if (alive _d) then { [_d, "HIZ", "recon", 60, 6] call FUNC(uzuvKirala); _d forceSpeed (if (_dm > 3000) then {17} else {9}); };
+// v8.500c (RPT 5c754ebb: yolda 28 km/sa giderken 240 sn'de 'ilerlemedi' sayildi, recon 1.5 km'de indi, 8 km yaya): duz mesafe yol dolambacinda azalmaz; tavan yol uzunluguna gore (240 + mesafe / 5 sn); gercek takilmayi asagidaki 'takildi' (80 sn hareketsiz) yakalar
 if (_bitis isEqualTo "" && {(time - _basT) > (240 + (_basD / 5))} && {_dm > (_basD * 0.85)}) then { _bitis = "ilerlemedi"; };
     if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
     else { if ((_rg findIf {(time - ((_x) getVariable [QGVAR(contact), -999])) < 5}) >= 0) then { _bitis = "temas"; }
@@ -426,7 +428,7 @@ if (!isNull _vg) then {
     _vg setCombatMode _eskiMod;
     _vg setVariable [QGVAR(aracMedevacT), time];
 };
-if (alive _d) then { _d setVariable [QGVAR(senkT), nil]; _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
+if (alive _d) then { [_d, "HIZ", "recon"] call FUNC(uzuvBirak); _d setVariable [QGVAR(senkT), nil]; _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
 _v setVariable [QGVAR(tasimaMesgul), nil];
 _vg setVariable [QGVAR(tasimaSonT), time];
 diag_log format ["[RECON-ARAC] %1 | %2 | recon araci gorevi bitti, rezerv (konum: %3)", _id, _ad, mapGridPosition _v];

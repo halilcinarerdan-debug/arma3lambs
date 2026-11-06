@@ -42,8 +42,14 @@ private _liste = {
     // Zeus modulu icin ortak liste (id, ad, durum)
     missionNamespace setVariable ["lambs_danger_harekatListe", (values lambs_danger_harekatlar) apply {[_x get "id", _x get "ad", _x get "durum"]}, true];
 };
+// v8.500f (kullanici: 'HQ'ya bagli olmamama ragmen oyuncu olarak bana gorev verdi'): ana / faz / objektif gorevleri yalniz HQ'ya ATANMIS (hqId dolu) oyuncu gruplarina verilir; boyle oyuncu yoksa gorev kurulmaz (oyuncu rol gorevleri zaten plan gruplarina ozel)
+private _gSahip = {
+    params ["_t"];
+    allGroups select {(side _x) isEqualTo _t && {(({isPlayer _x} count (units _x)) > 0)} && {(_x getVariable ["lambs_danger_hqId", ""]) isNotEqualTo ""}}
+};
 private _gorevKur = {
     params ["_sahip", "_kimlik", "_ust", "_baslik", "_acik", "_poz", "_tip"];
+    if (_sahip isEqualType [] && {_sahip isEqualTo []}) exitWith {};
     private _tid = if (_ust isEqualTo "") then {_kimlik} else {[_kimlik, _ust]};
     [_sahip, _tid, [_acik, _baslik, ""], _poz, "ASSIGNED", 1, true, _tip, false] call BIS_fnc_taskCreate;
 };
@@ -130,7 +136,7 @@ switch (_islem) do {
         _satir pushBack "<br/><t size='1.1'>4. IDARE / LOJISTIK</t><br/>Saglik: grup hekimleri (TCCC / ACE). Ikmal ve tahliye talepleri: sahada TC2 uzerinden (bu surumde harekat katmani ikmal yurutmez). [T]";
         _satir pushBack "<br/><t size='1.1'>5. KOMUTA / HABERLESME</t><br/>Komuta: bot grup liderleri (oyuncu bagli oldugu grubun lideri komutasindadir). Telsiz: sahada ACRE2 / TC2 aglari. [T]<br/><t size='0.8'>(Otomatik uretilmis TASLAK OPORD; TC2 OPORD formatina uyarlanacak.)</t>";
         private _ana = format ["HAR_%1", _id];
-        [_taraf, _ana, "", format ["HAREKAT: %1", _op get "ad"], _satir joinString "<br/>", objNull, "attack"] call _gorevKur;
+        [[_taraf] call _gSahip, _ana, "", format ["HAREKAT: %1", _op get "ad"], _satir joinString "<br/>", objNull, "attack"] call _gorevKur;
         {
             private _f = _x;
             { [_id, _f get "no", _x] call _isaretGuncelle; } forEach (_f get "hedefler");
@@ -182,11 +188,11 @@ switch (_islem) do {
         _faz set ["t0", time];
         private _fno = _faz get "no";
         private _fg = format ["HAR_%1_F%2", _id, _fno];
-        [_taraf, _fg, format ["HAR_%1", _id], format ["FAZ %1: %2", _fno, _faz get "ad"], format ["Faz %1 basladi. Objektifler: %2", _fno, ((_faz get "hedefler") apply { format ["%1 %2", _x get "ad", mapGridPosition (_x get "obj")] }) joinString "; "], objNull, "attack"] call _gorevKur;
+        [[_taraf] call _gSahip, _fg, format ["HAR_%1", _id], format ["FAZ %1: %2", _fno, _faz get "ad"], format ["Faz %1 basladi. Objektifler: %2", _fno, ((_faz get "hedefler") apply { format ["%1 %2", _x get "ad", mapGridPosition (_x get "obj")] }) joinString "; "], objNull, "attack"] call _gorevKur;
         {
             private _h = _x;
             private _hg = [_id, _fno, _h get "k"] call _gid;
-            [_taraf, _hg, _fg, format ["%1: %2", ["ELE GECIR", "SAVUN"] select ((_h get "tip") isEqualTo 1), _h get "ad"], format ["%1 %2 (%3). Bot komutanlar plani yurutur; oyuncular bagli olduklari grubun lideri komutasinda rol gorevlerini izler.", ["Objektifi ele gecirin", "Objektifi savunun"] select ((_h get "tip") isEqualTo 1), _h get "ad", mapGridPosition (_h get "obj")], _h get "obj", ["attack", "defend"] select ((_h get "tip") isEqualTo 1)] call _gorevKur;
+            [[_taraf] call _gSahip, _hg, _fg, format ["%1: %2", ["ELE GECIR", "SAVUN"] select ((_h get "tip") isEqualTo 1), _h get "ad"], format ["%1 %2 (%3). Bot komutanlar plani yurutur; oyuncular bagli olduklari grubun lideri komutasinda rol gorevlerini izler.", ["Objektifi ele gecirin", "Objektifi savunun"] select ((_h get "tip") isEqualTo 1), _h get "ad", mapGridPosition (_h get "obj")], _h get "obj", ["attack", "defend"] select ((_h get "tip") isEqualTo 1)] call _gorevKur;
             _h set ["durum", "BEKLE"];
             _h set ["bekleT", time];
         } forEach (_faz get "hedefler");
