@@ -173,6 +173,12 @@ private _kayit = _manifest apply {
     [_v, driver _v, group (driver _v), _ul, "GEL", time, [], -1, _ul select {isPlayer _x}]
 };
 
+private _yuru = {
+    // v8.500g (RPT 0bef7b5e: iptal olan aracin askeri (Manevra1) serbest kaldi ama emirsiz bekledi): binemeyen / arac iptal asker RP'ye yuruyerek gider (oyuncu grubu haric: oyuncuyla kalir)
+    params ["_yl"];
+    private _pg = allPlayers apply {group _x};
+    { if (alive _x && {isNull objectParent _x} && {!isPlayer _x} && {!((group _x) in _pg)}) then { _x doMove (_rp getPos [random 25, random 360]); }; } forEach _yl;
+};
 private _mAraclar = _kayit apply {_x select 0};
 private _yukMax = 240 + ((selectMax (_mAraclar apply {_x distance2D _pickRef})) / 6);
 private _serbest = {
@@ -210,6 +216,7 @@ waitUntil {
             if (!alive _v || {!alive _d} || {!canMove _v}) then {
                 (_kayit select _idx) set [4, "IPTAL"];
                 [_ul] call _serbest;
+                [_ul] call _yuru;
                 _ctl set [3, (_ctl select 3) + 1];
                 [format ["%1 | yuklemede arac / surucu kayip -> iptal", groupId _vg]] call _log;
             } else {
@@ -306,6 +313,7 @@ waitUntil {
                         };
                         // binemeyenler serbest (yuruyerek gider)
                         [_ul select {!(_x in _bn)}] call _serbest;
+                        [_ul select {!(_x in _bn)}] call _yuru;
                         { if (alive _x && {(vehicle _x) isNotEqualTo _v}) then { unassignVehicle _x; }; } forEach (_ul select {!(_x in _bn)});
                         (_kayit select _idx) set [6, _bn];
                         (_kayit select _idx) set [4, ["HAZIR", "IPTAL"] select (_bn isEqualTo [])];
@@ -330,6 +338,7 @@ waitUntil {
         private _v = _x select 0;
         { if (alive _x && {(vehicle _x) isNotEqualTo _v}) then { unassignVehicle _x; }; } forEach (_x select 3);
         [_x select 3] call _serbest;
+        [_x select 3] call _yuru;
         _x set [4, "IPTAL"];
         _ctl set [3, (_ctl select 3) + 1];
         [format ["%1 | yukleme zaman asimi -> arac iptal", groupId (_x select 2)]] call _log;
@@ -375,11 +384,22 @@ if (_ctl select 0) exitWith {
 
 // ===================================================================== 5 SURUS (konvoy birlikte)
 // yol zinciri (uzak hedefte ~300 m ara noktalar)
+// v8.500g KADEMELI VARIS NOKTALARI (kullanici: 'hepsi milimetrik ayni yere gitmeye calisiyor, ORP'ye yakinsa oldugu yerde dursun'; RPT 0bef7b5e: ayni noktaya varan araclar carpisti): konvoy sirasina gore (inise en yakin once) her arac inis noktasindan 26 m x sira GERIDE (objektiften uzaga), yola oturtulmus ayri nokta alir
+private _siraV = [_kayit apply {_forEachIndex}, [], {((_kayit select _x) select 0) distance2D _drop}, "ASCEND"] call BIS_fnc_sortBy;
+private _dropVs = _kayit apply { _drop };
+{
+    private _pt = _drop getPos [26 * _forEachIndex, _B];
+    private _rd = _pt nearRoads 40;
+    if (_rd isNotEqualTo []) then { _pt = getPosATL (([_rd, [], {_x distance2D _pt}, "ASCEND"] call BIS_fnc_sortBy) select 0); };
+    if (surfaceIsWater _pt) then { _pt = _drop; };
+    _dropVs set [_x, _pt];
+} forEach _siraV;
 private _yol = [];   // _kayit sirasiyla ara nokta listeleri
 {
     private _v = _x select 0;
-    private _zn = [_drop];
-    if (alive _v && {!(missionNamespace getVariable ["lambs_danger_nakilZincirOff", false])} && {(_v distance2D _drop) > 1200}) then { _zn = [_v, _drop, 300] call FUNC(yolZinciri); };
+    private _dv = _dropVs select _forEachIndex;
+    private _zn = [_dv];
+    if (alive _v && {!(missionNamespace getVariable ["lambs_danger_nakilZincirOff", false])} && {(_v distance2D _dv) > 1200}) then { _zn = [_v, _dv, 300] call FUNC(yolZinciri); };
     _yol pushBack _zn;
 } forEach _kayit;
 
@@ -417,7 +437,7 @@ waitUntil {
         _r params ["_v", "_d", "_vg", "_ul", "_durum", "_t0", "_binen"];
         _c params ["_yi", "_sonMoveT", "_durgunT", "_durgunBas", "_bitis"];
         private _zn = _yol select _idx;
-        private _dm = _v distance2D _drop;
+        private _dm = _v distance2D (_dropVs select _idx);
         private _hz = (speed _v) / 3.6;
         if (!alive _v || {!alive _d}) then { _c set [4, "OLDU"]; }
         else {
@@ -454,6 +474,8 @@ waitUntil {
                 _fren = true;
                 _d forceSpeed (if ((_v distance2D _rvv) < 40) then {0} else {(((speed _rvv) max 0) / 3.6) max 3});
             };
+            // YAKLASMA HIZI (RPT 0bef7b5e: arac inise 92 km/sa ile girdi, inen askeri ezdi / carpisti): kendi varis noktasina 250 m'de <= 9 m/sn, 100 m'de <= 5 m/sn
+            if (_dm < 250 && {!_fren}) then { _d forceSpeed (if (_dm < 100) then {5} else {9}); };
             // takilma izleme (kasitli fren degilse)
             if (_hz < 1 && {!_fren} && {_dm > 20}) then {
                 if (_durgunT < 0) then { _c set [2, time]; _durgunT = time; _c set [3, 0]; };
@@ -493,6 +515,10 @@ waitUntil {
 
 // ===================================================================== 6 INIS (birlikte)
 { private _r = _x; if ((_r select 4) isEqualTo "HAZIR") then { (_r select 0) setVariable [QGVAR(yolcuBirak), true]; }; } forEach _kayit;
+// v8.500g FREN: inmeden once tum araclar durur (RPT 0bef7b5e: 92 km/sa'te inen asker ezildi); en cok 12 sn
+{ if ((_x select 4) isEqualTo "HAZIR" && {alive (_x select 0)} && {alive (_x select 1)}) then { (_x select 1) forceSpeed 0; doStop (_x select 1); }; } forEach _kayit;
+private _tFr = time + 12;
+waitUntil { sleep 0.5; time > _tFr || {(_kayit findIf {(_x select 4) isEqualTo "HAZIR" && {alive (_x select 0)} && {(speed (_x select 0)) > 4}}) < 0} };
 {
     _x params ["_v", "_d", "_vg", "_ul", "_durum", "_t0", "_binen"];
     if (_durum isEqualTo "HAZIR" && {alive _v}) then {
@@ -513,6 +539,7 @@ private _inen = 0;
     { if (alive _x) then { _x setVariable [QGVAR(tasimaBekle), nil]; _x enableAI "PATH"; _x doFollow (leader (group _x)); if ((vehicle _x) isEqualTo _x) then { _inen = _inen + 1; }; }; } forEach _binen;
     if (alive _v && {_durum isEqualTo "HAZIR"}) then {
         // IFV: indirdikten sonra ates destegi (planZirh; piyadenin 40 m'den fazla onune gecmez) - gerisi "savas taksisi": GERIDE REZERV
+        if (alive _d) then { _d forceSpeed -1; };
         private _ifvMi = (([_v] call FUNC(aracSinif)) select 0) isEqualTo "IFV" && {count _ctl > 5};
         if (_ifvMi) then {
             private _ifvL = _ctl select 5;
