@@ -398,8 +398,17 @@ _plan set ["reconAracInis", true];
 // v8.500c (kullanici: 'recon araci reconu indirdigi yerde dursun'): varsayilan artik GERI CEKILMEZ, indirdigi yerde bekler (lambs_danger_reconAracGeriCekil = true ile eski davranis)
 private _geri = _dur getPos [250, (_plan get "rp") getDir _dur];
 if (!(missionNamespace getVariable ["lambs_danger_reconAracGeriCekil", false])) then {
+    // v8.500e (kullanici: 'recon araci olunca arkadaki konvoy yola gecmeye calisip tikandi'; RPT fd85e28a): yol uzerinde indirdiyse yol kenarina 18 m cekilir (yine ayni yerde; ana kol ayni yolu kullanir), yol kenari yoksa oldugu yerde kalir
+    private _yan = [];
+    { private _cn = (getPosATL _v) getPos [18, (getDir _v) + _x]; if (_yan isEqualTo [] && {!surfaceIsWater _cn} && {!(isOnRoad _cn)}) then { _yan = _cn; }; } forEach [90, -90];
+    if (_yan isNotEqualTo [] && {isOnRoad _v} && {alive _d} && {canMove _v}) then {
+        _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed 6;
+        _d doMove _yan;
+        private _tY = time + 15;
+        waitUntil { sleep 1; !alive _v || {(_v distance2D _yan) < 6} || {time > _tY} };
+    };
     if (alive _d) then { doStop _d; };
-    diag_log format ["[RECON-ARAC] %1 | %2 | recon indirildi, arac indirdigi yerde bekliyor", _id, _ad];
+    diag_log format ["[RECON-ARAC] %1 | %2 | recon indirildi, arac indirdigi yerde bekliyor (yol kenarina cekildi: %3)", _id, _ad, _yan isNotEqualTo []];
 } else {
 if (!_geriDon && {!surfaceIsWater _geri} && {alive _v} && {alive _d} && {canMove _v}) then {
     _d forceSpeed 9;
@@ -420,5 +429,5 @@ if (!isNull _vg) then {
 if (alive _d) then { _d setVariable [QGVAR(senkT), nil]; _d forceSpeed -1; _d setVariable [QGVAR(forceMove), nil]; _d enableAI "AUTOCOMBAT"; };
 _v setVariable [QGVAR(tasimaMesgul), nil];
 _vg setVariable [QGVAR(tasimaSonT), time];
-diag_log format ["[RECON-ARAC] %1 | %2 | geri cekildi, rezerv", _id, _ad];
+diag_log format ["[RECON-ARAC] %1 | %2 | recon araci gorevi bitti, rezerv (konum: %3)", _id, _ad, mapGridPosition _v];
 true
