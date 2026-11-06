@@ -455,7 +455,7 @@ waitUntil {
                 _d forceSpeed (if ((_v distance2D _rvv) < 40) then {0} else {(((speed _rvv) max 0) / 3.6) max 3});
             };
             // takilma izleme (kasitli fren degilse)
-            if (_hz < 1 && {!_fren} && {_dm > 60}) then {
+            if (_hz < 1 && {!_fren} && {_dm > 20}) then {
                 if (_durgunT < 0) then { _c set [2, time]; _durgunT = time; _c set [3, 0]; };
                 private _dg = time - _durgunT;
                 _v setVariable [QGVAR(durgunSn), _dg];
@@ -474,7 +474,9 @@ waitUntil {
             } else { if (_hz >= 2 || {_fren}) then { _c set [2, -1]; _c set [3, 0]; _v setVariable [QGVAR(durgunSn), 0]; }; };
             // bitis kosullari
             if ((_c select 4) isEqualTo "") then {
-                if (_dm < 45) then { _c set [4, "VARDI"]; };
+                // v8.500e VARIS TOLERANSI (kullanici: 'nokta atisi durmasina gerek yok, birkac metre daha ilerleyeceklerdi'; RPT fd85e28a: recon araci inis yolunda park edince konvoy tikandi): 60 m'de ya da 150 m icinde 5 sn'den uzun durdurulduysa (onde park eden arac / yol tikali) bu arac oldugu yerde iner
+                if (_dm < 60) then { _c set [4, "VARDI"]; };
+                if (_dm < 150 && {_hz < 1.5} && {(_c select 2) > 0} && {(time - (_c select 2)) >= 5}) then { _c set [4, "VARDI"]; [format ["%1 | VARIS (TIKALI): inise %2 m kala 5 sn durdu -> burada iner", groupId _vg, round _dm]] call _log; };
                 if (_dm < 220 && {(behaviour _d) isEqualTo "SAFE"}) then { _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 if (((_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0) && {_dm > 120}) then { _c set [4, "TEMAS"]; };
                 if ((time - _tSur) > _sureMax) then { _c set [4, "SURE"]; };
