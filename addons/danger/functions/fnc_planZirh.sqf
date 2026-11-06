@@ -158,7 +158,7 @@ private _nZ = count _zg;
     // v8.265 PIYADE BAGI: tank piyadenin cok onune gecmesin
     // v8.406 PIYADE BAGI SAHIBI (RPT 04-48: ayni 'tank' grubu P3 + P4 planinda; P4 bayragi koyuyor, P3 her 3 sn siliyordu -> tank dur-kalk, kapi 'tank mevzide false' ile ~420 sn kapali, arac / tank cok gec kalkti): bag yalniz ilk plan tarafindan yonetilir
     private _piySahip = _g getVariable ["lambs_danger_planZirhPiyadeSahip", ""];
-    if (_piyMed >= 0 && {_piySahip in ["", _id]} && {!(_g getVariable ["lambs_danger_planZirhVardi", false])} && {canMove _v} && {time > (_g getVariable ["lambs_danger_planZirhPiyadeSerbest", 0])} && {(_v distance2D _obj) < (_piyMed - (missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400]))}) then {
+    if (_piyMed >= 0 && {_piySahip in ["", _id]} && {!(_g getVariable ["lambs_danger_planZirhVardi", false])} && {canMove _v} && {time > (_g getVariable ["lambs_danger_planZirhPiyadeSerbest", 0])} && {(_v distance2D _obj) < (_piyMed - (if (_tankMi) then {missionNamespace getVariable ["lambs_danger_tankPiyadeMesafe", 400]} else {missionNamespace getVariable ["lambs_danger_ifvPiyadeMesafe", 40]}))}) then {
         if !(_g getVariable ["lambs_danger_planZirhPiyadeTut", false]) then {
             _g setVariable ["lambs_danger_planZirhPiyadeTut", true];
             _g setVariable ["lambs_danger_planZirhPiyadeSahip", _id];

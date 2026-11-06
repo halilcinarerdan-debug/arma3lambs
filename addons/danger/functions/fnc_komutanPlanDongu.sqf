@@ -499,6 +499,16 @@ while {true} do {
             // v8.226 KESIF ONDE (ATP 4-01.45 / FM 3-98: kesif unsuru ana kolun onunde gider): recon APC OP'ye giden yolun %60'ini gectiyse ana kol kalkar (%60 tasarim degeri)
             private _raG = _plan getOrDefault ["reconArac", objNull];
             private _reconOnde = !isNull _raG && {alive _raG} && {(_plan getOrDefault ["reconAracD0", 0]) > 0} && {(_raG distance2D (_plan get "op")) < 0.4 * (_plan get "reconAracD0")};
+            // v8.500f ZAMAN TABANLI ON-HAT (kullanici: 'recon araci cok daha once gitsin, arkadakiler biraz beklesin'; RPT 2e55744a: kapi recon bindikten 9 sn sonra acildi, konvoy yavas recon'u gecti): recon'un OP'ye kalan suresi <= konvoyun tahmini suresi + 90 sn VE recon >= 500 m gitti ise ana kol kalkar (recon once varir, konvoy arkasindan)
+            if (!_reconOnde && {!isNull _raG} && {alive _raG} && {(_plan getOrDefault ["reconAracD0", 0]) > 0} && {(_plan getOrDefault ["reconAracT0", -1]) > 0}) then {
+                private _rKal = _raG distance2D (_plan get "op");
+                private _rKat = (_plan get "reconAracD0") - _rKal;
+                private _rSure = time - (_plan get "reconAracT0");
+                private _rHiz = ((_rKat max 0) / (_rSure max 1)) max 3;
+                private _rTr = _rKal / _rHiz;
+                private _rTc = (_plan get "reconAracD0") / (missionNamespace getVariable ["lambs_danger_nakilTahminHiz", 11]);
+                if (_rSure > 20 && {_rKat > 500} && {_rTr <= (_rTc + 90)}) then { _reconOnde = true; };
+            };
             if (!(_plan getOrDefault ["oranTut", false]) && {(_reconOk && _tankOk) || {_reconOnde && {_tankOk}} || {_reconYaya && {_tankOk}} || {_reconYayaAracsiz && {_tankOk}} || {(time - (_plan getOrDefault ["t0", time])) > 420}}) then {
                 _plan set ["hazirBekle", false];
                 (_plan getOrDefault ["tasimaCtl", [false, true]]) set [1, true];
@@ -976,6 +986,7 @@ while {true} do {
                     } forEach _rgl;
                     if (!isNull (_plan getOrDefault ["reconArac", objNull])) then {
                         _plan set ["reconAracD0", (_plan getOrDefault ["reconArac", objNull]) distance2D _opN];
+                        _plan set ["reconAracT0", time];
                         _plan set ["reconAracH", ["CALIS", _plan, _rgl, _opN] spawn FUNC(reconArac)];
                     };
                     diag_log format ["[PLAN-RECON] %1 | recon OP'ye gidiyor (STEALTH + GREEN: ates gelene kadar ates yok) | %2 grup | OP %3", _id, count _rgl, mapGridPosition _opN];
