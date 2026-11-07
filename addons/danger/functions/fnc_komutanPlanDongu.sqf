@@ -223,6 +223,32 @@ private _topcuAt = {
                     if (_dc >= (_red + 20) && {!surfaceIsWater _cand}) exitWith { _nokta = _cand; _dE = _dc; };
                 } forEach [40, 80, 120, 160, 200];
             };
+            // v8.500o DUSMAN KUMESINE NISAN (kullanici: 'topcu hic atmadi'; RPT cf8911fb: 33 dusman dogrulandi ama dost 192-260 m < RED 455 m, objektif merkezi 200 m kaydirilinca da yetmedi): kaydirma basarisizsa,
+            //   taraf liderlerinin BILDIGI (knowsAbout >= SEZILDI), objektife <= 700 m, HER dostuna >= RED + 20 m olan dusmanlarin agirlik merkezine atilir (>= 2 dusman; kume merkezi de >= RED + 20 m). Savunma atesindeki ilkeyle ayni. Kapatma: lambs_danger_topcuKumeOff = true.
+            if (_nokta isEqualTo _poz && {!(missionNamespace getVariable ["lambs_danger_topcuKumeOff", false])}) then {
+                private _lidK = (allGroups select {(side _x) isEqualTo _taraf && {!isNull (leader _x)}}) apply { leader _x };
+                private _dostK = (allUnits select {alive _x && {(side (group _x)) isEqualTo _taraf}}) apply { getPosATL _x };
+                private _esikK = ["SEZILDI"] call FUNC(bilgiEsik);
+                private _uzakK = (allUnits select {
+                    alive _x && {(side (group _x)) isNotEqualTo civilian} && {(_taraf getFriend (side (group _x))) < 0.6} && {isNull objectParent _x} && {(_x distance2D _poz) < 700}
+                }) select {
+                    private _e = _x;
+                    private _ph = getPosATL _e;
+                    ((_lidK findIf { (_x knowsAbout _e) > _esikK }) >= 0) && {(_dostK findIf { (_x distance2D _ph) < (_red + 20) }) < 0}
+                };
+                if ((count _uzakK) >= 2) then {
+                    private _tcK = [0, 0, 0];
+                    { _tcK = _tcK vectorAdd (getPosATL _x); } forEach _uzakK;
+                    _tcK = _tcK vectorMultiply (1 / (count _uzakK));
+                    private _dcK = 99999;
+                    { _dcK = _dcK min (_x distance2D _tcK); } forEach _dostK;
+                    if (_dcK >= (_red + 20) && {!surfaceIsWater _tcK}) then {
+                        _nokta = _tcK;
+                        _dE = _dcK;
+                        diag_log format ["[PLAN-TOPCU] %1 | %2 | NISAN DUSMAN KUMESINE: objektif merkezi dostlara cok yakin (%3 m < RED %4 m); dostlardan >= RED+20 m uzaktaki %5 bilinen dusmanin merkezine (%6, dost %7 m)", _plan get "id", _ad, round _dostEn, _red, count _uzakK, mapGridPosition _tcK, round _dcK];
+                    };
+                };
+            };
         };
         // v8.338 KITAP DENETIMI: ates yasak alani (NFA, TC 3-21.76) - haritada adi 'nfa' ile baslayan isaret; plan atisi icinde dost mesafesi yukaridaki RED mantigiyla denetlenir
         private _nfaK = [_taraf, _nokta, _red, true] call FUNC(topcuGuvenlik);

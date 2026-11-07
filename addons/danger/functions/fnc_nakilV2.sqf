@@ -321,9 +321,14 @@ waitUntil {
                 } else {
                     private _gecen = time - _t0;
                     // 20 sn sonra (ve her 3 sn'de bir) kalan askeri duz koltuga otur (<= 300 m)
-                    if (_gecen > 20 && {(round _gecen) mod 3 isEqualTo 0}) then {
+                    // v8.500o KOLTUK BASKISI (kullanici: 'HEMTT'e binerken koltuk secemiyorlar, inip tekrar biniyorlar; arac dolmaya yakinken oluyor'): orderGetIn'de iki asker ayni son bos koltuga yonelip biri disarida kalip tekrar deniyor (varsayim, logda dogrulanamadi);
+                    //   duz bos koltuk <= 3 ise 6 sn sonra, 25 m icindeki askerler ANIMASYONSUZ dogrudan farkli bos koltuklara oturtulur (her 2 sn'de bir). Kapatma: lambs_danger_nakilKoltukBaskisiOff = true.
+                    private _bosK = [_v] call FUNC(aracDuzBos);
+                    private _baski = !(missionNamespace getVariable ["lambs_danger_nakilKoltukBaskisiOff", false]) && {_bosK <= 3} && {_gecen > 6} && {(round _gecen) mod 2 isEqualTo 0};
+                    if ((_gecen > 20 && {(round _gecen) mod 3 isEqualTo 0}) || {_baski}) then {
+                        private _yarK = [25, 450] select (_gecen > 20);
                         {
-                            if ((_x distance2D _v) < 450 && {([_v] call FUNC(aracDuzBos)) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); };
+                            if ((_x distance2D _v) < _yarK && {([_v] call FUNC(aracDuzBos)) > 0}) then { [_x, _v] call FUNC(aracYolcuKoy); };
                         } forEach _bekleyen;
                     };
                     // yakindaki asker binmeye devam: her 5 sn orderGetIn tekrar
