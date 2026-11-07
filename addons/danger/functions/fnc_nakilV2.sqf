@@ -202,6 +202,16 @@ private _piyDist = {
     private _p = [(_r select 3) select {alive _x && {isNull objectParent _x}}] call _merkez;
     if (_p isEqualTo []) then {0} else { round ((_r select 0) distance2D _p) }
 };
+// v8.500i: yukleme durum satiri (RPT 4f140aaf: 'askerler binmedi' gozlemi log ile dogrulanamadi): kac asker iceride, disarida kalanlar ve oyuncu mesafesi
+private _durumSatir = {
+    params ["_r"];
+    private _vv = _r select 0;
+    private _ul = _r select 3;
+    private _ic = count (_ul select {alive _x && {(vehicle _x) isEqualTo _vv}});
+    private _dis = (_ul select {alive _x && {isNull objectParent _x}}) apply { format ["%1 %2m", name _x, round (_x distance2D _vv)] };
+    private _oy = (_r select 8) apply { format ["%1 %2m", name _x, round (_x distance2D _vv)] };
+    format ["%1:%2 piyadeye %3 m hiz %4 motor %5 | iceride %6/%7 | disarida %8 | oyuncu %9", groupId (_r select 2), _r select 4, [_r] call _piyDist, round (speed _vv), isEngineOn _vv, _ic, count _ul, _dis, _oy]
+};
 private _tYuk = time;
 private _logT = time + 20;
 private _hazirSay = 0;
@@ -327,7 +337,7 @@ waitUntil {
     } forEach _kayit;
     if (time > _logT) then {
         _logT = time + 20;
-        [format ["YUKLEME surerken: hazir %1 / %2 arac | durum: %3", _ctl select 3, count _kayit, _kayit apply { format ["%1:%2 piyadeye %3 m hiz %4 motor %5", groupId (_x select 2), _x select 4, [_x] call _piyDist, round (speed (_x select 0)), isEngineOn (_x select 0)] }]] call _log;
+        [format ["YUKLEME surerken: hazir %1 / %2 arac | durum: %3", _ctl select 3, count _kayit, _kayit apply { [_x] call _durumSatir }]] call _log;
     };
     (_ctl select 0) || {_hepsiHazir} || {(time - _tYuk) > _yukMax}
 };
