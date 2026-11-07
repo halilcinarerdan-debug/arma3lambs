@@ -141,7 +141,7 @@ private _yaya = [];
                 (_kalan select _j) set [1, ((_kalan select _j) select 1) - count _al];
                 ((_manifest select _j) select 1) append _al;
             };
-        } else { _yaya pushBack groupId _x; };
+        } else { _yaya pushBack format ["%1 (%2 asker, bos koltuk %3: SIGMADI)", groupId _x, count _ul, _top]; };
     };
 } forEach _tum;
 // onceden aracta olan yolcular (oyuncunun bindirdigi dahil) manifeste eklenir: arac bunlarla birlikte gider (>= 2 yolcu varsa manifestsiz de gider)
