@@ -3,6 +3,7 @@
 """
 RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
+           --onucus             ON UCUS karnesi (v8.500l): oyun basinda yapilandirma durumu: oturumlar, 3DEN nitelik (EDEN-IFADE dahil), grup / arac / topcu / IHA envanteri, kapasite, UYARI listesi
            --harekat            HAREKAT / NAKIL / RECON KABUL KARNESI (v8.500): faz sirasi, ayni grup iki planda mi, recon varis, nakil V2 yukleme / inis, HQ sayisi, 3DEN nitelik (OK / KONTROL / YOK)
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
@@ -368,6 +369,34 @@ def karne(path):
         print("  [%-7s] %-18s %s" % (d, ad, k))
     print("  OK:%d  KONTROL:%d  YOK:%d" % tuple(len([1 for _, d, _ in sat if d == x]) for x in ("OK", "KONTROL", "YOK")))
 
+
+def onucus_karne(path):
+    """ON UCUS karnesi (v8.500l): fnc_onUcus'un [ONUCUS] / [ONUCUS-UYARI] satirlari + [EDEN-IFADE] ozeti. Duman testi (1-2 dk) ile yapilandirma sorunlarini ayiklar."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    on = [l for l in L if '"[ONUCUS]' in l]
+    uy = [l for l in L if '"[ONUCUS-UYARI]' in l]
+    ifade = [l for l in L if '[EDEN-IFADE]' in l]
+    def kes(l, n=210): return re.sub(r"^\s*", "", l)[:n]
+    print("=" * 78)
+    print("ON UCUS KARNESI |", path)
+    if not on:
+        print("  [YOK    ] ON UCUS blogu yok (paket eski mi? 'ONUCUS' satiri yazilmamis; oyun >= 30 sn calismis olmali)")
+        return
+    runs = [l for l in on if "| RUN |" in l or "RUN |" in l.split("[ONUCUS]")[-1][:8]]
+    print("  oturum sayisi (RUN):", len(runs))
+    for l in runs: print("   ", kes(l))
+    def say(tag): return len([l for l in on if ("[ONUCUS] " + tag + " |") in l])
+    mod = [l for l in on if "[ONUCUS] MODUL |" in l and "toplam" not in l]
+    nit_yok = [l for l in mod if re.search(r"nitelik degiskeni 0:", l)]
+    print("  moduller: %d | nitelik degiskeni OLMAYAN modul: %d" % (len(mod), len(nit_yok)))
+    print("  [EDEN-IFADE] satiri: %d %s" % (len(ifade), "(3DEN nitelik ifadeleri CALISIYOR)" if ifade else "(HIC YOK: ifadeler calismiyor ya da paket eski)"))
+    for l in ifade[:6]: print("   ", kes(l, 150))
+    print("  grup: %d | arac: %d | topcu: %d | IHA: %d | oyuncu: %d" % (say("GRUP"), say("ARAC"), say("TOPCU"), say("IHA"), say("OYUNCU")))
+    for l in on:
+        if "[ONUCUS] KAPASITE |" in l: print("   ", kes(l, 160))
+    print("  UYARI (%d):" % len(uy))
+    for l in uy: print("   !", kes(l, 230))
+    if not uy: print("    (yok)")
 
 def harekat_kabul(path):
     """HAREKAT / NAKIL / RECON KABUL KARNESI (v8.500): bu oturumda eklenen etiketlerden gecti / kaldi ozeti."""
@@ -1122,6 +1151,7 @@ if __name__ == "__main__":
     sadece_anomali = False
     karne_modu = False
     harekat_modu = False
+    onucus_modu = False
     hava_ied_modu = False
     zeka_modu = False
     form_modu = False
@@ -1138,6 +1168,8 @@ if __name__ == "__main__":
             karne_modu = True; i += 1
         elif args[i] == "--harekat":
             harekat_modu = True; i += 1
+        elif args[i] == "--onucus":
+            onucus_modu = True; i += 1
         elif args[i] == "--anomali":
             sadece_anomali = True; i += 1
         elif args[i] == "--hava-ied":
@@ -1166,6 +1198,8 @@ if __name__ == "__main__":
             zeka(p)
         elif hava_ied_modu:
             hava_ied(p)
+        elif onucus_modu:
+            onucus_karne(p)
         elif harekat_modu:
             harekat_kabul(p)
         elif karne_modu:
