@@ -94,6 +94,7 @@ PREP(isATUnit);
 PREP(atFire);
 PREP(orphanWatchdog);
 PREP(onUcus);
+PREP(bakisAcikYon);
 PREP(yigilmaCoz);
 PREP(cqbCevik);
 PREP(sektorBakis);

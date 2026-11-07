@@ -141,7 +141,9 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
             _u setVariable [QGVAR(stationDirty), true];
             if ((_u distance2D (_g getVariable [QGVAR(rearGuardPos), _hedef])) < 5) then {
                 _u setUnitPosWeak "MIDDLE";
-                _u doWatch (_lPos getPos [30, _arka]);
+                // v8.500r: arka yon duvar / arazi ile kapaliysa (1 m'de duvar) acik yone kayar; hicbiri acik degilse bakis serbest
+                private _byA = [_u, _arka, [0, 25, -25, 50, -50]] call FUNC(bakisAcikYon);
+                if (_byA > -900) then { _u doWatch (_lPos getPos [30, _byA]); } else { _u doWatch objNull; };
             };
         } forEach (allGroups select {!isNull leader _x});
     };
