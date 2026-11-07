@@ -92,6 +92,15 @@ if (_uav isKindOf "Plane" && {((getPosATL _uav) select 2) < 25} && {missionNames
     _uav setPosATL [_pz select 0, _pz select 1, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200]];
     [_uav] call FUNC(ihaUcakHiz);
     diag_log format ["[IHA-UCAK] %1 | yerdeydi (%2 m): havadan baslatildi %3 m (AI pistten kalkis yapmaz)", typeOf _uav, round (_pz select 2), round ((getPosATL _uav) select 2)];
+    // v8.500h TESHIS (davranis degistirmez): havadan baslayan ucak ilk 40 sn'de neden alcaliyor? irtifa / hiz / dikey hiz / motor / sahip / waypoint ornekle
+    [_uav] spawn {
+        params ["_u"];
+        private _t = time;
+        while {alive _u && {(time - _t) < 40}} do {
+            diag_log format ["[IHA-UCAK-IZ] %1 | t+%2 | irtifa %3 m | hiz %4 km/sa | dikey %5 m/s | motor %6 | yerel %7 | sahip %8 | wp %9 | yakit %10", typeOf _u, round (time - _t), round ((getPosATL _u) select 2), round (speed _u), (round ((velocity _u) select 2)), isEngineOn _u, local _u, owner _u, count (waypoints (group (driver _u))), (fuel _u) toFixed 2];
+            sleep 2;
+        };
+    };
 };
 private _taraf = side (group (driver _uav));
 // v8.363 SURE: GOZLEM = modul suresi ya da CBA 'Gozlem IHA suresi' (dk; 0 = sinirsiz -> 2 saat ya da yakit); BOMBA 1800; digerleri (FPV) 600 sn pil
