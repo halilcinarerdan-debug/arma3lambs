@@ -359,7 +359,7 @@ waitUntil {
                         (_kayit select _idx) set [6, _bn];
                         (_kayit select _idx) set [4, ["HAZIR", "IPTAL"] select (_bn isEqualTo [])];
                         _ctl set [3, (_ctl select 3) + 1];
-                        [format ["%1 | YUKLENDI %2 / %3 asker (%4) | disarida kalan %5", groupId _vg, count _bn, count _ul, getText (configOf _v >> "displayName"), count (_ul select {!(_x in _bn)})]] call _log;
+                        [format ["%1 | YUKLENDI %2 / %3 asker (%4) | disarida kalan %5 | koltuk: kargo toplam %6, bos %7 (emptyPositions %8), sure %9 sn", groupId _vg, count _bn, count _ul, getText (configOf _v >> "displayName"), count (_ul select {!(_x in _bn)}), count (fullCrew [_v, "cargo", true]), count ((fullCrew [_v, "cargo", true]) select {isNull (_x select 0)}), _v emptyPositions "cargo", round (time - _t0)]] call _log;
                     };
                 };
             };
