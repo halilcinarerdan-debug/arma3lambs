@@ -3,11 +3,11 @@
 // NOT: makro argumanlarinda virgul / parantez YOK (RV on-isleyicisi); metinler bu yuzden sade tutuldu.
 // Bu dosya CfgVehicles.hpp'nin ICINDE include edilir (class CfgVehicles govdesi).
 
-#define E_COMBO(ADI,DISP,TIP,DEF,VALS) class ADI: Combo { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "NUMBER"; defaultValue = DEF; class Values { VALS }; };
+#define E_COMBO(ADI,DISP,TIP,DEF,VALS) class ADI: Combo { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "private _p = '%s'; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "NUMBER"; defaultValue = DEF; class Values { VALS }; };
 #define E_V(N,AD) class V##N { name = AD; value = N; };
-#define E_NUM(ADI,DISP,TIP,DEF) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "NUMBER"; defaultValue = DEF; validate = "number"; };
-#define E_TXT(ADI,DISP,TIP) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "STRING"; defaultValue = """"""; };
-#define E_BOOL(ADI,DISP,TIP,DEF) class ADI: Checkbox { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "_this setVariable ['%s',_value];"; typeName = "BOOL"; defaultValue = DEF; };
+#define E_NUM(ADI,DISP,TIP,DEF) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "private _p = '%s'; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "NUMBER"; defaultValue = DEF; validate = "number"; };
+#define E_TXT(ADI,DISP,TIP) class ADI: Edit { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "private _p = '%s'; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "STRING"; defaultValue = """"""; };
+#define E_BOOL(ADI,DISP,TIP,DEF) class ADI: Checkbox { property = QGVAR(ADI); displayName = DISP; tooltip = TIP; expression = "private _p = '%s'; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "BOOL"; defaultValue = DEF; };
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 // 1) KOORDINASYON (gruplar arasi telsiz agi) - baglanti gerekmez
@@ -213,7 +213,7 @@ class GVAR(EdenHarekat): Module_F {
     isTriggerActivated = 0;
     isDisposable = 0;
     class Attributes: AttributesBase {
-        class edHrAd: Edit { property = QGVAR(edHrAd); displayName = "Harekat adi"; tooltip = "Gorevde ve OPORD'da gorunur."; expression = "_this setVariable ['%s',_value];"; typeName = "STRING"; defaultValue = """Harekat"""; };
+        class edHrAd: Edit { property = QGVAR(edHrAd); displayName = "Harekat adi"; tooltip = "Gorevde ve OPORD'da gorunur."; expression = "private _p = '%s'; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "STRING"; defaultValue = """Harekat"""; };
         E_COMBO(edHrTaraf,"Taraf","Otomatik: baglanan Objektif modullerinin / gruplarinin tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
         E_TXT(edHrNiyet,"Komutanin niyeti","OPORD 3. paragraf: ne icin, nasil bir son durum (kisa).")
         E_TXT(edHrDusman,"Dusman durumu (istihbarat)","OPORD 1. paragraf: oyunculara bildirilen dusman bilgisi (yalniz yazdiginiz kadari gosterilir).")
