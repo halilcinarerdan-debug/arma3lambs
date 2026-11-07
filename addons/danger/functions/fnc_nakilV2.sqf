@@ -280,10 +280,11 @@ waitUntil {
                         // v8.500k ILERLEME BEKCISI (RPT 7aee03f9: Alpha 3-2 15 dk boyunca palmiyeler arasinda 0.1-0.3 m/sn sürünerek piyadeye 537 -> 477 m geldi; hiz hic 'sifir' olmadigi icin kademe sayaci surekli sifirlaniyor, kurtarma 1 kez calisip bitti):
         //   her 20 sn'de hedefe yaklasma < 8 m ise 'ilerleme yok' say; 1: emir yenile, 2: itme, >= 3: hedefe dogru ileri tasima (25 m + 15 m x tekrar, en fazla 80 m); ilerleme (>= 15 m) olursa sayac sifirlanir.
                         private _pw = _v getVariable [QGVAR(nk2PrgD), []];
-                        if (_pw isEqualTo []) then { _v setVariable [QGVAR(nk2PrgD), [time, _v distance2D _hedefG, 0]]; } else {
+                        if (_pw isEqualTo []) then { _v setVariable [QGVAR(nk2PrgD), [time, getPosATL _v, 0]]; } else {
                             if ((time - (_pw select 0)) >= 20) then {
+                                // v8.500q: ILERLEME = ARACIN YER DEGISTIRMESI (RPT 2070df55: virajli yolda hedefe duz mesafe artarken arac aslinda gidiyordu -> '-250 m yaklasti' yanlis alarm, kurtarma kademeleri yersiz isinladi)
                                 private _dNow = _v distance2D _hedefG;
-                                private _prg = (_pw select 1) - _dNow;
+                                private _prg = (getPosATL _v) distance2D (_pw select 1);
                                 private _sN = _pw select 2;
                                 if (_prg < 8 && {_dNow > 60}) then {
                                     _sN = _sN + 1;
@@ -299,9 +300,9 @@ waitUntil {
                                             _vg setVariable [QGVAR(nk2MoveT), -99];
                                         };
                                     };
-                                    [format ["%1 | YUKLEME ILERLEME YOK: 20 sn'de %2 m yaklasti (kademe %3, piyadeye %4 m)", groupId _vg, round _prg, _sN, round (_v distance2D _pk)]] call _log;
+                                    [format ["%1 | YUKLEME ILERLEME YOK: 20 sn'de %2 m yer degistirdi (kademe %3, piyadeye %4 m)", groupId _vg, round _prg, _sN, round (_v distance2D _pk)]] call _log;
                                 } else { if (_prg >= 15) then { _sN = 0; }; };
-                                _v setVariable [QGVAR(nk2PrgD), [time, _dNow, _sN]];
+                                _v setVariable [QGVAR(nk2PrgD), [time, getPosATL _v, _sN]];
                             };
                         };
                         if ((time - (_vg getVariable [QGVAR(nk2MoveT), -99])) > 4) then {
@@ -387,6 +388,9 @@ waitUntil {
         [_x select 3] call _yuru;
         _x set [4, "IPTAL"];
         _ctl set [3, (_ctl select 3) + 1];
+        // v8.500q: iptal edilen arac BOS yola devam etmesin (kullanici, RPT 2070df55: 'bos bir arac cepheye dogru yol aldi'): nakil waypoint'i silinir, surucu durdurulur
+        { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints (_x select 2)) call { reverse _this; _this });
+        if (alive (_x select 1)) then { (_x select 1) forceSpeed -1; doStop (_x select 1); };
         [format ["%1 | yukleme zaman asimi -> arac iptal", groupId (_x select 2)]] call _log;
     };
 } forEach _kayit;

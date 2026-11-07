@@ -153,7 +153,7 @@ class GVAR(EdenSaldiri): Module_F {
         E_BOOL(edObAt,"Dusman: AT RPG var","Roketatar fuze tasiyan dusman var.","false")
         E_BOOL(edObMg,"Dusman: MG var","Makineli tufek var - kanat manevrasi.","false")
         E_BOOL(edObBina,"Dusman: binalarda mevzili","CQB bina temizleme beklenir.","false")
-        E_COMBO(edObTopcu,"Ates destegi topcu havan","Tarafin topcu havan araclari kullanilir.","0",E_V(0,"Yok") E_V(1,"Hazirlik atesi") E_V(2,"Cagri atesi") E_V(3,"Hazirlik ve cagri"))
+        E_COMBO(edObTopcu,"Ates destegi topcu havan","Tarafin topcu havan araclari kullanilir.","3",E_V(0,"Yok") E_V(1,"Hazirlik atesi") E_V(2,"Cagri atesi") E_V(3,"Hazirlik ve cagri"))
         E_COMBO(edObRecon,"Recon ek gozlem","Evet: recon dusman noktalarini da gizlice gozlemler. Gorev Ata ile RECON grubu gerekir.","0",E_V(0,"Hayir") E_V(1,"Evet gizlice incele"))
         E_COMBO(edObIha,"IHA destegi","Objektife SYNC ile bagli dronlar plan baslayinca gorev alir. Gozlem: hepsi objektif uzerinde gozlem devriyesi. Destek: FPV / bomba sorti, Bayraktar gibi digerleri gozlem.","0",E_V(0,"Yok") E_V(1,"Gozlem") E_V(2,"Destek FPV sorti + gozlem"))
         E_COMBO(edObFaz,"Harekat fazi","Yalniz bu modul bir ELITE Harekat modulune SYNC'liyse anlamli. Ayni fazin objektifleri birlikte baslar; faz bitince siradaki faz.","1",E_V(1,"Faz 1") E_V(2,"Faz 2") E_V(3,"Faz 3") E_V(4,"Faz 4") E_V(5,"Faz 5") E_V(6,"Faz 6"))
@@ -205,7 +205,7 @@ class GVAR(EdenSavunma): Module_F {
         E_NUM(edObSay,"Dusman sayisi tahmin","0 bilinmiyor.","0")
         E_COMBO(edObGuven,"Bilgi guvenilirligi","Komutanin elindeki bilgi.","1",E_V(0,"Yetersiz") E_V(1,"Orta tek kaynak") E_V(2,"Kesin ama yine iddia"))
         E_COMBO(edObDogr,"Dogrulama disiplini","Tam kesif: rapor gelmeden topcu atmaz. Yok: iddiaya guvenir.","0",E_V(0,"Tam kesif") E_V(1,"Son dogrulama kisa") E_V(2,"YOK iddiaya guvenilir"))
-        E_COMBO(edObTopcu,"Ates destegi topcu havan","Tarafin topcu havan araclari kullanilir.","0",E_V(0,"Yok") E_V(1,"Hazirlik atesi") E_V(2,"Cagri atesi") E_V(3,"Hazirlik ve cagri"))
+        E_COMBO(edObTopcu,"Ates destegi topcu havan","Tarafin topcu havan araclari kullanilir.","3",E_V(0,"Yok") E_V(1,"Hazirlik atesi") E_V(2,"Cagri atesi") E_V(3,"Hazirlik ve cagri"))
         E_NUM(edObTopcuN,"Topcu atis sayisi mermi","Atis seansi basina mermi.","4")
         E_COMBO(edObTopcuBasit,"Topcu modu","Basit: dogrulama beklenmez.","0",E_V(0,"Standart dogrulamali") E_V(1,"BASIT dogrulamasiz"))
         class ModuleDescription: ModuleDescription {};

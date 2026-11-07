@@ -384,7 +384,8 @@ private _gucOrani = {
     private _ob = _plan get "obj";
     private _tf = _plan get "taraf";
     private _dost = 0;
-    { _dost = _dost + ({alive _x && {isNull objectParent _x}} count (units _x)); } forEach _gruplar;
+    // v8.500q: ARACTA OTURAN YOLCU DA DOST SAYILIR (kullanici, RPT 2070df55: konvoy yoldayken 25 askerden yalniz 8'i 'yayada' sayildi -> 'dost 8 : dusman 8 = 1.01 < 2' saldiri IPTAL, plan t+19 dk'da basarisiz; yol 20 dk surmustu). Murettebat (surucu / nisanci / komutan) sayilmaz.
+    { _dost = _dost + ({alive _x && {(isNull objectParent _x) || {((assignedVehicleRole _x) param [0, ""]) isEqualTo "cargo"}}} count (units _x)); } forEach _gruplar;
     {
         private _zl = leader _x;
         private _zv = if (isNull _zl) then {objNull} else {vehicle _zl};

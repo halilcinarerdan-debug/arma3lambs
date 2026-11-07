@@ -262,7 +262,10 @@ if (EGVAR(main,debug_functions)) then {
     };
     // v8.386: 4 askerde de kapsama takimi (2 + 2); eskiden <= 4 askerde HERKES birlikte kosuyor, kapsama 0 + TARGET kapali = kimse karsilik vermiyordu (RPT 17:34:25 ALPHA:4 BRAVO:0)
     private _hizMod = ["NORMAL", "FULL"] select _topluKosu;   // yakin temasta (< cekilTopluM) NORMAL (tufek yukarda kosu), uzakta FULL (sprint)
-    if (_nCek <= 3 || {_topluKosu}) then {
+    // v8.500q BUDDY TEAM GERI CEKILME (kullanici: '2 kisilik buddy takiminda biri ates etsin digeri hareket etsin; ikisi ayni anda hareket ve ates ediyor'): 2-3 askerde de (yakin temas < cekilTopluM) bolme acik: alfa SICRAR, bravo KAPSAR, sonra rol degisir.
+    //   Eskiden <= 3 askerde bolme hic yoktu ('yedek bolme' bu satir yuzunden iptal oluyordu). Geri almak: lambs_danger_cekilKucukBolmeOff = true. Tek asker (1) ve uzak dusman (toplu kosu) degismedi.
+    private _kucukBolme = !(missionNamespace getVariable ["lambs_danger_cekilKucukBolmeOff", false]);
+    if (_nCek <= ([1, 3] select !_kucukBolme) || {_topluKosu}) then {
         _alpha = +_tumBirimler;
         _bravo = [];
     } else {
