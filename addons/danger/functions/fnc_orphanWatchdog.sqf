@@ -73,7 +73,7 @@ private _calis = {
                     || {_u getVariable [QGVAR(cephaneAliciBusy), false]} || {!isNil {_u getVariable QGVAR(mevziStatikGorev)}} || {!isNil {_u getVariable QGVAR(rearGuardPos)}}
                     || {(time - (_u getVariable [QGVAR(yetimT), -999])) < 30} || {!(_u checkAIFeature "PATH")}
                 ) then { _u setVariable [QGVAR(yetimGor), nil]; continue };
-                if ((_u distance2D _lp) < _uzak) then { _u setVariable [QGVAR(yetimGor), nil]; continue };
+                if ((_u distance2D _lp) < _uzak) then { _u setVariable [QGVAR(yetimGor), nil]; _u setVariable [QGVAR(yetimPos), nil]; continue };
                 private _dusman = _u findNearestEnemy _u;
                 if (!isNull _dusman && {(_u distance2D _dusman) < _dusmanM}) then { _u setVariable [QGVAR(yetimGor), nil]; continue };
 
@@ -85,6 +85,29 @@ private _calis = {
                 // ---- YETIM: gruba cagir ----
                 _u setVariable [QGVAR(yetimGor), nil];
                 _u setVariable [QGVAR(yetimT), time];
+                // v8.500k KADEME 2 (kullanici: 'Lewis Campbell evin icinde donguye girmis'; RPT 22a55e61: MOVE komutuyla 5 dk ayni noktada [4701,3978] doniyor, lidere 46 -> 425 m): ilk doFollow'dan sonra asker
+                //   (>= 30 sn) hala ayni yerdeyse (< 5 m) AI yol bulamiyor demektir -> liderin 8-18 m yanina bos noktaya tasinir. Kapatma: lambs_danger_orphanTasimaOff = true.
+                private _yp = _u getVariable [QGVAR(yetimPos), []];
+                if (_yp isNotEqualTo [] && {(_u distance2D _yp) < 5} && {!(missionNamespace getVariable ["lambs_danger_orphanTasimaOff", false])}) then {
+                    private _np = _lp getPos [8 + random 10, random 360];
+                    private _bos = _np findEmptyPosition [0, 15, typeOf _u];
+                    if (_bos isNotEqualTo []) then { _np = _bos; };
+                    if !(surfaceIsWater _np) then {
+                        _u setVehiclePosition [_np, [], 0, "NONE"];
+                        _u setVariable [QGVAR(yetimPos), nil];
+                        _u setUnitPos "AUTO";
+                        _u forceSpeed -1;
+                        _u doFollow _l;
+                        _butce = _butce - 1;
+                        _topN = _topN + 1;
+                        if (_logN < 40) then {
+                            _logN = _logN + 1;
+                            diag_log format ["[YETIM-TOPLA] %1 | %2 TAKILI (doFollow sonrasi %3 m oynadi, liderden %4 m, binada:%5) -> liderin yanina tasindi", groupId _g, name _u, round (_u distance2D _yp), round (_u distance2D _lp), (insideBuilding _u) > 0.5];
+                        };
+                        continue
+                    };
+                };
+                _u setVariable [QGVAR(yetimPos), getPosATL _u];
                 _u setUnitPos "AUTO";
                 _u forceSpeed -1;
                 _u doFollow _l;

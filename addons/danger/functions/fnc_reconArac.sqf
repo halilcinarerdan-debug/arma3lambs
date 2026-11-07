@@ -115,7 +115,34 @@ if ((_v distance2D _pk) > 120) then {
     _d doMove _pk;
     private _w = _vg addWaypoint [_pk, 0]; _w setWaypointType "MOVE"; _w setWaypointName "ELITE RECON-ARAC"; _vg setCurrentWaypoint _w;
     private _tl = time + 180;
-    waitUntil { sleep 1; !alive _v || {!alive _d} || {(_v distance2D _pk) < 60} || {time > _tl} };
+    // v8.500k ALMA BACAGI TAKILMA KURTARMA (RPT 7aee03f9: recon APC 427 m'deki recon askerine 240 sn 'hiz 0' kaldi, kurtarma yoktu -> 'kimse binmedi' -> recon yaya): her 8 sn'de < 4 m ilerlemediyse
+    //   kademe 1: motor + PATH / MOVE + emir yenile, kademe 2: ileri itme, kademe 3: 20 m ileri tasima. Teshis: 20 sn'de bir [RECON-ARAC] alma bacagi satiri. Kapatma: lambs_danger_reconAlmaKurtarOff = true.
+    private _yerA = getPosATL _v; private _tY = time + 8; private _adimA = 0; private _logA = time + 20;
+    waitUntil {
+        sleep 1;
+        if (alive _v && {time > _logA}) then {
+            _logA = time + 20;
+            diag_log format ["[RECON-ARAC] %1 | %2 | alma bacagi: asker %3 m | hiz %4 km/s | motor %5 | komut %6 | kurtarma kademe %7", _id, _ad, round (_v distance2D _pk), round (speed _v), isEngineOn _v, currentCommand _d, _adimA];
+        };
+        if (alive _v && {alive _d} && {time > _tY} && {!(missionNamespace getVariable ["lambs_danger_reconAlmaKurtarOff", false])}) then {
+            _tY = time + 8;
+            if ((_v distance2D _yerA) < 4 && {(_v distance2D _pk) > 60}) then {
+                _adimA = _adimA + 1;
+                switch (true) do {
+                    case (_adimA <= 1): { _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; doStop _d; _d doMove _pk; };
+                    case (_adimA isEqualTo 2): { private _dirA = vectorDir _v; _v setVelocity [(_dirA select 0) * 3, (_dirA select 1) * 3, 0.3]; };
+                    default {
+                        private _np = _v getPos [20, _v getDir _pk];
+                        if (!surfaceIsWater _np) then { _v setPosATL [_np select 0, _np select 1, 0.3]; _v setVectorUp (surfaceNormal _np); };
+                        _adimA = 0;
+                    };
+                };
+                diag_log format ["[RECON-ARAC] %1 | %2 | alma bacagi TAKILMA: kademe %3 uygulandi (asker %4 m)", _id, _ad, _adimA, round (_v distance2D _pk)];
+            } else { _adimA = 0; };
+            _yerA = getPosATL _v;
+        };
+        !alive _v || {!alive _d} || {(_v distance2D _pk) < 60} || {time > _tl}
+    };
 };
 if (!alive _v || {!alive _d}) exitWith { ["arac / surucu oldu"] call _basarisiz; };
 doStop _d;
