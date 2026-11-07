@@ -82,8 +82,9 @@ private _calis = {
             // artik gorevde olmayanlari serbest birak
             { if (!isNull _x && {alive _x} && {!(_x in _yeni)}) then { _x lookAt objNull; _x setVariable [QGVAR(yanGuv), nil]; }; } forEach _eski;
 
-            if (!isNull _sag) then { _sag lookAt (_lp getPos [60, _dir + 90]); _sag setVariable [QGVAR(yanGuv), "SAG"]; };
-            if (!isNull _sol) then { _sol lookAt (_lp getPos [60, _dir - 90]); _sol setVariable [QGVAR(yanGuv), "SOL"]; };
+            // v8.500r: yan yon kapaliysa (duvar / arazi) acik yone kayar, hicbiri acik degilse bakis serbest
+            if (!isNull _sag) then { private _bs = [_sag, _dir + 90, [0, 25, -25, 50, -50]] call FUNC(bakisAcikYon); if (_bs > -900) then { _sag lookAt (_lp getPos [60, _bs]); } else { _sag lookAt objNull; }; _sag setVariable [QGVAR(yanGuv), "SAG"]; };
+            if (!isNull _sol) then { private _bl = [_sol, _dir - 90, [0, 25, -25, 50, -50]] call FUNC(bakisAcikYon); if (_bl > -900) then { _sol lookAt (_lp getPos [60, _bl]); } else { _sol lookAt objNull; }; _sol setVariable [QGVAR(yanGuv), "SOL"]; };
             if (!isNull _arka) then { _arka lookAt (_lp getPos [60, _dir + 180]); _arka setVariable [QGVAR(yanGuv), "ARKA"]; };
 
             // log: yeni atama olunca ya da 60 sn'de bir
