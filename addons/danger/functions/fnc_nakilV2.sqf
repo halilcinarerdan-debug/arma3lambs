@@ -213,6 +213,7 @@ private _durumSatir = {
     format ["%1:%2 piyadeye %3 m hiz %4 motor %5 | iceride %6/%7 | disarida %8 | oyuncu %9", groupId (_r select 2), _r select 4, [_r] call _piyDist, round (speed _vv), isEngineOn _vv, _ic, count _ul, _dis, _oy]
 };
 private _tYuk = time;
+private _tIlkHazir = -1;
 private _logT = time + 20;
 private _hazirSay = 0;
 waitUntil {
@@ -375,6 +376,24 @@ waitUntil {
     if (time > _logT) then {
         _logT = time + 20;
         [format ["YUKLEME surerken: hazir %1 / %2 arac | durum: %3", _ctl select 3, count _kayit, _kayit apply { [_x] call _durumSatir }]] call _log;
+    };
+    // v8.500q UZAK ARACI BEKLEME (kullanici, RPT 2070df55: 2 dolu arac, piyadeden 6 km uzaktaki ucuncu araci 11 dk bekledi, sonra 'zaman asimi'): en az bir arac HAZIR ve ilk hazir olandan beri >= 150 sn gectiyse, hala GEL durumundaki
+    //   ve piyadesine > 1500 m uzak araclar iptal edilir (konvoy kalkar, o araclarin askeri yuruyerek / sonraki seferle gider). Kapatma: lambs_danger_nakilUzakBeklemeOff = true.
+    if (_tIlkHazir < 0 && {(_kayit findIf { (_x select 4) isEqualTo "HAZIR" }) >= 0}) then { _tIlkHazir = time; };
+    if (_tIlkHazir > 0 && {(time - _tIlkHazir) > 150} && {!(missionNamespace getVariable ["lambs_danger_nakilUzakBeklemeOff", false])}) then {
+        {
+            private _rk = _x;
+            if ((_rk select 4) isEqualTo "GEL" && {([_rk] call _piyDist) > 1500}) then {
+                { if (alive _x && {(vehicle _x) isNotEqualTo (_rk select 0)}) then { unassignVehicle _x; }; } forEach (_rk select 3);
+                [_rk select 3] call _serbest;
+                [_rk select 3] call _yuru;
+                _rk set [4, "IPTAL"];
+                _ctl set [3, (_ctl select 3) + 1];
+                { if ((waypointName _x) find "ELITE NAKIL" isEqualTo 0) then { deleteWaypoint _x; }; } forEach ((waypoints (_rk select 2)) call { reverse _this; _this });
+                if (alive (_rk select 1)) then { (_rk select 1) forceSpeed -1; doStop (_rk select 1); };
+                [format ["%1 | UZAK ARAC beklenmiyor: piyadeye %2 m, konvoy %3 sn once hazirdi -> arac iptal", groupId (_rk select 2), [_rk] call _piyDist, round (time - _tIlkHazir)]] call _log;
+            };
+        } forEach _kayit;
     };
     (_ctl select 0) || {_hepsiHazir} || {(time - _tYuk) > _yukMax}
 };
