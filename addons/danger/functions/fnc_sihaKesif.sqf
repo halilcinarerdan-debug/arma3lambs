@@ -38,8 +38,8 @@ private _adayFiltre = {
     vehicles select {
         unitIsUAV _x && {alive _x} && {_x isKindOf "Air"} && {(([_x] call FUNC(ihaTip)) isEqualTo "GOZLEM") || {(_x getVariable [QGVAR(ihaGorevTur), ""]) isEqualTo "GOZLEM"}}
         && {_mesgulOk || {private _tk = _x getVariable [QGVAR(ihaTok), -1]; _tk < 0 || {(diag_tickTime - _tk) > (1800 max ((_x getVariable [QGVAR(ihaSureS), 0]) + 50))}}}
-        && {((getPosATL _x) select 2) > 30 || {_x isKindOf "Helicopter"}}
-        && {(_x distance2D _obj) < 9000}
+        && {((getPosATL _x) select 2) > 30 || {_x isKindOf "Helicopter"} || {(_x isKindOf "Plane") && {missionNamespace getVariable ["lambs_danger_ihaUcakHavadan", true]}}}   // v8.500q: yerdeki UCAK IHA da aday (asagida havadan baslatilir; eskiden yalniz zaten ucan IHA secilirdi: RPT 2070df55 'IHA yola cikmadi')
+        && {(_x distance2D _obj) < ((missionNamespace getVariable ["lambs_danger_planMesafe", 12000]) max 9000)}   // v8.500q: 9 km sabit sinir yerine plan grup mesafesi (12 km); RPT 2070df55: IHA objektife ~10.6 km, aday bulunamadi
         && {
             private _mur = (crew _x) select {alive _x};
             if (_mur isEqualTo []) then { (getNumber (configOf _x >> "side")) isEqualTo _tarafNo } else { (side (group (_mur select 0))) isEqualTo _taraf }
@@ -55,12 +55,19 @@ if (_adaylar isEqualTo []) then {
     };
 };
 if (_adaylar isEqualTo []) exitWith {
-    diag_log format ["[SIHA-KESIF] %1 | %2 | kesif IHA / SIHA bulunamadi (ucuyor / ucak ya da helikopter tipi, GOZLEM turu, 9 km icinde, ayni taraf; serbest ya da karakol disi mesgul) - sortie yok. Taraf '%2' icin IHA (sinif adi + murettebat tarafi) var mi? (TB2 vb. 'taraf UNKNOWN' ise murettebat yok)", _id, _taraf];
+    diag_log format ["[SIHA-KESIF] %1 | %2 | kesif IHA / SIHA bulunamadi (ucuyor / ucak ya da helikopter tipi, GOZLEM turu, plan mesafesi (>= 9 km) icinde, ayni taraf; serbest ya da karakol disi mesgul) - sortie yok. Taraf '%2' icin IHA (sinif adi + murettebat tarafi) var mi? (TB2 vb. 'taraf UNKNOWN' ise murettebat yok)", _id, _taraf];
     false
 };
 private _uav = ([_adaylar, [], {_x distance2D _obj}, "ASCEND"] call BIS_fnc_sortBy) select 0;
 if (!local _uav) then { _uav setOwner 2; private _w = time + 6; waitUntil { sleep 0.2; local _uav || {time > _w} }; };
 if (!local _uav) exitWith { diag_log format ["[SIHA-KESIF] %1 | %2 sunucuda yerel degil", _id, typeOf _uav]; false };
+// v8.500q: yerdeki UCAK IHA (AI pistten kalkis yapmaz) fnc_ihaSorti ile ayni sekilde ucus irtifasinda / hizinda havadan baslatilir
+if (_uav isKindOf "Plane" && {((getPosATL _uav) select 2) < 25} && {missionNamespace getVariable ["lambs_danger_ihaUcakHavadan", true]}) then {
+    private _pz0 = getPosATL _uav;
+    _uav setPosATL [_pz0 select 0, _pz0 select 1, missionNamespace getVariable ["lambs_danger_ihaUcakIrtifa", 1200]];
+    [_uav] call FUNC(ihaUcakHiz);
+    diag_log format ["[SIHA-KESIF] %1 | yerdeki ucak IHA havadan baslatildi: %2 -> %3 m", _id, typeOf _uav, round ((getPosATL _uav) select 2)];
+};
 
 private _tok = diag_tickTime;
 _uav setVariable [QGVAR(ihaTok), _tok];

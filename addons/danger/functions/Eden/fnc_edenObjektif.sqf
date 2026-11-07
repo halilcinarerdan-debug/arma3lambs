@@ -117,7 +117,7 @@ if (!_activated || {!isServer}) exitWith {};
         ["sivil", ["edObSivil", false] call _b], ["agirYasak", ["edObAgir", false] call _b], ["topcu", round (["edObTopcu", _topVars] call _n)],
         ["topcuN", round (["edObTopcuN", 4] call _n)], ["topcuBasit", round (["edObTopcuBasit", 0] call _n)], ["zincir", (round (["edObZincir", 0] call _n)) isEqualTo 1],
         ["reconEk", (round (["edObRecon", 0] call _n)) isEqualTo 1], ["tut", round (["edObTut", 1] call _n)], ["dronAvi", round (["edObDron", 0] call _n)],
-        ["ihaListe", _ihaBagli], ["ihaMod", round (["edObIha", _ihaVars] call _n)],
+        ["ihaListe", _ihaBagli], ["ihaMod", (round (["edObIha", _ihaVars] call _n)) max _ihaVars],
         ["otoGarnizon", round (["edObOtoGar", 0] call _n)], ["rpIsaret", ""], ["mevziYar", round (["edObMevziYar", 500] call _n)], ["oranEsik", ["edObOran", 2] call _n]
     ];
     if (_secimModu isEqualTo 1) then {
