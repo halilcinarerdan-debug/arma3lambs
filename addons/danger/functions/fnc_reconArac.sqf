@@ -34,7 +34,7 @@ if (_mod isEqualTo "SEC") exitWith {
         && {(_v distance2D _mrk) <= (missionNamespace getVariable ["lambs_danger_planMesafe", 12000])}
         && {!(_v getVariable [QGVAR(tasimaMesgul), false])} && {!(_v getVariable [QGVAR(reconArac), false])}
         && {!((group _d) getVariable [QGVAR(planAktif), false])}
-        && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
+        && {!(((_v getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]) || {((group _d) getVariable ["lambs_danger_gorev", ""]) in ["HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"]})}
         && {((units (group _d)) findIf {alive _x && {(vehicle _x) isNotEqualTo _v}}) isEqualTo -1}
         && {(getNumber (configOf _v >> "attendant")) isEqualTo 0}
         && {

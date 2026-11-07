@@ -38,6 +38,12 @@ private _calis = {
             private _n = count _canli;
             if (_n < 1 || {_n > 2} || {(_canli findIf {isPlayer _x}) > -1}) then { continue };
             if ((_canli findIf {!isNull objectParent _x}) > -1) then { continue };
+            // v8.500n LOJISTIK / ARAC MURETTEBATI KATILMAZ (kullanici, RPT cf8911fb: 'HEMTT soforu asker squadlarina katildi; lojistikle gorevli, tank / mekanize piyade ile karistirma'): gorevi lojistik olan (TASIMA / RECON_ARAC / MEDEVAC / TOPCU / KARAKOL_ARAC)
+            //   ya da atanmis (assignedVehicle) CANLI araci olan grup piyade squad'ina katilmaz; araca doner. Kapatma: lambs_danger_yetimMurettebatKatilsin = true.
+            if (!(missionNamespace getVariable ["lambs_danger_yetimMurettebatKatilsin", false])) then {
+                private _gvY = _g getVariable ["lambs_danger_gorev", ""];
+                if (_gvY in ["TASIMA", "RECON_ARAC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "KARAKOL_ARAC"] || {(_canli findIf { private _av = assignedVehicle _x; !isNull _av && {alive _av} }) > -1}) then { continue };
+            };
             if (time < (_g getVariable [QGVAR(yetimBekle), 0])) then { continue };
             missionNamespace setVariable ["lambs_danger_yetimAdim", format ["grup %1", groupId _g]];
 
