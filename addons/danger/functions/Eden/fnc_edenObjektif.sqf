@@ -101,6 +101,10 @@ if (!_activated || {!isServer}) exitWith {};
     };
 
     private _grupN = (round (["edObGrupN", 4] call _n)) max 1;
+    // v8.500i: 3DEN nitelikleri oyuna ulasmiyor ([EDEN-NITELIK] HIC YOK) -> 'IHA destegi' varsayilani 0 (Yok) idi ve objektife SYNC'li dron hic gorev almiyordu (log 4f140aaf: Greyhawk, IHA-SORTI yok). SYNC acik niyettir: nitelik okunamazsa bagli IHA varsa varsayilan 1 (Gozlem)
+    private _ihaBagli = ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x}) apply {netId _x};
+    private _ihaVars = if (_ihaBagli isEqualTo []) then {0} else {1};
+    diag_log format ["[EDEN] Objektif (3DEN) %1 | IHA: bagli %2 dron | mod %3 (nitelik yoksa varsayilan %4)", mapGridPosition _obj, count _ihaBagli, round (["edObIha", _ihaVars] call _n), _ihaVars];
     private _ayar = createHashMapFromArray [
         ["hqId", _hqId], ["tip", _tip], ["grupN", _grupN], ["tumHQ", _secimModu in [2, 3]], ["tumHQGuvenlik", _secimModu isEqualTo 2],
         ["piyade", ["edObPiy", true] call _b], ["zirh", ["edObZirh", false] call _b], ["at", ["edObAt", false] call _b], ["mg", ["edObMg", false] call _b],
@@ -111,7 +115,7 @@ if (!_activated || {!isServer}) exitWith {};
         ["sivil", ["edObSivil", false] call _b], ["agirYasak", ["edObAgir", false] call _b], ["topcu", round (["edObTopcu", 0] call _n)],
         ["topcuN", round (["edObTopcuN", 4] call _n)], ["topcuBasit", round (["edObTopcuBasit", 0] call _n)], ["zincir", (round (["edObZincir", 0] call _n)) isEqualTo 1],
         ["reconEk", (round (["edObRecon", 0] call _n)) isEqualTo 1], ["tut", round (["edObTut", 1] call _n)], ["dronAvi", round (["edObDron", 0] call _n)],
-        ["ihaListe", ((["BAGLI", [_logic]] call FUNC(edenOrtak)) select {unitIsUAV _x}) apply {netId _x}], ["ihaMod", round (["edObIha", 0] call _n)],
+        ["ihaListe", _ihaBagli], ["ihaMod", round (["edObIha", _ihaVars] call _n)],
         ["otoGarnizon", round (["edObOtoGar", 0] call _n)], ["rpIsaret", ""], ["mevziYar", round (["edObMevziYar", 500] call _n)], ["oranEsik", ["edObOran", 2] call _n]
     ];
     if (_secimModu isEqualTo 1) then {
