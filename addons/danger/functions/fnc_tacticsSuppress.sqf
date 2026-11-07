@@ -36,7 +36,8 @@ if ((_target select 2) > 6) then {
 };
 
 // exit with flank squad leader cannot suppress from here
-if !([_unit, (ATLToASL _target) vectorAdd [0, 0, 5]] call EFUNC(main,shouldSuppressPosition)) exitWith {
+// v8.500j: LAMBS shouldSuppressPosition hedefin 5 m USTUNE bakiyor -> duvar / bina hattini kapali saymiyor; gercek namlu hatti da kontrol edilir (fnc_atesHatiAcik)
+if (!([_unit, (ATLToASL _target) vectorAdd [0, 0, 5]] call EFUNC(main,shouldSuppressPosition)) || {!([_unit, _target] call FUNC(atesHatiAcik))}) exitWith {
     [_group, _target] call FUNC(tacticsFlank);
 };
 
@@ -81,6 +82,12 @@ private _vehicles = ([_unit] call EFUNC(main,findReadyVehicles)) select {someAmm
 private _posList = [_target, 20, true, false] call EFUNC(main,findBuildings);
 _posList append ((nearestTerrainObjects [ _target, ["HIDE", "TREE", "BUSH", "SMALL TREE"], 8, false, true]) apply { (getPosATL _x) vectorAdd [0, 0, random 2] });
 _posList pushBack _target;
+// v8.500j BASTIRMA HATTI (kullanici: 'duvara ates ediyorlar, bastirmaya benziyor'; findBuildings bina ICI konumlari veriyor -> mermi duvara gidiyor): lider hattinda kapali konumlar listeden cikar, hedefin kendisi her zaman kalir;
+//   hedefe hatti kapali askerler bastirmaya katilmaz (hic biri acik degilse yan manevra)
+_posList = (_posList select {[_unit, _x] call FUNC(atesHatiAcik)}) - [_target];
+_posList pushBack _target;
+_units = _units select {[_x, _target] call FUNC(atesHatiAcik)};
+if (_units isEqualTo []) exitWith { _group setVariable [QGVAR(isExecutingTactic), nil]; [_group, _target] call FUNC(tacticsFlank); false };
 
 // set tasks
 _unit setVariable [QEGVAR(main,currentTarget), _target, EGVAR(main,debug_functions)];
