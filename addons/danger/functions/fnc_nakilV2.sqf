@@ -164,7 +164,7 @@ _ctl set [2, _nM];   // plan: nakil gercekten yapiliyor (> 0)
 
 // birimler araclar gelene kadar bekler (oyuncu haric)
 { { if (alive _x && {!isPlayer _x}) then { _x setVariable [QGVAR(tasimaBekle), true]; doStop _x; _x disableAI "PATH"; }; } forEach (_x select 1); } forEach _manifest;
-{ (_x select 0) setVariable [QGVAR(nk2Zincir), []]; (_x select 0) setVariable [QGVAR(nk2ZincirDene), false]; (_x select 0) setVariable [QGVAR(nk2DurT), -1]; } forEach _manifest;
+{ (_x select 0) setVariable [QGVAR(nk2Zincir), []]; (_x select 0) setVariable [QGVAR(nk2ZincirDene), false]; (_x select 0) setVariable [QGVAR(nk2DurT), -1]; (_x select 0) setVariable [QGVAR(nk2PrgD), []]; } forEach _manifest;
 { (_x select 0) setVariable [QGVAR(tasimaMesgul), true]; (group (driver (_x select 0))) setVariable [QGVAR(aracMedevacT), time]; (_x select 0) setVariable [QGVAR(aracMedevacT), time]; } forEach _manifest;
 
 // kayit: [arac, surucu, grup, birimler, durum, t0, binen, gercekKoltuk, yolcuOyuncular]
@@ -277,6 +277,33 @@ waitUntil {
                                 [format ["%1 | YUKLEME TAKILMA 3: 25 m ileri tasindi (piyadeye %2 m)", groupId _vg, round (_v distance2D _pk)]] call _log;
                             };
                         } else { _v setVariable [QGVAR(nk2DurT), -1]; };
+                        // v8.500k ILERLEME BEKCISI (RPT 7aee03f9: Alpha 3-2 15 dk boyunca palmiyeler arasinda 0.1-0.3 m/sn sürünerek piyadeye 537 -> 477 m geldi; hiz hic 'sifir' olmadigi icin kademe sayaci surekli sifirlaniyor, kurtarma 1 kez calisip bitti):
+        //   her 20 sn'de hedefe yaklasma < 8 m ise 'ilerleme yok' say; 1: emir yenile, 2: itme, >= 3: hedefe dogru ileri tasima (25 m + 15 m x tekrar, en fazla 80 m); ilerleme (>= 15 m) olursa sayac sifirlanir.
+                        private _pw = _v getVariable [QGVAR(nk2PrgD), []];
+                        if (_pw isEqualTo []) then { _v setVariable [QGVAR(nk2PrgD), [time, _v distance2D _hedefG, 0]]; } else {
+                            if ((time - (_pw select 0)) >= 20) then {
+                                private _dNow = _v distance2D _hedefG;
+                                private _prg = (_pw select 1) - _dNow;
+                                private _sN = _pw select 2;
+                                if (_prg < 8 && {_dNow > 60}) then {
+                                    _sN = _sN + 1;
+                                    switch (true) do {
+                                        case (_sN isEqualTo 1): { _v engineOn true; _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; doStop _d; _vg setVariable [QGVAR(nk2MoveT), -99]; };
+                                        case (_sN isEqualTo 2): { _v setVelocityModelSpace [0, 4, 0.2]; _vg setVariable [QGVAR(nk2MoveT), -99]; };
+                                        default {
+                                            private _adimM = (25 + 15 * (_sN - 3)) min 80;
+                                            private _ip2 = (getPosATL _v) getPos [_adimM, _v getDir _hedefG];
+                                            private _yr2 = _ip2 nearRoads 30;
+                                            if (_yr2 isNotEqualTo []) then { _ip2 = getPosATL (_yr2 select 0); };
+                                            if !(surfaceIsWater _ip2) then { _v setVehiclePosition [_ip2, [], 0, "NONE"]; _v setDir (_v getDir _hedefG); _v engineOn true; };
+                                            _vg setVariable [QGVAR(nk2MoveT), -99];
+                                        };
+                                    };
+                                    [format ["%1 | YUKLEME ILERLEME YOK: 20 sn'de %2 m yaklasti (kademe %3, piyadeye %4 m)", groupId _vg, round _prg, _sN, round (_v distance2D _pk)]] call _log;
+                                } else { if (_prg >= 15) then { _sN = 0; }; };
+                                _v setVariable [QGVAR(nk2PrgD), [time, _dNow, _sN]];
+                            };
+                        };
                         if ((time - (_vg getVariable [QGVAR(nk2MoveT), -99])) > 4) then {
                             _vg setVariable [QGVAR(nk2MoveT), time];
                             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _vg setBehaviour "SAFE"; _vg setSpeedMode "FULL";
@@ -302,8 +329,12 @@ waitUntil {
                     // yakindaki asker binmeye devam: her 5 sn orderGetIn tekrar
                     if ((round _gecen) mod 5 isEqualTo 0) then { { if ((_x distance2D _v) < 80) then { _x assignAsCargo _v; }; } forEach _bekleyen; _bekleyen orderGetIn true; };
                     private _oyBekle = _oyuncular select {alive _x && {!((vehicle _x) in _mAraclar)}};
+                    // v8.500k BINIS SURESI MESAFEYE GORE (RPT 7aee03f9: Alpha 2-6 14 askerden 4'u 120 sn'de binebildi, 10 asker yuruyerek kaldi): en uzak bekleyen asker ~1.3 m/sn yurur -> sinir 120 sn ile (60 + mesafe / 1.3) arasi buyuk olan, en fazla 300 sn
+                    private _uzakM = 0;
+                    { _uzakM = _uzakM max (_x distance2D _v); } forEach _bekleyen;
+                    private _binLimit = (120 max (60 + (_uzakM / 1.3))) min 300;
                     private _bitti = (_bekleyen isEqualTo [] && {_oyBekle isEqualTo [] || {_gecen > 90}})
-                        || {_gecen > 120}
+                        || {_gecen > _binLimit}
                         || {_ic isNotEqualTo [] && {([_v] call FUNC(aracDuzBos)) <= 0} && {_oyBekle isEqualTo [] || {_gecen > 90}}};
                     // arac gercekten doldu ama disarida kalan var -> kapasite ogren (emptyPositions / cargo sayisi yalan soyledi)
                     private _doluKoltuk = count (fullCrew [_v, "cargo", false]);   // gercekten oturan sayisi (taze)
