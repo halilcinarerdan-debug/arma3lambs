@@ -69,7 +69,7 @@ private _calis = {
                 // ---- asker duzeyi muafiyet: amaci olan askere dokunma ----
                 if (
                     captive _u || {_u getVariable [QGVAR(teslimOldu), false]} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getUnitTrait "medic"} || {(damage _u) > 0.3}
-                    || {!isNil {_u getVariable QGVAR(forceMove)}} || {!isNil {_u getVariable QGVAR(tcccBy)}} || {_u getVariable [QGVAR(tcccBusy), false]}
+                    || {!isNil {_u getVariable QGVAR(forceMove)}} || {!isNil {_u getVariable QGVAR(tcccBy)}} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                     || {_u getVariable [QGVAR(cephaneAliciBusy), false]} || {!isNil {_u getVariable QGVAR(mevziStatikGorev)}} || {!isNil {_u getVariable QGVAR(rearGuardPos)}}
                     || {(time - (_u getVariable [QGVAR(yetimT), -999])) < 30} || {!(_u checkAIFeature "PATH")}
                 ) then { _u setVariable [QGVAR(yetimGor), nil]; continue };

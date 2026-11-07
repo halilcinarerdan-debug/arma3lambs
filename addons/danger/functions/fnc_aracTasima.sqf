@@ -50,7 +50,7 @@ if (missionNamespace getVariable ["lambs_danger_tasimaOff", false]) exitWith {0}
         diag_log format ["[TASIMA] MURETTEBAT TOPLAMA: %1 | surucu yoktu -> %2 (%3 m yaninda, yayaydi) surucu yapildi; ekip aday %4", getText (configOf _v >> "displayName"), name _sr, round (_sr distance2D _v), count _adaylar];
         if (count _adaylar > 1) then {
             private _kmt = _adaylar select 1;
-            if (isNull (commander _v)) then { _kmt assignAsCommander _v; _kmt moveInCommander _v; };
+            if (isNull (commander _v) && {(fullCrew [_v, "commander", true]) isNotEqualTo []}) then { _kmt assignAsCommander _v; _kmt moveInCommander _v; };
         };
     } else {
         diag_log format ["[TASIMA] MURETTEBAT YOK: %1 | surucu yok, ekip grubu / yakinda TASIMA gorevli yaya asker bulunamadi (ekipGrup %2)", getText (configOf _v >> "displayName"), if (isNull _eg) then {"kayitsiz"} else {groupId _eg}];
@@ -71,8 +71,8 @@ private _tamamlandi = 0;
         private _u = _x;
         _u enableAI "PATH";
         private _yakin = (_u distance2D _v) < 30;
-        if (isNull (commander _v)) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
-            if (isNull (gunner _v)) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
+        if (isNull (commander _v) && {(fullCrew [_v, "commander", true]) isNotEqualTo []}) then { _u assignAsCommander _v; if (_yakin) then { _u moveInCommander _v; } else { [_u] orderGetIn true; }; } else {
+            if (isNull (gunner _v) && {(fullCrew [_v, "gunner", true]) isNotEqualTo []}) then { _u assignAsGunner _v; if (_yakin) then { _u moveInGunner _v; } else { [_u] orderGetIn true; }; } else {
                 _u assignAsCargo _v; if (_yakin) then { [_u, _v] call FUNC(aracYolcuKoy); } else { [_u] orderGetIn true; };
             };
         };
