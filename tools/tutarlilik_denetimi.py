@@ -236,6 +236,16 @@ for p, t in SQF.items():
     for m in re.finditer(r"(?:=|\()\s*_\w+\s+(append|sort)\b", c):
         HATA.append("[DEGER] %s:%d '%s' deger DONDURMEZ" % (goreli(p), c[:m.start()].count("\n") + 1, m.group(1)))
 
+
+# ------------------------------------------------------------------ 6b. _forEachIndex yalniz forEach icinde vardir (apply / select / count / findIf icinde TANIMSIZ -> calisma zamani hatasi)
+for p, t in SQF.items():
+    c = temizle(t)
+    for m in re.finditer(r"\b(apply|select|count|findIf)\s*\{", c):
+        j = match(c, m.end() - 1)
+        b = c[m.end():j - 1]
+        if "_forEachIndex" in b and not re.search(r"\bforEach\b", b):
+            HATA.append("[FOREACHINDEX] %s:%d %s{} icinde _forEachIndex yok (yalniz forEach verir; indeks dizisi for-dongusuyle kurun)" % (goreli(p), c[:m.start()].count("\n") + 1, m.group(1)))
+
 # ------------------------------------------------------------------ 7. surum
 boot = re.search(r"lambs_danger ELITE build (v[\d.]+)", prep); bek = re.search(r'BEKLENEN_SURUM\s*=\s*"(v[\d.]+)"', oku(os.path.join(KOK, "tools", "rpt_ozet.py")))
 log = re.findall(r"^(v\d+\.\d+)[ b(]", oku(os.path.join(KOK, "DEVIR_LOGU_v7.0.txt")), re.M)
