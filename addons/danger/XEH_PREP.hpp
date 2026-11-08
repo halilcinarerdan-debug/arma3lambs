@@ -95,6 +95,7 @@ PREP(atFire);
 PREP(orphanWatchdog);
 PREP(onUcus);
 PREP(bakisAcikYon);
+PREP(aracHasar);
 PREP(yigilmaCoz);
 PREP(cqbCevik);
 PREP(sektorBakis);
@@ -432,6 +433,7 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
     ["lambs_danger_taksiMenzil", "SLIDER", ["Taksi: arac arama menzili (m)", "v8.396. Genel arac taksisi (fnc_taksi): yaya AI grubu uzak bir hedefe gidiyorsa bu mesafedeki bos kara araci aranir. Varsayilan 600."], _katU, [200, 5000, 600, 0], 1] call CBA_fnc_addSetting;
     ["lambs_danger_taksiEsik", "SLIDER", ["Taksi: en kisa waypoint mesafesi (m)", "v8.396. Aktif waypoint bu mesafeden uzaksa taksi devreye girer (daha yakin hedefe yuruyerek gidilir). Buyuk haritada artirilabilir. Varsayilan 1200."], _katU, [300, 6000, 1200, 0], 1] call CBA_fnc_addSetting;
     ["lambs_danger_planMesafe", "SLIDER", ["Plan: grup secme mesafesi (m)", "v8.395. Objektif planina (HQ'siz otomatik secim, Zeus listesi, recon) katilabilecek gruplarin objektife en fazla uzakligi. Eskiden sabit 4000 m idi; buyuk haritada gruplar daha uzakta olabilir. Varsayilan 12000."], _katU, [1000, 30000, 12000, 0], 1] call CBA_fnc_addSetting;
+    ["lambs_danger_rhsAceUyum", "CHECKBOX", ["RHS / ACE arac hasar uyumu (murettebat)", "v8.500t. Aciksa murettebat / surucu yenileme / nakil / tank kararlarinda arac hasari yalniz genel damage degil govde + motor + yakit + cephanelik hitpoint'lerinin en yuksegi sayilir (RHS ve ACE vehicle damage farkli HP isler). Kapali (varsayilan) = eski davranis: yalniz damage."], _katU, false, 1] call CBA_fnc_addSetting;
     ["lambs_danger_reconOncelikOran", "SLIDER", ["Recon onculugu: ana kol kalkis orani", "v8.500n (kullanici: recon daha onde gitsin, arkadakiler daha uzun beklesin). Recon araci OP'ye giden yolun bu kadarini gectiyse ana kol (nakil kapisi) kalkar. TASARIM degeri (kitapta sayi yok; FM 3-98: kesif ana kolun onunde). Eskiden sabit 0.60; varsayilan 0.75. Ust sinir kapi suresi 420 sn degismez."], _katU, [0.3, 0.95, 0.75, 2], 1] call CBA_fnc_addSetting;
     ["lambs_danger_reconOncelikSn", "SLIDER", ["Recon onculugu: en az on sure (sn)", "v8.500n. Zaman tabanli kural: recon'un OP'ye varis suresi, konvoyun tahmini suresinden en az bu kadar KISA ise ana kol kalkar (recon bu kadar onde varir). TASARIM degeri. Eskiden recon konvoydan 90 sn SONRA varsa bile kalkiyordu (+90); varsayilan 60 sn once."], _katU, [0, 300, 60, 0], 1] call CBA_fnc_addSetting;
     ["lambs_danger_nakilMenzil", "SLIDER", ["Nakil: arac arama menzili (m)", "v8.395. Plan nakli icin kara araci (APC / IFV / kamyon) bu mesafeye kadar uzaktan aranir ve piyadenin ANLIK konumuna gider (eskiden sabit 6000 m). Varsayilan 12000."], _katU, [600, 30000, 12000, 0], 1] call CBA_fnc_addSetting;

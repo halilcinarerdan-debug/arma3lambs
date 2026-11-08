@@ -37,7 +37,7 @@ private _calis = {
                 private _kaynak = objNull;
                 private _kendiMur = {
                     params ["_unit", "_arac"];
-                    !(missionNamespace getVariable ["lambs_danger_aracUzakMurOff", false]) && {alive _arac} && {!isBurning _arac} && {(damage _arac) <= 0.85}
+                    !(missionNamespace getVariable ["lambs_danger_aracUzakMurOff", false]) && {alive _arac} && {!isBurning _arac} && {([_arac] call FUNC(aracHasar)) <= 0.85}
                     && {((assignedVehicle _unit) isEqualTo _arac) || {((_arac getVariable [QGVAR(murKayit), []]) findIf {(_x select 0) isEqualTo _unit}) >= 0}}
                 };
                 private _gerek = 0;

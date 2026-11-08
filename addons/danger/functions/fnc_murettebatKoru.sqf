@@ -27,7 +27,7 @@ private _calis = {
         if (missionNamespace getVariable ["lambs_danger_murKoruOff", false]) then { continue };
         {
             private _v = _x;
-            if (!local _v || {!canMove _v} || {(damage _v) > 0.6} || {isBurning _v}) then { continue };
+            if (!local _v || {!canMove _v} || {([_v] call FUNC(aracHasar)) > 0.6} || {isBurning _v}) then { continue };
             if ((crew _v) findIf {isPlayer _x} >= 0) then { continue };
             private _kayit = _v getVariable [QGVAR(murKayit), []];
             // yeni murettebati kaydet
