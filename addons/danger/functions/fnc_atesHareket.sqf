@@ -121,7 +121,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
             if (_dus isEqualTo []) then { continue };
             private _en = ([_dus, [], {(_x select 4) distance _l}, "ASCEND"] call BIS_fnc_sortBy) select 0 select 4;
             private _ed = _l distance2D _en;
-            if (_ed < 30 || {_ed > 220}) then { continue };
+            if (_ed < 30 || {_ed > (missionNamespace getVariable ["lambs_danger_atesHareketMaxM", 300])}) then { continue };   // v8.500x: 220 -> 300 (CBA), RPT: catismalar 250 m+ oldugu icin sistem hic tetiklenmedi (rush 0)
             // acikta olan var mi (dusman gozunden gogus hizasi hatti serbest)
             private _acik = _uyeler select { !(lineIntersects [eyePos _en, (getPosASL _x) vectorAdd [0, 0, 1.1], _en, _x]) };
             if (_acik isEqualTo []) then { continue };
@@ -241,7 +241,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                         private _dolu = (missionNamespace getVariable ["lambs_danger_acikSiperDolu", []]);
                         _dolu pushBack [_nokta select 0, time];
                         missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
-                        private _dire = ((getSuppression _u) > 0.5) || {_kayipOran >= 0.4} || {(random 1) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.10])};
+                        private _dire = ((getSuppression _u) > 0.5) || {_kayipOran >= 0.4} || {(random 1) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.25])};
                         _u setVariable [QGVAR(fhRushBit), time + 5];
                         _u setVariable [QGVAR(fhVardi), nil];
                         private _tk = time + 6;
