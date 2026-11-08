@@ -36,16 +36,21 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
 [] spawn {
     private _birakAnim = ["aovr", "ladder", "climb", "vault", "ainv", "adth", "acts", "apanp", "amov_pro", "abdl"];
     // v8.500u AGIRLIGA GORE DONUS (kullanici: 'sag sola donme hizi ACE agirligina gore yavaslasin, abartisiz'): agirlik kg = loadAbs x 0.1 / 2.2046 (ACE ile ayni formul; ACE yoksa da vanilla loadAbs).
-    //   20 kg'a kadar etki yok; 50 kg ve uzeri en fazla lambs_danger_turnAgirlikMax (varsayilan %12) yavaslama, aradaki dogrusal. 10 sn onbellek. CBA: lambs_danger_turnAgirlik (acik / kapali).
+    //   12 kg'a kadar etki yok; 40 kg ve uzeri en fazla lambs_danger_turnAgirlikMax (varsayilan %15) yavaslama, aradaki dogrusal. 10 sn onbellek. CBA: lambs_danger_turnAgirlik (acik / kapali).
     private _agirCarpan = {
         params ["_u"];
         if !(missionNamespace getVariable ["lambs_danger_turnAgirlik", true]) exitWith {1};
         private _onb = _u getVariable [QGVAR(mvAgirT), [0, 1]];
         if (time < (_onb select 0)) exitWith { _onb select 1 };
         private _kg = (loadAbs _u) * 0.1 / 2.2046226;
-        private _mx = ((missionNamespace getVariable ["lambs_danger_turnAgirlikMax", 0.12]) max 0) min 0.3;
-        private _c = 1 - ((((_kg - 20) / 30) max 0) min 1) * _mx;
+        private _mx = ((missionNamespace getVariable ["lambs_danger_turnAgirlikMax", 0.15]) max 0) min 0.3;
+        // v8.500v: esik 20 -> 12 kg, tam etki 40 kg (RPT: tipik tufekci 20-27 kg tasiyor, 20 kg esigiyle fark gorunmuyordu)
+        private _c = 1 - ((((_kg - 12) / 28) max 0) min 1) * _mx;
         _u setVariable [QGVAR(mvAgirT), [time + 10, _c]];
+        if ((missionNamespace getVariable ["lambs_danger_mvAgirLogN", 0]) < 12) then {
+            missionNamespace setVariable ["lambs_danger_mvAgirLogN", (missionNamespace getVariable ["lambs_danger_mvAgirLogN", 0]) + 1];
+            diag_log format ["[DONUS-AGIRLIK] %1 | yuk %2 kg (loadAbs %3) | donus carpani %4 -> donus katsayisi %5 (taban %6)", name _u, _kg toFixed 1, round (loadAbs _u), _c toFixed 3, ((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * _c) toFixed 3, missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]];
+        };
         _c
     };
 
