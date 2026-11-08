@@ -35,6 +35,19 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
 
 [] spawn {
     private _birakAnim = ["aovr", "ladder", "climb", "vault", "ainv", "adth", "acts", "apanp", "amov_pro", "abdl"];
+    // v8.500u AGIRLIGA GORE DONUS (kullanici: 'sag sola donme hizi ACE agirligina gore yavaslasin, abartisiz'): agirlik kg = loadAbs x 0.1 / 2.2046 (ACE ile ayni formul; ACE yoksa da vanilla loadAbs).
+    //   20 kg'a kadar etki yok; 50 kg ve uzeri en fazla lambs_danger_turnAgirlikMax (varsayilan %12) yavaslama, aradaki dogrusal. 10 sn onbellek. CBA: lambs_danger_turnAgirlik (acik / kapali).
+    private _agirCarpan = {
+        params ["_u"];
+        if !(missionNamespace getVariable ["lambs_danger_turnAgirlik", true]) exitWith {1};
+        private _onb = _u getVariable [QGVAR(mvAgirT), [0, 1]];
+        if (time < (_onb select 0)) exitWith { _onb select 1 };
+        private _kg = (loadAbs _u) * 0.1 / 2.2046226;
+        private _mx = ((missionNamespace getVariable ["lambs_danger_turnAgirlikMax", 0.12]) max 0) min 0.3;
+        private _c = 1 - ((((_kg - 20) / 30) max 0) min 1) * _mx;
+        _u setVariable [QGVAR(mvAgirT), [time + 10, _c]];
+        _c
+    };
 
     private _tick = 0;
     while {true} do {
@@ -65,7 +78,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;
             private _tabanAnim = [1, 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
-            private _istenen = if (_donuyor) then {missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]} else {
+            private _istenen = if (_donuyor) then {(missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)} else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
             };
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
