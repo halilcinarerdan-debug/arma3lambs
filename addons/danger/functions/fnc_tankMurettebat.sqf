@@ -93,7 +93,7 @@ private _calis = {
         if (missionNamespace getVariable ["lambs_danger_tankMurettebatOff", false]) then { continue };
         {
             private _v = _x;
-            if (!local _v || {!alive _v} || {!(_v isKindOf "LandVehicle")} || {isBurning _v} || {(damage _v) > 0.85}) then { continue };
+            if (!local _v || {!alive _v} || {!(_v isKindOf "LandVehicle")} || {isBurning _v} || {([_v] call FUNC(aracHasar)) > 0.85}) then { continue };
             if ((crew _v) findIf {isPlayer _x} >= 0) then { continue };
             // v8.266: murettebatin grubunda oyuncu varsa (oyuncu komutasindaki botlar) koltuk degistirme / geri cagirma / terk YOK
             if ((crew _v) findIf {private _cg = group _x; ((units _cg) findIf {isPlayer _x}) >= 0} >= 0) then { continue };

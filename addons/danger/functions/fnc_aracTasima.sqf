@@ -691,7 +691,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, [], _asBirim];
                 params ["_v", "_ps", "_gid", "_drop"];
                 // v8.189: inis noktasindan > 600 m uzaktaki arac (takilsa bile) yolcusunu birakmaz: lider onden inince takipciler "GET OUT" alir (RPT aee29fdd: lideri onde inen 5 asker 1.8 km geride indi)
                 private _uzakTut = {
-                    (alive _v) && {(_v distance2D _drop) > 600} && {(damage _v) < 0.6}
+                    (alive _v) && {(_v distance2D _drop) > 600} && {([_v] call FUNC(aracHasar)) < 0.6}
                     && {(_ps findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 10}}) < 0}   // v8.246: yolcu grubu son 10 sn temasta ise uzakTut degil (inme istegi gercek tehdit: geri almaya calisma)
                     && {((_v nearEntities [["CAManBase", "LandVehicle"], 300]) findIf {alive _x && {((side _x) getFriend (side (group (driver _v)))) < 0.6}}) < 0}
                 };
@@ -904,7 +904,7 @@ private _senk = [0, count _eslesme, _eslesme apply {_x select 0}, [], _asBirim];
                 if (!alive _v || {!alive _d}) then { _bitis = "oldu"; }
                 else { if (_ctl select 0) then { _bitis = "iptal"; }
                 else { if (time > _st) then { _bitis = "sure"; }
-                else { if ((!canMove _v) || {(damage _v) > 0.5}) then { _bitis = "hasar"; }
+                else { if ((!canMove _v) || {([_v] call FUNC(aracHasar)) > 0.5}) then { _bitis = "hasar"; }
                 else { if ([_binen, _d] call _temasVar && {_gecisT < 0 || {(time - _gecisT) > 40}}) then {
                     // PUSU (v8.138): dusman >= 150 m ve arac hareketli -> ates altinda DURMA, tam gazla gec (en fazla 40 sn); yakin pusu (< 150 m) / hasar -> hemen in
                     // v8.246 DUSMAN MESAFESI (RPT b8f696ff: LAMBS 'Enemy Near @60m' + 'BTR-80 unloading 4 carried troops' iken surucunun kendi findNearestEnemy'si bos dondu -> 'dusman bilinmiyor, HIZLI GECIS' secildi ve

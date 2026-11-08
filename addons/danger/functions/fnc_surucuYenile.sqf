@@ -34,7 +34,7 @@ private _calis = {
             if (isNull _son || {alive _son}) then { continue };
             if ((time - (_v getVariable [QGVAR(surucuYenileT), -999])) < 15) then { continue };
             if ((_v emptyPositions "driver") < 1) then { continue };
-            if (!canMove _v || {(fuel _v) <= 0.01} || {isBurning _v} || {(damage _v) >= 0.9} || {(crew _v) findIf {isPlayer _x} >= 0}) then { continue };
+            if (!canMove _v || {(fuel _v) <= 0.01} || {isBurning _v} || {([_v] call FUNC(aracHasar)) >= 0.9} || {(crew _v) findIf {isPlayer _x} >= 0}) then { continue };
             private _aday = (fullCrew [_v, "cargo", false]) select {
                 private _u = _x select 0;
                 alive _u && {local _u} && {!isPlayer _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])}

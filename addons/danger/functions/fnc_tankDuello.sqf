@@ -23,7 +23,7 @@
 
 params ["_g", "_v", "_d", "_savunma", "_obj", "_id", ["_plan", createHashMap, [createHashMap]]];
 private _l = leader _g;
-if (isNull _l || {!local _l} || {!canMove _v} || {(damage _v) > 0.45}) exitWith {false};
+if (isNull _l || {!local _l} || {!canMove _v} || {([_v] call FUNC(aracHasar)) > 0.45}) exitWith {false};
 if ((time - (_g getVariable ["lambs_danger_tankDuelloT", -999])) < 45) exitWith {false};
 if ((_g getVariable ["lambs_danger_tankDuelloN", 0]) >= 8) exitWith {false};
 // v8.280 KOORDINASYON (birbirini ortme): ayni planda baska bir tank grubu son 45 sn icinde hamle yaptiysa bu tank yerinde kalip ortu ates verir

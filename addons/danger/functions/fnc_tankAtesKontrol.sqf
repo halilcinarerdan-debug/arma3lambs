@@ -41,7 +41,7 @@ private _calis = {
             if (_tf isEqualTo civilian) then { continue };
 
             // A) isabet
-            private _h = damage _v;
+            private _h = [_v] call FUNC(aracHasar);
             private _h0 = _v getVariable [QGVAR(tankHasar0), _h];
             _v setVariable [QGVAR(tankHasar0), _h];
             if (_h >= _h0 + 0.05) then {

@@ -572,7 +572,7 @@ waitUntil {
                 if (_dm < 220 && {(behaviour _d) isEqualTo "SAFE"}) then { _vg setBehaviour "AWARE"; _vg setSpeedMode "NORMAL"; };
                 if (((_binen findIf {alive _x && {(time - ((group _x) getVariable [QGVAR(contact), -999])) < 5}}) >= 0) && {_dm > 120}) then { _c set [4, "TEMAS"]; };
                 if ((time - _tSur) > _sureMax) then { _c set [4, "SURE"]; };
-                if ((damage _v) > 0.8 || {!canMove _v}) then { _c set [4, "HASAR"]; };
+                if (([_v] call FUNC(aracHasar)) > 0.8 || {!canMove _v}) then { _c set [4, "HASAR"]; };
             };
         };
         if ((_c select 4) isEqualTo "") then { _surende = _surende + 1; };

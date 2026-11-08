@@ -447,14 +447,14 @@ private _nZ = count _zg;
     // ---- v8.194 YER DEGISTIR: mevzideki tank hasar aldiysa (>= 0.08) yedek mevziye gecer (60 sn'de en fazla bir kez; eski mevzi yeni yedek olur)
     if (_vardi && {_tankMi} && {_savas} && {canMove _v}) then {
         private _hs0 = _g getVariable ["lambs_danger_planZirhHasar", -1];
-        if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", damage _v]; _hs0 = damage _v; };
+        if (_hs0 < 0) then { _g setVariable ["lambs_danger_planZirhHasar", ([_v] call FUNC(aracHasar))]; _hs0 = ([_v] call FUNC(aracHasar)); };
         private _alt2 = _g getVariable ["lambs_danger_planZirhAlt", []];
         // v8.277 SAVUNMA TANKI YER DEGISTIRIR (kullanici: 'tanklar son kale oluyor, piyadelere nefes aldirmiyor'; ATP 3-20.15: birincil / yedek mevzi arasinda yer degistirerek kesin cati engagement'tan kacinma):
         //   savunma tanki ayni mevzide savasta > tankYerSureS (150) sn kaldiysa ve bilinen dusman varsa yedek mevziye gecer (hasar beklemez); yedek <-> birincil donusumlu. Kapatma: lambs_danger_tankYerOff = true.
         // v8.278 (kullanici: '25 dakika ayni mevzide durmasinlar'): saldirida da (ileri sicrama olmadiysa) 300 sn sonra yedek mevzi; savunmada 150 sn
         private _zamanYer = !(_g getVariable ["lambs_danger_planZirhHide", false]) && {!(missionNamespace getVariable ["lambs_danger_tankYerOff", false])} && {(time - (_g getVariable ["lambs_danger_planZirhVardiT", time])) > (if (_savunma) then {(missionNamespace getVariable ["lambs_danger_tankYerSureS", 150]) * ([1, 1.5, 2] select _agr)} else {missionNamespace getVariable ["lambs_danger_tankYerSureAS", 300]})}
             && {((_l nearTargets 1300) findIf {((side _g) getFriend (_x select 2)) < 0.6 && {alive (_x select 4)} && {(_l knowsAbout (_x select 4)) > (["SUPHE"] call FUNC(bilgiEsik))}}) >= 0};
-        if (((damage _v) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin} && {[_g, _v] call _digerYerlesti}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
+        if ((([_v] call FUNC(aracHasar)) >= (_hs0 + 0.08) || {_zamanYer && {[_g] call _hareketIzin} && {[_g, _v] call _digerYerlesti}}) && {_alt2 isNotEqualTo []} && {(time - (_g getVariable ["lambs_danger_planZirhYerT", -999])) > 60} && {(time - (_v getVariable ["lambs_danger_tankManevraT", -999])) > 20}) then {
             _g setVariable ["lambs_danger_planZirhYerT", time];
             [_g] call _hareketKaydet;
             _g setVariable ["lambs_danger_planZirhAlt", _poz];
@@ -462,7 +462,7 @@ private _nZ = count _zg;
             _g setVariable ["lambs_danger_planZirhVardi", nil];
             _g setVariable ["lambs_danger_planZirhT", time];
             _g setVariable ["lambs_danger_planZirhMax", 120];
-            _g setVariable ["lambs_danger_planZirhHasar", damage _v];
+            _g setVariable ["lambs_danger_planZirhHasar", ([_v] call FUNC(aracHasar))];
             _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1;
             _d doMove _alt2;
             diag_log format ["[PLAN-ZIRH] %1 | %2 YER DEGISTIRIYOR: %6 (hasar %3) -> yedek mevzi %4 (%5 m)", _id, groupId _g, (damage _v) toFixed 2, mapGridPosition _alt2, round (_v distance2D _alt2), ["hasar", "sure (shoot-and-scoot)"] select (_zamanYer && {(damage _v) < (_hs0 + 0.08)})];
