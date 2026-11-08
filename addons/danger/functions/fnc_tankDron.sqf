@@ -99,7 +99,7 @@ if (_dist <= 500 && {[group (commander _v), _dr, _dist] call FUNC(dronAtesIzin)}
                             if ((vectorMagnitude _fark) > 1 && {(vectorMagnitude _wd) > 0.1}) then {
                                 private _aci = acos ((((vectorNormalized _wd) vectorDotProduct (vectorNormalized _fark)) min 1) max -1);
                                 if (_aci < _min) then { _min = _aci; };
-                                if (_aci < 5 && {random 1 < ([_u, _dr] call FUNC(dronVurusOlasi))}) then {   // v8.340: atis olasiligi nisancinin becerisine (CBA isabet) bagli
+                                if (_aci < 5 && {(["tankDronVurus", [_u] call FUNC(birimId)] call FUNC(rastgele)) < ([_u, _dr] call FUNC(dronVurusOlasi))}) then {   // v8.340: atis olasiligi nisancinin becerisine (CBA isabet) bagli
                                     for "_k" from 1 to 4 do {
                                         _v fireAtTarget [_dr, _w];
                                         _v setVariable [QGVAR(tankZorlaN), (_v getVariable [QGVAR(tankZorlaN), 0]) + 1];
@@ -131,7 +131,7 @@ if (_kamikaze && {_dist <= 520} && {_kap > 0 || {_dist <= 300}}) then {
 if (_kamikaze && {_dist <= 380} && {_kap > 4} && {canMove _v} && {(time - (_v getVariable [QGVAR(tankDronKacT), -99])) > 12}) then {
     _v setVariable [QGVAR(tankDronKacT), time];
     private _gelisDir = _v getDir _dr;
-    private _taraf2 = selectRandom [90, -90];
+    private _taraf2 = ([[90, -90], "tankDronYan", [_v] call FUNC(birimId), true] call FUNC(rastgeleSec));
     private _yan1 = (_v getPos [38, _gelisDir + _taraf2]) getPos [10, _gelisDir + 180];
     if (!surfaceIsWater _yan1) then {
         _d enableAI "PATH"; _d enableAI "MOVE"; _d forceSpeed -1; _d setSpeedMode "FULL";

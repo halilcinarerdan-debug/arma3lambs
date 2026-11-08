@@ -134,7 +134,7 @@ if (!_uygun) then {
     })) >= 2;
     // v8.62: kume yaricapi 8 -> 15 m; sans %50 -> %70; grup bastirilmissa (kendi ates ustunlugu yok) UGL oncelikli
     private _bastirilmis = ((units group _unit) findIf {alive _x && {(getSuppression _x) > 0.3}}) >= 0;
-    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(random 1) < (missionNamespace getVariable ["lambs_danger_uglSans", 0.92])};   // v8.284: acikta tek hedefe de %70 -> %92
+    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(["uglSans", [_unit] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_uglSans", 0.92])};   // v8.284: acikta tek hedefe de %70 -> %92
 };
 if (!_uygun) exitWith {"uygun_degil" call _red};
 

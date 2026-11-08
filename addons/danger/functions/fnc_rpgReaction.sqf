@@ -75,7 +75,7 @@ private _sayi = 0;
 
         // 3) dagil — yan yone kisa kayis (MG daha kisa)
         private _kayis = if (_rol isEqualTo "MG") then { 3.5 } else { 6 + (random 2) };
-        private _taraf = selectRandom [90, -90];
+        private _taraf = ([[90, -90], "rpgYan", [_u] call FUNC(birimId), true] call FUNC(rastgeleSec));
         // en yakin dostun uzaginda olan tarafi sec
         private _yakinDost = (_u nearEntities ["CAManBase", 7]) select {_x isNotEqualTo _u && {alive _x} && {(group _x) isEqualTo _g}};
         if (_yakinDost isNotEqualTo []) then {

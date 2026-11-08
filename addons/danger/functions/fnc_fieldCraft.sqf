@@ -243,7 +243,7 @@ private _fnLog = {
                         private _c = _u getPos [7.5, _yon + _x];
                         if (!surfaceIsWater _c && {((_c nearEntities ["CAManBase", 1.5]) select {_x isNotEqualTo _u}) isEqualTo []}
                             && {!(lineIntersects [(getPosASL _u) vectorAdd [0, 0, 0.9], AGLToASL (_c vectorAdd [0, 0, 0.9]), _u])}) exitWith { _sec = _c; };
-                    } forEach selectRandom [[90, -90], [-90, 90]];
+                    } forEach ([[[90, -90], [-90, 90]], "fieldCraftYan", [_u] call FUNC(birimId), true] call FUNC(rastgeleSec));
                     if (_sec isNotEqualTo []) then {
                         private _s2 = [_u, _eASL, _sec, 6] call _sutNoktasi;
                         _u doMove ([_sec, _s2] select (_s2 isNotEqualTo []));

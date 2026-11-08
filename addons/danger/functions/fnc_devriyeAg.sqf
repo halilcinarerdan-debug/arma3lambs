@@ -143,7 +143,7 @@ if (_durum isEqualTo "DINLEN") then {
                 if ((_x select 0) isEqualTo _taraf && {(time - (_x select 2)) < 300} && {((_x select 1) distance2D _pm) < _kb}) then { _skor = _skor + 400; };
             } forEach _haberler;
             if (_s isEqualTo _onceki) then { _skor = _skor - 250; };
-            _skor = _skor + (random 15);
+            _skor = _skor + (15 * (["devriyeRota", format ["%1|%2", _ad, _devN]] call FUNC(rastgele)));
             if (_skor > _enS) then { _enS = _skor; _sec = _s; };
         };
 

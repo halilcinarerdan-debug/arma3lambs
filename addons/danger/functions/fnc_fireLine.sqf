@@ -137,7 +137,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (v8.388: gercek atista tet
                         } else { true };
                         if (_temiz) then { _secildi = _c; };
                     };
-                } forEach (selectRandom [[90, -90], [-90, 90]]);
+                } forEach ([[[90, -90], [-90, 90]], "fireLineYan", [_mover] call FUNC(birimId), true] call FUNC(rastgeleSec));
                 if (_secildi isNotEqualTo []) exitWith {};
             } forEach [3.5, 5.5];
 

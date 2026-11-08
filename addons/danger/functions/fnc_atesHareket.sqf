@@ -241,7 +241,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                         private _dolu = (missionNamespace getVariable ["lambs_danger_acikSiperDolu", []]);
                         _dolu pushBack [_nokta select 0, time];
                         missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
-                        private _dire = ((getSuppression _u) > 0.5) || {_kayipOran >= 0.4} || {(random 1) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.25])};
+                        private _dire = ((getSuppression _u) > 0.5) || {_kayipOran >= 0.4} || {(["atesHareketB", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.25])};
                         _u setVariable [QGVAR(fhRushBit), time + 5];
                         _u setVariable [QGVAR(fhVardi), nil];
                         private _tk = time + 6;

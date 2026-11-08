@@ -261,7 +261,7 @@ private _govde = {
         // kapi noktasi yoksa: giris bina pozisyonunun 3.5 m DISINDA (eski davranisa yakin; bina icine yigilmasin)
         private _disYon = if (_kapi isEqualTo []) then {_bPos getDir _giris} else {_bPos getDir _kapi};
         private _kapiPos = if (_kapi isEqualTo []) then {_giris getPos [3.5, _disYon]} else {+_kapi};
-        private _yigYan = selectRandom [90, -90];
+        private _yigYan = ([[90, -90], "binaYigYan", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec));
         private _sirali = [_poslar, [], {((round ((_x select 2) / 3)) * 1000) + (_x distance2D _giris)}, "ASCEND"] call BIS_fnc_sortBy;
         private _secilen = [];
         {

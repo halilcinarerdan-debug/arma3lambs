@@ -43,7 +43,7 @@ private _dist = _lp distance2D _est;
 private _hedef = [];
 if (_mod isEqualTo "KANAT") then {
     if (_dist >= 60) then {
-        private _yan = selectRandom [-1, 1];
+        private _yan = ([[-1, 1], "istiksafYan", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec));
         _hedef = _est getPos [70 + random 40, (_est getDir _lp) + (_yan * (60 + random 25))];
     };
 } else {

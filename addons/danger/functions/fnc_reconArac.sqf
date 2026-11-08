@@ -336,7 +336,7 @@ if (_bitis isEqualTo "" && {(time - _basT) > (240 + (_basD / 5))} && {_dm > (_ba
             } else {
                 _kurtN = 3;
                 _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
-                private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
+                private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + ([[-40, 40], "reconKurtar", _plan get "id", true] call FUNC(rastgeleSec))];
                 if (surfaceIsWater _alt) then { _alt = _dur; };
                 _d doMove _alt;
                 // v8.209: recon araci da AI surmuyorsa (RPT 91b5ffbd: Stryker 2.4 km'de hic kalkmadi, recon yola cikmadi) ortak kinematik surus (fnc_aracKinSurus) devreye girer
@@ -349,7 +349,7 @@ if (_bitis isEqualTo "" && {(time - _basT) > (240 + (_basD / 5))} && {_dm > (_ba
         if (_dtk > 38 && {_kurtN isEqualTo 2} && {!(_v getVariable [QGVAR(deneyCalisiyor), false])}) then {
             _kurtN = 3;
             _v setVectorUp [0, 0, 1]; _v setPosATL ((getPosATL _v) vectorAdd [0, 0, 0.8]);
-            private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + (selectRandom [-40, 40])];
+            private _alt = (getPosATL _v) getPos [70, ((getPosATL _v) getDir _dur) + ([[-40, 40], "reconKurtar", _plan get "id", true] call FUNC(rastgeleSec))];
             if (surfaceIsWater _alt) then { _alt = _dur; };
             _d doMove _alt;
             [_v, _d, _dur, _id] call FUNC(aracKinSurus);

@@ -171,7 +171,7 @@ private _calis = {
                     if (_retreat || {_u getVariable [QGVAR(forceMove), false]}) then { _p = _p * 0.5; };
                     if ((_u getVariable [QGVAR(iedIsci), false]) || {_u getVariable [QGVAR(iedGuv), false]} || {_u getUnitTrait "explosiveSpecialist"}) then { _p = _p * 0.5; };
                     if (_us isNotEqualTo [] && {(_panikte / (count _us)) >= 0.3}) then { _p = 0; };
-                    if ((random 1) < _p) then { _tetik = true; };
+                    if ((["panikTetik", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _p) then { _tetik = true; };
                 };
                 if (!_tetik) then { continue };
 
@@ -181,7 +181,7 @@ private _calis = {
                 private _a = [0.55, 0.35, 0.10];
                 if (_s >= 0.7) then { _a = [0.35, 0.25, 0.40]; };
                 if (_zirhKorku) then { _a = [0.15, 0.10, 0.75]; };   // v8.258: tank korkusunda baskin tepki KACIS (sag sola dagilma)
-                private _r = random 1;
+                private _r = ["panikTur", [_u] call FUNC(birimId)] call FUNC(rastgele);
                 private _tur = if (_r < (_a select 0)) then {"DONMA"} else { ["KACIS", "KOR"] select (_r < ((_a select 0) + (_a select 1))) };
                 private _sure = switch (_tur) do { case "DONMA": {3 + (random 4)}; case "KOR": {4 + (random 4)}; default {4 + (random 3)}; };
                 if (_tur isEqualTo "DONMA" && {!_liderOlu} && {(_u distance2D _l) <= 20}) then { _sure = _sure * 0.6; };

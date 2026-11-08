@@ -102,7 +102,7 @@ if (
 ) then {
     private _cover = nearestTerrainObjects [ _unit, ["BUSH", "TREE", "SMALL TREE", "HOUSE", "ROCK", "WALL", "FENCE"], 35, false, true ];
     if (_cover isNotEqualTo []) then {
-        _cover = selectRandom _cover;
+        _cover = [_cover, "contactSiper", [_unit] call FUNC(birimId), true] call FUNC(rastgeleSec);
         _unit doMove ( ( _cover getPos [1, _enemy getDir _cover]) );
     };
 };

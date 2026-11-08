@@ -42,7 +42,12 @@ diag_log "[KOMUTAN-ZIHIN] komutan zihni baslatildi (v8.156): algiya dayali gozle
 
 lambs_danger_zihinKisilik = createHashMap; // str taraf -> TEMKINLI / DENGELI / SALDIRGAN (oturum boyunca sabit; okunabilir)
 lambs_danger_zihinTavir = createHashMap;   // str taraf -> [ad, puan, zaman]
-{ lambs_danger_zihinKisilik set [str _x, selectRandom ["TEMKINLI", "DENGELI", "SALDIRGAN"]]; } forEach [west, east, independent];
+// v8.501 TOHUMLU KISILIK (Asama 7; RNG_ENVANTERI.md V grubu): CBA 'Komutan kisiligi' (taraf basina) TEMKINLI / DENGELI / SALDIRGAN secilirse o kullanilir; RASTGELE ise tohuma bagli (ayni tohum = ayni kisilik); tohum yoksa motorun random'u.
+[] call FUNC(tohumBaslat);
+{
+    private _ov = missionNamespace getVariable [format ["lambs_danger_komutanKisilik%1", ["West", "East", "Ind"] select (([west, east, independent] find _x) max 0)], "RASTGELE"];
+    lambs_danger_zihinKisilik set [str _x, if (_ov in ["TEMKINLI", "DENGELI", "SALDIRGAN"]) then {_ov} else {[["TEMKINLI", "DENGELI", "SALDIRGAN"], "komutanKisilik", str _x, false] call FUNC(rastgeleSec)}];
+} forEach [west, east, independent];
 diag_log format ["[KOMUTAN-TAVIR] kisilikler: %1", lambs_danger_zihinKisilik toArray false];
 lambs_danger_zihinKayit = createHashMap;   // str taraf -> [[t, tip, yon, mesafe, arazi, detay], ...]
 lambs_danger_zihinHip = createHashMap;     // str taraf -> HashMap hipotez
