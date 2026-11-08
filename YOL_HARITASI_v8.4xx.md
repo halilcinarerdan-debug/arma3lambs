@@ -63,6 +63,31 @@ Faz arası toparlanma içinde yaralı toplama, cephane dağıtımı, yakıt; pla
 - Görev Ata: iki kademeli seçim (Plan rolü / Özel rol) — şimdilik yalnız etiket gruplaması yapıldı.
 - Sahne şablonu: örnek "Fırat Kalkanı" görev dosyası + `TEST_SENARYOLARI.md` güncellemesi.
 
+## Aşama 7 — AAR ve eğitimsel tekrarlanabilirlik (eklendi; kararlar henüz uygulanmadı, hepsi "T" = doğrulanmadı)
+Hedef: bit düzeyinde determinizm DEĞİL (motor: AI / fizik / yol bulma deterministik değil). Eğitim için üç şey: kontrollü değişkenlik, açıklanabilirlik, incelenebilirlik (AAR). Mevcut durum (kod taraması): `random` 171 + `selectRandom` 20 çağrı, tohum yok; ~422 `sleep`, 148 dosyada betik; tekrarlanabilirlik yaklaşık 3/10 (kendi katmanlarımıza göre kaba yargı, dış yazılımla karşılaştırma YOK; VBS4 / Titan IM Vanguard determinizmi doğrulanamadı).
+Sıra (her adım: CBA bayrağı + RPT kabul ölçütü + test turu):
+1. **Tohumlu rastgelelik** (`fnc_rastgele`): tek global akış DEĞİL; sayı = f(tohum, grup kimliği, sistem etiketi, sayaç) (betik sırası farklı olsa da aynı kalsın). Tohum `[ONUCUS] RUN` satırına yazılır; eğitmen sabitleyebilir / değiştirebilir. `random` / `selectRandom` çağrıları kademeli taşınır (önce siper seçimi, varış noktası dağıtımı, rush / ateş olasılıkları, topçu dağılımı).
+2. **Karar defteri `[KARAR]`**: zaman, kim, sistem, girdi özeti, tetiklenen kural, reddedilen seçenekler. Önce 4–5 sistem: plan kapısı, nakil, geri çekilme, topçu, bastırma. Mevcut dağınık etiketler (`[PLAN-KAPI]`, `[PLAN-TOPCU]`, `[GERI-CEKILME]`...) tek biçime çekilir.
+3. **AAR üreticisi** (çevrimdışı, `tools/rpt_ozet.py` genişler): zaman çizelgesi + harita üzerinde konum (1 Hz, seyreltilmiş) + olaylar + karar defteri → HTML. Sınır: Arma içinden dosya yazamaz (RPT tabanlı); log hacmi sınırlanmalı. Açık soru: AAR oyun içinde (Zeus / brifing) mi, çevrimdışı rapor mu?
+4. **Doktrin puanlaması**: mevcut doktrin tablolarını ölçüt yapıp tim bazlı AAR puanı (siper, ateş-hareket, kayıp, süre, dost ateşi). Ölçütlerin kitap kaynağı tek tek belgelenmeli; "tasarım değeri" işaretli olanlar puan temeli olmamalı.
+5. **Tekrar-doğrulama düzeneği**: aynı senaryo + tohum, N koşu; olay sayıları ve temel göstergelerin dağılımı kıyaslanır (aynı sayı değil, aynı aralık).
+6. **Karar katmanının saflaştırılması** (uzun vadeli): algı → karar → uygulama; karar "durum özeti → niyet" saf fonksiyonları (birim testlenebilir). Niyet / uygulayıcı katmanı ve hakem (uzuv) çalışmasıyla birleşik.
+Not: "ciddi oyun" kullanımı için gerçek doğrulama (V&V: ölçüt kaynağı, senaryo geçerliliği, kullanıcı testi) teknik katmanlardan ayrı gerekir.
+
+## Aşama 8 — Çevre algısı ve RHS / ACE uyumu (bekleyen, "test ede ede" ilerlenecek)
+1. Açık-yön servisini birleştir: `fnc_sektorBakis` kendi kopyası yerine `fnc_bakisAcikYon` kullansın (+ ACE hendek / tahkimata ek siper değeri; tür-bağımsız yedek zaten var).
+2. Bina / nesne sınıflandırma tablosu (ateş geçirir mi, siper değeri: duvar, çit, kaya, ağaç, araç, ACE nesneleri); önce `fnc_atesHatiAcik` ve `fnc_bakisAcikYon` kullanır.
+3. ACE tıbbi bilgi: hangi karar için okunacağı belirlenecek (komutan raporu / nakil önceliği / medevac); `fnc_tccc` zaten ACE tıbbını kullanıyor.
+4. Arazi / görüş haritası önbelleği (en büyük iş, regresyon riski yüksek; 1–3 doğrulandıktan sonra).
+5. RHS / ACE: hasar uyumu eklendi (`fnc_aracHasar`, CBA `lambs_danger_rhsAceUyum`, varsayılan kapalı; RHS / ACE ile DENENMEDİ). Bekleyenler: RHS koltuk düzeni / FFV kalibrasyonu, aktif koruma (Trophy vb.) sınıf tanıma, RHS MANPADS sınıflandırması.
+
+## Açık maddeler (son testlerden)
+- Şoförlerin park halinde tekrar tekrar araçtan inmesinin kaynağı (komut `GET OUT`, motor kapalı, temas yok; `MURETTEBAT-KORU` 19 kez geri döndürüyor).
+- Oyuncu ve ekibinin araçlardan çok uzakta olması (8–50 km): manifest araca atıyor; bekleme kısaltıldı, atama mantığı değişmedi.
+- Faz 2'de araçların başlangıçta 5 km uzakta olması (faz 1 sonrası yedekte bekleyen araçlar): tasarım kararı bekliyor.
+- Duvara ateşin kaynağı doğrulanamadı (motorun otomatik atışı mı, başka bir modül mü); `tacticsSuppress` hat kontrolü eklendi, gözlem bekleniyor.
+- 3DEN niteliklerinin tüm senaryolarda sağlam okunduğunun doğrulanması (kök neden düzeltildi: `%s` sınıf adını veriyor; ön uçuş `--onucus` ile kontrol edilir).
+
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
 - Doğrulanmayan davranış belgede "T" (doğrulanmadı) işaretlenir.
