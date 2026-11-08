@@ -113,7 +113,7 @@ private _yapilan = 0;
         private _mesafe = _aL distance2D _muhbirL;
         // teslim guvenilirligi: 600 m'e kadar %100, menzil sinirinda %35
         private _guv = 1 - (0.65 * _sd * (((_mesafe - 600) max 0) / ((_mzr - 600) max 1)));
-        if (_sis && {(random 1) > _guv}) then { ["rapor kayboldu (parazit/menzil)"] call _say; continue };
+        if (_sis && {(["istihbaratKayip", groupId _a] call FUNC(rastgele)) > _guv}) then { ["rapor kayboldu (parazit/menzil)"] call _say; continue };
         private _gk = format ["%1|%2", groupId _a, netId _o];
         if ((time - (lambs_danger_hqIstGecmis getOrDefault [_gk, -999])) < 25) then { continue };
         lambs_danger_hqIstGecmis set [_gk, time];

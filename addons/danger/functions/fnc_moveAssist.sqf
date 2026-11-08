@@ -202,7 +202,7 @@ if (
                                 };
                                 if (_blk isNotEqualTo []) then {
                                     private _b = _blk select 0;
-                                    private _yonler = selectRandom [[90, -90], [-90, 90]];
+                                    private _yonler = ([[[90, -90], [-90, 90]], "moveAssistYon", [_u] call FUNC(birimId), true] call FUNC(rastgeleSec));
                                     private _secildi = [];
                                     {
                                         private _c = _u getPos [3.5, _bdir + _x];

@@ -400,7 +400,7 @@ private _nZ = count _zg;
                     // v8.327: aday acilar arasinda agac yogunlugu en dusuk olan secilir (tank agaca girmesin); agac onundeyse once 2.5 sn geri alinir
                     private _araM = 220 min (0.6 * (_v distance2D _poz));
                     private _araYon = (getPosATL _v) getDir _poz;
-                    private _enAci = selectRandom [-50, 50, -25, 25];
+                    private _enAci = ([[-50, 50, -25, 25], "zirhEnAci", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec));
                     if (_tankMi) then {
                         private _enAgac = 1e9;
                         {

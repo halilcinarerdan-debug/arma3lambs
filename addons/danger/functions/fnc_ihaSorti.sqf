@@ -562,8 +562,8 @@ diag_log format ["[IHA-SORTI] %1 (%2) | mod %3 | tur %4 | taraf %5 | menzil %6 m
                         if ((speed _h) > 25) then { _p = _p * 0.7; };
                         if (_h isKindOf "CAManBase" && {(stance _h) in ["PRONE", "CROUCH"]}) then { _p = _p * 0.8; };
                         _p = (_p * (0.6 + 0.4 * _gor)) min 0.9;
-                        private _ew = random 1 < (0.08 * (missionNamespace getVariable ["lambs_danger_ihaEWOrani", 1]));
-                        private _iska = !_ew && {random 1 > _p};
+                        private _ew = (["ihaEW", [_uav] call FUNC(birimId)] call FUNC(rastgele)) < (0.08 * (missionNamespace getVariable ["lambs_danger_ihaEWOrani", 1]));
+                        private _iska = !_ew && {(["ihaIska", [_uav] call FUNC(birimId)] call FUNC(rastgele)) > _p};
                         diag_log format ["[IHA-ISABET] %1 (%2, rol %3) | hedef %4 %5 m | olasilik %6 (gorus %7) | sonuc: %8", typeOf _uav, _tur, _rol, typeOf _h, round _dist, _p toFixed 2, _gor toFixed 2, ["ISABET SANSI TUTTU", "ISKA (sapma)", "EW / LINK KAYBI"] select ([0, 1, 2] select ((parseNumber _iska) + (2 * (parseNumber _ew))) )];
                         if (_ew) then {
                             _bitti = true;

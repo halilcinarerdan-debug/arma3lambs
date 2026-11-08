@@ -78,7 +78,7 @@ private _agacN = 0;
     if (!isNull _bina && {(_u distance2D _bina) < 60}) then {
         private _bps = (_bina buildingPos -1) select { private _c = _x; (_atanan findIf {(_x distance2D _c) < 1.5}) < 0 };
         if (_bps isNotEqualTo []) then {
-            _hedef = selectRandom _bps;
+            _hedef = [_bps, "dronSaklaBina", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec);
             _durus = "AUTO";
             _binaN = _binaN + 1;
         };

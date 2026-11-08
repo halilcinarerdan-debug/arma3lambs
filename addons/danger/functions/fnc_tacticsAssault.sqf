@@ -140,9 +140,9 @@ private _overwatch = [ASLToAGL (getPosASL _unit), EGVAR(main,minSuppressionRange
 if (_overwatch isNotEqualTo []) then {
     {
         private _roads = _overwatch nearRoads 30;
-        if (_roads isNotEqualTo []) then {_overwatch = ASLToAGL (getPosASL (selectRandom _roads))};
+        if (_roads isNotEqualTo []) then {_overwatch = ASLToAGL (getPosASL ([_roads, "assaultOverwatch", [_group] call FUNC(birimId), true] call FUNC(rastgeleSec)))};
         _x doMove _overwatch;
-        _x doWatch (selectRandom _buildings);
+        _x doWatch ([_buildings, "assaultBina", [_group] call FUNC(birimId), true] call FUNC(rastgeleSec));
     } forEach _vehicles;
 };
 

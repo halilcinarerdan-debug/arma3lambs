@@ -682,7 +682,7 @@ if (EGVAR(main,debug_functions)) then {
             private _arkaY = _canliY select 0;
             { if ((_x distance2D _targetPos) > (_arkaY distance2D _targetPos)) then { _arkaY = _x; }; } forEach _canliY;
             private _oY = getPosATL _arkaY;
-            private _yon = (_targetPos getDir _oY) + (selectRandom [55, -55]);
+            private _yon = (_targetPos getDir _oY) + ([[55, -55], "cekilYan", [_group] call FUNC(birimId), true] call FUNC(rastgeleSec));
             private _wpY = [_oY, _yon] call _wpSec;
             _wpY = [_wpY, _oY] call _suKontrol;
             diag_log format ["[GERI-CEKILME-YON] %1 | neden:%2 | yon degistirme sicramasi (eksen %3 derece) | dusman son bilinen %4 m", groupId _group, _ekNeden, round (_yon - (_targetPos getDir _oY)), round (_oY distance2D _targetPos)];

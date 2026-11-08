@@ -118,7 +118,7 @@ private _yeni = [];
         _min = missionNamespace getVariable ["lambs_danger_skillFarkMin", _min];
         _max = (missionNamespace getVariable ["lambs_danger_skillFarkMax", _max]) max _min;
     };
-    private _v = _min + (random (_max - _min));
+    private _v = _min + ((_max - _min) * (["skill", format ["%1|%2", [_u] call FUNC(birimId), _ad], false] call FUNC(rastgele)));   // v8.501 V: ayni birim + ayni beceri = ayni deger (tohumlu)
     _onceki pushBack format ["%1=%2", _ad, (_u skill _ad) toFixed 2];
     _u setSkill [_ad, _v];
     _yeni pushBack format ["%1=%2", _ad, _v toFixed 2];
@@ -143,7 +143,7 @@ private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
 private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.45];
 private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.15];
 private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.75];
-private _acemi = (random 1) < _acemiOran;
+private _acemi = (["skillAcemi", [_u] call FUNC(birimId), false] call FUNC(rastgele)) < _acemiOran;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];
     _yeni pushBack format ["TECRUBESIZ x%1 (isabet / titreme)", _acemiK];

@@ -153,7 +153,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             _ng selectLeader _s;
             _ng setVariable [QGVAR(sniperTeam), true];
             _ng setVariable [QGVAR(sniperParent), _g];
-            _ng setVariable [QGVAR(sniperSide), selectRandom [1, -1]];
+            _ng setVariable [QGVAR(sniperSide), ([[1, -1], "sniperYan", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec))];
             _ng setBehaviour "STEALTH";
             _ng setCombatMode "GREEN";
             [_ng, "FILE", "sniper", 2] call FUNC(formSet);
