@@ -46,3 +46,11 @@ Oneri: ayni birim + ayni sistem = ayni yon (tohumlu), farkli birimler farkli yon
 2. K grubunu kurala cevir (8 satir), V ve YAN SECIMI grubunu `fnc_rastgele`'ye bagla (~30 satir).
 3. Tohum + egitim degiskenligi ayarlari CBA'ya; tohum `[ONUCUS] RUN` satirina.
 4. Her degisiklikte `RPT` kabul olcutu + bayrak (`lambs_danger_rastgeleEskiOff`: eski davranisa donus).
+
+## UYGULAMA DURUMU (v8.501)
+- Altyapi: `fnc_tohumBaslat` (oncelik: senaryo degiskeni > CBA `lambs_danger_tohumAyar` > otomatik), `fnc_rastgele` (durumsuz / sayacli, 24-bit hash), `fnc_rastgeleSec` (tohumlu `selectRandom`), `fnc_birimId` (kosular arasi kararli kimlik). Tohum `[TOHUM]` ve `[ONUCUS] RUN` satirinda.
+- Tasinan K: `fireSupport` UGL atici (KURAL: en uzun suredir atmayan), UGL salvo %60 (tohumlu), `tacticalUGL` sans (tohumlu), `contact` siper, `dronSakla` bina, `devriyeAg` rota skoru, `tacticsAssault` overwatch yolu / bina, `atesHareket` 'b' kapisi.
+- Tasinan V: komutan kisiligi (CBA taraf basina RASTGELE / TEMKINLI / DENGELI / SALDIRGAN), beceri (durumsuz: ayni birim + ayni beceri = ayni deger) + acemi, panik tetik / tur, istihbarat rapor kaybi, EW / iska, dron vurus (`dronTepki`, `tankDron`).
+- Tasinan yan secimleri (12): `moveAssist`, `fieldCraft`, `fireLine`, `rpgReaction`, `tankDron`, `istiksaf`, `sniperTeam`, `buildingClearRun`, `planZirh`, `reconArac` (x2), `tacticsRetreat`, `gozcuRto` bakis ofseti.
+- KALAN: `komutanZihin:84 / 85` (gozlem hatasi), `dronTepki:50`, `motorSes:101`, `patlayici:80 / 95` (sensor / atis dagilimi, V), `cqbCevik` darbe olasiligi (mikro), `ihaGozlem:72`. Mikro (konum / zaman sapmasi) dokunulmadi.
+- DOGRULANMADI (T): oyunda hic calistirilmadi. Hash Python'da simule edildi (20 000 ornek duzgun dagilim, tekrarlanabilir); SQF tarafi ilk calistirmada hata verebilir. Geri alma: `lambs_danger_rastgeleEskiOff = true` (motorun random'una doner; kisilik CBA'si ayri).
