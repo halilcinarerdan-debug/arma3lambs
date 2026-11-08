@@ -279,6 +279,8 @@ private _calis = {
                     private _hazir = [_l, 150] call EFUNC(main,findReadyUnits);
                     diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI ONCESI | yakin bina:%2 (en yakin %3 m) | kullanilabilir bina pozisyonu:%4 | hazir asker:%5/%6 | grup:%7", groupId _g, count _yakinB, round (_l distance2D (_yakinB select 0)), count _bpos, count _hazir, count (units _g), ["serbest", "bounding/taktik"] select (_mesgul)];
                     _ok = [_g, getPosATL _l, [], _sure] call _garrisonF;
+                    // v8.501 HATA DUZELTME (RPT 13:28:52 'Undefined variable _ok'): tacticsGarrison bazi yollarda deger DONDURMEZ (nil); nil atamasi yerel degiskeni TANIMSIZ yapar -> sonraki format / kosul hata verirdi.
+                    if (isNil "_ok") then { _ok = false; };
                     diag_log format ["[HAVA-FARK-GARRISON] %1 | CAGRI SONUCU: %2%3", groupId _g, _ok, [" -> garrison BASARISIZ, HIDE'a dusuluyor (bina yok / pozisyon yok / hazir asker yok)", " (LAMBS tacticsGarrison kabul etti)"] select ((_ok isEqualType true) && {_ok})];
                     if (_ok isEqualType true && {_ok}) then {
                         _yontem = "GARRISON";
