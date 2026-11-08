@@ -166,6 +166,20 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                         _u setSpeedMode "FULL";
                         _u doTarget _en;
                         _u doMove _enIyi;
+                        // v8.500x CQB HAREKET HALINDE ATES (kullanici: 'cqb de hareket halinde ates baya artabilir'): atilim suresince (en fazla 6 sn) her ~0.9 sn'de lambs_danger_cqbHareketAtesOran olasiligiyla
+                        //   dusmana doFire (gorus hatti aciksa, mermi varsa). Eskiden yalniz varista ates ediliyordu.
+                        private _hOran = missionNamespace getVariable ["lambs_danger_cqbHareketAtesOran", 0.7];
+                        if (_hOran > 0) then {
+                            [_u, _en, _hOran] spawn {
+                                params ["_uu", "_ee", "_o"];
+                                private _tb = time + 6;
+                                while {alive _uu && {alive _ee} && {time < _tb}} do {
+                                    if ((random 1) < _o && {(_uu ammo (primaryWeapon _uu)) > 0} && {!(lineIntersects [eyePos _uu, eyePos _ee, _uu, _ee])}) then { _uu doTarget _ee; _uu doFire _ee; };
+                                    sleep 0.9;
+                                };
+                            };
+                            _sayac set ["ates", (_sayac get "ates") + 1];
+                        };
                         private _cl = ((group _u) getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 8};
                         _cl pushBack [_enIyi, time, _u];
                         (group _u) setVariable [QEGVAR(main,coverClaims), _cl];
