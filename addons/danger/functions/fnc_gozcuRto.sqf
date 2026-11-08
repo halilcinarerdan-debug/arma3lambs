@@ -115,7 +115,7 @@ private _calis = {
                     private _sit = _g getVariable [QGVAR(cmdSit), []];
                     private _taban = getDir _l;
                     if (_sit isNotEqualTo [] && {(time - (_sit select 0)) < 300} && {(_sit select 7) isEqualType []} && {(_sit select 7) isNotEqualTo [0,0,0]}) then { _taban = (getPosATL _l) getDir (_sit select 7); };
-                    private _yon = _taban + ([[-35, -15, 0, 15, 35], "gozcuBakis", [_u] call FUNC(birimId), true] call FUNC(rastgeleSec));
+                    private _yon = _taban + ([[-35, -15, 0, 15, 35], "gozcuBakis", [_gz] call FUNC(birimId), true] call FUNC(rastgeleSec));
                     // v8.376: duvara bakmasin - secilen yon 30 m icinde engelliyse digerleri denenir, hicbiri acik degilse bakis degismez
                     private _eyeG = eyePos _gz;
                     private _aday = [_yon, _taban, _taban + 35, _taban - 35, _taban + 70, _taban - 70] select {
