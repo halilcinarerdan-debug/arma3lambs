@@ -32,6 +32,7 @@ if (isNull _g) exitWith {false};
 if (_g getVariable [QGVAR(isPeeling), false]) exitWith {false};
 
 private _ok = [_g, _target] call FUNC(tacticsRetreat);
+if (isNil "_ok") then { _ok = false; };   // v8.501: tacticsRetreat bazi yollarda deger dondurmeyebilir (nil -> tanimsiz degisken hatasi onlemi)
 if (_ok isEqualType true && {_ok}) then {
     _g setVariable [QGVAR(isPeeling), true];
     diag_log format ["[PEEL] %1 | kademeli geri cekilme basladi (PEEL karari; tacticsRetreat uzerinden) | uye %2 | hedef %3", groupId _g, {alive _x} count (units _g), if (_target isEqualType objNull) then {typeOf _target} else {"konum"}];
