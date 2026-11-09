@@ -81,7 +81,7 @@ class GVAR(EdenObjektif): Module_F {
     function = QFUNC(edenObjektif);
     functionPriority = 2;
     isGlobal = 0;
-    isTriggerActivated = 0;
+    isTriggerActivated = 1;
     isDisposable = 0;
     class Attributes: AttributesBase {
         E_COMBO(edObTaraf,"Taraf","Otomatik: baglanan HQ nun ya da ilk grubun tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
@@ -140,7 +140,7 @@ class GVAR(EdenSaldiri): Module_F {
     function = QFUNC(edenObjektif);
     functionPriority = 2;
     isGlobal = 0;
-    isTriggerActivated = 0;
+    isTriggerActivated = 1;
     isDisposable = 0;
     class Attributes: AttributesBase {
         E_COMBO(edObTaraf,"Taraf","Otomatik: baglanan HQ nun ya da ilk grubun tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
@@ -168,7 +168,7 @@ class GVAR(EdenSaldiri): Module_F {
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "SALDIRI: plan toplan - ORP - kesif - saldiri akisini yurutur. SYNC: HQ modulu, plana girecek gruplar, istege bagli IHA (dron). Fazli harekatta ELITE Harekat modulune de SYNC edin.";
+        description = "SALDIRI: plan toplan - ORP - kesif - saldiri akisini yurutur. TETIK: bir Trigger (tetik) modulune SYNC edilirse plan tetik tetiklenince baslar (tetik yoksa mission basinda; Harekat modulune bagliysa tetigi HAREKAT modulune bagla). SYNC: HQ modulu, plana girecek gruplar, istege bagli IHA (dron). Fazli harekatta ELITE Harekat modulune de SYNC edin.";
     };
 };
 
@@ -183,7 +183,7 @@ class GVAR(EdenSavunma): Module_F {
     function = QFUNC(edenObjektif);
     functionPriority = 2;
     isGlobal = 0;
-    isTriggerActivated = 0;
+    isTriggerActivated = 1;
     isDisposable = 0;
     class Attributes: AttributesBase {
         E_COMBO(edObTaraf,"Taraf","Otomatik: baglanan HQ nun ya da ilk grubun tarafi.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
@@ -211,7 +211,7 @@ class GVAR(EdenSavunma): Module_F {
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "SAVUNMA: objektif cevresinde sektorlu mevzi. SYNC: savunacak gruplar, istege bagli IHA (dron). Karakol / garnizon icin ayrica Karakol modulunu kullanin.";
+        description = "SAVUNMA: objektif cevresinde sektorlu mevzi. TETIK: bir Trigger (tetik) modulune SYNC edilirse tetik tetiklenince baslar (tetik yoksa mission basinda). SYNC: savunacak gruplar, istege bagli IHA (dron). Karakol / garnizon icin ayrica Karakol modulunu kullanin.";
     };
 };
 
@@ -229,7 +229,7 @@ class GVAR(EdenHarekat): Module_F {
     function = QFUNC(edenHarekat);
     functionPriority = 0;
     isGlobal = 0;
-    isTriggerActivated = 0;
+    isTriggerActivated = 1;
     isDisposable = 0;
     class Attributes: AttributesBase {
         class edHrAd: Edit { property = QGVAR(edHrAd); displayName = "Harekat adi"; tooltip = "Gorevde ve OPORD'da gorunur."; expression = "private _p = '%s'; if ((_p find 'lambs_danger_') != 0) then { _p = 'lambs_danger_' + _p; }; _this setVariable [_p,_value]; if (isNil 'lambs_danger_edIfadeIlk') then { lambs_danger_edIfadeIlk = true; diag_log ['[EDEN-IFADE] ilk nitelik ifadesi CALISTI', _p, _value, typeOf _this]; }; if ((_p find 'Topcu') >= 0 || {(_p find 'Iha') >= 0}) then { diag_log ['[EDEN-IFADE]', _p, _value, typeOf _this]; };"; typeName = "STRING"; defaultValue = """Harekat"""; };
@@ -250,7 +250,7 @@ class GVAR(EdenHarekat): Module_F {
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
-        description = "Fazli harekat (Zeytin Dali / Firat Kalkani tarzi). ELITE Objektif modullerini bu module SYNC edin ve her birinde Harekat fazi secin. Harekat OPORD'u oyunculara ARMA GOREVI olarak duser; oyunculu gruplara rol gorevi yazilir. Oyuncu katilimi zorunlu degil.";
+        description = "Fazli harekat (Zeytin Dali / Firat Kalkani tarzi). TETIK: bir Trigger (tetik) modulune SYNC edilirse harekat tetik tetiklenince baslar (tetik yoksa mission basinda). ELITE Objektif modullerini bu module SYNC edin ve her birinde Harekat fazi secin. Harekat OPORD'u oyunculara ARMA GOREVI olarak duser; oyunculu gruplara rol gorevi yazilir. Oyuncu katilimi zorunlu degil.";
     };
 };
 

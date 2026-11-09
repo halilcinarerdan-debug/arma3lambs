@@ -13,6 +13,10 @@
 
 params ["_logic", "", "_activated"];
 if (!_activated || {!isServer}) exitWith {};
+// v8.501 TETIKLE BASLATMA (Asama 9 adim 1; modul isTriggerActivated = 1): bir Trigger SYNC'liyse fonksiyon tetik tetiklenince (_activated = true) cagrilir; tetik yoksa mission basinda. Tek seferlik: tetik tekrar tetiklenirse ikinci plan KURULMAZ.
+if (_logic getVariable ["lambs_danger_tetikBasladi", false]) exitWith { diag_log format ["[EDEN] %1 (3DEN) %2: zaten baslatildi, ikinci tetik yok sayildi", "Objektif", mapGridPosition _logic] };
+_logic setVariable ["lambs_danger_tetikBasladi", true];
+diag_log format ["[EDEN] %1 (3DEN) %2: baslatildi | bagli tetik (Trigger): %3", "Objektif", mapGridPosition _logic, count ((synchronizedObjects _logic) select {_x isKindOf "EmptyDetector"})];
 
 [_logic] spawn {
     params ["_logic"];

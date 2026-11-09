@@ -92,6 +92,15 @@ Not: "ciddi oyun" kullanımı için gerçek doğrulama (V&V: ölçüt kaynağı,
 - Duvara ateşin kaynağı doğrulanamadı (motorun otomatik atışı mı, başka bir modül mü); `tacticsSuppress` hat kontrolü eklendi, gözlem bekleniyor.
 - 3DEN niteliklerinin tüm senaryolarda sağlam okunduğunun doğrulanması (kök neden düzeltildi: `%s` sınıf adını veriyor; ön uçuş `--onucus` ile kontrol edilir).
 
+## Aşama 9 — Tasarımcı güdümlü makro katman (dal: `claude/tasarimci-makro`; hibrit: otomatik varsayılan, tasarımcı geçersiz kılar)
+Gerekçe (kullanıcı + oturum verisi): makro kararları sistemin tahmin etmesi her testte yeni varsayım hatası üretti (medevac aracı recon aracı seçildi, 6 km uzak araç 11 dk beklendi, oyuncu / ekibi araçlardan 8-50 km uzakta ama manifeste girdi, kuvvet oranı kapısı yolcuları saymadı, faz 2'de araçlar 5 km uzakta). Makroyu senaryo tasarımcısı (3DEN + Trigger + modüller) verir, FSM mikroyu yürütür. Tohum / "neden binmedi" sorunları küçülür. Mikro güvenilirlik (araç takılması, yol bulma, koltuk) yine bizim işimiz. Hepsi "T" (denenmedi).
+1. **Modüller tetikle başlatılabilir** (Objektif x3 + Harekât: `isTriggerActivated = 1`; Trigger SYNC'liyse tetik tetiklenince, yoksa mission başında; tek seferlik koruma; log `[EDEN] ... baslatildi | bagli tetik`). Sınır: Harekât'a bağlı objektiflerde tetiği HAREKÂT modülüne bağla; Trigger davranışı (`_activated`, `EmptyDetector`) oyunda DOĞRULANMALI.
+2. **Nakil modu**: Otomatik (bugünkü) / Tasarımcı atamalı (SYNC ile araç grubu <-> hizmet edeceği gruplar; "Nakil Emri" modülü mü SYNC mi: karar bekliyor).
+3. **Kapı koşulları tasarımcıya açılır**: recon önce / hemen / tetikle, kuvvet oranı kapısı, nakil bekleme tavanı, faz arası.
+4. **Plan A / B**: iki objektif + tetik + başarısızlık çıktısı; seçici ve her seçim `[KARAR]` defterine (neden A / neden B).
+5. **Öncelik ağacı**: modül bazlı yapılandırılabilir (1-4 kullanımından sonra gerekenler belirlenir).
+6. **Oyuncu eğilimleri + öğrenen seçici**: en sonda; Aşama 7 madde 8-9 (karar defteri + oyuncu profili) ile birleşir.
+
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
 - Doğrulanmayan davranış belgede "T" (doğrulanmadı) işaretlenir.
