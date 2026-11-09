@@ -99,6 +99,7 @@ Gerekçe (kullanıcı + oturum verisi): makro kararları sistemin tahmin etmesi 
 3. **Kapı koşulları tasarımcıya açılır**: recon önce / hemen / tetikle, kuvvet oranı kapısı, nakil bekleme tavanı, faz arası.
 4. **Plan A / B**: iki objektif + tetik + başarısızlık çıktısı; seçici ve her seçim `[KARAR]` defterine (neden A / neden B).
 5. **Öncelik ağacı**: modül bazlı yapılandırılabilir (1-4 kullanımından sonra gerekenler belirlenir).
+0. **Tasarımcı araçları (ilk iki hazır, "T" = denenmedi):** (a) `tools/senaryo_denetimi.py <mission.sqm>`: oyunsuz senaryo denetimi (HQ bağlantısı, rol grupları, objektif / Harekât / faz, nakil koltuğu ve mesafe, sürücüsüz araç, oyuncu, İHA / topçu mesafesi); sentetik `tools/ornek_mission.sqm` ile sınandı, GERÇEK mission.sqm ile doğrulanmadı (grup adı, araç / asker ayrımı, SYNC hedefi için yedek yollar var, ikili SQM okunamaz). (b) Oyun içi ön uçuş özeti: uyarılar ana bilgisayar + Zeus'a sohbet olarak da gösterilir (`lambs_danger_onUcusSohbetOff`). Sırada: mikro-senaryo test seti, Nakil Emri modülü, tetikli olay modülü, plan görselleştirme, AAR.
 6. **Oyuncu eğilimleri + öğrenen seçici**: en sonda; Aşama 7 madde 8-9 (karar defteri + oyuncu profili) ile birleşir.
 
 ## Sürüm disiplini

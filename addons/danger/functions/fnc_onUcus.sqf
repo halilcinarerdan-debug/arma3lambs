@@ -35,7 +35,8 @@ lambs_danger_onUcusStarted = true;
     if (missionNamespace getVariable ["lambs_danger_onUcusOff", false]) exitWith {};
 
     private _L = { diag_log ("[ONUCUS] " + _this); };
-    private _W = { diag_log ("[ONUCUS-UYARI] " + _this); };
+    private _uyList = [];
+    private _W = { _uyList pushBack _this; diag_log ("[ONUCUS-UYARI] " + _this); };
     private _kes = { params ["_s", ["_n", 360]]; if ((count _s) > _n) then { (_s select [0, _n]) + "..." } else { _s } };
     private _ilk = { params ["_a", "_n"]; _a select [0, _n min (count _a)] };
     private _uyari = 0;
@@ -155,6 +156,17 @@ lambs_danger_onUcusStarted = true;
     } forEach ([allPlayers, 8] call _ilk);
 
     (format ["BITTI | uyari %1 | sure %2 sn (tek seferlik; bundan sonra bu blok tekrar etmez)", _uyari, (diag_tickTime - _t0) toFixed 2]) call _L;
+
+    // v8.501 OYUN ICI OZET (Asama 9 araci 3): uyarilar ana bilgisayara / Zeus'a sohbet olarak da gosterilir (log beklemeden). CBA yok: lambs_danger_onUcusSohbetOff = true ile kapanir.
+    if (!(missionNamespace getVariable ["lambs_danger_onUcusSohbetOff", false])) then {
+        private _satirlar = if (_uyList isEqualTo []) then { [format ["[ELITE] On ucus: uyari yok (modul %1, grup %2, arac %3)", count _moduller, count _gruplar, count _araclar]] } else { [format ["[ELITE] On ucus: %1 UYARI (ayrintisi RPT [ONUCUS-UYARI]):", count _uyList]] };
+        { _satirlar pushBack (format ["[ELITE] - %1", [_x, 150] call _kes]); } forEach ([_uyList, 6] call _ilk);
+        if ((count _uyList) > 6) then { _satirlar pushBack (format ["[ELITE] ... ve %1 uyari daha (RPT)", (count _uyList) - 6]); };
+        private _alici = ((allCurators apply { getAssignedCuratorUnit _x }) select { !isNull _x && {isPlayer _x} }) apply { owner _x };
+        if (hasInterface) then { _alici = _alici - [clientOwner]; };
+        if (hasInterface) then { { systemChat _x; } forEach _satirlar; };
+        { [_x] remoteExec ["systemChat", _alici]; } forEach _satirlar;
+    };
 };
 
 true
