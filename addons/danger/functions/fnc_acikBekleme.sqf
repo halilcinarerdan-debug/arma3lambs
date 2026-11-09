@@ -158,7 +158,7 @@ diag_log "[ACIK-BEKLE] acikta bekleme denetimi baslatildi (v8.377): duran + ayak
                     };
                 };
             } forEach (units _g);
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "acikBekleme"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
     };
 };
 

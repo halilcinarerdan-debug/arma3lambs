@@ -215,7 +215,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                     };
                 };
             } forEach _bilgi;
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "cqbCevik"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
     };
 };
 

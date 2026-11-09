@@ -96,7 +96,7 @@ private _calis = {
                 _say set ["duzeltildi", (_say getOrDefault ["duzeltildi", 0]) + 1];
                 if (_logN < 40) then { diag_log format ["[MEKANIZE-DUR-KALK] %1 | DUZELTICI: COLUMN + FULL hiz + AWARE + surucu AUTOCOMBAT 60 sn kapali (dusman %2 m)", groupId _g, round _enM]; };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "mekanize"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then {

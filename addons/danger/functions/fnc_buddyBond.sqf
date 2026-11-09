@@ -217,7 +217,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
                     };
                 };
             } forEach _tum;
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "buddyBond"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
     };
 };
 

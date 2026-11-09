@@ -43,7 +43,7 @@ lambs_danger_onUcusStarted = true;
     private _t0 = diag_tickTime;
 
     // ---------------------------------------------------------------- 0 RUN
-    (format ["RUN | %1 | harita %2 | oyun zamani %3 sn | UTC %4 | yerel sunucu:%5 | oyuncu %6 | tohum %7 (%8) | paket surumu: boot satirina bak", missionName, worldName, round time, (systemTimeUTC apply { str _x }) joinString "-", isServer, count allPlayers, missionNamespace getVariable ["lambs_danger_tohumDeger", "yok"], missionNamespace getVariable ["lambs_danger_tohumKaynak", "-"]]) call _L;
+    (format ["RUN | %1 | harita %2 | oyun zamani %3 sn | UTC %4 | yerel sunucu:%5 | oyuncu %6 | tohum %7 (%8) | senaryo modu %9 | paket surumu: boot satirina bak", missionName, worldName, round time, (systemTimeUTC apply { str _x }) joinString "-", isServer, count allPlayers, missionNamespace getVariable ["lambs_danger_tohumDeger", "yok"], missionNamespace getVariable ["lambs_danger_tohumKaynak", "-"], ["KAPALI", "ACIK"] select (missionNamespace getVariable ["lambs_danger_senaryoModu", false])]) call _L;
 
     // ---------------------------------------------------------------- 1 MODULLER
     private _moduller = (entities "Logic") select { ((toLower (typeOf _x)) find "lambs_danger_eden") isEqualTo 0 };

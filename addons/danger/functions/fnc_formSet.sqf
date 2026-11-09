@@ -23,6 +23,8 @@
 params [["_g", grpNull, [grpNull, objNull]], ["_f", "", [""]], ["_kaynak", "?", [""]], ["_oncelik", 0, [0]], ["_bekle", 12, [0]]];
 if (_g isEqualType objNull) then { _g = group _g; };
 if (isNull _g || {_f isEqualTo ""}) exitWith {false};
+// v8.502 SENARYO MODU: waypoint'li grupta ELITE formasyon yazimi yok sayilir (geri cekilme / kacis kaynaklari haric)
+if ((_kaynak find "retreat") < 0 && {(_kaynak find "evade") < 0} && {(_kaynak find "peel") < 0} && {[_g, "formSet"] call FUNC(senaryoKapi)}) exitWith {false};
 
 private _simdi = formation _g;
 if (_simdi isEqualTo _f) exitWith {false};

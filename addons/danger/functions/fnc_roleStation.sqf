@@ -408,7 +408,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     };
                 };
             } forEach _tum;
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "roleStation"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
     };
 };
 

@@ -25,6 +25,7 @@
 
 params [["_g", grpNull, [grpNull]], ["_ad", "", [""]], ["_veri", []]];
 if (isNull _g || {_ad isEqualTo ""} || {!alive (leader _g)}) exitWith {false};
+if ([_g, "hqEmir"] call FUNC(senaryoKapi)) exitWith {false};   // v8.502 SENARYO MODU: HQ emirleri (takviye / kanat / destek) waypoint'li grupta yok sayilir
 
 private _ok = false;
 

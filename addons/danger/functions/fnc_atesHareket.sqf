@@ -292,7 +292,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
                 _logN = _logN + 1;
                 diag_log format ["[ATES-HAREKET] %1 | dusman %2 m (acikta %3/%4) | TABAN ATES %5 asker / HAREKET %6 asker | rush %7 (b: %8) siperli nokta yok (yatar) %9 | faz %10 sn kayip %11", groupId _g, round _ed, count _acik, count _uyeler, count _bof, count _mov, _rushN, _bN, _yokN, round _fazYas, _kayipOran toFixed 2];
             };
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "atesHareket"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
 
         if (time > _sonOzet) then {
             _sonOzet = time + 60;

@@ -127,7 +127,7 @@ private _calis = {
                     diag_log format ["[ARAC-SENKRON] %1 | arac %2 | %3 | piyade %4 (%5 kisi, %6 km/s) | aracin onunde %7 m | hiz siniri %8 m/sn", groupId _g, typeOf _veh, _durum, groupId _pg, count _yaya, round (_pHiz * 3.6), round _onde, _hiz toFixed 1];
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!([_x, "aracSenkron"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[ARAC-SENKRON-OZET] son 90 sn (tur sayaci): %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };

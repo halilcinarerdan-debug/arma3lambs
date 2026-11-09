@@ -118,7 +118,7 @@ private _calis = {
                     diag_log format ["[YETIM-TOPLA] %1 | %2 (%3) liderden %4 m kopuk, ~16 sndir bayraksiz -> doFollow", groupId _g, name _u, typeOf _u, round (_u distance2D _lp)];
                 };
             } forEach (units _g);
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "orphan"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
         if (time > _ozetT) then {
             _ozetT = time + 120;
             if (_topN > 0) then { diag_log format ["[YETIM-TOPLA] 120 sn ozeti: toplam cagrilan %1", _topN]; };

@@ -118,7 +118,7 @@ private _calis = {
                     };
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "yetimKatil"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
         missionNamespace setVariable ["lambs_danger_yetimAdim", "tur bitti"];
     };
 };

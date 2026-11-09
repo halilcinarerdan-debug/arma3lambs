@@ -155,7 +155,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                     };
                 };
             } forEach _sirali;
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "dispersion"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
     };
 };
 

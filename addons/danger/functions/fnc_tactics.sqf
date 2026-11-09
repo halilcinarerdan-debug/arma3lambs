@@ -103,6 +103,9 @@ if (_group getVariable [QGVAR(disableGroupAI), false]) exitWith {false};
 // ELITE HOTFIX: geri cekilme / temas kesme / evade sirasinda taban LAMBS taktikleri (ASSAULT/FLANK/sempatik) birimleri yeniden gorevlendirmesin
 if (_group getVariable [QGVAR(isRetreating), false] || {_group getVariable [QGVAR(isEvading), false]} || {_group getVariable [QGVAR(isBreakingContact), false]}) exitWith {false};
 
+// v8.502 SENARYO MODU: tasarimci waypoint'i olan grupta ELITE taktik / hareket kararlari yok sayilir (geri cekilme / peel / zirhtan kacis / temas kesme haric)
+private _senaryo = [_group, "tactics"] call FUNC(senaryoKapi);
+
 // Initated contact?
 private _contactState = _group getVariable [QGVAR(contact), 0];
 if (_contactState < time) exitWith {[_unit, _target] call FUNC(contact)};
@@ -157,8 +160,10 @@ if (
     _group setVariable [QGVAR(isExecutingTactic), nil];
 
     private _karar = [_group, _target] call FUNC(commanderAssess);
+    if (_senaryo && {!(_karar in ["WITHDRAW", "PEEL", "EVADE_ARMOR"])}) then { _karar = "SENARYO-YOK"; };
 
         switch (_karar) do {
+        case "SENARYO-YOK": {};
         case "WITHDRAW": {
             [_group, _target] call FUNC(tacticsRetreat);
         };
@@ -240,7 +245,7 @@ if (_temasKes) exitWith {true};
 // Leader assessment
 // v8.256: mevzideki grup LAMBS tacticsAssess'e (Hide / Suppress / Flank / Assault secimi) hic dusmesin
 if ([_group] call FUNC(mevziDeMi) && {(({alive _x} count (units _group)) > ((_group getVariable [QGVAR(mevziIlk), 0]) * 0.4)) || {(_group getVariable [QGVAR(mevziIlk), 0]) <= 0}} && {!(missionNamespace getVariable ["lambs_danger_mevziTutOff", false])}) exitWith {true};
-if (!isPlayer (leader _unit)) then {_unit call FUNC(tacticsAssess);};
+if (!isPlayer (leader _unit) && {!_senaryo}) then {_unit call FUNC(tacticsAssess);};
 
 // end
 true
