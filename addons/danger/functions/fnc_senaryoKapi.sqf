@@ -7,8 +7,9 @@
  * Kapsam (lambs_danger_senaryoKapsam): 0 = yalniz AKTIF tasarimci waypoint'i olan gruplar (varsayilan; waypoint'siz / bekleyen gruplarda ELITE tepkileri surer), 1 = TUM AI gruplari.
  * 'Tasarimci waypoint'i' = adi 'ELITE' ile BASLAMAYAN, indeksi >= 1 ve >= currentWaypoint olan waypoint (kalan aktif waypoint). ELITE'in kendi waypoint'leri (nakil, recon vb.) sayilmaz.
  * OYUNCULU gruplar etkilenmez.
+ * v8.502b: BOUNDING / overwatch (HOLD), arka + yan emniyet, nokta elemani, ileri gozcu SERBEST (rota degistirmez); bounding'in rotadan sapmasi fnc_senaryoRota ile izlenir, bounding sonu hucum devri kapali. Yok sayilan karar: DELAY (hide), SUPPRESS_ASSAULT, FLANK, ASSAULT, AT_ENGAGE.
  * KAPI DISINDA KALANLAR (bilincli): GERI CEKILME / PEEL / ZIRHTAN KACIS / TEMAS KESME (fnc_tactics karari WITHDRAW / PEEL / EVADE_ARMOR + < 4 asker temas kes), panik / felc, teslim, tibbi (TCCC), atis disiplini / sarjor, tank-arac guvenlik freni (ezme).
- * KAPI ICINDE (waypoint'li grupta yok sayilir): fnc_tactics'in assault / flank / bounding / hide / hold / suppress / garrison / AT karari + LAMBS tacticsAssess, ates-hareket (rush), CQB cevik, hat-formasyon (formSet; geri cekilme haric), rol istasyonu, buddy bagi, dagilma, yetim toplama / katilma, arac senkronu, mekanize hiz duzeltici, HQ emirleri.
+ * KAPI ICINDE (waypoint'li grupta yok sayilir): fnc_tactics'in assault / flank / hide (DELAY) / suppress / AT karari + LAMBS tacticsAssess, ates-hareket (rush), CQB cevik, formasyon (formSet; geri cekilme haric), rol istasyonu, buddy bagi, dagilma, yetim toplama / katilma, arac senkronu, mekanize hiz duzeltici, tank araligi, acikta bekleme, HQ emirleri.
  * Log: [SENARYO-MODU] acilis + 120 sn'de bir ozet (kapi sayilari).
  *
  * Arguments:

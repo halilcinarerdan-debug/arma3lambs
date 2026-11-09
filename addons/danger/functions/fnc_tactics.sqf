@@ -160,7 +160,7 @@ if (
     _group setVariable [QGVAR(isExecutingTactic), nil];
 
     private _karar = [_group, _target] call FUNC(commanderAssess);
-    if (_senaryo && {!(_karar in ["WITHDRAW", "PEEL", "EVADE_ARMOR"])}) then { _karar = "SENARYO-YOK"; };
+    if (_senaryo && {_karar in ["DELAY", "SUPPRESS_ASSAULT", "FLANK", "ASSAULT", "AT_ENGAGE"]}) then { _karar = "SENARYO-YOK"; };   // bounding (varsayilan dal) + HOLD + geri cekilme SERBEST; rota degistiren / hucum karari yok
 
         switch (_karar) do {
         case "SENARYO-YOK": {};

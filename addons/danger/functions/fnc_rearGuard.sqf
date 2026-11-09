@@ -145,7 +145,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                 private _byA = [_u, _arka, [0, 25, -25, 50, -50]] call FUNC(bakisAcikYon);
                 if (_byA > -900) then { _u doWatch (_lPos getPos [30, _byA]); } else { _u doWatch objNull; };
             };
-        } forEach (allGroups select {!isNull leader _x && {!([_x, "rearGuard"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
+        } forEach (allGroups select {!isNull leader _x});   // v8.502: senaryo modunda SERBEST (liderin arkasinda 9 m, rota degistirmez)
     };
 };
 

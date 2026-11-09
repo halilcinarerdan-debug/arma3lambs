@@ -125,7 +125,7 @@ private _calis = {
                     if (_aday isNotEqualTo []) then { _gz doWatch ((getPosATL _gz) getPos [150, _aday select 0]); };
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "gozcu"] call FUNC(senaryoKapi))}});   // v8.502 senaryo modu
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});   // v8.502: senaryo modunda SERBEST (lidere gore konumlanir, rota degistirmez)
         missionNamespace setVariable ["lambs_danger_gozcuAdim", "tur bitti"];
     };
 };

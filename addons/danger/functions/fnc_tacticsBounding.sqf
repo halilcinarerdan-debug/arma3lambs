@@ -58,7 +58,7 @@ private _targetASL = AGLToASL _target;
 // ---------------------------------------------------------------------------
 private _boundingCQB = (GVAR(cqbRange) min 20);
 if (_unit distance2D _target < _boundingCQB) exitWith {
-    [_group, _target] call FUNC(tacticsAssault);
+    if !([_group, "bndAssault"] call FUNC(senaryoKapi)) then { [_group, _target] call FUNC(tacticsAssault); };   // v8.502 senaryo modu: hucum devri yok
     false
 };
 
@@ -1283,7 +1283,7 @@ if (EGVAR(main,debug_functions)) then {
         private _yakin = ((leader _group) distance2D _target < (_BND_ASSAULT_RANGE + 10))
             && {({alive _x} count (units _group)) >= 2};
         [_group] call _bndTemizle;
-        if (_yakin) then {
+        if (_yakin && {!([_group, "bndAssault"] call FUNC(senaryoKapi))}) then {   // v8.502 senaryo modu: bounding sonu hucum devri yok
             [_group, _target] call FUNC(tacticsAssault);
         } else {
             // Cycle limiti doldu / hedef uzak: kilidi birak, gruba normal davranisi geri ver
