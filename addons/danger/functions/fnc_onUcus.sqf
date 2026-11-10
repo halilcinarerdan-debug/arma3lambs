@@ -62,6 +62,12 @@ lambs_danger_onUcusStarted = true;
         };
     } forEach _moduller;
     (format ["MODUL | toplam %1 ELITE 3DEN modulu", count _moduller]) call _L;
+    // v8.502: modul yoksa bilgi satiri (uyari degil): plan / nakil / faz sistemleri kullanilmaz, yalniz taktik tepkiler calisir
+    private _bilgiSatiri = "";
+    if (_moduller isEqualTo []) then {
+        _bilgiSatiri = "ELITE 3DEN modulu yok: plan / nakil / faz sistemleri KULLANILMAZ, yalniz taktik tepkiler (temas, bounding, CQB, ates-hareket, bakis) calisir";
+        ("BILGI | " + _bilgiSatiri) call _L;
+    };
     if (_nitelikYok isNotEqualTo []) then {
         _uyari = _uyari + 1;
         (format ["%1 modulde 3DEN nitelik degiskeni YOK (%2): ayarlar oyuna ulasmiyor; yedekler / varsayilanlar kullanilir. [EDEN-IFADE] satirina bakin", count _nitelikYok, [str (_nitelikYok arrayIntersect _nitelikYok), 200] call _kes]) call _W;
@@ -160,6 +166,7 @@ lambs_danger_onUcusStarted = true;
     // v8.501 OYUN ICI OZET (Asama 9 araci 3): uyarilar ana bilgisayara / Zeus'a sohbet olarak da gosterilir (log beklemeden). CBA yok: lambs_danger_onUcusSohbetOff = true ile kapanir.
     if (!(missionNamespace getVariable ["lambs_danger_onUcusSohbetOff", false])) then {
         private _satirlar = if (_uyList isEqualTo []) then { [format ["[ELITE] On ucus: uyari yok (modul %1, grup %2, arac %3)", count _moduller, count _gruplar, count _araclar]] } else { [format ["[ELITE] On ucus: %1 UYARI (ayrintisi RPT [ONUCUS-UYARI]):", count _uyList]] };
+        if (_bilgiSatiri isNotEqualTo "") then { _satirlar pushBack (format ["[ELITE] bilgi: %1", _bilgiSatiri]); };
         { _satirlar pushBack (format ["[ELITE] - %1", [_x, 150] call _kes]); } forEach ([_uyList, 6] call _ilk);
         if ((count _uyList) > 6) then { _satirlar pushBack (format ["[ELITE] ... ve %1 uyari daha (RPT)", (count _uyList) - 6]); };
         private _alici = ((allCurators apply { getAssignedCuratorUnit _x }) select { !isNull _x && {isPlayer _x} }) apply { owner _x };
