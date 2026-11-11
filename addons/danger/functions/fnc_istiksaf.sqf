@@ -23,6 +23,7 @@ params [["_g", grpNull, [grpNull]], ["_est", [], [[]]], ["_mod", "KANAT", [""]],
 if (isNull _g || {_est isEqualTo []} || {missionNamespace getVariable ["lambs_danger_istiksafOff", false]}) exitWith {0};
 private _l = leader _g;
 if (isNull _l || {!alive _l}) exitWith {0};
+if ([_g, "istiksaf"] call FUNC(senaryoKapi)) exitWith {0};   // v8.504: tasarimci waypoint'i / LAMBS gorevi olan gruptan eleman cikarilmaz
 if (_sure < 0) then { _sure = [60, 40] select (_mod isEqualTo "KANAT"); };
 
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];

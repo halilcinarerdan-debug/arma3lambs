@@ -179,7 +179,7 @@ private _calis = {
                         groupId _g, _imza joinString ", ", _muhtemel, _ileri, round ((_eski select 0) distance2D _l), round ((_eski param [1, _l]) distance2D _l), round _dir, round (speed _l), _hareket, _hedefN];
                 };
             };
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});   // v8.502: senaryo modunda SERBEST (lidere gore konumlanir, rota degistirmez)
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "noktaEleman", true] call FUNC(senaryoKapi))}});   // v8.502: senaryo modunda SERBEST (lidere gore konumlanir, rota degistirmez)
         missionNamespace setVariable ["lambs_danger_noktaAdim", "tur bitti"];
     };
 };

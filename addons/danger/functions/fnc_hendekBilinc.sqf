@@ -6,7 +6,7 @@
  *   GEREK = grup temasta (lambs_danger_contact) VE (baski > 0.15 ya da bilinen en yakin dusman < 400 m) VE dusman >= 25 m (yakin dovuste hendege kosulmaz);
  *   v8.238: baski > 0.08 / dusman < 600 m; ya da TOPCU / HAVAN altinda (fnc_topSiper 'topUyariT', temas aranmaz); cikis 75 sn ve topcu altindayken cikmaz.
  *   MESAFE = lider hendek alanina <= 70 m (v8.238: 110 m; asker basina 90 -> 130 m) (kosarak ulasilabilir). Her asker KENDI konumuna en yakin ic noktaya gider (formasyon / aralik YOK), comelir (MIDDLE: 1.4 m hendekte siper).
- *   CIKIS = temas bitip 45 sn gectiyse (ya da grup bir plana alindiysa) serbest birakilir (setUnitPos AUTO + doFollow).
+ *   CIKIS = temas bitip 45 sn gectiyse (ya da grup LAMBS gorevi / kal-bekle waypoint'i alirsa) serbest birakilir (setUnitPos AUTO + doFollow).
  * Plan gruplari (SAVUN) fnc_hendekYerles ile plan icinden yerlesir; SALDIRI / ORP / KESIF fazindaki gruplar hendek aramaz. Araclar, oyuncu gruplari, aracta lider dislanir.
  * Kaynak ilkesi: ATP 3-21.8 / FM 3-21.10 — mevcut koruyucu mevzileri kullan; ates altinda siper al. Sayisal esikler TASARIM degeri (25 m, 70 m, 400 m, 0.15, 45 sn).
  * Kapatma: lambs_danger_hendekBilincOff = true.  Log: [HENDEK-BILINC] (ilk 40).
@@ -38,7 +38,8 @@ lambs_danger_hendekBLogN = 0;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             private _taraf = side _g;
             if (_taraf isEqualTo civilian) then { continue };
-            private _plan = _g getVariable ["lambs_danger_planAktif", false];
+            // v8.504: plan katmani yok; LAMBS gorevi / kal-bekle waypoint'li (sabit) grup hendege kosmaz, hendekteyse serbest birakilir
+            private _plan = [_g, "hendekBilinc", true] call FUNC(senaryoKapi);
             private _durum = _g getVariable [QGVAR(hendekB), []];   // [giris zamani]
             private _temas = (_g getVariable ["lambs_danger_contact", -999]);
             private _topUyari = _onc && {(_g getVariable [QGVAR(topUyariT), 0]) > time};   // fnc_topSiper: topcu / havan altinda

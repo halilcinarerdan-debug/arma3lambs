@@ -43,7 +43,7 @@ lambs_danger_onUcusStarted = true;
     private _t0 = diag_tickTime;
 
     // ---------------------------------------------------------------- 0 RUN
-    (format ["RUN | %1 | harita %2 | oyun zamani %3 sn | UTC %4 | yerel sunucu:%5 | oyuncu %6 | tohum %7 (%8) | senaryo modu %9 | paket surumu: boot satirina bak", missionName, worldName, round time, (systemTimeUTC apply { str _x }) joinString "-", isServer, count allPlayers, missionNamespace getVariable ["lambs_danger_tohumDeger", "yok"], missionNamespace getVariable ["lambs_danger_tohumKaynak", "-"], ["KAPALI", "ACIK"] select (missionNamespace getVariable ["lambs_danger_senaryoModu", false])]) call _L;
+    (format ["RUN | %1 | harita %2 | oyun zamani %3 sn | UTC %4 | yerel sunucu:%5 | oyuncu %6 | tohum %7 (%8) | senaryo modu %9 | paket surumu: boot satirina bak", missionName, worldName, round time, (systemTimeUTC apply { str _x }) joinString "-", isServer, count allPlayers, missionNamespace getVariable ["lambs_danger_tohumDeger", "yok"], missionNamespace getVariable ["lambs_danger_tohumKaynak", "-"], ["KAPALI", "ACIK"] select (missionNamespace getVariable ["lambs_danger_senaryoModu", true])]) call _L;
 
     // ---------------------------------------------------------------- 1 MODULLER
     private _moduller = (entities "Logic") select { ((toLower (typeOf _x)) find "lambs_danger_eden") isEqualTo 0 };
@@ -87,7 +87,7 @@ lambs_danger_onUcusStarted = true;
         private _veh = [];
         { private _vv = vehicle _x; if (_vv isNotEqualTo _x) then { _veh pushBackUnique (typeOf _vv); }; } forEach (units _g);
         if (_idx < 30) then {
-            (format ["GRUP | %1 | %2 | asker %3 | gorev '%4' | lider %5 (oyuncu %6) | arac %7 | yerel %8", groupId _g, side _g, { alive _x } count (units _g), _gv, [name _ld, "-"] select (isNull _ld), isPlayer _ld, _veh, local _g]) call _L;
+            (format ["GRUP | %1 | %2 | asker %3 | gorev '%4' | lider %5 (oyuncu %6) | arac %7 | yerel %8 | waypoint %9 (%10 adet, aktif tur %11)", groupId _g, side _g, { alive _x } count (units _g), _gv, [name _ld, "-"] select (isNull _ld), isPlayer _ld, _veh, local _g, [_g] call FUNC(wpSahip), (count (waypoints _g)) - 1 max 0, [waypointType [_g, (currentWaypoint _g) max 1], "-"] select ((count (waypoints _g)) < 2)]) call _L;
         };
     } forEach _gruplar;
     (format ["GRUP | toplam %1 AI grubu (ilk 30 gosterildi)", count _gruplar]) call _L;

@@ -22,7 +22,6 @@ lambs_danger_senaryoRotaStarted = true;
     private _logN = 0;
     while {true} do {
         sleep 2;
-        if !(missionNamespace getVariable ["lambs_danger_senaryoModu", false]) then { continue };
         {
             private _g = _x;
             if (isNull _g || {!local _g} || {!(_g getVariable [QGVAR(isBounding), false])}) then { _g setVariable [QGVAR(senRotaBas), nil]; continue };

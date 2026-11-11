@@ -90,7 +90,7 @@ if (_hedef isEqualTo []) exitWith {false};
 private _haric = ["TOPCU", "TOPCU_YOK", "MEDEVAC", "HARIC", "RECON", "RECON_ARAC", "KARAKOL_ARAC", "TASIMA"];
 private _adaylar = allGroups select {
     private _lg = leader _x;
-    (side _x) isEqualTo _taraf && {local _x} && {!isNull _lg} && {alive _lg} && {!isPlayer _lg} && {isNull objectParent _lg} && {(lifeState _lg) in ["HEALTHY", "INJURED"]}
+    (side _x) isEqualTo _taraf && {local _x} && {!([_x, "foHakim"] call FUNC(senaryoKapi))} && {!isNull _lg} && {alive _lg} && {!isPlayer _lg} && {isNull objectParent _lg} && {(lifeState _lg) in ["HEALTHY", "INJURED"]}
     && {({isPlayer _x} count (units _x)) isEqualTo 0} && {(_x getVariable [QGVAR(contact), 0]) <= time}
     && {!((_x getVariable ["lambs_danger_gorev", ""]) in _haric)} && {(_x getVariable ["lambs_danger_garnizonAlt", ""]) isEqualTo ""}
     && {!(_x getVariable [QGVAR(isRetreating), false])} && {!(_x getVariable [QGVAR(isBreakingContact), false])} && {!(_x getVariable [QGVAR(isSonDirenis), false])}

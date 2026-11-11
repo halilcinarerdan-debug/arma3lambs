@@ -28,7 +28,7 @@ lambs_danger_agacSayFn = _agacSay;
     while {true} do {
         sleep 10;
         if (missionNamespace getVariable ["lambs_danger_agacGizlenOff", false]) then { continue };
-        private _grs = allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x} && {alive leader _x} && {isNull objectParent leader _x} && {(side _x) in [west, east, independent]}};
+        private _grs = allGroups select {local _x && {!isNull leader _x} && {!isPlayer leader _x} && {alive leader _x} && {isNull objectParent leader _x} && {(side _x) in [west, east, independent]} && {!([_x, "agacGizlen"] call FUNC(senaryoKapi))}};
         private _islem = 0;
         {
             private _g = _x;

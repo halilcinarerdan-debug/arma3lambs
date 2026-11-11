@@ -121,24 +121,6 @@ class CfgVehicles {
         };
     };
 
-    class GVAR(Karakol) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(Karakol);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Karakol / Mevzi (kur + hazir garnizon)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(moduleKarakol);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
-
     class GVAR(TopcuTest) : Module_F {
         author = "ELITE fork";
         _generalMacro = QGVAR(TopcuTest);
@@ -157,45 +139,9 @@ class CfgVehicles {
         };
     };
 
-    class GVAR(KarakolKaldir) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(KarakolKaldir);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Karakol / Mevzi / HQ KALDIR (listeden sec)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(moduleKarakolKaldir);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
-
     // ELITE fork (v8.404): fazli harekat kontrolu (Basla / Sonraki faz / Durdur / Durum)
 
     // ELITE fork (v8.239): AI surucu A/B testi - ayni arac sinifi, temiz murettebat, ELITE kapali / acik, doMove / waypoint, yolcusuz / yolcuyla
-
-    class GVAR(GozetleAta) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(GozetleAta);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Gozetleme Ata (mevcut karakola squad ekle)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
-        function = QFUNC(moduleGozetleAta);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
 
     class GVAR(IhaGorev) : Module_F {
         author = "ELITE fork";
@@ -207,24 +153,6 @@ class CfgVehicles {
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
         function = QFUNC(moduleIhaGorev);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
-
-    class GVAR(KarakolGarnizon) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(KarakolGarnizon);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Karakol Garnizon (ozel ayar: nobet / devriye / arac / IHA / AA)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(moduleKarakolGarnizon);
         class EventHandlers {
             class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
             class ADDON {

@@ -293,7 +293,7 @@ private _calis = {
             _g setVariable [QGVAR(tehlikeAlaniT), time];
             _say set ["gecis", (_say getOrDefault ["gecis", 0]) + 1];
             [_g, _c, _yonYol, _yon] spawn _gecisFn;
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "tehlikeAlani", true] call FUNC(senaryoKapi))}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[TEHLIKE-ALANI-OZET] son 90 sn: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };

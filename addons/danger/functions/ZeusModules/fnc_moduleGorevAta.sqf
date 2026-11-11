@@ -3,15 +3,11 @@
 // ELITE fork (v8.127): "ELITE Gorev Ata" Zeus modulu — bir birimin / grubun / aracin ustune birakilir; hangi squad / arac hangi gorevi yapacak Zeus secer.
 // Atama grupta (ve aractaysa araca) 'lambs_danger_gorev' degiskeni olarak tutulur; ELITE Objektif plani, topcu atesi ve arac medevac bunu okur.
 //   Otomatik        : atama silinir (sistem kendi secer)
-//   MANEVRA / DESTEK / YEDEK : plana KATILIR ve rolu bu olur (grup sayisi sinirina bakilmaksizin)
-//   HARIC           : hicbir plana alinmaz (kendi basina davranir)
-//   MEDEVAC         : plana girmez; arac medevacinde bu atananlar oncelikli ve yalniz bunlar (en az bir atanmis arac varsa)
+//   HARIC           : ELITE bu gruba hareket / taktik katmani uygulamaz (waypoint / LAMBS gorevi sahibi gibi davranir; geri cekilme / tibbi / atis disiplini kalir)
+//   MEDEVAC         : arac medevacinde bu atananlar oncelikli ve yalniz bunlar (en az bir atanmis arac varsa)
 //   TOPCU / TOPCU_YOK : topcu / havan ateşi: en az bir arac TOPCU atandiysa yalniz atananlar atar; TOPCU_YOK atesi kapatir
-//   LISTELE         : bu tarafin mevcut atamalari (systemChat)
-//   RECON           : plana KESIF unsuru (>= 2 asker): gozlem noktasina STEALTH + GREEN (ates gelene kadar ates yok) gidip bilgi toplar, plan gruplarina rapor verir
-//   TASIMA          : arac nakli / taksi (APC, kamyon): once bu araclar kullanilir (atanmis yoksa uygun araclar otomatik)
+//   LISTELE         : mevcut atamalari (systemChat)
 //   OYUNCU          : (v8.151) grup oyuncu komutasinda: ELITE taktik katmani kapali (LAMBS FSM + tum karar izleyicileri), TCCC / cephane / IED / ezme / murettebat korumasi ACIK; oyunculu gruplar otomatik
-//   RECON_ARAC      : (v8.226) ARACA/ARAC GRUBUNA: bu kara araci KESIF (recon) aracidir; nakilden ayri tutulur, recon grubunu OP'ye sessizce goturur
 //   ELITE_TAM       : oyuncu grubunda da ELITE tam acik (otomatik oyuncu modunu ezer)
 // Hedef: modul bir nesnenin ustune birakildiysa o, degilse 25 m icindeki en yakin asker / kara-hava-deniz araci.
 
@@ -24,9 +20,9 @@ if (_activated && local _logic) then {
     [
         "ELITE Gorev Ata",
         [
-            ["Gorev", "LIST", "Birimin / grubun gorevi. Otomatik: atama silinir. MANEVRA / DESTEK / YEDEK: ELITE Objektif planina bu rolle katilir (grup sayisi sinirina bakilmaksizin). HARIC: hicbir plana girmez. MEDEVAC: yarali tasima gorevi, plana girmez. TOPCU: yalniz atananlar ates eder. TOPCU_YOK: bu arac ates etmez. LISTELE: atamalari goster.",
-                ["Otomatik (atamayi sil)", "Plan: MANEVRA", "Plan: DESTEK (baski / SBF)", "Plan: YEDEK", "Plan disi (HARIC)", "MEDEVAC ekibi / araci", "TOPCU ates destegi", "Topcu DEGIL (ates etmesin)", "LISTELE (atamalari goster)", "TASIMA araci (APC / kamyon taksi)", "RECON (gozlem: gizli, ates gelene kadar ates yok)", "OYUNCU KOMUTASI (ELITE taktik kapali; tedavi / cephane / IED acik)", "ELITE TAM ACIK (oyuncu grubunda da)", "RECON ARACI (kesif APC'si; nakilden ayri, recon'u OP'ye gotürür)"], 0]
-        ],
+            ["Gorev", "LIST", "Birimin / grubun gorevi. Otomatik: atama silinir. HARIC: ELITE hareket / taktik katmani bu gruba dokunmaz (waypoint'ini izler). MEDEVAC: yarali tasima gorevi. TOPCU: yalniz atananlar ates eder. TOPCU_YOK: bu arac ates etmez. OYUNCU: oyuncu komutasi. ELITE TAM: oyunculu grupta da ELITE acik. LISTELE: atamalari goster.",
+                ["Otomatik (atamayi sil)", "HARIC (ELITE dokunmasin)", "MEDEVAC ekibi / araci", "TOPCU ates destegi", "Topcu DEGIL (ates etmesin)", "OYUNCU KOMUTASI (ELITE taktik kapali; tedavi / cephane / IED acik)", "ELITE TAM ACIK (oyunculu grupta da)", "LISTELE (atamalari goster)"], 0]
+],
         {
             params ["_data", "_args"];
             _args params ["_poz", "_bagli"];
@@ -36,7 +32,7 @@ if (_activated && local _logic) then {
                 private _y = nearestObjects [_poz, ["CAManBase", "LandVehicle", "Air", "Ship"], 25];
                 _hedef = if (_y isEqualTo []) then {objNull} else {_y select 0};
             };
-            if (_kod isEqualTo 8) exitWith {
+            if (_kod isEqualTo 7) exitWith {
                 private _l = [];
                 {
                     private _g = _x;
@@ -50,9 +46,9 @@ if (_activated && local _logic) then {
                 if (_l isEqualTo []) then { systemChat "[ELITE] Atama yok (hepsi Otomatik)"; } else { { systemChat format ["[ELITE] %1", _x]; } forEach _l; };
             };
             if (isNull _hedef) exitWith { systemChat "[ELITE] Gorev Ata: yakinda asker / arac yok (modulu bir birimin ustune birak)"; };
-            private _kodlar = ["", "MANEVRA", "DESTEK", "YEDEK", "HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "", "TASIMA", "RECON", "OYUNCU", "ELITE_TAM", "RECON_ARAC"];
-            ["lambs_danger_gorevAta", [_hedef, _kodlar select (_kod max 0 min 13)]] call CBA_fnc_serverEvent;
-            systemChat format ["[ELITE] Gorev Ata istegi gonderildi: %1 -> %2", getText (configOf _hedef >> "displayName"), _kodlar select (_kod max 0 min 13)];
+            private _kodlar = ["", "HARIC", "MEDEVAC", "TOPCU", "TOPCU_YOK", "OYUNCU", "ELITE_TAM"];
+            ["lambs_danger_gorevAta", [_hedef, _kodlar select (_kod max 0 min 6)]] call CBA_fnc_serverEvent;
+            systemChat format ["[ELITE] Gorev Ata istegi gonderildi: %1 -> %2", getText (configOf _hedef >> "displayName"), _kodlar select (_kod max 0 min 6)];
         }, {}, {}, [_poz, _bagli]
     ] call EFUNC(main,showDialog);
 };

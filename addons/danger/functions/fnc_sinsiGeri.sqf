@@ -142,7 +142,7 @@ private _calis = {
             _g setVariable [QGVAR(sinsiDurum), [time + 75, -1, _nokta, _dPos, _eskiCM, _eskiBeh, count _us]];
             _say set ["baslat", (_say getOrDefault ["baslat", 0]) + 1];
             diag_log format ["[SINSI-GERI] %1 | BASLADI | dusman %2 m oran %3 (esik %4) | %5/%6 asker onde (lider dahil) %7 m geri noktaya | ates kesik + STEALTH", groupId _g, round _mesafe, _oran toFixed 2, _esik, count _onde, count _us, round (_l distance2D _nokta)];
-        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])}});
+        } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "sinsiGeri", true] call FUNC(senaryoKapi))}});
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _say > 0) then { diag_log format ["[SINSI-GERI-OZET] son 90 sn: %1", (keys _say) apply {format ["%1:%2", _x, _say get _x]}]; };

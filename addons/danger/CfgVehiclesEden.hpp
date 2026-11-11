@@ -58,99 +58,11 @@ class GVAR(EdenGorevAta): Module_F {
     isTriggerActivated = 0;
     isDisposable = 0;
     class Attributes: AttributesBase {
-        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: mevcut gorev korunur (RECON / RECON ARACI silinmez); silmek icin Zorla sil.","0",E_V(0,"Otomatik (mevcut gorevi koru)") E_V(1,"PLAN: Manevra") E_V(2,"PLAN: Destek baski") E_V(3,"PLAN: Yedek") E_V(4,"PLAN: Plan disi HARIC") E_V(5,"OZEL: Medevac ekibi araci") E_V(6,"OZEL: Topcu ates destegi") E_V(7,"OZEL: Topcu DEGIL") E_V(9,"OZEL: Tasima araci APC kamyon") E_V(10,"OZEL: RECON gozlem ekibi") E_V(11,"KOMUTA: Oyuncu komutasi") E_V(12,"KOMUTA: ELITE tam acik") E_V(13,"OZEL: RECON ARACI") E_V(14,"Zorla sil atamayi kaldir"))
+        E_COMBO(edGorKod,"Gorev","Baglanan birimlerin gorevi. Otomatik: mevcut gorev korunur; silmek icin Zorla sil.","0",E_V(0,"Otomatik (mevcut gorevi koru)") E_V(1,"HARIC: ELITE dokunmasin (waypoint izler)") E_V(2,"OZEL: Medevac ekibi araci") E_V(3,"OZEL: Topcu ates destegi") E_V(4,"OZEL: Topcu DEGIL") E_V(5,"KOMUTA: Oyuncu komutasi") E_V(6,"KOMUTA: ELITE tam acik") E_V(7,"Zorla sil atamayi kaldir"))
         class ModuleDescription: ModuleDescription {};
     };
     class ModuleDescription: ModuleDescription {
         description = "SYNC ile baglanan asker grup ve araclara secilen gorevi yazar. Birden cok birim baglanabilir.";
-    };
-};
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-// 5) KARAKOL / MEVZI - modul konumu; baglanan gruplar savunma plani ile bu mevziye atanir
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-class GVAR(EdenKarakol): Module_F {
-    author = "ELITE fork";
-    _generalMacro = QGVAR(EdenKarakol);
-    scope = 2;
-    scopeCurator = 0;
-    displayName = "ELITE Karakol / Mevzi (3DEN) - kur + hazir garnizon";
-    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-    category = "lambs_danger_elite_cat";
-    function = QFUNC(edenKarakol);
-    functionPriority = 1;
-    isGlobal = 0;
-    isTriggerActivated = 0;
-    isDisposable = 0;
-    class Attributes: AttributesBase {
-        E_COMBO(edKarTaraf,"Taraf savunan sahip","Otomatik: baglanan ilk grubun tarafi; grup yoksa BLUFOR.","0",E_V(0,"Otomatik") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
-        E_COMBO(edKarAd,"Ad tur","Harita isaretindeki ad.","0",E_V(0,"Karakol") E_V(1,"Mevzi") E_V(2,"Gozetleme noktasi"))
-        E_NUM(edKarYar,"Yaricap m","Karakol cevre yaricapi (garnizon alani da bu yaricap; 30-1500 m onerilir).","120")
-        E_COMBO(edKarGar,"Garnizon hazir ayar","Tek modulle karakol + garnizon: Hafif = 2 nobetci + 1 devriye x 2. Standart = 4 nobetci + 2 devriye x 3 + arac mevzisi. Guclu = 6 nobetci + 3 devriye x 3 + arac + anti-air + IHA alarmda gozlem. Ozel ayar (asker takim secimi IHA SYNC devriye mesafesi) icin ayrica Karakol Garnizon modulu koyun.","0",E_V(0,"Yok") E_V(1,"Hafif") E_V(2,"Standart") E_V(3,"Guclu"))
-        class ModuleDescription: ModuleDescription {};
-    };
-    class ModuleDescription: ModuleDescription {
-        description = "Modul konumunda karakol veya mevzi tanimlar. SYNC ile baglanan gruplar mevziyi savunur.";
-    };
-};
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-// 6) KARAKOL GARNIZON - karakolun icine birakilir; nobetci devriye ust kat arac mevzisi
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-class GVAR(EdenGarnizon): Module_F {
-    author = "ELITE fork";
-    _generalMacro = QGVAR(EdenGarnizon);
-    scope = 2;
-    scopeCurator = 0;
-    displayName = "ELITE Karakol Garnizon (3DEN) - ozel ayar / IHA / asker sec";
-    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-    category = "lambs_danger_elite_cat";
-    function = QFUNC(edenGarnizon);
-    functionPriority = 3;
-    isGlobal = 0;
-    isTriggerActivated = 0;
-    isDisposable = 0;
-    class Attributes: AttributesBase {
-        E_NUM(edGarNobet,"Nobetci sayisi","Ust kat yuksek arazide tek basina nobet tutan asker.","3")
-        E_NUM(edGarDev,"Devriye alt grubu sayisi","Karakol cevresinde dolasan devriye grubu.","1")
-        E_NUM(edGarDevBoy,"Devriye boyu asker","Her devriye grubundaki asker sayisi.","3")
-        E_BOOL(edGarUst,"Ust kat cati nobet pozisyonlari","Binalarin yuksek ic pozisyonlari nobet adayi olur.","true")
-        E_BOOL(edGarArac,"Araclar mevzi olsun","Karakol icindeki AI suruculu kara araclari cevrede ates mevzisine gider.","true")
-        E_COMBO(edGarSecim,"Secim modu SYNC","Modulle SYNC edilen askerler: Yalniz kendileri = yalniz o askerler garnizon olur. Takimlari = SYNC edilen askerlerin TAKIMI (grup) garnizona asker verebilir (kaynak takimda en az 3 asker kalir). Hic asker SYNC edilmezse karakol yaricapi havuzu.","0",E_V(0,"Yalniz baglanan askerler") E_V(1,"Baglanan askerlerin takimlari"))
-        E_COMBO(edGarAA,"Anti-air konumlandirma","Otomatik: MANPADS (Stinger / Igla / Zipkin ...) tasiyan askerler ayri acik / yuksek AA nobet noktalarina (en cok 3, 55 m aralikla), kendiyurur AA araclari (SPAAG) karakol merkezine yakin ic halkaya gider, STATIK AA (ZU-23 vb.) yerinde kalir. Elle tanim: nesne init this setVariable ['lambs_danger_aa', 'SPAAG', true] (MANPADS / SPAAG / STATIK / NONE). v8.402: varsayilan Otomatik (eskiden Yok: RPT 'AA 0' - kullanici 'akilli AA yerlesimi calismadi' dedi).","1",E_V(0,"Yok") E_V(1,"Otomatik"))
-        E_COMBO(edGarIha,"IHA gozlem","Karakola bagli gozlem IHA: Surekli = karakol merkezinde gozlem devriyesi, Alarmda = yalniz grup temasinda. Modulle SYNC edilen IHA kullanilir; baglanmazsa karakol yaricapinin x1.5 icindeki bosta, ayni taraf, GOZLEM tipi IHA (FPV / bomba degil).","0",E_V(0,"Yok") E_V(1,"Surekli gozlem devriyesi") E_V(2,"Alarmda gozlem"))
-        E_NUM(edGarIhaYar,"IHA devriye yaricapi m","IHA gozlem devriyesi yaricapi (karakol merkezi etrafinda). 0 = karakol yaricapi (100-800 m).","0")
-        E_NUM(edGarIhaSure,"IHA gozlem suresi dk","0 = CBA Gozlem IHA suresi (varsayilan 20 dk).","0")
-        E_NUM(edGarDevMes,"Devriye mesafesi m","Devriye rotasinin karakol MERKEZINE uzakligi (halka). 0 = karakol yaricapinin yuzde 60i (yaricap kucukse devriye merkezin dibinde doner). Uzak devriye icin buyuk deger (ornek 600).","0")
-        class ModuleDescription: ModuleDescription {};
-    };
-    class ModuleDescription: ModuleDescription {
-        description = "Yakinda karakol yoksa karakol OTOMATIK kurulur (taraf: SYNC askerin / takimin / en yakin AI askerin tarafi; yaricap 150 m). Karakol varsa: karakolun yaricapi + CBA Garnizon ek mesafesi (varsayilan 500 m) icine yerlestirin; garnizon alani karakolun yaricapidir (genis alan icin Karakol yaricapini buyutun, Eden yaricap sinirsiz). Karakol modulunden SONRA calisir. Modulle SYNC edilen AI askerler garnizon havuzu olur (nobetci / devriye yalniz onlardan, yaricap kurali yok); hic asker baglanmazsa karakol yaricapinin x1.5 icindeki gruplardan asker alinir.";
-    };
-};
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-// 7) GOZETLEME ATA - baglanan gruplar modul konumuna en yakin karakolda nobet tutar
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-class GVAR(EdenGozetle): Module_F {
-    author = "ELITE fork";
-    _generalMacro = QGVAR(EdenGozetle);
-    scope = 2;
-    scopeCurator = 0;
-    displayName = "ELITE Gozetleme Ata (3DEN) - squad ekle";
-    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\scout_ca.paa";
-    category = "lambs_danger_elite_cat";
-    function = QFUNC(edenGozetle);
-    functionPriority = 3;
-    isGlobal = 0;
-    isTriggerActivated = 0;
-    isDisposable = 0;
-    class Attributes: AttributesBase {
-        E_NUM(edGozAra,"Karakol arama mesafesi m","Modul konumuna bu mesafedeki en yakin ELITE karakol mevzi gozetleme noktasi hedef olur.","300")
-        class ModuleDescription: ModuleDescription {};
-    };
-    class ModuleDescription: ModuleDescription {
-        description = "SYNC ile baglanan gruplar modul konumuna en yakin karakolda nobet tutar. Karakol modulunden SONRA calisir.";
     };
 };
 

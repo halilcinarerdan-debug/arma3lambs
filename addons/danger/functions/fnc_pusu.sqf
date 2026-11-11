@@ -292,7 +292,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                     [_g, "AmbushBitti", _neden] call _gonder;
                 };
             };
-        } forEach allGroups;
+        } forEach (allGroups select {!([_x, "pusu", true] call FUNC(senaryoKapi))});
     };
 };
 

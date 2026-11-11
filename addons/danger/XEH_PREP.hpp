@@ -97,6 +97,7 @@ PREP(rastgele);
 PREP(rastgeleSec);
 PREP(birimId);
 PREP(senaryoKapi);
+PREP(wpSahip);
 PREP(senaryoRota);
 PREP(aracHasar);
 PREP(yigilmaCoz);
@@ -171,14 +172,7 @@ PREP(cpAday);
 PREP(cmSet);
 PREP(lambsRpgMi);
 PREP(havaAA);
-PREP(garnizonAskerSec);
-PREP(garnizonTakimSec);
 PREP(aaSinif);
-PREP(devriyeAg);
-PREP(devriyeHaber);
-PREP(garnizonPanel);
-PREP(garnizonHazir);
-PREP(kaldirPanel);
 PREP(topcuKonumla);
 PREP(aracUzak);
 PREP(topSiper);
@@ -197,8 +191,6 @@ PREP(ihaSilah);
 PREP(ihaSilahliVur);
 PREP(isaretGizle);
 PREP(topcuDestek);
-PREP(gozetleAta);
-PREP(karakolGarnizon);
 PREP(hqDestek);
 PREP(sinsiGeri);
 PREP(gozcuRto);
@@ -281,19 +273,12 @@ SUBPREP(ZeusModules,moduleDisableAI);
 SUBPREP(ZeusModules,moduleSetRadio);
 SUBPREP(ZeusModules,moduleKumanda);
 SUBPREP(ZeusModules,moduleGorevAta);
-SUBPREP(ZeusModules,moduleKarakol);
-SUBPREP(ZeusModules,moduleKarakolGarnizon);
-SUBPREP(ZeusModules,moduleGozetleAta);
 SUBPREP(Eden,edenOrtak);
 SUBPREP(Eden,edenKumanda);
 SUBPREP(Eden,edenGorevAta);
-SUBPREP(Eden,edenKarakol);
-SUBPREP(Eden,edenGarnizon);
-SUBPREP(Eden,edenGozetle);
 SUBPREP(Eden,edenIha);
 SUBPREP(Eden,edenPozisyon);
 SUBPREP(ZeusModules,moduleIhaGorev);
-SUBPREP(ZeusModules,moduleKarakolKaldir);
 SUBPREP(ZeusModules,moduleTopcuTest);
 
 SUBPREP(ZEN,setDisableAI);
@@ -396,18 +381,8 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
     ["lambs_danger_fireLineOn", "CHECKBOX", ["Dost ates hatti: hattin icindeki dost kayar (MG oncelikli)", "v8.388. Ates eden askerin hattinda dost varsa (1.6 m, +-40 derece) dusuk oncelikli olan 3.5-5.5 m yana kayar: MG 3 > nisanci 2 > digerleri; MG yerinden oynamaz, hattindaki herkes kayar. Bounding / geri cekilmede kosucular kaymaz, kapsama askerleri kayar. Yalniz GERCEKTEN ates edildiginde tetiklenir."], _katS, true, 1] call CBA_fnc_addSetting;
     ["lambs_danger_tehlikeAcikAktif", "CHECKBOX", ["Tehlikeli alan: acik alan gecisi (once gozetle + oncu eleman)", "v8.390. Rota ortu kenarindan >= 60 m acik alana giriyor ve karsi kenar menzil icindeyse (varsayilan 250 m, gorus hatti acik): gozetleme ekibi (lider + MG + nisanci) yatip karsi kenari izler, ONCU ELEMAN (1-2 asker) once karsi kenara kosar ve 8 sn guvenlik alir, ana govde iki yari halinde ~7 m yanal aralikla gecer, gozetleme ekibi en son. Temas olursa hemen serbest birakir. Yol gecisi (fnc_tehlikeAlani) ayri calisir."], _katS, true, 1] call CBA_fnc_addSetting;
     ["lambs_danger_tehlikeAcikMenzil", "SLIDER", ["Acik alan gecisi: en uzak karsi kenar (m)", "v8.390. Karsi kenar bu mesafeden uzaksa (cok genis alan) gozetleme / oncu akisi baslamaz (uzun mesafede bounding overwatch devralir). Doktrin: gozlenebilir, <= 250 m."], _katS, [100, 400, 250, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_garnizonEk", "SLIDER", ["Garnizon modulu ek mesafe (m)", "v8.393. 'ELITE Karakol Garnizon' modulu, karakolun yaricapi + bu mesafe icine birakilabilir (en yakin karakol secilir). Eskiden sabit 150 m idi (uzak birakinca 'yakinda karakol yok'). GARNIZON ALANI karakolun yaricapidir, modulun konumu degil; genis alan icin Karakol yaricapini buyutun. Varsayilan 500."], _katS, [150, 3000, 500, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devAkilli", "CHECKBOX", ["Karakol devriyesi: akilli / planli", "v8.400. Acik: her devriye karakolun farkli bir SEKTORUNU (8 sektor) planli turlarla gezer: kademeli cikis, tur sonunda toplanma noktasinda dinlenme, sektor secimi ortak resme gore (kimse baska devriyenin rotasina girmez, en eski gezilmeyen / temas bildirilen sektor once). Kapali: eski halka rotasi (hepsi ayni anda, surekli dongu). Varsayilan ACIK."], _katS, true, 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devAralik", "SLIDER", ["Devriye takvimi: tur araligi (sn)", "v8.400. Ayni karakoldan devriyelerin cikis ritmi: iki devriye (devAralik / devriye sayisi) sn'den yakin cikmaz; ilk turlar da bu aralikla kademelenir. Varsayilan 180."], _katS, [60, 900, 180, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devDinlen", "SLIDER", ["Devriye takvimi: dinlenme (sn)", "v8.400. Tur bitince devriye toplanma noktasinda bu kadar (+0-20 sn) bekler, sonra yeni sektor secer. Varsayilan 90."], _katS, [20, 600, 90, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devTurSure", "SLIDER", ["Devriye turu en uzun sure (sn)", "v8.400. Tur bu sureyi asarsa (engel / yavaslik) kesilip dinlenmeye alinir; sektor ziyaret edilmis sayilmaz. Uzak devriye mesafesinde buyutun. Varsayilan 900."], _katS, [180, 3600, 900, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devHaber", "CHECKBOX", ["Devriye agi: temas haberi paylasimi", "v8.400. Bir devriye / nobet grubu temas yasayip dusmani biliyorsa (gercek algi) devHaberYar icindeki TUM dost devriyeler ve nobet gruplari dusmani 'reveal' ile bilir; rapor sonraki sektor secimini etkiler. Varsayilan ACIK."], _katS, true, 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devHaberYar", "SLIDER", ["Devriye agi: haber menzili (m)", "v8.400. Telsiz menzili benzeri: raporlayan grubun lideri ile alici grup lideri arasi bu mesafeden uzaksa haber gitmez. Varsayilan 2500."], _katS, [300, 6000, 2500, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devDestek", "CHECKBOX", ["Devriye agi: temasa destek devriyesi", "v8.400. Temas raporu gelince rapor basina EN YAKIN bir devriye (alarmda olmayan, temasta olmayan, devDestekMes icinde) 240 sn boyunca rapor konumuna yonlendirilir (SAD), sonra karakola doner. Varsayilan ACIK."], _katS, true, 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devDestekMes", "SLIDER", ["Devriye agi: destek menzili (m)", "v8.400. Destege gonderilecek devriyenin rapor konumuna azami uzakligi. Varsayilan 1200."], _katS, [200, 3000, 1200, 0], 1] call CBA_fnc_addSetting;
-    ["lambs_danger_devIsaret", "CHECKBOX", ["Devriye agi: harita isareti (hata ayiklama)", "v8.400. Her devriyenin konumu + durumu (TUR / DINLEN / DESTEK) + sektoru haritada gorunur. Isaretler ELITE_DEV_* adli ve taraf renklidir: 'Dusman ELITE isaretlerini gizle' (varsayilan acik) dusman taraf oyunculara gizler. Varsayilan KAPALI."], _katS, false, 1] call CBA_fnc_addSetting;
     private _katU = ["LAMBS Danger", "ELITE uzun operasyon"];
-    ["lambs_danger_senaryoModu", "CHECKBOX", ["SENARYO MODU (waypoint disi kararlar yok sayilir)", "v8.502. Acikken tasarimcinin verdigi WAYPOINT'i olan AI gruplarinda ELITE hareket / taktik karar katmanlari (assault / flank / bounding / hide / hold / suppress, ates-hareket, CQB cevik, formasyon, rol istasyonu, buddy, dagilma, yetim, arac senkronu, HQ emirleri) devre disi: grup waypoint'ini izler. GERI CEKILME / peel / zirhtan kacis / temas kesme, panik, teslim, tibbi, atis disiplini ve arac guvenlik freni AKTIF KALIR. Oyunculu gruplar etkilenmez. Hazir senaryolari (ornek: Blackfox) gozlemlemek icin."], _katU, false, 1] call CBA_fnc_addSetting;
+    ["lambs_danger_senaryoModu", "CHECKBOX", ["Waypoint uyumu: hareket waypoint'inde ELITE geri cekilsin", "v8.504. Acikken tasarimcinin verdigi MOVE / SAD / DESTROY / CYCLE waypoint'i olan AI gruplarinda ELITE hareket / taktik karar katmanlari (assault / flank / bounding / hide / hold / suppress, ates-hareket, CQB cevik, formasyon, rol istasyonu, buddy, dagilma, yetim, arac senkronu, HQ emirleri) devre disi: grup waypoint'ini izler. LAMBS gorevleri (lambs_wp Garrison / Camp / Patrol / Hunt / CQB ...), 'LAMBS Danger: AI Kapat' ve kal-bekle turu vanilla waypoint'ler (HOLD / SENTRY / GUARD / SCRIPTED ...) bu ayardan BAGIMSIZ olarak HER ZAMAN ELITE'i geri ceker. GERI CEKILME / peel / zirhtan kacis / temas kesme, panik, teslim, tibbi, atis disiplini ve arac guvenlik freni AKTIF KALIR. Oyunculu gruplar etkilenmez."], _katU, true, 1] call CBA_fnc_addSetting;
     ["lambs_danger_senaryoKapsam", "LIST", ["Senaryo modu kapsami", "v8.502. 0 = yalniz AKTIF tasarimci waypoint'i olan gruplar (waypoint'siz / bekleyen gruplarda ELITE tepkileri surer). 1 = tum AI gruplari (ELITE karar katmanlari hic calismaz, yalniz geri cekilme vb. guvenlik tepkileri kalir)."], _katU, [[0, 1], ["Yalniz waypoint'i olan gruplar", "Tum AI gruplari"], 0], 1] call CBA_fnc_addSetting;
     ["lambs_danger_komutanKisilikWest", "LIST", ["Komutan kisiligi: BLUFOR (west)", "v8.501. RASTGELE (varsayilan): oturum tohumuna bagli TEMKINLI / DENGELI / SALDIRGAN secilir (ayni tohum = ayni kisilik). Baska secim: egitmen sabitler. Egitimde karsilasma karakterini belirleyen en etkili ayarlardan biri. Oturum basinda okunur."], _katU, [["RASTGELE", "TEMKINLI", "DENGELI", "SALDIRGAN"], ["RASTGELE (tohumlu)", "TEMKINLI", "DENGELI", "SALDIRGAN"], 0], 1] call CBA_fnc_addSetting;
     ["lambs_danger_komutanKisilikEast", "LIST", ["Komutan kisiligi: OPFOR (east)", "v8.501. RASTGELE (varsayilan): oturum tohumuna bagli TEMKINLI / DENGELI / SALDIRGAN secilir (ayni tohum = ayni kisilik). Baska secim: egitmen sabitler. Egitimde karsilasma karakterini belirleyen en etkili ayarlardan biri. Oturum basinda okunur."], _katU, [["RASTGELE", "TEMKINLI", "DENGELI", "SALDIRGAN"], ["RASTGELE (tohumlu)", "TEMKINLI", "DENGELI", "SALDIRGAN"], 0], 1] call CBA_fnc_addSetting;
@@ -621,15 +596,15 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.503-SADE (SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.504-SADE (WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {
         private _fns = [
             "tactics", "commanderAssess", "tacticsBounding", "tacticsRetreat", "tacticsEvadeArmor", "tacticsATEngage",
             "tacticsBreakContact", "roleStation", "buddyBond", "dispersion", "reloadCover", "grenadeAwareness",
-            "leaderSync", "firedHub", "soundAwareness", "cqbReflex", "koseTemkin", "binaPencere", "atisUstunlugu", "isSniper", "sniperTeam", "buildingClear", "buildingClearRun", "coverHug", "rpgReaction", "fireSupport", "buddyDebug", "tacticalUGL", "rotaPlan", "pusu", "ufukMu", "araziAnaliz", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "medicTasma", "moral", "teslimOl", "tankMuhimmat", "roeGuard", "tehditBakis", "havaFarkindalik", "olumBolgesi", "pusuKarsi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "formSet", "mekanizeIzle", "aracMedevac", "tehditIzle", "tehditOlay", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "aracTasima", "taksi", "ezmeKoruma", "aracUzak", "reconArac", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "ihaTip", "ihaSorti", "karakolGarnizon", "hqDestek", "asistanTur", "aracSenkron", "komutanPlan", "komutanPlanDongu", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "iedFarkindalik", "sonDirenis", "toparlan", "hq", "hqTakviye", "hqEmir", "hqMedevac", "hqIstihbarat", "hqKanat", "hqFeint", "tacticalSmoke", "getUnitRole", "buddyPairs", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "atisGuvenli", "rearGuard", "uglMags", "durumLog", "doktrin", "dk", "olayGonder", "olay"
-        , "orphanWatchdog", "eliteCover", "tacticsPeel", "sihaLazer", "topcuLG", "bilgiEsik", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip", "cpAday", "cmSet", "lambsRpgMi", "havaAA", "garnizonAskerSec", "garnizonTakimSec", "aaSinif", "devriyeAg", "devriyeHaber", "garnizonPanel", "garnizonHazir", "ihaSilah", "ihaSilahliVur", "harekat", "harekatDongu"];
+            "leaderSync", "firedHub", "soundAwareness", "cqbReflex", "koseTemkin", "binaPencere", "atisUstunlugu", "isSniper", "sniperTeam", "buildingClear", "buildingClearRun", "coverHug", "rpgReaction", "fireSupport", "buddyDebug", "tacticalUGL", "rotaPlan", "pusu", "ufukMu", "araziAnaliz", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "medicTasma", "moral", "teslimOl", "tankMuhimmat", "roeGuard", "tehditBakis", "havaFarkindalik", "olumBolgesi", "pusuKarsi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "formSet", "mekanizeIzle", "aracMedevac", "tehditIzle", "tehditOlay", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "aracTasima", "taksi", "ezmeKoruma", "aracUzak", "reconArac", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "ihaTip", "ihaSorti", "hqDestek", "asistanTur", "aracSenkron", "komutanPlan", "komutanPlanDongu", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "iedFarkindalik", "sonDirenis", "toparlan", "hq", "hqTakviye", "hqEmir", "hqMedevac", "hqIstihbarat", "hqKanat", "hqFeint", "tacticalSmoke", "getUnitRole", "buddyPairs", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "atisGuvenli", "rearGuard", "uglMags", "durumLog", "doktrin", "dk", "olayGonder", "olay"
+        , "orphanWatchdog", "eliteCover", "tacticsPeel", "sihaLazer", "topcuLG", "bilgiEsik", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip", "cpAday", "cmSet", "lambsRpgMi", "havaAA", "aaSinif", "ihaSilah", "ihaSilahliVur", "harekat", "harekatDongu"];
         diag_log format [
             "[ELITE-BOOT] makine: isServer=%1 hasInterface=%2 | fonksiyonlar: %3",
             isServer, hasInterface,
@@ -639,7 +614,7 @@ diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.503-SADE (SADE WAYPOINT: komu
         // watchdog'lar ilk temasta degil, acilista baslasin
         {
             [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
-        } forEach ["tohumBaslat", "senaryoRota", "isaretGizle", "onUcus", "duvarBakis", "firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "rearGuard", "durumLog", "olay", "pusu", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "tankMuhimmat", "medicTasma", "moral", "roeGuard", "tehditBakis", "havaFarkindalik", "iedFarkindalik", "olumBolgesi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "mekanizeIzle", "aracMedevac", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "taksi", "ezmeKoruma", "aracUzak", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "karakolGarnizon", "aracSenkron", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "hq", "aracFfvDuzelt", "atPaylas", "surucuYenile", "motorSes", "aracZirhKac", "tankAtesKontrol", "tankMurettebat", "tani", "mevziKilit", "teslimBirey", "pusuTepki", "patlayici", "atesHareket", "zirhDronIzle", "aracUnstuck", "dronGozlemci", "dronTopcu", "modUyum", "tankAralik", "koseTemkin", "binaPencere", "atisUstunlugu", "orphanWatchdog", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip"];
+        } forEach ["tohumBaslat", "senaryoRota", "isaretGizle", "onUcus", "duvarBakis", "firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "rearGuard", "durumLog", "olay", "pusu", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "tankMuhimmat", "medicTasma", "moral", "roeGuard", "tehditBakis", "havaFarkindalik", "iedFarkindalik", "olumBolgesi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "mekanizeIzle", "aracMedevac", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "taksi", "ezmeKoruma", "aracUzak", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "aracSenkron", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "hq", "aracFfvDuzelt", "atPaylas", "surucuYenile", "motorSes", "aracZirhKac", "tankAtesKontrol", "tankMurettebat", "tani", "mevziKilit", "teslimBirey", "pusuTepki", "patlayici", "atesHareket", "zirhDronIzle", "aracUnstuck", "dronGozlemci", "dronTopcu", "modUyum", "tankAralik", "koseTemkin", "binaPencere", "atisUstunlugu", "orphanWatchdog", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip"];
 
         // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
         [] spawn {
