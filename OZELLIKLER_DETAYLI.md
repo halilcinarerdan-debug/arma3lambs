@@ -1,5 +1,7 @@
 # ELITE fork — Ayrıntılı Özellik Listesi (birey → buddy → ateş timi → squad → kumanda)
 
+> **v8.503 (dal `claude/sade-waypoint`) — SADELESTIRME NOTU:** komutan plani / ELITE Objektif (Saldiri-Savunma) / Harekat / personel nakli (V2) / recon / HQ-US / hendek-mevzi kurulumu / tank duellosu katmani KALDIRILDI. Bu belgede bu konulara ait bolumler TARIHSELDIR (eski dallarda gecerli: `claude/nakil-v2`, `claude/tasarimci-makro`). Gecerli omurga: waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu. Ayrinti: DEVIR_LOGU_v7.0.txt v8.503, YOL_HARITASI_v8.4xx.md Asama 10.
+
 Kaynak: fonksiyon başlıkları (`addons/danger/functions/fnc_*.sqf`) ve `DEVIR_LOGU_v7.0.txt`. Sayılar kod başlıklarından alınmıştır.
 Doktrin dayanakları genel ilke / tasarım tahminidir; kaynaklı olanlar `kaynaklar_doktrin/` altında. **(T)** = oyunda henüz doğrulanmadı.
 Kapatma anahtarları: `lambs_danger_<ad>Off = true` (yanındaki ada bakın).
@@ -140,7 +142,7 @@ MG: takılı şarjör kapasitesi ≥ 75 veya bilinen MG adı. Silah başına ön
 - Araç mürettebatı roket / duman tehdidine tepki verir (`tehditOlay`).
 - DIAMOND yalnız ≥ 4 kara aracı, açık, yol dışı, temas > 60 sn, düşman > 500 m; DÜZENSİZ doktrinde yok.
 - **Araç–piyade senkronu** (`aracSenkron`, T): BEKLE > 60 m, YAVAŞLA 20–60 m, SENKRON; temas / baskı / medevac / nakilde serbest.
-- **Kara aracı nakli** (`aracTasima`, T): adaylar AI sürücülü, arac grubu tamamen içinde, kargo ≥ 3, yakıt > %10, planda / medevac / karakol görevinde değil. Adımlar: alma noktasına gel (≤ 150 sn) → bin (60 sn; 40 m içindeki gecikenler `moveInCargo`) → iniş noktasına sür (≤ 240 sn; temas / baskı olursa erken in) → in (`doGetOut` → 10 sn sonra `moveOut`) → geri dön, bekle. İniş noktası = hedeften max(500 m, ORP + 150 m) (M16 etkili menzili 460 m + pay; kitapta iniş mesafesi sayısı yok → tasarım). Plan TASIMA fazı 420 sn'de iptal edilir. Kapatma: `lambs_danger_tasimaOff`; otomatik araç seçimi: `lambs_danger_tasimaOtomatik = false` ile kapanır.
+- **Kara aracı nakli** (`aracTasima`, T): adaylar AI sürücülü, arac grubu tamamen içinde, kargo ≥ 3, yakıt > %10, planda / medevac / karakol görevinde değil. Adımlar: alma noktasına gel (≤ 150 sn) → bin (60 sn; 40 m içindeki gecikenler `moveInCargo`) → iniş noktasına sür (≤ 240 sn; temas / baskı olursa erken in) → in (`doGetOut` → 10 sn sonra `moveOut`) → geri dön, bekle. İniş noktası = hedeften max(500 m, ORP + 150 m) (M16 etkili menzili 460 m + pay; kitapta iniş mesafesi sayısı yok → tasarım). Plan TASIMA fazı 420 sn'de iptal edilir. Kapatma: `lambs_danger_tasimaOff`; otomatik araç seçimi: `tasimaOtomatik (kaldirildi) = false` ile kapanır.
 - **Taksi** (`taksi`, sunucu, T): yaya AI grubunun aktif waypoint'i > 1200 m ve 600 m içinde boş araç varsa aynı nakil (iniş hedefin 500 m öncesi); ≤ 2 eşzamanlı, grup başına 180 sn bekleme; plan waypoint'leri alınmaz. Kapatma: `lambs_danger_taksiOff`.
 
 ---

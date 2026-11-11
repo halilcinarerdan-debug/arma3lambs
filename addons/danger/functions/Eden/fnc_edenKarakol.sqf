@@ -1,8 +1,7 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * 3DEN: ELITE Karakol / Mevzi modulu (v8.362). Modul konumunda karakol / mevzi / gozetleme noktasi kaydi + harita isareti (Zeus lambs_danger_karakolIstegi). Savunma = HEMEN ve module gruplar SYNC edilmisse savunma plani
- * YALNIZ bu gruplarla kurulur (Zeus 'Elle sec' ile ayni: planIstegi, tip 1, secili); grup baglanmamissa yaricap x1.5 icindeki savunan gruplar otomatik alinir.
+ * 3DEN: ELITE Karakol / Mevzi modulu (v8.362). Modul konumunda karakol / mevzi / gozetleme noktasi kaydi + harita isareti (Zeus lambs_danger_karakolIstegi). Sade surum: plan yok; module SYNC'li takimlar (garnizon ayari secilmisse) garnizon havuzu olur.
  * Arguments: 0: modul <OBJECT>, 1: baglananlar (kullanilmaz), 2: etkin <BOOL>
  * Return Value: None
  * Public: No
@@ -22,15 +21,11 @@ if (!_activated || {!isServer}) exitWith {};
     private _taraf = ["TARAF", [_logic, "lambs_danger_edKarTaraf", _gruplar]] call FUNC(edenOrtak);
     private _adI = (round (["SAYI", [_logic, "lambs_danger_edKarAd", 0]] call FUNC(edenOrtak))) max 0 min 2;
     private _yar = round (["SAYI", [_logic, "lambs_danger_edKarYar", 120]] call FUNC(edenOrtak));
-    private _sav = (round (["SAYI", [_logic, "lambs_danger_edKarSav", 1]] call FUNC(edenOrtak))) max 0 min 2;
+    private _sav = 0;   // sade-waypoint: plan / alarm savunma katmani yok
     private _poz = getPosATL _logic;
     private _secili = (_gruplar select {(side _x) isEqualTo _taraf}) apply {netId _x};
-    private _elle = _sav isEqualTo 1 && {_secili isNotEqualTo []};
+    private _elle = false;
     ["lambs_danger_karakolIstegi", [_taraf, _poz, _adI, _yar, _sav, _elle]] call CBA_fnc_serverEvent;
-    if (_elle) then {
-        private _ayar = createHashMapFromArray [["tip", 1], ["grupN", count _secili], ["grupMesafe", _yar * 1.5], ["bina", true], ["piyade", true], ["rallyM", 250], ["orpM", 150], ["basla", 0], ["secili", _secili]];
-        ["lambs_danger_planIstegi", [_taraf, _poz, _ayar toArray false]] call CBA_fnc_serverEvent;
-    };
     // v8.400 SADELESTIRME: 'Garnizon hazir ayar' (Yok / Hafif / Standart / Guclu) ayni modulle garnizon da kurar (fnc_garnizonHazir); ozel ayar icin 'ELITE Karakol Garnizon' modulu
     private _garHazir = (round (["SAYI", [_logic, "lambs_danger_edKarGar", 0]] call FUNC(edenOrtak))) max 0 min 3;
     private _gh = [_garHazir] call FUNC(garnizonHazir);
@@ -38,7 +33,7 @@ if (!_activated || {!isServer}) exitWith {};
         _gh params ["_gN", "_gD", "_gB", "_gU", "_gA", "_gAA", "_gI"];
         // v8.401: hazir garnizon SYNC'li IHA'yi (mod 'Yok' ise Surekli) ve - Savunma 'HEMEN' DEGILSE - SYNC'li askerlerin takimlarini garnizon havuzu yapar (HEMEN'de takimlar savunma plani squad'i olur)
         private _gT = [];
-        if (_sav isNotEqualTo 1) then { _gT = _secili; };
+        _gT = _secili;
         if (_ihaObj isNotEqualTo [] && {_gI isEqualTo 0}) then { _gI = 1; };
         ["lambs_danger_garnizonIstegi", [_poz, 0, _gN, _gD, _gB, _gU, _gA, [], 0, _gT, [_gI, 0, 0, _ihaObj apply {netId _x}], _gAA]] call CBA_fnc_serverEvent;
         diag_log format ["[EDEN] Karakol (3DEN) hazir garnizon %1: nobet %2 | devriye %3 x %4 | ust kat %5 | arac %6 | AA %7 | IHA mod %8 (baglanan IHA %9) | garnizon takimi %10", ["", "hafif", "standart", "guclu"] select _garHazir, _gN, _gD, _gB, _gU, _gA, _gAA, _gI, count _ihaObj, count _gT];

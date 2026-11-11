@@ -97,6 +97,8 @@ def varliklar(entities, ebeveyn=None, grup=None, out=None):
             v["oyuncu"] = bool(at.get("isPlayer") == 1 or at.get("isPlayable") == 1)
             out.append(v)
             if dt == "Group":
+                wp = it.get("Waypoints")
+                v["wp"] = len(alt_bloklar(wp)) if isinstance(wp, dict) else 0
                 v["ad"] = v["ad"] or str(it.get("name", "")) or str(it.get("Attributes", {}).get("callsign", "") if isinstance(it.get("Attributes"), dict) else "")
                 if isinstance(it.get("Entities"), dict): varliklar(it["Entities"], it, v, out)
             elif dt == "Layer":
@@ -145,9 +147,7 @@ def denetle(yol, koltuk_ek, arac_ek):
     def ekle(sv, ba, tx): sonuc.append((sv, ba, tx))
 
     moduller = [v for v in V if v["dt"] == "Logic" and v["tip"].lower().startswith("lambs_danger_eden")]
-    def mt(ad): return [v for v in moduller if v["tip"].lower() == "lambs_danger_eden" + ad]
-    hq, obj_s, obj_v, obj_e, har = mt("hq"), mt("saldiri"), mt("savunma"), mt("objektif"), mt("harekat")
-    objekt = obj_s + obj_v + obj_e
+    objekt = []
     triggerlar = [v for v in V if v["dt"] == "Trigger"]
     adamlar = [v for v in V if v["dt"] == "Object" and v["grup"] is not None]
     def arac_mi(v): return v["tip"] in ARAC_EK or bool(ARAC_RX.search(v["tip"]))
@@ -156,109 +156,35 @@ def denetle(yol, koltuk_ek, arac_ek):
     gruplar = [v for v in V if v["dt"] == "Group"]
     ai_gruplar = [g for g in gruplar if any((not a["oyuncu"]) and a["grup"] is g and not arac_mi(a) for a in adamlar)]
 
-    ekle("BILGI", "ENVANTER", "modul %d (HQ %d, Saldiri %d, Savunma %d, eski Objektif %d, Harekat %d) | tetik %d | grup %d | asker %d | arac %d | oyuncu %d" %
-         (len(moduller), len(hq), len(obj_s), len(obj_v), len(obj_e), len(har), len(triggerlar), len(gruplar), len(askerler), len(araclar), sum(1 for a in adamlar if a["oyuncu"])))
-    if not moduller: ekle("UYARI", "MODUL", "hic ELITE 3DEN modulu yok (lambs_danger_Eden*): gruplar plana alinmaz")
+    ekle("BILGI", "ENVANTER", "ELITE modul %d | tetik %d | grup %d | asker %d | arac %d | oyuncu %d" %
+         (len(moduller), len(triggerlar), len(gruplar), len(askerler), len(araclar), sum(1 for a in adamlar if a["oyuncu"])))
+    tur = collections.Counter(v["tip"].split("_", 3)[-1] for v in moduller)
+    if tur: ekle("BILGI", "MODUL", "modul turleri: %s" % dict(tur))
+    else: ekle("BILGI", "MODUL", "ELITE 3DEN modulu yok (lambs_danger_Eden*): yalniz taktik tepkiler calisir; makro modul (Kumanda / Karakol / Garnizon / IHA) istenirse ekleyin")
 
-    # bagli kume: modul id -> bagli varlik idleri (grup ya da asker)
-    bag = collections.defaultdict(set)
-    for a, b in L:
-        bag[a].add(b); bag[b].add(a)
-    def bagli_gruplar(mod):
-        g = set()
-        for x in bag.get(mod["id"], ()):
-            v = by.get(x)
-            if not v: continue
-            if v["dt"] == "Group": g.add(id(v))
-            elif v["dt"] == "Object" and v["grup"] is not None: g.add(id(v["grup"]))
-        return [v for v in gruplar if id(v) in g]
-    def bagli_trigger(mod): return [by[x] for x in bag.get(mod["id"], ()) if x in by and by[x]["dt"] == "Trigger"]
-
-    # HQ baglantisi
-    if not hq: ekle("UYARI", "HQ", "ELITE HQ modulu yok: ele gecir plani HQ ister (objektif tek basina otomatik HQ kurabilir ama sorunlari gizler)")
-    hq_gr = set()
-    for h in hq:
-        g = bagli_gruplar(h); hq_gr |= {id(x) for x in g}
-        ekle("BILGI", "HQ", "HQ %s: %d grup bagli" % (h["id"], len(g)))
-    bagsiz = [g for g in ai_gruplar if id(g) not in hq_gr]
-    if hq and bagsiz:
-        ekle("UYARI", "HQ", "HQ'ya bagli OLMAYAN AI grubu: %d (%s) - plana alinmaz / gorev almaz" % (len(bagsiz), ", ".join((g["ad"] or "?") for g in bagsiz[:10])))
+    # waypoint: SQM'de grup waypoint'i sayilir (Waypoints sinifi); waypoint'siz AI grubu SENARYO MODU'nda yerinde durur
+    wpsiz = [g for g in ai_gruplar if not g.get("wp")]
+    if ai_gruplar and len(wpsiz) == len(ai_gruplar):
+        ekle("BILGI", "WAYPOINT", "waypoint okunamadi ya da hic AI grubunun waypoint'i yok (senaryo modunda grup yerinde bekler; waypoint'i 3DEN'de cizin)")
+    elif wpsiz:
+        ekle("BILGI", "WAYPOINT", "waypoint'siz AI grubu: %d (%s) - senaryo modunda yerinde bekler" % (len(wpsiz), ", ".join((g["ad"] or "?") for g in wpsiz[:10])))
 
     # rol gruplari (ad) - Gorev Ata modulu yoksa grup adindan otomatik atama
     def adlar(rx): return [g["ad"] for g in gruplar if g["ad"] and re.search(rx, g["ad"], re.I)]
-    for ad, rx in (("recon", r"recon"), ("medevac", r"medic|medevac"), ("topcu", r"topcu|top\b|artil|mortar")):
+    for ad, rx in (("medevac", r"medic|medevac"), ("topcu", r"topcu|top\b|artil|mortar")):
         if not adlar(rx): ekle("BILGI", "ROL", "'%s' adli grup yok (Gorev Ata modulu ya da grup adi gerekir; rol kullanmayacaksan sorun degil)" % ad)
-    if not any(g["ad"] for g in gruplar): ekle("BILGI", "ROL", "grup adlari okunamadi (grup adi bu SQM'de beklenen alanda degil olabilir): rol kontrolu atlandi")
 
-    # objektif / harekat / faz
-    if not objekt: ekle("UYARI", "OBJEKTIF", "Saldiri / Savunma / Objektif modulu yok")
-    fazlar = []
-    for o in objekt:
-        tg = bagli_trigger(o)
-        faz = o["ozellik"].get("lambs_danger_edObFaz")
-        ekle("BILGI", "OBJEKTIF", "%s %s: faz %s | bagli grup %d | tetik %d | IHA ayari %s | topcu ayari %s" % (o["tip"].split("_")[-1], o["id"], faz, len(bagli_gruplar(o)), len(tg), o["ozellik"].get("lambs_danger_edObIha", "-"), o["ozellik"].get("lambs_danger_edObTopcu", "-")))
-        if isinstance(faz, (int, float)): fazlar.append(int(faz))
-    if har:
-        har_bag = set()
-        for h in har:
-            for x in bag.get(h["id"], ()):
-                if x in by and by[x]["tip"].lower() in ("lambs_danger_edensaldiri", "lambs_danger_edensavunma", "lambs_danger_edenobjektif"): har_bag.add(x)
-        serbest = [o for o in objekt if o["id"] not in har_bag]
-        if serbest: ekle("UYARI", "HAREKAT", "Harekat modulune SYNC OLMAYAN objektif: %d - ayri (fazsiz) plan olarak calisir" % len(serbest))
-        if fazlar and sorted(set(fazlar)) != list(range(1, max(fazlar) + 1)):
-            ekle("UYARI", "HAREKAT", "faz numaralari ardisik degil: %s" % sorted(set(fazlar)))
-    elif len(objekt) > 1:
-        ekle("BILGI", "HAREKAT", "birden cok objektif var ama Harekat modulu yok: hepsi ayni anda baslar (sirayla ilerlemesi icin Harekat + faz)")
+    # surucusuz arac grubu: arac var, grupta adam yok
+    for v in araclar:
+        g = v["grup"]
+        if IHA_RX.search(v["tip"]) or TOP_RX.search(v["tip"]): continue   # IHA / topcu murettebati oyunda otomatik / ayri grup
+        if g is not None and not any((a["grup"] is g) and not arac_mi(a) for a in adamlar):
+            ekle("UYARI", "ARAC", "%s (%s) grubunda murettebat yok: surucusuz arac waypoint izleyemez" % (v["tip"], g["ad"] or v["id"]))
 
-    # nakil: koltuk / mesafe
-    arac_gruplari = {id(v["grup"]) for v in araclar if v["grup"] is not None}
-    # tasinacak piyade: AI grup, arac icermeyen, rol grubu (recon / medevac / topcu) degil
-    cikar = [g for g in ai_gruplar if id(g) not in arac_gruplari and not re.search(r"recon|medic|medevac|topcu|arti", g["ad"] or "", re.I)]
-    cikar_id = {id(g) for g in cikar}
-    asker_say = sum(1 for a in askerler if (not a["oyuncu"]) and id(a["grup"]) in cikar_id)
-    arac_sayi = collections.Counter(v["tip"] for v in araclar)
-    kap = 0; bilinmeyen = []
-    for t, n in arac_sayi.items():
-        if t in kolt: kap += kolt[t] * n
-        elif re.search(r"(?i)truck|hemtt|transport", t): bilinmeyen.append(t)
-        else: bilinmeyen.append(t)
-    if araclar:
-        ekle("BILGI", "NAKIL", "arac: %s | bilinen koltuk toplami %d | taşınacak AI asker (recon / medevac / topcu haric) %d" % (dict(arac_sayi), kap, asker_say))
-        if bilinmeyen: ekle("BILGI", "NAKIL", "koltuk sayisi bilinmeyen siniflar (--koltuk SINIF=N verin): %s" % sorted(set(bilinmeyen)))
-        if kap and kap < asker_say: ekle("UYARI", "NAKIL", "bilinen koltuk (%d) tasinacak asker sayisindan (%d) az: en az %d asker yaya kalir" % (kap, asker_say, asker_say - kap))
-        # surucusuz arac grubu: arac var, grupta adam yok
-        for v in araclar:
-            g = v["grup"]
-            if IHA_RX.search(v["tip"]) or TOP_RX.search(v["tip"]): continue   # IHA / topcu murettebati oyunda otomatik / ayri grup
-            if g is not None and not any((a["grup"] is g) and not arac_mi(a) for a in adamlar):
-                ekle("UYARI", "NAKIL", "%s (%s) grubunda murettebat yok: surucusuz arac nakil / recon icin kullanilamaz" % (v["tip"], g["ad"] or v["id"]))
-        # arac - piyade mesafesi
-        for v in araclar:
-            if not v["poz"]: continue
-            mes = [mesafe(v["poz"], a["poz"]) for a in askerler if id(a["grup"]) in cikar_id and a["poz"]]
-            mes = [x for x in mes if x is not None]
-            if mes and min(mes) > 1500: ekle("UYARI", "NAKIL", "%s (%s) en yakin piyadeye %d m: uzak arac konvoyu geciktirir (150 sn + >1500 m kuralinda iptal edilir)" % (v["tip"], v["grup"]["ad"] if v["grup"] else v["id"], min(mes)))
-    elif asker_say: ekle("BILGI", "NAKIL", "arac yok: %d AI asker yaya gider" % asker_say)
-
-    # oyuncu
-    for p in [a for a in adamlar if a["oyuncu"]]:
-        if p["poz"] and araclar:
-            mes = [mesafe(p["poz"], v["poz"]) for v in araclar if v["poz"]]
-            mes = [x for x in mes if x is not None]
-            if mes and min(mes) > 1500: ekle("UYARI", "OYUNCU", "oyuncu (%s) en yakin araca %d m: manifest araca atar ama arac gelemeyebilir" % (p["grup"]["ad"] if p["grup"] else p["id"], min(mes)))
-        if p["grup"] is not None and hq and id(p["grup"]) not in hq_gr:
-            ekle("BILGI", "OYUNCU", "oyuncu grubu HQ'ya bagli degil: harekat gorevi (ARMA gorevi) yazilmaz")
-
-    # IHA / topcu
-    obj_poz = [o["poz"] for o in objekt if o["poz"]]
+    # IHA / topcu envanteri
     for v in adamlar + [x for x in V if x["dt"] == "Object" and x["grup"] is None]:
-        if IHA_RX.search(v["tip"]) and v["poz"] and obj_poz:
-            d = min(mesafe(v["poz"], o) for o in obj_poz)
-            if d > 12000: ekle("UYARI", "IHA", "%s en yakin objektife %d m (> 12 km): otomatik gozlem IHA'si secilmez (SYNC ile baglayin)" % (v["tip"], d))
-            else: ekle("BILGI", "IHA", "%s objektife %d m" % (v["tip"], d))
-        if TOP_RX.search(v["tip"]) and v["poz"] and obj_poz:
-            d = min(mesafe(v["poz"], o) for o in obj_poz)
-            ekle("BILGI", "TOPCU", "%s en yakin objektife %d m (menzil kontrolu oyunda: [PLAN-TOPCU] ENVANTER)" % (v["tip"], d))
+        if IHA_RX.search(v["tip"]): ekle("BILGI", "IHA", "%s var (SYNC'li 'ELITE IHA' modulu / Zeus IHA Gorevi ile gorevlendirilir)" % v["tip"])
+        if TOP_RX.search(v["tip"]): ekle("BILGI", "TOPCU", "%s var (Gorev Ata -> TOPCU ile ates destegi verir)" % v["tip"])
     return sonuc
 
 def main(arg):

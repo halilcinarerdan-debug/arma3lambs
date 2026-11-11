@@ -22,7 +22,7 @@ params [["_mod", "", [""]], ["_a", []]];
 switch (_mod) do {
     case "BEKLE": {
         private _t = diag_tickTime + 180;
-        waitUntil { sleep 0.5; ((!isNil "lambs_danger_planKapiStarted") && {!isNil "lambs_danger_fnc_komutanPlan"} && {time > 4}) || {diag_tickTime > _t} };
+        waitUntil { sleep 0.5; ((!isNil "lambs_danger_planKapiStarted") && {time > 4}) || {diag_tickTime > _t} };
         // v8.407 GRUP ADINDAN OTOMATIK GOREV (RPT 3b142eec: 3DEN nitelik degiskenleri HIC YOK -> Gorev Ata modulleri secimi okuyamadi, 'recon' / 'recon araci' / 'medic' / 'topcu' gorevsiz kaldi, recon hic calismadi):
         //   gorevi bos grubun adi (groupId) 'recon' iceriyorsa RECON ('arac' / 'apc' de varsa RECON_ARAC), 'medic' / 'medevac' MEDEVAC, 'topcu' TOPCU olarak atanir (grubun araclarina da). Gorev Ata modulu 'Otomatik' ise bunu SILMEZ. Kapatma: lambs_danger_gorevAdOtomatikOff = true
         if (isServer && {!isNil "lambs_danger_planKapiStarted"} && {!(missionNamespace getVariable ["lambs_danger_gorevOtoYapildi", false])} && {!(missionNamespace getVariable ["lambs_danger_gorevAdOtomatikOff", false])}) then {

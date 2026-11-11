@@ -13,9 +13,9 @@
  *   [ONUCUS] GRUP       her AI grubu: taraf, asker, gorev etiketi, lider, aracta mi
  *   [ONUCUS] ARAC       kara araclari: sinif, kargo koltuk sayisi, surucu grubu, gorev
  *   [ONUCUS] TOPCU / IHA   topcu araclari (mermi, gorev, sahipli grup) ve IHA'lar
- *   [ONUCUS] KAPASITE   taraf basina yaya asker ve nakil koltugu
+ *   [ONUCUS] KAPASITE   taraf basina yaya asker ve arac koltugu
  *   [ONUCUS] OYUNCU    oyuncu, grubu, HQ baglantisi
- *   [ONUCUS-UYARI]      celiskiler: nitelik degiskeni yok, grup adi 'recon' ama gorev bos, topcu araci var ama TOPCU grubu yok, koltuk yetmiyor ...
+ *   [ONUCUS-UYARI]      celiskiler: nitelik degiskeni yok, topcu araci var ama TOPCU grubu yok, ...
  * Karne: tools/rpt_ozet.py --onucus
  * Kapatma: lambs_danger_onUcusOff = true (mission init'te).
  *
@@ -62,10 +62,10 @@ lambs_danger_onUcusStarted = true;
         };
     } forEach _moduller;
     (format ["MODUL | toplam %1 ELITE 3DEN modulu", count _moduller]) call _L;
-    // v8.502: modul yoksa bilgi satiri (uyari degil): plan / nakil / faz sistemleri kullanilmaz, yalniz taktik tepkiler calisir
+    // v8.502: modul yoksa bilgi satiri (uyari degil): yalniz taktik tepkiler calisir
     private _bilgiSatiri = "";
     if (_moduller isEqualTo []) then {
-        _bilgiSatiri = "ELITE 3DEN modulu yok: plan / nakil / faz sistemleri KULLANILMAZ, yalniz taktik tepkiler (temas, bounding, CQB, ates-hareket, bakis) calisir";
+        _bilgiSatiri = "ELITE 3DEN modulu yok: yalniz taktik tepkiler (temas, bounding, CQB, ates-hareket, bakis) calisir";
         ("BILGI | " + _bilgiSatiri) call _L;
     };
     if (_nitelikYok isNotEqualTo []) then {
@@ -74,12 +74,11 @@ lambs_danger_onUcusStarted = true;
     };
 
     // ---------------------------------------------------------------- 2 AYAR
-    private _ayarAd = ["lambs_danger_nakilV2", "lambs_danger_orphanOff", "lambs_danger_fireLineOn", "lambs_danger_atisUstunlugu", "lambs_danger_ihaUcakIrtifa", "lambs_danger_ihaUcakHavadan", "lambs_danger_tasimaTutS", "lambs_danger_nakilTahminHiz", "lambs_danger_planMesafe", "lambs_danger_bastirmaYogunluk"];
+    private _ayarAd = ["lambs_danger_orphanOff", "lambs_danger_fireLineOn", "lambs_danger_atisUstunlugu", "lambs_danger_ihaUcakIrtifa", "lambs_danger_ihaUcakHavadan", "lambs_danger_bastirmaYogunluk"];
     (format ["AYAR | %1", _ayarAd apply { format ["%1=%2", _x select [13, (count _x) - 13], missionNamespace getVariable [_x, "yok"]] }]) call _L;
 
     // ---------------------------------------------------------------- 3 GRUPLAR
     private _gruplar = allGroups select { !isNull _x && {(side _x) in [west, east, resistance]} && {({ alive _x } count (units _x)) > 0} };
-    private _recon = [];
     {
         private _g = _x;
         private _idx = _forEachIndex;
@@ -90,13 +89,8 @@ lambs_danger_onUcusStarted = true;
         if (_idx < 30) then {
             (format ["GRUP | %1 | %2 | asker %3 | gorev '%4' | lider %5 (oyuncu %6) | arac %7 | yerel %8", groupId _g, side _g, { alive _x } count (units _g), _gv, [name _ld, "-"] select (isNull _ld), isPlayer _ld, _veh, local _g]) call _L;
         };
-        if (((toLower (groupId _g)) find "recon") >= 0 && {_gv isEqualTo ""}) then { _recon pushBack (groupId _g); };
     } forEach _gruplar;
     (format ["GRUP | toplam %1 AI grubu (ilk 30 gosterildi)", count _gruplar]) call _L;
-    if (_recon isNotEqualTo []) then {
-        _uyari = _uyari + 1;
-        (format ["grup adi 'recon' iceriyor ama gorev bos: %1 (Gorev Ata modulu / grup adindan otomatik atama bekleniyor)", _recon]) call _W;
-    };
 
     // ---------------------------------------------------------------- 4 ARACLAR / TOPCU / IHA
     private _araclar = vehicles select { alive _x && {_x isKindOf "LandVehicle"} && {!isNull (driver _x)} && {!(unitIsUAV _x)} && {(getNumber (configOf _x >> "artilleryScanner")) <= 0} };
@@ -130,7 +124,7 @@ lambs_danger_onUcusStarted = true;
         if (!(_topGrupTaraf getOrDefault [str _sd, false])) then {
             if ((_x getVariable ["lambs_danger_gorev", (group (driver _x)) getVariable ["lambs_danger_gorev", ""]]) isNotEqualTo "TOPCU") then {
                 _uyari = _uyari + 1;
-                (format ["topcu araci %1 (%2) var ama gorevi TOPCU degil (gorev '%3'): plan topcu destegini kullanmaz", typeOf _x, _sd, _x getVariable ["lambs_danger_gorev", (group (driver _x)) getVariable ["lambs_danger_gorev", ""]]]) call _W;
+                (format ["topcu araci %1 (%2) var ama gorevi TOPCU degil (gorev '%3'): topcu destegi (Gorev Ata TOPCU) bu araci kullanmaz", typeOf _x, _sd, _x getVariable ["lambs_danger_gorev", (group (driver _x)) getVariable ["lambs_danger_gorev", ""]]]) call _W;
             };
         };
     } forEach ([_toplar, 8] call _ilk);
@@ -148,10 +142,6 @@ lambs_danger_onUcusStarted = true;
         private _kap = _kapTop getOrDefault [str _sd, 0];
         if (_yaya > 0 || {_kap > 0}) then {
             (format ["KAPASITE | %1 | yaya AI asker %2 | nakil koltugu %3 (APC / KAMYON / IFV, surucusu olan)", _sd, _yaya, _kap]) call _L;
-            if (_kap < _yaya && {_kap > 0}) then {
-                _uyari = _uyari + 1;
-                (format ["%1: nakil koltugu (%2) yaya asker sayisindan (%3) az: en az %4 asker yaya kalabilir", _sd, _kap, _yaya, _yaya - _kap]) call _W;
-            };
         };
     } forEach [west, east, resistance];
 

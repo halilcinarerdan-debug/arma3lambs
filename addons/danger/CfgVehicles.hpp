@@ -100,42 +100,8 @@ class CfgVehicles {
     };
 
     // ELITE fork (v8.113): objektif (komutan plani) - Zeus'tan objektif + duşman bilgisi verilir, komutan harekat plani + waypoint uretir
-    class GVAR(Objektif) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(Objektif);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Objektif (komutan plani)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\attack_ca.paa";
-        function = QFUNC(moduleObjektif);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
 
     // ELITE fork (v8.115): manuel plan noktasi - Zeus rally point / ORP / destek / kanat / CCP noktasini kendisi secer (komutan uygular, uyari loglar)
-    class GVAR(PlanNokta) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(PlanNokta);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Plan Noktasi (manuel)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(modulePlanNokta);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
 
     class GVAR(GorevAta) : Module_F {
         author = "ELITE fork";
@@ -165,24 +131,6 @@ class CfgVehicles {
         category = "Lambs_Danger_Cat";
         icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
         function = QFUNC(moduleKarakol);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
-
-    class GVAR(HQ) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(HQ);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE HQ / US Kur (kategori + squad atama)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(moduleHQ);
         class EventHandlers {
             class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
             class ADDON {
@@ -228,42 +176,8 @@ class CfgVehicles {
     };
 
     // ELITE fork (v8.404): fazli harekat kontrolu (Basla / Sonraki faz / Durdur / Durum)
-    class GVAR(HarekatKontrol) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(HarekatKontrol);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Harekat Kontrol (basla / faz / durdur)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\map_ca.paa";
-        function = QFUNC(moduleHarekatKontrol);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
 
     // ELITE fork (v8.239): AI surucu A/B testi - ayni arac sinifi, temiz murettebat, ELITE kapali / acik, doMove / waypoint, yolcusuz / yolcuyla
-    class GVAR(SurusAB) : Module_F {
-        author = "ELITE fork";
-        _generalMacro = QGVAR(SurusAB);
-        scope = 1;
-        scopeCurator = 2;
-        displayName = "ELITE Arac SURUS A/B Testi (AI surucu tani)";
-        isGlobal = 0;
-        category = "Lambs_Danger_Cat";
-        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\move_ca.paa";
-        function = QFUNC(moduleSurusAB);
-        class EventHandlers {
-            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
-            class ADDON {
-                init = QUOTE(call EFUNC(main,initModules));
-            };
-        };
-    };
 
     class GVAR(GozetleAta) : Module_F {
         author = "ELITE fork";

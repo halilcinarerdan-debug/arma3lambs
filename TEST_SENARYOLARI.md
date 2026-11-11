@@ -1,5 +1,7 @@
 # Test senaryolari (lambs_danger ELITE)
 
+> **v8.503 (dal `claude/sade-waypoint`) — SADELESTIRME NOTU:** komutan plani / ELITE Objektif (Saldiri-Savunma) / Harekat / personel nakli (V2) / recon / HQ-US / hendek-mevzi kurulumu / tank duellosu katmani KALDIRILDI. Bu belgede bu konulara ait bolumler TARIHSELDIR (eski dallarda gecerli: `claude/nakil-v2`, `claude/tasarimci-makro`). Gecerli omurga: waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu. Ayrinti: DEVIR_LOGU_v7.0.txt v8.503, YOL_HARITASI_v8.4xx.md Asama 10.
+
 Her senaryo icin: kurulum -> beklenen log -> `python tools/rpt_ozet.py <rpt>` ile hizli kontrol.
 Yuklenen surum `[ELITE-BOOT] ... build vX` satirindan dogrulanir.
 
@@ -154,7 +156,7 @@ Sonuca gore: ELITE acikken gitmiyorsa ikinci kosuda "Otomatik bisect" isaretli t
 Ortam: P1 gibi EAST SAVUN (4 grup, hendek alani var), karsi taraf WEST ELE GECIR; topcu destegi 'cagri'.
 1. Temas ve topcu olsun; savunma gruplarinin hendekte KALMASI beklenir. Loglar: `[MEVZI-TUT] ... hendekte: komutan beyni / taktik atlandi` (grup basina 60 sn'de bir), `[TASIMA]` vb. degil. LAMBS `TACTICS HIDE/HOLD/FLANK` satiri hendekteki gruplar icin ARTIK gelmemeli (kayip >= %60 sonrasi gelebilir).
 2. YEDEK karsi saldiri: `[PLAN-SAVUNMA] KARSI SALDIRI: ... dusmanlar: <tip/taraf listesi>` — listede GERCEK dusman tipleri olmali; sonrasinda `KARSI SALDIRI BITTI: ... mevziye donuyor` ve `[HENDEK-YERLES]` tekrar gelmeli. Acikta 5 dk+ kalan grup olmamali.
-3. Savunma suresi: `lambs_danger_planSavunmaS` kisa verip (ornegin 120) temasta `SURE DOLDU ... temas kesilene kadar surer` satiri gelmeli; temas kesilince BITTI.
+3. Savunma suresi: `planSavunmaS (kaldirildi)` kisa verip (ornegin 120) temasta `SURE DOLDU ... temas kesilene kadar surer` satiri gelmeli; temas kesilince BITTI.
 4. Savunma atesi: topcu aracina menzil icinde ol; dusman >= 3 ve dostundan >= 480 m: `[PLAN-TOPCU] ... SAVUNMA ATESI` (RED / izin kurallari ayni). Atmazsa `ATIS YAPILMADI` nedeni yazar.
 5. Topcu tepkisi: `[TOP-TEPKI]` satirlari (ilk 30): her asker icin karar (HENDEGE kosuyor / ZATEN HENDEKTE / HENDEK YOK: hemen uzaklasiyor ...). Acikta olup 'tehlike disinda' diyenleri not al.
 6. Senkron tavani: hendekte duran piyadenin onunde GOZETLEME gorevli tank: `[ARAC-SENKRON] ... SERBEST (eskort piyade durdu: BEKLE tavani ...)`.

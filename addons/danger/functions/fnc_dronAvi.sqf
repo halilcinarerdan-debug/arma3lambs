@@ -130,11 +130,11 @@ private _arPlan = createHashMap;
 private _opN = _lp getPos [((_lp distance2D _est) min 1600) max 250, _brg];
 if (_aracIste) then {
     _arPlan = createHashMapFromArray [["id", format ["DRONAVI-%1", round time]], ["taraf", _taraf], ["reconG", [_pg]], ["rp", _lp], ["hqPoz", _lp], ["aracHafif", true]];
-    private _av = ["SEC", _arPlan] call FUNC(reconArac);
+    private _av = objNull;   // v8.503 SADE: reconArac kaldirildi -> arac secimi yok, devriye YAYA gider
     // v8.323 (kullanici: 'ama mumkunse, yoksa eldekini degerlendirsinler'): hafif arac yoksa eldeki uygun araca (APC / kamyon / IFV; recon arac secimi) bin; o da yoksa yaya
     if (isNull _av) then {
         _arPlan set ["aracHafif", false];
-        _av = ["SEC", _arPlan] call FUNC(reconArac);
+        _av = objNull;   // v8.503 SADE: reconArac kaldirildi -> arac secimi yok, devriye YAYA gider
         if (!isNull _av) then { diag_log format ["[DRON-AVI] %1 | hafif arac yok -> eldeki arac: %2", groupId _kaynak, getText (configOf _av >> "displayName")]; };
     };
     if (!isNull _av) then {
@@ -189,7 +189,7 @@ diag_log format ["[DRON-AVI] %1 | %2 | devriye: %3 asker (%4) %5 m ileriye (tahm
     private _sure = (_mesafe / 1.2) + 150;
     if (_aracVar) then {
         // v8.322 RECON MANTIGI: ayrilmis hafif arac alir, sessiz surus, 150 m kala indirir, arac 250 m geri cekilir (fnc_reconArac CALIS)
-        private _h = ["CALIS", _arPlan, [_pg], _opN] spawn FUNC(reconArac);
+        private _h = [] spawn {};   // v8.503 SADE: reconArac kaldirildi (bu dal _aracVar false oldugu icin zaten calismaz)
         private _tout = time + 480 + ((_pg distance2D _opN) / 5);
         waitUntil {
             sleep 3;
