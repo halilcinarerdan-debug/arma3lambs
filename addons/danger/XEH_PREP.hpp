@@ -596,7 +596,7 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.504-SADE (WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.505-SADE (DUVAR BAKISI: comelen + bina ici + gizli hedefli kapsam; WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {

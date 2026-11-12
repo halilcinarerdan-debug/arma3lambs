@@ -8,12 +8,13 @@
  * 0: Asker <OBJECT>
  * 1: Istenen yon (derece) <NUMBER>
  * 2: Kayma dizisi <ARRAY> (varsayilan [0, 25, -25, 50, -50, 75, -75])
+ * 3: Aranacak acik mesafeler <ARRAY> (varsayilan [40, 20]; bina ici icin [12, 6]; v8.505)
  *
  * Return Value: Acik yon (derece) ya da -999 (hicbiri acik degil: asker bakisi serbest birakilmali) <NUMBER>
  * Public: No
 */
 
-params [["_u", objNull, [objNull]], ["_yon", 0, [0]], ["_kay", [0, 25, -25, 50, -50, 75, -75], [[]]]];
+params [["_u", objNull, [objNull]], ["_yon", 0, [0]], ["_kay", [0, 25, -25, 50, -50, 75, -75], [[]]], ["_mes", [40, 20], [[]]]];
 if (isNull _u) exitWith {-999};
 private _eye = eyePos _u;
 private _sec = -999;
@@ -25,5 +26,5 @@ private _sec = -999;
         if (!(lineIntersects [_eye, _p, _u, objNull]) && {!(terrainIntersectASL [_eye, _p])}) exitWith { _sec = _b; };
     } forEach _kay;
     if (_sec > -900) exitWith {};
-} forEach [40, 20];
+} forEach _mes;
 _sec
