@@ -48,6 +48,13 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
             _sonOzet = time;
             private _a = _sayac get "ayarlandi";
             diag_log format ["[SIPER-YAPIS-OZET] 60 sn: ayarlandi:%1 (ort kayma %2 m) | acikta:%3 reddedildi:%4 | arazi siperi:%8 | durus UP:%5 MIDDLE:%6 DOWN:%7", _a, ((_sayac get "kaymaTop") / (_a max 1)) toFixed 2, _sayac get "acikta", _sayac get "reddedildi", _sayac get "UP", _sayac get "MIDDLE", _sayac get "DOWN", _sayac getOrDefault ["arazi", 0]];
+            private _snO = missionNamespace getVariable ["lambs_danger_acikSinif", createHashMap];
+            if (count _snO > 0) then {
+                private _top = ((_snO getOrDefault ["sert<=20m", 0]) + (_snO getOrDefault ["yalniz agac", 0]) + (_snO getOrDefault ["yalniz cali", 0]) + (_snO getOrDefault ["hic yok", 0])) max 1;
+                private _sn = _snO getOrDefault ["sert<=20m", 0];
+                diag_log format ["[ACIKTA-SINIF-OZET] 60 sn, acikta %1 ornek: sert siper <=20 m %2 (%3 %%; ort %4 m) | yalniz agac %5 | yalniz cali %6 | hic yok %7 | grup: bounding %8, bounding-kosucu %9, diger %10", _top, _sn, round (100 * _sn / _top), ((_snO getOrDefault ["sert_mesafe_top", 0]) / (_sn max 1)) toFixed 1, _snO getOrDefault ["yalniz agac", 0], _snO getOrDefault ["yalniz cali", 0], _snO getOrDefault ["hic yok", 0], _snO getOrDefault ["grup:bounding", 0], _snO getOrDefault ["grup:bounding-kosucu", 0], _snO getOrDefault ["grup:diger", 0]];
+            };
+            missionNamespace setVariable ["lambs_danger_acikSinif", createHashMap];
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
         if (missionNamespace getVariable ["lambs_danger_coverHugOff", false]) then { continue };
@@ -127,6 +134,27 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 };
                 if (_hP isEqualTo [] || {_d > _esik}) then {
                     _sayac set ["acikta", (_sayac get "acikta") + 1];
+                    // v8.519 ACIKTA SINIFLAMA (teshis; kullanici: 'Altis'te acikta sayisi hala yuksekse yakinda kaya / duvar / bina olup olmadigina bak'): acikta kalan askerin 16-20 m cevresinde ne var?
+                    //   sert (kaya / duvar / bina / HIDE) | yalniz agac | yalniz cali | hic yok  +  grup durumu (bounding / kosucu / diger).  [ACIKTA-SINIF] 60 sn ozeti + ilk 15 ornek.
+                    private _snf = missionNamespace getVariable ["lambs_danger_acikSinif", createHashMap];
+                    missionNamespace setVariable ["lambs_danger_acikSinif", _snf];
+                    private _sertO = nearestTerrainObjects [_u, ["ROCK", "ROCKS", "WALL", "BUILDING", "HIDE"], 20, false, true];
+                    private _binaO = nearestObjects [_u, ["House"], 20];
+                    private _agacO = nearestTerrainObjects [_u, ["TREE"], 16, false, true];
+                    private _caliO = nearestTerrainObjects [_u, ["BUSH", "SMALL TREE"], 16, false, true];
+                    private _kat = if (_sertO isNotEqualTo [] || {_binaO isNotEqualTo []}) then {"sert<=20m"} else { if (_agacO isNotEqualTo []) then {"yalniz agac"} else { if (_caliO isNotEqualTo []) then {"yalniz cali"} else {"hic yok"} } };
+                    private _grD = if (_g getVariable [QGVAR(isBounding), false]) then { ["bounding", "bounding-kosucu"] select ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) } else {"diger"};
+                    _snf set [_kat, (_snf getOrDefault [_kat, 0]) + 1];
+                    _snf set ["grup:" + _grD, (_snf getOrDefault ["grup:" + _grD, 0]) + 1];
+                    if (_kat isEqualTo "sert<=20m") then {
+                        private _en0 = if (_sertO isNotEqualTo []) then {_sertO select 0} else {_binaO select 0};
+                        _snf set ["sert_mesafe_top", (_snf getOrDefault ["sert_mesafe_top", 0]) + (_u distance2D _en0)];
+                        if ((missionNamespace getVariable ["lambs_danger_acikSinifLogN", 0]) < 15) then {
+                            missionNamespace setVariable ["lambs_danger_acikSinifLogN", (missionNamespace getVariable ["lambs_danger_acikSinifLogN", 0]) + 1];
+                            private _mdl = (getModelInfo _en0) select 0;
+                            diag_log format ["[ACIKTA-SINIF] %1 | %2 | acikta ama %3 m'de sert siper var: %4 | stance %5 | grup %6 | acikSiperKilit %7 sn | taktikKilit %8 sn | dusman %9 m", groupId _g, name _u, round (_u distance2D _en0), _mdl, stance _u, _grD, round (((_u getVariable [QGVAR(acikSiperT), 0]) - time) max 0), round (((_u getVariable [QGVAR(taktikKilit), 0]) - time) max 0), round _ed];
+                        };
+                    };
                     // v8.303 ACIKTA + yakinda BINA (kullanici: 'arkada ev var adam acikta ama evi siper kullanmiyor'): sert yuzey yok / uzaksa 28 m icindeki binada dusmandan gizli bir noktaya git
                     [_u, _en] call FUNC(acikSiper);
                     if (isNil "lambs_danger_hugAcikLogN") then { lambs_danger_hugAcikLogN = 0; };
