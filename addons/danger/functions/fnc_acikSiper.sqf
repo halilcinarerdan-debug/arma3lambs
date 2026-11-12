@@ -82,6 +82,8 @@ private _talepYaz = {
 // v8.305 NESNENIN ARKASINA GEC (kullanici: 'siper cok guzel seciyor ama sadece yaklasiyor, siperin yanindaysa guvende saniyor, agac varsa sadece agacin yanindan gecip gidiyor'):
 //   14 m icindeki sert nesneler (agac / kaya / duvar, yukseklik >= 0.7 m): dusmandan nesneye dogru yonde nesnenin 0.55 m ARKASI hesaplanir; dusmanin gozunden o noktaya (1.5 / 1.0 / 0.4 m) hat nesne
 //   tarafindan kesiliyorsa aday (en yuksek korunan durus: UP > MIDDLE > DOWN); skor = mesafe + durus cezasi (0 / 2 / 5); dusmana 10 m'den fazla yaklasmaz.
+// v8.521 GERI SINIRI (kullanici: 'bir one gidiyor sonra bir arkaya gidiyor'): siper dusmandan mevcut konumdan en fazla 3 m daha UZAK olabilir (ciddi baski >= 0.5 iken 10 m); eskiden sinirsiz geri (RPT 14:26: bina 16-22 m, hep geride) -> git-gel
+private _geriMax = [3, 10] select ((getSuppression _u) >= 0.5);
 private _obj = [];
 private _objS = 1e9;
 private _objDurus = "";
@@ -97,7 +99,7 @@ private _objAd = "";
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
         private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5;
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
-        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {!([_pos, _aralik] call _doluMu)}) then {
+        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
             private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, (missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]), "NONE"]) isNotEqualTo [] };
             // en yuksek durus: ortadaki isin kapali VE govde genisligi (+-0.25 m) kapali (ince direk / tel siper sayilmaz)
@@ -135,7 +137,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
         if (_yk >= 0.3 && {(_u distance2D _op) <= _yar}) then {
             private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2;
             private _pos = _op getPos [_r + 0.5, _en getDir _o];
-            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {!([_pos, _aralik] call _doluMu)}) then {
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
                 private _gizli = {
                     params ["_h"];
@@ -161,7 +163,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi
         private _r = _x;
         for "_ai" from 0 to 7 do {
             private _pt = _p getPos [_r, (_ai * 45) + (_u getDir _en)];
-            if (!surfaceIsWater _pt && {(_pt distance2D _en) >= (_ed - 10)} && {!([_pt, _aralik] call _doluMu)}) then {
+            if (!surfaceIsWater _pt && {(_pt distance2D _en) >= (_ed - 10)} && {(_pt distance2D _en) <= (_ed + _geriMax)} && {!([_pt, _aralik] call _doluMu)}) then {
                 private _ptASL = AGLToASL [_pt select 0, _pt select 1, 0];
                 private _dn = "";
                 private _dc = 0;
@@ -188,7 +190,7 @@ private _nesneGit = {
     _u doMove _obj;
     _u setUnitPos "UP";
     [_u, _obj, _en, _objDurus] call FUNC(siperZorla);   // v8.510: ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
-    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
         missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
@@ -218,7 +220,7 @@ private _edir = _p getDir _en;
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
+        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {(_bp distance2D _en) <= (_ed + _geriMax)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
             private _bA = AGLToASL _bp;
             if (!_cqbV2) then {
                 if (_d < _enS && {lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.3], _en, _u]}) then { _enS = _d; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = false; };
@@ -240,6 +242,7 @@ private _edir = _p getDir _en;
                         if (_acik >= 5) then { _sk = _sk + 8; };
                     } else {
                         _sk = _sk + 30;
+                        if ((getSuppression _u) < 0.5) then { _sk = 1e9; };   // v8.521: atis pozisyonu yoksa (pasif gizlenme) yalniz ciddi baskida; aksi halde binanin icinde atissiz bekleme (git-gel / pasif) yok
                     };
                     if !(lineIntersects [_bA vectorAdd [0, 0, 1.6], _bA vectorAdd [0, 0, 25], _u]) then { _sk = _sk + 15; };
                     switch (_rolB) do {
@@ -271,7 +274,7 @@ _u setUnitPos "AUTO";
 _u doMove _en_iyi;
 // v8.354: atis pozisyonuna varinca durus + dusmana bak (pasif beklemesin); 45 sn sonra serbest
 if (_atisVar) then {
-    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; [_uu] call FUNC(siperTut); }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu doWatch objNull; }; }, [_u], 45] call CBA_fnc_waitAndExecute;
 };
 if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {

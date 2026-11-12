@@ -38,6 +38,7 @@ if (_mes < 1.2 || {_mes > (20 / (((missionNamespace getVariable ["lambs_danger_s
 private _ed = _u distance2D _e;
 if (_ed <= 8) exitWith {false};   // yakin dovus: kacma, ates et (fnc_yakinAtes)
 if ((_pos distance2D _e) < (_ed - 4)) exitWith {false};   // dusmana 4 m'den fazla yaklastirmaz
+if ((_pos distance2D _e) > (_ed + ([3, 10] select ((getSuppression _u) >= 0.5)))) exitWith {false};   // v8.521: geri siniri (git-gel): siper en fazla 3 m (ciddi baskida 10 m) daha uzak
 
 // v8.511 RISK CARPANI (kullanici: 'risk carpani ekle, yakin mesafede bu sure kissin, tehdite gore; karsida 1 kisi varsa gerek yok'):
 //   tehdit = bilinen (nearTargets 200 m) dusman sayisi + agir silah (arac x2, roketatar / MG x1.5) ; baz: 1 kisi 0 / 2 kisi 0.4 / 3 kisi 0.6 / 4+ 0.8; + baski x 0.4 (asker) ; x mesafe carpani
@@ -136,6 +137,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
         _uu setUnitPosWeak _dd;
+        [_uu] call FUNC(siperTut);   // v8.521: varinca siperde bekle (formasyon slotuna geri yuruyup git-gel yapmasin)
         if (_ak && {(missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) < 30}) then {
             missionNamespace setVariable ["lambs_danger_kosuAtesLogN", (missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) + 1];
             diag_log format ["[KOSU-ATES] %1 | %2 | kosarken atilan mermi: %3 (muzzle %4)", groupId (group _uu), name _uu, (_mm0 - (_uu ammo (currentMuzzle _uu))) max 0, currentMuzzle _uu];

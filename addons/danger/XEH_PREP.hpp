@@ -105,6 +105,7 @@ PREP(uglPozisyon);
 PREP(yakinAtes);
 PREP(siperZorla);
 PREP(siperKalibre);
+PREP(siperTut);
 PREP(senaryoRota);
 PREP(aracHasar);
 PREP(yigilmaCoz);
@@ -615,7 +616,7 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.520-SADE (KENTSEL ONCELIK: ev ici; KAPI YARIDA DURMA; ACIKTA SINIFLAMA TESHISI; UGL BAYGIN DUSMAN ENGELI; KOSARKEN forceWeaponFire; ARAZI SIPERI; HARITA KALIBRASYONU: agac govde / FIRE LOD olcumu; SIPER TANIMI SIKI: yakinlik 6 -> 3 m, govde genisligi; SIPER YAKINLIGI x2; KOSARKEN ATES: sipere zorla b sikki; RISK CARPANI; YAKIN ATES + SIPERE ZORLA; UGL BOOST + BITKI ORTUSU; BOUNDING AGRESIFLIGI: siper-siper tempo / sicrama / yakinlasma; KAPI ACMA: fnc_kapiBekci / kapiAc; DUVAR BAKISI: comelen + bina ici + gizli hedefli kapsam; WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.521-SADE (SIPERDE TUT + GERI SINIRI: git-gel yok; KENTSEL ONCELIK: ev ici; KAPI YARIDA DURMA; ACIKTA SINIFLAMA TESHISI; UGL BAYGIN DUSMAN ENGELI; KOSARKEN forceWeaponFire; ARAZI SIPERI; HARITA KALIBRASYONU: agac govde / FIRE LOD olcumu; SIPER TANIMI SIKI: yakinlik 6 -> 3 m, govde genisligi; SIPER YAKINLIGI x2; KOSARKEN ATES: sipere zorla b sikki; RISK CARPANI; YAKIN ATES + SIPERE ZORLA; UGL BOOST + BITKI ORTUSU; BOUNDING AGRESIFLIGI: siper-siper tempo / sicrama / yakinlasma; KAPI ACMA: fnc_kapiBekci / kapiAc; DUVAR BAKISI: comelen + bina ici + gizli hedefli kapsam; WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {
