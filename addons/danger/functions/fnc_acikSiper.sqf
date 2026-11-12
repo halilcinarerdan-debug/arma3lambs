@@ -27,7 +27,21 @@ private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
 private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 16];
 _u setVariable [QGVAR(acikSiperT), time + ([25, 10] select _hizli)];
 private _g = group _u;
-if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isRetreating), false]}) exitWith {false};
+// v8.515: eskiden bounding / taktik yurutenlerin TUM grubu atlaniyordu -> RPT 13:14 (Alpha 1-1 BOUNDING iken uyeler 140-160 m'de acikta: [SIPER-YAPIS-OZET] acikta 24 / dk, [ACIK-SIPER] 1) hic kurtarilmiyordu.
+//   Simdi yalniz geri cekilen grup, KOSUCU (forceMove) ve baska emirle kilitli (taktikKilit) asker atlanir; bounding'in kapsama / bekleyen uyeleri siperden yararlanir.
+private _sayAS = missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap];
+missionNamespace setVariable ["lambs_danger_acikSiperSay", _sayAS];
+private _sebep = if (_g getVariable [QGVAR(isRetreating), false]) then {"geri cekilme"} else { if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) then {"kosucu"} else { if ((_u getVariable [QGVAR(taktikKilit), 0]) > time) then {"kilitli"} else {""} } };
+if (_sebep isNotEqualTo "") exitWith { _sayAS set [_sebep, (_sayAS getOrDefault [_sebep, 0]) + 1]; false };
+if (isNil "lambs_danger_acikSiperOzetT") then {
+    lambs_danger_acikSiperOzetT = time + 60;
+};
+if (time > lambs_danger_acikSiperOzetT) then {
+    lambs_danger_acikSiperOzetT = time + 60;
+    diag_log format ["[ACIK-SIPER-OZET] 60 sn: %1", (_sayAS toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }];
+    _sayAS = createHashMap;
+    missionNamespace setVariable ["lambs_danger_acikSiperSay", _sayAS];
+};
 
 private _p = getPosATL _u;
 private _eASL = eyePos _en;
@@ -52,7 +66,9 @@ private _govdeKapali = {
     private _hd = _gA vectorAdd [0, 0, _hh];
     private _vv = _hd vectorDiff _eA;
     private _pp = vectorNormalized [-(_vv select 1), _vv select 0, 0];
-    ({(lineIntersectsSurfaces [_eA, _hd vectorAdd (_pp vectorMultiply _x), _enm, _unt, true, 1, "FIRE", "NONE"]) isNotEqualTo []} count [-0.25, 0.25]) isEqualTo 2
+    private _gvA = missionNamespace getVariable ["lambs_danger_siperGovde", 0.25];
+    private _lodA = missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"];
+    ({(lineIntersectsSurfaces [_eA, _hd vectorAdd (_pp vectorMultiply _x), _enm, _unt, true, 1, _lodA, "NONE"]) isNotEqualTo []} count [-_gvA, _gvA]) isEqualTo 2
 };
 // talep: bu askerin secimi grubun ortak rezerv defterine + kendi 'hedef' degiskenine yazilir ([YIGILMA-NEDEN] ayni noktaya giden askerleri buradan adlandirir)
 private _talepYaz = {
@@ -83,7 +99,7 @@ private _objAd = "";
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
         if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
-            private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, "FIRE", "NONE"]) isNotEqualTo [] };
+            private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, (missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]), "NONE"]) isNotEqualTo [] };
             // en yuksek durus: ortadaki isin kapali VE govde genisligi (+-0.25 m) kapali (ince direk / tel siper sayilmaz)
             private _ds = ["", 99];
             {
@@ -136,6 +152,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
 };
 
 if (_obj isNotEqualTo []) exitWith {
+    _sayAS set ["nesne", (_sayAS getOrDefault ["nesne", 0]) + 1];
     _dolu pushBack [_obj, time];
     missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
     [_obj, _objAd] call _talepYaz;
@@ -209,8 +226,9 @@ private _edir = _p getDir _en;
     } forEach (_b buildingPos -1);
 } forEach ((nearestObjects [_p, ["House"], _yar + 12]) select {(count (_x buildingPos -1)) > 0});
 
-if (_en_iyi isEqualTo []) exitWith {false};
+if (_en_iyi isEqualTo []) exitWith { _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1]; false };
 
+_sayAS set ["bina", (_sayAS getOrDefault ["bina", 0]) + 1];
 _dolu pushBack [_en_iyi, time];
 missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
 [_en_iyi, _binaAd] call _talepYaz;

@@ -99,18 +99,20 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 //   'siper' sayiliyor, asker 6 m uzakta acikta duruyordu. Simdi: (a) govde genisligi (+-0.25 m yan isinlar) ucu de kapali olmali, (b) engel askere <= lambs_danger_siperYakinlik (3 m; eskiden 6),
                 //   (c) elektrik teli / direk / lamba / kablo nesneleri sayilmaz.
                 private _esik = missionNamespace getVariable ["lambs_danger_siperYakinlik", 3];
+                private _gvK = missionNamespace getVariable ["lambs_danger_siperGovde", 0.25];   // v8.515: haritaya gore olculen govde toleransi (fnc_siperKalibre)
+                private _lodK = missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"];
                 private _perpE = (vectorNormalized ((_pASL vectorAdd [0, 0, 1]) vectorDiff _eASL)) vectorCrossProduct [0, 0, 1];
                 {
                     private _uH = _pASL vectorAdd [0, 0, _x];
-                    private _hh = lineIntersectsSurfaces [_eASL, _uH, _en, _u, true, 1, "FIRE", "NONE"];
+                    private _hh = lineIntersectsSurfaces [_eASL, _uH, _en, _u, true, 1, _lodK, "NONE"];
                     if (_hh isNotEqualTo []) then {
                         private _hp = (_hh select 0) select 0;
                         private _ho = (_hh select 0) select 2;
                         private _dd = _uH distance _hp;
                         private _ad0 = toLower ([typeOf _ho, (getModelInfo _ho) select 0] select ((typeOf _ho) isEqualTo ""));
                         private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon"] findIf {(_ad0 find _x) >= 0}) >= 0;
-                        private _genis = ([-0.25, 0.25] findIf {
-                            (lineIntersectsSurfaces [_eASL, _uH vectorAdd (_perpE vectorMultiply _x), _en, _u, true, 1, "FIRE", "NONE"]) isEqualTo []
+                        private _genis = ([-_gvK, _gvK] findIf {
+                            (lineIntersectsSurfaces [_eASL, _uH vectorAdd (_perpE vectorMultiply _x), _en, _u, true, 1, _lodK, "NONE"]) isEqualTo []
                         }) < 0;
                         if (!_sahte && {_genis} && {_dd < _d} && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
                     };

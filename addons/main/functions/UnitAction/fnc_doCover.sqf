@@ -67,8 +67,10 @@ if (_dusmanVar && {_pos isEqualTo []}) then {
     private _esikK = missionNamespace getVariable ["lambs_danger_siperYakinlik", 3];
     private _perpK = (vectorNormalized (_benimASL vectorDiff _dusmanGoz)) vectorCrossProduct [0, 0, 1];
     private _kapaliSay = 0;
+    private _gvK = missionNamespace getVariable ["lambs_danger_siperGovde", 0.25];   // v8.515: haritaya gore (fnc_siperKalibre)
+    private _lodK = missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"];
     {
-        private _hh = lineIntersectsSurfaces [_dusmanGoz, _benimASL vectorAdd (_perpK vectorMultiply _x), objNull, _unit, true, 1, "FIRE", "NONE"];
+        private _hh = lineIntersectsSurfaces [_dusmanGoz, _benimASL vectorAdd (_perpK vectorMultiply _x), objNull, _unit, true, 1, _lodK, "NONE"];
         if (_hh isNotEqualTo []) then {
             private _ho = (_hh select 0) select 2;
             private _ad0 = toLower ([typeOf _ho, (getModelInfo _ho) select 0] select ((typeOf _ho) isEqualTo ""));
@@ -77,7 +79,7 @@ if (_dusmanVar && {_pos isEqualTo []}) then {
         } else {
             if (terrainIntersectASL [_dusmanGoz, _benimASL vectorAdd (_perpK vectorMultiply _x)]) then { _kapaliSay = _kapaliSay + 1; };
         };
-    } forEach [0, -0.25, 0.25];
+    } forEach [0, -_gvK, _gvK];
     _zatenKorunakli = _kapaliSay isEqualTo 3;
 
     if (_zatenKorunakli) then {
