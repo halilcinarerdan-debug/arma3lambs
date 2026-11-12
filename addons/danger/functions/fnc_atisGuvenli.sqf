@@ -47,7 +47,7 @@ if (_d < _minMes) exitWith {["hedef cok yakin"] call _gorev};
 
 private _side = side group _unit;
 private _dostlar = (allUnits select {
-    alive _x && {_x isNotEqualTo _unit} && {(_side getFriend (side _x)) >= 0.6} && {(_x distance2D _unit) < 450}
+    alive _x && {_x isNotEqualTo _unit} && {(_side getFriend (side group _x)) >= 0.6} && {(_x distance2D _unit) < 450}
 });
 
 // 2) hedef etrafinda dost

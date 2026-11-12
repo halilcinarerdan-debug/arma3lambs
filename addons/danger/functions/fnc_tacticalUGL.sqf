@@ -116,14 +116,15 @@ if (_d < 30 || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 ->
 // UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
 if (_d > ([group _unit, "uglUzakM", 240] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 12] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 
+// v8.518 KOK NEDEN (RPT 13:48 [UGL-DOST]): "engelleyen Andrey Kalashnikov taraf EAST dostluk 1.00": BAYGIN-KORU setCaptive yaptigi yarali dusman askerin `side _x` degeri CIVILIAN doner (dostluk 1.0) -> hedefin yanindaki bayilmis DUSMAN "dost / sivil" sayilip 40 mm'yi engelliyordu. `side group _x` (grup tarafi) kullanilir.
 // Dost atesi: hedefin lambs_danger_uglDostM (8 m; eskiden 12) cevresinde dost varsa atma (escort / ilerleyen birlik)
-private _dostIdx = (_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}};
+private _dostIdx = (_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) findIf {alive _x && {((side group _unit) getFriend (side group _x)) >= 0.6}};
 if (_dostIdx > -1) exitWith {
     // v8.517 TESHIS (RPT 13:36: dost_yakin 21 / 30 sn, yaricap 8 m'ye indirilmesine ragmen): kim engelliyor? (ilk 25)
     if ((missionNamespace getVariable ["lambs_danger_uglDostLogN", 0]) < 25) then {
         missionNamespace setVariable ["lambs_danger_uglDostLogN", (missionNamespace getVariable ["lambs_danger_uglDostLogN", 0]) + 1];
-        private _b = ((_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) select {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) select 0;
-        diag_log format ["[UGL-DOST] %1 | %2 (taraf %3) hedef %4 (taraf %5) %6 m | engelleyen: %7 taraf %8 (hedefe %9 m, dostluk %10, oyuncu %11)", groupId (group _unit), name _unit, side group _unit, name _target, side group _target, round _d, name _b, side group _b, round (_b distance2D _target), ((side group _unit) getFriend (side _b)) toFixed 2, isPlayer _b];
+        private _b = ((_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) select {alive _x && {((side group _unit) getFriend (side group _x)) >= 0.6}}) select 0;
+        diag_log format ["[UGL-DOST] %1 | %2 (taraf %3) hedef %4 (taraf %5) %6 m | engelleyen: %7 taraf %8 (hedefe %9 m, dostluk %10, oyuncu %11)", groupId (group _unit), name _unit, side group _unit, name _target, side group _target, round _d, name _b, side group _b, round (_b distance2D _target), ((side group _unit) getFriend (side group _b)) toFixed 2, isPlayer _b];
     };
     "dost_yakin" call _red
 };
