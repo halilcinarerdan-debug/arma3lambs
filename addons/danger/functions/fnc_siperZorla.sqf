@@ -6,7 +6,7 @@
  * ates edip siperi sonra aliyordu. Bu fonksiyon kisa (1.2 - 3.5 sn, RISK CARPANI ile) bir SIPERE ATILIS uygular:
  *   1) RAYCAST DOGRULAMA: (a) siper noktasi dusman gozunden GIZLI olmali (FIRE LOD hatti ya da arazi keser; durus yuksekligi 1.5 / 1.0 / 0.4), (b) askerden siper noktasina 0.6 m yukseklikte hat (GEOM) engelsiz
  *      (duvar / cit icinden gecilmez), (c) siper dusmana ilk konumdan >= 4 m daha yaklasmamali.
- *   2) ATILIS: hedef secimi (AUTOTARGET + TARGET) kapatilir (asker nisan alip durmaz), forceSpeed -1, FULL hiz, ayakta (UP), doMove; varinca ya da 3.5 sn sonra HER DURUMDA geri acilir,
+ *   2) ATILIS: hedef secimi (AUTOTARGET + TARGET) kapatilir (asker nisan alip durmaz); v8.512: zor durumda / oranla KOSARKEN BASTIRMA ATESI (hedef secimi acik, atis hatti acik sartiyla), forceSpeed -1, FULL hiz, ayakta (UP), doMove; varinca ya da 3.5 sn sonra HER DURUMDA geri acilir,
  *      varista durus (MIDDLE / DOWN) + dusmana bakis; ates serbest.
  *   RISK (v8.511): tehdit (bilinen dusman sayisi + agir silah / arac) x baski x mesafe -> 0-1; esik altinda (tek hafif dusman, yakin mesafe) atilis yok; sure 1.2 + 2.3 x risk. Mesafe 8 m 0, 25 m 0.6, 50 m+ 1.
  *   3) KORUMA: dusman <= 8 m (yakin dovus: fnc_yakinAtes ates etsin), asker forceMove / teslim / baygin, LAMBS gorevi / kal-bekle waypoint (fnc_senaryoKapi 'sabit'), 5 sn tekrar siniri.
@@ -86,32 +86,49 @@ if ((lineIntersectsSurfaces [_uASL, _pATL, _u, objNull, true, 1, "GEOM", "NONE"]
 _u setVariable [QGVAR(zorlaT), time + 5];
 _u setVariable [QGVAR(zorlaBitis), time + _sure];
 _u setVariable [QGVAR(taktikKilit), time + _sure];
+// v8.512 KOSARKEN ATES ('b' sikki, fnc_atesHareket ile ayni olcu): ZOR DURUM (risk >= 0.6 ya da baski > 0.5) ya da CBA orani (lambs_danger_atesHareketOran) kadar sansla, atis hatti ACIKSA
+//   hedef secimi kapatilmaz, hedefe BASTIRMA ATESI (doSuppressiveFire) verilerek kosulur (dusmanin nisanini bozar); aksi halde saf kosu (hedef secimi kapali).
+//   Gercek atis sayisi atilisin basinda / sonunda mermi farkindan olculur ([KOSU-ATES] log + [ATES-HAREKET-OZET] 'b' sayaci).
+private _ateseKos = false;
+if ([_u, _e] call FUNC(atesHatiAcik)) then {
+    _ateseKos = (_risk >= 0.6) || {_bask > 0.5} || {(["zorlaKosuAtes", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.25])};
+};
 private _atVar = _u checkAIFeature "AUTOTARGET";
 private _tVar = _u checkAIFeature "TARGET";
-if (_atVar) then { _u disableAI "AUTOTARGET"; };
-if (_tVar) then { _u disableAI "TARGET"; };
+private _m0 = _u ammo (currentMuzzle _u);
+if (_ateseKos) then {
+    _u doSuppressiveFire _e;
+    if (!isNil "lambs_danger_atesHareketSay") then { lambs_danger_atesHareketSay set ["b_mod", (lambs_danger_atesHareketSay getOrDefault ["b_mod", 0]) + 1]; };
+} else {
+    if (_atVar) then { _u disableAI "AUTOTARGET"; };
+    if (_tVar) then { _u disableAI "TARGET"; };
+};
 _u forceSpeed -1;
 _u setSpeedMode "FULL";
 _u setUnitPosWeak "UP";
 _u doMove _pos;
 if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_zorlaLogN", (missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) + 1];
-    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | RISK %6 (tehdit %7, baski %8) -> hedef secimi %9 sn kapali", groupId (group _u), name _u, round _ed, round _mes, _ds, _risk toFixed 2, _tehdit toFixed 1, _bask toFixed 2, _sure toFixed 1];
+    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | RISK %6 (tehdit %7, baski %8) | %10 | sure %9 sn", groupId (group _u), name _u, round _ed, round _mes, _ds, _risk toFixed 2, _tehdit toFixed 1, _bask toFixed 2, _sure toFixed 1, ["saf kosu (hedef secimi kapali)", "KOSARKEN BASTIRMA ATESI"] select _ateseKos];
 };
 [{
     params ["_uu", "_pp"];
     !alive _uu || {(_uu distance2D _pp) < 1.2}
 }, {
-    params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1"];
+    params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1", "_ak", "_mm0"];
     if (alive _uu) then {
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
         _uu setUnitPosWeak _dd;
+        if (_ak && {(missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) < 30}) then {
+            missionNamespace setVariable ["lambs_danger_kosuAtesLogN", (missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) + 1];
+            diag_log format ["[KOSU-ATES] %1 | %2 | kosarken atilan mermi: %3 (muzzle %4)", groupId (group _uu), name _uu, (_mm0 - (_uu ammo (currentMuzzle _uu))) max 0, currentMuzzle _uu];
+        };
         if (!isNull _ee && {alive _ee}) then { _uu doWatch _ee; };
     };
-}, [_u, _pos, _ds, _e, _atVar, _tVar], _sure, {
-    params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1"];
+}, [_u, _pos, _ds, _e, _atVar && {!_ateseKos}, _tVar && {!_ateseKos}, _ateseKos, _m0], _sure, {
+    params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1", "_ak", "_mm0"];
     if (alive _uu) then {
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
         if (_t1) then { _uu enableAI "TARGET"; };
