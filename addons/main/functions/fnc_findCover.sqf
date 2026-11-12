@@ -30,7 +30,7 @@
  *   + yan acilar: dusman +-25 derece kayarsa da gizli                         +8 / aci
  *   + diger bilinen dusmanlara (en fazla 2) karsi da gizli                    +10 / -6
  *   + hull-down (DEFEND): MIDDLE gizli, UP acik = korunup ates edebilir        +6
- *   - uzaklik (0.5 / m; EVADE 0.25 / m)
+ *   - uzaklik (0.5 / m; EVADE 0.25 / m; v8.513: DEFEND / OVERWATCH / SURVIVE'de x lambs_danger_siperUzaklik (2) ve arama menzili / 2)
  *   - dusmana yaklasma (DEFEND/OVERWATCH -0.8 / m;  ADVANCE bonus +0.9 / m;  EVADE: UZAKLASMA bonusu +0.9 / m)
  *   - yumusak obje (cali / kucuk agac) -6
  *   - baska askerin 8 sn icinde rezerve ettigi nokta (6m icinde) -20
@@ -68,6 +68,12 @@ params [
     ["_mode", "DEFEND", [""]],
     ["_orijin", [], [[]]]
 ];
+
+// v8.513 SIPER YAKINLIGI (kullanici: 'botlar cok uzaga siper aliyor, 2 kat yakinlastirman lazim'): savunma / gozetleme / hayatta kalma siperlerinde (DEFEND / OVERWATCH / SURVIVE) arama menzili / k ve uzaklik cezasi x k
+//   (CBA lambs_danger_siperUzaklik, varsayilan 2; 1 = eski). ADVANCE (bounding sicramasi: ilerleme bilincli) ve EVADE (zirhtan kacis: uzaklasma bilincli) etkilenmez; bounding UZAK ADAY aramasi (arama merkezi verilen) da.
+private _yakinK = ((missionNamespace getVariable ["lambs_danger_siperUzaklik", 2]) max 1) min 4;
+private _yakinMod = !(_mode in ["ADVANCE", "EVADE"]);
+if (_yakinMod && {_orijin isEqualTo []}) then { _range = (_range / _yakinK) max (_range min 8); };
 
 _maxResults = floor _maxResults;
 private _ret = [];
@@ -290,7 +296,7 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                         } forEach _digerTehditler;
 
                         // Uzaklik maliyeti
-                        _skor = _skor - ((_orijinPos distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}));
+                        _skor = _skor - ((_orijinPos distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}) * ([1, _yakinK] select _yakinMod));
 
                         // Dusmana yaklasma: ADVANCE bonus, EVADE uzaklasma bonusu, digerleri ceza
                         private _yaklasma = _unitEnemyDist - _enemyDist;

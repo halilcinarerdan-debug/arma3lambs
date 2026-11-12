@@ -41,7 +41,7 @@ private _yatEsik   = [0.85, 0.9, 0.95] select _agr;  // bu baskida asker siperde
 _BND_CYCLE_BASE      = [6, 4.5, 3] select _agr;
 _BND_CYCLE_RAND      = [3, 2, 1.5] select _agr;
 _BND_SUPPRESSION_MUL = [3, 2.2, 1.5] select _agr;
-_BND_COVER_RANGE     = [50, 60, 70] select _agr;
+_BND_COVER_RANGE     = [50, 55, 60] select _agr;   // v8.513: agresif 70 -> 60 (cok uzak siper)
 
 // ---------------------------------------------------------------------------
 // Grup / lider dogrulama

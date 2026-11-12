@@ -6,7 +6,7 @@
  *   1) 28 m icindeki girilebilir binalarin (buildingPos) noktalari taranir
  *   2) aday: dusmanin gozunden o noktaya hat bina tarafindan KESILIYOR (lineIntersects) + dusmana 8 m'den fazla yaklasmaz + baska askere ayrilmis degil (1.8 m, 30 sn)
  *   3) en yakin aday: doMove, FULL hiz, 15 sn taktik kilidi (diger hareket arbitrajlari ezmesin); asker basina 25 sn'de bir
- * v8.509: sert siper yoksa CALI / FIDAN ARKASI (gizlenme, VIEW LOD) de aranir; arama yaricapi varsayilan 22 -> 32 m (lambs_danger_siperYaricap).
+ * v8.509: sert siper yoksa CALI / FIDAN ARKASI (gizlenme, VIEW LOD) de aranir; arama yaricapi varsayilan 22 -> 32 -> v8.513: 16 m (lambs_danger_siperYaricap; 'cok uzaga siper aliyorlar').
  * ATLANIR: bounding / taktik yurutenler (hucumda ilerlemek bilincli), CBA kapatma: lambs_danger_acikSiperOff = true
  * v8.354: bina kolu ATIS POZISYONU tercih eder (dusmana pencere hatti acik, ust ortulu); pasif gizlenme yalniz son care. Log: [ACIK-SIPER]
  *
@@ -24,7 +24,7 @@ if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   /
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
 // v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
 private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
-private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 32];
+private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 16];
 _u setVariable [QGVAR(acikSiperT), time + ([25, 10] select _hizli)];
 private _g = group _u;
 if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isRetreating), false]}) exitWith {false};

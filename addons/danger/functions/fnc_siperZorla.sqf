@@ -34,7 +34,7 @@ if (isNull _e || {!alive _e}) exitWith {false};
 
 private _uPos = getPosATL _u;
 private _mes = _uPos distance2D _pos;
-if (_mes < 1.2 || {_mes > 20}) exitWith {false};
+if (_mes < 1.2 || {_mes > (20 / (((missionNamespace getVariable ["lambs_danger_siperUzaklik", 2]) max 1) min 4))}) exitWith {false};   // v8.513: 20 m / siperUzaklik (2) = 10 m
 private _ed = _u distance2D _e;
 if (_ed <= 8) exitWith {false};   // yakin dovus: kacma, ates et (fnc_yakinAtes)
 if ((_pos distance2D _e) < (_ed - 4)) exitWith {false};   // dusmana 4 m'den fazla yaklastirmaz
