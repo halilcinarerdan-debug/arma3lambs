@@ -95,23 +95,34 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 private _uASL = _pASL vectorAdd [0, 0, 1.1];
                 private _hP = [];
                 private _d = 99;
+                // v8.514 SIPER TANIMI SIKILASTI (kullanici: 'sipere yakinligini 2 kat arttir, su anda siper olarak saydigi yer aciklik'): eskiden TEK isin + 6 m: ince direk / agac govdesi / cit teli de
+                //   'siper' sayiliyor, asker 6 m uzakta acikta duruyordu. Simdi: (a) govde genisligi (+-0.25 m yan isinlar) ucu de kapali olmali, (b) engel askere <= lambs_danger_siperYakinlik (3 m; eskiden 6),
+                //   (c) elektrik teli / direk / lamba / kablo nesneleri sayilmaz.
+                private _esik = missionNamespace getVariable ["lambs_danger_siperYakinlik", 3];
+                private _perpE = (vectorNormalized ((_pASL vectorAdd [0, 0, 1]) vectorDiff _eASL)) vectorCrossProduct [0, 0, 1];
                 {
                     private _uH = _pASL vectorAdd [0, 0, _x];
                     private _hh = lineIntersectsSurfaces [_eASL, _uH, _en, _u, true, 1, "FIRE", "NONE"];
                     if (_hh isNotEqualTo []) then {
                         private _hp = (_hh select 0) select 0;
+                        private _ho = (_hh select 0) select 2;
                         private _dd = _uH distance _hp;
-                        if (_dd < _d && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
+                        private _ad0 = toLower ([typeOf _ho, (getModelInfo _ho) select 0] select ((typeOf _ho) isEqualTo ""));
+                        private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon"] findIf {(_ad0 find _x) >= 0}) >= 0;
+                        private _genis = ([-0.25, 0.25] findIf {
+                            (lineIntersectsSurfaces [_eASL, _uH vectorAdd (_perpE vectorMultiply _x), _en, _u, true, 1, "FIRE", "NONE"]) isEqualTo []
+                        }) < 0;
+                        if (!_sahte && {_genis} && {_dd < _d} && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
                     };
                 } forEach [1.1, 0.4, 1.5];
-                if (_hP isEqualTo [] || {_d > 6}) then {
+                if (_hP isEqualTo [] || {_d > _esik}) then {
                     _sayac set ["acikta", (_sayac get "acikta") + 1];
                     // v8.303 ACIKTA + yakinda BINA (kullanici: 'arkada ev var adam acikta ama evi siper kullanmiyor'): sert yuzey yok / uzaksa 28 m icindeki binada dusmandan gizli bir noktaya git
                     [_u, _en] call FUNC(acikSiper);
                     if (isNil "lambs_danger_hugAcikLogN") then { lambs_danger_hugAcikLogN = 0; };
                     if (lambs_danger_hugAcikLogN < 25) then {
                         lambs_danger_hugAcikLogN = lambs_danger_hugAcikLogN + 1;
-                        diag_log format ["[SIPER-YAPIS-TANI] %1 | %2 | dusman %3 m | yuzey: %4 | en yakin yuzey %5 m (esik 6) | stance:%6", groupId _g, name _u, round _ed, ["var ama uzak", "YOK (3 yukseklikte isin kesisimi yok)"] select (_hP isEqualTo []), if (_hP isEqualTo []) then {"-"} else {_d toFixed 1}, stance _u];
+                        diag_log format ["[SIPER-YAPIS-TANI] %1 | %2 | dusman %3 m | yuzey: %4 | en yakin yuzey %5 m (esik %7) | stance:%6", groupId _g, name _u, round _ed, ["var ama uzak", "YOK (govde genisliginde kapali yuzey yok)"] select (_hP isEqualTo []), if (_hP isEqualTo []) then {"-"} else {_d toFixed 1}, stance _u, _esik];
                     };
                     continue
                 };

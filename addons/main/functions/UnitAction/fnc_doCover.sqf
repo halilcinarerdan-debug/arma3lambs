@@ -61,9 +61,24 @@ if (_dusmanVar && {_pos isEqualTo []}) then {
     };
     private _benimASL = (getPosASL _unit) vectorAdd [0, 0, 0.75];
     private _hatYon = vectorNormalized (_dusmanGoz vectorDiff _benimASL);
-    _zatenKorunakli =
-        (lineIntersects [_benimASL, _benimASL vectorAdd (_hatYon vectorMultiply 5), _unit])
-        && {(lineIntersects [_dusmanGoz, _benimASL, _unit]) || {terrainIntersectASL [_dusmanGoz, _benimASL]}};
+    // v8.514 SIPER TANIMI SIKILASTI (kullanici: 'su anda siper olarak saydigi yer aciklik'): eskiden askerin 5 m onunde HERHANGI bir nesne + dusman hattinin herhangi bir yerde kesilmesi yetiyordu
+    //   (ince agac govdesi / cit / direk / uzaktaki nesne 'siper' sayiliyor, asker acikta kaliyordu). Simdi: engel askere <= lambs_danger_siperYakinlik (3 m; eskiden 5-6) VE govde genisligi (+-0.25 m yan isinlar)
+    //   dahil dusman gozunden ucu de kapali (FIRE LOD; elektrik teli / direk sayilmaz).
+    private _esikK = missionNamespace getVariable ["lambs_danger_siperYakinlik", 3];
+    private _perpK = (vectorNormalized (_benimASL vectorDiff _dusmanGoz)) vectorCrossProduct [0, 0, 1];
+    private _kapaliSay = 0;
+    {
+        private _hh = lineIntersectsSurfaces [_dusmanGoz, _benimASL vectorAdd (_perpK vectorMultiply _x), objNull, _unit, true, 1, "FIRE", "NONE"];
+        if (_hh isNotEqualTo []) then {
+            private _ho = (_hh select 0) select 2;
+            private _ad0 = toLower ([typeOf _ho, (getModelInfo _ho) select 0] select ((typeOf _ho) isEqualTo ""));
+            private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon"] findIf {(_ad0 find _x) >= 0}) >= 0;
+            if (!_sahte && {(_benimASL distance ((_hh select 0) select 0)) <= _esikK}) then { _kapaliSay = _kapaliSay + 1; };
+        } else {
+            if (terrainIntersectASL [_dusmanGoz, _benimASL vectorAdd (_perpK vectorMultiply _x)]) then { _kapaliSay = _kapaliSay + 1; };
+        };
+    } forEach [0, -0.25, 0.25];
+    _zatenKorunakli = _kapaliSay isEqualTo 3;
 
     if (_zatenKorunakli) then {
         // ayakta da gizliyse UP, degilse MIDDLE
