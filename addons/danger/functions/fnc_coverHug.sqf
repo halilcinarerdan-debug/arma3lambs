@@ -37,7 +37,7 @@ lambs_danger_coverHugStarted = true;
 diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchdog baslatildi";
 
 [] spawn {
-    private _sayac = createHashMapFromArray [["ayarlandi", 0], ["acikta", 0], ["reddedildi", 0], ["kaymaTop", 0], ["UP", 0], ["MIDDLE", 0], ["DOWN", 0]];
+    private _sayac = createHashMapFromArray [["ayarlandi", 0], ["arazi", 0], ["acikta", 0], ["reddedildi", 0], ["kaymaTop", 0], ["UP", 0], ["MIDDLE", 0], ["DOWN", 0]];
     private _sonOzet = time;
     while {true} do {
         // v8.312 HIZLI SIPER (kullanici: 'botlarin cover alma hizini ve tam covera yapismasini ayarlayabilir misin, genellikle acikta oluyorlar, ates ustunlugu kurarken'): tick 1.5 -> 0.8 sn, asker basina yeniden degerlendirme 3 -> 1.5 sn, tick butcesi 8 -> 12, yurume esigi 0.6 -> 1.0 km/s.
@@ -47,7 +47,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             private _a = _sayac get "ayarlandi";
-            diag_log format ["[SIPER-YAPIS-OZET] 60 sn: ayarlandi:%1 (ort kayma %2 m) | acikta:%3 reddedildi:%4 | durus UP:%5 MIDDLE:%6 DOWN:%7", _a, ((_sayac get "kaymaTop") / (_a max 1)) toFixed 2, _sayac get "acikta", _sayac get "reddedildi", _sayac get "UP", _sayac get "MIDDLE", _sayac get "DOWN"];
+            diag_log format ["[SIPER-YAPIS-OZET] 60 sn: ayarlandi:%1 (ort kayma %2 m) | acikta:%3 reddedildi:%4 | arazi siperi:%8 | durus UP:%5 MIDDLE:%6 DOWN:%7", _a, ((_sayac get "kaymaTop") / (_a max 1)) toFixed 2, _sayac get "acikta", _sayac get "reddedildi", _sayac get "UP", _sayac get "MIDDLE", _sayac get "DOWN", _sayac getOrDefault ["arazi", 0]];
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
         if (missionNamespace getVariable ["lambs_danger_coverHugOff", false]) then { continue };
@@ -117,6 +117,14 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                         if (!_sahte && {_genis} && {_dd < _d} && {_dd > 0.01}) then { _d = _dd; _hP = _hp; _uASL = _uH; };
                     };
                 } forEach [1.1, 0.4, 1.5];
+                // v8.516 ARAZI SIPERI (RPT 13:27 chernarus: agaclarin %75'inde FIRE LOD yok, gövde genisligi medyan 0.00 m -> agac mermi durdurmuyor): nesne yok ama arazi kivrimi (yamac / cukur / tumsek)
+                //   dusman hattini kesiyorsa (terrainIntersectASL) asker zaten siperde sayilir; yatma (0.4 m kapali) ya da comelme (1.1 m kapali) durusu uygulanir.
+                if (_hP isEqualTo [] && {(missionNamespace getVariable ["lambs_danger_siperArazi", true])} && {terrainIntersectASL [_eASL, _pASL vectorAdd [0, 0, 0.4]]}) then {
+                    _u setUnitPosWeak (["DOWN", "MIDDLE"] select (terrainIntersectASL [_eASL, _pASL vectorAdd [0, 0, 1.1]]));
+                    _u doWatch _en;
+                    _sayac set ["arazi", (_sayac getOrDefault ["arazi", 0]) + 1];
+                    continue
+                };
                 if (_hP isEqualTo [] || {_d > _esik}) then {
                     _sayac set ["acikta", (_sayac get "acikta") + 1];
                     // v8.303 ACIKTA + yakinda BINA (kullanici: 'arkada ev var adam acikta ama evi siper kullanmiyor'): sert yuzey yok / uzaksa 28 m icindeki binada dusmandan gizli bir noktaya git
