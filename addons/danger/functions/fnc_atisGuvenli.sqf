@@ -30,7 +30,7 @@ if (_tPos isEqualTo []) exitWith {false};
 
 private _rpg = (_tur isEqualTo "RPG");
 private _minMes = [30, 35] select _rpg;
-private _yaricap = [12, 10] select _rpg;
+private _yaricap = [missionNamespace getVariable ["lambs_danger_uglDostM", 8], 10] select _rpg;   // v8.508: UGL 12 -> 8 m (ayar)
 private _uPos = getPosATL _unit;
 private _d = _uPos distance2D _tPos;
 private _gorev = {

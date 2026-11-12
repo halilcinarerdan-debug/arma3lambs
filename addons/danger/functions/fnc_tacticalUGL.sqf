@@ -69,7 +69,7 @@ private _red = {
     false
 };
 // v8.284 UGL SIKLIGI BOOST (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla'): birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown)
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (missionNamespace getVariable ["lambs_danger_uglCooldown", 3])) exitWith {"cooldown" call _red};
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (missionNamespace getVariable ["lambs_danger_uglCooldown", 2])) exitWith {"cooldown" call _red};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
@@ -116,11 +116,35 @@ if (_d < 30 || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 ->
 // UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
 if (_d > ([group _unit, "uglUzakM", 240] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 12] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 
-// Dost atesi: hedefin 12 m cevresinde dost varsa atma (escort / ilerleyen birlik)
-if (((_target nearEntities ["CAManBase", 12]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {"dost_yakin" call _red};
+// Dost atesi: hedefin lambs_danger_uglDostM (8 m; eskiden 12) cevresinde dost varsa atma (escort / ilerleyen birlik)
+if (((_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {"dost_yakin" call _red};
 
 // GUVENLIK: dost / engel (cali, dal) / sekme kontrolu — guvenli degilse ATMA
-if (!([_unit, _target, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}]))) exitWith {"guvenlik" call _red};
+if (!([_unit, _target, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}]))) exitWith {
+    // v8.508 ENGEL (orman): namlu onunde dal / cali / agac -> 10 m icinde temiz atis noktasi (tercihen siper kenari) bul, git, varinca at
+    private _ret = _unit getVariable [QGVAR(atisRet), [-999, ""]];
+    if ((missionNamespace getVariable ["lambs_danger_uglYanAdim", true]) && {(time - (_ret select 0)) < 2} && {((_ret select 1) find "engel") >= 0}
+        && {time > (_unit getVariable [QGVAR(uglYanT), 0])} && {!(_unit getVariable [QGVAR(forceMove), false])} && {(_unit getVariable [QGVAR(taktikKilit), 0]) <= time}
+        && {!([group _unit, "uglYan", true] call FUNC(senaryoKapi))}) then {
+        private _yp = [_unit, _target] call FUNC(uglPozisyon);
+        _unit setVariable [QGVAR(uglYanT), time + 15];
+        if (_yp isNotEqualTo []) then {
+            _unit setVariable [QGVAR(taktikKilit), time + 9];
+            _unit doMove _yp;
+            _unit doWatch _target;
+            diag_log format ["[UGL-YAN] %1 | %2 | namlu onunde engel -> %3 m yandaki temiz noktaya geciyor (hedef %4 m)", groupId (group _unit), name _unit, round (_unit distance2D _yp), round _d];
+            [{ params ["_u", "_t", "_p"]; !alive _u || {isNull _t} || {!alive _t} || {(_u distance2D _p) < 2.5} }, {
+                params ["_u", "_t", "_p"];
+                _u setVariable [QGVAR(taktikKilit), 0];
+                if (alive _u && {!isNull _t} && {alive _t}) then { _u setVariable [QGVAR(uglLast), -999]; [_u, _t, true, 2] call FUNC(tacticalUGL); };
+            }, [_unit, _target, _yp], 9, {
+                params ["_u", "_t", "_p"];
+                _u setVariable [QGVAR(taktikKilit), 0];
+            }] call CBA_fnc_waitUntilAndExecute;
+        };
+    };
+    "guvenlik" call _red
+};
 
 // ---------------------------------------------------------------------------
 // UYGUN MU: hat kapali / binada / kume / %50
@@ -134,7 +158,7 @@ if (!_uygun) then {
     })) >= 2;
     // v8.62: kume yaricapi 8 -> 15 m; sans %50 -> %70; grup bastirilmissa (kendi ates ustunlugu yok) UGL oncelikli
     private _bastirilmis = ((units group _unit) findIf {alive _x && {(getSuppression _x) > 0.3}}) >= 0;
-    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(["uglSans", [_unit] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_uglSans", 0.92])};   // v8.284: acikta tek hedefe de %70 -> %92
+    _uygun = _engelli || {_binada} || {_kume} || {_bastirilmis} || {(["uglSans", [_unit] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_uglSans", 1])};   // v8.284: acikta tek hedefe de %70 -> %92
 };
 if (!_uygun) exitWith {"uygun_degil" call _red};
 

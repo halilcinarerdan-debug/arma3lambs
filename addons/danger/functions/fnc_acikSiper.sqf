@@ -6,6 +6,7 @@
  *   1) 28 m icindeki girilebilir binalarin (buildingPos) noktalari taranir
  *   2) aday: dusmanin gozunden o noktaya hat bina tarafindan KESILIYOR (lineIntersects) + dusmana 8 m'den fazla yaklasmaz + baska askere ayrilmis degil (1.8 m, 30 sn)
  *   3) en yakin aday: doMove, FULL hiz, 15 sn taktik kilidi (diger hareket arbitrajlari ezmesin); asker basina 25 sn'de bir
+ * v8.509: sert siper yoksa CALI / FIDAN ARKASI (gizlenme, VIEW LOD) de aranir; arama yaricapi varsayilan 22 -> 32 m (lambs_danger_siperYaricap).
  * ATLANIR: bounding / taktik yurutenler (hucumda ilerlemek bilincli), CBA kapatma: lambs_danger_acikSiperOff = true
  * v8.354: bina kolu ATIS POZISYONU tercih eder (dusmana pencere hatti acik, ust ortulu); pasif gizlenme yalniz son care. Log: [ACIK-SIPER]
  *
@@ -23,7 +24,7 @@ if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   /
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
 // v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
 private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
-private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 22];
+private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 32];
 _u setVariable [QGVAR(acikSiperT), time + ([25, 10] select _hizli)];
 private _g = group _u;
 if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isRetreating), false]}) exitWith {false};
@@ -102,6 +103,37 @@ private _objAd = "";
     !(_x isKindOf "Man") && {!(_x isKindOf "AllVehicles")} && {!(_x isKindOf "House")} && {!(_x isKindOf "Logic")} && {!isObjectHidden _x}
     && {((typeOf _x) select [0, 1]) isNotEqualTo "#"} && {((getModelInfo _x) select 0) isNotEqualTo ""}
 }) }));
+
+// v8.509 BITKI / CALI ORTUSU (kullanici: 'siperden uzak kalmasinlar, agaclara en ufak bitkiyi degerlendirsinler, acikta durmasinlar'): sert siper (agac govdesi / kaya / duvar) bulunamazsa GIZLENME:
+//   cali / fidan / kucuk agac (yukseklik >= 0.3 m) arkasi; mermiyi durdurmaz ama gorusu keser (VIEW LOD: dusmanin gozunden o noktaya hattin ILK carpani bitkinin kendisi olmali), comelerek / yatarak gizlenir.
+//   Sert siper her zaman once; yalniz hic sert siper yoksa (+6 gizlenme cezasi: sert siper 6 m daha uzak olsa bile tercih edilir). Kapatma: lambs_danger_siperBitki = false.
+if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki", true]}) then {
+    {
+        private _o = _x;
+        private _op = getPosATL _o;
+        private _bb = boundingBoxReal _o;
+        private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
+        if (_yk >= 0.3 && {(_u distance2D _op) <= _yar}) then {
+            private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2;
+            private _pos = _op getPos [_r + 0.5, _en getDir _o];
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {!([_pos, _aralik] call _doluMu)}) then {
+                private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
+                private _gizli = {
+                    params ["_h"];
+                    private _vh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _h], _en, _u, true, 1, "VIEW", "NONE"];
+                    (_vh isNotEqualTo []) && {((_vh select 0) select 2) isEqualTo _o}
+                };
+                private _ds = "";
+                private _dc = 0;
+                if ([1.0] call _gizli) then { _ds = "MIDDLE"; _dc = 2; } else { if ([0.4] call _gizli) then { _ds = "DOWN"; _dc = 5; }; };
+                if (_ds isNotEqualTo "") then {
+                    private _sk = (_u distance2D _pos) + _dc + 6;
+                    if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
+                };
+            };
+        };
+    } forEach (nearestTerrainObjects [_p, ["BUSH", "SMALL TREE"], _yar, false, true]);
+};
 
 if (_obj isNotEqualTo []) exitWith {
     _dolu pushBack [_obj, time];
