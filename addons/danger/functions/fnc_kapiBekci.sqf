@@ -33,11 +33,13 @@ diag_log "[KAPI-AC] kapi bekcisi baslatildi (v8.506): yuruyen / kapiya bakan ask
                 private _yuruyor = (speed _u) >= 1;
                 private _eye = eyePos _u;
                 private _yon = if (_yuruyor) then { vectorDir _u } else { eyeDirection _u };
-                private _vur = lineIntersectsSurfaces [_eye, _eye vectorAdd (_yon vectorMultiply 3), _u, objNull, true, 3, "GEOM", "NONE"];
+                // v8.520: hizla yuruyen asker kapiya carpmasin (kapi animasyonu ~1.5 sn): bakis mesafesi 3 m + hiz x 1.2 sn (en cok 5 m)
+                private _bakM = (3 + (((speed _u) / 3.6) * 1.2)) min 5;
+                private _vur = lineIntersectsSurfaces [_eye, _eye vectorAdd (_yon vectorMultiply _bakM), _u, objNull, true, 3, "GEOM", "NONE"];
                 if (!_yuruyor && {_vur isEqualTo []}) then { continue };
                 {
                     private _o = _x select 2;
-                    if (!isNull _o && {!(_o isKindOf "CAManBase")}) then { [_o, _u, 2.5] call FUNC(kapiAc); };
+                    if (!isNull _o && {!(_o isKindOf "CAManBase")}) then { [_o, _u, 2.5 max (_bakM * 0.9)] call FUNC(kapiAc); };
                 } forEach _vur;
                 // ayak hizasinda da bak (cit kapisi alt kenari)
                 if (_vur isEqualTo []) then {

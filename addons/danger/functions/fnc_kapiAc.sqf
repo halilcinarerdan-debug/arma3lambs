@@ -68,5 +68,15 @@ if (_acilan isNotEqualTo []) then {
     };
     // kapat: ~20 sn sonra yakinda asker yoksa (fnc_kapiKapat; doluysa ertelenir)
     [FUNC(kapiKapat), [_o, _acilan, 0], 20] call CBA_fnc_waitAndExecute;
+    // v8.520 YARIDA DURMA (kullanici: 'kapidan gecti 1 adam ama yarida durdu, kapi ile temas etti'): AI kapi acilirken yolu yeniden planlamiyor -> 2.5 sn sonra hala duruyorsa (< 0.5 km/s) eski hedefine yeniden doMove
+    if (!isNull _u && {alive _u} && {!isPlayer _u}) then {
+        [{
+            params ["_uu"];
+            if (alive _uu && {(speed _uu) < 0.5} && {!(_uu getVariable [QGVAR(forceMove), false])} && {(lifeState _uu) in ["HEALTHY", "INJURED"]}) then {
+                private _ed = expectedDestination _uu;
+                if (_ed isNotEqualTo [] && {((_ed select 0) distance2D _uu) > 3} && {(_ed select 1) in ["LEADER PLANNED", "DoNotPlan", "FORMATION PLANNED", "LEADER DIRECT"]}) then { _uu doMove (_ed select 0); };
+            };
+        }, [_u], 2.5] call CBA_fnc_waitAndExecute;
+    };
 };
 count _acilan

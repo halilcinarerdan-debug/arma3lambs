@@ -175,7 +175,9 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi
     } forEach [4, 8, 12];
 };
 
-if (_obj isNotEqualTo []) exitWith {
+// v8.520 KENTSEL ONCELIK (kullanici: 'ev ici ve meskun mahalde oncelik'; RPT 14:10 Altis 'cover': 55 kurtarmanin 0'i bina, 34'u cam agaci - cevrede dukkan / ev varken): girilebilir >= 2 bina varsa (_yar + 10 m)
+//   NESNE (agac / kaya / duvar) sonucu ERTELENIR, once BINA (atis pozisyonu / gizli nokta) aranir; bina bulunamazsa ertelenen nesne uygulanir. CBA lambs_danger_kentselOncelik (varsayilan acik).
+private _nesneGit = {
     _sayAS set ["nesne", (_sayAS getOrDefault ["nesne", 0]) + 1];
     _dolu pushBack [_obj, time];
     missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
@@ -194,6 +196,9 @@ if (_obj isNotEqualTo []) exitWith {
     };
     true
 };
+private _binalarK = (nearestObjects [_p, ["House"], _yar + 10]) select {(count (_x buildingPos -1)) >= 2};
+private _kentsel = (missionNamespace getVariable ["lambs_danger_kentselOncelik", true]) && {(count _binalarK) >= 2};
+if (_obj isNotEqualTo [] && {!_kentsel}) exitWith { call _nesneGit };
 
 private _en_iyi = [];
 private _enS = 1e9;
@@ -250,7 +255,10 @@ private _edir = _p getDir _en;
     } forEach (_b buildingPos -1);
 } forEach ((nearestObjects [_p, ["House"], _yar + 12]) select {(count (_x buildingPos -1)) > 0});
 
-if (_en_iyi isEqualTo []) exitWith { _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1]; false };
+if (_en_iyi isEqualTo []) exitWith {
+    if (_obj isNotEqualTo []) then { call _nesneGit } else { _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1]; false }
+};
+if (_kentsel) then { _sayAS set ["kentsel_bina", (_sayAS getOrDefault ["kentsel_bina", 0]) + 1]; };
 
 _sayAS set ["bina", (_sayAS getOrDefault ["bina", 0]) + 1];
 _dolu pushBack [_en_iyi, time];
