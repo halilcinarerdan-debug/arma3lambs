@@ -98,6 +98,21 @@ private _tVar = _u checkAIFeature "TARGET";
 private _m0 = _u ammo (currentMuzzle _u);
 if (_ateseKos) then {
     _u doSuppressiveFire _e;
+    // v8.517: RPT 13:36 [KOSU-ATES] kosarken atilan mermi: 0 -> doSuppressiveFire hareket halinde yutuluyor; kosu boyunca 0.45 sn'de bir forceWeaponFire (atis hatti acik, asker gercekten kosuyorsa) kisa seri
+    [_u, _e, _sure] spawn {
+        params ["_uu", "_ee", "_sr"];
+        private _bit = time + _sr;
+        while {alive _uu && {time < _bit}} do {
+            sleep 0.45;
+            if (isNull _ee || {!alive _ee}) exitWith {};
+            if ((speed _uu) < 0.5) then { continue };
+            if !([_uu, _ee] call FUNC(atesHatiAcik)) then { continue };
+            private _mz = currentMuzzle _uu;
+            if (_mz isEqualTo "" || {(_uu ammo _mz) <= 0}) then { continue };
+            _uu doWatch _ee;
+            _uu forceWeaponFire [_mz, currentWeaponMode _uu];
+        };
+    };
     if (!isNil "lambs_danger_atesHareketSay") then { lambs_danger_atesHareketSay set ["b_mod", (lambs_danger_atesHareketSay getOrDefault ["b_mod", 0]) + 1]; };
 } else {
     if (_atVar) then { _u disableAI "AUTOTARGET"; };

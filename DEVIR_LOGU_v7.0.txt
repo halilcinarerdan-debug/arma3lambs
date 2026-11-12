@@ -3329,3 +3329,9 @@ v8.516 (dal sade-waypoint) ARAZI SIPERI (RPT 2026-11-12 13:27, v8.515, karabag /
  - fnc_acikSiper: nesne / bina yoksa 4 / 8 / 12 m halkalarda 8 yonden ARAZI KIVRIMI ARKASI noktasi (yat 0.4 m / comel 1.0 m gizli; +8 ceza: nesneler once).
  - [SIPER-ZORLA] ayni RPT'de 25+ kez (siper 2-10 m, RISK 0.4-1.0, 2 'KOSARKEN BASTIRMA ATESI'); [KOSU-ATES] mermi sayisi bu RPT'de gelmedi.
  - Kabul olcutu: 'arazi siperi' sayaci > 0, acikta sayisi dusmeli, [ACIK-SIPER] 'ARAZI KIVRIMI' satirlari. NOT: oyunda denenmedi.
+
+v8.517 (dal sade-waypoint) RPT 2026-11-12 13:36 (v8.516, chernarus_summer): KOSARKEN ATES GERCEK OLCUM + UGL TESHIS + AGAC CEZASI.
+ - v8.516 SONUCU: [SIPER-YAPIS-OZET] acikta 24 / dk, 'arazi siperi' 0 (acik arazi: arazi kivrimi bulunmadi); [ACIK-SIPER] kurtarmalar t_picea3f / t_fagus2f agaclarina (agac yalniz GIZLER, mermi durdurmaz); [AGAC-TANI] FIRE LOD %25, govde medyan 0.00 m (ayni).
+ - [KOSU-ATES] kosarken atilan mermi: 0 ([ATES-HAREKET-OZET] 'b' 3) -> doSuppressiveFire hareket halinde YUTULUYOR (v8.512 uyarisi dogrulandi). fnc_siperZorla: kosarken ates sikkinda kosu boyunca 0.45 sn'de bir forceWeaponFire (atis hatti acik + asker gercekten kosuyor (speed >= 0.5)); sonuc yine [KOSU-ATES] mermi sayisi.
+ - [UGL-OZET] dost_yakin 21 / 30 sn (yaricap 12 -> 8 m'ye inmesine ragmen): kim engelliyor bilinmiyor -> [UGL-DOST] logu (ilk 25: atici, hedef, engelleyen taraf / dostluk / mesafe / oyuncu mu).
+ - fnc_acikSiper: kalibrasyon LOD = VIEW (agac mermi durdurmuyor) iken agac modelleri (t_* / tree / picea) +10 puan cezali: kaya / duvar / konteyner gibi gercek siper once. NOT: oyunda denenmedi.

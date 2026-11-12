@@ -117,7 +117,16 @@ if (_d < 30 || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 ->
 if (_d > ([group _unit, "uglUzakM", 240] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 12] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 
 // Dost atesi: hedefin lambs_danger_uglDostM (8 m; eskiden 12) cevresinde dost varsa atma (escort / ilerleyen birlik)
-if (((_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) > -1) exitWith {"dost_yakin" call _red};
+private _dostIdx = (_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) findIf {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}};
+if (_dostIdx > -1) exitWith {
+    // v8.517 TESHIS (RPT 13:36: dost_yakin 21 / 30 sn, yaricap 8 m'ye indirilmesine ragmen): kim engelliyor? (ilk 25)
+    if ((missionNamespace getVariable ["lambs_danger_uglDostLogN", 0]) < 25) then {
+        missionNamespace setVariable ["lambs_danger_uglDostLogN", (missionNamespace getVariable ["lambs_danger_uglDostLogN", 0]) + 1];
+        private _b = ((_target nearEntities ["CAManBase", missionNamespace getVariable ["lambs_danger_uglDostM", 8]]) select {alive _x && {((side group _unit) getFriend (side _x)) >= 0.6}}) select 0;
+        diag_log format ["[UGL-DOST] %1 | %2 (taraf %3) hedef %4 (taraf %5) %6 m | engelleyen: %7 taraf %8 (hedefe %9 m, dostluk %10, oyuncu %11)", groupId (group _unit), name _unit, side group _unit, name _target, side group _target, round _d, name _b, side group _b, round (_b distance2D _target), ((side group _unit) getFriend (side _b)) toFixed 2, isPlayer _b];
+    };
+    "dost_yakin" call _red
+};
 
 // GUVENLIK: dost / engel (cali, dal) / sekme kontrolu — guvenli degilse ATMA
 if (!([_unit, _target, "UGL"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}]))) exitWith {

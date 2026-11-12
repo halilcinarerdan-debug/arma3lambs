@@ -108,6 +108,9 @@ private _objAd = "";
             } forEach [["UP", 1.5, 0], ["MIDDLE", 1.0, 2], ["DOWN", 0.4, 5]];
             if ((_ds select 0) isNotEqualTo "") then {
                 private _sk = (_u distance2D _pos) + (_ds select 1);
+                // v8.517: haritada agaclar mermi durdurmuyorsa (kalibrasyon LOD = VIEW) agac yalniz GIZLER -> kaya / duvar / konteyner gibi gercek siperler +10 puanla (m) one gecer
+                private _mdl = toLower ((getModelInfo _o) select 0);
+                if ((missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]) isEqualTo "VIEW" && {((_mdl find "t_") isEqualTo 0) || {(_mdl find "tree") >= 0} || {(_mdl find "picea") >= 0}}) then { _sk = _sk + 10; };
                 if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds select 0; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
             };
         };
