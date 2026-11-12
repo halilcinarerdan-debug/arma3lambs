@@ -144,6 +144,7 @@ if (_obj isNotEqualTo []) exitWith {
     _u setSpeedMode "FULL";
     _u doMove _obj;
     _u setUnitPos "UP";
+    [_u, _obj, _en, _objDurus] call FUNC(siperZorla);   // v8.510: ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
     [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {

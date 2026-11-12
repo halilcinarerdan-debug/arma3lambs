@@ -114,6 +114,14 @@ if (_pos isEqualTo []) then {
     };
 };
 
+// v8.510 SIPERE ZORLA (kullanici: 'botlar ates etmekten cover alamiyor, FSM cover istediginde sipere forceleyecek sistem, raycast destegiyle'): catisma halindeki (COMBAT / baski) asker icin
+//   hedef secimi 3.5 sn kapali kisa siper atilisi (raycast: siper dusmandan gizli + yol acik; dusman <= 8 m'de uygulanmaz). Uygulanamazsa asagidaki eski yuruyus davranisi.
+private _zorlaYap = false;
+if (_dusmanVar && {_dusman isEqualType objNull} && {((behaviour _unit) isEqualTo "COMBAT") || {(getSuppression _unit) >= 0.1}}) then {
+    _zorlaYap = [_unit, _pos, _dusman, (_unit getVariable [QGVAR(coverCache), [-10, [], "MIDDLE"]]) param [2, "MIDDLE"]] call (missionNamespace getVariable ["lambs_danger_fnc_siperZorla", {false}]);
+};
+if (_zorlaYap) exitWith {true};
+
 // force anim
 if (_unit distance2D _pos < 0.6) exitWith {false};
 private _direction = _unit getRelDir _pos;

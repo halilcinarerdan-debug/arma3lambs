@@ -65,7 +65,8 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                     private _bilgi = if (_d < 9999) then {_u knowsAbout _e} else {0};
 
                     // ---------------- A) CQB ----------------
-                    if (_d <= 28 && {_bilgi >= (["TESPIT"] call FUNC(bilgiEsik))}) then {
+                    // v8.510: <= 10 m'de daha dusuk bilgi (SEZILDI) yeter (sasirtilmis askerin yakin dusmana refleksi)
+                    if (_d <= 28 && {_bilgi >= (([["TESPIT"], ["SEZILDI"]] select (_d <= 10)) call FUNC(bilgiEsik))}) then {
                         // kalibrasyon (orijinali sakla, yukseltilmis tabana cek)
                         if ((_u getVariable [QGVAR(cqbSkill), []]) isEqualTo []) then {
                             _u setVariable [QGVAR(cqbSkill), [_u skill "aimingSpeed", _u skill "aimingAccuracy"]];
@@ -74,7 +75,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                         };
                         _u setVariable [QGVAR(cqbSon), time];
 
-                        if ((time - (_u getVariable [QGVAR(cqbLast), -999])) > 4 && {(_u getVariable [QGVAR(cqbSiperKilit), 0]) <= time}) then {
+                        if ((time - (_u getVariable [QGVAR(cqbLast), -999])) > ([4, 1.2] select (_d <= 10)) && {(_u getVariable [QGVAR(cqbSiperKilit), 0]) <= time}) then {
                             _u setVariable [QGVAR(cqbLast), time];
                             _u setVariable [QGVAR(stationLast), time];
 
