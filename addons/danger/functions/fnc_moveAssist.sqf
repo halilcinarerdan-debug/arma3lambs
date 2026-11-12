@@ -138,6 +138,8 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                         if (_hit isNotEqualTo []) then {
                             private _o = (_hit select 0) select 2;
                             if (!isNull _o && {!(_o isKindOf "AllVehicles")} && {!(_o isKindOf "Man")}) then {
+                                // v8.506: nesne kapali kapi / cit kapisi ise ac (asker kapidan gecmeye calisiyordu; fnc_kapiAc)
+                                [_o, _u, 3.5] call FUNC(kapiAc);
                                 _u setPosASL _prev;
                                 _u setVariable [QGVAR(mvSlowUntil), time + 3];
                                 private _n = (_u getVariable [QGVAR(mvFix), 0]) + 1;

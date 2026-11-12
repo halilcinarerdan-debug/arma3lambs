@@ -98,6 +98,9 @@ PREP(rastgeleSec);
 PREP(birimId);
 PREP(senaryoKapi);
 PREP(wpSahip);
+PREP(kapiAc);
+PREP(kapiKapat);
+PREP(kapiBekci);
 PREP(senaryoRota);
 PREP(aracHasar);
 PREP(yigilmaCoz);
@@ -596,7 +599,7 @@ if (!isNil "CBA_fnc_addSetting" && {!isNil "CBA_settings_default"}) then {
 // (bu dosya XEH_preInit'e include edilir: asagidaki satirlar acilista RPT'ye yazar,
 //  LAMBS debug acik olmasa da gorunur)
 // ===========================================================================
-diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.505-SADE (DUVAR BAKISI: comelen + bina ici + gizli hedefli kapsam; WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
+diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.506-SADE (KAPI ACMA: fnc_kapiBekci / kapiAc; DUVAR BAKISI: comelen + bina ici + gizli hedefli kapsam; WAYPOINT UYUMU: fnc_wpSahip + Karakol / Garnizon / Gozetleme KALDIRILDI; SADE WAYPOINT: komutan plani / objektif / harekat / nakil / recon / HQ-US katmani KALDIRILDI; waypoint + tetik + makro koordinasyon (Kumanda, Karakol, Garnizon, Gozetleme, Gorev Ata) + FPV / IHA + taktik tepkiler + senaryo modu kalir; eski V2 dallari: claude/nakil-v2, claude/tasarimci-makro)";
 [{
     // HER makinede: Zeus'la yaratilan AI'lar istemcide yerel olur; watchdog'lar yalnizca YEREL gruplara dokunur
     if (true) then {
@@ -614,7 +617,7 @@ diag_log "[ELITE-BOOT] lambs_danger ELITE build v8.505-SADE (DUVAR BAKISI: comel
         // watchdog'lar ilk temasta degil, acilista baslasin
         {
             [] call (missionNamespace getVariable [format ["lambs_danger_fnc_%1", _x], {false}]);
-        } forEach ["tohumBaslat", "senaryoRota", "isaretGizle", "onUcus", "duvarBakis", "firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "rearGuard", "durumLog", "olay", "pusu", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "tankMuhimmat", "medicTasma", "moral", "roeGuard", "tehditBakis", "havaFarkindalik", "iedFarkindalik", "olumBolgesi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "mekanizeIzle", "aracMedevac", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "taksi", "ezmeKoruma", "aracUzak", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "aracSenkron", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "hq", "aracFfvDuzelt", "atPaylas", "surucuYenile", "motorSes", "aracZirhKac", "tankAtesKontrol", "tankMurettebat", "tani", "mevziKilit", "teslimBirey", "pusuTepki", "patlayici", "atesHareket", "zirhDronIzle", "aracUnstuck", "dronGozlemci", "dronTopcu", "modUyum", "tankAralik", "koseTemkin", "binaPencere", "atisUstunlugu", "orphanWatchdog", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip"];
+        } forEach ["tohumBaslat", "senaryoRota", "isaretGizle", "onUcus", "duvarBakis", "kapiBekci", "firedHub", "buddyDebug", "dispersion", "buddyBond", "leaderSync", "roleStation", "reloadCover", "grenadeAwareness", "cqbReflex", "sniperTeam", "buildingClear", "coverHug", "fireSupport", "commanderFormation", "moveAssist", "fireLine", "tccc", "fieldCraft", "rearGuard", "durumLog", "olay", "pusu", "kamuflaj", "saglik", "ortamSkill", "yaprakGorus", "varsayilanSkill", "tankMuhimmat", "medicTasma", "moral", "roeGuard", "tehditBakis", "havaFarkindalik", "iedFarkindalik", "olumBolgesi", "baskiTufekci", "yanGuvenlik", "noktaEleman", "yetimKatil", "panikFelc", "gizliAlgi", "mekanizeIzle", "aracMedevac", "haltKur", "sinsiGeri", "liderDevri", "mermiDisiplin", "grupSunucuDevir", "telemetri", "taksi", "ezmeKoruma", "aracUzak", "murettebatKoru", "giyimTani", "komutanZihin", "topSiper", "hendekBilinc", "agacGizlen", "ihaGozlem", "ihaEnvanter", "aracSenkron", "komutanPlanKapi", "gozcuRto", "tarafSecim", "cephanePaylas", "tehlikeAlani", "hq", "aracFfvDuzelt", "atPaylas", "surucuYenile", "motorSes", "aracZirhKac", "tankAtesKontrol", "tankMurettebat", "tani", "mevziKilit", "teslimBirey", "pusuTepki", "patlayici", "atesHareket", "zirhDronIzle", "aracUnstuck", "dronGozlemci", "dronTopcu", "modUyum", "tankAralik", "koseTemkin", "binaPencere", "atisUstunlugu", "orphanWatchdog", "yigilmaCoz", "cqbCevik", "sektorBakis", "acikBekleme", "ozguven", "isinlanmaKoruma", "turretEkip"];
 
         // nabiz: 60 sn'de bir (yerel AI grubu varsa) — temas / taktik bayraklari RPT'de gorunsun
         [] spawn {
