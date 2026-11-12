@@ -28,6 +28,20 @@ private _BND_CYCLE_RAND      = 3;
 private _BND_SUPPRESSION_MUL = 3;
 private _BND_MAX_CYCLES      = 10;
 private _BND_COVER_RANGE     = 50;    // ileri siper arama menzili (m)
+// v8.507 BOUNDING AGRESIFLIGI (kullanici: 'botlar cover almaya oncelik versin, hep ates ustunlugu kurmaya calisiyorlar, daha agresif cover alsinlar, daha yakinlassinlar, ates altinda cok hantallar'):
+//   [temkinli (eski), dengeli, agresif] -> kapi min / max (sn), siperde bekleme taban / rastgele / baski carpani / ek (sn), varis bekleme taban / baski carpani, ezilmis kosucu esigi, yatirma esigi, siper arama menzili
+private _agr = (missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2;
+private _kapiMin   = [3, 2, 1.2] select _agr;
+private _kapiMax   = [5, 3.5, 2.2] select _agr;
+private _varisTab  = [9, 7.5, 6] select _agr;
+private _varisBas  = [4, 3, 2] select _agr;
+private _ekBekle   = [1.5, 1, 0.5] select _agr;
+private _kosuEsik  = [0.6, 0.7, 0.8] select _agr;    // kosucu bu baskida 'ezilmis' sayilir, yardim / yakinlasma atlanir
+private _yatEsik   = [0.85, 0.9, 0.95] select _agr;  // bu baskida asker siperde YATAR (altinda cokmeden durur)
+_BND_CYCLE_BASE      = [6, 4.5, 3] select _agr;
+_BND_CYCLE_RAND      = [3, 2, 1.5] select _agr;
+_BND_SUPPRESSION_MUL = [3, 2.2, 1.5] select _agr;
+_BND_COVER_RANGE     = [50, 60, 70] select _agr;
 
 // ---------------------------------------------------------------------------
 // Grup / lider dogrulama
@@ -260,14 +274,18 @@ if (EGVAR(main,debug_functions)) then {
 // ---------------------------------------------------------------------------
 [_group, _fse, _maneuver, _reserve, _target, _targetASL, _vehicles, _unit,
  _BND_ASSAULT_RANGE, _BND_CYCLE_BASE, _BND_CYCLE_RAND, _BND_SUPPRESSION_MUL,
- _BND_MAX_CYCLES, _BND_COVER_RANGE, _bndToken, _delay] spawn {
+ _BND_MAX_CYCLES, _BND_COVER_RANGE, _bndToken, _delay,
+ _kapiMin, _kapiMax, _varisTab, _varisBas, _ekBekle, _kosuEsik, _yatEsik] spawn {
 
     params [
         "_group", "_fse", "_maneuver", "_reserve", "_target", "_targetASL", "_vehicles", "_leader",
         "_BND_ASSAULT_RANGE", "_BND_CYCLE_BASE", "_BND_CYCLE_RAND", "_BND_SUPPRESSION_MUL",
-        "_BND_MAX_CYCLES", "_BND_COVER_RANGE", "_bndToken", "_delay"
+        "_BND_MAX_CYCLES", "_BND_COVER_RANGE", "_bndToken", "_delay",
+        "_kapiMin", "_kapiMax", "_varisTab", "_varisBas", "_ekBekle", "_kosuEsik", "_yatEsik"
     ];
 
+    // v8.507: ilerleme odulu (kosucu siper secerken hedefe kazanilan metre basina puan) - temkinli 0 / dengeli 0.12 / agresif 0.25
+    private _kazK = [0, 0.12, 0.25] select ((missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2);
     private _cycleCount = 0;
     private _rushN = 0;   // sadece buddy cycle'larda artar (kosucu dagilimi esit olsun)
     // Zarif bitis: temizlik zamanlayicisindan (delay) 20 sn once dongu kendisi biter
@@ -321,13 +339,13 @@ if (EGVAR(main,debug_functions)) then {
         params ["_b", "_p", "_s"];
         if (!alive _b) exitWith {};
         _b setUnitPosWeak (
-            if ((getSuppression _b) >= 0.85) then {"DOWN"} else {
+            if ((getSuppression _b) >= _yatEsik) then {"DOWN"} else {
                 [_s, "AUTO"] select ((_b distance2D _p) > 8)
             }
         );
         // VARDI: sipernin yerinde KAL (doStop) — aksi halde AI formasyon slotuna (liderin yanina) geri yuruyup "ileri-geri" yapiyor.
         // Bounding bitince / sonraki sicramada doMove zaten yeni emir verir; en sonda doFollow gruba doner.
-        if ((_b distance2D _p) <= 8 && {(getSuppression _b) < 0.85}) then { doStop _b; };
+        if ((_b distance2D _p) <= 8 && {(getSuppression _b) < _yatEsik}) then { doStop _b; };
     };
 
     // ODAK: grubun bildigi en yakin dusman (hepsi AYNI hedefe ates eder = yogun ates)
@@ -451,7 +469,7 @@ if (EGVAR(main,debug_functions)) then {
         // v8.388 DOKTRINE GORE UZUN SICRAMA (kullanici: 'sicrama mesafesini doktrine gore arttir, 2-3 m'de dur kalk'): bant atilimlari CBA carpanla (varsayilan 1.6) buyur; kazanc esigi yariya kadar buyur.
         //   Ust sinirlar: (1) gozetleyen silahin etkili menzilinin 2/3'u (asagida _owCap: tufek 307 m, MG 400 m; M111 8708-8710), (2) dusmana kalan mesafe: hucum menzili (bndBitisM) oncesi dur (kalan x 0.85),
         //   yorgunluk tabani 12 -> 18 m.
-        private _bndCarpan = (missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 1.6]) max 0.5 min 3;
+        private _bndCarpan = (missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3;
         private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
@@ -504,7 +522,7 @@ if (EGVAR(main,debug_functions)) then {
                     };
                 };
                 private _aciFark = abs ((((_kPos getDir _cp) - ((_kosan getDir _hedef) + _aci)) + 540) % 360 - 180);
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark) - ([_cp] call _kalabalik);
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark) - ([_cp] call _kalabalik) + (_kazK * (_mesafe - (_cp distance2D _hedef)));
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
@@ -517,7 +535,7 @@ if (EGVAR(main,debug_functions)) then {
         };
         [_cover] call _secFn;
         // v8.388 UZAK ADAY: yakin nesneler findCover'in 30 nesnelik sinirini doldurur, ilerideki siper hic aday olmaz -> hop kisa kalir. Hop < atMax x 0.5 ise hedefe dogru atMax x 0.7 ilerideki NOKTA merkezli ikinci arama.
-        if (_atMax >= 40 && {_hop < (_atMax * 0.5)}) then {
+        if (_atMax >= 40 && {_hop < (_atMax * ([0.5, 0.6, 0.7] select ((missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2)))}) then {
             private _fMerkez = _kPos getPos [_atMax * 0.7, ((_kosan getDir _hedef) + _aci)];
             if (!surfaceIsWater _fMerkez) then {
                 private _far = [_kosan, _hedef, (_atMax * 0.4) max 25, "ASCEND", 6, "ADVANCE", _fMerkez] call EFUNC(main,findCover);
@@ -922,13 +940,13 @@ if (EGVAR(main,debug_functions)) then {
         waitUntil {
             sleep 0.5;
             !(call _hala)
-            || {(time - _atesBasi) >= 5}
+            || {(time - _atesBasi) >= _kapiMax}
             || {
-                ((time - _atesBasi) >= 3)   // v8.379: 1.5 -> 3 sn (kapsama ates dususu kurulmadan kosucu kalkmasin)
+                ((time - _atesBasi) >= _kapiMin)   // v8.379: 3 sn; v8.507: agresiflige gore 1.2 - 3 sn
                 && {isNull _odak || {!alive _odak} || {(getSuppression _odak) >= 0.25}}
             }
             // v8.355: odak UZAK makinede (oyuncu / baska makine) ise getSuppression -1 doner -> kapi hic 'bastirildi' demiyor ve 5 sn'in tamamini bekliyordu (RPT 30-10: kapi 5.3-5.9 sn); bu durumda 3 sn
-            || {((time - _atesBasi) >= 3) && {!isNull _odak} && {(getSuppression _odak) < 0}}
+            || {((time - _atesBasi) >= _kapiMin) && {!isNull _odak} && {(getSuppression _odak) < 0}}
         };
 
         if (!(call _hala)) exitWith {};
@@ -977,7 +995,7 @@ if (EGVAR(main,debug_functions)) then {
         // Varisa kadar bekle (9 sn + baski kadar ek), varan askere siper stance'i
         private _maxSupp = 0;
         { _maxSupp = _maxSupp max (getSuppression _x); } forEach (_hareketEdecek select {alive _x});
-        private _bekleBitis = time + 9 + (_maxSupp * 4);
+        private _bekleBitis = time + _varisTab + (_maxSupp * _varisBas);
         private _inen = [];
         private _yenidenSecti = [];
         private _yonKontrol = time;
@@ -1079,14 +1097,14 @@ if (EGVAR(main,debug_functions)) then {
                 private _cp = (_hareketler select _hi) select 1;
                 // v8.382: kosucu planli siperine varamadiysa (baski / engel) bulundugu yer referans alinir; es oraya yetisir (eskiden 12 m kosulu yuzunden hic tetiklenmiyordu)
                 if ((_kosan distance2D _cp) >= 12) then { _cp = getPosATL _kosan; };
-                if ((getSuppression _kosan) >= 0.6) then {
+                if ((getSuppression _kosan) >= _kosuEsik) then {
                     diag_log format ["[BND-YAKIN-ATLA] %1 | cycle:%2 | kosucu %3 bastirilmis (%4)", groupId _group, _cycleCount, name _kosan, (getSuppression _kosan) toFixed 2];
                 } else {
                     {
                         private _d = _x;
                         if (
                             alive _d && {isNull objectParent _d}
-                            && {(getSuppression _d) < 0.6}
+                            && {(getSuppression _d) < _kosuEsik}
                             && {(_d distance2D _cp) > 8}
                             && {(_d distance2D _cp) < 60}
                         ) then {
@@ -1129,10 +1147,10 @@ if (EGVAR(main,debug_functions)) then {
                 sleep 0.5;
                 {
                     _x params ["_b", "_p", "_s"];
-                    if (alive _b && {!(_b in _yInen)} && {((_b distance2D _p) < 3) || {(getSuppression _b) >= 0.85}}) then {
+                    if (alive _b && {!(_b in _yInen)} && {((_b distance2D _p) < 3) || {(getSuppression _b) >= _yatEsik}}) then {
                         _yInen pushBack _b;
                         _b setVariable [QGVAR(forceMove), nil];
-                        _b setUnitPosWeak ([_s, "DOWN"] select ((getSuppression _b) >= 0.85));
+                        _b setUnitPosWeak ([_s, "DOWN"] select ((getSuppression _b) >= _yatEsik));
                     };
                 } forEach _yakinlasan;
                 !(call _hala)
@@ -1203,7 +1221,7 @@ if (EGVAR(main,debug_functions)) then {
             };
         };
 
-        private _omurBitis = time + _BND_CYCLE_BASE + 1.5 + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL);
+        private _omurBitis = time + _BND_CYCLE_BASE + _ekBekle + (random _BND_CYCLE_RAND) + (_maxSupp * _BND_SUPPRESSION_MUL);
         if (_mgGidis isNotEqualTo []) then { _omurBitis = _omurBitis + 4; };   // MG nin varmasi icin kisa uzatma
         private _uzatildi = false;
         private _peekte = false;

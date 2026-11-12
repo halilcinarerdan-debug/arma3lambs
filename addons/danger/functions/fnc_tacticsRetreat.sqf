@@ -98,7 +98,7 @@ private _suKontrol = {
 //   tehdit < 100 m : 20 m | 100-200 m : 30 m | > 200 m : 50 m  (kisa, hizli atilim; acikta uzun kosu olum)
 private _retAdim = [_group, "retreatAdim", [20, 30, 50]] call FUNC(dk);
 // v8.388: geri cekilme adimi da CBA atilim carpaniyla uzar (en cok x1.5; baski altinda cok uzun kosu istenmez)
-private _adimBoy = (_retAdim select ([2, [1, 0] select (_cqbMesafe < 100)] select (_cqbMesafe < 200))) * ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 1.6]) max 1 min 1.5);
+private _adimBoy = (_retAdim select ([2, [1, 0] select (_cqbMesafe < 100)] select (_cqbMesafe < 200))) * ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 1 min 1.5);
 // SIPER HEDEFLI SICRAMA (v7.38): her sicrama noktasi artik rastgele "acik nokta" degil, dusmandan GIZLI / dogal siperli (agac, kaya, cali, duvar) aday;
 //   - dusman -> nokta gorus hatti kesiliyorsa (+35)  : gercekten siper arkasi
 //   - 3 m'de agac / kaya / cali / duvar / siper varsa (+10)
