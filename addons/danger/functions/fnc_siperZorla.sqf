@@ -3,11 +3,12 @@
  * Author: Cinar (ELITE fork)
  * SIPERE ZORLA (v8.510; kullanici: 'botlar ates etmekten cover alamiyor, catisma bitince kazanan taraf yeni cover aliyor; FSM cover istediginde onu sipere forceleyecek bir sistem, raycast destegiyle').
  * Neden: AI hedefi gorup ates ederken doMove / moveTo emrini ertelenir (ates 'dur' gibi davranir): fnc_doCover (LAMBS FSM 'cover') yalniz moveTo + yuruyus animasyonu veriyordu, asker catisma bitene kadar yerinde
- * ates edip siperi sonra aliyordu. Bu fonksiyon kisa (<= 3.5 sn) bir SIPERE ATILIS uygular:
+ * ates edip siperi sonra aliyordu. Bu fonksiyon kisa (1.2 - 3.5 sn, RISK CARPANI ile) bir SIPERE ATILIS uygular:
  *   1) RAYCAST DOGRULAMA: (a) siper noktasi dusman gozunden GIZLI olmali (FIRE LOD hatti ya da arazi keser; durus yuksekligi 1.5 / 1.0 / 0.4), (b) askerden siper noktasina 0.6 m yukseklikte hat (GEOM) engelsiz
  *      (duvar / cit icinden gecilmez), (c) siper dusmana ilk konumdan >= 4 m daha yaklasmamali.
  *   2) ATILIS: hedef secimi (AUTOTARGET + TARGET) kapatilir (asker nisan alip durmaz), forceSpeed -1, FULL hiz, ayakta (UP), doMove; varinca ya da 3.5 sn sonra HER DURUMDA geri acilir,
  *      varista durus (MIDDLE / DOWN) + dusmana bakis; ates serbest.
+ *   RISK (v8.511): tehdit (bilinen dusman sayisi + agir silah / arac) x baski x mesafe -> 0-1; esik altinda (tek hafif dusman, yakin mesafe) atilis yok; sure 1.2 + 2.3 x risk. Mesafe 8 m 0, 25 m 0.6, 50 m+ 1.
  *   3) KORUMA: dusman <= 8 m (yakin dovus: fnc_yakinAtes ates etsin), asker forceMove / teslim / baygin, LAMBS gorevi / kal-bekle waypoint (fnc_senaryoKapi 'sabit'), 5 sn tekrar siniri.
  * Cagiranlar: fnc_doCover (FSM cover istegi; main), fnc_acikSiper (acikta kalan). Kapatma: lambs_danger_siperZorla = false.  Log: [SIPER-ZORLA] (ilk 40).
  *
@@ -38,6 +39,38 @@ private _ed = _u distance2D _e;
 if (_ed <= 8) exitWith {false};   // yakin dovus: kacma, ates et (fnc_yakinAtes)
 if ((_pos distance2D _e) < (_ed - 4)) exitWith {false};   // dusmana 4 m'den fazla yaklastirmaz
 
+// v8.511 RISK CARPANI (kullanici: 'risk carpani ekle, yakin mesafede bu sure kissin, tehdite gore; karsida 1 kisi varsa gerek yok'):
+//   tehdit = bilinen (nearTargets 200 m) dusman sayisi + agir silah (arac x2, roketatar / MG x1.5) ; baz: 1 kisi 0 / 2 kisi 0.4 / 3 kisi 0.6 / 4+ 0.8; + baski x 0.4 (asker) ; x mesafe carpani
+//   (8 m 0, 25 m 0.6, 50 m+ 1.0). risk < esik (CBA lambs_danger_zorlaRisk, 0.25) ise atilis YOK (dovus et); atilis suresi = 1.2 + 2.3 x risk (1.2 - 3.5 sn).
+//   Tek dusman: yalniz ates ustunlugu kuruyorsa (asker baskisi >= 0.3 ya da grup >= 0.4) ya da dusman zirhli / agir silahliysa.
+private _sideU = side group _u;
+private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
+private _tehdit = 0;
+private _agir = false;
+{
+    private _o = _x select 4;
+    if (!isNull _o && {alive _o} && {((_x select 2) isNotEqualTo civilian)} && {(_sideU getFriend (_x select 2)) < 0.6}) then {
+        if (_o isKindOf "CAManBase") then {
+            private _r = [_o] call _rolFn;
+            if (_r in ["MG", "AT", "MARKSMAN"] || {(secondaryWeapon _o) isNotEqualTo ""}) then { _tehdit = _tehdit + 1.5; _agir = true; } else { _tehdit = _tehdit + 1; };
+        } else {
+            if (!(_o isKindOf "StaticWeapon") || {true}) then { _tehdit = _tehdit + 2; _agir = true; };
+        };
+    };
+} forEach (_u nearTargets 200);
+private _bask = getSuppression _u;
+// ATES USTUNLUGU: dusman bizi (asker ya da grubundan biri) bastiriyorsa = ates ustunlugu kuruyor (asker >= 0.3 / grup >= 0.4)
+private _grupBask = selectMax ((units group _u) apply {if (alive _x) then {getSuppression _x} else {0}});
+private _atesUst = (_bask >= 0.3) || {_grupBask >= 0.4};
+private _baz = [0, 0.4, 0.6, 0.8] select ((round _tehdit) max 0 min 3);
+if (_tehdit < 1.5 && {!_agir}) then { _baz = [0, 0.4] select _atesUst; };   // tek (hafif) dusman: ates ustunlugu kurmuyorsa risk yok; kuruyorsa 2 kisi gibi
+private _mesF = ((((_ed - 8) / 42) max 0) min 1) * 0.4 + 0.6 * ((((_ed - 8) / 17) max 0) min 1);
+_mesF = (_mesF min 1);
+private _risk = (((_baz + (_bask * 0.4)) min 1) * _mesF) min 1;
+if (_tehdit < 1.5 && {!_agir} && {!_atesUst}) then { _risk = 0; };   // 1 kisi ve ates ustunlugu kurmuyor (bastirmiyor): savas, kacma
+if (_risk < (missionNamespace getVariable ["lambs_danger_zorlaRisk", 0.25])) exitWith {false};
+private _sure = 1.2 + (2.3 * _risk);
+
 // RAYCAST (a): siper dusman gozunden gizli mi
 private _eASL = eyePos _e;
 private _pASL = AGLToASL [_pos select 0, _pos select 1, 0];
@@ -51,8 +84,8 @@ private _pATL = _pASL vectorAdd [0, 0, 0.6];
 if ((lineIntersectsSurfaces [_uASL, _pATL, _u, objNull, true, 1, "GEOM", "NONE"]) isNotEqualTo []) exitWith {false};
 
 _u setVariable [QGVAR(zorlaT), time + 5];
-_u setVariable [QGVAR(zorlaBitis), time + 3.5];
-_u setVariable [QGVAR(taktikKilit), time + 3.5];
+_u setVariable [QGVAR(zorlaBitis), time + _sure];
+_u setVariable [QGVAR(taktikKilit), time + _sure];
 private _atVar = _u checkAIFeature "AUTOTARGET";
 private _tVar = _u checkAIFeature "TARGET";
 if (_atVar) then { _u disableAI "AUTOTARGET"; };
@@ -63,7 +96,7 @@ _u setUnitPosWeak "UP";
 _u doMove _pos;
 if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_zorlaLogN", (missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) + 1];
-    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | hedef secimi 3.5 sn kapali", groupId (group _u), name _u, round _ed, round _mes, _ds];
+    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | RISK %6 (tehdit %7, baski %8) -> hedef secimi %9 sn kapali", groupId (group _u), name _u, round _ed, round _mes, _ds, _risk toFixed 2, _tehdit toFixed 1, _bask toFixed 2, _sure toFixed 1];
 };
 [{
     params ["_uu", "_pp"];
@@ -77,7 +110,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         _uu setUnitPosWeak _dd;
         if (!isNull _ee && {alive _ee}) then { _uu doWatch _ee; };
     };
-}, [_u, _pos, _ds, _e, _atVar, _tVar], 3.5, {
+}, [_u, _pos, _ds, _e, _atVar, _tVar], _sure, {
     params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1"];
     if (alive _uu) then {
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
