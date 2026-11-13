@@ -367,6 +367,10 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _cift;
         } forEach _ciftler;
+        // v8.545: sicrama ONCESI ortalama tehdit mesafesi (ilerleme olcusu: varis yerine GERCEK mesafe kazanci)
+        private _dOnce = 0;
+        { _dOnce = _dOnce + ((_x select 0) distance2D _targetPos); } forEach _varis;
+        _dOnce = _dOnce / ((count _varis) max 1);
 
         // 3) Varisa kadar bekle (en fazla 16 sn, %75 vardiysa erken cik); sadece TAKILANA (3.5 sn ilerleyemeyen) emri tazele —
         //    her 3 sn'de doMove tekrari yol hesabini sifirlayip askeri yerinde tutuyordu
@@ -508,7 +512,12 @@ if (EGVAR(main,debug_functions)) then {
 
         // v8.380 ILERLEME TAKIBI (RPT 05:02: Alpha 1-1 PEEL ile 4 dk / 8 sicrama, her sicramada vardi 0/6; dusman 300 m'de, grup yerinde -> 'engage atmiyorlar'): art arda 2 sicramada varan < %20 ise cekilme birakilir
         private _vardiSay = count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}});
-        if ((_vardiSay * 5) < (count _varis)) then {
+        // v8.545 ILERLEME = varis VEYA gercek mesafe kazanci (RPT 14:21-15:07: 4 testte 'ilerleme yok (2 sicrama 0 varis)' ile cekilme 54 sn'de bitti; ormanda 12 m varis yaricapi tutmuyor, asker siperde durup mesafe kazaniyor)
+        private _dSonra = 0;
+        private _canliN = 0;
+        { if (alive (_x select 0)) then { _dSonra = _dSonra + ((_x select 0) distance2D _targetPos); _canliN = _canliN + 1; }; } forEach _varis;
+        private _kazanc = if (_canliN > 0) then {(_dSonra / _canliN) - _dOnce} else {0};
+        if ((_vardiSay * 5) < (count _varis) && {_kazanc < 8}) then {
             _grup setVariable [QGVAR(retSifirArd), (_grup getVariable [QGVAR(retSifirArd), 0]) + 1];
         } else {
             _grup setVariable [QGVAR(retSifirArd), 0];
@@ -516,10 +525,10 @@ if (EGVAR(main,debug_functions)) then {
 
         // Sicrama sonucu (diagnostik): kac asker gercekten vardi
         diag_log format [
-            "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5",
+            "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5 | mesafe kazanci:%6 m",
             groupId _grup, _no,
             count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}}),
-            count _varis, count _pinned
+            count _varis, count _pinned, round _kazanc
         ];
 
         // 4) Vardilar: siperde alcal, artik ortu atesi veren takima katilirlar

@@ -7,7 +7,7 @@
  * uyguluyor; tacticsRetreat 'ilerleme yok (2 sicrama 0 varis)' ile erken bitiyor ve ardindan dusmana yakin DELAY'e donuluyor.
  *
  * BU WATCHER (2 sn): BIREYSEL KACIS (CBA kacisBireysel): grubu temasta (son 25 sn), bilinen dusman 20-250 m'de, yaya, yerel AI asker; asagidakilerden biri saglaniyorsa 'topuga vurur':
- *   (a) TEK KALAN: 40 m icinde (CBA kacisTekM) baska SAGLIKLI / yarali (baygin olmayan) dost yok VEYA grubun etkin sayisi <= 2;
+ *   (a) TEK KALAN: grupta <= 1 etkin dost (grup etkini <= 2) VEYA (40 m icinde (CBA kacisTekM) saglikli / yarali dost yok VE grupta <= 3 etkin dost) — dagilmis ama kalabalik grup tek kalan sayilmaz;
  *   (b) MERMI KRITIK: birincil silahin yedek sarjoru yok ve sarjordaki mermi <= max(5, kapasite x %30).
  *   Aksiyon: dusman yonunun TERSINE 70-120 m'de, dusman gozunden arazi ile gizli + ortulu en iyi noktaya (8 aday) kosar (hedef secimi / otomatik ates kapali, FULL hiz, ayakta); varinca yatar, siperde 45 sn bekler (fnc_siperTut).
  *   Askerin kacis tekrari 90 sn bekler. Tibbi islem yapan, bounding / zorla kosucusu, geri cekilen grup (isRetreating), araca bagli, dusman < 20 m (kacilmaz: dovus) birimlere dokunmaz.
@@ -54,7 +54,8 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
             // (a) tek kalan
             private _dostlar = (units _g) select {alive _x && {_x isNotEqualTo _u} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};
             private _yakinDost = _dostlar findIf {(_x distance2D _u) <= _tekM};
-            private _tek = (_yakinDost < 0) || {(count _dostlar) <= 1};
+            // v8.545: 'tek kalan' = grupta <= 1 etkin dost VEYA (40 m'de dost yok VE grupta <= 3 etkin dost); ormanda dagilma (> 40 m) tek basina 'tek kalan' SAYILMAZ (RPT 15:06: dost 4 iken kacti)
+            private _tek = ((count _dostlar) <= 1) || {(_yakinDost < 0) && {(count _dostlar) <= 3}};
             // (b) mermi kritik: yedek sarjor yok + sarjorda az
             private _w = primaryWeapon _u;
             private _yedek = (magazines _u) select {_x in (compatibleMagazines _w)};
