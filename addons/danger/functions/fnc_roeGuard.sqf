@@ -44,7 +44,7 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
                     // v8.384 BAYGIN KORUMA (kullanici: 'tum mermilerini olu bir adama bosalttilar ve el bombasi salladilar yerde yatan adama'; RPT 12:37-12:41: 3 baygin EAST askerine 4 dk mermi / UGL / el bombasi harcandi,
                     //   Alpha 1-3 sarjorlari 0-8 mermiye indi; forgetTarget motorda 1 sn icinde geri geliyordu - baygin asker 5 m'de gorunuyor). Kalici cozum: baygin (INCAPACITATED / ACE_isUnconscious) asker setCaptive -> motor AI onu HEDEF ALMAZ;
                     //   uyaninca (HEALTHY / INJURED) bayrak bizdeyse captive geri alinir. Bu bayrak yalniz BU modulun koydugu captive icin gecerli (teslim / esir captive'ine dokunulmaz). Kapatma: lambs_danger_bayginKoruOff = true.
-                    if (!(missionNamespace getVariable ["lambs_danger_bayginKoruOff", false]) && {missionNamespace getVariable ["lambs_danger_bayginKoru", true]} && {!isPlayer _x}) then {   // v8.524: CBA lambs_danger_bayginKoru (varsayilan acik)
+                    if (!(missionNamespace getVariable ["lambs_danger_bayginKoruOff", false]) && {!isPlayer _x}) then {
                         private _bay = ((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_x getVariable ["ACE_isUnconscious", false]};
                         if (_bay) then {
                             if (!(captive _x)) then {
