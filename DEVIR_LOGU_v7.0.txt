@@ -3385,3 +3385,5 @@ v8.526 (dal sade-waypoint) CAG / DONEM SECIMI (kullanici: 'sog gm csla gibi cdlc
  - Her donemde ACIK: siper kullanimi / sert siper, kapi acma, tank kesif atesi (keskin gozlem: bilinen konuma ates donemde de vardi), el bombasi, baski / moral / teslim, GERI CEKILME.
  - fnc_doktrin haritasi: vn_o_men_vc -> DUZENSIZ, vn_o_men_nva -> RUS, vn_b_ / vn_i_ -> ABD, csla -> RUS, us85 -> ABD. Fraksiyon adlari TAHMIN (dogrulanmadi); profil degerleri de dogrulanmis tarihsel nizamname degil, tasarim degeridir.
  - Carpanlarin hicbiri kaynaktan dogrulanmis degildir (genel tarih bilgisi + tasarim karari); depodaki doktrin kaynaklari modern. NOT: oyunda denenmedi.
+
+v8.526b (dal sade-waypoint) DOKTRIN ESLEMESI DUZELTME: RPT (vn_khe_sanh) gercek SOG fraksiyonlari 'o_vc' ve 'b_macv' cikti; v8.526 tahmini 'vn_*' adlari eslesmedi, VC askerleri ABD profiline dusuyordu. Eklendi: o_vc -> DUZENSIZ, b_macv -> ABD. Diger SOG fraksiyonlari (NVA / ARVN vb.) adlari RPT'de gorulmedi, eslenmedi (GENEL).

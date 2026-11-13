@@ -122,7 +122,7 @@ private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", 
     ["taliban", "DUZENSIZ"], ["lop_am", "DUZENSIZ"], ["lop_ists", "DUZENSIZ"], ["_ists", "DUZENSIZ"], ["insurgent", "DUZENSIZ"], ["irregular", "DUZENSIZ"], ["_isis", "DUZENSIZ"], ["opf_g_f", "DUZENSIZ"], ["ind_g_f", "DUZENSIZ"],
     ["gm_gc_pol", "GENEL"], ["gm_ge_pol", "GENEL"], ["gm_fc_gc", "RUS"], ["gm_fc_ge", "ABD"], ["gm_fc_dk", "ABD"], ["gm_fc_pl", "RUS"], ["gm_gc", "RUS"], ["gm_ge", "ABD"], ["gm_dk", "ABD"], ["gm_pl", "RUS"],
     // v8.526 CDLC: S.O.G. Prairie Fire (vn_) + CSLA / US 1985 (Iron Curtain). Eslesme TAHMINDIR (fraksiyon adlari dogrulanmadi); donemin kendisi CBA 'Cag' ayariyla secilir. VC = duzensiz, NVA = RUS profili
-    ["vn_o_men_vc", "DUZENSIZ"], ["vn_o_men_nva", "RUS"], ["vn_b_", "ABD"], ["vn_i_", "ABD"], ["csla", "RUS"], ["us85", "ABD"],
+    ["o_vc", "DUZENSIZ"], ["b_macv", "ABD"], ["vn_o_men_vc", "DUZENSIZ"], ["vn_o_men_nva", "RUS"], ["vn_b_", "ABD"], ["vn_i_", "ABD"], ["csla", "RUS"], ["us85", "ABD"],
     ["cup_b_us", "ABD"], ["cup_o_ru", "RUS"], ["cup_i_tk_gue", "DUZENSIZ"], ["tk_gue", "DUZENSIZ"], ["cup_o_chdkz", "DUZENSIZ"], ["chdkz", "DUZENSIZ"], ["cup_i_napa", "DUZENSIZ"],
     // v8.344 RHS / CUP UYUMU: ek fraksiyonlar (alt dize eslesmesi, kucuk harf); bilinmeyen fraksiyon GENEL profile duser
     ["rhs_faction_socom", "ABD"], ["cup_b_baf", "ABD"], ["cup_b_gb", "ABD"], ["cup_b_ger", "ABD"], ["cup_b_cz", "ABD"], ["cup_b_cdf", "GENEL"], ["cup_o_sla", "RUS"],
