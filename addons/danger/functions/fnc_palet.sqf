@@ -41,9 +41,9 @@ private _norm = {
 private _tab = [
     ["SNOW", ["snow", "winter", "arctic", "white", "wtr", "frost", "ice"]],
     ["DESERT", ["desert", "arid", "sand", "tan", "coyote", "khaki", "dst", "cbr", "aor1", "dune", "dry", "dust"]],
-    ["FOREST", ["woodland", "wdl", "forest", "flecktarn", "fleck", "m81", "green", "olive", "oli", "grn", "jungle", "leaf", "vegetation", "dpm", "tiger", "tigerstripe", "grass", "needle", "moss", "swamp", "leaves", "tropic"]],
+    ["FOREST", ["woodland", "wdl", "forest", "flecktarn", "fleck", "m81", "green", "olive", "oli", "grn", "jungle", "leaf", "vegetation", "dpm", "tiger", "tigerstripe", "grass", "needle", "moss", "swamp", "leaves", "tropic", "nva", "pavn", "tgr", "erdl", "m1967", "og107", "arvn"]],   // v8.530: S.O.G. NVA / ABD / ARVN zeytin-yesil tonlari TAHMINI
     ["URBAN", ["urban", "grey", "gray", "city", "asphalt", "concrete", "tarmac", "pavement", "cobble", "tile"]],
-    ["DARK", ["black", "blk", "dark", "night"]],
+    ["DARK", ["black", "blk", "dark", "night", "vc"]],   // v8.530: S.O.G. VC (vn_o_uniform_vc_*) siyah / koyu pijama TAHMINI
     ["KARISIK", ["multicam", "mcam", "ocp", "scorpion", "mtp", "cadpat", "marpat", "ucp", "mixed"]],
     ["TOPRAK", ["rock", "stone", "gravel", "dirt", "mud", "earth", "soil", "clay", "cliff", "mountain"]]
 ];

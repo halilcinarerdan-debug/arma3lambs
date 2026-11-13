@@ -3411,3 +3411,7 @@ v8.529 (dal sade-waypoint) MEVZI HAFIZASI / OGRENME (kullanici: 'siper hafizasi 
    Cagiranlar: main fnc_findCover (_skor, tum modlar), fnc_acikSiper (aday maliyeti -0.6 x puan: nesne / bitki / arazi kivrimi / bina), fnc_ufukAlgi (yer degistirme, ufuk hafizasi dahil). Bounding hop secimi findCover uzerinden etkilenir.
  - SINIR: waypoint rotasi yeniden cizilmez; hafiza siper / hop / yer secimini etkiler ('ayni yerden ikinci kez gecmez' siper ve sicrama noktasi duzeyinde). Dusman atis noktasi icin komutanZihin Fired olayi gerekir (lambs_danger_zihinOff = true ise atis hafizasi dolmaz). Oyuncu birimler hafizaya yazmaz.
  - CBA: mevziHafiza, mevziYariOmur, mevziAgirlik. Log: [MEVZI-OGREN] (ilk 40), [MEVZI-OZET] 120 sn. NOT: oyunda denenmedi; puan carpanlari tasarim degeridir.
+
+v8.530 (dal sade-waypoint) PALET: SOG JETONLARI. RPT (vn_khe_sanh, build v8.529, 10:43): [PALET] 9 VC uniforma / vest (vn_o_uniform_vc_mf_xx_07 / vn_o_vest_vc_xx) HEPSI BELIRSIZ (oylar:[]) - sinif adi ve texture yollarinda renk jetonu yok; palet etkisi sifirdi (tarafsiz 0.5).
+ - Eklendi (TAHMIN, renkler oyunda dogrulanmadi): DARK 'vc'; FOREST 'nva', 'pavn', 'tgr', 'erdl', 'm1967', 'og107', 'arvn'. Yanlissa misyon degiskeni lambs_danger_paletJetonlari ile ezilir / kapatmak icin CBA paletAlgi.
+ - Ayni RPT'de dogrulanan: v8.529 hatasiz yuklendi; [MEVZI-OGREN] 35 olay (iyi 6, kotu 18, maruz 11), [MEVZI-OZET] taraf basina hucre / tahmini dusman mevzisi (WEST 2, EAST 3) uretti; [UFUK-ALGI-OZET] 60 sn: siluet spot 0, ufukta comelme 2, yer degistirme 0.
