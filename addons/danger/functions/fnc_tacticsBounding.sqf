@@ -67,6 +67,19 @@ if ((_target select 2) > 6) then {
 
 private _targetASL = AGLToASL _target;
 
+// v8.539 YAKIN ARAZI MODU (kullanici: 'catismalar 100 m icinde, vietnam dogasi, gercekci sureler'): kapali arazide (30 m'de >= 8 agac / cali / kaya / duvar) dusman <= 130 m ise
+//   sicrama CBA yakinBndAtilim ile (varsayilan 22 m) sinirli, ates ustunlugu kapisi en az 2-3.5 sn, ortak ates bekleme en az 4.5 sn, ileri siper arama 35 m. Ormanda 15-25 m'lik kisa kosular + siperde durup gozleme / ates.
+private _yakinBnd = (missionNamespace getVariable ["lambs_danger_yakinBounding", true])
+    && {((leader _group) distance2D _target) <= 130}
+    && {(count (nearestTerrainObjects [getPosATL (leader _group), ["TREE", "BUSH", "SMALL TREE", "ROCK", "WALL", "HIDE"], 30, false, true])) >= 8};
+private _yakinAt = (missionNamespace getVariable ["lambs_danger_yakinBndAtilim", 22]) max 10 min 40;
+if (_yakinBnd) then {
+    _kapiMin = _kapiMin max 2;
+    _kapiMax = _kapiMax max 3.5;
+    _BND_CYCLE_BASE = _BND_CYCLE_BASE max 4.5;
+    _BND_COVER_RANGE = _BND_COVER_RANGE min 35;
+};
+
 // ---------------------------------------------------------------------------
 // CQB ise assault'a devret
 // ---------------------------------------------------------------------------
@@ -275,13 +288,13 @@ if (EGVAR(main,debug_functions)) then {
 [_group, _fse, _maneuver, _reserve, _target, _targetASL, _vehicles, _unit,
  _BND_ASSAULT_RANGE, _BND_CYCLE_BASE, _BND_CYCLE_RAND, _BND_SUPPRESSION_MUL,
  _BND_MAX_CYCLES, _BND_COVER_RANGE, _bndToken, _delay,
- _kapiMin, _kapiMax, _varisTab, _varisBas, _ekBekle, _kosuEsik, _yatEsik] spawn {
+ _kapiMin, _kapiMax, _varisTab, _varisBas, _ekBekle, _kosuEsik, _yatEsik, _yakinBnd, _yakinAt] spawn {
 
     params [
         "_group", "_fse", "_maneuver", "_reserve", "_target", "_targetASL", "_vehicles", "_leader",
         "_BND_ASSAULT_RANGE", "_BND_CYCLE_BASE", "_BND_CYCLE_RAND", "_BND_SUPPRESSION_MUL",
         "_BND_MAX_CYCLES", "_BND_COVER_RANGE", "_bndToken", "_delay",
-        "_kapiMin", "_kapiMax", "_varisTab", "_varisBas", "_ekBekle", "_kosuEsik", "_yatEsik"
+        "_kapiMin", "_kapiMax", "_varisTab", "_varisBas", "_ekBekle", "_kosuEsik", "_yatEsik", "_yakinBnd", "_yakinAt"
     ];
 
     // v8.507: ilerleme odulu (kosucu siper secerken hedefe kazanilan metre basina puan) - temkinli 0 / dengeli 0.12 / agresif 0.25
@@ -471,6 +484,7 @@ if (EGVAR(main,debug_functions)) then {
         //   yorgunluk tabani 12 -> 18 m.
         private _bndCarpan = ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3) * (["sicrama"] call FUNC(cag));   // v8.526: donem carpani (1 / 0.85 / 0.7)
         private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
+        if (_yakinBnd) then { _atMax = _atMax min _yakinAt; };   // v8.539: yakin arazi: kisa sicrama
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
             if (lambs_danger_yorgLogN < 40) then {
@@ -583,9 +597,9 @@ if (EGVAR(main,debug_functions)) then {
     };
 
     diag_log format [
-        "[BND-BASLA] %8 %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5 | lider xy:%6 | hedef xy:%7",
+        "[BND-BASLA] %8 %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5 | lider xy:%6 | hedef xy:%7 | yakin arazi modu:%9",
         groupId _group, round ((leader _group) distance2D _target), count _fse, count _maneuver, count _reserve,
-        (getPosATL (leader _group)) select [0, 2] apply { round _x }, _target select [0, 2] apply { round _x }, str (side _group)
+        (getPosATL (leader _group)) select [0, 2] apply { round _x }, _target select [0, 2] apply { round _x }, str (side _group), _yakinBnd
     ];
     [_group, "BoundingBasla", round ((leader _group) distance2D _target)] call FUNC(olayGonder);
 

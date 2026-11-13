@@ -85,6 +85,8 @@ DURUM ETIKETLERI (dürüst dogrulama)
    - [CBA bndAgresif]: Temkinli (eski tempo) / Dengeli / Agresif (VARSAYILAN): ates ustunlugu kapisi 3-5 sn -> 1.2-2.2 sn, siperde kisa bekleme,
      hucum / bounding bitis mesafesi x0.7 (daha yakina yaklasir), siper arama menzili 60-70 m.  [CBA bndAtilimCarpan] (varsayilan 2.2): sicrama uzunlugu carpani.
    - Ilerleme odulu: kosucu siper secerken hedefe kazanilan metre basina puan. Cag ayari bu agresifligi sinirlar (bkz. 6).
+   - YAKIN ARAZI BOUNDING (v8.539) [CBA yakinBounding, yakinBndAtilim (22)]: orman / sehirde dusman 30-130 m'deyken (binada degil, guc orani < 1.4) komutan BOUNDING secer (eskiden dogrudan hucum / bastirma-hucum / kanat);
+     sicrama <= 22 m, ates ustunlugu kapisi >= 2-3.5 sn, ortak ates bekleme >= 4.5 sn (gercekci sureler). Vietnam / orman cok yakin muharebesi icin. [RPT BND-BASLA yakin arazi modu, BND-HOP]
  4.2 GERI CEKILME / PEEL / TEMAS KESME (tacticsRetreat, tacticsPeel, tacticsBreakContact)
    - Iki takim donusumlu sicrama; baski altinda once siper + karsi ates; cekilme sonrasi toparlanma. Son direnis (<= 3 asker: yakin binaya kale savunmasi), sinsi geri cekilme.
    - Bilerek ACIMASIZ: kolay basarilmaz.
