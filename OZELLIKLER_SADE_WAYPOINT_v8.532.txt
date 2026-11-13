@@ -169,6 +169,7 @@ DURUM ETIKETLERI (dürüst dogrulama)
  8.4b BOT AYAK SESI + KONUSMA (v8.535, fnc_adimKonusma) [CBA botAdim, konusmaAlgi, konusmaM (60)]
    - Bot ayak sesi: oyuncu olmayan yaya askerlerin adimi (1.6 x hiz x durus x yuzey, <= 45 m) DUSMAN botlarca duyulur; DOST etkilenmez. (Oyuncu adimi ayri: gizliAlgi.)
    - Konusma: bot callout'u (2.2 sn) veya oyuncu ses konusmasi (TFAR / getPlayerChannel) sirasinda, STEALTH degilse, <= 60 m'deki dusman botlar konusanin konumunu duyar. Hile serbest: gercek konum, yalniz yon hata payi.
+   - ACRE2 (v8.537): ACRE_LOCAL_SPEAKING ile oyuncu konusmasi (dogrudan + telsiz) algilanir; ses seviyesi (fisilti / normal / bagirma) duyulma menzilini olcekler.
    - SINIR: oyuncu ses konusmasi algisi surume / mod'a bagli, test edilmeli ([KONUSMA] komut denemesi satiri). [RPT ADIM-BOT, KONUSMA, ADIM-KONUSMA-OZET]
  8.5 DIGER ALGI: gizli algi (ayak sesi, el feneri / IR lazer), duman / patlama farkindaligi, IED farkindaligi (ACE EOD uyumu), tehdit yonune bakis, hava farkindaligi,
    gozcu RTO, gercek hedef (sivil / dost / esir ayrimi).

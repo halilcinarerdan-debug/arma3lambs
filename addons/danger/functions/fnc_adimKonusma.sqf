@@ -10,7 +10,8 @@
  *    yagmur > 0.4 x0.8, ruzgar > 6 m/s x0.8, dinleyici grubu temasta x0.7. r icinde bilgi (reveal) 0.45 + 0.45 x (1 - d / r) + yaklasik yon (doWatch, hata d x 0.25 + 4 m). Dinleyici basina 3 sn'de bir.
  * 2) KONUSMA [CBA konusmaAlgi, konusmaM (60 m)]: bir birim KONUSURKEN (bot: LAMBS callout'u 2.2 sn / oyuncu: ses (VON) konusmasi) ve davranisi STEALTH DEGILSE, <= konusmaM mesafedeki DUSMAN
  *    askerler konusmanin SURESI BOYUNCA konusanin konumunu duyar: bilgi 0.4 + 0.5 x (1 - d / M) (en cok 0.9), yaklasik yon (hata d x 0.15 + 3 m); duvar / bina araya girerse etkin mesafe x1.8. Dinleyici basina 1.5 sn'de bir.
- *    OYUNCU KONUSMA ALGISI: bu makinedeki yerel oyuncu icin once TFAR (TFAR_fnc_isSpeaking), sonra vanilla getPlayerChannel (>= 0 = bir kanalda KONUSUYOR; surume bagli, test edilmeli) kullanilir;
+ *    OYUNCU KONUSMA ALGISI: bu makinedeki yerel oyuncu icin once ACRE2 (ACRE_LOCAL_SPEAKING; ACRE2 kaynagindan: localStartSpeaking / localStopSpeaking), sonra TFAR (TFAR_fnc_isSpeaking), sonra vanilla getPlayerChannel
+ *    (>= 0 = bir kanalda KONUSUYOR; surume bagli, test edilmeli) kullanilir. ACRE2'de konusma SES SEVIYESI menzili olcekler: ses egrisi katsayisi linearConversion [0,1,seviye,0.1,1.3] / 0.7 (fisilti kisa, bagirma uzun; telsizde seviye -0.25);
  *    sonuc lambs_danger_konusmaBit (serverTime bitis) olarak HERKESE yayilir. Baska bir mod / betik ayni degiskeni setVariable ile verebilir: unit setVariable ["lambs_danger_konusmaBit", serverTime + 2, true].
  *    Acilista [KONUSMA] komut denemesi satiri hangi yolun kullanildigini yazar.
  * Kapatma: CBA botAdim / konusmaAlgi.  Log: [ADIM-BOT] / [KONUSMA] (ilk 30 + 60 sn ozeti [ADIM-KONUSMA-OZET]).
@@ -28,19 +29,32 @@ diag_log "[ADIM-KONUSMA] bot ayak sesi + konusma farkindaligi baslatildi (v8.535
 if (hasInterface) then {
     [] spawn {
         waitUntil { sleep 1; !isNull player };
+        // ACRE2 (ACRE_LOCAL_SPEAKING: ACRE2 localStartSpeaking / localStopSpeaking ile true / false; konusma sesi ister dogrudan ister telsizde), sonra TFAR, sonra vanilla getPlayerChannel
+        private _acre = !isNil "ACRE_LOCAL_SPEAKING";
         private _tfar = !isNil "TFAR_fnc_isSpeaking";
         private _degerler = [];
         for "_i" from 0 to 2 do { _degerler pushBack (getPlayerChannel player); sleep 0.2; };
-        diag_log format ["[KONUSMA] komut denemesi | TFAR:%1 | getPlayerChannel (konusmuyorken) = %2 -> vanilla konusma algisi: %3 (konusurken >= 0 olmali; yoksa lambs_danger_konusmaBit elle verilebilir)", _tfar, _degerler, (_degerler findIf {_x isEqualType 0}) >= 0];
+        diag_log format ["[KONUSMA] komut denemesi | ACRE2:%1 (ACRE_LOCAL_SPEAKING) | TFAR:%2 | getPlayerChannel (konusmuyorken) = %3 | kullanilan yol: %4", _acre, _tfar, _degerler, ["vanilla getPlayerChannel (>= 0 = konusuyor; surume bagli, DOGRULANMADI)", ["TFAR_fnc_isSpeaking", "ACRE2 ACRE_LOCAL_SPEAKING"] select _acre] select (_tfar || _acre)];
         private _ilkLog = true;
         while {true} do {
             sleep 0.4;
             if !(missionNamespace getVariable ["lambs_danger_konusmaAlgi", true]) then { continue };
             private _konusuyor = false;
-            if (_tfar) then { _konusuyor = [player] call TFAR_fnc_isSpeaking; } else { _konusuyor = (getPlayerChannel player) >= 0; };
+            private _carpan = 1;
+            if (_acre) then {
+                _konusuyor = (missionNamespace getVariable ["ACRE_LOCAL_SPEAKING", false]) isEqualTo true;
+                if (_konusuyor) then {
+                    // ACRE2 ses egrisi: menzil katsayisi = linearConversion [0, 1, seviye, 0.1, 1.3] (varsayilan seviye 0.5 -> 0.7); telsizde konusurken ACRE seviyeyi 0.25 dusurur
+                    private _sv = (missionNamespace getVariable ["acre_sys_gui_volumeLevel", 0.5]) - ([0, 0.25] select ((missionNamespace getVariable ["ACRE_LOCAL_BROADCASTING", false]) isEqualTo true));
+                    _carpan = (((linearConversion [0, 1, _sv, 0.1, 1.3, true]) / 0.7) max 0.15) min 1.9;
+                };
+            } else {
+                if (_tfar) then { _konusuyor = [player] call TFAR_fnc_isSpeaking; } else { _konusuyor = (getPlayerChannel player) >= 0; };
+            };
             if (_konusuyor isEqualTo true) then {
+                player setVariable ["lambs_danger_konusmaCarpan", _carpan, true];
                 player setVariable ["lambs_danger_konusmaBit", serverTime + 0.9, true];
-                if (_ilkLog) then { _ilkLog = false; diag_log "[KONUSMA] yerel oyuncu KONUSUYOR algilandi (ses konusmasi): konusma bilgisi dusmana aktariliyor"; };
+                if (_ilkLog) then { _ilkLog = false; diag_log format ["[KONUSMA] yerel oyuncu KONUSUYOR algilandi (%1): konusma bilgisi dusmana aktariliyor | ses menzil carpani %2", ["vanilla / TFAR", "ACRE2"] select _acre, _carpan toFixed 2]; };
             };
         };
     };
@@ -71,6 +85,7 @@ if (hasInterface) then {
                 if (_sSide isEqualTo civilian) then { continue };
                 private _sPos = getPosATL _s;
                 private _sEye = eyePos _s;
+                private _konMs = _konM * ((_s getVariable ["lambs_danger_konusmaCarpan", 1]) max 0.15 min 1.9);   // ACRE2 ses seviyesi (fisilti / normal / bagirma) menzili olcekler
                 {
                     private _b = _x;
                     if (_tepki >= 24) exitWith {};
@@ -81,9 +96,9 @@ if (hasInterface) then {
                     if (time < (_b getVariable [QGVAR(konT), 0])) then { continue };
                     private _d = _sPos distance (getPosATL _b);
                     private _dEtkin = _d * ([1, 1.8] select (lineIntersects [_sEye, eyePos _b, _s, _b]));
-                    if (_dEtkin > _konM) then { continue };
+                    if (_dEtkin > _konMs) then { continue };
                     _b setVariable [QGVAR(konT), time + 1.5];
-                    private _lvl = (0.4 + (0.5 * (1 - (_dEtkin / (_konM max 1))))) min 0.9;
+                    private _lvl = (0.4 + (0.5 * (1 - (_dEtkin / (_konMs max 1))))) min 0.9;
                     if (_lvl > (_b knowsAbout _s)) then { _b reveal [_s, _lvl]; };
                     private _g = group _b;
                     if (((_g getVariable [QGVAR(contact), 0]) < time) && {isNull (assignedTarget _b)}) then {
@@ -97,7 +112,7 @@ if (hasInterface) then {
                         _logN = _logN + 1;
                         diag_log format ["[KONUSMA] %1 -> %2 | %3 m (etkin %4) | konusma duyuldu | bilgi %5 | konusan %6", name _s, groupId _g, round _d, round _dEtkin, _lvl toFixed 2, ["bot", "OYUNCU"] select (isPlayer _s)];
                     };
-                } forEach (_sPos nearEntities ["CAManBase", _konM * 1.8]);
+                } forEach (_sPos nearEntities ["CAManBase", _konMs * 1.8]);
             } forEach (allUnits select {(_x getVariable ["lambs_danger_konusmaBit", 0]) > serverTime});
         };
 
