@@ -17,12 +17,13 @@
  * 1: Siper noktasi (AGL) <ARRAY>
  * 2: Dusman <OBJECT> (opsiyonel; yoksa en yakin bilinen)
  * 3: Varis durusu "UP" / "MIDDLE" / "DOWN" <STRING> (opsiyonel, varsayilan MIDDLE)
+ * 4: Risk esigini atla <BOOL> (v8.522; sarjor degistirme siperi icin true)
  *
  * Return Value: Atilis baslatildi mi <BOOL>
  * Public: No
 */
 
-params [["_u", objNull, [objNull]], ["_pos", [], [[]]], ["_e", objNull, [objNull]], ["_ds", "MIDDLE", [""]]];
+params [["_u", objNull, [objNull]], ["_pos", [], [[]]], ["_e", objNull, [objNull]], ["_ds", "MIDDLE", [""]], ["_riskAtla", false, [false]]];
 if (!(missionNamespace getVariable ["lambs_danger_siperZorla", true])) exitWith {false};
 if (isNull _u || {!alive _u} || {_pos isEqualTo []} || {!local _u} || {isPlayer _u} || {!isNull objectParent _u}) exitWith {false};
 if ((lifeState _u) in ["INCAPACITATED", "UNCONSCIOUS"] || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {_u getVariable [QGVAR(forceMove), false]}) exitWith {false};
@@ -69,8 +70,8 @@ private _mesF = ((((_ed - 8) / 42) max 0) min 1) * 0.4 + 0.6 * ((((_ed - 8) / 17
 _mesF = (_mesF min 1);
 private _risk = (((_baz + (_bask * 0.4)) min 1) * _mesF) min 1;
 if (_tehdit < 1.5 && {!_agir} && {!_atesUst}) then { _risk = 0; };   // 1 kisi ve ates ustunlugu kurmuyor (bastirmiyor): savas, kacma
-if (_risk < (missionNamespace getVariable ["lambs_danger_zorlaRisk", 0.25])) exitWith {false};
-private _sure = 1.2 + (2.3 * _risk);
+if (!_riskAtla && {_risk < (missionNamespace getVariable ["lambs_danger_zorlaRisk", 0.25])}) exitWith {false};   // v8.522: _riskAtla (sarjor degistirme siperi): acikta reload tehlikeli, risk esigi aranmaz
+private _sure = (1.2 + (2.3 * _risk)) max ([0, 1.8] select _riskAtla);
 
 // RAYCAST (a): siper dusman gozunden gizli mi
 private _eASL = eyePos _e;

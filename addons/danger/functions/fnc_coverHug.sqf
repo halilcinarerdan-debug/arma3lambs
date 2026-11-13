@@ -251,8 +251,15 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                         groupId _g, name _u, _d toFixed 2, _kayma toFixed 2, _durus, round _ed
                     ];
                 };
-            } forEach (units _g);
-        } forEach allGroups;
+            } forEach ([units _g, [], {   // v8.522: grubun en yakin dusmanina gore siralama (en one cikan asker ilk siperi alir)
+    private _eu = _x findNearestEnemy _x;
+    if (isNull _eu) then {1e9} else {_x distance2D _eu}
+}, "ASCEND"] call BIS_fnc_sortBy);
+        } forEach ([allGroups select {local _x && {(_x getVariable [QGVAR(contact), 0]) > time}}, [], {   // v8.522 ONCELIK: dusmana EN YAKIN grup / asker once (cok adam varsa ilk siper en one cikanlara; kullanici istegi)
+    private _lg = leader _x;
+    private _eg = if (isNull _lg) then {objNull} else {_lg findNearestEnemy _lg};
+    if (isNull _eg) then {1e9} else {_lg distance2D _eg}
+}, "ASCEND"] call BIS_fnc_sortBy);
     };
 };
 

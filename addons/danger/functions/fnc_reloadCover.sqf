@@ -153,6 +153,8 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                         } else {
                             _u setUnitPosWeak "AUTO";
                         };
+                        // v8.522: reload bitti + temas suruyor -> siperde kal (formasyon slotuna geri yuruyup acikta durma / git-gel olmasin; fnc_siperTut)
+                        if (((group _u) getVariable [QGVAR(contact), 0]) > time) then { [_u] call FUNC(siperTut); };
                     };
                 } else {
                     // -----------------------------------------------------
@@ -203,20 +205,34 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                 // siper <= 4 m (birkac adim, acikta kosu yok) ve baski < 0.85 -> siper; aksi halde yerinde cok eger/yatarak reload (reload SONRASI kosu yok)
                                 private _yakinDusman = !isNull _e && {(_u distance2D _e) < 20};
                                 private _cv = if (isNull _e || {_yakinDusman}) then {[]} else {[_u, _e, 20, "ASCEND", 4, "DEFEND"] call EFUNC(main,findCover)};
+                                // v8.522 SIPERE ZORLA ENTEGRASYONU (kullanici: 'once reload sonra cover da bu sisteme katilsin'): siper <= 10 m (eskiden 4) ise raycast dogrulamali siper atilisi (fnc_siperZorla,
+                                //   risk esigi atlanir: acikta reload tehlikeli); olmazsa eski kisa yol (<= 4 m)
                                 if (
                                     _cv isNotEqualTo []
                                     && {(getSuppression _u) < 0.85}
-                                    && {(_u distance2D ((_cv select 0) select 0)) <= 4}
+                                    && {(_u distance2D ((_cv select 0) select 0)) <= 10}
                                 ) then {
                                     _hedef = (_cv select 0) select 0;
                                     _stance = (_cv select 0) select 1;
                                     if ((_u distance2D _hedef) > 2) then {
-                                        _faz = "GO";
-                                        _not = format ["siper %1 m", round (_u distance2D _hedef)];
-                                        _u setVariable [QGVAR(forceMove), true];
-                                        _u setUnitPosWeak "UP";
-                                        _u doMove _hedef;
-                                        _u forceSpeed -1;
+                                        private _zorla = [_u, _hedef, _e, _stance, true] call FUNC(siperZorla);
+                                        if (_zorla) then {
+                                            _faz = "GO";
+                                            _not = format ["siper %1 m (SIPERE ZORLA, raycast dogrulamali)", round (_u distance2D _hedef)];
+                                        } else {
+                                            if ((_u distance2D _hedef) <= 4) then {
+                                                _faz = "GO";
+                                                _not = format ["siper %1 m", round (_u distance2D _hedef)];
+                                                _u setVariable [QGVAR(forceMove), true];
+                                                _u setUnitPosWeak "UP";
+                                                _u doMove _hedef;
+                                                _u forceSpeed -1;
+                                            } else {
+                                                _hedef = getPosATL _u;
+                                                _stance = "DOWN";
+                                                _not = "siper 4-10 m ama atilis dogrulanamadi -> yerinde yatarak";
+                                            };
+                                        };
                                     } else {
                                         _not = "siper yanimda";
                                     };
@@ -254,7 +270,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                             };
 
                             _u setVariable [QGVAR(stationLast), time];
-                            _u setVariable [QGVAR(reloadState), [_faz, time, time + _sure, _stance, _hedef, _mermi, _b, time, _e, _faz isEqualTo "GO"]];
+                            _u setVariable [QGVAR(reloadState), [_faz, time, time + _sure, _stance, _hedef, _mermi, _b, time, _e, (_faz isEqualTo "GO") && {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true}]];
 
                             // Log (global 3 sn'de bir; catismada dalga dalga yazmasin)
                             if ((time - (missionNamespace getVariable ["lambs_danger_reloadLogT", -999])) > 3) then {

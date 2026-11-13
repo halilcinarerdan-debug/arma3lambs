@@ -142,6 +142,11 @@ lambs_danger_onUcusStarted = true;
         private _kap = _kapTop getOrDefault [str _sd, 0];
         if (_yaya > 0 || {_kap > 0}) then {
             (format ["KAPASITE | %1 | yaya AI asker %2 | nakil koltugu %3 (APC / KAMYON / IFV, surucusu olan)", _sd, _yaya, _kap]) call _L;
+            // v8.522: UGL'li asker sayisi (kullanici: 'ugl hala kullanilmadi, neden?': once senaryoda kac askerde 40 mm namlu var?)
+            private _glFn = missionNamespace getVariable ["lambs_danger_fnc_hasUGL", {""}];
+            private _glN = 0;
+            { if ((side _x) isEqualTo _sd) then { { if (alive _x && {isNull objectParent _x} && {!isPlayer _x} && {([_x] call _glFn) isNotEqualTo ""}) then { _glN = _glN + 1; }; } forEach (units _x); }; } forEach _gruplar;
+            (format ["UGL | %1 | 40 mm namlulu AI asker %2 / yaya %3 (UGL kullanimi yalniz bu askerlerle sinirlidir)", _sd, _glN, _yaya]) call _L;
         };
     } forEach [west, east, resistance];
 

@@ -112,7 +112,7 @@ if ((_unit ammo _gl) <= 0) exitWith {"mermi_yok" call _red};
 // MENZIL
 // ---------------------------------------------------------------------------
 private _d = _unit distance2D _target;
-if (_d < 30 || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 -> 30-340 m
+if (_d < (missionNamespace getVariable ["lambs_danger_uglMinM", 20]) || {_d > 340}) exitWith {"menzil" call _red};   // v8.284: 35-320 -> 30-340 m; v8.522: alt sinir CBA uglMinM (20; eskiden 30)
 // UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
 if (_d > ([group _unit, "uglUzakM", 240] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 12] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 
