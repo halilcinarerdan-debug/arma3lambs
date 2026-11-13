@@ -91,7 +91,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 private _en = _u findNearestEnemy _u;
                 if (isNull _en || {!alive _en}) then { continue };
                 private _ed = _u distance2D _en;
-                if (_ed < 6 || {_ed > 400}) then { continue };
+                if (_ed < 3 || {_ed > 400}) then { continue };   // v8.524 CQB: 6 -> 3 m (yakin mesafede de acikta kalan siper arasin)
 
                 _u setVariable [QGVAR(hugT), time + ([3, 1.5] select _hizli)];
                 _butce = _butce - 1;

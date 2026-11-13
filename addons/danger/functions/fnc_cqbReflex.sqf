@@ -82,13 +82,13 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                             // v8.351 C) YAKIN SIPER: dusmana ACIK (govde yuksekliginde ray temiz) ve yakinda sert siper varsa 3 sn'lik kosuyla siper / kose arkasina
                             private _siperGitti = false;
                             if (
-                                (missionNamespace getVariable ["lambs_danger_cqbV2", true]) && {_d >= 6} && {_butce > 0} && {(insideBuilding _u) < 0.5}
+                                (missionNamespace getVariable ["lambs_danger_cqbV2", true]) && {_d >= 3} && {_butce > 0} && {(insideBuilding _u) < 0.5}
                                 && {(time - (_u getVariable [QGVAR(cqbSiperT), -999])) > 6}
                                 && {(lineIntersectsSurfaces [eyePos _e, (getPosASL _u) vectorAdd [0, 0, 1.1], _e, _u, true, 1, "FIRE", "NONE"]) isEqualTo []}
                             ) then {
                                 _u setVariable [QGVAR(cqbSiperT), time];
                                 _butce = _butce - 1;
-                                private _cs = [_u, _e, 6, "ASCEND", 1, "DEFEND"] call EFUNC(main,findCover);
+                                private _cs = [_u, _e, 10, "ASCEND", 1, "DEFEND"] call EFUNC(main,findCover);   // v8.524 CQB: arama 6 -> 10 m (findCover DEFEND menzili siperUzaklik ile bolunur; min 8 m)
                                 if (_cs isNotEqualTo []) then {
                                     private _csp = (_cs select 0) select 0;
                                     if (!surfaceIsWater _csp && {(_u distance2D _csp) > 0.8} && {(_csp distance2D _e) >= 4}) then {

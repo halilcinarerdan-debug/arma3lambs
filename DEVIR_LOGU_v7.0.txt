@@ -3369,3 +3369,7 @@ v8.524 (dal sade-waypoint) BAYGIN KORU CBA AYARI + SERT SIPER MENZILI x1.5 (kull
  - Baygin: fnc_roeGuard BAYGIN-KORU (v8.384; baygin asker setCaptive: AI mermi / UGL / bomba harcamaz) artik CBA lambs_danger_bayginKoru (varsayilan ACIK); eski mission degiskeni lambs_danger_bayginKoruOff de gecerli. NOT: 'sunger' yorumu (AI mermisini bayilmislara harciyor) varsayildi.
  - Cover: fnc_acikSiper kaya / duvar / HIDE arama yaricapi _yar x 1.5 (24 m; agac / cali 16 m): RPT [ACIKTA-SINIF-OZET] acikta kalanlarin %71-100'unun 8-19 m'de sert siperi vardi, ort 13-17 m.
  NOT: oyunda denenmedi.
+
+v8.524b (dal sade-waypoint) BAYGIN OLUM + CQB ACIKTA DURMA (kullanici: 'baygin adam yerdeyken olmuyor, sunger gibi' - yani bayilmis AI ek mermiyi emiyor / olmuyor; 'cqb de aciktta durmasinlar').
+ - YENI fnc_bayginOlum: (1) bayilmis AI (ACE_isUnconscious / INCAPACITATED) ace_medical_injured olayiyla CBA lambs_danger_bayginVurus (varsayilan 2) ek isabet alirsa (30 sn pencere) ace_medical_status_fnc_setDead ile OLUR; (2) tedavi gormeden lambs_danger_bayginOlmeSure (300 sn; 0 = kapali) yerde kalirsa olur (tedavide sayac ilerler). CBA lambs_danger_bayginOlum (ana, varsayilan ACIK). Yalniz AI; oyuncuya dokunmaz. Log [BAYGIN-OLUM]. NOT: ace_medical_injured olay imzasi ([unit, painLevel]) ACE3 master woundsHandlerBase'ten dogrulandi; kullanici surumunde denenmedi.
+ - CQB: fnc_coverHug 'acikta' asgari dusman mesafesi 6 -> 3 m; fnc_cqbReflex yakin siper (C) asgari 6 -> 3 m, arama 6 -> 10 m (findCover DEFEND menzili siperUzaklik ile bolunur, min 8 m).
