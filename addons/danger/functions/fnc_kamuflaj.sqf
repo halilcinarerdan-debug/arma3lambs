@@ -74,6 +74,11 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                 if (_ufukta) then { _c = _c + 0.2; };
             };
             _c = _c - _isikBonus;
+            // v8.528 RENK PALETI: uniforma + vest paleti x zemin paleti uyumu (1 = karisir -0.15, 0.1 = belirgin +0.12, 0.5 = tarafsiz); fnc_palet jeton tahmini, piksel ortalamasi DEGIL
+            if (missionNamespace getVariable ["lambs_danger_paletAlgi", true]) then {
+                private _uyum = ["uyum", _u, getPosATL _u] call FUNC(palet);
+                _c = _c + ((0.5 - _uyum) * 0.3);
+            };
             _c = (_c max _minC) min 1.2;
 
             private _eski = _u getVariable [QGVAR(kamuflajC), 1];
@@ -118,6 +123,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                             private _c2ASL = AGLToASL (_c2 vectorAdd [0, 0, 0.4]);
                             if (terrainIntersectASL [_gozE, _c2ASL] || {lineIntersects [_gozE, _c2ASL, objNull, objNull]}) then { _s = _s + 12; };
                             if ((nearestTerrainObjects [_c2, ["TREE", "BUSH", "SMALL TREE", "HIDE", "ROCK", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 4; };
+                            _s = _s + (4 * (["uyum", _u, _c2] call FUNC(palet)));   // v8.528: zemine karisan renk
                             if (_s > _enIyiS) then { _enIyiS = _s; _enIyi = _c2; };
                         } forEach [0, 45, 90, 135, 180, 225, 270, 315];
                     } forEach [8, 16];
