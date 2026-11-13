@@ -67,7 +67,7 @@ if ((count _am) > 0) then {
     private _kumeler = [];
     {
         private _r = _y;
-        private _d = 0.5 ^ ((time - (_r select 4)) / _T);
+        private _d = 0.5 ^ ((time - (_r select 4)) / (_T min 300));   // v8.534: ates kumesi yari omru <= 300 sn
         private _n = (_r select 0) * _d;
         if (_n >= 2.5) then {
             private _c = [(_r select 1) / (_r select 0), (_r select 2) / (_r select 0), (_r select 3) / (_r select 0)];

@@ -32,7 +32,7 @@ if (_tur isEqualTo "ates") exitWith {
     _a set [_sk, _m];
     private _anahtar = format ["%1|%2", _cx, _cy];
     private _r = _m getOrDefault [_anahtar, [0, 0, 0, 0, time]];   // [n, sx, sy, sz, zaman]
-    private _d = 0.5 ^ ((time - (_r select 4)) / _T);
+    private _d = 0.5 ^ ((time - (_r select 4)) / (_T min 300));   // v8.534: dusman ates kumesi yari omru <= 300 sn (hareketli dusman: eski kume 'sabit mevzi' sayilmasin)
     _r = [(_r select 0) * _d + _w, ((_r select 1) * _d) + ((_pos select 0) * _w), ((_r select 2) * _d) + ((_pos select 1) * _w), ((_r select 3) * _d) + ((_pos param [2, 0]) * _w), time];
     _m set [_anahtar, _r];
     if (count _m > 80) then {

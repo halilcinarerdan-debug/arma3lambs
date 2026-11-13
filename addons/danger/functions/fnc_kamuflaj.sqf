@@ -74,6 +74,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                 if (_ufukta) then { _c = _c + 0.2; };
             };
             _c = _c - _isikBonus;
+            private _palK = 0;
             // v8.528 RENK PALETI: uniforma + vest paleti x zemin paleti uyumu (1 = karisir -0.15, 0.1 = belirgin +0.12, 0.5 = tarafsiz); fnc_palet: getTextureInfo ile GERCEK ortalama renk (yedek: jeton tahmini)
             //   v8.532: Dynamic Camo System (DYNCAS_core, rekterakathom) yuklu ise renk etkisini O MOD uygular (ayni getTextureInfo mantigi): burada tekrar eklenmez (cift sayim yok), mod sonucu (DYNCAS_core_unitCache) carpan olarak korunur.
             if (isClass (configFile >> "CfgPatches" >> "DYNCAS_core")) then {
@@ -81,10 +82,13 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
             } else {
                 if (missionNamespace getVariable ["lambs_danger_paletAlgi", true]) then {
                     private _uyum = ["uyum", _u, getPosATL _u] call FUNC(palet);
-                    _c = _c + ((0.5 - _uyum) * 0.3);
+                    // v8.534: uyumsuzluk (renk bastigi zeminle uyusmuyor) artik BELIRGIN: +0.7 x fark x CBA paletUyumsuzluk (uyum 0 -> +0.35); uyum yine -0.3 x fark (-0.15)
+                    private _dl = 0.5 - _uyum;
+                    _palK = [_dl * 0.3, _dl * 0.7 * (missionNamespace getVariable ["lambs_danger_paletUyumsuzluk", 1])] select (_dl > 0);
+                    _c = _c + _palK;
                 };
             };
-            _c = (_c max _minC) min 1.2;
+            _c = (_c max _minC) min ([1.2, 1.5] select (_palK > 0.12));   // v8.534: renk uyumsuzlugunda ust sinir 1.5
 
             private _eski = _u getVariable [QGVAR(kamuflajC), 1];
             if ((abs (_c - _eski)) >= 0.05) then {

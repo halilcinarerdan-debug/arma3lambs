@@ -68,10 +68,18 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
                             private _d = _u distance _e;
                             if ((_u knowsAbout _e) >= (["SUPHE"] call FUNC(bilgiEsik))) then { continue };
                             private _hE = [1.7, 1.0, 0.4] select ((["STAND", "CROUCH", "PRONE"] find (stance _e)) max 0);
-                            if !([_eyeU, getPosATL _e, _hE] call _ufukFn) then { continue };
+                            private _siluet = [_eyeU, getPosATL _e, _hE] call _ufukFn;
+                            // v8.534 RENK UYUMSUZLUGU: hedefin uniforma + vest rengi bastigi zeminle uyumsuzsa (uyum < 0.35) <= 350 m'de de kolay spotlanir (kullanici: 'kamuflaj uyumsuzsa cok daha rahat spot edebilsinler')
+                            private _uyumsuz = 1;
+                            if (!_siluet && {_d <= 350} && {missionNamespace getVariable ["lambs_danger_paletAlgi", true]}) then {
+                                _uyumsuz = ["uyum", _e, getPosATL _e] call FUNC(palet);
+                            };
+                            private _renkSpot = !_siluet && {_uyumsuz < 0.35};
+                            if (!_siluet && {!_renkSpot}) then { continue };
                             if ((abs ((((_u getDir _e) - (getDir _u)) + 540) mod 360 - 180)) > 110) then { continue };
                             if (([_u, "VIEW", _e] checkVisibility [_eyeU, eyePos _e]) < 0.25) then { continue };
                             private _lvl = 0.25 + (0.55 * (1 - (_d / (_menzil max 1))));
+                            if (_renkSpot) then { _lvl = 0.2 + ((0.5 * (1 - (_d / 350)) * (1 - _uyumsuz) * (missionNamespace getVariable ["lambs_danger_paletUyumsuzluk", 1])) min 1.4); };
                             if ((speed _e) > 6) then { _lvl = _lvl + 0.1; };
                             if (_nvgYok) then { _lvl = _lvl * 0.5; };
                             _lvl = ((_lvl * _spotHiz) max 0.15) min 0.95;
@@ -80,7 +88,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
                                 _say set ["spot", (_say get "spot") + 1];
                                 if (_logN < 30) then {
                                     _logN = _logN + 1;
-                                    diag_log format ["[UFUK-SPOT] %1 | %2 -> %3 | %4 m | siluet (gokyuzu karsisinda) | bilgi %5%6", groupId _g, name _u, name _e, round _d, _lvl toFixed 2, ["", " (gece NVG'siz)"] select _nvgYok];
+                                    diag_log format ["[UFUK-SPOT] %1 | %2 -> %3 | %4 m | %7 | bilgi %5%6", groupId _g, name _u, name _e, round _d, _lvl toFixed 2, ["", " (gece NVG'siz)"] select _nvgYok, ["siluet (gokyuzu karsisinda)", format ["RENK UYUMSUZ (uyum %1)", _uyumsuz toFixed 2]] select _renkSpot];
                                 };
                             };
                         } forEach (_hedefler select [0, 3]);
