@@ -146,6 +146,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
                         if (terrainIntersectASL [_gozE, _c2ASL] || {lineIntersects [_gozE, _c2ASL, objNull, objNull]}) then { _s = _s + 12; };
                         if ((nearestTerrainObjects [_c2, ["TREE", "BUSH", "SMALL TREE", "HIDE", "ROCK", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 4; };
                         _s = _s + (4 * (["uyum", _u, _c2] call FUNC(palet)));
+                        _s = _s + (0.6 * ([_tf, _c2, getPosATL _en, true] call FUNC(mevziPuan)));   // v8.529: ufukta vurulan / kotu hucrelerden kacin
                         if (_s > _enIyiS) then { _enIyiS = _s; _enIyi = _c2; };
                     } forEach [0, 45, 90, 135, 180, 225, 270, 315];
                 } forEach [8, 16];

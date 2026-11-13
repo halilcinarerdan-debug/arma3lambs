@@ -45,6 +45,7 @@ if (time > lambs_danger_acikSiperOzetT) then {
 
 private _p = getPosATL _u;
 private _eASL = eyePos _en;
+private _mevziFn = missionNamespace getVariable ["lambs_danger_fnc_mevziPuan", {0}];   // v8.529
 private _ed = _u distance2D _en;
 private _dolu = missionNamespace getVariable ["lambs_danger_acikSiperDolu", []];
 _dolu = _dolu select {(time - (_x select 1)) < 30};
@@ -110,6 +111,7 @@ private _objAd = "";
             } forEach [["UP", 1.5, 0], ["MIDDLE", 1.0, 2], ["DOWN", 0.4, 5]];
             if ((_ds select 0) isNotEqualTo "") then {
                 private _sk = (_u distance2D _pos) + (_ds select 1);
+                _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));   // v8.529 mevzi hafizasi (puan yuksek = iyi -> maliyet duser)
                 // v8.517: haritada agaclar mermi durdurmuyorsa (kalibrasyon LOD = VIEW) agac yalniz GIZLER -> kaya / duvar / konteyner gibi gercek siperler +10 puanla (m) one gecer
                 private _mdl = toLower ((getModelInfo _o) select 0);
                 if ((missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]) isEqualTo "VIEW" && {((_mdl find "t_") isEqualTo 0) || {(_mdl find "tree") >= 0} || {(_mdl find "picea") >= 0}}) then { _sk = _sk + 10; };
@@ -151,6 +153,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
                 if ([1.0] call _gizli) then { _ds = "MIDDLE"; _dc = 2; } else { if ([0.4] call _gizli) then { _ds = "DOWN"; _dc = 5; }; };
                 if (_ds isNotEqualTo "") then {
                     private _sk = (_u distance2D _pos) + _dc + 6;
+                    _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
                 };
             };
@@ -172,6 +175,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
                     private _sk = _r + _dc + 8;
+                    _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
                 };
             };
@@ -232,6 +236,7 @@ private _edir = _p getDir _en;
                     private _gMid = (lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.0], _en, _u]) || {terrainIntersectASL [_eASL, _bA vectorAdd [0, 0, 1.0]]};
                     private _atis = !_gUp || {!_gMid};
                     private _sk = _d;
+                    _sk = _sk - (0.6 * ([side group _u, _bp, getPosATL _en] call _mevziFn));
                     private _durus = "AUTO";
                     if (_atis) then {
                         _durus = ["MIDDLE", "UP"] select (!_gUp);

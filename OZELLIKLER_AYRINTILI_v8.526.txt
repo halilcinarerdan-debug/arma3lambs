@@ -227,3 +227,16 @@ NASIL OKUNUR
  - Telsiz yogunlugu / tip (TCCC) donem anahtarindan etkilenmez.
  - SOG / CSLA / GM icin NVA, ARVN, CSLA fraksiyon adlari dogrulanmadi (yalniz o_vc ve b_macv RPT'de goruldu).
  - Hicbir ozellik icin "oyunda tamamen dogrulandi" iddiasi yoktur; test RPT'ye gore ilerlemektedir.
+
+
+=====================================================================================
+16. SONRADAN EKLENENLER (v8.527 - v8.529)
+=====================================================================================
+ - v8.527 NAMLU ALEVI TEPKISI: gorus hattindaki dusman alevi gorur (gunduz 200 m, gece 700 m); susturucu VEYA alev gizleyici 0.5, ikisi birden 0.2 gorulme orani.
+   [CBA parlamaTepki, parlamaGunduzM, parlamaTekOran, parlamaIkiliOran] [RPT SES-ALEV]
+ - v8.528 UFUK CIZGISI v2: siluet veren dusmani hizli spot, ufukta yururken comel / duran icin yer degistirme [CBA ufukAlgi, ufukSpotM, ufukSpotHiz]
+   RENK PALETI: uniforma + vest jeton tahmini (piksel okunamaz), zemin paletiyle uyum -> camouflageCoef ve yer secimi [CBA paletAlgi] [RPT PALET]
+ - v8.529 MEVZI HAFIZASI (oturum boyunca, taraf basina): hasarsiz dayanilan siperler 'iyi', vurulunca / olunce 'kotu' (tehdit yonune gore), ufukta vurulan noktalar,
+   duyulan dusman atis noktalari -> tahmini dusman mevzisi. Siper secimi (findCover / acikSiper / bounding hop) ve ufuk yer degistirmesi bunu kullanir.
+   [CBA mevziHafiza, mevziYariOmur, mevziAgirlik] [RPT MEVZI-OGREN, MEVZI-OZET]
+ - Oneri (yapilmadi): gozlem / pusu v2, yem, gozcu rotasyonu.

@@ -69,6 +69,7 @@ params [
     ["_orijin", [], [[]]]
 ];
 
+private _mevziFn = missionNamespace getVariable ["lambs_danger_fnc_mevziPuan", {0}];
 // v8.513 SIPER YAKINLIGI (kullanici: 'botlar cok uzaga siper aliyor, 2 kat yakinlastirman lazim'): savunma / gozetleme / hayatta kalma siperlerinde (DEFEND / OVERWATCH / SURVIVE) arama menzili / k ve uzaklik cezasi x k
 //   (CBA lambs_danger_siperUzaklik, varsayilan 2; 1 = eski). ADVANCE (bounding sicramasi: ilerleme bilincli) ve EVADE (zirhtan kacis: uzaklasma bilincli) etkilenmez; bounding UZAK ADAY aramasi (arama merkezi verilen) da.
 private _yakinK = ((missionNamespace getVariable ["lambs_danger_siperUzaklik", 2]) max 1) min 4;
@@ -294,6 +295,9 @@ if (_dangerPos isNotEqualTo [0, 0, 1.8]) then {
                                 _skor = _skor - 6;
                             };
                         } forEach _digerTehditler;
+
+                        // v8.529 MEVZI HAFIZASI: oturum boyu ogrenilen iyi / kotu siper hucreleri + tahmini dusman mevzisi (lambs_danger_fnc_mevziPuan; yoksa 0)
+                        _skor = _skor + ([side group _unit, _pos, _enemyPos] call _mevziFn);
 
                         // Uzaklik maliyeti
                         _skor = _skor - ((_orijinPos distance2D _pos) * (if (_evade) then {0.25} else {[0.5, 0.9] select (_survive)}) * ([1, _yakinK] select _yakinMod));
