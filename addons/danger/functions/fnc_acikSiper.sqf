@@ -118,6 +118,8 @@ private _objAd = "";
         };
     };
 } forEach ((nearestTerrainObjects [_p, ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "HIDE"], _yar, false, true])
+    // v8.524 SERT SIPER MENZILI x1.5 (RPT 14:10 / 14:26 [ACIKTA-SINIF-OZET]: acikta kalanlarin %71-100'unun 8-19 m'de (ort 13-17 m) kaya / duvar siperi vardi ama arama yaricapi 16 m'ydi): kaya / duvar / HIDE _yar x 1.5 (24 m)
+    + ((nearestTerrainObjects [_p, ["ROCK", "ROCKS", "WALL", "HIDE"], _yar * 1.5, false, true]) select {(_x distance2D _p) > _yar})
     // v8.402 TUR-BAGIMSIZ YEDEK (kullanici: 'pmc terrain kendi objelerini kullandim, simple object falan olabilir'): arazi nesnesi turu ('TREE' / 'WALL' ...) tanimsiz / simple object / harita'ya yerlestirilmis nesneler nearestTerrainObjects'te gorunmez ->
     //   nesne turune BAKMADAN (nearestObjects, insan / arac / ev / iz haric) ayni geometri testi (yukseklik >= 0.7, FIRE LOD isin testi) uygulanir. Kapatma: lambs_danger_siperYedekOff = true.
     + (if (missionNamespace getVariable ["lambs_danger_siperYedekOff", false]) then {[]} else { ((nearestObjects [_p, [], _yar]) select {
