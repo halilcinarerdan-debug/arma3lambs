@@ -36,9 +36,14 @@ if (hasInterface) then {
         for "_i" from 0 to 2 do { _degerler pushBack (getPlayerChannel player); sleep 0.2; };
         diag_log format ["[KONUSMA] komut denemesi | ACRE2:%1 (ACRE_LOCAL_SPEAKING) | TFAR:%2 | getPlayerChannel (konusmuyorken) = %3 | kullanilan yol: %4", _acre, _tfar, _degerler, ["vanilla getPlayerChannel (>= 0 = konusuyor; surume bagli, DOGRULANMADI)", ["TFAR_fnc_isSpeaking", "ACRE2 ACRE_LOCAL_SPEAKING"] select _acre] select (_tfar || _acre)];
         private _ilkLog = true;
+        private _acreLog = false;
         while {true} do {
             sleep 0.4;
             if !(missionNamespace getVariable ["lambs_danger_konusmaAlgi", true]) then { continue };
+            // v8.538: ACRE2 / TFAR degiskenleri GEC tanimlanabilir (ACRE2 TeamSpeak baglantisinda baslatilir) -> her turda yeniden bakilir
+            _acre = !isNil "ACRE_LOCAL_SPEAKING";
+            _tfar = !isNil "TFAR_fnc_isSpeaking";
+            if (_acre && {!_acreLog}) then { _acreLog = true; diag_log "[KONUSMA] ACRE2 algilandi (ACRE_LOCAL_SPEAKING tanimli): oyuncu konusmasi ACRE2 uzerinden izleniyor"; };
             private _konusuyor = false;
             private _carpan = 1;
             if (_acre) then {

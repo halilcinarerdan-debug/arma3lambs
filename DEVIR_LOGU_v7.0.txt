@@ -3460,3 +3460,8 @@ v8.537 (dal sade-waypoint) ACRE2 KONUSMA ALGISI (kullanici: 'acre2 kullaniyorum'
  - fnc_adimKonusma: oyuncu konusma algisi once ACRE2 (ACRE_LOCAL_SPEAKING), sonra TFAR, sonra vanilla getPlayerChannel. ACRE2'de ses seviyesi konusma duyulma menzilini olcekler (carpan = ses egrisi / 0.7, 0.15-1.9; fisilti kisa, bagirma uzun; lambs_danger_konusmaCarpan birim degiskeni, herkese yayilir).
    Acilista [KONUSMA] komut denemesi 'ACRE2:true' ve kullanilan yolu yazar; oyuncu konusunca '[KONUSMA] yerel oyuncu KONUSUYOR algilandi (ACRE2) | ses menzil carpani x' satiri gorulmeli.
  - SINIR: ACRE2'nin acre_sys_gui_volumeLevel / egri formulleri ACRE2 surumune gore degisebilir (kaynak master); sayilar tahmin tabanlidir. NOT: oyunda denenmedi.
+
+v8.538 (dal sade-waypoint) RPT (v8.537, vn_khe_sanh 11:43-11:51; ACRE2 bu oturumda YUKLU DEGIL: -mod listesinde yok, [MOD-UYUM] yok: ACRE2) degerlendirmesi.
+ - GORULDU: v8.537 hatasiz yuklendi; [ADIM-BOT] 16 duyulma (kaynak 14-21 km/s kosu, menzil 17-37 m, mesafe 5-35 m, bilgi 0.47-0.83) -> bot ayak sesi CALISIYOR. [KAMUFLAJ] coef 0.74 - 1.18 (karisma 0.74-0.78, uyumsuzluk 1.08-1.18): renk etkisi GORULDU.
+   [KONUSMA] komut denemesi: ACRE2:false, TFAR:false, getPlayerChannel konusmuyorken [-1,-1,-1]; konusma duyulmasi 0 (13 bot callout'u vardi ama dusman > 60 m; oyuncu konusma satiri yok) -> konusma yolu DOGRULANMADI.
+ - DUZELTME: ACRE2 / TFAR degiskenleri acilista bir kez degil her turda (0.4 sn) aranir (ACRE2 TeamSpeak baglantisinda gec baslatabilir); ACRE2 algilaninca '[KONUSMA] ACRE2 algilandi' satiri yazilir.
