@@ -1,0 +1,252 @@
+LAMBS DANGER ELITE - SADE WAYPOINT DALI (claude/sade-waypoint) - OZELLIKLER, KAPSAMLI VE ACIKLAYICI - v8.532
+=========================================================================================================
+
+BU BELGE NEDIR
+ Bu dal, LAMBS Danger FSM uzerine eklenen ELITE katmanlarinin SADELESTIRILMIS halidir. Eski dallardaki "plan / hedef / harekat / nakil / keşif / HQ / Karakol / Garnizon"
+ katmanlari kaldirildi; geriye YALNIZ temas aninda taktik karar, insan faktoru, siper / yakin dovus, algi ve mekanize guvenligi kaldi.
+ Hareketi artik TASARIMCI belirler (waypoint + trigger), ELITE ise "temasta ne yapilir"i belirler.
+
+DURUM ETIKETLERI (dürüst dogrulama)
+ - Hepsi kod olarak yazildi; statik denetimden gecti (HEMTT lint + tools/tutarlilik_denetimi.py: 0 hata).
+ - "GORULDU" = Arma 3 RPT'sinde / kullanici gozleminde calistigi goruldu. Etiketsiz olanlar oyunda tam dogrulanmadi; RPT'lerle tek tek test ediliyor.
+ - Sayisal esikler (mesafe, sure, carpan) cogunlukla TASARIM DEGERIDIR; nizamname sayisi degildir. Depodaki doktrin kaynaklari modern (kaynaklar_doktrin/);
+   Soguk Savas / Vietnam / WWII icin kaynakli deger YOKTUR.
+ - Ayar adlari: CBA > Addon Options > LAMBS Danger > "ELITE siper" (cogu), "ELITE uzun operasyon", "ELITE moral / teslim", "ELITE zirh / mekanize" ... (lambs_danger_<ad>).
+ - Log etiketleri RPT'de gorunur; test ederken bunlara bakilir.
+
+
+=====================================================================================
+1. TASARIM FELSEFESI: WAYPOINT + TRIGGER YONETIR
+=====================================================================================
+ NEDEN: Plan / harekat katmanlari tasarimcinin kontrolunu kemiriyordu (AI kendi rotasini kuruyordu). Bu dalda tasarimci waypoint koyar, ELITE yalniz temasta devreye girer.
+
+ WAYPOINT UYUMU (fnc_wpSahip + fnc_senaryoKapi) - grubun "sahibi" kim?
+   LAMBS   : LAMBS gorevi (lambs_wp: Garrison / Camp / Patrol / Hunt / CQB ...) ya da "LAMBS Danger: AI Kapat" -> ELITE hareket / taktik katmanlari geri cekilir (HER ZAMAN).
+   TUTAN   : Kal-bekle vanilla waypoint (HOLD / SENTRY / GUARD / SCRIPTED ...) ya da Zeus "Gorev Ata -> HARIC" -> ELITE geri cekilir (HER ZAMAN).
+   HAREKET : MOVE / SAD / DESTROY / CYCLE waypoint'i -> [CBA senaryoModu, varsayilan ACIK]: acikken assault / flank / bounding / hide / hold / suppress, ates-hareket,
+             CQB cevik, formasyon, rol istasyonu, buddy, dagilma, yetim, arac senkronu devre disi; grup waypoint'ini izler. [CBA senaryoKapsam: kapsam secimi]
+   (yok)   : waypoint'siz grup -> ELITE tam calisir.
+ HER ZAMAN ACIK KALANLAR (waypoint ne olursa olsun): geri cekilme / peel / zirhtan kacis / temas kesme, panik, teslim, tibbi (TCCC), ates disiplini, arac guvenlik freni.
+ Oyunculu gruplar etkilenmez. Her ozellik kendi kapisini fnc_senaryoKapi [grup, etiket, sadeceSabit] ile sorar.
+ Korunan makro katmanlar: Zeus "ELITE Koordinasyon" (Kumanda), IHA / FPV, taktik tepkiler, senaryo modu.
+
+
+=====================================================================================
+2. SIPER SISTEMI (en guclu katman)
+=====================================================================================
+ Amac: AI "canini tatli bilsin ama agresif olsun" - acikta kalmasin, siperi tehdit yonune gore dogru kullansin, siperde donup kalmasin.
+
+ 2.1 ACIKTA TESPITI (fnc_coverHug)
+   - Askerin gercekten siperde olup olmadigini KATI test eder: govde genisligi (+-lambs_danger_siperGovde), yakinlik (lambs_danger_siperYakinlik, 3 m),
+     isin turu FIRE / VIEW LOD (lambs_danger_siperLod), arazi kivrimi (lambs_danger_siperArazi).
+   - Siniflama RPT'de: acikta, "yalniz agac", "yalniz cali", "hic yok". [RPT ACIKTA-SINIF, ACIKTA-SINIF-OZET]
+   - Dusmana EN YAKIN askerler once siper alir (dusman mesafesine gore siralama).
+   - GORULDU: Altis / Khe Sanh'ta acikta kalanlarin cogunun 8-19 m icinde sert siperi vardi ve aktif siper aldilar.
+ 2.2 HARITA / AGAC KALIBRASYONU (fnc_siperKalibre)
+   - Haritadaki agaclari olcer (govde genisligi, FIRE LOD'lu agac orani) ve siper toleransini O HARITAYA gore ayarlar. [RPT AGAC-TANI]
+   - Neden: Chernarus'ta bircok agacin FIRE LOD'u yok (mermi gecer, gorus kesilir); Altis / SOG ormaninda farkli. GORULDU: Altis'te belirgin iyilesme; Khe Sanh FIRE LOD %75-100.
+ 2.3 ACIKTA KALANI KURTARMA (fnc_acikSiper)
+   - En uygun siperi bulup yollar: kaya / duvar / bina / HIDE nesneleri (sert siper yaricapi x1.5 = 24 m), bitki ortusu [CBA siperBitki], arazi kivrimi adaylari,
+     geri gitme siniri (git-gel onleme). Aday maliyetine MEVZI HAFIZASI da girer (bkz. 11).
+   - KENTSEL ONCELIK [CBA kentselOncelik]: meskun mahalde ev ici / bina oncelikli.
+ 2.4 SIPERE ZORLA (fnc_siperZorla) [CBA siperZorla, zorlaRisk]
+   - Raycast dogrulamali kisa kosu (3.5 sn): hedef siper dusmana gizli + yol acik ise asker oraya "zorla" gonderilir. Kosarken ates ACIK (forceWeaponFire dongusu).
+   - RISK CARPANI: yakin mesafe / tek dusman / dusuk baski -> sure kisalir (cevik); ates ustunlugu kurulmuyorsa daha cevik. [RPT SIPER-ZORLA]
+   - Neden: siperi "isteyen" FSM ates ederken doMove'u erteliyordu; atis altinda hantal kaliyorlardi.
+ 2.5 SIPERDE TUT (fnc_siperTut)
+   - Sipere varinca doStop ile 45 sn'e kadar (temas bitince serbest) tutar; formasyon slotuna geri yuruyup acikta durma / "bir one bir arkaya" GIT-GEL yok. [RPT SIPER-TUT]
+ 2.6 findCover / doCover (main addon)
+   - DEFEND / OVERWATCH / SURVIVE modlarinda arama menzili ve uzaklik cezasi [CBA siperUzaklik] ile ayarlanir (botlar cok uzak siper almasin);
+     ADVANCE / EVADE kapsam disi. doCover'da siper zaten sertse tekrar kosturmaz. Puana MEVZI HAFIZASI eklenir.
+ 2.7 SARJOR DEGISTIRME KORUMASI (fnc_reloadCover)
+   - Acikta ayakta reload yok: once siper (<= 10 m, siperZorla ile), yoksa YAT. Buddy korur (odak ates + baski). Reload bitince 2 sn PEEK + siperde tut.
+ 2.8 CQB (cqbReflex, koseTemkin, binaPencere, buildingClear) [CBA cqbV2, cqbCevikAktif, cqbCevikMenzil]
+   - Yakin dusman (<= 28 m): dondur / hedef al / ates. CQB'de acikta durma yok (asgari 3 m, siper arama 10 m). Bina rolu / etaj / pencere atis pozisyonu, bina cevre emniyeti ve temizleme.
+ 2.9 DUVARA KOR BAKIS DUZELTMESI (duvarBakis, bakisAcikYon): bos duvara / engele bakan askerin bakisini tehdit yonune acik yone cevirir.
+ 2.10 DIGER SAHA USTALIGI: yaprak arkasi gorus kirici, kamuflaj bilinci (bkz. 8), agac gizlenme, tehlike alani gecisi, ates hatti kontrolu (dost hatti yan adimi), rol istasyonu.
+
+
+=====================================================================================
+3. YAKIN DOVUS
+=====================================================================================
+ 3.1 YAKIN ATES (fnc_yakinAtes) [CBA yakinAtes, yakinAtesM]: <= 7 m'de raycast + forceWeaponFire. Cok yakin mesafede (1 m dahil) "ates etmeme" sorununu cozer. [RPT YAKIN-ATES]
+ 3.2 YAKIN HAREKET / PEEK-STRAFE (fnc_yakinHareket) [CBA yakinHareket, yakinHareketM]
+   - Bilinen dusman yakindayken (insan oyuncu <= 40 m, AI <= 22 m) duran asker 2.5-6 sn'de bir kisa yan adim yapar (siper kenari tercih; ates acik). Oyuncuya karsi daha sik.
+   - Amac: agresif oyuncuya "statik hedef" olmamak. [RPT YAKIN-HAREKET, YAKIN-HAREKET-OZET]
+ 3.3 KAPI SISTEMI (kapiAc / kapiBekci / kapiKapat): kapali kapiyi acar, gecis boyunca acik tutar, sonra kapatir; "kapida yarida durma / temas hatasi" duzeltildi.
+ 3.4 CQB CEVIK, SEKTOR BAKIS, ACIK BEKLEME: yakin mekanda yanal atilim, sektor paylasimi, acikta bekleme azaltma.
+
+
+=====================================================================================
+4. MANEVRA VE TAKTIKLER
+=====================================================================================
+ 4.1 BOUNDING OVERWATCH (fnc_tacticsBounding)
+   - 3 ates timi (Fire Support / Maneuver / Reserve), donusumlu sicrama, mesafeye gore sicrama boyu (doktrin bantlari).
+   - [CBA bndAgresif]: Temkinli (eski tempo) / Dengeli / Agresif (VARSAYILAN): ates ustunlugu kapisi 3-5 sn -> 1.2-2.2 sn, siperde kisa bekleme,
+     hucum / bounding bitis mesafesi x0.7 (daha yakina yaklasir), siper arama menzili 60-70 m.  [CBA bndAtilimCarpan] (varsayilan 2.2): sicrama uzunlugu carpani.
+   - Ilerleme odulu: kosucu siper secerken hedefe kazanilan metre basina puan. Cag ayari bu agresifligi sinirlar (bkz. 6).
+ 4.2 GERI CEKILME / PEEL / TEMAS KESME (tacticsRetreat, tacticsPeel, tacticsBreakContact)
+   - Iki takim donusumlu sicrama; baski altinda once siper + karsi ates; cekilme sonrasi toparlanma. Son direnis (<= 3 asker: yakin binaya kale savunmasi), sinsi geri cekilme.
+   - Bilerek ACIMASIZ: kolay basarilmaz.
+ 4.3 DIGER TAKTIKLER: hucum, kanat, bastirma, gizlenme, bekleme, takviye, bina garnizon, CQB, zirhtan kacis, AT zirha taarruz, AT atisi, pusu + ates emri (ROE), kanat ates kaydirma,
+   yetim asker (<= 2: saklan / katil), nokta eleman, yan / arka guvenlik, keskin nisanci takimi, baski tufekcisi.
+ 4.4 KOMUTAN BEYNI (commanderAssess)
+   - Rol agirlikli guc orani, zirh / MG / baski farkindaligi, kayip orani; kararlar: BOUNDING, SUPPRESS_ASSAULT, DELAY, PEEL, WITHDRAW, PUSH, HIDE.
+   - Komutan zihni: yalniz ALGILADIKLARINDAN gozlem defteri (ates yonu, duman, temas); alisikanlik hipotezleri; kisilik [CBA komutanKisilikWest / East / Ind]. Hile yok.
+   - Arazi bilinci (araziAnaliz, ufukMu): hakim nokta, ufuk cizgisi, arazi kivrimi.
+ 4.5 FORMASYON: tek yazici hakem (formSet), arazi / seyir tekniklerine gore COLUMN / WEDGE / VEE, halt / slot kovalama kesici, dagilma bilinci (RPG / el bombasi gorulunce 9-16 m).
+ 4.6 BUDDY / ORPHAN / YIGILMA: kalici es, yetim izleme, yigilma cozumu, cephane paylasma.
+
+
+=====================================================================================
+5. ATES DESTEGI VE PATLAYICILAR
+=====================================================================================
+ 5.1 UGL / 40 mm (tacticalUGL, atisGuvenli, uglMags, uglPozisyon, hasUGL) [CBA uglCooldown, uglDostM, uglMinM, uglYanAdim, uglEkMermi]
+   - Piyadeye karsi SIK kullanim (cooldown 2 sn), minimum 20 m, dost guvenligi (8 m), yan adimla atis pozisyonu, HE yukleme (duman / flare ile doldurulmaz).
+   - Hata duzeltildi: esir / baygin (captive) dusman side group ile degerlendirilir (eskiden "dost yakin" diye yanlis reddediyordu). GORULDU: ATIS 4-8 / 30 sn. [RPT UGL-OZET]
+ 5.2 TANK / IFV BILINEN KONUMA KESIF ATESI (fnc_tankBilinenAtes) [CBA tankBilinenAtes]
+   - Gorus engeli (bugday, yuksek ot, cali, sis) yuzunden motorun ates etmedigi BILINEN dusmana, bilinen konum + bilgi hatasi sapmasiyla 7 sn bastirma (reconnaissance by fire).
+   - Dayanak: FM 3-34 12-90, ATP 7-100.1 4-21; sayilar tasarim degeri. Cephane disiplini: arac basina 18-28 sn, hedef basina en cok 4 seri. [RPT TANK-BILINEN]
+ 5.3 EL BOMBASI FARKINDALIGI, BAYGINA PATLAYICI YASAGI, RPG TEPKISI, roket / duman izleme, taktik sis ve duman perdesi, ates merkezi (firedHub), atis ustunlugu [CBA atisUstunlugu, bastirmaYogunluk].
+ 5.4 HAVA: helikoptere karsi AA ekibi [CBA havaAAAktif, havaAAHold], RPG-7 sinifi alcak heliye [havaATAktif], hava farkindaligi.
+ 5.5 ATES VE HAREKET (atesHareket) [CBA atesHareketAktif, atesHareketOran, atesHareketMaxM]: kosarken taban ates / rush / takas. [RPT KOSU-ATES]
+ 5.6 TOPCU (topcu* + Zeus "Topcu Test") [CBA tacizAktif, tacizAralik ...]: gozlem / dogrulama, atis, taciz, guvenlik, butce.
+
+
+=====================================================================================
+6. DONEM / CAG SECIMI (v8.526) [CBA: "Cag / donem", lambs_danger_cag]
+=====================================================================================
+ Amac: CDLC'ler (S.O.G. Prairie Fire, Global Mobilization, CSLA) ve WWII modlarinda modern taktigin "sirmamasi". Otomatik algilama YOK; oyuncu / sunucu SECER.
+   MODERN (varsayilan)         : mevcut tam davranis.
+   SOGUK SAVAS / VIETNAM       : bounding agresifligi en cok Dengeli, hucum / bitis mesafesi x0.85, sicrama x0.85, yan adim menzili x0.6 ve bekleme x1.6.
+   IKINCI DUNYA SAVASI         : bounding Temkinli, sicrama x0.7, yan adim KAPALI, reload sonrasi peek (ayaga kalk) yok, CQB yakin-siper refleksi kapali, UGL (tufek bombasi) 3 kat seyrek.
+ Her donemde ACIK: siper, kapi acma, tank kesif atesi, el bombasi, baski / moral / teslim, geri cekilme.
+ Doktrin eslemesi: o_vc -> DUZENSIZ (vur-kac), b_macv -> ABD (RPT'de dogrulandi); vn_o_men_nva / csla -> RUS, vn_b_ / vn_i_ / us85 -> ABD (TAHMIN; fraksiyon adlari dogrulanmadi).
+ Carpanlar tasarim degeridir; telsiz yogunlugu ve tip (TCCC) donemden etkilenmez.
+
+
+=====================================================================================
+7. DOKTRIN CERCEVESI (fnc_doktrin, fnc_dk)
+=====================================================================================
+ - Davranis kodu sabit sayi tasimaz; grubun PROFILINI okur: anahtar degerleri (assaultM, bndBitisM, bantlar, cekilKayip, retreatAdim, peelOran, uglRezerv, kamuflajMin, teslim ...).
+   Kalitim zinciri: GENEL -> ust profil -> ordu profili.
+ - Yerlesik profiller: ABD / USMC, RUS (kesif atisi hizli, topcu x2), CHN (PLA), PESHMERGA, DUZENSIZ (vur-kac, pusu, erken temas kesme, teslim yok), GENEL.
+   GM: gm_fc_gc -> RUS, gm_fc_ge / gm_fc_dk -> ABD (digerleri tahmin).
+ - Yeni ordu ekleme (kod degismeden, misyonda): lambs_danger_doktrinTanimlari + lambs_danger_doktrinHaritasi.
+ - CBA taraf secimi: ELITE'in hangi tarafta aktif olacagi (BATI / DOGU / BAGIMSIZ). [RPT DOKTRIN-PROFIL]
+ - Ordu degerleri BASLANGIC TAHMINIDIR; nizamnamelerle dogrulanmalidir.
+
+
+=====================================================================================
+8. ALGI, GIZLENME VE UFUK (v8.527 - v8.532)
+=====================================================================================
+ 8.1 BILGI ESIK TABLOSU (fnc_bilgiEsik): ISARET 0.15, SEZILDI 0.30, SUPHE 0.50, TESPIT 0.80, KESIN 1.20, TAM 2.00. Hicbir kod knowsAbout'u sayisal esikle karsilastirmaz. [CBA esik_*]
+   "Hile yok": bot yalniz fiziksel olarak duyabilecegi / gorebilecegi seyi algilar.
+ 8.2 SES VE NAMLU ALEVI (fnc_soundAwareness) - v8.527 [CBA parlamaTepki, parlamaGunduzM, parlamaTekOran, parlamaIkiliOran]
+   - Duyma: silah sinifina gore taban menzil (tabanca 200 m ... MG 900 m ... roketatar 1100 m), susturucu menzili belirgin azaltir (ama supersonik catlama yakinda duyulur).
+   - NAMLU ALEVI: gorus hattindaki dusman alevi GORUR: gunduz 200 m (CBA; eskiden 120), gece 700 m. Grubun en yakin 4 askerinden biri gorurse yeter (gorenin kendisi dinleyici olur).
+     Gorulunce atici hakkinda bilgi (reveal) + yone bakis; STEALTH'teki grup AWARE'e gecer.
+   - ALEV GORULME ORANI (her atista zar): aksesuarsiz 1.0 | yalniz susturucu VEYA yalniz alev gizleyici 0.5 | susturucu + alev gizleyici BIRLIKTE 0.2.
+     Susturucu = muzzle esyasi audibleFire < 0.5; alev gizleyici = visibleFire < 0.8 (modun kendi katsayilari). Roketatar arka alevi aksesuardan etkilenmez.
+   - SINIR: yalniz muzzle yuvasindaki esya okunur; silaha gomulu (tek parca) susturucular ayri taninmaz. [RPT SES, SES-ALEV]
+ 8.3 UFUK CIZGISI FARKINDALIGI v2 (fnc_ufukAlgi) - v8.528 [CBA ufukAlgi, ufukSpotM (700), ufukSpotHiz (1)]
+   - Ufuk cizgisi = askerin gokyuzune karsi SILUET verdigi nokta (en gorunur durum).
+   - HIZLI SPOT: gokyuzu karsisinda siluet veren dusmani (gorus hatti + gozlemci yonu icinde, <= 700 m) daha hizli fark eder (bilgi hizla yukselir, en cok 0.95; gece NVG'siz x0.5). Hile yok.
+   - UFUKTA DOLASMA: bilinen dusmanin gozunden ufuk cizgisinde yururken COMEL; durup bekliyorsa yatar / temas yoksa 8-16 m ufuk disi, gizli, renge uyan noktaya cekilir (30 sn'de bir).
+     Temasta yalniz comel (yerinden oynamaz). LAMBS gorevi / kal-bekle waypoint'li gruplara dokunmaz. [RPT UFUK-SPOT, UFUK-CEK, UFUK-ALGI-OZET]
+ 8.4 RENK PALETI / KAMUFLAJ (fnc_palet + fnc_kamuflaj) - v8.528, v8.532 [CBA paletAlgi]
+   - fnc_kamuflaj: camouflageCoef (kucuk = gorunmesi zor): duran -0.1, kosan +0.1, ufukta +0.2, alaca -0.1, gece -0.15, sis; STEALTH iken yatma / ufuktan cekilme.
+   - RENK UYUMU (v8.532, GERCEK ortalama renk): getTextureInfo komutuyla uniforma (%65) + vest (%35) texture'unun ORTALAMA RENGI, zeminin (surfaceTexture) ortalama rengiyle karsilastirilir.
+     Fark 3 kanalda max(|zemin-birim| / buyuk); uyum = 0.5 + 0.5 cos(180 x). Zemine karisan renk coef'i duser (-0.15'e kadar), belirgin renk artar (+0.12). Gece zemin x0.75.
+     Yalniz uniforma + vest sayilir (kask / canta / yuz yok). Vest texture'i config'te yoksa yalniz uniforma. Yer secimi (ufuk cekilmesi, STEALTH gizlenme) karisan zemini tercih eder.
+   - Yontem Rekterakathom/DynamicCamoSystem mantigindan alinmistir. O mod yukluyse (DYNCAS_core) coef'i O uygular; biz cift sayim yapmayiz (modun sonucunu carpan olarak koruruz).
+   - YEDEK: getTextureInfo yoksa sinif adi / texture yolu sozcuk jetonlariyla palet tahmini. [RPT PALET-RENK (ilk 20), PALET (yedek)]
+   - DUZELTME NOTU: v8.528'de "SQF texture pikselini okuyamaz" demistim; yanlisti, v8.532'de duzeltildi. TEXTURE DEGISTIRME (forceAddUniform / setObjectTexture) bilincli YAPILMAZ:
+     envanter, ACE tibbi ve mod uyumu icin riskli (daha once "cirilciplak asker" sorunu vardi). Palet bilgisi yalniz yer secimi ve gorunurluk katsayisinda kullanilir.
+ 8.5 DIGER ALGI: gizli algi (ayak sesi, el feneri / IR lazer), duman / patlama farkindaligi, IED farkindaligi (ACE EOD uyumu), tehdit yonune bakis, hava farkindaligi,
+   gozcu RTO, gercek hedef (sivil / dost / esir ayrimi).
+
+
+=====================================================================================
+9. SAGLIK / INSAN FAKTORU
+=====================================================================================
+ 9.1 TCCC / MEDEVAC (tccc, medicTasma, aracMedevac) [CBA tcccAktif, tcccKatiGuvenlik, tcccTamGuvenSn]
+   - ACE Medical + ACM: hekim yaralıya gider; kanama kontrolu (sargi / turnike), kalp durmasinda CPR + epinefrin, IV, morfin; ates altinda yalniz baygina + kanama.
+   - Triyaj: kalp durmasi > kanama hizi > dusuk kan hacmi > bekleme. Hekim bounding'den muaf. Araçli medevac. Baygin asker KAYIP sayilir. Baygina patlayici yasagi.
+ 9.2 SAGLIK AYARLARI (ACE / ACM) - LAMBS DISINDA: gercekci / acimasiz ayarlar ayri dosyada; oyuncu = AI esit esikler. LAMBS'a baygin / olum icin CBA EKLENMEDI (kullanici istegi).
+ 9.3 MORAL / TESLIMIYET / PANIK [CBA ELITE moral / teslim: teslimMoral, teslimKayip, teslimKalan, teslimBaski, teslimMesafe ...]
+   - Moral endeksi, kayip orani, baski, umutsuzluk -> teslim (DUZENSIZ: teslim yok). Panik / felc: donma, kor ates, kacis; oyuncuya karsi hafifletilmis.
+ 9.4 OZGUVEN / YORGUNLUK [CBA ozguvenAktif]; SIVIL / DOST / ESIR KORUMA (roeGuard BAYGIN-KORU: baygin asker setCaptive, AI mermi / bomba harcamaz).
+
+
+=====================================================================================
+10. MEKANIZE VE IHA
+=====================================================================================
+ - Arac siniflama (TANK / IFV / APC / KAMYON), mekanize dur-kalk izleyici, >=4 aracta DIAMOND, arac-piyade senkronu, murettebat koruma, ezme korumasi, arac sikisma cozumu.
+ - Tank: hedef secimi, ates kontrolu, muhimmat, murettebat, dron savunmasi, zirh uyarisi, tank araligi. Turret ekibi, FFV duzeltme, surucu yenileme.
+ - ARAC GIT-GEL TESHISI (v8.525, fnc_aracGitGel): ileri-geri titremede (20 sn'de >= 3 yon degisimi) sinif / hiz / yakin engel / komut / ELITE degiskenleri RPT'ye yazilir; davranis DEGISTIRMEZ.
+   Cozum icin aracli bir RPT gerekli. [RPT ARAC-GITGEL]
+ - IHA / dron / FPV (senaryoya yerlestirirsen): gozlem, envanter, sorti, silahli IHA, FPV tepkisi, dron gozlemci / topcu, EW, lazer. [CBA ihaTimAktif, dronGozlemAktif, dronTopcuAktif ...]
+
+
+=====================================================================================
+11. MEVZI HAFIZASI / OGRENME (v8.529) [CBA mevziHafiza, mevziYariOmur (1800 sn), mevziAgirlik (1)]
+=====================================================================================
+ Amac: gruplar OTURUM BOYUNCA ogrensin: hangi siper ise yaradi, nerede vuruldular, dusman nereden ates etti; "ayni yerden ikinci kez gecmesinler".
+ Taraf basina tutulur (dosyaya yazilmaz), 40 m hucre; kayitlar CBA globalEvent ile her makinede (HC dahil) ayni. Agirlik yari omurle (varsayilan 30 dk) soner.
+ NE OGRENIR
+   1) SIPER HAFIZASI: "iyi" = siperde (siperTut) tehdit altinda >= 15 sn hasarsiz dayandi; "kotu" = siperdeyken vuruldu (+1) / oldu (+3); "maruz" = siper disinda vuruldu (+0.5).
+      Tehdit yonu 8 sektore ayrilir (yalniz asker saldirganini BILIYORSA): "bu siper kuzeyden iyi, dogudan kotu" cikarimi.
+   2) UFUK HAFIZASI: saldirganin gozunden siluette vurulan nokta "ufuk kotu".
+   3) DUSMAN ATES NOKTASI: dinleyici AI <= 450 m (mesafenin %6'si gurultu); >= 2.5 (sonumlu) atis kumelenirse TAHMIN DUSMAN MEVZISI. Hile yok: duyulmayan atis girmez.
+ NEREDE KULLANILIR (fnc_mevziPuan; puan sinirlari [-14, +8] x agirlik)
+   - main fnc_findCover (bounding / DEFEND / OVERWATCH siper puani), fnc_acikSiper (aday maliyeti), fnc_ufukAlgi (yer degistirme).
+   - Puan: 2.2 iyi(sektor) + 0.8 iyi - 3 kotu(sektor) - 1.6 kotu - 0.6 maruz - 0.7 komsu hucre kotu; kotu >= 2.5 "olum bolgesi" -5; tahmini dusman mevzisine arazi gizliyse +1.5, aciksa -2.
+ GORULDU (RPT, v8.529): 35 ogrenme olayi (18 kotu, 11 maruz, 6 iyi); ozet: WEST 2, EAST 3 tahmini dusman mevzisi. [RPT MEVZI-OGREN, MEVZI-OZET]
+ SINIR: waypoint rotasi yeniden cizilmez (tasarimci yolu); hafiza siper / bounding hop / yer secimini etkiler. Atis hafizasi komutanZihin'in Fired olayina baglidir (zihinOff = true ise dolmaz).
+ Oyuncu birimler hafizaya yazmaz.
+
+
+=====================================================================================
+12. ZEUS MODULLERI (bu dalda kalanlar)
+=====================================================================================
+ - ELITE Koordinasyon (Kumanda): gruplar arasi telsiz agi: SPOTREP istihbarat paylasimi, takviye, kanat manevrasi, feint, medevac. SADECE yerlestirilirse acik.
+ - ELITE Gorev Ata: grup / araca gorev ata (HARIC = ELITE disi, MEDEVAC / TOPCU vb.).   - ELITE IHA Gorev.   - ELITE Topcu Test.
+
+
+=====================================================================================
+13. BOT BECERISI / ORTAM
+=====================================================================================
+ - Varsayilan beceri ve CBA bot becerisi (isabet, titreme, hiz, fark, optiksiz carpan, acemi orani) [CBA skill*].
+ - Ortam beceri dususu (isik / NVG / sis / yagmur), optiksiz birim dogrulugu x0.75, sis butcesi, isinlanma korumasi, RHS / ACE uyumu [rhsAceUyum].
+
+
+=====================================================================================
+14. GELISTIRICI ARACLARI VE LOG ETIKETLERI
+=====================================================================================
+ - tools/tutarlilik_denetimi.py (PREP / FUNC / CBA ayar / olay / kapanis kapsami / surum / belge tutarliligi), uyum_denetimi.py, hemtt_kontrol.sh (HEMTT lint), rpt_ozet.py (RPT karnesi), senaryo_denetimi.py.
+ - Boot satirinda surum gorunur: "[ELITE-BOOT] ... build v8.532-SADE" - RPT'de bunu GORMEDEN yeni ozellik test edilmis sayilmaz (eski paket yuklu olabilir).
+ - Etiketler: [ELITE-BOOT] [DOKTRIN-PROFIL] [AGAC-TANI] [ACIKTA-SINIF-OZET] [ACIK-SIPER-OZET] [SIPER-ZORLA] [SIPER-TUT] [UGL-OZET] [YAKIN-HAREKET] [YAKIN-ATES] [KOSU-ATES]
+   [TANK-BILINEN] [ARAC-GITGEL] [SES] [SES-ALEV] [UFUK-SPOT] [UFUK-CEK] [UFUK-ALGI-OZET] [PALET-RENK] [PALET] [MEVZI-OGREN] [MEVZI-OZET] [ANOMALI] [TELEMETRI-SUNUCU] [PERF-SQF].
+ - DEVIR_LOGU_v7.0.txt: her surumun gerekcesi ve notlari.
+
+
+=====================================================================================
+15. SURUM OZETI (sade dal)
+=====================================================================================
+ v8.503  sade dal: plan / harekat / nakil / recon / HQ / Karakol / Garnizon KALDIRILDI.        v8.504  waypoint uyumu (fnc_wpSahip / senaryoKapi).
+ v8.507  bounding agresifligi.   v8.510 siperZorla.   v8.513 siper yakinligi.   v8.514-517 harita / agac kalibrasyonu, arazi kivrimi.   v8.521 siperTut (git-gel).
+ v8.522  yakin hareket (peek-strafe).   v8.523 tank kesif atesi.   v8.524 sert siper x1.5, CQB acikta durma.   v8.525 arac git-gel teshisi.
+ v8.526  donem (cag) secimi (+526b SOG fraksiyon eslemesi).   v8.527 namlu alevi tepkisi.   v8.528 ufuk v2 + renk paleti.   v8.529 mevzi hafizasi.
+ v8.530-531 palet SOG jetonlari (geri alindi).   v8.532 gercek ortalama renk (getTextureInfo, DynamicCamoSystem mantigi).
+
+
+=====================================================================================
+16. BILINEN SINIRLAR / BEKLEYEN
+=====================================================================================
+ - Arac titremesi (engel yakininda): yalniz teshis var; cozum icin aracli RPT lazim.
+ - Orman haritalarinda (Khe Sanh) sert siper payi dusuk (yalniz agac); hafiza ve siperBitki bu durumda yardimci. Bazi askerler 15-30 sn hareketsiz kaliyor (siper tutma / bounding); ayrica incelenebilir.
+ - Cag ayari acilis loguna yazilmiyor (onay bekliyor).   - Telsiz yogunlugu / tip (TCCC) donem anahtarindan etkilenmez.
+ - SOG / CSLA / GM fraksiyon adlari yalniz o_vc ve b_macv RPT'de dogrulandi; digerleri tahmin.
+ - Oneri (yapilmadi): gozlem / pusu v2 (ates etmeden gozlem, rapor, kill-zone / cekilme karari), yem, gozcu rotasyonu.
+ - Hicbir ozellik icin "oyunda tamamen dogrulandi" iddiasi yoktur; test RPT'ye gore ilerlemektedir.
