@@ -88,13 +88,21 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 [QGVAR(isBreakingContact), "BRK"], [QGVAR(isAmbushing), "AMB"], [QGVAR(isExecutingTactic), "TAK"], [QGVAR(isATEngage), "ATE"]
             ];
 
+            // v8.542 ETKIN SAYISI + SILAH DAGILIMI (kullanici: 'baygin da etkisiz; bizde herkeste otomatik, onlarda cok az; sks ile m16 ayni degil'): 'kisi' canli sayisi (baygin DAHIL); etkin = saglikli / yarali ve baygin olmayan;
+            //   silah: otomatik (q >= 0.8) / yari-otomatik veya bolt (q < 0.8) sayisi ve ortalama silah gucu (fnc_silahGucu)
+            private _etkinN = count (_us select {(lifeState _x) in ["HEALTHY", "INJURED"] && {!(_x getVariable ["ACE_isUnconscious", false])}});
+            private _qs = _us apply { [_x] call FUNC(silahGucu) };
+            private _oto = count (_qs select { _x >= 0.8 });
+            private _qT = 0;
+            { _qT = _qT + _x; } forEach _qs;
+            private _qOrt = _qT / ((count _qs) max 1);
             diag_log format [
-                "[DURUM-GRUP] %13 %1 | %2 kisi | karar:%3 | form:%4 | beh:%5 cm:%6 | bayrak:%7 | temas:%8 | dusman:%9 m yon:%10 | lider xy:%11 | dusman xy:%12",
+                "[DURUM-GRUP] %13 %1 | %2 kisi (etkin %14) | silah: otomatik %15 / yari-bolt %16, ort guc %17 | karar:%3 | form:%4 | beh:%5 cm:%6 | bayrak:%7 | temas:%8 | dusman:%9 m yon:%10 | lider xy:%11 | dusman xy:%12",
                 groupId _g, count _us, _g getVariable [QGVAR(cmdLastDecision), "-"], formation _g, behaviour _l, combatMode _g,
                 _bayrak joinString "+", ["yok", "var"] select _temas, _enMes, round _yon,
                 (getPosATL _l) select [0, 2] apply { round _x },
                 if (isNull _en) then {"-"} else {(getPosATL _en) select [0, 2] apply { round _x }},
-                str (side _g)
+                str (side _g), _etkinN, _oto, (count _qs) - _oto, _qOrt toFixed 2
             ];
 
             private _lProj = 0;
