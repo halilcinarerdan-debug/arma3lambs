@@ -162,6 +162,7 @@ DURUM ETIKETLERI (dürüst dogrulama)
    - Yontem Rekterakathom/DynamicCamoSystem mantigindan alinmistir. O mod yukluyse (DYNCAS_core) coef'i O uygular; biz cift sayim yapmayiz (modun sonucunu carpan olarak koruruz).
    - RENK UYUMSUZLUGU (v8.534) [CBA paletUyumsuzluk (1)]: uyumsuz renk (ornek beyaz / acik uniforma koyu ormanda) camouflageCoef'i +0.35'e kadar artirir (ust sinir 1.5) ve
      <= 350 m'de gorus hattindaki gozlemci hedefi daha cabuk spotlar (siluet olmasa bile; bilgi 0.2-0.7).
+   - TERMAL MUAFIYET (v8.536) [CBA paletTermalMuaf]: <= 1500 m'de dusman, murettebatli, termal (Ti) gorus modlu arac varsa renk kamuflaji uygulanmaz (termalde renk anlamsiz).
    - YEDEK: getTextureInfo yoksa sinif adi / texture yolu sozcuk jetonlariyla palet tahmini. [RPT PALET-RENK (ilk 20), PALET (yedek)]
    - DUZELTME NOTU: v8.528'de "SQF texture pikselini okuyamaz" demistim; yanlisti, v8.532'de duzeltildi. TEXTURE DEGISTIRME (forceAddUniform / setObjectTexture) bilincli YAPILMAZ:
      envanter, ACE tibbi ve mod uyumu icin riskli (daha once "cirilciplak asker" sorunu vardi). Palet bilgisi yalniz yer secimi ve gorunurluk katsayisinda kullanilir.

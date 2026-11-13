@@ -77,7 +77,10 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
             private _palK = 0;
             // v8.528 RENK PALETI: uniforma + vest paleti x zemin paleti uyumu (1 = karisir -0.15, 0.1 = belirgin +0.12, 0.5 = tarafsiz); fnc_palet: getTextureInfo ile GERCEK ortalama renk (yedek: jeton tahmini)
             //   v8.532: Dynamic Camo System (DYNCAS_core, rekterakathom) yuklu ise renk etkisini O MOD uygular (ayni getTextureInfo mantigi): burada tekrar eklenmez (cift sayim yok), mod sonucu (DYNCAS_core_unitCache) carpan olarak korunur.
-            if (isClass (configFile >> "CfgPatches" >> "DYNCAS_core")) then {
+            private _termal = [_u] call FUNC(termalTehdit);   // v8.536: termal gorusu olan dusman arac varsa renk etkisi yok
+            if (_termal) then {
+                // renk kamuflaji uygulanmaz
+            } else { if (isClass (configFile >> "CfgPatches" >> "DYNCAS_core")) then {
                 _c = _c * ((missionNamespace getVariable ["DYNCAS_core_unitCache", createHashMap]) getOrDefault [hashValue _u, 1]);
             } else {
                 if (missionNamespace getVariable ["lambs_danger_paletAlgi", true]) then {
@@ -87,7 +90,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                     _palK = [_dl * 0.3, _dl * 0.7 * (missionNamespace getVariable ["lambs_danger_paletUyumsuzluk", 1])] select (_dl > 0);
                     _c = _c + _palK;
                 };
-            };
+            }; };
             _c = (_c max _minC) min ([1.2, 1.5] select (_palK > 0.12));   // v8.534: renk uyumsuzlugunda ust sinir 1.5
 
             private _eski = _u getVariable [QGVAR(kamuflajC), 1];
