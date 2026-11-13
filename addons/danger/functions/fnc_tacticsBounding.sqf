@@ -517,7 +517,9 @@ if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", tr
             };
         };
 
-        private _kazMin = (_bnd select 2) * (1 + (0.5 * (_bndCarpan - 1)));
+        // v8.548 KANAT KOSUCUSU (aci >= 68 derece): ileri kazanc sarti yok (yan hareket), aci uyumu agirligi 0.2 -> 0.8, ilerleme odulu yok (RPT 15:41: kanat sicramalari hedef hattina gore -81 .. +72 derece dagildi, kanat acisi en fazla 31 derece)
+        private _kanatKosucu = (abs _aci) >= 68;
+        private _kazMin = [(_bnd select 2) * (1 + (0.5 * (_bndCarpan - 1))), -3] select _kanatKosucu;
         _siperMenzil = _siperMenzil min (_atMax + 10);
         private _cover = [_kosan, _hedef, _siperMenzil, "ASCEND", 6, "ADVANCE"] call EFUNC(main,findCover);
         private _movePos = [];
@@ -560,7 +562,7 @@ if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", tr
                     };
                 };
                 private _aciFark = abs ((((_kPos getDir _cp) - ((_kosan getDir _hedef) + _aci)) + 540) % 360 - 180);
-                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (0.2 * _aciFark) - ([_cp] call _kalabalik) + (_kazK * (_mesafe - (_cp distance2D _hedef)));
+                private _skor = (-4 * _forEachIndex) - (7 * _a) - (1.5 * ((_atilim - (_atMax * 0.75)) max 0)) - (([0.2, 0.8] select _kanatKosucu) * _aciFark) - ([_cp] call _kalabalik) + (([_kazK, 0] select _kanatKosucu) * (_mesafe - (_cp distance2D _hedef)));
                 if (_skor > _enIyi) then {
                     _enIyi = _skor;
                     _movePos = _cp;
