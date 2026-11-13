@@ -523,9 +523,22 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
     _reason = ["koord: farkli grup", "hafiza: alternatif"] select (_tekrarMi);
 };
 
+// v8.544 KACIS KILIDI (kullanici: 'zaiyat fazlaysa daha da geri cekil, dusmanin sayisi azaldi diye riske atmak olgun degil'): kayip >= CBA kacisKayip iken WITHDRAW / PEEL / DELAY -> kilit (CBA kacisKilitS sn);
+//   kilit boyunca: hucum ailesi YOK (dusman sayisi azalsa da), DELAY -> WITHDRAW (daha da geri), ve 'kucuk ekip / yakin: kosarak kacilmaz' kurali dusman >= 25 m iken uygulanmaz. Dusman < 25 m = kacilmaz (dovus).
+private _kacisOn = missionNamespace getVariable ["lambs_danger_kacisAktif", true];
+if (_kacisOn && {_decision in ["WITHDRAW", "PEEL", "DELAY"]} && {_lossRatio >= (missionNamespace getVariable ["lambs_danger_kacisKayip", 0.3])}) then {
+    _group setVariable [QGVAR(kacisKilitBit), time + (missionNamespace getVariable ["lambs_danger_kacisKilitS", 150])];
+};
+private _kacisKilitli = _kacisOn && {time < (_group getVariable [QGVAR(kacisKilitBit), 0])} && {_closest >= 25} && {_ownCount > 0};
+if (_kacisKilitli && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT", "DELAY"]}) then {
+    _push = false;
+    _reason = format ["kacis kilidi (kayip %1%%): dusman sayisi azaldi diye riske girilmez, daha da geri", round (_lossRatio * 100)];
+    _decision = "WITHDRAW";
+};
+
 // KUCUK EKIP / YAKIN TEMAS: cekilme (koşarak kacma) ONERILMEZ — 60 m'den yakin dusmana sirt cevirmek olum; <= 3 kisi acikta kosamaz.
 // Cephane bitmedikce WITHDRAW / PEEL yerine DELAY (siper al + sis + temas kes) uygulanir.
-if (_decision in ["WITHDRAW", "PEEL"] && {(_closest < _dkYakin) || {_ownCount <= _dkKucuk}} && {(_reason select [0, 7]) isNotEqualTo "cephane"} && {_ownCount > 0}) then {
+if (_decision in ["WITHDRAW", "PEEL"] && {!_kacisKilitli} && {(_closest < _dkYakin) || {_ownCount <= _dkKucuk}} && {(_reason select [0, 7]) isNotEqualTo "cephane"} && {_ownCount > 0}) then {
     _reason = format ["%1 -> DELAY (%2 kisi, dusman %3m: kosarak kacilmaz, siper al + sis)", _decision, _ownCount, round _closest];
     _decision = "DELAY";
 };
