@@ -30,7 +30,7 @@ private _BND_MAX_CYCLES      = 10;
 private _BND_COVER_RANGE     = 50;    // ileri siper arama menzili (m)
 // v8.507 BOUNDING AGRESIFLIGI (kullanici: 'botlar cover almaya oncelik versin, hep ates ustunlugu kurmaya calisiyorlar, daha agresif cover alsinlar, daha yakinlassinlar, ates altinda cok hantallar'):
 //   [temkinli (eski), dengeli, agresif] -> kapi min / max (sn), siperde bekleme taban / rastgele / baski carpani / ek (sn), varis bekleme taban / baski carpani, ezilmis kosucu esigi, yatirma esigi, siper arama menzili
-private _agr = (missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2;
+private _agr = ["agr"] call FUNC(cag);   // v8.526: CBA donemi (Soguk Savas = en cok Dengeli, WWII = Temkinli) ile sinirli
 private _kapiMin   = [3, 2, 1.2] select _agr;
 private _kapiMax   = [5, 3.5, 2.2] select _agr;
 private _varisTab  = [9, 7.5, 6] select _agr;
@@ -285,7 +285,7 @@ if (EGVAR(main,debug_functions)) then {
     ];
 
     // v8.507: ilerleme odulu (kosucu siper secerken hedefe kazanilan metre basina puan) - temkinli 0 / dengeli 0.12 / agresif 0.25
-    private _kazK = [0, 0.12, 0.25] select ((missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2);
+    private _kazK = [0, 0.12, 0.25] select (["agr"] call FUNC(cag));
     private _cycleCount = 0;
     private _rushN = 0;   // sadece buddy cycle'larda artar (kosucu dagilimi esit olsun)
     // Zarif bitis: temizlik zamanlayicisindan (delay) 20 sn once dongu kendisi biter
@@ -469,7 +469,7 @@ if (EGVAR(main,debug_functions)) then {
         // v8.388 DOKTRINE GORE UZUN SICRAMA (kullanici: 'sicrama mesafesini doktrine gore arttir, 2-3 m'de dur kalk'): bant atilimlari CBA carpanla (varsayilan 1.6) buyur; kazanc esigi yariya kadar buyur.
         //   Ust sinirlar: (1) gozetleyen silahin etkili menzilinin 2/3'u (asagida _owCap: tufek 307 m, MG 400 m; M111 8708-8710), (2) dusmana kalan mesafe: hucum menzili (bndBitisM) oncesi dur (kalan x 0.85),
         //   yorgunluk tabani 12 -> 18 m.
-        private _bndCarpan = (missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3;
+        private _bndCarpan = ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3) * (["sicrama"] call FUNC(cag));   // v8.526: donem carpani (1 / 0.85 / 0.7)
         private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
@@ -535,7 +535,7 @@ if (EGVAR(main,debug_functions)) then {
         };
         [_cover] call _secFn;
         // v8.388 UZAK ADAY: yakin nesneler findCover'in 30 nesnelik sinirini doldurur, ilerideki siper hic aday olmaz -> hop kisa kalir. Hop < atMax x 0.5 ise hedefe dogru atMax x 0.7 ilerideki NOKTA merkezli ikinci arama.
-        if (_atMax >= 40 && {_hop < (_atMax * ([0.5, 0.6, 0.7] select ((missionNamespace getVariable ["lambs_danger_bndAgresif", 2]) max 0 min 2)))}) then {
+        if (_atMax >= 40 && {_hop < (_atMax * ([0.5, 0.6, 0.7] select (["agr"] call FUNC(cag))))}) then {
             private _fMerkez = _kPos getPos [_atMax * 0.7, ((_kosan getDir _hedef) + _aci)];
             if (!surfaceIsWater _fMerkez) then {
                 private _far = [_kosan, _hedef, (_atMax * 0.4) max 25, "ASCEND", 6, "ADVANCE", _fMerkez] call EFUNC(main,findCover);

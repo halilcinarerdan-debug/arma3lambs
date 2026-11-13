@@ -82,7 +82,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                             // v8.351 C) YAKIN SIPER: dusmana ACIK (govde yuksekliginde ray temiz) ve yakinda sert siper varsa 3 sn'lik kosuyla siper / kose arkasina
                             private _siperGitti = false;
                             if (
-                                (missionNamespace getVariable ["lambs_danger_cqbV2", true]) && {_d >= 3} && {_butce > 0} && {(insideBuilding _u) < 0.5}
+                                (missionNamespace getVariable ["lambs_danger_cqbV2", true]) && {(["cag"] call FUNC(cag)) < 2} && {_d >= 3} && {_butce > 0} && {(insideBuilding _u) < 0.5}
                                 && {(time - (_u getVariable [QGVAR(cqbSiperT), -999])) > 6}
                                 && {(lineIntersectsSurfaces [eyePos _e, (getPosASL _u) vectorAdd [0, 0, 1.1], _e, _u, true, 1, "FIRE", "NONE"]) isEqualTo []}
                             ) then {

@@ -147,7 +147,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                         _u setVariable [QGVAR(reloadState), []];
                         // sarjor DOLDUYSA 15 sn, dolmadan zaman asimiysa 30 sn cooldown (engine mermi bitince reload eder)
                         _u setVariable [QGVAR(reloadLast), [time + 15, time] select (_mermi > (_tetikMermi + 2))];
-                        if (_mermi > 0 && {(getSuppression _u) < 0.5}) then {
+                        if (_mermi > 0 && {(getSuppression _u) < 0.5} && {(["cag"] call FUNC(cag)) < 2}) then {   // v8.526: WWII donemde peek-reload-peek (ayaga kalkma) yok
                             _u setUnitPosWeak "UP";
                             _u setVariable [QGVAR(reloadPeekEnd), time + 2];
                         } else {

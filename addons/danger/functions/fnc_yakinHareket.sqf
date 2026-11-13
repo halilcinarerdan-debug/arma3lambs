@@ -28,7 +28,10 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
     while {true} do {
         sleep 0.5;
         if !(missionNamespace getVariable ["lambs_danger_yakinHareket", true]) then { continue };
-        private _menzilAI = missionNamespace getVariable ["lambs_danger_yakinHareketM", 22];
+        // v8.526 DONEM: Ikinci Dunya Savasi = kapali (modern yan-adim yok); Soguk Savas / Vietnam = menzil x0.6, bekleme x1.6
+        private _cag = ["cag"] call FUNC(cag);
+        if (_cag >= 2) then { continue };
+        private _menzilAI = (missionNamespace getVariable ["lambs_danger_yakinHareketM", 22]) * ([1, 0.6] select (_cag >= 1));
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
             && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x} && {!(_x getVariable [QGVAR(teslim), false])}
@@ -60,7 +63,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
                 private _bid = [_u] call FUNC(birimId);
                 private _r1 = ["yakinHareketYon", _bid] call FUNC(rastgele);
                 private _r2 = ["yakinHareketSure", _bid] call FUNC(rastgele);
-                _u setVariable [QGVAR(ykHrkT), time + ([4.5 + (_r2 * 3), 2.5 + (_r2 * 2)] select _oyuncu)];
+                _u setVariable [QGVAR(ykHrkT), time + (([4.5 + (_r2 * 3), 2.5 + (_r2 * 2)] select _oyuncu) * ([1, 1.6] select (_cag >= 1)))];
                 _u setVariable [QGVAR(ykDurT), -1];
                 // aday noktalar: dusman dogrultusuna dik +-3 / +-2 m, geri-yan 1.5 m
                 private _yon = _u getDir _e;

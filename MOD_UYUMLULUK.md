@@ -43,3 +43,8 @@ LAMBS RPG, LAMBS ailesinin **config tabanli** (SQF icermeyen) modudur: omuz roke
 | Saldirmayan helikoptere `forgetTarget` (Weapons-Hold) | Mod yuklu + grupta HAVA yetenekli roketatar + heli <= 900 m ise uygulanmaz | AI kendi kurallariyla ates edebilir |
 | Aktif hava savunmasi (`fnc_havaAA`) | AA ekibi (flags HAVA) + kilitsiz roketatar alcak / asili heliye; LAMBS RPG ile cift ates yok (birim 12 sn cooldown) | EK komut katmani |
 Tani: `[LAMBS-RPG] LAMBS RPG YUKLU / YOK | CfgPatches: [...]` (acilista bir kez) ve `[HAVA-AA]` satirlari.
+
+## Donem secimi (CDLC: S.O.G. Prairie Fire, Global Mobilization, CSLA, WWII) - v8.526
+CBA > LAMBS Danger > ELITE siper > "Cag / donem" (`lambs_danger_cag`): Modern (varsayilan) / Soguk Savas - Vietnam / Ikinci Dunya Savasi. Otomatik algilama yoktur; oyuncu / sunucu secer.
+Soguk Savas: bounding en cok Dengeli, sicrama x0.85, yan adim menzil x0.6. WWII: bounding Temkinli, sicrama x0.7, yan adim / reload-peek / CQB yakin-siper refleksi kapali, UGL 3 kat seyrek.
+Carpanlar tasarim degeridir (dogrulanmis tarihsel nizamname degil); oyunda denenmedi.
