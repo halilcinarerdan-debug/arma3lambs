@@ -141,6 +141,8 @@ if (lambs_main_cagriLogN < 300) then {
     diag_log format ["[CAGRI] %1 | %2 | cagri:%3 | davranis:%4 | mesafe:%5", groupId _grp, name _unit, _callout, _behavior, _distance];
 };
 playSound3D [_sound, _unit, isNull (objectParent _unit), eyePos _unit, 5, pitch _unit, _distance];
+// v8.535 KONUSMA: callout suresince (~2.2 sn) bu birim 'konusuyor' (STEALTH degilse dusman kisitli mesafede duyar; fnc_adimKonusma)
+_unit setVariable ["lambs_danger_konusmaBit", serverTime + 2.2, true];
 [_unit, true] remoteExecCall ["setRandomLip", 0];
 [{
     _this remoteExecCall ["setRandomLip", 0];

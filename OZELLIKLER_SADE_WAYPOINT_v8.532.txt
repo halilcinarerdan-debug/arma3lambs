@@ -165,6 +165,10 @@ DURUM ETIKETLERI (dürüst dogrulama)
    - YEDEK: getTextureInfo yoksa sinif adi / texture yolu sozcuk jetonlariyla palet tahmini. [RPT PALET-RENK (ilk 20), PALET (yedek)]
    - DUZELTME NOTU: v8.528'de "SQF texture pikselini okuyamaz" demistim; yanlisti, v8.532'de duzeltildi. TEXTURE DEGISTIRME (forceAddUniform / setObjectTexture) bilincli YAPILMAZ:
      envanter, ACE tibbi ve mod uyumu icin riskli (daha once "cirilciplak asker" sorunu vardi). Palet bilgisi yalniz yer secimi ve gorunurluk katsayisinda kullanilir.
+ 8.4b BOT AYAK SESI + KONUSMA (v8.535, fnc_adimKonusma) [CBA botAdim, konusmaAlgi, konusmaM (60)]
+   - Bot ayak sesi: oyuncu olmayan yaya askerlerin adimi (1.6 x hiz x durus x yuzey, <= 45 m) DUSMAN botlarca duyulur; DOST etkilenmez. (Oyuncu adimi ayri: gizliAlgi.)
+   - Konusma: bot callout'u (2.2 sn) veya oyuncu ses konusmasi (TFAR / getPlayerChannel) sirasinda, STEALTH degilse, <= 60 m'deki dusman botlar konusanin konumunu duyar. Hile serbest: gercek konum, yalniz yon hata payi.
+   - SINIR: oyuncu ses konusmasi algisi surume / mod'a bagli, test edilmeli ([KONUSMA] komut denemesi satiri). [RPT ADIM-BOT, KONUSMA, ADIM-KONUSMA-OZET]
  8.5 DIGER ALGI: gizli algi (ayak sesi, el feneri / IR lazer), duman / patlama farkindaligi, IED farkindaligi (ACE EOD uyumu), tehdit yonune bakis, hava farkindaligi,
    gozcu RTO, gercek hedef (sivil / dost / esir ayrimi).
 
