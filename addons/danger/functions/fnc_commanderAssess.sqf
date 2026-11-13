@@ -441,7 +441,7 @@ private _result = call {
     };
     // v8.539 YAKIN ARAZI BOUNDING (kullanici: 'catismalar 100 metre icinde geciyor, vietnam dogasi, gercekci sureler'): kapali arazide (orman / sehir) dusman 30-130 m, binada degil, dusman ustun degil:
     //   dogrudan SUPPRESS_ASSAULT / ASSAULT / FLANK yerine KISA sicramali ates-manevra (BOUNDING; sicrama / bekleme sureleri fnc_tacticsBounding'de yakin arazi moduna cekilir). CBA yakinBounding.
-    if ((missionNamespace getVariable ["lambs_danger_yakinBounding", true]) && {!_isOpen} && {!_enemyInBuilding} && {_pwrRatio < 1.4} && {_closest >= (_dkAssault max 30)} && {_closest <= 130}) exitWith {
+    if ((missionNamespace getVariable ["lambs_danger_yakinBounding", true]) && {!_isOpen} && {!_enemyInBuilding} && {_pwrRatio < (missionNamespace getVariable ["lambs_danger_yakinBndOran", 1.1])} && {_closest >= (_dkAssault max 30)} && {_closest <= 130}) exitWith {
         ["BOUNDING", format ["yakin arazi %1m: kisa sicramalarla ates-manevra (orman / sehir)", round _closest]]
     };
     if (_enemyMg >= 2 && {_isOpen}) exitWith {
