@@ -159,7 +159,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
                 _say set ["cek", (_say get "cek") + 1];
                 if (_logN < 30) then {
                     _logN = _logN + 1;
-                    diag_log format ["[UFUK-CEK] %1 | %2 | ufuk cizgisinden cekildi | puan:%3 | renk(rgb):%4 uyum:%5 | dusman:%6 m", groupId _g, name _u, round _enIyiS, (["renk", _u] call FUNC(palet)) apply { _x toFixed 2 }, (["uyum", _u, _enIyi] call FUNC(palet)) toFixed 2, round _dd];
+                    diag_log format ["[UFUK-CEK] %1 | %2 | ufuk cizgisinden cekildi | puan:%3 | renk(rgb):%4 uyum:%5 | dusman:%6 m | xy %7 -> %8 | dusman xy %9", groupId _g, name _u, round _enIyiS, (["renk", _u] call FUNC(palet)) apply { _x toFixed 2 }, (["uyum", _u, _enIyi] call FUNC(palet)) toFixed 2, round _dd, _upos select [0, 2] apply { round _x }, _enIyi select [0, 2] apply { round _x }, (getPosATL _en) select [0, 2] apply { round _x }];
                 };
                 [_u, _enIyi] spawn {
                     params ["_a", "_p"];

@@ -3426,3 +3426,9 @@ v8.532 (dal sade-waypoint) PALET: GERCEK ORTALAMA RENK (kullanici: 'ama bir mod 
  - fnc_kamuflaj: Dynamic Camo System yuklu ise (CfgPatches DYNCAS_core) renk etkisi O MODDAN (cift sayim yok): burada palet terimi eklenmez, modun sonucu (DYNCAS_core_unitCache) coef'e carpan olarak katilir. Yer secimi (ufuk / STEALTH) palet uyumunu yine kullanir.
  - v8.531'deki VC tarafsiz kararinin yerine: VC uniformalari artik BELIRSIZ degil, gercek texture ortalamasiyla degerlendirilir (cesitli renkler dogal).
  - SINIR: vest texture'i bazi modlarda config'te hiddenSelectionsTextures olarak yok (model icinde) -> yalniz uniforma. getTextureInfo oyun surumu istegi (supportInfo). NOT: oyunda denenmedi; [PALET-RENK] satirlarindaki rgb degerleri oyunda dogrulanmali.
+
+v8.533 (dal sade-waypoint) LOG KOORDINATLARI (kullanici: 'koordinat eklesene xy'; ayni oturumda 'askerlerin manevrasini rptlerden okuyabiliyor musun' sorusunun devami). Davranis DEGISMEZ, yalniz log.
+ - [DURUM-GRUP]: lider xy ve en yakin dusman xy (| lider xy:[x,y] | dusman xy:[x,y]).   - [BND-BASLA]: lider xy / hedef xy.
+ - YENI [BND-HOP] (ilk 80): her bounding sicramasinda kosucu xy -> hedef xy, sicrama uzunlugu (m), durus, dusmana mesafe, dusman xy. Sicrama carpani / agresiflik ayarini sayiyla degerlendirmek icin.
+ - [SIPER-ZORLA] (xy -> siper xy), [SIPER-TUT] (xy), [YAKIN-HAREKET] (xy -> yeni xy, dusman xy), [UFUK-CEK] (xy -> yeni xy, dusman xy).
+ - Koordinat = getPosATL x / y, tam metre (round); Arma dunya koordinati (mapGridPosition ile ayni eksen), haritada / grid araclarinda dogrudan kullanilir.

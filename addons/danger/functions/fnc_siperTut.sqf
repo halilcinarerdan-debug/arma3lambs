@@ -42,6 +42,6 @@ doStop _u;
 }] call CBA_fnc_waitUntilAndExecute;
 if ((missionNamespace getVariable ["lambs_danger_siperTutLogN", 0]) < 30) then {
     missionNamespace setVariable ["lambs_danger_siperTutLogN", (missionNamespace getVariable ["lambs_danger_siperTutLogN", 0]) + 1];
-    diag_log format ["[SIPER-TUT] %1 | %2 | siperde bekliyor (doStop; temas bitince / 45 sn serbest)", groupId (group _u), name _u];
+    diag_log format ["[SIPER-TUT] %1 | %2 | siperde bekliyor (doStop; temas bitince / 45 sn serbest) | xy %3", groupId (group _u), name _u, (getPosATL _u) select [0, 2] apply { round _x }];
 };
 true

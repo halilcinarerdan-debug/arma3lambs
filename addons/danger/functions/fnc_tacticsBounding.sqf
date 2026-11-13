@@ -572,12 +572,20 @@ if (EGVAR(main,debug_functions)) then {
         _kosan doWatch _hedef;
         _kosan forceSpeed -1;
 
+        // v8.533 SICRAMA GUNLUGU (kullanici: 'koordinat eklesene xy'): her sicrama icin kosucu xy -> hedef xy, uzunluk, durus, dusman xy (ilk 80)
+        if ((missionNamespace getVariable ["lambs_danger_bndHopLogN", 0]) < 80) then {
+            missionNamespace setVariable ["lambs_danger_bndHopLogN", (missionNamespace getVariable ["lambs_danger_bndHopLogN", 0]) + 1];
+            diag_log format ["[BND-HOP] %1 | %2 | xy %3 -> %4 | sicrama %5 m | durus %6 | dusmana %7 m | dusman xy %8",
+                groupId (group _kosan), name _kosan, (getPosATL _kosan) select [0, 2] apply { round _x }, _movePos select [0, 2] apply { round _x },
+                round (_kosan distance2D _movePos), _stance, round _mesafe, _hedef select [0, 2] apply { round _x }];
+        };
         [_kosan, _movePos, _stance, _hop, _acik]
     };
 
     diag_log format [
-        "[BND-BASLA] %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5",
-        groupId _group, round ((leader _group) distance2D _target), count _fse, count _maneuver, count _reserve
+        "[BND-BASLA] %1 | hedef:%2m | FSE:%3 MVR:%4 RES:%5 | lider xy:%6 | hedef xy:%7",
+        groupId _group, round ((leader _group) distance2D _target), count _fse, count _maneuver, count _reserve,
+        (getPosATL (leader _group)) select [0, 2] apply { round _x }, _target select [0, 2] apply { round _x }
     ];
     [_group, "BoundingBasla", round ((leader _group) distance2D _target)] call FUNC(olayGonder);
 

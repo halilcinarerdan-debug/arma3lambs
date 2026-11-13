@@ -104,7 +104,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
                 _u doWatch _e;
                 if (_logN < 30) then {
                     _logN = _logN + 1;
-                    diag_log format ["[YAKIN-HAREKET] %1 | %2 | dusman %3 (%4) %5 m | yan adim %6 m (%7)", groupId _g, name _u, name _e, ["AI", "OYUNCU"] select _oyuncu, round _d, (_u distance2D _en) toFixed 1, ["acik", "GIZLI nokta"] select (_enP >= 3)];
+                    diag_log format ["[YAKIN-HAREKET] %1 | %2 | dusman %3 (%4) %5 m | yan adim %6 m (%7) | xy %8 -> %9 | dusman xy %10", groupId _g, name _u, name _e, ["AI", "OYUNCU"] select _oyuncu, round _d, (_u distance2D _en) toFixed 1, ["acik", "GIZLI nokta"] select (_enP >= 3), (getPosATL _u) select [0, 2] apply { round _x }, _en select [0, 2] apply { round _x }, (getPosATL _e) select [0, 2] apply { round _x }];
                 };
                 [{
                     params ["_uu", "_pp"];

@@ -126,7 +126,7 @@ _u setUnitPosWeak "UP";
 _u doMove _pos;
 if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_zorlaLogN", (missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) + 1];
-    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | RISK %6 (tehdit %7, baski %8) | %10 | sure %9 sn", groupId (group _u), name _u, round _ed, round _mes, _ds, _risk toFixed 2, _tehdit toFixed 1, _bask toFixed 2, _sure toFixed 1, ["saf kosu (hedef secimi kapali)", "KOSARKEN BASTIRMA ATESI"] select _ateseKos];
+    diag_log format ["[SIPER-ZORLA] %1 | %2 | dusman %3 m | siper %4 m (raycast: gizli + yol acik) | varis durus %5 | RISK %6 (tehdit %7, baski %8) | %10 | sure %9 sn | xy %11 -> %12", groupId (group _u), name _u, round _ed, round _mes, _ds, _risk toFixed 2, _tehdit toFixed 1, _bask toFixed 2, _sure toFixed 1, ["saf kosu (hedef secimi kapali)", "KOSARKEN BASTIRMA ATESI"] select _ateseKos, (getPosATL _u) select [0, 2] apply { round _x }, _pos select [0, 2] apply { round _x }];
 };
 [{
     params ["_uu", "_pp"];

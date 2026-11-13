@@ -89,9 +89,11 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
             ];
 
             diag_log format [
-                "[DURUM-GRUP] %1 | %2 kisi | karar:%3 | form:%4 | beh:%5 cm:%6 | bayrak:%7 | temas:%8 | dusman:%9 m yon:%10",
+                "[DURUM-GRUP] %1 | %2 kisi | karar:%3 | form:%4 | beh:%5 cm:%6 | bayrak:%7 | temas:%8 | dusman:%9 m yon:%10 | lider xy:%11 | dusman xy:%12",
                 groupId _g, count _us, _g getVariable [QGVAR(cmdLastDecision), "-"], formation _g, behaviour _l, combatMode _g,
-                _bayrak joinString "+", ["yok", "var"] select _temas, _enMes, round _yon
+                _bayrak joinString "+", ["yok", "var"] select _temas, _enMes, round _yon,
+                (getPosATL _l) select [0, 2] apply { round _x },
+                if (isNull _en) then {"-"} else {(getPosATL _en) select [0, 2] apply { round _x }}
             ];
 
             private _lProj = 0;
