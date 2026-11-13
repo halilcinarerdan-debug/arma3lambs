@@ -124,13 +124,14 @@ private _ownMg = 0;
 private _ownAT = 0;
 {
     private _r = [_x] call _rolFn;
-    _ownPower = _ownPower + (switch (_r) do {
+    // v8.541 SILAH GUCU: rol agirligi x silah carpani (otomatik / sarjor; fnc_silahGucu; CBA silahGucu)
+    _ownPower = _ownPower + ((switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};
         case "AT":       {1.4};
         case "MEDIC":    {0.6};
         default          {1.0};
-    });
+    }) * ([_x] call FUNC(silahGucu)));
     if (_r isEqualTo "MG") then {_ownMg = _ownMg + 1;};
     if ([_x] call _atFn) then {_ownAT = _ownAT + 1;};
 } forEach _etkin;
@@ -144,13 +145,13 @@ private _enemyAT = 0;
 private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else {_enemies};
 {
     private _r = [_x, true] call _rolFn;
-    _enemyPower = _enemyPower + (switch (_r) do {
+    _enemyPower = _enemyPower + ((switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};
         case "AT":       {1.4};
         case "MEDIC":    {0.6};
         default          {1.0};
-    });
+    }) * ([_x] call FUNC(silahGucu)));
     if (_r isEqualTo "MG") then {_enemyMg = _enemyMg + 1;};
     if ([_x] call _atFn) then {_enemyAT = _enemyAT + 1;};
 } forEach _enemySample;

@@ -96,6 +96,8 @@ DURUM ETIKETLERI (dürüst dogrulama)
    - Rol agirlikli guc orani, zirh / MG / baski farkindaligi, kayip orani; kararlar: BOUNDING, SUPPRESS_ASSAULT, DELAY, PEEL, WITHDRAW, PUSH, HIDE.
    - Komutan zihni: yalniz ALGILADIKLARINDAN gozlem defteri (ates yonu, duman, temas); alisikanlik hipotezleri; kisilik [CBA komutanKisilikWest / East / Ind]. Hile yok.
    - Arazi bilinci (araziAnaliz, ufukMu): hakim nokta, ufuk cizgisi, arazi kivrimi.
+   - SILAH KALITESI (v8.541, fnc_silahGucu) [CBA silahGucu]: komutan guc orani rol agirligi x silah carpani (otomatik ates + sarjor kapasitesi; bolt-action ~0.45, SKS ~0.5, M16 ~0.94, AK ~1.1).
+     Zayif silahli taraf (ornek VC) kendini daha zayif gorur -> bounding hucum yerine gecikme / pusu / cekilme. Yakin bounding guc orani siniri [CBA yakinBndOran 1.1]. [RPT SILAH-GUCU]
  4.5 FORMASYON: tek yazici hakem (formSet), arazi / seyir tekniklerine gore COLUMN / WEDGE / VEE, halt / slot kovalama kesici, dagilma bilinci (RPG / el bombasi gorulunce 9-16 m).
  4.6 BUDDY / ORPHAN / YIGILMA: kalici es, yetim izleme, yigilma cozumu, cephane paylasma.
 
