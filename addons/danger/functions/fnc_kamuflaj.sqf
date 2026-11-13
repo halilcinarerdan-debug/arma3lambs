@@ -74,10 +74,15 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
                 if (_ufukta) then { _c = _c + 0.2; };
             };
             _c = _c - _isikBonus;
-            // v8.528 RENK PALETI: uniforma + vest paleti x zemin paleti uyumu (1 = karisir -0.15, 0.1 = belirgin +0.12, 0.5 = tarafsiz); fnc_palet jeton tahmini, piksel ortalamasi DEGIL
-            if (missionNamespace getVariable ["lambs_danger_paletAlgi", true]) then {
-                private _uyum = ["uyum", _u, getPosATL _u] call FUNC(palet);
-                _c = _c + ((0.5 - _uyum) * 0.3);
+            // v8.528 RENK PALETI: uniforma + vest paleti x zemin paleti uyumu (1 = karisir -0.15, 0.1 = belirgin +0.12, 0.5 = tarafsiz); fnc_palet: getTextureInfo ile GERCEK ortalama renk (yedek: jeton tahmini)
+            //   v8.532: Dynamic Camo System (DYNCAS_core, rekterakathom) yuklu ise renk etkisini O MOD uygular (ayni getTextureInfo mantigi): burada tekrar eklenmez (cift sayim yok), mod sonucu (DYNCAS_core_unitCache) carpan olarak korunur.
+            if (isClass (configFile >> "CfgPatches" >> "DYNCAS_core")) then {
+                _c = _c * ((missionNamespace getVariable ["DYNCAS_core_unitCache", createHashMap]) getOrDefault [hashValue _u, 1]);
+            } else {
+                if (missionNamespace getVariable ["lambs_danger_paletAlgi", true]) then {
+                    private _uyum = ["uyum", _u, getPosATL _u] call FUNC(palet);
+                    _c = _c + ((0.5 - _uyum) * 0.3);
+                };
             };
             _c = (_c max _minC) min 1.2;
 

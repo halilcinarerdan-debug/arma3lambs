@@ -235,7 +235,7 @@ NASIL OKUNUR
  - v8.527 NAMLU ALEVI TEPKISI: gorus hattindaki dusman alevi gorur (gunduz 200 m, gece 700 m); susturucu VEYA alev gizleyici 0.5, ikisi birden 0.2 gorulme orani.
    [CBA parlamaTepki, parlamaGunduzM, parlamaTekOran, parlamaIkiliOran] [RPT SES-ALEV]
  - v8.528 UFUK CIZGISI v2: siluet veren dusmani hizli spot, ufukta yururken comel / duran icin yer degistirme [CBA ufukAlgi, ufukSpotM, ufukSpotHiz]
-   RENK PALETI: uniforma + vest jeton tahmini (piksel okunamaz), zemin paletiyle uyum -> camouflageCoef ve yer secimi [CBA paletAlgi] [RPT PALET]
+   RENK PALETI (v8.532): uniforma + vest GERCEK ortalama renk (getTextureInfo; yedek: jeton tahmini), zemin texture ortalamasiyla uyum -> camouflageCoef ve yer secimi; Dynamic Camo System varsa o mod coef uygular [CBA paletAlgi] [RPT PALET-RENK]
  - v8.529 MEVZI HAFIZASI (oturum boyunca, taraf basina): hasarsiz dayanilan siperler 'iyi', vurulunca / olunce 'kotu' (tehdit yonune gore), ufukta vurulan noktalar,
    duyulan dusman atis noktalari -> tahmini dusman mevzisi. Siper secimi (findCover / acikSiper / bounding hop) ve ufuk yer degistirmesi bunu kullanir.
    [CBA mevziHafiza, mevziYariOmur, mevziAgirlik] [RPT MEVZI-OGREN, MEVZI-OZET]

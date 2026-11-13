@@ -3,15 +3,18 @@
  * Author: Cinar (ELITE fork)
  * RENK PALETI FARKINDALIGI (v8.528; kullanici: 'ustlerindeki rengin ortalamasi alinsin, sadece uniforma + vest hesaplansin, botlar renk paletinin farkinda olsun, ona gore texture secimi yapabilsinler').
  *
- * !! SINIR (dogru bilgi): SQF texture PIKSELLERINI okuyamaz; gercek 'renk ortalamasi' hesaplanamaz. Bu fonksiyon ortalamayi TAHMIN eder:
- *    uniforma + vest (YALNIZ ikisi; kask / sirt cantasi / yuz sayilmaz) icin sinif adi + esyanin config'indeki texture YOLLARI (hiddenSelectionsTextures) kucuk harfe cevrilip
- *    sozcuk jetonlariyla (snow / desert / arid / woodland / flecktarn / urban / black / multicam ...) taranir -> palet oyu. Uniforma agirligi 0.65, vest 0.35; en yuksek oy kazanir.
- *    Jeton bulunamazsa 'BELIRSIZ' (tarafsiz 0.5). Zemin paleti de ayni sekilde surfaceTexture / surfaceType YOLUNDAN tahmin edilir (agac yogunlugu yedegi).
- *    Mod yolu / adi bu jetonlari icermiyorsa tanima BASARISIZ olur; misyon degiskeni lambs_danger_paletJetonlari ile [[PALET, [jetonlar]], ...] listesi eklenebilir (ustune yazar).
+ * YONTEM 1 (ASIL, v8.532): GERCEK ORTALAMA RENK. SQF'te getTextureInfo komutu texture'un ortalama rengini ([r,g,b,a]) verir (kaynak fikir: rekterakathom/DynamicCamoSystem, ayni komut). v8.528'de 'SQF pikseli okuyamaz'
+ *    dedim; YANLISTI: ortalama renk okunabiliyor.  Birim = getObjectTextures'in ilk texture'u (uniforma govdesi; yoksa uniformClass config'inin ilk texture'u) agirlik 0.65 + vest (config hiddenSelectionsTextures'in ilk dolu
+ *    texture'u) agirlik 0.35 (vest texture'i config'te yoksa yalniz uniforma). YALNIZ uniforma + vest (kask / canta / yuz yok). Zemin = surfaceTexture'in ortalama rengi (gece x0.75).
+ *    Fark x = max(|zemin - birim| / buyuk) 3 kanalda, uyum = 0.5 + 0.5 x cos(180 x): 1 = ayni renk, 0 = tam zit. Texture ortalamalari onbellekli.
+ * YONTEM 2 (YEDEK): getTextureInfo yoksa / texture bulunamazsa sinif adi + texture YOLU sozcuk jetonlariyla (snow / desert / woodland / flecktarn / urban / black / multicam ...) palet TAHMINI; jeton yoksa BELIRSIZ (0.5).
+ *    misyon degiskeni lambs_danger_paletJetonlari ile [[PALET, [jetonlar]], ...] eklenir.
  * PALETLER: FOREST (koyu yesil / flecktarn / woodland), DESERT (col / kum / tan), SNOW (kar), URBAN (gri / sehir), DARK (siyah / koyu), KARISIK (multicam / MTP / OCP tipi), TOPRAK (zemin: toprak / kaya / camur).
  *
  * Modlar:
- *   ["birim", unit]            -> palet adi <STRING>     (uniforma + vest oyu; sinif / esya degisince yeniden)
+ *   ["renk", unit]             -> [r,g,b] <ARRAY>        (uniforma + vest ortalama rengi; [] = bulunamadi)
+ *   ["zeminRenk", pos]         -> [r,g,b] <ARRAY>        (zemin ortalama rengi; [] = bulunamadi)
+ *   ["birim", unit]            -> palet adi <STRING>     (YEDEK jeton yontemi: uniforma + vest oyu)
  *   ["zemin", pos]             -> palet adi <STRING>     (zemin: surfaceTexture / surfaceType, yedek agac yogunlugu)
  *   ["uyum", unit, pos]        -> 0..1 <NUMBER>         (birim paleti x zemin paleti uyum puani; 1 = iyi karisir, 0.1 = ceviriye gore cok belirgin, 0.5 = bilinmiyor)
  * Ek: lambs_danger_paletAlgi = false ise "uyum" daima 0.5 doner.
@@ -30,6 +33,84 @@
 params [["_mod", "uyum", [""]], ["_a", objNull, [objNull, []]], ["_poz", [], [[]]]];
 
 if (_mod isEqualTo "uyum" && {!(missionNamespace getVariable ["lambs_danger_paletAlgi", true])}) exitWith {0.5};
+
+// ---------- YONTEM 1: GERCEK ORTALAMA RENK (getTextureInfo) ----------
+private _sonucRenk = nil;
+private _renkVar = (supportInfo "u:gettextureinfo*") isNotEqualTo [];
+private _renkAl = {
+    params ["_yol"];
+    if (_yol isEqualTo "") exitWith {[]};
+    private _oc = missionNamespace getVariable ["lambs_danger_texOnbellek", createHashMap];
+    missionNamespace setVariable ["lambs_danger_texOnbellek", _oc];
+    private _r = _oc get _yol;
+    if (isNil "_r") then {
+        private _i = getTextureInfo _yol;
+        _r = [];
+        if (!isNil "_i") then {
+            private _c = _i param [2, []];
+            if (_c isEqualType [] && {(count _c) >= 3}) then { _r = [_c select 0, _c select 1, _c select 2]; };
+        };
+        _oc set [_yol, _r];
+    };
+    _r
+};
+if (_renkVar && {_mod in ["renk", "zeminRenk", "uyum"]}) then {
+    private _zeminRenk = {
+        params ["_pz"];
+        private _pp = +_pz;
+        _pp resize 2;
+        private _g = [surfaceTexture _pp] call _renkAl;
+        if (_g isNotEqualTo [] && {sunOrMoon < 0.2}) then { _g = _g apply { _x * 0.75 }; };
+        _g
+    };
+    private _birimRenk = {
+        params ["_bu"];
+        private _tex = (getObjectTextures _bu) param [0, ""];
+        private _uc = getText (configFile >> "CfgWeapons" >> (uniform _bu) >> "ItemInfo" >> "uniformClass");
+        if (_tex isEqualTo "" && {_uc isNotEqualTo ""}) then {
+            { if (_tex isEqualTo "" && {_x isNotEqualTo ""}) then { _tex = _x; }; } forEach (getArray (configFile >> "CfgVehicles" >> _uc >> "hiddenSelectionsTextures"));
+        };
+        private _vc = vest _bu;
+        private _vtex = "";
+        if (_vc isNotEqualTo "") then {
+            private _vcfg = configFile >> "CfgWeapons" >> _vc;
+            { if (_vtex isEqualTo "" && {_x isNotEqualTo ""}) then { _vtex = _x; }; } forEach ((getArray (_vcfg >> "ItemInfo" >> "hiddenSelectionsTextures")) + (getArray (_vcfg >> "hiddenSelectionsTextures")));
+        };
+        private _u = [_tex] call _renkAl;
+        private _v = [_vtex] call _renkAl;
+        private _sonuc = [];
+        if (_u isNotEqualTo [] && {_v isNotEqualTo []}) then {
+            _sonuc = [0, 1, 2] apply { ((_u select _x) * 0.65) + ((_v select _x) * 0.35) };
+        } else {
+            _sonuc = [_u, _v] select (_u isEqualTo []);
+        };
+        // ilk 20 farkli uniforma / vest icin log
+        private _lk = (uniform _bu) + "|" + _vc;
+        private _gor = missionNamespace getVariable ["lambs_danger_paletRenkGor", createHashMap];
+        missionNamespace setVariable ["lambs_danger_paletRenkGor", _gor];
+        if (!(_lk in _gor) && {(count _gor) < 20}) then {
+            _gor set [_lk, true];
+            diag_log format ["[PALET-RENK] uniforma:%1 tex:%2 | vest:%3 tex:%4 | ortalama renk (agirlikli): %5 | getTextureInfo ile GERCEK ortalama", uniform _bu, _tex, _vc, _vtex, _sonuc apply { _x toFixed 2 }];
+        };
+        _sonuc
+    };
+    if (_mod isEqualTo "renk" && {_a isEqualType objNull} && {!isNull _a}) then { _sonucRenk = [_a] call _birimRenk; };
+    if (_mod isEqualTo "zeminRenk" && {_a isEqualType []}) then { _sonucRenk = [_a] call _zeminRenk; };
+    if (_mod isEqualTo "uyum" && {_a isEqualType objNull} && {!isNull _a} && {_poz isNotEqualTo []}) then {
+        private _pc = [_a] call _birimRenk;
+        private _gc = [_poz] call _zeminRenk;
+        if (_pc isNotEqualTo [] && {_gc isNotEqualTo []}) then {
+            private _x1 = 0;
+            for "_k" from 0 to 2 do {
+                private _pv = _pc select _k;
+                private _gv = _gc select _k;
+                _x1 = _x1 max ((abs (_gv - _pv)) / ((_pv max _gv) max 0.0001));
+            };
+            _sonucRenk = 0.5 + (0.5 * (cos (180 * (_x1 min 1))));
+        };
+    };
+};
+if (!isNil "_sonucRenk") exitWith {_sonucRenk};
 
 // metni jetonlara ayir: harf / rakam disindaki her sey '_' olur, bastan sona '_' ile cevrilir -> "_jeton_" aramasi parca eslesmesini onler ('tan' != 'standard')
 private _norm = {
@@ -114,7 +195,7 @@ if (isNil "_pal") then {
     if (isNil "lambs_danger_paletLogN") then { lambs_danger_paletLogN = 0; };
     if (lambs_danger_paletLogN < 20) then {
         lambs_danger_paletLogN = lambs_danger_paletLogN + 1;
-        diag_log format ["[PALET] uniforma:%1 | vest:%2 | palet:%3 | oylar:%4 (jeton tahmini, piksel ortalamasi DEGIL)", _uniforma, _yelek, _pal, _oy];
+        diag_log format ["[PALET] uniforma:%1 | vest:%2 | palet:%3 | oylar:%4 (YEDEK jeton tahmini; getTextureInfo yoksa / texture bulunamadiysa)", _uniforma, _yelek, _pal, _oy];
     };
 };
 
