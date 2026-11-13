@@ -3415,3 +3415,6 @@ v8.529 (dal sade-waypoint) MEVZI HAFIZASI / OGRENME (kullanici: 'siper hafizasi 
 v8.530 (dal sade-waypoint) PALET: SOG JETONLARI. RPT (vn_khe_sanh, build v8.529, 10:43): [PALET] 9 VC uniforma / vest (vn_o_uniform_vc_mf_xx_07 / vn_o_vest_vc_xx) HEPSI BELIRSIZ (oylar:[]) - sinif adi ve texture yollarinda renk jetonu yok; palet etkisi sifirdi (tarafsiz 0.5).
  - Eklendi (TAHMIN, renkler oyunda dogrulanmadi): DARK 'vc'; FOREST 'nva', 'pavn', 'tgr', 'erdl', 'm1967', 'og107', 'arvn'. Yanlissa misyon degiskeni lambs_danger_paletJetonlari ile ezilir / kapatmak icin CBA paletAlgi.
  - Ayni RPT'de dogrulanan: v8.529 hatasiz yuklendi; [MEVZI-OGREN] 35 olay (iyi 6, kotu 18, maruz 11), [MEVZI-OZET] taraf basina hucre / tahmini dusman mevzisi (WEST 2, EAST 3) uretti; [UFUK-ALGI-OZET] 60 sn: siluet spot 0, ufukta comelme 2, yer degistirme 0.
+
+v8.531 (dal sade-waypoint) PALET: VC TARAFSIZ (kullanici: 'gercekle ayni, VC'ler daha serbest, beyaz dolasan bile var, sorun degil'). v8.530'daki DARK 'vc' jetonu GERI ALINDI: VC uniformalari tek renk degil (mf_01..12 cesitli), hepsini koyu saymak yanlis. VC uniformalari BELIRSIZ (palet etkisi 0.5 tarafsiz) kalir.
+ - NVA / ABD / ARVN FOREST jetonlari (nva, pavn, tgr, erdl, m1967, og107, arvn) kaldi: TAHMIN, renkler oyunda dogrulanmadi.
