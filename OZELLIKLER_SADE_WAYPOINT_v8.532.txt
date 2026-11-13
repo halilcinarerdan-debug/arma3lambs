@@ -101,7 +101,7 @@ DURUM ETIKETLERI (dürüst dogrulama)
    - KACIS KATMANI (v8.544, fnc_kacis + commanderAssess) [CBA kacisAktif, kacisKilitS (150), kacisKayip (0.3), kacisBireysel, kacisTekM (40)]:
      (1) Bireysel: TEK KALAN (40 m'de saglikli dost yok / grup etkini <= 2) ya da MERMISI KRITIK (yedek sarjor yok, sarjorda <= %30) asker dusmanin tersine 70-120 m gizli noktaya kosar, 45 sn saklanir (dusman < 20 m dovus).
      (2) Grup kilidi: kayip >= %30 iken geri cekilme / gecikme kilit kurar: dusman sayisi azalsa da hucum yok, gecikme -> geri cekilme, 'kucuk ekip kosarak kacilmaz' kurali atlanir. Amac: zaiyati sinirlamak, tek dusmani oldurmek degil. [RPT KACIS, KACIS-OZET]
-   - KANAT BOUNDING (v8.546) [CBA kanatBounding]: yakin arazi bounding'de (>= 6 asker, dusman 45-130 m) manevra ekibi yan yaydan dusmanin kanadina siperden siper doner, kapsama ekibi (MG dahil) bastirma atesi verir;
+   - KANAT BOUNDING (v8.546, ayar v8.547: 75-130 m, +-70 derece, sicrama <= 30 m) [CBA kanatBounding]: yakin arazi bounding'de (>= 6 asker, dusman 75-130 m) manevra ekibi yan yaydan dusmanin kanadina siperden siper doner, kapsama ekibi (MG dahil) bastirma atesi verir;
      kanat acisi >= 50 derece ya da 7 cycle sonra normal bounding. Taraf siper yogunlugu + mevzi hafizasi ile secilir. [RPT BND-KANAT, BND-KANAT-BITTI]
  4.5 FORMASYON: tek yazici hakem (formSet), arazi / seyir tekniklerine gore COLUMN / WEDGE / VEE, halt / slot kovalama kesici, dagilma bilinci (RPG / el bombasi gorulunce 9-16 m).
  4.6 BUDDY / ORPHAN / YIGILMA: kalici es, yetim izleme, yigilma cozumu, cephane paylasma.

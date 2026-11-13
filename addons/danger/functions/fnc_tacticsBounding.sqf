@@ -292,7 +292,7 @@ private _kanatOn = false;
 private _kanatYon = 1;
 private _kanatB0 = 0;
 if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", true]} && {(count (units _group)) >= 6}
-    && {((leader _group) distance2D _target) >= 45}) then {
+    && {((leader _group) distance2D _target) >= 75}) then {   // v8.547: 45 -> 75 m (RPT 15:25: 108-125 m'de baslayan kanat 40-60 sn'de 20-55 m temasa dondu, 13 m'lik sicramalar kanada yetmedi)
     private _lp = getPosATL (leader _group);
     private _th = (leader _group) getDir _target;
     private _puanTaraf = [60, -60] apply {
@@ -507,7 +507,8 @@ if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", tr
         //   yorgunluk tabani 12 -> 18 m.
         private _bndCarpan = ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3) * (["sicrama"] call FUNC(cag));   // v8.526: donem carpani (1 / 0.85 / 0.7)
         private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
-        if (_yakinBnd) then { _atMax = _atMax min _yakinAt; };   // v8.539: yakin arazi: kisa sicrama
+        // v8.547: kanat kosucusu (aci >= 68 derece) icin sicrama tavani 30 m (yan kazanc ~28 m / sicrama); digerleri CBA yakinBndAtilim (22 m)
+        if (_yakinBnd) then { _atMax = _atMax min ([_yakinAt, _yakinAt max 30] select ((abs _aci) >= 68)); };   // v8.539: yakin arazi: kisa sicrama
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
             if (lambs_danger_yorgLogN < 40) then {
@@ -1020,7 +1021,7 @@ if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", tr
         // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
         private _rotaAci = [_group, _target] call FUNC(rotaPlan);
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), ([(_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75, _kanatYon * 60] select (_kanatAktif && {_x in _alphaE}))] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), ([(_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75, _kanatYon * 70] select (_kanatAktif && {_x in _alphaE}))] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 
