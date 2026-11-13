@@ -53,16 +53,18 @@ private _calis = {
         private _taraf = createHashMap;
         {
             private _n = {alive _x} count (units _x);
+            // v8.549: ETKIN asker (saglikli / yarali ve baygin olmayan): 'asker' canli sayisi bayginlari da sayar (kullanici: 'westteki herkes bayildi' - canli 12 gorunuyordu, etkin 0'di)
+            private _nE = {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}} count (units _x);
             _asker = _asker + _n;
             private _s = str (side _x);
-            private _e = _taraf getOrDefault [_s, [0, 0]];
-            _taraf set [_s, [(_e select 0) + 1, (_e select 1) + _n]];
+            private _e = _taraf getOrDefault [_s, [0, 0, 0]];
+            _taraf set [_s, [(_e select 0) + 1, (_e select 1) + _n, (_e param [2, 0]) + _nE]];
         } forEach _yerel;
         private _planN = count (missionNamespace getVariable ["lambs_danger_planlar", createHashMap]);
         private _donus = {local _x && {alive _x} && {!isPlayer _x} && {((toLower (animationState _x)) find "turn") >= 0}} count allUnits;
         missionNamespace setVariable ["lambs_danger_telemetriDonus", _donus];
         if (_yerel isNotEqualTo [] || {isServer}) then {
-            diag_log format ["[TELEMETRI-SUNUCU] t=%1 | fps %2 (min %3) | yerel AI grup:%4 asker:%5 | taraf [grup, asker]: %6 | plan:%7 | donus animasyonunda:%8 | isServer:%9",
+            diag_log format ["[TELEMETRI-SUNUCU] t=%1 | fps %2 (min %3) | yerel AI grup:%4 asker:%5 | taraf [grup, asker(canli, baygin dahil), ETKIN]: %6 | plan:%7 | donus animasyonunda:%8 | isServer:%9",
                 round time, round diag_fps, round diag_fpsMin, count _yerel, _asker, _taraf toArray false, _planN, _donus, isServer];
         };
         // v8.301 PERF (kullanici: 'sunucuda neredeyse hic bot yokken 15 FPS kaybediyorum, mod cikarinca rahatliyor, son zamanlarda'): 60 sn'de bir calisan betik sayisi + en cok betik calistiran dosyalar.
