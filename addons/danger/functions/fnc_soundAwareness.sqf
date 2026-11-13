@@ -83,9 +83,23 @@ _burst set [1, (_burst select 1) + 1];
 _unit setVariable [QGVAR(sesBurst), _burst];
 if ((_burst select 1) >= 6) then { _menzil = _menzil * 1.3; };
 
+// v8.527 NAMLU ALEVI TEPKISI (kullanici: 'botlar namlu alevine tepki versin; susturucu ve alev gizleyicisi olan modlanmis silahta bu oran dussun').
+//   Alev gorulme ORANI (her atista zar): aksesuarsiz 1.0 | susturucu VEYA alev gizleyici (yalniz biri) CBA parlamaTekOran (0.5) | susturucu + alev gizleyici BIRLIKTE CBA parlamaIkiliOran (0.2).
+//   Susturucu = audibleFire katsayisi < 0.5; alev gizleyici = visibleFire katsayisi < 0.8 (modlarin kendi AmmoCoef degerleri; tek parca susturucu hem sesi hem alevi kisan bir esya olabilir -> ikisi birden sayilir).
+//   Susturucu esyasinin visibleFire'i tanimsiz (>= 0.8) ise alev menzili x0.6. Roketatar arka alevi (backblast) aksesuardan etkilenmez.
+private _gizleyici = _visK < 0.8;
+private _alevOran = 1;
+if (_susturucu && {_gizleyici}) then {
+    _alevOran = missionNamespace getVariable ["lambs_danger_parlamaIkiliOran", 0.2];
+} else {
+    if (_susturucu || {_gizleyici}) then { _alevOran = missionNamespace getVariable ["lambs_danger_parlamaTekOran", 0.5]; };
+};
+if (_susturucu && {!_gizleyici}) then { _visK = 0.6; };
+
 // Parlama / duman gorunurlugu
 private _gece = (sunOrMoon < 0.35);
-private _parlamaMenzil = ([120, 700] select _gece) * _visK;
+private _parlamaMenzil = ([(missionNamespace getVariable ["lambs_danger_parlamaGunduzM", 200]), 700] select _gece) * _visK;
+if !(missionNamespace getVariable ["lambs_danger_parlamaTepki", true]) then { _parlamaMenzil = 0; };
 if (_launcher) then { _parlamaMenzil = [500, 800] select _gece; };   // arka alev + toz / duman her kosulda gorunur
 if (_glMi) then { _parlamaMenzil = _parlamaMenzil max 80; };
 
@@ -113,8 +127,10 @@ private _say = 0;
         private _k = _x;
         // grubun atici ile en yakin askeri
         private _grupUye = (units _g) select {alive _x && {local _x} && {isNull objectParent _x}};
+        private _sirali = [];
         if (_grupUye isNotEqualTo []) then {
-            _k = ([_grupUye, [], {_x distance _unit}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+            _sirali = [_grupUye, [], {_x distance _unit}, "ASCEND"] call BIS_fnc_sortBy;
+            _k = _sirali select 0;
         };
         private _d = _k distance _unit;
 
@@ -122,9 +138,17 @@ private _say = 0;
         if ((_k knowsAbout _unit) < (["KESIN"] call FUNC(bilgiEsik))) then {
             private _duyuldu = _d < _menzil || {_catlama && {_d < 220}};
             private _gorulur = false;
-            if (_d < _parlamaMenzil) then {
-                // LOS: parlama / backblast duman gorulebilir mi
-                _gorulur = !(terrainIntersectASL [eyePos _k, _eP]) && {!(lineIntersects [eyePos _k, _eP, _k, _unit])};
+            if (_parlamaMenzil > 0) then {
+                // LOS: parlama / backblast duman gorulebilir mi (v8.527: grubun en yakin 4 askerinden herhangi biri gorurse; gorenin kendisi dinleyici olur)
+                {
+                    if ((_x distance _unit) < _parlamaMenzil && {!(terrainIntersectASL [eyePos _x, _eP])} && {!(lineIntersects [eyePos _x, _eP, _x, _unit])}) exitWith {
+                        _gorulur = true;
+                        _k = _x;
+                        _d = _x distance _unit;
+                    };
+                } forEach (_sirali select [0, 4]);
+                // alev gorulme orani (susturucu / alev gizleyici): backblast haric her atista zar
+                if (_gorulur && {!_launcher} && {(random 1) > _alevOran}) then { _gorulur = false; };
             };
 
             if (_duyuldu || {_gorulur}) then {
@@ -174,6 +198,9 @@ private _say = 0;
                         ["", "(susturucu)"] select _susturucu,
                         _lvl toFixed 2, _ammo
                     ];
+                    if (_alevOran < 1) then {
+                        diag_log format ["[SES-ALEV] %1 | alev gorulme orani %2 | susturucu:%3 alev gizleyici:%4 | gorulen:%5", name _unit, _alevOran toFixed 2, _susturucu, _gizleyici, _gorulur];
+                    };
                 };
                 _say = _say + 1;
             };

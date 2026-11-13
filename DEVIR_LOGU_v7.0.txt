@@ -3387,3 +3387,9 @@ v8.526 (dal sade-waypoint) CAG / DONEM SECIMI (kullanici: 'sog gm csla gibi cdlc
  - Carpanlarin hicbiri kaynaktan dogrulanmis degildir (genel tarih bilgisi + tasarim karari); depodaki doktrin kaynaklari modern. NOT: oyunda denenmedi.
 
 v8.526b (dal sade-waypoint) DOKTRIN ESLEMESI DUZELTME: RPT (vn_khe_sanh) gercek SOG fraksiyonlari 'o_vc' ve 'b_macv' cikti; v8.526 tahmini 'vn_*' adlari eslesmedi, VC askerleri ABD profiline dusuyordu. Eklendi: o_vc -> DUZENSIZ, b_macv -> ABD. Diger SOG fraksiyonlari (NVA / ARVN vb.) adlari RPT'de gorulmedi, eslenmedi (GENEL).
+
+v8.527 (dal sade-waypoint) NAMLU ALEVI TEPKISI (kullanici: 'botlar namlu alevine tepki versin, susturucu ve alev gizleyicisi olan modlanmis silah varsa bu oran dussun').
+ - fnc_soundAwareness: (1) alevi grubun yalniz en yakin askeri degil, en yakin 4 askerinden herhangi biri gorus hattindan gorebilir (gorenin kendisi dinleyici olur); (2) gunduz alev menzili 120 -> 200 m (CBA parlamaGunduzM, 60-400); gece 700 m;
+   (3) ALEV GORULME ORANI (her atista zar): aksesuarsiz 1.0 | susturucu VEYA alev gizleyici 0.5 (CBA parlamaTekOran) | ikisi birden 0.2 (CBA parlamaIkiliOran). Susturucu = muzzle esyasi AmmoCoef audibleFire < 0.5, alev gizleyici = visibleFire < 0.8;
+   susturucunun visibleFire'i tanimsizsa alev menzili x0.6. Roketatar arka alevi etkilenmez. (4) CBA parlamaTepki ile tamami kapatilabilir. Log: [SES-ALEV] (atici basina 10 sn'de bir, yalniz aksesuarli silahta).
+ - SINIR: yalniz muzzle yuvasindaki esyanin config katsayilari okunur; tek parca (silaha gomulu) susturuculu silahlar (ornegin VSS tipi) ayrica taninmaz — onlar icin mermi (subsonic) ses tarafi var, alev tarafi aksesuarsiz sayilir. NOT: oyunda denenmedi.
