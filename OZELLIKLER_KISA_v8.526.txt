@@ -1,0 +1,56 @@
+LAMBS DANGER ELITE (dal: sade-waypoint) - OZELLIKLER, KISA LISTE - v8.526
+=========================================================================
+NOT: Tum ozellikler kod olarak yazildi ve statik denetimden gecti (HEMTT lint, tutarlilik denetimi).
+Oyunda dogrulanma durumu degisir; RPT'lerle tek tek test ediliyor. Detay: OZELLIKLER_LISTESI.md, DEVIR_LOGU_v7.0.txt
+
+1) TASARIM (sade waypoint)
+ - Hareket: tasarimcinin waypoint'i + trigger'i yonetir. Plan / hedef / harekat / nakil / keşif / HQ / Karakol / Garnizon katmanlari kaldirildi.
+ - Waypoint uyumu: LAMBS gorevleri (Garrison, Camp, Patrol, Hunt, CQB...), "AI Kapat" ve HOLD / SENTRY / GUARD / SCRIPTED waypoint'li gruplarda ELITE geri cekilir.
+   MOVE / SAD / DESTROY / CYCLE'da hareket kararlari waypoint'te kalir (CBA: Waypoint uyumu), ates / siper / tibbi / panik katmanlari acik kalir.
+ - Makro Kumanda (Zeus), IHA / FPV, taktik tepkiler, senaryo modu korunur.
+
+2) SIPER SISTEMI (en guclu katman)
+ - Acikta kalan askeri tespit eder (govde genisligi, yakinlik, FIRE / VIEW LOD, arazi kivrimi); haritaya gore agac kalibrasyonu.
+ - En yakin dusmandaki askerler once siper alir; siper arama menzili ve bitki / kaya / duvar / bina onceligi.
+ - Raycast dogrulamali "sipere zorla" kosusu (3.5 sn, risk carpani, kosarken ates); sipere vardiginda 45 sn tutma (git-gel yok).
+ - Meskun mahalde ev ici onceligi, CQB'de acikta durmama, reload oncesi siper.
+
+3) YAKIN DOVUS
+ - Yakin ates (<= 7 m), yan adim (peek-strafe, oyuncuya karsi daha sik), CQB refleksi, kapi acma / bekleme / kapatma, duvara kor bakis duzeltmesi.
+
+4) MANEVRA
+ - Bounding (siper-siper ilerleme) agresiflik ayari (Temkinli / Dengeli / Agresif), sicrama uzunlugu carpani, ates ustunlugu kapisi.
+ - Geri cekilme (peel / delay), temas kesme, moral / teslim, panik.
+
+5) ATES DESTEGI
+ - UGL (40 mm) akilli kullanim: min mesafe 20 m, dost guvenligi, cooldown.
+ - Tank / IFV: gorus engelinde (bugday, cali, sis) BILINEN konuma kesif atesi (FM 3-34 12-90).
+ - Roketatar, AA ekibi, el bombasi bilinci, bastirma atesi.
+
+6) DOKTRIN PROFILLERI
+ - Fraksiyona gore degerler: ABD / USMC, RUS, CHN, PESHMERGA, DUZENSIZ, GENEL; SOG (o_vc = DUZENSIZ, b_macv = ABD), GM, CSLA eslesmeleri (tahmin).
+ - Yeni ordu = yeni profil (veri); misyondan tanimlanabilir.
+
+7) DONEM SECIMI (CBA: "Cag / donem") - v8.526
+ - Modern (varsayilan) / Soguk Savas - Vietnam (S.O.G., GM, CSLA) / Ikinci Dunya Savasi. Otomatik algilama yok, oyuncu secer.
+ - Soguk Savas: bounding en cok Dengeli, sicrama x0.85, yan adim menzili x0.6.
+ - WWII: bounding Temkinli, sicrama x0.7, yan adim / reload-peek / CQB yakin-siper kapali, UGL 3 kat seyrek.
+
+8) SAGLIK / INSAN FAKTORU
+ - TCCC / medevac, medic tasima; yorgunluk, ozguven, moral; ACE / ACM ile uyum (saglik ayarlari ayri dosyada, LAMBS tarafinda CBA yok).
+
+9) ALGI (hile yok)
+ - Yalniz "bildikleri" (knowsAbout esik tablosu); ses, isik, kamuflaj, yaprak gorus kaybi, gozcu RTO.
+
+10) MEKANIZE / IHA
+ - Arac murettebati, zirh kacis, tank atis kontrolu, arac sikismasi cozumu, arac ileri-geri salinim TESHISI ([ARAC-GITGEL]; davranis degistirmez).
+ - IHA gozlem / envanter, FPV / dron tepkileri (senaryoya yerlestirirsen).
+
+11) GELISTIRICI ARACLARI
+ - tools/tutarlilik_denetimi.py, uyum_denetimi.py, hemtt_kontrol.sh, rpt_ozet.py (RPT karnesi), senaryo_denetimi.py.
+ - RPT etiketleri: [SIPER-ZORLA] [SIPER-TUT] [ACIKTA-SINIF-OZET] [UGL-OZET] [TANK-BILINEN] [YAKIN-HAREKET] [AGAC-TANI] [ARAC-GITGEL] [DOKTRIN-PROFIL].
+
+BEKLEYEN
+ - Araclarda titreme / ileri-geri: arac iceren RPT gerekli.
+ - Orman haritalarinda (Khe Sanh) sert siper azlugu ve 15-30 sn duran askerler: ayrica incelenebilir.
+ - Cag ayarini acilis loguna yazma (onay bekliyor).
