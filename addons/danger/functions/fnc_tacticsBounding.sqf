@@ -285,21 +285,44 @@ if (EGVAR(main,debug_functions)) then {
 // ---------------------------------------------------------------------------
 // Bounding dongusunu ayri scheduled thread'de baslat
 // ---------------------------------------------------------------------------
+// v8.546 KANAT BOUNDING (kullanici: 'flank sistemi var mi? ekle'): yakin arazi modunda, >= 6 askerli grup, dusman 45-130 m: manevra ekibi (ALPHA) her cycle YAN YAYLA (+-60 derece) dusmanin kanadina siper-siper doner,
+//   kapsama ekibi (BRAVO + MG) yerinde BASTIRMA atesi verir (FSE ileri sicramaz) ta ki manevra ekibi yaklasim eksenine gore >= 50 derece kanada ulasana ya da 7 cycle gecene kadar; sonra normal bounding.
+//   Taraf (sag / sol): iki yan noktanin (lider +-60 derece, 40 m) cevresindeki siper yogunlugu + mevzi hafizasi puani yuksek olan secilir. CBA kanatBounding.
+private _kanatOn = false;
+private _kanatYon = 1;
+private _kanatB0 = 0;
+if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", true]} && {(count (units _group)) >= 6}
+    && {((leader _group) distance2D _target) >= 45}) then {
+    private _lp = getPosATL (leader _group);
+    private _th = (leader _group) getDir _target;
+    private _puanTaraf = [60, -60] apply {
+        private _p = _lp getPos [40, _th + _x];
+        (count (nearestTerrainObjects [_p, ["TREE", "BUSH", "SMALL TREE", "ROCK", "WALL", "HIDE"], 15, false, true]))
+        + (0.5 * ([side _group, _p, _target] call (missionNamespace getVariable ["lambs_danger_fnc_mevziPuan", {0}])))
+    };
+    _kanatYon = [1, -1] select ((_puanTaraf select 1) > (_puanTaraf select 0));
+    _kanatB0 = _target getDir _lp;
+    _kanatOn = true;
+    diag_log format ["[BND-KANAT] %1 %2 | kanat bounding: %3 kanat | cover puani sag %4 sol %5 | lider xy %6 -> hedef xy %7", str (side _group), groupId _group, ["SAG", "SOL"] select (_kanatYon < 0), (_puanTaraf select 0) toFixed 1, (_puanTaraf select 1) toFixed 1,
+        _lp select [0, 2] apply { round _x }, _target select [0, 2] apply { round _x }];
+};
+
 [_group, _fse, _maneuver, _reserve, _target, _targetASL, _vehicles, _unit,
  _BND_ASSAULT_RANGE, _BND_CYCLE_BASE, _BND_CYCLE_RAND, _BND_SUPPRESSION_MUL,
  _BND_MAX_CYCLES, _BND_COVER_RANGE, _bndToken, _delay,
- _kapiMin, _kapiMax, _varisTab, _varisBas, _ekBekle, _kosuEsik, _yatEsik, _yakinBnd, _yakinAt] spawn {
+ _kapiMin, _kapiMax, _varisTab, _varisBas, _ekBekle, _kosuEsik, _yatEsik, _yakinBnd, _yakinAt, _kanatOn, _kanatYon, _kanatB0] spawn {
 
     params [
         "_group", "_fse", "_maneuver", "_reserve", "_target", "_targetASL", "_vehicles", "_leader",
         "_BND_ASSAULT_RANGE", "_BND_CYCLE_BASE", "_BND_CYCLE_RAND", "_BND_SUPPRESSION_MUL",
         "_BND_MAX_CYCLES", "_BND_COVER_RANGE", "_bndToken", "_delay",
-        "_kapiMin", "_kapiMax", "_varisTab", "_varisBas", "_ekBekle", "_kosuEsik", "_yatEsik", "_yakinBnd", "_yakinAt"
+        "_kapiMin", "_kapiMax", "_varisTab", "_varisBas", "_ekBekle", "_kosuEsik", "_yatEsik", "_yakinBnd", "_yakinAt", "_kanatOn", "_kanatYon", "_kanatB0"
     ];
 
     // v8.507: ilerleme odulu (kosucu siper secerken hedefe kazanilan metre basina puan) - temkinli 0 / dengeli 0.12 / agresif 0.25
     private _kazK = [0, 0.12, 0.25] select (["agr"] call FUNC(cag));
     private _cycleCount = 0;
+    private _kanatAktif = _kanatOn;   // v8.546: manevra ekibi kanata ulasana kadar true
     private _rushN = 0;   // sadece buddy cycle'larda artar (kosucu dagilimi esit olsun)
     // Zarif bitis: temizlik zamanlayicisindan (delay) 20 sn once dongu kendisi biter
     private _bndEnd = time + ((_delay - 20) max 60);
@@ -789,6 +812,22 @@ if (EGVAR(main,debug_functions)) then {
             _alphaE pushBack _kk;
         };
         private _fseSicrama = ((_cycleCount % 2) isEqualTo 0) && {_bravoE isNotEqualTo []} && {_alphaE isNotEqualTo []};
+        // v8.546 KANAT: manevra ekibi (ALPHA) kanata ulasana kadar HER cycle sicrar; kapsama (BRAVO + MG) sabit bastirma atesi
+        if (_kanatAktif) then {
+            private _aCanli = _alphaE select {alive _x};
+            private _acisal = 0;
+            if (_aCanli isNotEqualTo []) then {
+                private _ox = 0; private _oy = 0;
+                { private _pp = getPosATL _x; _ox = _ox + (_pp select 0); _oy = _oy + (_pp select 1); } forEach _aCanli;
+                _acisal = abs ((((_target getDir [_ox / (count _aCanli), _oy / (count _aCanli), 0]) - _kanatB0) + 540) mod 360 - 180);
+            };
+            if (_acisal >= 50 || {_cycleCount > 7} || {_aCanli isEqualTo []}) then {
+                _kanatAktif = false;
+                diag_log format ["[BND-KANAT-BITTI] %1 | cycle:%2 | kanat acisi %3 derece (hedef >= 50) | normal bounding'e donuldu", groupId _group, _cycleCount, round _acisal];
+            } else {
+                _fseSicrama = false;
+            };
+        };
         private _hareketEdecek = [];
         private _kapsama = [];
         private _ciftYakinla = [];   // eski cift yakinlasma: ekip bound'unda gerek yok (bos kalir)
@@ -981,7 +1020,7 @@ if (EGVAR(main,debug_functions)) then {
         // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
         private _rotaAci = [_group, _target] call FUNC(rotaPlan);
         {
-            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), (_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75] call _kosanHareket;
+            private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), ([(_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75, _kanatYon * 60] select (_kanatAktif && {_x in _alphaE}))] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
         } forEach _hareketEdecek;
 
