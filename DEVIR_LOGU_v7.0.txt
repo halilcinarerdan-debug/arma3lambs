@@ -3531,3 +3531,8 @@ v8.550 (dal sade-waypoint) ZIRHTAN KACIS DUZELTMESI (kullanici: 'EVADE_ARMOR don
    Nedeni (fnc_commanderAssess): 'zirh > 0 ve kendi AT yok -> EVADE_ARMOR' kurali EN YUKSEK ONCELIKLI ve zamansiz / mesafesiz (450 m'deki bilinen zirh yeter).
  - DUZELTME: (1) kapali arazide (orman / sehir, !_isOpen) + >= 2 bilinen dusman piyade, en yakin <= 130 m + zirh >= 60 m: EVADE_ARMOR uygulanmaz (normal karar akisi); zirh < 60 m: kacis. (2) zaman siniri (CBA zirhKacisSinir): ayni zirh icin kesintisiz kacis 90 sn'yi gecerse 60 sn mola; 60 sn kacissiz kalinca sayac sifirlanir.
  - DOKUNULMADI (kullanici istegi): fnc_ezmeKoruma freni (APC 5-13 m onundeki dost piyadeye FREN; piyadeyi ezmesin).
+
+v8.551 (dal sade-waypoint) RPT (v8.550, mekanize, 04:58-05:16; kullanici: 'apc yi ben zeustan sildim').
+ - GOZLEM: M113 ~05:07'ye kadar sahadaydi; EAST Alpha 1-2 5:01:43-5:08:05 EVADE_ARMOR (etkin 12 / 12, kayip yok) + 2 AT_ENGAGE (mola); [ZIRH-KAC-BASLA] 5 (mesafe 100-237 m); en yakin dusman piyade 99-185 m (>130 m): v8.550 orman ic ice kurali tetiklenmedi, zaman siniri molasi AT_ENGAGE'e (AT'siz grup icin anlamsiz) dustu. APC silindikten sonra (5:08): BOUNDING / SUPPRESS_ASSAULT / ASSAULT akisi geldi.
+   KANAT: [BND-KANAT] WEST SOL kanat (cover puani sag 2.5 sol 10.5), [BND-KANAT-BITTI] cycle 3, kanat acisi 60 derece (hedef >= 50): v8.548+ kanat TAMAMLANDI. WEST kanat sicrama ofsetleri karisik (-56 .. +54, cogunlugu negatif = sol).
+ - DUZELTME: (1) AT_ENGAGE / 'zirh uzak kanat' yalniz AT'li grupta (AT'siz grup mola / orman ic ice durumunda normal piyade karar akisina duser); (2) orman ic ice esigi: en yakin dusman piyade <= 160 m (eskiden 130). EZME freni DOKUNULMADI.

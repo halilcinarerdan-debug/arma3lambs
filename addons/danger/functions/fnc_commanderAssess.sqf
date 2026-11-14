@@ -328,7 +328,7 @@ private _enemyInBuilding = false;
 //   (1) KAPALI ARAZI (orman / sehir) + dusman PIYADE ic ice (>= 2 bilinen, en yakin <= 130 m) + zirh >= 60 m: zirhtan kacmak yerine normal karar akisi (piyadeyle dovus; zirh < 60 m = ezilme riski: kacis).
 //   (2) ZAMAN SINIRI: ayni zirh icin kesintisiz kacis 90 sn'den uzun surerse 60 sn MOLA (normal karar), sonra yeniden. CBA zirhKacisSinir (kapali: eski sinirsiz kacis).
 private _evadeIzin = _armorCount > 0 && {_ownAT <= 0};
-private _evadeOrmanIcIce = !_isOpen && {_enemyCount >= 2} && {_closest <= 130} && {_armorDist >= 60};
+private _evadeOrmanIcIce = !_isOpen && {_enemyCount >= 2} && {_closest <= 160} && {_armorDist >= 60};   // v8.551: 130 -> 160 m (RPT 04:58: piyade 99-185 m, EVADE_ARMOR 7 dk)
 private _evadeMola = false;
 if (_evadeIzin && {missionNamespace getVariable ["lambs_danger_zirhKacisSinir", true]}) then {
     private _evBas = _group getVariable [QGVAR(evadeBas), -999];
@@ -392,10 +392,11 @@ private _result = call {
     // =======================================================================
     // 3) ZIRH TEHDIDI
     // =======================================================================
-    if (_armorCount > 0 && {_armorDist > 70} && {_armorDist <= 400}) exitWith {
+    // v8.551: AT'si olmayan grup icin 'AT taarruz' / 'zirh uzak kanat' anlamsiz (RPT 04:58: EVADE_ARMOR molasinda AT_ENGAGE'e dusuyor, piyadeyle dovus yok): yalniz AT'li grup; AT'siz gruplar normal piyade akisina duser
+    if (_armorCount > 0 && {_ownAT > 0} && {_armorDist > 70} && {_armorDist <= 400}) exitWith {
         ["AT_ENGAGE", format ["zirh %1m, AT taarruz + piyade korumasi", round _armorDist]]
     };
-    if (_armorCount > 0 && {_armorDist > 70}) exitWith {
+    if (_armorCount > 0 && {_ownAT > 0} && {_armorDist > 70}) exitWith {
         ["FLANK", format ["zirh %1m, uzak - kanat", round _armorDist]]
     };
     if (_armorCount > 0) exitWith {
