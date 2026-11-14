@@ -55,7 +55,7 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
             private _dostlar = (units _g) select {alive _x && {_x isNotEqualTo _u} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable ["ACE_isUnconscious", false])}};
             private _yakinDost = _dostlar findIf {(_x distance2D _u) <= _tekM};
             // v8.545: 'tek kalan' = grupta <= 1 etkin dost VEYA (40 m'de dost yok VE grupta <= 3 etkin dost); ormanda dagilma (> 40 m) tek basina 'tek kalan' SAYILMAZ (RPT 15:06: dost 4 iken kacti)
-            private _tek = ((count _dostlar) <= 1) || {(_yakinDost < 0) && {(count _dostlar) <= 3}};
+            private _tek = ((count _dostlar) <= 1) || {(_yakinDost < 0) && {(count _dostlar) <= 2}};   // v8.553: <= 3 -> <= 2 (RPT 08:08: acik arazide dagilmis ve 3 etkin dost varken tek kalan sayildi)
             // (b) mermi kritik: yedek sarjor yok + sarjorda az
             private _w = primaryWeapon _u;
             private _yedek = (magazines _u) select {_x in (compatibleMagazines _w)};

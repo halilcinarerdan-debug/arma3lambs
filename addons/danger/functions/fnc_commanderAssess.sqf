@@ -342,6 +342,15 @@ if (_evadeIzin && {missionNamespace getVariable ["lambs_danger_zirhKacisSinir", 
     };
     _evadeMola = ((time - _evBas) > 90) && {(time - _evBas) < 150};
 };
+// v8.553 ERKEN CEKILME hesaplari (kurallar karar tablosunda '1c'; call {} icinde ic ice if-then + exitWith olmaz, bu yuzden degiskenler burada)
+private _kayipGecmis = (_group getVariable [QGVAR(kayipGecmis), []]) select {(time - (_x select 0)) < 90};
+_kayipGecmis pushBack [time, _ownCount];
+if ((count _kayipGecmis) > 24) then { _kayipGecmis deleteAt 0; };
+_group setVariable [QGVAR(kayipGecmis), _kayipGecmis];
+private _erkenKayip60 = (selectMax ([_ownCount] + ((_kayipGecmis select {(time - (_x select 0)) <= 60}) apply { _x select 1 }))) - _ownCount;
+private _erkenOn = (missionNamespace getVariable ["lambs_danger_erkenCekilme", true]) && {_enemyCount > 0} && {_ownCount >= 2};
+private _erkenA = _erkenOn && {_erkenKayip60 >= (missionNamespace getVariable ["lambs_danger_erkenKayipHiz", 3])} && {_closest >= 120} && {_pwrRatio >= 0.7};
+private _erkenB = _erkenOn && {_lossRatio >= (missionNamespace getVariable ["lambs_danger_erkenKayipOran", 0.25])} && {_closest >= 150} && {_pwrRatio >= 0.8};
 private _result = call {
 
     // =======================================================================
@@ -381,6 +390,20 @@ private _result = call {
             ["SUPPRESS_ASSAULT", "ASSAULT"] select (_closest < 120),
             format ["PUSH: ustun guc (%1v%2, oran %3) kayip %4%% - cekilme, bastir + hucum", _ownCount, _enemyCount, _pwrRatio toFixed 2, round (_lossRatio * 100)]
         ]
+    };
+
+    // =======================================================================
+    // 1c) ERKEN CEKILME (v8.553; kullanici: 'geri cekilme cok gec oluyor'): RPT 08:08 (GM Weferlingen, acik arazi, 200-360 m): WEST etkin 12 -> 7 (%42) SUPPRESS_ASSAULT'ta kaldi, WITHDRAW %42'de ve ~40 sn gec;
+    //   ikinci turda PEEL 8:31:53'te baslayip etkin 9 -> 3 dusman 216-231 m'de SABIT kaldi (mesafe kazanilmadi), WITHDRAW etkin 3'te. Iki tetik (CBA erkenCekilme):
+    //   (a) KAYIP HIZI: son 60 sn'de >= CBA erkenKayipHiz (3) etkin asker kaybi, dusman >= 120 m (yaklasma / duz dovus degil, uzaktan ates altinda eriyoruz), >= 2 etkin kaldi, guc orani >= 0.7 (ustun degiliz);
+    //   (b) KAYIP ORANI: kayip >= CBA erkenKayipOran (0.25), dusman >= 150 m, guc orani >= 0.8.
+    //   Kacis kilidi (v8.544) bu WITHDRAW ile de kurulur (kayip >= kacisKayip).
+    // =======================================================================
+    if (_erkenA) exitWith {
+        ["WITHDRAW", format ["erken cekilme: son 60 sn'de %1 etkin kayip, dusman %2 m (uzaktan eriyoruz)", _erkenKayip60, round _closest]]
+    };
+    if (_erkenB) exitWith {
+        ["WITHDRAW", format ["erken cekilme: kayip %1%%, dusman %2 m (>= 150), oran %3", round (_lossRatio * 100), round _closest, _pwrRatio toFixed 2]]
     };
 
     // =======================================================================
