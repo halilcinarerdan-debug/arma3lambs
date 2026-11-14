@@ -323,13 +323,29 @@ private _enemyInBuilding = false;
 // call {} + exitWith: duz (ic ice `if then` YOK) — ic ice exitWith sadece
 // ic blogu bitirir, call'u degil.
 // ---------------------------------------------------------------------------
+// v8.550 ZIRHTAN KACIS DUZELTMESI (kullanici: 'evade armor dongusunu duzelt; vietnam junglesiydi, ic ice ciktilar'): RPT 04:31 (M113 + AT'siz EAST): EVADE_ARMOR 50 kez, ~9 dk; piyade ic ice (55-130 m) iken kacis combatMode GREEN
+//   ile piyadeye de ates etmedi (grup 1-2: 12 -> 4). Iki duzeltme:
+//   (1) KAPALI ARAZI (orman / sehir) + dusman PIYADE ic ice (>= 2 bilinen, en yakin <= 130 m) + zirh >= 60 m: zirhtan kacmak yerine normal karar akisi (piyadeyle dovus; zirh < 60 m = ezilme riski: kacis).
+//   (2) ZAMAN SINIRI: ayni zirh icin kesintisiz kacis 90 sn'den uzun surerse 60 sn MOLA (normal karar), sonra yeniden. CBA zirhKacisSinir (kapali: eski sinirsiz kacis).
+private _evadeIzin = _armorCount > 0 && {_ownAT <= 0};
+private _evadeOrmanIcIce = !_isOpen && {_enemyCount >= 2} && {_closest <= 130} && {_armorDist >= 60};
+private _evadeMola = false;
+if (_evadeIzin && {missionNamespace getVariable ["lambs_danger_zirhKacisSinir", true]}) then {
+    private _evBas = _group getVariable [QGVAR(evadeBas), -999];
+    if ((time - (_group getVariable [QGVAR(evadeSon), -999])) > 60 || {(time - _evBas) >= 150}) then {
+        _group setVariable [QGVAR(evadeBas), time];
+        _evBas = time;
+    };
+    _evadeMola = ((time - _evBas) > 90) && {(time - _evBas) < 150};
+};
 private _result = call {
 
     // =======================================================================
     // 0) ZIRH + AT YOK -> KACIS (en yuksek oncelik): AT'siz piyade tank/APC'ye karsi
     //    acikta savasmaz; SERT siper + gorus hatti kirma (tacticsEvadeArmor)
     // =======================================================================
-    if (_armorCount > 0 && {_ownAT <= 0}) exitWith {
+    if (_evadeIzin && {!_evadeOrmanIcIce} && {!_evadeMola}) exitWith {
+        _group setVariable [QGVAR(evadeSon), time];
         ["EVADE_ARMOR", format ["zirh %1m, AT yok - sert siperden kac", round _armorDist]]
     };
 
