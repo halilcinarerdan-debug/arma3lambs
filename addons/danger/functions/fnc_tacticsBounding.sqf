@@ -69,9 +69,10 @@ private _targetASL = AGLToASL _target;
 
 // v8.539 YAKIN ARAZI MODU (kullanici: 'catismalar 100 m icinde, vietnam dogasi, gercekci sureler'): kapali arazide (30 m'de >= 8 agac / cali / kaya / duvar) dusman <= 130 m ise
 //   sicrama CBA yakinBndAtilim ile (varsayilan 22 m) sinirli, ates ustunlugu kapisi en az 2-3.5 sn, ortak ates bekleme en az 4.5 sn, ileri siper arama 35 m. Ormanda 15-25 m'lik kisa kosular + siperde durup gozleme / ates.
+private _kapaliArazi = (count (nearestTerrainObjects [getPosATL (leader _group), ["TREE", "BUSH", "SMALL TREE", "ROCK", "WALL", "HIDE"], 30, false, true])) >= 8;
 private _yakinBnd = (missionNamespace getVariable ["lambs_danger_yakinBounding", true])
     && {((leader _group) distance2D _target) <= 130}
-    && {(count (nearestTerrainObjects [getPosATL (leader _group), ["TREE", "BUSH", "SMALL TREE", "ROCK", "WALL", "HIDE"], 30, false, true])) >= 8};
+    && _kapaliArazi;
 private _yakinAt = (missionNamespace getVariable ["lambs_danger_yakinBndAtilim", 22]) max 10 min 40;
 if (_yakinBnd) then {
     _kapiMin = _kapiMin max 2;
@@ -291,8 +292,9 @@ if (EGVAR(main,debug_functions)) then {
 private _kanatOn = false;
 private _kanatYon = 1;
 private _kanatB0 = 0;
-if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", true]} && {(count (units _group)) >= 6}
-    && {((leader _group) distance2D _target) >= 75}) then {   // v8.547: 45 -> 75 m (RPT 15:25: 108-125 m'de baslayan kanat 40-60 sn'de 20-55 m temasa dondu, 13 m'lik sicramalar kanada yetmedi)
+// v8.554: kanat mesafesi 75-130 m'den 75 - CBA kanatMaksM (220 m)'ye (RPT 08:08 GM orman testi: temas 220-320 m, yakin arazi modu / kanat hic tetiklenmedi; GM ormani seyrek, gorus uzun)
+if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding", true]} && {(count (units _group)) >= 6}
+    && {((leader _group) distance2D _target) >= 75} && {((leader _group) distance2D _target) <= (missionNamespace getVariable ["lambs_danger_kanatMaksM", 220])}) then {   // v8.547: 45 -> 75 m (RPT 15:25: 108-125 m'de baslayan kanat 40-60 sn'de 20-55 m temasa dondu, 13 m'lik sicramalar kanada yetmedi)
     private _lp = getPosATL (leader _group);
     private _th = (leader _group) getDir _target;
     private _puanTaraf = [60, -60] apply {
@@ -508,7 +510,7 @@ if (_yakinBnd && {missionNamespace getVariable ["lambs_danger_kanatBounding", tr
         private _bndCarpan = ((missionNamespace getVariable ["lambs_danger_bndAtilimCarpan", 2.2]) max 0.5 min 3) * (["sicrama"] call FUNC(cag));   // v8.526: donem carpani (1 / 0.85 / 0.7)
         private _atMax = (((_bnd select 1) * _yorgCarpan * _bndCarpan) max 18) min (((_mesafe - _hucumMenzil) max 20) * 0.85);
         // v8.547: kanat kosucusu (aci >= 68 derece) icin sicrama tavani 30 m (yan kazanc ~28 m / sicrama); digerleri CBA yakinBndAtilim (22 m)
-        if (_yakinBnd) then { _atMax = _atMax min ([_yakinAt, _yakinAt max 30] select ((abs _aci) >= 68)); };   // v8.539: yakin arazi: kisa sicrama
+        if (_yakinBnd) then { _atMax = _atMax min ([_yakinAt, _yakinAt max 30] select ((abs _aci) >= 68)); } else { if (_kanatAktif && {(abs _aci) >= 68}) then { _atMax = _atMax min 45; }; };   // v8.539: yakin arazi: kisa sicrama; v8.554: yakin mod disi kanat kosucusu <= 45 m
         if (_yorgunluk > 0.3) then {
             if (isNil "lambs_danger_yorgLogN") then { lambs_danger_yorgLogN = 0; };
             if (lambs_danger_yorgLogN < 40) then {
