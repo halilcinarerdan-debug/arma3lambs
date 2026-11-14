@@ -122,8 +122,10 @@ private _closest = _distance;
 private _ownPower = 0;
 private _ownMg = 0;
 private _ownAT = 0;
+private _ownQT = 0;
 {
     private _r = [_x] call _rolFn;
+    _ownQT = _ownQT + ([_x] call FUNC(silahGucu));   // v8.552: silah kalitesi ortalamasi (savunma tercihi)
     // v8.541 SILAH GUCU: rol agirligi x silah carpani (otomatik / sarjor; fnc_silahGucu; CBA silahGucu)
     _ownPower = _ownPower + ((switch (_r) do {
         case "MG":       {2.0};
@@ -142,9 +144,11 @@ private _ownAT = 0;
 private _enemyPower = 0;
 private _enemyMg = 0;
 private _enemyAT = 0;
+private _enemyQT = 0;
 private _enemySample = if (_enemyCount > 12) then {_enemies select [0, 12]} else {_enemies};
 {
     private _r = [_x, true] call _rolFn;
+    _enemyQT = _enemyQT + ([_x] call FUNC(silahGucu));   // v8.552
     _enemyPower = _enemyPower + ((switch (_r) do {
         case "MG":       {2.0};
         case "MARKSMAN": {1.5};
@@ -459,6 +463,13 @@ private _result = call {
     };
     // v8.539 YAKIN ARAZI BOUNDING (kullanici: 'catismalar 100 metre icinde geciyor, vietnam dogasi, gercekci sureler'): kapali arazide (orman / sehir) dusman 30-130 m, binada degil, dusman ustun degil:
     //   dogrudan SUPPRESS_ASSAULT / ASSAULT / FLANK yerine KISA sicramali ates-manevra (BOUNDING; sicrama / bekleme sureleri fnc_tacticsBounding'de yakin arazi moduna cekilir). CBA yakinBounding.
+    // v8.552 100 m ICI SAVUNMA TERCIHI (kullanici: '100 m ici savunma tercihi yap'): kapali arazide (orman / sehir), dusman <= CBA savunmaMesafe (100 m) ama >= 25 m, binada degil, guc orani < 2.2 (umutsuz degil) ve
+    //   KENDI ortalama silah gucumuz dusmaninkinin >= CBA savunmaSilahOran (1.15) kati ise: ilerlemek / yaklasmak yerine MEVZIDE KAL (HOLD: siperde ates, yaklasani vur). Silah ustunlugu yakindan dovuste (dusmanin 'sarilma' taktigini) onler.
+    //   Silah ustunlugu yoksa (zayif silahli taraf) normal akis (bounding / kanat / hucum: yaklasarak ustunlugu kapatir). Dusman < 25 m = CQB / hucum. CBA savunmaTercihi.
+    if ((missionNamespace getVariable ["lambs_danger_savunmaTercihi", true]) && {!_isOpen} && {!_enemyInBuilding} && {_enemyCount > 0} && {_closest <= (missionNamespace getVariable ["lambs_danger_savunmaMesafe", 100])} && {_closest >= 25}
+        && {_pwrRatio < 2.2} && {(_ownQT / (_ownCount max 1)) >= (((_enemyQT / ((count _enemySample) max 1)) max 0.3) * (missionNamespace getVariable ["lambs_danger_savunmaSilahOran", 1.15]))}) exitWith {
+        ["HOLD", format ["savunma tercihi: dusman %1 m (<= 100), silah ustunlugu (biz %2 / dusman %3): mevzide kal, yaklasma", round _closest, (_ownQT / (_ownCount max 1)) toFixed 2, (_enemyQT / ((count _enemySample) max 1)) toFixed 2]]
+    };
     if ((missionNamespace getVariable ["lambs_danger_yakinBounding", true]) && {!_isOpen} && {!_enemyInBuilding} && {_pwrRatio < (missionNamespace getVariable ["lambs_danger_yakinBndOran", 1.1])} && {_closest >= (_dkAssault max 30)} && {_closest <= 130}
         && {!([_group, "yakinBnd", true] call FUNC(senaryoKapi))}) exitWith {   // v8.543: kal-bekle (HOLD / SENTRY / GUARD) waypoint'li ya da LAMBS gorevli grup yakin bounding ile mevziden ILERLEMEZ
         ["BOUNDING", format ["yakin arazi %1m: kisa sicramalarla ates-manevra (orman / sehir)", round _closest]]

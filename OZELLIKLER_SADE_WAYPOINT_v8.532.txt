@@ -103,6 +103,8 @@ DURUM ETIKETLERI (dürüst dogrulama)
      (2) Grup kilidi: kayip >= %30 iken geri cekilme / gecikme kilit kurar: dusman sayisi azalsa da hucum yok, gecikme -> geri cekilme, 'kucuk ekip kosarak kacilmaz' kurali atlanir. Amac: zaiyati sinirlamak, tek dusmani oldurmek degil. [RPT KACIS, KACIS-OZET]
    - KANAT BOUNDING (v8.546, ayar v8.547: 75-130 m, +-70 derece, sicrama <= 30 m) [CBA kanatBounding]: yakin arazi bounding'de (>= 6 asker, dusman 75-130 m) manevra ekibi yan yaydan dusmanin kanadina siperden siper doner, kapsama ekibi (MG dahil) bastirma atesi verir;
      kanat acisi >= 50 derece ya da 7 cycle sonra normal bounding. Taraf siper yogunlugu + mevzi hafizasi ile secilir. [RPT BND-KANAT, BND-KANAT-BITTI]
+   - 100 M ICI SAVUNMA TERCIHI (v8.552) [CBA savunmaTercihi, savunmaMesafe (100), savunmaSilahOran (1.15)]: kapali arazide dusman 25-100 m ve KENDI ortalama silah gucumuz dusmanin >= 1.15 kati ise komutan HOLD (mevzide kal, siperden ates) secer; silah ustunlugu yoksa bounding / kanat.
+   - COMBAT'TAN GEVSEME (v8.552) [CBA combatGevset]: temas 120 sn'den eski, bilinen dusman 300 m'de yok -> AWARE.
  4.5 FORMASYON: tek yazici hakem (formSet), arazi / seyir tekniklerine gore COLUMN / WEDGE / VEE, halt / slot kovalama kesici, dagilma bilinci (RPG / el bombasi gorulunce 9-16 m).
  4.6 BUDDY / ORPHAN / YIGILMA: kalici es, yetim izleme, yigilma cozumu, cephane paylasma.
 

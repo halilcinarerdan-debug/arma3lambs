@@ -68,6 +68,7 @@ private _govdeKapali = {
     private _vv = _hd vectorDiff _eA;
     private _pp = vectorNormalized [-(_vv select 1), _vv select 0, 0];
     private _gvA = missionNamespace getVariable ["lambs_danger_siperGovde", 0.25];
+    if (_hh <= 0.5) then { _gvA = _gvA * 0.7; };   // v8.552: YATIK govde (0.4 m) daha dar: ince govdeli ormanda yatarak siper (RPT: 'yalniz agac' siniflamasi 12-24 / dk)
     private _lodA = missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"];
     ({(lineIntersectsSurfaces [_eA, _hd vectorAdd (_pp vectorMultiply _x), _enm, _unt, true, 1, _lodA, "NONE"]) isNotEqualTo []} count [-_gvA, _gvA]) isEqualTo 2
 };

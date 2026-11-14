@@ -104,12 +104,14 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             {
                 private _u = _x;
                 private _kilit = (_u getVariable [QGVAR(taktikKilit), 0]) - time;
-                if (_kilit > 40) then {
+                // v8.552: kilit > 50 sn (fnc_siperTut 45 sn'lik kilidi ANOMALI degil; RPT 14 KILIT-UZUN kaydinin 40-45 sn'lik hepsi siperTut / bounding kilidiydi)
+                if (_kilit > 50 && {(_u getVariable [QGVAR(siperTutBit), 0]) <= time}) then {
                     ["KILIT-UZUN", _g, format ["%1 | kilit %2 sn kaldi | bayrak:%3", name _u, round _kilit, _bStr]] call _isaretle;
                 };
                 private _bsk = getSuppression _u;
                 if (_bsk >= 0.85) then { _ezilmis = _ezilmis + 1; };
-                if ((currentCommand _u) isEqualTo "MOVE" && {(speed _u) < 0.8} && {_bsk < 0.85}) then {
+                // v8.552 YURUMUYOR yanlis alarmlari: baygin / etkisiz (gorev:Incapacitated), siperde tutulan (siperTut), baski >= 0.5 (yatip saklanan) asker 'yurumuyor' sayilmaz (RPT 24 kaydin cogu PRONE + baski / baygin)
+            if ((currentCommand _u) isEqualTo "MOVE" && {(speed _u) < 0.8} && {_bsk < 0.5} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])} && {(_u getVariable [QGVAR(siperTutBit), 0]) <= time}) then {
                     if ((_u getVariable [QGVAR(saglikMoveT), -1]) < 0) then { _u setVariable [QGVAR(saglikMoveT), time]; };
                     // v8.159: AFK / varmis ama komutu silinmemis askerde ayni uyari saatlerce tekrarlanmasin (ilk 120 sn serbest, sonra 300 sn'de bir)
                     private _durS = time - (_u getVariable [QGVAR(saglikMoveT), time]);

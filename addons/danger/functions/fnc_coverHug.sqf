@@ -143,6 +143,24 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     private _agacO = nearestTerrainObjects [_u, ["TREE"], 16, false, true];
                     private _caliO = nearestTerrainObjects [_u, ["BUSH", "SMALL TREE"], 16, false, true];
                     private _kat = if (_sertO isNotEqualTo [] || {_binaO isNotEqualTo []}) then {"sert<=20m"} else { if (_agacO isNotEqualTo []) then {"yalniz agac"} else { if (_caliO isNotEqualTo []) then {"yalniz cali"} else {"hic yok"} } };
+                    // v8.552 AGAC GOVDE TESHISI (kullanici: 'ormanda sert siper azligina calis'): 'yalniz agac' sayilan askerin en yakin agacinin GERCEK govde genisligi (1.1 m yukseklikte yanal FIRE LOD isin taramasi, 0.1 m adim) loga yazilir;
+                    //   amac: agaclar mermi durduruyor mu / ince mi? (AGAC-TANI 'medyan 1.64 m' bounding-box olcusuyle supheli) -> kalibrasyon verisi. Ilk 15 ornek.
+                    if (_kat isEqualTo "yalniz agac" && {(missionNamespace getVariable ["lambs_danger_agacGovdeLogN", 0]) < 15}) then {
+                        missionNamespace setVariable ["lambs_danger_agacGovdeLogN", (missionNamespace getVariable ["lambs_danger_agacGovdeLogN", 0]) + 1];
+                        private _tr = _agacO select 0;
+                        private _trP = getPosASL _tr;
+                        private _dirT = vectorNormalized ((_trP vectorDiff _eASL) vectorMultiply [1, 1, 0]);
+                        private _perpT = [-(_dirT select 1), _dirT select 0, 0];
+                        private _bas = _trP vectorAdd [0, 0, 1.1];
+                        private _gen = 0;
+                        for "_o" from -15 to 15 do {
+                            private _ofs = _o * 0.1;
+                            private _b0 = (_bas vectorAdd (_perpT vectorMultiply _ofs)) vectorAdd (_dirT vectorMultiply -6);
+                            private _b1 = (_bas vectorAdd (_perpT vectorMultiply _ofs)) vectorAdd (_dirT vectorMultiply 6);
+                            if ((lineIntersectsSurfaces [_b0, _b1, objNull, objNull, true, 1, "FIRE", "NONE"]) isNotEqualTo []) then { _gen = _gen + 0.1; };
+                        };
+                        diag_log format ["[AGAC-GOVDE] %1 | agac %2 | %3 m | FIRE LOD govde genisligi (1.1 m, yanal tarama): %4 m | bounding-box genisligi: %5 m", name _u, (getModelInfo _tr) select 0, round (_u distance2D _tr), _gen toFixed 2, ((((boundingBoxReal _tr) select 1) select 0) - (((boundingBoxReal _tr) select 0) select 0)) toFixed 1];
+                    };
                     private _grD = if (_g getVariable [QGVAR(isBounding), false]) then { ["bounding", "bounding-kosucu"] select ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) } else {"diger"};
                     _snf set [_kat, (_snf getOrDefault [_kat, 0]) + 1];
                     _snf set ["grup:" + _grD, (_snf getOrDefault ["grup:" + _grD, 0]) + 1];
