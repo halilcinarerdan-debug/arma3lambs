@@ -131,6 +131,8 @@ DURUM ETIKETLERI (dürüst dogrulama)
    MODERN (varsayilan)         : mevcut tam davranis.
    SOGUK SAVAS / VIETNAM       : bounding agresifligi en cok Dengeli, hucum / bitis mesafesi x0.85, sicrama x0.85, yan adim menzili x0.6 ve bekleme x1.6.
    IKINCI DUNYA SAVASI         : bounding Temkinli, sicrama x0.7, yan adim KAPALI, reload sonrasi peek (ayaga kalk) yok, CQB yakin-siper refleksi kapali, UGL (tufek bombasi) 3 kat seyrek.
+                                   (v8.555) + CQB cevik (yanal atilim) kapali, bireysel kacis (tek kalan / mermisi az) kapali, erken geri cekilme esikleri daha yuksek (kayip hizi +1, oran x1.4),
+                                   WW2 doktrin profilleri (Spearhead spe_ / IFA3 lib_: ates ve hareket, MG agirlikli, kisa atilim, daha uzun direnis). KANAT (flanking) ACIK.
  Her donemde ACIK: siper, kapi acma, tank kesif atesi, el bombasi, baski / moral / teslim, geri cekilme.
  Doktrin eslemesi: o_vc -> DUZENSIZ (vur-kac), b_macv -> ABD (RPT'de dogrulandi); vn_o_men_nva / csla -> RUS, vn_b_ / vn_i_ / us85 -> ABD (TAHMIN; fraksiyon adlari dogrulanmadi).
  Carpanlar tasarim degeridir; telsiz yogunlugu ve tip (TCCC) donemden etkilenmez.

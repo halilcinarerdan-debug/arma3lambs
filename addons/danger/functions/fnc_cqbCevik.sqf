@@ -47,6 +47,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
         if (!(missionNamespace getVariable ["lambs_danger_cqbCevikAktif", true])) then { continue };
+        if ((["cag"] call FUNC(cag)) >= 2) then { continue };   // v8.555: Ikinci Dunya Savasi'nda modern CQB cevik (yanal atilim / dodge) yok
         private _menzil = missionNamespace getVariable ["lambs_danger_cqbCevikMenzil", 32];
         private _butce = 6;
 

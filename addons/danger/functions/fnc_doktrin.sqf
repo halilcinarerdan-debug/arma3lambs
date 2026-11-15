@@ -107,7 +107,12 @@ private _tanim = [
     ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]],
     // DUZENSIZ / TALIBAN-tipi isyanci (TAHMIN, kaynak dogrulanmadi): vur-kac, pusu agirlikli, kucuk dagitik takimlar, ates ustunlugu yoksa ERKEN temas keser,
     //   yakin mesafeden hucum, daha iyi gizlenme (camouflageCoef alt siniri 0.55), uzun dagilarak cekilme
-    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 40], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]]
+    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 40], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]],
+    // v8.555 IKINCI DUNYA SAVASI PROFILLERI (kullanici: '2. dunya savasina tutarli hale getir'; Spearhead 1944 / IFA3). TAHMIN, kaynak dogrulanmadi (genel tarih bilgisi + tasarim): tufek takimi 'ates ve hareket', MG agirlikli;
+    //   modern ASTE / koruyucu dagilma yok (arkaGuvenlik kapali), tufek bombasi (UGL) rezervi yok, daha uzun direnis (cekilKayip 0.5-0.6), kisa atilimlar, yakina daha cok yaklasarak hucum (assaultM 35).
+    ["WW2_ABD", "GENEL", [["assaultM", 35], ["bndBitisM", 32], ["bantlar", [[200, 45, 15], [100, 30, 12], [0, 18, 8]]], ["retreatAdim", [20, 28, 40]], ["cekilKayip", 0.5], ["peelOran", 1.8], ["arkaGuvenlik", false], ["uglRezerv", 0], ["kamuflajMin", 0.7]]],
+    ["WW2_ALM", "GENEL", [["assaultM", 35], ["bndBitisM", 32], ["bantlar", [[200, 45, 15], [100, 30, 12], [0, 18, 8]]], ["retreatAdim", [20, 28, 40]], ["cekilKayip", 0.55], ["peelOran", 1.9], ["arkaGuvenlik", false], ["uglRezerv", 0], ["kamuflajMin", 0.7]]],
+    ["WW2_SSCB", "GENEL", [["assaultM", 40], ["bndBitisM", 35], ["bantlar", [[200, 45, 15], [100, 30, 12], [0, 20, 8]]], ["retreatAdim", [20, 25, 35]], ["cekilKayip", 0.6], ["peelOran", 2.0], ["arkaGuvenlik", false], ["uglRezerv", 0], ["kamuflajMin", 0.7], ["teslim", false]]]
 ];
 // misyon / kullanici tanimlari (ayni ad = ustune yazar)
 { _tanim pushBack _x; } forEach (missionNamespace getVariable ["lambs_danger_doktrinTanimlari", []]);
@@ -122,6 +127,8 @@ private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", 
     ["taliban", "DUZENSIZ"], ["lop_am", "DUZENSIZ"], ["lop_ists", "DUZENSIZ"], ["_ists", "DUZENSIZ"], ["insurgent", "DUZENSIZ"], ["irregular", "DUZENSIZ"], ["_isis", "DUZENSIZ"], ["opf_g_f", "DUZENSIZ"], ["ind_g_f", "DUZENSIZ"],
     ["gm_gc_pol", "GENEL"], ["gm_ge_pol", "GENEL"], ["gm_fc_gc", "RUS"], ["gm_fc_ge", "ABD"], ["gm_fc_dk", "ABD"], ["gm_fc_pl", "RUS"], ["gm_gc", "RUS"], ["gm_ge", "ABD"], ["gm_dk", "ABD"], ["gm_pl", "RUS"],
     // v8.526 CDLC: S.O.G. Prairie Fire (vn_) + CSLA / US 1985 (Iron Curtain). Eslesme TAHMINDIR (fraksiyon adlari dogrulanmadi); donemin kendisi CBA 'Cag' ayariyla secilir. VC = duzensiz, NVA = RUS profili
+    // v8.555 WW2 fraksiyon eslesmesi (TAHMIN; fraksiyon adlari dogrulanmadi): Spearhead 1944 (spe_), IFA3 (lib_)
+    ["spe_us", "WW2_ABD"], ["spe_wehr", "WW2_ALM"], ["spe_ger", "WW2_ALM"], ["spe_ss", "WW2_ALM"], ["spe_fall", "WW2_ALM"], ["lib_us", "WW2_ABD"], ["lib_wehr", "WW2_ALM"], ["lib_ss", "WW2_ALM"], ["lib_rkka", "WW2_SSCB"], ["lib_nkvd", "WW2_SSCB"], ["lib_dak", "WW2_ALM"],
     ["o_vc", "DUZENSIZ"], ["b_macv", "ABD"], ["vn_o_men_vc", "DUZENSIZ"], ["vn_o_men_nva", "RUS"], ["vn_b_", "ABD"], ["vn_i_", "ABD"], ["csla", "RUS"], ["us85", "ABD"],
     ["cup_b_us", "ABD"], ["cup_o_ru", "RUS"], ["cup_i_tk_gue", "DUZENSIZ"], ["tk_gue", "DUZENSIZ"], ["cup_o_chdkz", "DUZENSIZ"], ["chdkz", "DUZENSIZ"], ["cup_i_napa", "DUZENSIZ"],
     // v8.344 RHS / CUP UYUMU: ek fraksiyonlar (alt dize eslesmesi, kucuk harf); bilinmeyen fraksiyon GENEL profile duser

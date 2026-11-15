@@ -349,8 +349,10 @@ if ((count _kayipGecmis) > 24) then { _kayipGecmis deleteAt 0; };
 _group setVariable [QGVAR(kayipGecmis), _kayipGecmis];
 private _erkenKayip60 = (selectMax ([_ownCount] + ((_kayipGecmis select {(time - (_x select 0)) <= 60}) apply { _x select 1 }))) - _ownCount;
 private _erkenOn = (missionNamespace getVariable ["lambs_danger_erkenCekilme", true]) && {_enemyCount > 0} && {_ownCount >= 2};
-private _erkenA = _erkenOn && {_erkenKayip60 >= (missionNamespace getVariable ["lambs_danger_erkenKayipHiz", 3])} && {_closest >= 120} && {_pwrRatio >= 0.7};
-private _erkenB = _erkenOn && {_lossRatio >= (missionNamespace getVariable ["lambs_danger_erkenKayipOran", 0.25])} && {_closest >= 150} && {_pwrRatio >= 0.8};
+// v8.555 DONEM: Ikinci Dunya Savasi'nda birlikler kayba daha dayanikli (modern kayip-kacinimi yok): kayip hizi esigi +1, kayip orani esigi x1.4
+private _erkenWW2 = (["cag"] call FUNC(cag)) >= 2;
+private _erkenA = _erkenOn && {_erkenKayip60 >= ((missionNamespace getVariable ["lambs_danger_erkenKayipHiz", 3]) + ([0, 1] select _erkenWW2))} && {_closest >= 120} && {_pwrRatio >= 0.7};
+private _erkenB = _erkenOn && {_lossRatio >= ((missionNamespace getVariable ["lambs_danger_erkenKayipOran", 0.25]) * ([1, 1.4] select _erkenWW2))} && {_closest >= 150} && {_pwrRatio >= 0.8};
 private _result = call {
 
     // =======================================================================

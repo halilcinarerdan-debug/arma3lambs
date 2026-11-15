@@ -31,6 +31,7 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
     while {true} do {
         sleep 2;
         if !((missionNamespace getVariable ["lambs_danger_kacisAktif", true]) && {missionNamespace getVariable ["lambs_danger_kacisBireysel", true]}) then { continue };
+        if ((["cag"] call FUNC(cag)) >= 2) then { continue };   // v8.555: Ikinci Dunya Savasi'nda bireysel 'tek kalan / mermisi az kosar' yok (grup kacis kilidi / geri cekilme ayri calisir)
         private _tekM = missionNamespace getVariable ["lambs_danger_kacisTekM", 40];
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
