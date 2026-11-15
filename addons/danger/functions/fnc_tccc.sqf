@@ -490,6 +490,66 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
         [_m, _c] call _birak;
     };
 
+    // v8.556 VANILLA IYILESTIRME (kullanici: 'ace medical yokken vanilla iyilestirme calissin'): ACE Medical yuklu DEGILSE MARCH / ACE malzeme zinciri yerine vanilla yol: hekim yaraliya gider, FirstAidKit / Medikit ile
+    //   'HealSoldier' aksiyonunu uygular (en fazla 2 deneme; yaralanma (damage) 0.25'in altina inene kadar). Yaralanma tespiti zaten vanilla alanlari kullanir (damage > 0.2, lifeState INCAPACITATED). Hekim secimi, kati guvenlik
+    //   (ates altinda bekle), triyaj sirasi ve hekim 'mesgul' bayraklari ayni. Malzeme yoksa yaralidan / 25 m'deki dostlardan FirstAidKit alinir. Log [TCCC-VANILLA].
+    private _aceYok = !isClass (configFile >> "CfgPatches" >> "ace_medical");
+    private _tedaviVanilla = {
+        params ["_g", "_m", "_c", "_baygin", "_birak"];
+        private _t0 = time;
+        _m setVariable [QGVAR(tcccBusy), time + 120];
+        _m setVariable [QGVAR(forceMove), true];
+        _m setVariable [QGVAR(tcccFM), true];
+        _c setVariable [QGVAR(tcccBy), _m];
+        private _kitVar = { params ["_u"]; ((items _u) findIf {(toLower _x) in ["firstaidkit", "medikit"]}) > -1 };
+        // malzeme: hekimde yoksa yaralidan / yakin dostlardan al
+        if !([_m] call _kitVar) then {
+            private _kaynaklar = [_c] + (((getPosATL _m) nearEntities ["CAManBase", 25]) select {alive _x && {_x isNotEqualTo _m} && {_x isNotEqualTo _c} && {(side (group _x)) isEqualTo (side (group _m))}});
+            {
+                private _src = _x;
+                private _ix = (items _src) findIf {(toLower _x) in ["firstaidkit", "medikit"]};
+                if (_ix >= 0) exitWith {
+                    private _it = (items _src) select _ix;
+                    _src removeItem _it;
+                    _m addItem _it;
+                    diag_log format ["[TCCC-VANILLA] %1 hekimde FirstAidKit yok -> %2 kaynagindan alindi (%3)", name _m, name _src, _it];
+                };
+            } forEach _kaynaklar;
+        };
+        if !([_m] call _kitVar) exitWith {
+            if ((missionNamespace getVariable ["lambs_danger_tcccVanN", 0]) < 40) then {
+                missionNamespace setVariable ["lambs_danger_tcccVanN", (missionNamespace getVariable ["lambs_danger_tcccVanN", 0]) + 1];
+                diag_log format ["[TCCC-VANILLA] %1 | hekim %2 -> yarali %3 | YOK-ESYA (FirstAidKit / Medikit yok)", groupId _g, name _m, name _c];
+            };
+            _c setVariable [QGVAR(tcccIptalT), time];
+            [_m, _c] call _birak;
+        };
+        diag_log format ["[TCCC-VANILLA] %1 | hekim %2 -> yarali %3 | hasar %4 | baygin:%5 | mesafe %6 m | ace_medical YOK: vanilla HealSoldier", groupId _g, name _m, name _c, (damage _c) toFixed 2, [_c] call _baygin, round (_m distance2D _c)];
+        // yaklas
+        _m setUnitPos "UP";
+        _m doMove (getPosATL _c);
+        private _bitis = time + ((25 max (((_m distance2D _c) / 3) + 8)) min 90);
+        waitUntil {
+            sleep 0.7;
+            if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) > 3}) then { _m doMove (getPosATL _c); };
+            !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) <= 2.5} || {time > _bitis}
+        };
+        private _uygulandi = false;
+        if (([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) <= 4}) then {
+            for "_k" from 1 to 2 do {
+                if (!([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {!([_m] call _kitVar)} || {(_m distance2D _c) > 6}) exitWith {};
+                if (_k > 1 && {(damage _c) <= 0.25} && {!([_c] call _baygin)}) exitWith {};
+                [_m, _c] call lambs_danger_tcccDurus;
+                _m doWatch _c;
+                _m action ["HealSoldier", _c];
+                _uygulandi = true;
+                sleep 6.5;
+            };
+        };
+        diag_log format ["[TCCC-VANILLA] %1 | %2 -> %3 | sonuc: %4 | hasar simdi %5 | baygin:%6 | sure %7 sn", groupId _g, name _m, name _c, ["UYGULANAMADI (uzak / olu / mesgul)", "HealSoldier uygulandi"] select _uygulandi, (damage _c) toFixed 2, [_c] call _baygin, round (time - _t0)];
+        [_m, _c] call _birak;
+    };
+
     while {true} do {
         sleep 3;
         // v8.307: CBA 'TCCC hekim sistemi AKTIF' (kullanici: 'tccc opsiyonel kalkabilsin'); kapaliyken hekim atamasi yapilmaz (ACE'nin kendi AI tedavisi etkilenmez)
@@ -593,7 +653,11 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 _m setVariable [QGVAR(tcccBusy), time + 150];
                 _m setVariable [QGVAR(forceMove), true];
                 _c setVariable [QGVAR(tcccBy), _m];
-                [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
+                if (_aceYok) then {
+                    [_g, _m, _c, _baygin, _birak] spawn _tedaviVanilla;   // v8.556: ACE Medical yok -> vanilla HealSoldier
+                } else {
+                    [_g, _m, _c, _baygin, _birak, _tx, _kanKaybi] spawn _tedavi;
+                };
             } forEach _yaralilar;
         } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable [QGVAR(teslimOldu), false])} && {!(_x getVariable ["lambs_danger_tarafKapali", false]) || {_x getVariable ["lambs_danger_oyuncuKomutaAktif", false]}}});
     };
