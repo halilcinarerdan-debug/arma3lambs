@@ -472,9 +472,21 @@ if (EGVAR(main,debug_functions)) then {
                             _x set [4, (_x select 4) + 1];
                             // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
                             if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
-                            if (lambs_danger_retTakiliN < 40) then {
+                            if (lambs_danger_retTakiliN < 90) then {
                                 lambs_danger_retTakiliN = lambs_danger_retTakiliN + 1;
-                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13 | AI PATH:%14 MOVE:%15 ANIM:%16 FSM:%17", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true]), _b checkAIFeature "PATH", _b checkAIFeature "MOVE", _b checkAIFeature "ANIM", _b checkAIFeature "FSM"];
+                                private _enT = _b findNearestEnemy _b;
+                                private _enMes = if (isNull _enT) then {"-"} else {str (round (_b distance2D _enT))};
+                                private _enGor = if (isNull _enT) then {"-"} else {([_b, "VIEW", _enT] checkVisibility [eyePos _b, eyePos _enT]) toFixed 2};
+                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13 | AI PATH:%14 MOVE:%15 ANIM:%16 FSM:%17 | v8.560 TANI: moveToFailed:%18 moveToCompleted:%19 anim:%20 baski:%21 en yakin dusman:%22 m gorunurluk:%23", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true]), _b checkAIFeature "PATH", _b checkAIFeature "MOVE", _b checkAIFeature "ANIM", _b checkAIFeature "FSM", moveToFailed _b, moveToCompleted _b, animationState _b, (getSuppression _b) toFixed 2,
+                                    _enMes, _enGor];
+                            };
+                            // v8.560: yol bulma BASARISIZ (moveToFailed) ise ayni noktayi tekrar tekrar emretmek anlamsiz: ilk takilmada hemen dusmandan uzaga yeni nokta (doStop YOK, komut sifirlanmaz)
+                            if (moveToFailed _b && {(_x select 4) < 2}) then {
+                                private _npF = (getPosATL _b) getPos [15 + random 10, (_hedefASL getDir (getPosATL _b)) + ((random 60) - 30)];
+                                if (!surfaceIsWater _npF) then { _x set [1, _npF]; };
+                                if (isNil "lambs_danger_retYolHataN") then { lambs_danger_retYolHataN = 0; };
+                                lambs_danger_retYolHataN = lambs_danger_retYolHataN + 1;
+                                if (lambs_danger_retYolHataN <= 20) then { diag_log format ["[GERI-CEKILME-YOLHATA] %1 | %2 | moveToFailed -> yeni nokta %3 m | toplam %4", groupId _grup, name _b, round (_b distance2D (_x select 1)), lambs_danger_retYolHataN]; };
                             };
                             // her takilmada hareket bayraklari yeniden acilir
                             _b enableAI "PATH";
