@@ -60,6 +60,9 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
 
             private _leader = leader _g;
             if (isNull _leader || {isPlayer _leader}) then { continue };
+            // v8.557 CQB: bilinen dusman <= 40 m ise dagilma YOK (kullanici: 'cqb de cok dagınık durmasinlar, tek olunca kolay avlaniyorlar'); toplanmayi fnc_cqbKume yapar
+            private _yakinDus = _leader findNearestEnemy _leader;
+            if (!isNull _yakinDus && {alive _yakinDus} && {(_leader distance2D _yakinDus) <= 40} && {(_leader knowsAbout _yakinDus) >= (["SUPHE"] call FUNC(bilgiEsik))}) then { continue };
 
             // Uygun birimler
             private _u = (units _g) select {

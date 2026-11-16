@@ -15,6 +15,7 @@
  *   - 'perdeli': nisancidan hedefe checkVisibility < 0.5 (gorus engeli) AMA FIRE LOD hatti temiz (tepe / duvar / bina gibi SERT engel yok: o halde mermi gitmez);
  *   - hedef cevresi 25 m'de dost yok;  konum = hedefin BILINEN konumu + bilgi hatasi (posError 8-40 m) kadar sapma (mukemmel bilgi degil).
  *   ATIS: nisanciya doSuppressiveFire (bilinen konuma); 7 sn sonra hedef secimi serbest (doTarget objNull). Piyadeye karsi motor genelde koaksiyel MG secer, zirhli / bina icin top.
+ * v8.557: sinif TANK / IFV + APC / DIGER (MG'li arac, menzil 600 m); FIRE LOD hatti penetre edilebilir nesneden geciyorsa (fnc_penetreMi) da ates.
  * Kapatma: lambs_danger_tankBilinenAtes = false.  Log: [TANK-BILINEN] (ilk 30) + 60 sn ozeti.
  *
  * Arguments: None
@@ -39,7 +40,10 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
             if (time < (_v getVariable [QGVAR(tankBilinenT), 0])) then { continue };
             private _d = driver _v;
             if (isNull _d || {!alive _d} || {isPlayer _d} || {(crew _v) findIf {isPlayer _x} >= 0}) then { continue };
-            if (!(((([_v] call FUNC(aracSinif)) select 0)) in ["TANK", "IFV"])) then { continue };
+            // v8.557: yalniz TANK / IFV degil, MG'li APC / silahli cip / teknik (DIGER) de (kullanici: 'sutre arkasi atis araclar icinde gecerli olmali, MG si icinde'); MG'liler icin menzil 600 m
+            private _asn = (([_v] call FUNC(aracSinif)) select 0);
+            if (!(_asn in ["TANK", "IFV", "APC", "DIGER"])) then { continue };
+            private _azMenzil = [600, 1400] select (_asn in ["TANK", "IFV"]);
             if ((speed _v) > 25 || {!someAmmo _v}) then { continue };
             private _gn = gunner _v;
             if (isNull _gn || {!alive _gn}) then { _gn = commander _v; };
@@ -58,7 +62,7 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
                 private _o = _x select 4;
                 if (!isNull _o && {alive _o} && {(_tf getFriend (_x select 2)) < 0.6} && {(_x select 2) isNotEqualTo civilian} && {[_o] call FUNC(gercekHedef)}) then {
                     private _dm = _v distance2D _o;
-                    if (_dm >= 150 && {_dm <= 1400} && {(_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))}) then {
+                    if (_dm >= 150 && {_dm <= _azMenzil} && {(_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))}) then {
                         private _tk = _l targetKnowledge _o;
                         private _ls = (_tk select 2) max (_tk select 3);   // lastSeenByGroup / ByUnit (oyun zamani)
                         if (_ls > 0 && {(time - _ls) <= 40} && {(_tbl getOrDefault [netId _o, [0, -999]]) params ["_n", "_t0"]; (time - _t0 > 120) || {_n < 4}}) then {
@@ -77,7 +81,9 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
             private _hedefASL = aimPos _o;
             private _vis = [_v, "VIEW", _o] checkVisibility [_eyeG, _hedefASL];
             if (_vis >= 0.5) then { _say set ["gorunur", (_say get "gorunur") + 1]; continue };
-            if ((terrainIntersectASL [_eyeG, _hedefASL]) || {(lineIntersectsSurfaces [_eyeG, _hedefASL, _v, _o, true, 1, "FIRE", "NONE"]) isNotEqualTo []}) then {
+            // v8.557: hat yalniz PENETRE EDILEBILIR nesnelerden (tahta / kumas / brandra ...) geciyorsa da ates edilir (fnc_penetreMi); sert engel (beton / tas / metal / tepe) gecmez
+            private _pm = [_eyeG, _hedefASL, _v, _o] call FUNC(penetreMi);
+            if !(_pm select 0) then {
                 _say set ["sert_engel", (_say get "sert_engel") + 1];
                 _v setVariable [QGVAR(tankBilinenT), time + 6];
                 continue;
@@ -104,7 +110,7 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
             [{ params ["_gg"]; if (alive _gg) then { _gg doTarget objNull; _gg doWatch objNull; }; }, [_gn], 7] call CBA_fnc_waitAndExecute;
             if (_logN < 30) then {
                 _logN = _logN + 1;
-                diag_log format ["[TANK-BILINEN] %1 | %2 | hedef %3 (%4) %5 m | gorunurluk %6 (< 0.5, perdeli) | bilgi hatasi %7 m | son gorulme %8 sn once | bilinen konuma BASTIRMA ATESI (7 sn)", groupId _g, typeOf _v, typeOf _o, ["AT / zirhli", "piyade"] select ((_sk) >= 10000), round (_v distance2D _o), _vis toFixed 2, round _err, round (time - ((_tk select 2) max (_tk select 3)))];
+                diag_log format ["[TANK-BILINEN] %1 | %2 | hedef %3 (%4) %5 m | gorunurluk %6 (< 0.5, perdeli; hatta penetre edilebilir nesne: %9) | bilgi hatasi %7 m | son gorulme %8 sn once | bilinen konuma BASTIRMA ATESI (7 sn)", groupId _g, typeOf _v, typeOf _o, ["AT / zirhli", "piyade"] select ((_sk) >= 10000), round (_v distance2D _o), _vis toFixed 2, round _err, round (time - ((_tk select 2) max (_tk select 3))), _pm select 1];
             };
         } forEach vehicles;
         if (time > _ozetT) then {

@@ -271,3 +271,12 @@ DURUM ETIKETLERI (dürüst dogrulama)
  - SOG / CSLA / GM fraksiyon adlari yalniz o_vc ve b_macv RPT'de dogrulandi; digerleri tahmin.
  - Oneri (yapilmadi): gozlem / pusu v2 (ates etmeden gozlem, rapor, kill-zone / cekilme karari), yem, gozcu rotasyonu.
  - Hicbir ozellik icin "oyunda tamamen dogrulandi" iddiasi yoktur; test RPT'ye gore ilerlemektedir.
+
+
+[v8.557] ISABET ARTISI / PENETRASYON ATESI / SIPERLI HEDEF DISIPLINI / SIPER TAHMINI / CQB KUMELENME
+ - Isabet artisi: sabit hedefe seri atista nisan dogrulugu mermi basina +0.03 (tavan CBA 0.30), 3 sn atissiz kalinca sifirlanir. [DOGRULUK]
+ - Penetrasyon atesi: gorunmeyen ama bilinen dusman, hat tahta / kumas / brandra gibi penetre edilebilir nesnelerden geciyorsa piyade ve ARAC MG / top nisancisi bastirma atesi eder (model adi jetonlariyla TAHMIN). Tank / IFV / MG'li arac kesif atesi de ayni testi kullanir. [PENETRE-ATES]
+ - Siperli hedef disiplini: > 25 m'de siperdeki hareketsiz dusmana ates tutulur (GREEN), siperden cikinca serbest; CQB'de yok. [SIPERLI-TUT]
+ - Siper tahmini: hareketli dusmanin siper alabilecegi nokta onundeyse siper almadan bastirma. [SIPER-TAHMIN]
+ - CQB kumelenme: dusman <= 40-45 m'de dagilma kapali, kopuk (> 14 m) asker dostunun yanina toplanir. [CQB-KUME]
+ NOT: oyunda denenmedi.
