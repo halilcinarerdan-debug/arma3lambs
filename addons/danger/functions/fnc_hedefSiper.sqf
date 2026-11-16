@@ -10,7 +10,7 @@
  *     birim 'GREEN' (yalniz kendini savun) moduna alinir = siperden cikmayan hedefe mermi harcamaz / aciga cikmaz. Hedef siperden cikinca (gorunurluk >= 0.45, > 3 m kayar, hiz > 3 km/s), baski gelince, mesafe < 25 m (CQB) olunca ESKI moda doner.
  *  3) SIPER TAHMINI [CBA siperTahmin] (yalniz piyade): hareketli (hiz > 3 km/s) bilinen dusman 15-120 m'de: findCover (dusmanin gozunden bize karsi DEFEND, 20 m, 3 aday; 7. arg origin = yalniz oneri, rezerv defteri yazilmaz) ile dusmanin SIPER ALABILECEGI noktalar hesaplanir; dusman onunde (<= 14 m, yone +-70 derece) bir noktaya gidiyorsa
  *     o noktaya doSuppressiveFire (siper almadan bastir). Dusman basina 2 sn'de bir, birim basina 5 sn'de bir.
- * v8.558: ates tutma YALNIZ ILK TEMAS FAZINDA (CBA siperliIlkTemasSn, 40 sn; grup 30 sn temassiz kalirsa faz basa doner): grup hedef ACIGA CIKANA kadar bekler; hedef acikta net gorununce (vis >= 0.6), hareketlenince (> 3 km/s / > 3 m kayma) ya da CQB'ye girince faz BITER ve tum grup AYNI ANDA serbest kalir (en uygun zamanda, en acik yerde ates acilir). Faz bittikten sonra bastirma ESKI gibi (LAMBS / vanilla; yeni surekli baski YOK). OYUNCULU GRUPLARDA (icinde oyuncu olan) HICBIR ozellik calismaz.
+ * v8.558: ates tutma YALNIZ ILK TEMAS FAZINDA (CBA siperliIlkTemasSn, 40 sn; grup 30 sn temassiz kalirsa faz basa doner): grup hedef ACIGA CIKANA kadar bekler; hedef acikta net gorununce (vis >= 0.6), ates edince (son 5 sn; RPT 1c620d7d: oyuncu ates ederken bot beklemisti), hareketlenince (> 3 km/s / > 3 m kayma) ya da CQB'ye girince faz BITER ve tum grup AYNI ANDA serbest kalir (en uygun zamanda, en acik yerde ates acilir). Faz bittikten sonra bastirma ESKI gibi (LAMBS / vanilla; yeni surekli baski YOK). OYUNCULU GRUPLARDA (icinde oyuncu olan) HICBIR ozellik calismaz.
  * Log: [PENETRE-ATES] / [SIPERLI-TUT] / [SIPER-TAHMIN] (ilk 20) + 60 sn ozeti [HEDEF-SIPER-OZET]. Kapatma: ilgili CBA ayarlari.
  *
  * Arguments: None
@@ -47,7 +47,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
             private _g0 = group _u;
             private _ilkSn0 = missionNamespace getVariable ["lambs_danger_siperliIlkTemasSn", 40];
             // ACIGA CIKTI: net gorunur (>= 0.6), hareketlendi, yer degistirdi ya da CQB'ye girdi -> ilk temas fazi biter, TUM grup ayni anda serbest kalir
-            private _acik = !isNull _e && {alive _e} && {(_vis >= 0.6) || {(speed _e) > 3} || {((getPosATL _e) distance2D (_u getVariable [QGVAR(sipPoz), [0, 0, 0]])) > 3} || {(_u distance2D _e) < (missionNamespace getVariable ["lambs_danger_siperliMinM", 25])}};
+            private _acik = !isNull _e && {alive _e} && {(_vis >= 0.6) || {(time - (_e getVariable [QGVAR(sonAtisT), -999])) < 5} || {(speed _e) > 3} || {((getPosATL _e) distance2D (_u getVariable [QGVAR(sipPoz), [0, 0, 0]])) > 3} || {(_u distance2D _e) < (missionNamespace getVariable ["lambs_danger_siperliMinM", 25])}};
             if (_acik) then { _g0 setVariable [QGVAR(hsBas), -1000000]; };
             if (isNull _e || {!alive _e} || _acik || {(getSuppression _u) >= 0.25} || {(time - (_g0 getVariable [QGVAR(hsBas), time])) > _ilkSn0} || {time > (_u getVariable [QGVAR(sipHoldT), 0])}) then {
                 _u setUnitCombatMode (_u getVariable [QGVAR(sipEskiCM), "YELLOW"]);
@@ -121,7 +121,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 if (_arac) then { continue };
 
                 // ---- 2) SIPERLI HEDEF DISIPLINI ----
-                if (_siperliAcik && {_ilkFaz} && {!_atesVerdi} && {_d > _siperliM} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
+                if (_siperliAcik && {_ilkFaz} && {!_atesVerdi} && {_d > _siperliM} && {(time - (_e getVariable [QGVAR(sonAtisT), -999])) >= 5} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
                     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
                     && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {(speed _e) < 3} && {!(_g getVariable [QGVAR(isAmbushing), false])}) then {
                     if ((_u getVariable [QGVAR(sipEskiCM), ""]) isEqualTo "") then {

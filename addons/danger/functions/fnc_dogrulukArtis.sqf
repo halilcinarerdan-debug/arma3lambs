@@ -23,6 +23,8 @@ diag_log "[DOGRULUK] sabit hedefe ardisik atista dogruluk artisi baslatildi (v8.
     private _t = assignedTarget _u;
     if (isNull _t || {!alive _t}) then { _t = _u findNearestEnemy _u; };
     if (isNull _t || {!alive _t}) exitWith {};
+    // v8.559: doSuppressiveFire'in 'SuppressTarget' mantiksal nesnesi gercek hedef degil (RPT 1c620d7d: bastirma atesi sabit hedef sayilip +0.30 aldi) -> yalniz gercek piyade / kara araci
+    if !(_t isKindOf "CAManBase" || {_t isKindOf "LandVehicle"}) exitWith {};
     private _eski = _u getVariable [QGVAR(dogrHedef), objNull];
     private _poz0 = _u getVariable [QGVAR(dogrPoz), [0, 0, 0]];
     private _n = _u getVariable [QGVAR(dogrN), 0];
@@ -51,7 +53,7 @@ diag_log "[DOGRULUK] sabit hedefe ardisik atista dogruluk artisi baslatildi (v8.
     _u setVariable [QGVAR(dogrUygS), _yShk - _bShk];
     if (_n >= 6 && {(missionNamespace getVariable ["lambs_danger_dogrLogN", 0]) < 25}) then {
         missionNamespace setVariable ["lambs_danger_dogrLogN", (missionNamespace getVariable ["lambs_danger_dogrLogN", 0]) + 1];
-        diag_log format ["[DOGRULUK] %1 | hedef %2 (sabit) | ardisik atis %3 | nisan %4 -> %5 (bonus +%6)", name _u, name _t, _n, _bAcc toFixed 2, _yAcc toFixed 2, (_yAcc - _bAcc) toFixed 2];
+        diag_log format ["[DOGRULUK] %1 | hedef %2 (sabit) | ardisik atis %3 | nisan %4 -> %5 (bonus +%6)", name _u, (if (_t isKindOf "CAManBase") then {name _t} else {typeOf _t}), _n, _bAcc toFixed 2, _yAcc toFixed 2, (_yAcc - _bAcc) toFixed 2];
     };
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
