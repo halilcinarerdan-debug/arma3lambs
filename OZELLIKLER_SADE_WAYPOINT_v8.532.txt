@@ -280,3 +280,5 @@ DURUM ETIKETLERI (dürüst dogrulama)
  - Siper tahmini: hareketli dusmanin siper alabilecegi nokta onundeyse siper almadan bastirma. [SIPER-TAHMIN]
  - CQB kumelenme: dusman <= 40-45 m'de dagilma kapali, kopuk (> 14 m) asker dostunun yanina toplanir. [CQB-KUME]
  NOT: oyunda denenmedi.
+
+[v8.558] Siperli hedef: ates tutma yalniz ilk temas fazinda; grup hedef acikta net gorunene (vis >= 0.6 / hareket / CQB) kadar bekler, sonra tum grup ayni anda ates acar (40 sn dolarsa normal ates). Bastirma eskisi gibi. Oyunculu gruplarda v8.557 ozellikleri (penetrasyon, siperli disiplin, siper tahmini, CQB kume, isabet artisi, arac kesif atesi) calismaz. NOT: oyunda denenmedi.

@@ -36,7 +36,7 @@ diag_log "[CQB-KUME] CQB kumelenme (kopuk askeri yakin dostuna cek) baslatildi (
                 || {_g getVariable [QGVAR(isATEngage), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]}
             ) then { continue };
             private _l = leader _g;
-            if (isNull _l || {isPlayer _l} || {!local _l}) then { continue };
+            if (isNull _l || {isPlayer _l} || {!local _l} || {((units _g) findIf {isPlayer _x}) > -1}) then { continue };   // oyunculu grup: yok (v8.558)
             if ([_g, "cqbKume", true] call FUNC(senaryoKapi)) then { continue };
             private _e = _l findNearestEnemy _l;
             if (isNull _e || {!alive _e} || {(_l distance2D _e) > 45} || {(_l knowsAbout _e) < (["SUPHE"] call FUNC(bilgiEsik))}) then {

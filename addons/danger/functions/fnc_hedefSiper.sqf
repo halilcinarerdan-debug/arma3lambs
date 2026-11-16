@@ -10,6 +10,7 @@
  *     birim 'GREEN' (yalniz kendini savun) moduna alinir = siperden cikmayan hedefe mermi harcamaz / aciga cikmaz. Hedef siperden cikinca (gorunurluk >= 0.45, > 3 m kayar, hiz > 3 km/s), baski gelince, mesafe < 25 m (CQB) olunca ESKI moda doner.
  *  3) SIPER TAHMINI [CBA siperTahmin] (yalniz piyade): hareketli (hiz > 3 km/s) bilinen dusman 15-120 m'de: findCover (dusmanin gozunden bize karsi DEFEND, 20 m, 3 aday; 7. arg origin = yalniz oneri, rezerv defteri yazilmaz) ile dusmanin SIPER ALABILECEGI noktalar hesaplanir; dusman onunde (<= 14 m, yone +-70 derece) bir noktaya gidiyorsa
  *     o noktaya doSuppressiveFire (siper almadan bastir). Dusman basina 2 sn'de bir, birim basina 5 sn'de bir.
+ * v8.558: ates tutma YALNIZ ILK TEMAS FAZINDA (CBA siperliIlkTemasSn, 40 sn; grup 30 sn temassiz kalirsa faz basa doner): grup hedef ACIGA CIKANA kadar bekler; hedef acikta net gorununce (vis >= 0.6), hareketlenince (> 3 km/s / > 3 m kayma) ya da CQB'ye girince faz BITER ve tum grup AYNI ANDA serbest kalir (en uygun zamanda, en acik yerde ates acilir). Faz bittikten sonra bastirma ESKI gibi (LAMBS / vanilla; yeni surekli baski YOK). OYUNCULU GRUPLARDA (icinde oyuncu olan) HICBIR ozellik calismaz.
  * Log: [PENETRE-ATES] / [SIPERLI-TUT] / [SIPER-TAHMIN] (ilk 20) + 60 sn ozeti [HEDEF-SIPER-OZET]. Kapatma: ilgili CBA ayarlari.
  *
  * Arguments: None
@@ -43,11 +44,18 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
             private _u = _x;
             private _e = _u getVariable [QGVAR(sipHedef), objNull];
             private _vis = if (isNull _e || {!alive _e}) then {1} else {[_u, "VIEW", _e] checkVisibility [eyePos _u, eyePos _e]};
-            if (isNull _e || {!alive _e} || {_vis >= 0.45} || {(speed _e) > 3} || {((getPosATL _e) distance2D (_u getVariable [QGVAR(sipPoz), [0, 0, 0]])) > 3} || {(_u distance2D _e) < (missionNamespace getVariable ["lambs_danger_siperliMinM", 25])}
-                || {(getSuppression _u) >= 0.25} || {time > (_u getVariable [QGVAR(sipHoldT), 0])}) then {
+            private _g0 = group _u;
+            private _ilkSn0 = missionNamespace getVariable ["lambs_danger_siperliIlkTemasSn", 40];
+            // ACIGA CIKTI: net gorunur (>= 0.6), hareketlendi, yer degistirdi ya da CQB'ye girdi -> ilk temas fazi biter, TUM grup ayni anda serbest kalir
+            private _acik = !isNull _e && {alive _e} && {(_vis >= 0.6) || {(speed _e) > 3} || {((getPosATL _e) distance2D (_u getVariable [QGVAR(sipPoz), [0, 0, 0]])) > 3} || {(_u distance2D _e) < (missionNamespace getVariable ["lambs_danger_siperliMinM", 25])}};
+            if (_acik) then { _g0 setVariable [QGVAR(hsBas), -1000000]; };
+            if (isNull _e || {!alive _e} || _acik || {(getSuppression _u) >= 0.25} || {(time - (_g0 getVariable [QGVAR(hsBas), time])) > _ilkSn0} || {time > (_u getVariable [QGVAR(sipHoldT), 0])}) then {
                 _u setUnitCombatMode (_u getVariable [QGVAR(sipEskiCM), "YELLOW"]);
                 _u setVariable [QGVAR(sipEskiCM), ""];
                 if (!isNull _e && {alive _e}) then { _u doTarget _e; };
+            } else {
+                // hedef kismen gorunuyor ama henuz tam acikta degil: beklemeye devam
+                _u setVariable [QGVAR(sipHoldT), time + 3];
             };
         } forEach (allUnits select {local _x && {(_x getVariable [QGVAR(sipEskiCM), ""]) isNotEqualTo ""}});
 
@@ -57,9 +65,10 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
         if (!_penetreAcik && {!_siperliAcik} && {!_tahminAcik}) then { continue };
         private _penetreM = missionNamespace getVariable ["lambs_danger_penetreM", 60];
         private _siperliM = missionNamespace getVariable ["lambs_danger_siperliMinM", 25];
+        private _ilkSn = missionNamespace getVariable ["lambs_danger_siperliIlkTemasSn", 40];
 
         private _adaylar = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {(side group _x) in [west, east, resistance]} && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            local _x && {alive _x} && {!isPlayer _x} && {((units group _x) findIf {isPlayer _x}) < 0} && {(side group _x) in [west, east, resistance]} && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
             && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 20)}
             && {
                 (isNull objectParent _x && {(primaryWeapon _x) isNotEqualTo ""}) || {(vehicle _x) isNotEqualTo _x && {_x isEqualTo (gunner (vehicle _x))} && {(vehicle _x) isKindOf "LandVehicle"}}
@@ -72,6 +81,10 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
             for "_i" from 0 to (_kesit - 1) do {
                 private _u = _adaylar select ((_indeks + _i) mod _n);
                 private _g = group _u;
+                // ilk temas fazi: grup 30 sn temassiz kaldiktan sonra yeniden temasa girerse faz basa doner (v8.558)
+                if ((time - (_g getVariable [QGVAR(hsSon), -999])) > 30) then { _g setVariable [QGVAR(hsBas), time]; };
+                _g setVariable [QGVAR(hsSon), time];
+                private _ilkFaz = (time - (_g getVariable [QGVAR(hsBas), time])) <= _ilkSn;
                 private _arac = (vehicle _u) isNotEqualTo _u;
                 private _e = _u findNearestEnemy _u;
                 if (isNull _e || {!alive _e} || {captive _e} || {!(_e isKindOf "AllVehicles")}) then { continue };
@@ -108,7 +121,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 if (_arac) then { continue };
 
                 // ---- 2) SIPERLI HEDEF DISIPLINI ----
-                if (_siperliAcik && {!_atesVerdi} && {_d > _siperliM} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
+                if (_siperliAcik && {_ilkFaz} && {!_atesVerdi} && {_d > _siperliM} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
                     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
                     && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {(speed _e) < 3} && {!(_g getVariable [QGVAR(isAmbushing), false])}) then {
                     if ((_u getVariable [QGVAR(sipEskiCM), ""]) isEqualTo "") then {
