@@ -282,3 +282,5 @@ DURUM ETIKETLERI (dürüst dogrulama)
  NOT: oyunda denenmedi.
 
 [v8.558] Siperli hedef: ates tutma yalniz ilk temas fazinda; grup hedef acikta net gorunene (vis >= 0.6 / hareket / CQB) kadar bekler, sonra tum grup ayni anda ates acar (40 sn dolarsa normal ates). Bastirma eskisi gibi. Oyunculu gruplarda v8.557 ozellikleri (penetrasyon, siperli disiplin, siper tahmini, CQB kume, isabet artisi, arac kesif atesi) calismaz. NOT: oyunda denenmedi.
+
+[v8.561] ALiVE uyumu (CBA lambs_danger_aliveUyum: 0 Kapali / 1 Uyumlu / 2 Tam el cekme; yalniz ALiVE yukluyse): ALiVE gruplari (profileID / CQB / destek) ELITE grup katmanlarindan cikarilir (lambs_danger_disableGroupAI, ALiVE Guard ile ayni anahtar), ALiVE AI Skill korunur. Kaynak: ALiVE kaynak kodu (wiki erisilemedi). NOT: ALiVE ile oyunda denenmedi.

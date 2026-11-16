@@ -34,12 +34,13 @@ if (isNull _u) exitWith {
     if (isNil "lambs_danger_skillVarsayilan") then {
         lambs_danger_skillVarsayilan = [["commanding", 1, 1], ["general", 1, 1], ["aimingAccuracy", 0.20, 0.40], ["aimingSpeed", 0.85, 0.95], ["aimingShake", 0.35, 0.55], ["spotDistance", 0.85, 0.98], ["spotTime", 0.85, 0.98], ["reloadSpeed", 0.95, 1.00]];
     };
-    lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]];
+    lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0], ["alive", 0]];
     diag_log format ["[SKILL-VARSAYILAN] varsayilan beceri sistemi baslatildi | tablo:%1", lambs_danger_skillVarsayilan];
 
     ["CAManBase", "init", {
         params ["_birim"];
-        [{ params ["_b"]; [_b] call (missionNamespace getVariable ["lambs_danger_fnc_varsayilanSkill", {false}]); }, [_birim], 0.5] call CBA_fnc_waitAndExecute;
+        // v8.561: ALiVE yukluyse profil / CQB birimlerinin profileID / ALIVE_* isaretleri spawn'dan sonra yazilir ve ALiVE AI Skill modulu kendi becerisini atar -> 2 sn bekle
+        [{ params ["_b"]; [_b] call (missionNamespace getVariable ["lambs_danger_fnc_varsayilanSkill", {false}]); }, [_birim], [0.5, 2] select (missionNamespace getVariable ["lambs_danger_aliveVar", false])] call CBA_fnc_waitAndExecute;
     }, true, [], true] call CBA_fnc_addClassEventHandler;
 
     [] spawn {
@@ -52,7 +53,7 @@ if (isNull _u) exitWith {
 };
 
 if (!(missionNamespace getVariable ["lambs_danger_skillVarsayilanV1", true])) exitWith {false};
-if (isNil "lambs_danger_skillSay") then { lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0]]; };
+if (isNil "lambs_danger_skillSay") then { lambs_danger_skillSay = createHashMapFromArray [["uygulandi", 0], ["oyuncu", 0], ["yerel_degil", 0], ["elle", 0], ["zaten", 0], ["alive", 0]]; };
 private _say = {
     params ["_k"];
     lambs_danger_skillSay set [_k, (lambs_danger_skillSay getOrDefault [_k, 0]) + 1];
@@ -63,6 +64,8 @@ if (isPlayer _u) exitWith { ["oyuncu"] call _say; false };
 if (!local _u) exitWith { ["yerel_degil"] call _say; false };
 if (_u getVariable ["lambs_danger_skillElle", false]) exitWith { ["elle"] call _say; false };
 if (_u getVariable [QGVAR(skillAyarli), false]) exitWith { ["zaten"] call _say; false };
+// v8.561 ALIVE UYUMU: ALiVE birimi (profil / CQB / sivil ajan) ALiVE AI Skill modulunun becerisini korur
+if ([_u] call FUNC(aliveSahip)) exitWith { ["alive"] call _say; false };
 
 // v8.309 GOC (kullanici: 'yeni taktik istemiyorum, sadece AI daha vurucu olsun hizli olsun'): CBA'da KAYITLI deger eski varsayilanla BIREBIR aynıysa (kullanici elle degistirmemis) yeni varsayilana tasinir (fnc_moral'daki yontem); elle degisen korunur.
 if (!(missionNamespace getVariable ["lambs_danger_skillMigV309", false])) then {

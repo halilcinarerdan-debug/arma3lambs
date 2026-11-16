@@ -121,7 +121,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 if (_arac) then { continue };
 
                 // ---- 2) SIPERLI HEDEF DISIPLINI ----
-                if (_siperliAcik && {_ilkFaz} && {!_atesVerdi} && {_d > _siperliM} && {(time - (_e getVariable [QGVAR(sonAtisT), -999])) >= 5} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
+                if (_siperliAcik && {_ilkFaz} && {!(_g getVariable [QGVAR(disableGroupAI), false])} && {!_atesVerdi} && {_d > _siperliM} && {(time - (_e getVariable [QGVAR(sonAtisT), -999])) >= 5} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
                     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
                     && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {(speed _e) < 3} && {!(_g getVariable [QGVAR(isAmbushing), false])}) then {
                     if ((_u getVariable [QGVAR(sipEskiCM), ""]) isEqualTo "") then {

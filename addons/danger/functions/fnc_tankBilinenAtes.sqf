@@ -49,7 +49,7 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
             if (isNull _gn || {!alive _gn}) then { _gn = commander _v; };
             if (isNull _gn || {!alive _gn} || {isPlayer _gn}) then { continue };
             private _g = group _d;
-            if (((units _g) findIf {isPlayer _x}) > -1) then { continue };   // v8.558: oyunculu grup yok
+            if (((units _g) findIf {isPlayer _x}) > -1 || {_g getVariable [QGVAR(disableGroupAI), false]}) then { continue };   // v8.558: oyunculu grup yok; v8.561: disableGroupAI / ALiVE grubu yok
             private _l = leader _g;
             if (isNull _l || {((_g getVariable [QGVAR(contact), 0]) <= time)}) then { continue };
             private _tf = side _g;
