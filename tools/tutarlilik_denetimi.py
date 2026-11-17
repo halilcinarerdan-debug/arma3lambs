@@ -176,6 +176,14 @@ _dinOn = [d for d in re.findall(r'"(lambs_danger_\w*?)%\d', "".join(SQF.values()
 for ad in sets:
     if any(ad.startswith(d) for d in _dinOn): continue
     if sum(len(re.findall(r"\b" + ad + r"\b", t)) for t in list(SQF.values()) + list(HPP.values())) <= 1: UYARI.append("[AYAR] kayitli ama kullanilmayan ayar: %s" % ad)
+# v8.572: addSetting blogunda kullanilan _katS o blokta tanimli mi? (RPT 89d68bc7: tanimsiz -> 'Empty menu category', ayar menude gorunmez)
+_bloklar = [m.start() for m in re.finditer(r'if \(!isNil "CBA_fnc_addSetting"', prep)]
+for m in re.finditer(r'\],\s*_katS\s*,', prep):
+    onceki = [b for b in _bloklar if b < m.start()]
+    if not onceki: continue
+    b0 = onceki[-1]
+    if not re.search(r'private\s+_katS\s*=', prep[b0:m.start()]):
+        HATA.append("[AYAR] _katS bu addSetting blogunda tanimli degil (kategorisiz kalir, menude gorunmez): XEH_PREP.hpp:%d" % (prep[:m.start()].count("\n") + 1))
 BILGI.append("CBA ayari (tablo/addSetting): %d" % len(sets))
 
 # ------------------------------------------------------------------ 4/5. yerel degiskenler + kapanis kapsami
