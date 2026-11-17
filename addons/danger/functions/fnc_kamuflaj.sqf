@@ -56,6 +56,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
         for "_i" from 0 to (_kesit - 1) do {
             private _u = _askerler select ((_indeks + _i) mod _n);
             private _g = group _u;
+            if (_u getVariable [QGVAR(yakinAlgi), false]) then { continue };   // v8.567: dusman <= 20 m (fnc_yakinAlgi) - kamuflaj dusurucu katman kapali
             if (!([_g, "kamuflaj", true] call FUNC(dk))) then { continue };
             private _minC = [_g, "kamuflajMin", 0.6] call FUNC(dk);
 
