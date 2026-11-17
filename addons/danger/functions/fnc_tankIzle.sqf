@@ -18,7 +18,7 @@ params [["_v", objNull, [objNull]]];
 if (isNull _v || {!local _v} || {_v getVariable ["lambs_danger_tankIzleEH", false]}) exitWith {};
 _v setVariable ["lambs_danger_tankIzleEH", true];
 
-private _sk = missionNamespace getVariable ["lambs_danger_tankEkipSkill", 0.95];   // v8.280: 0.85 -> 0.95 (kullanici: 'tanklari guclendir')
+private _sk = missionNamespace getVariable ["lambs_danger_tankEkipSkill", 0.6];   // v8.280: 0.85 -> 0.95 (kullanici: 'tanklari guclendir')
 if (_sk > 0) then {
     {
         private _u = _x;

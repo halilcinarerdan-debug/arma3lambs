@@ -24,7 +24,7 @@ private _acc = _u skill "aimingAccuracy";
 private _taban = (((_acc - 0.25) / 0.72) max 0) min 1;
 private _fm = (1 - (((_u distance _dr) - 100) / 600)) max 0.5 min 1;
 private _fh = (1 - ((speed _dr) / 3.6 / 80)) max 0.5 min 1;
-private _p = (_taban * _fm * _fh * (missionNamespace getVariable ["lambs_danger_dronIsabetOran", 1])) min 1;
+private _p = (_taban * _fm * _fh * (missionNamespace getVariable ["lambs_danger_dronIsabetOran", 0.3])) min 1;
 // v8.562 FPV KISMA: saldiri tipi FPV / bomba dron icin olasilik x sqrt(CBA dronFpvKis) (dronTepki'deki tur olasiligi ile birlikte ~ dronFpvKis)
 private _fpvC = _dr getVariable [QGVAR(fpvMiC), -1];
 if (_fpvC < 0) then {

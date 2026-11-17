@@ -72,8 +72,7 @@ if (!(missionNamespace getVariable ["lambs_danger_skillMigV309", false])) then {
     missionNamespace setVariable ["lambs_danger_skillMigV309", true];
     private _gec = [
         ["lambs_danger_skillIsabetMin", 0.70, 0.80], ["lambs_danger_skillIsabetMax", 0.88, 0.95], ["lambs_danger_skillTavanIsabet", 0.95, 0.97],
-        ["lambs_danger_skillOptiksizCarpan", 0.75, 0.90], ["lambs_danger_skillAcemiOran", 0.15, 0.05], ["lambs_danger_skillAcemiCarpan", 0.85, 0.90],
-        ["lambs_danger_skillHizMin", 0.70, 0.85], ["lambs_danger_skillHizMax", 0.80, 0.95]
+        ["lambs_danger_skillOptiksizCarpan", 0.75, 0.90], ["lambs_danger_skillAcemiOran", 0.15, 0.05], ["lambs_danger_skillAcemiCarpan", 0.85, 0.90]
     ];
     private _gecen = [];
     {
@@ -140,7 +139,7 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 };
 // v8.280 BOT BECERISI +%20 (kullanici: 'botlarin dogrulugunu ve sağa sola donme animasyon hizini yuzde 20 arttir'): aimingAccuracy (isabet) ve aimingSpeed (nisan alma / donus hizi) x lambs_danger_skillCarpan (1.2), en cok 1.0.
 //   Optik carpanindan SONRA uygulanir. Kapatma: lambs_danger_skillCarpan = 1.
-private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1.2];
+private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1];
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
 private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.45];
@@ -156,7 +155,7 @@ private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 
 {
     private _o = _u skill _x;
     private _kat = if (_x isEqualTo "aimingAccuracy") then {_katI} else {_cpn};
-    private _n = (_o * _kat) min ([missionNamespace getVariable ["lambs_danger_skillTavanHiz", 0.98], _tavanI] select (_x isEqualTo "aimingAccuracy"));
+    private _n = (_o * _kat) min ([missionNamespace getVariable ["lambs_danger_skillTavanHiz", 0.9], _tavanI] select (_x isEqualTo "aimingAccuracy"));
     _u setSkill [_x, _n];
     _yeni pushBack format ["%1 x%2 -> %3", _x, _kat, _n toFixed 2];
 } forEach ["aimingAccuracy", "aimingSpeed"];

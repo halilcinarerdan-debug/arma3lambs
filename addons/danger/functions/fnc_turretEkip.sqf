@@ -30,7 +30,7 @@ diag_log "[TURRET-EKIP] LAMBS Turrets algilandi: tank/hava disi silahli arac + s
     while {true} do {
         sleep 5;
         if (!(missionNamespace getVariable ["lambs_danger_turretEkipAktif", true])) then { continue };
-        private _sk = missionNamespace getVariable ["lambs_danger_turretEkipSkill", 0.85];
+        private _sk = missionNamespace getVariable ["lambs_danger_turretEkipSkill", 0.6];
         if (_sk <= 0) then { continue };
         {
             private _v = _x;
