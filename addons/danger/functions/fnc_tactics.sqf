@@ -159,7 +159,19 @@ if (
     // Onceki taktik kilitlerini temizle
     _group setVariable [QGVAR(isExecutingTactic), nil];
 
-    private _karar = [_group, _target] call FUNC(commanderAssess);
+    // v8.579 PERFORMANS (Parca 1: taktik cekirdek): komutan karari grup basina 1.0 sn onbelleklenir. Eskiden her birimin her tehlike olayinda tam analiz (350 m nearEntities + zirh taramasi + guc orani) calisiyordu;
+    //   5-10 asker ayni anda ayni karari yeniden hesapliyordu. Karar 1 sn icinde degisebilecek kadar hizli degismez; onbellek [zaman, karar]. CBA komutanKararOnbellek (acik); kapaliyken eski davranis.
+    private _t0A = diag_tickTime;
+    private _karar = "";
+    private _onb = _group getVariable [QGVAR(cmdOnbellek), []];
+    if ((missionNamespace getVariable ["lambs_danger_komutanKararOnbellek", true]) && {_onb isNotEqualTo []} && {(time - (_onb select 0)) < 1.0}) then {
+        _karar = _onb select 1;
+        ["commanderAssess-onbellek", -1] call FUNC(perfKayit);
+    } else {
+        _karar = [_group, _target] call FUNC(commanderAssess);
+        _group setVariable [QGVAR(cmdOnbellek), [time, _karar]];
+        ["commanderAssess", _t0A] call FUNC(perfKayit);
+    };
     if (_senaryo && {_karar in ["DELAY", "SUPPRESS_ASSAULT", "FLANK", "ASSAULT", "AT_ENGAGE"]}) then { _karar = "SENARYO-YOK"; };   // bounding (varsayilan dal) + HOLD + geri cekilme SERBEST; rota degistiren / hucum karari yok
 
         switch (_karar) do {
