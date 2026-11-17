@@ -34,7 +34,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
         sleep 1.5;
         if !(missionNamespace getVariable ["lambs_danger_ufukAlgi", true]) then { continue };
         private _menzil = missionNamespace getVariable ["lambs_danger_ufukSpotM", 700];
-        private _spotHiz = (missionNamespace getVariable ["lambs_danger_ufukSpotHiz", 1]) max 0 min 3;
+        private _spotHiz = (missionNamespace getVariable ["lambs_danger_ufukSpotHiz", 1]) max 0 min 6;
         private _gece = (sunOrMoon < 0.2);
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}

@@ -3743,3 +3743,7 @@ v8.593 (dal sade-waypoint) SIPERDE ALCAK DURUS (kullanici: 'el bombasi calisti; 
  - fnc_coverHug: dusmandan gizli en yuksek durus secildikten sonra CBA lambs_danger_siperDusuk (0 = eski, 1 = bir kademe alcak [varsayilan], 2 = iki kademe alcak) kadar kademe alcaltilir (UP -> MIDDLE -> DOWN); baski altinda zaten bir kademe daha. Durus setUnitPosWeak (ates gerekirse motor kalkabilir). Yapisma mesafesi coverHugMesafe (0.10-0.7; v8.588 hassas raycast) ayni.
  - SINIR / DOGRULANMADI: alcak durus botun gormesini / atesini kisitlayabilir (yatik asker siperin ustunu goremez; 'weak' ile motor kalkabilir ama gecikme olur); yalniz sipere yapisma izleyicisinin kapsadigi askerler (oyuncu grubu muaf); gozle: bot cok az ates ediyorsa siperDusuk'u 1'e indir. NOT: oyunda denenmedi.
 
+v8.594 (dal sade-waypoint) EN ZOR: TAVANLAR ACILDI (kullanici: 'en zora cek'; insansi olmasinlar).
+ - CBA slider tavanlari: botAdimCarpan 3 -> 6, ufukSpotM 1200 -> 1800, ufukSpotHiz 3 -> 6 (kodda min 3 -> min 6), konusmaM 200 -> 400. fnc_botIsabet: mermi yonu duzeltme siniri +-8 -> +-15 derece (isabetYardim 1 iken uzak mesafede de tam duzeltme).
+ - SINIR / DOGRULANMADI: ufuk spot menzili 1800 m taramasi CPU maliyeti OLCULMEDI (fnc_ufukAlgi); +-15 derece duzeltme aimbot benzeri; konusma 400 m duvar / arazi engelsiz (hile benzeri). NOT: oyunda denenmedi.
+

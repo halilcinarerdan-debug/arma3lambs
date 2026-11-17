@@ -9,7 +9,7 @@
  *     (2) mermi yonu hatasi (1 - 1 / seviye) oraninda duzeltilir (isabet seviyesi ~ 1 / hata varsayimi: 1.25 -> %20, 1.30 -> %23, 1.5 -> %33).
  *   - CBA isabetYardim (0-1): seviyeden bagimsiz dogrudan mermi yonu duzeltme orani; ikisi birlikte ise buyuk olan gecerli.
  * MERMI YONU DUZELTME: bot (oyuncusuz grup, yerel mermi) bilinen dusman piyadeye <= 600 m BulletBase mermisi attiginda (hedef = assignedTarget, yoksa en yakin dusman; SuppressTarget / nokta bastirma sayilmaz) mermi hizinin yonu
- *   (azimut + yukselme) hedefe (aimPos + hedef hizi x ucus suresi onculu; yercekimi dusmesi 0.5 g t^2 telafili, ucus suresi = menzil / (hiz x 0.9)) olan hatanin orani kadar duzeltilir; her eksende en cok +-8 derece (v8.592; eskiden +-4).
+ *   (azimut + yukselme) hedefe (aimPos + hedef hizi x ucus suresi onculu; yercekimi dusmesi 0.5 g t^2 telafili, ucus suresi = menzil / (hiz x 0.9)) olan hatanin orani kadar duzeltilir; her eksende en cok +-15 derece (v8.594; v8.592: +-8; eskiden +-4).
  * SINIR: setVelocity'nin tum mermi turlerinde / ACE Advanced Ballistics ile calistigi DENENMEDI; hava surtunmesi modellenmedi; hile benzeri (aimbot yardimi). Log: [ISABET-SEVIYE] (ilk 10).
  *
  * Arguments: None
@@ -76,8 +76,8 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
     private _elI = atan ((((_d2 select 2) + (0.5 * 9.81 * _tof * _tof))) / _R2);
     private _azC = (_v select 0) atan2 (_v select 1);
     private _elC = atan ((_v select 2) / _vh);
-    private _dAz = ((((_azI - _azC) + 540) mod 360) - 180) max -8 min 8;
-    private _dEl = ((_elI - _elC) max -8) min 8;
+    private _dAz = ((((_azI - _azC) + 540) mod 360) - 180) max -15 min 15;
+    private _dEl = ((_elI - _elC) max -15) min 15;
     private _azN = _azC + (_dAz * _yrd);
     private _elN = _elC + (_dEl * _yrd);
     _proj setVelocity ([(sin _azN) * (cos _elN), (cos _azN) * (cos _elN), sin _elN] vectorMultiply _sp);
