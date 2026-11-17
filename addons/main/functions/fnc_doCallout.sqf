@@ -143,6 +143,7 @@ if (lambs_main_cagriLogN < 300) then {
 playSound3D [_sound, _unit, isNull (objectParent _unit), eyePos _unit, 5, pitch _unit, _distance];
 // v8.535 KONUSMA: callout suresince (~2.2 sn) bu birim 'konusuyor' (STEALTH degilse dusman kisitli mesafede duyar; fnc_adimKonusma)
 _unit setVariable ["lambs_danger_konusmaBit", serverTime + 2.2, true];
+_unit setVariable ["lambs_danger_konusmaMes", _distance, true];   // v8.573: callout sesinin GERCEK duyulma mesafesi (playSound3D maxDistance) - bilgi aktarimi da ayni menzilde (eskiden sabit 60 m; RPT: konusma duyulma 0)
 [_unit, true] remoteExecCall ["setRandomLip", 0];
 [{
     _this remoteExecCall ["setRandomLip", 0];

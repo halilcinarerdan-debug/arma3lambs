@@ -67,7 +67,7 @@ if (hasInterface) then {
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["adim", 0], ["konusma", 0]];
+    private _say = createHashMapFromArray [["adim", 0], ["konusma", 0], ["olay", 0], ["enYakin", 1e9]];
     private _ozetT = time + 60;
     private _hizTablo = [["road", 1.3], ["conc", 1.3], ["asph", 1.3], ["rock", 1.3], ["stone", 1.3]];
     private _davK = createHashMapFromArray [["CARELESS", 0.5], ["SAFE", 0.8], ["AWARE", 1], ["COMBAT", 1.1], ["STEALTH", 1.2]];
@@ -90,7 +90,21 @@ if (hasInterface) then {
                 if (_sSide isEqualTo civilian) then { continue };
                 private _sPos = getPosATL _s;
                 private _sEye = eyePos _s;
-                private _konMs = _konM * ((_s getVariable ["lambs_danger_konusmaCarpan", 1]) max 0.15 min 1.9);   // ACRE2 ses seviyesi (fisilti / normal / bagirma) menzili olcekler
+                // v8.573: callout (bot) konusmasinda menzil = sesin GERCEK duyulma mesafesi (lambs_danger_konusmaMes, playSound3D maxDistance 100-125 m); eskiden yalniz sabit CBA konusmaM (60 m) -> konusma duyulma 0
+                private _konMs = ((_konM * ((_s getVariable ["lambs_danger_konusmaCarpan", 1]) max 0.15 min 1.9)) max (_s getVariable ["lambs_danger_konusmaMes", 0])) * (missionNamespace getVariable ["lambs_danger_konusmaOlcek", 1]);
+                // TESHIS: her konusma OLAYI icin en yakin dusman mesafesi (menzilde kimse yoksa 0 etki normal)
+                private _bitS = _s getVariable ["lambs_danger_konusmaBit", 0];
+                if (_bitS isNotEqualTo (_s getVariable ["lambs_danger_konSayBit", 0])) then {
+                    _s setVariable ["lambs_danger_konSayBit", _bitS];
+                    _say set ["olay", (_say get "olay") + 1];
+                    private _dn = 1e9;
+                    { if (alive _x && {(side group _x) isNotEqualTo civilian} && {((side group _s) getFriend (side group _x)) < 0.6}) then { _dn = _dn min (_s distance _x); }; } forEach (_s nearEntities ["CAManBase", 400]);
+                    _say set ["enYakin", (_say get "enYakin") min _dn];
+                    if ((missionNamespace getVariable ["lambs_danger_konOlayN", 0]) < 12) then {
+                        missionNamespace setVariable ["lambs_danger_konOlayN", (missionNamespace getVariable ["lambs_danger_konOlayN", 0]) + 1];
+                        diag_log format ["[KONUSMA-OLAY] %1 (%2) konustu | ses menzili %3 m | en yakin dusman %4 m | %5", name _s, ["bot", "OYUNCU"] select (isPlayer _s), round _konMs, if (_dn > 399) then {">400"} else {str (round _dn)}, ["MENZIL DISI (etki yok)", "menzilde dusman var"] select (_dn <= (_konMs * 1.8))];
+                    };
+                };
                 {
                     private _b = _x;
                     if (_tepki >= 24) exitWith {};
@@ -175,10 +189,11 @@ if (hasInterface) then {
 
         if (time > _ozetT) then {
             _ozetT = time + 60;
-            if (((_say get "adim") + (_say get "konusma")) > 0) then {
-                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: bot ayak sesi duyulma %1 | konusma duyulma %2", _say get "adim", _say get "konusma"];
+            if (((_say get "adim") + (_say get "konusma") + (_say get "olay")) > 0) then {
+                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: bot ayak sesi duyulma %1 | konusma olayi %2 (en yakin dusman %3 m) | konusma duyulma %4", _say get "adim", _say get "olay", if ((_say get "enYakin") > 399) then {">400"} else {str (round (_say get "enYakin"))}, _say get "konusma"];
             };
-            { _say set [_x, 0]; } forEach ["adim", "konusma"];
+            { _say set [_x, 0]; } forEach ["adim", "konusma", "olay"];
+            _say set ["enYakin", 1e9];
         };
     };
 };

@@ -137,13 +137,18 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                 };
             };
             // gorev bayragi: dispersion / buddyBond / roleStation diger birimleri yonetirken buna dokunmaz; sure dolmasin
-            _u setVariable [QGVAR(stationPos), [_g getVariable [QGVAR(rearGuardPos), _hedef], "MIDDLE", _lPos getPos [40, _arka], time, true]];
+            // v8.573 ENTEGRASYON (fnc_gelisYonu): bilinen dusman varken arka gozcunun bakisi ARKA SEKTORDEKI gelis yollarina (acik gorus / yol / kapi) cevrilir; gelisYonu taze bir aday (15 sn) yayinladiysa o kullanilir
+            private _gyP = _u getVariable [QGVAR(gelisArkaPoz), []];
+            private _gyTaze = _gyP isNotEqualTo [] && {time < (_u getVariable [QGVAR(gelisArkaT), 0])};
+            _u setVariable [QGVAR(stationPos), [_g getVariable [QGVAR(rearGuardPos), _hedef], "MIDDLE", [_lPos getPos [40, _arka], _gyP] select _gyTaze, time, true]];
             _u setVariable [QGVAR(stationDirty), true];
             if ((_u distance2D (_g getVariable [QGVAR(rearGuardPos), _hedef])) < 5) then {
                 _u setUnitPosWeak "MIDDLE";
                 // v8.500r: arka yon duvar / arazi ile kapaliysa (1 m'de duvar) acik yone kayar; hicbiri acik degilse bakis serbest
                 private _byA = [_u, _arka, [0, 25, -25, 50, -50]] call FUNC(bakisAcikYon);
-                if (_byA > -900) then { _u doWatch (_lPos getPos [30, _byA]); } else { _u doWatch objNull; };
+                if (_gyTaze) then { _u doWatch (_gyP vectorAdd [0, 0, 1.4]); } else {
+                    if (_byA > -900) then { _u doWatch (_lPos getPos [30, _byA]); } else { _u doWatch objNull; };
+                };
             };
         } forEach (allGroups select {!isNull leader _x});   // v8.502: senaryo modunda SERBEST (liderin arkasinda 9 m, rota degistirmez)
     };
