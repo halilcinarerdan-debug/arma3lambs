@@ -75,47 +75,58 @@ lambs_danger_patlayiciDon = {
                     private _D = ((_rel select 0) - (_hedef select 0)) ^ 2;
                     _D = sqrt (_D + (((_rel select 1) - (_hedef select 1)) ^ 2));
                     private _dh = ((_hedef select 2) + 0.3) - (_rel select 2);
+                    // v8.595 YAY ACISI ARAMASI (RPT 38287827: 14 denemeden 12'si 'yay uzerinde engel'; engel Land_Radar_01_HQ_F yay noktasi 6-8/8 = hedefin binasi / pencere onu): eskiden yalniz 40 / 50 / 60 derece, ilk aci
+                    //   secilip engel varsa vazgecilirdi. Simdi aci adaylari sirayla denenir (40, 50, 60, sonra DUZ yaylar 25 / 32 / 18 / 12 [pencere / kapidan iceri duz atis], 68); her aday icin hiz (<= 26 m/sn) + GEOM yay kontrolu;
+                    //   ilk TEMIZ yay atilir; hicbiri temiz degilse ilk engelin adi loglanir. Bina duvari GEOM'da kapaliysa (pencere acik degilse) yine atilmaz (bomba geri seker).
                     private _v = -1;
                     private _th = 0;
+                    private _vel = [];
+                    private _engelAd = "";
+                    private _engelI = 0;
+                    private _denenen = 0;
+                    private _yon = _rel getDir _hedef;
                     {
-                        private _payda = (_D * (tan _x)) - _dh;
-                        if (_v < 0 && {_payda > 0.5}) then {
-                            private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _x) ^ 2) * _payda));
-                            if (_vv <= 26) then { _v = _vv; _th = _x; };
-                        };
-                    } forEach [40, 50, 60];
-                    if (_v < 0) then { _sonuc = "menzil / yukseklik uygun degil"; } else {
-                        _v = _v * (1 + ((random 0.1) - 0.05));
-                        private _yon = _rel getDir _hedef;
-                        private _vel = [(sin _yon) * (cos _th) * _v, (cos _yon) * (cos _th) * _v, (sin _th) * _v];
-                        // yay temizligi: 6 noktada
-                        // v8.591 YAY TEMIZLIGI (RPT b3f29106 / aa5e787e: 9 denemeden 4'u 'yay uzerinde engel', 14-35 m): eskiden lineIntersects (gorus geometrisi: dal / yaprak / askerin kendi siperi dahil) 6 noktada;
-                        //   simdi GEOM LOD (bombanin fiziksel carptigi geometri) lineIntersectsSurfaces, ilk segment (atici gogsu / kendi siperi) atlanir, 8 nokta; engel adi RPT'ye yazilir.
-                        private _tTop = _D / ((cos _th) * _v max 1);
-                        private _onceki = _rel;
-                        private _engel = false;
-                        private _engelAd = "";
-                        private _engelI = 0;
-                        for "_i" from 1 to 8 do {
-                            private _tt = _tTop * (_i / 8) * 0.92;
-                            private _nokta = _rel vectorAdd [(_vel select 0) * _tt, (_vel select 1) * _tt, ((_vel select 2) * _tt) - (4.905 * _tt * _tt)];
-                            private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
-                            if (_ht isNotEqualTo []) exitWith {
-                                _engel = true;
-                                _engelI = _i;
-                                private _eo = (_ht select 0) select 2;
-                                _engelAd = if (isNull _eo) then {"arazi / nesne"} else { [typeOf _eo, (getModelInfo _eo) select 0] select ((typeOf _eo) isEqualTo "") };
+                        if (_v >= 0) then { continue };
+                        private _a = _x;
+                        private _payda = (_D * (tan _a)) - _dh;
+                        if (_payda > 0.5) then {
+                            private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _a) ^ 2) * _payda));
+                            if (_vv <= 26) then {
+                                private _vk = _vv * (1 + ((random 0.1) - 0.05));
+                                private _vl = [(sin _yon) * (cos _a) * _vk, (cos _yon) * (cos _a) * _vk, (sin _a) * _vk];
+                                private _tTop = _D / ((cos _a) * _vk max 1);
+                                private _onceki = _rel;
+                                private _engel = false;
+                                private _ad = "";
+                                private _ni = 0;
+                                for "_i" from 1 to 8 do {
+                                    private _tt = _tTop * (_i / 8) * 0.92;
+                                    private _nokta = _rel vectorAdd [(_vl select 0) * _tt, (_vl select 1) * _tt, ((_vl select 2) * _tt) - (4.905 * _tt * _tt)];
+                                    private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
+                                    if (_ht isNotEqualTo []) exitWith {
+                                        _engel = true;
+                                        _ni = _i;
+                                        private _eo = (_ht select 0) select 2;
+                                        _ad = if (isNull _eo) then {"arazi / nesne"} else { [typeOf _eo, (getModelInfo _eo) select 0] select ((typeOf _eo) isEqualTo "") };
+                                    };
+                                    _onceki = _nokta;
+                                };
+                                _denenen = _denenen + 1;
+                                if (_engel) then {
+                                    if (_engelAd isEqualTo "") then { _engelAd = _ad; _engelI = _ni; };
+                                } else { _v = _vk; _th = _a; _vel = _vl; };
                             };
-                            _onceki = _nokta;
                         };
-                        if (_engel) then { _sonuc = format ["yay uzerinde engel (%1, yay noktasi %2/8) - atilmadi", _engelAd, _engelI]; } else {
-                            private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
-                            _gr setPosASL _rel;
-                            _gr setVelocity _vel;
-                            _gr setShotParents [_u, _u];
-                            _u removeMagazine _mag;
-                            _sonuc = format ["ATILDI (hedef %1 m, aci %2, hiz %3 m/sn, dagilma %4 m)", round _D, _th, _v toFixed 1, _dag toFixed 1];
-                        };
+                    } forEach [40, 50, 60, 25, 32, 18, 12, 68];
+                    if (_v < 0) then {
+                        _sonuc = if (_denenen isEqualTo 0) then {"menzil / yukseklik uygun degil"} else { format ["yay uzerinde engel (%1, yay noktasi %2/8; %3 aci denendi) - atilmadi", _engelAd, _engelI, _denenen] };
+                    } else {
+                        private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
+                        _gr setPosASL _rel;
+                        _gr setVelocity _vel;
+                        _gr setShotParents [_u, _u];
+                        _u removeMagazine _mag;
+                        _sonuc = format ["ATILDI (hedef %1 m, aci %2, hiz %3 m/sn, dagilma %4 m)", round _D, _th, _v toFixed 1, _dag toFixed 1];
                     };
                 } else { _sonuc = "hedef / bomba kayboldu"; };
             }; }; };
@@ -263,7 +274,7 @@ lambs_danger_patlayiciDon = {
                     private _m = _u distance _o;
                     private _k = ({ (_x select 4) isNotEqualTo _o && {(_x select 4) distance _o < 8} } count _dusman) + 1;
                     private _kp = lineIntersects [eyePos _u, eyePos _o, _u, _o];
-                    private _bn = (insideBuilding _o) > 0.5;
+                    private _bn = (insideBuilding _o) > 0.2;
                     if (_m < _enM && {_k >= 2 || _kp || _bn || _baski || _pusu || {_cqbBomba && {_m <= _cqbM}}}) then { _enIyi = _o; _enM = _m; _kumeN = _k; _kapali = _kp; _binada = _bn; };
                 } forEach _dusman;
                 // v8.316 DEGER SARTI VAR AMA ESNEK (kullanici: 'deger sarti olsun ama esnetilsin'; v8.315 sarti tamamen kaldirmisti): el bombasi hedefi 10-60 m, temasta bilinen dusman piyade ve ASAGIDAKILERDEN EN AZ BIRI:
@@ -282,7 +293,7 @@ lambs_danger_patlayiciDon = {
                     if (_m >= _bombaMin && {_m <= _bombaMax} && {_m < _bM}) then {
                         _bAday = true;
                         private _kk = ({ (_x select 4) isNotEqualTo _o && {((_x select 4) distance _o) < 12} } count _dusman) + 1;
-                        private _deger = _kk >= 2 || {(insideBuilding _o) > 0.5} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
+                        private _deger = _kk >= 2 || {(insideBuilding _o) > 0.2} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
                             || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu} || {_cqbBomba && {_m <= _cqbM}};
                         if (_deger) then { _bH = _o; _bM = _m; };
                     };
