@@ -12,7 +12,7 @@
  * Calisma: catisma halindeki yerel AI gruplarinda, duran (speed < 0.6), binada olmayan, aractan inmis askerlerde
  * 1.5 sn'de bir (en fazla 5 asker / tik):
  *   1) en yakin bilinen dusmanin gozunden askere ray -> hattaki ILK sert (FIRE geometri) yuzey bulunur
- *   2) yuzey 3.5 m icindeyse: hedef nokta = yuzeyin 0.45 m ARKASI (dusman -> asker yonunde); en fazla 2.2 m kayar
+ *   2) yuzey 3.5 m icindeyse: hedef nokta = yuzeyin hug mesafesi ARKASI (v8.588: askere bakan yuzden + yuzey normali; eskiden dusman -> asker yonunde); en fazla 2.2 m kayar
  *      (0.3 sn'lik yumusak kayma, isinlanma yok)
  *   3) durus: bas + iki omuz noktasi dusmandan gizliyse o stance (UP > MIDDLE > DOWN); hicbiri degilse DOWN
  *   - ayni noktada 20 sn tekrar etmez; ayni noktada kalan askere dokunmaz
@@ -184,13 +184,29 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 };
 
                 private _dir = vectorNormalized (_uASL vectorDiff _eASL);
-                private _tASL = _hP vectorAdd (_dir vectorMultiply (missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.30]));   // 45 -> 35 cm (kullanici: daha yapisik)
+                // v8.588 HASSAS SIPER NOKTASI (kullanici: 'sipere yapisma yakinligini arttir, daha profesyonel raycast hesaplasin, daha dogru ve daha yakin'): eskiden hedef nokta = dusman tarafindaki ILK yuzey + hug mesafesi (isin yonunde);
+                //   kalin engelde (duvar / kaya / bina kosesi) bu nokta engelin ICINE dusebiliyor, egik isinda gercek mesafe de hug x cos(aci) kaliyordu. Simdi: askerden dusmana TERS isin -> askere BAKAN ilk sert yuz;
+                //   hedef = o yuz + yuzey NORMALI (yatay izdusum, askere bakacak sekilde yonlendirilmis) x hug. Yuz yok / cok uzak (> 2.5 m kalinlik) / yatay yuzey ise eski formul (yedek).
+                private _hugM = ((missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.17]) max 0.1) min 0.7;
+                private _tASL = _hP vectorAdd (_dir vectorMultiply _hugM);
+                private _nokta = "yedek";
+                private _ters = lineIntersectsSurfaces [_uASL, _eASL, _u, _en, true, 1, _lodK, "NONE"];
+                if (_ters isNotEqualTo []) then {
+                    private _fp = (_ters select 0) select 0;
+                    private _fn = (_ters select 0) select 1;
+                    if ((_fn vectorDotProduct (vectorNormalized (_eASL vectorDiff _uASL))) > 0) then { _fn = _fn vectorMultiply -1; };
+                    private _fnH = [_fn select 0, _fn select 1, 0];
+                    if ((vectorMagnitude _fnH) > 0.3 && {(_fp distance _hP) <= 2.5}) then {
+                        _tASL = _fp vectorAdd ((vectorNormalized _fnH) vectorMultiply _hugM);
+                        _nokta = "ters";
+                    };
+                };
                 _tASL set [2, _pASL select 2];
                 private _t = ASLToATL _tASL;
                 _t set [2, (getPosATL _u) select 2];
 
                 private _kayma = (getPosATL _u) distance2D _t;
-                private _yapisik = _kayma < 0.15;
+                private _yapisik = _kayma < 0.08;   // v8.588: 0.15 -> 0.08 (daha yakin hedef gercekten uygulansin; ayni noktada 20 sn tekrar yok)
 
                 // yeni nokta gecerli mi: su yok, 2.5 m icinde dost yok (v8.39: 0.9 -> 2.5, siperde yigilma yok), kayma <= 2.2 m, yon dusmana dogru
                 if (!_yapisik) then {
@@ -239,7 +255,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 } forEach [["UP", 1.62], ["MIDDLE", 1.08], ["DOWN", 0.38]];
 
                 // TEK yumusak kayma: son nokta (yuzey + 35 cm + yanal ince ayar); en fazla 4.5 m, 8 adim
-                if (!surfaceIsWater _t && {((getPosATL _u) distance2D _t) >= 0.15} && {((getPosATL _u) distance2D _t) <= 4.5}) then {
+                if (!surfaceIsWater _t && {((getPosATL _u) distance2D _t) >= 0.08} && {((getPosATL _u) distance2D _t) <= 4.5}) then {
                     [_u, getPosATL _u, _t] spawn {
                         params ["_a", "_p0", "_p1"];
                         for "_k" from 1 to 8 do {
@@ -265,8 +281,8 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
 
                 if (missionNamespace getVariable ["lambs_danger_coverHugLog", false]) then {
                     diag_log format [
-                        "[SIPER-YAPIS] %1 | %2 | yuzey %3 m | kayma %4 m | durus %5 | dusman %6 m",
-                        groupId _g, name _u, _d toFixed 2, _kayma toFixed 2, _durus, round _ed
+                        "[SIPER-YAPIS] %1 | %2 | yuzey %3 m | kayma %4 m | durus %5 | dusman %6 m | nokta %7 (hug %8 m)",
+                        groupId _g, name _u, _d toFixed 2, _kayma toFixed 2, _durus, round _ed, _nokta, _hugM toFixed 2
                     ];
                 };
             } forEach ([units _g, [], {   // v8.522: grubun en yakin dusmanina gore siralama (en one cikan asker ilk siperi alir)
