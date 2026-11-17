@@ -32,7 +32,7 @@
  * Public: No
 */
 
-params [["_g", grpNull, [grpNull]]];
+params [["_g", grpNull, [grpNull]], ["_saldiri", false, [false]], ["_hedefBina", objNull, [objNull]]];   // v8.598: SALDIRI modu (fnc_binaSaldiri): temasta, binadaki dusmana koordineli giris
 if (isNull _g || {!local _g}) exitWith {false};
 if (_g getVariable [QGVAR(isSweeping), false]) exitWith {false};
 
@@ -63,8 +63,8 @@ private _iptalMi = {
                     if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isATEngage), false]}) then { _sb = "taktik basladi"; } else {
                         if ((({alive _x && {isNull objectParent _x}} count (units _g)) < 3)) then { _sb = "az asker"; } else {
                             private _en = _l findNearestEnemy _l;
-                            if (!isNull _en && {alive _en} && {(_l distance2D _en) < 120}) then { _sb = "dusman yakin"; } else {
-                                if (({alive _x && {(getSuppression _x) > 0.45}} count (units _g)) > 0) then { _sb = "baski"; };
+                            if (!_saldiri && {!isNull _en} && {alive _en} && {(_l distance2D _en) < 120}) then { _sb = "dusman yakin"; } else {
+                                if (({alive _x && {(getSuppression _x) > ([0.45, 0.8] select _saldiri)}} count (units _g)) > 0) then { _sb = "baski"; };
                             };
                         };
                     };
@@ -229,10 +229,11 @@ private _govde = {
     private _adaylar = (nearestObjects [_merkez, ["House"], 70]) select {(count (_x buildingPos -1)) >= 2};
     _adaylar = [_adaylar, [], {_x distance2D _merkez}, "ASCEND"] call BIS_fnc_sortBy;
     _adaylar = _adaylar select [0, 3];
+    if (_saldiri && {!isNull _hedefBina}) then { _adaylar = [_hedefBina]; };   // v8.598: saldirida yalniz dusmanin bulundugu bina
 
     diag_log format [
-        "[BINA-TEMIZLE] %1 | BASLA | asker:%2 | bina:%3 | tehdit yonu:%4",
-        _grpAd, count _uyeler0, count _adaylar, round _tehditYonu
+        "[BINA-TEMIZLE] %1 | BASLA%5 | asker:%2 | bina:%3 | tehdit yonu:%4",
+        _grpAd, count _uyeler0, count _adaylar, round _tehditYonu, ["", " (SALDIRI: temasta binadaki dusman)"] select _saldiri
     ];
 
     private _sonMerkez = _merkez;
@@ -316,6 +317,13 @@ private _govde = {
         } forEach _takimlar;
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
         [12, _postlar] call _bekle;
+        // v8.598 BOMBA SENKRONU (SALDIRI): yigilma sonrasi <= 6 sn patlayici izleyicisinin bombasini bekle; atildiysa ~3.5 sn (fitil) sonra gir
+        if (_saldiri && {!(call _iptalMi)}) then {
+            private _bk = time + 6;
+            waitUntil { sleep 0.5; (time > _bk) || {(time - (_g getVariable [QGVAR(bombaGT), -999])) < 5} || {call _iptalMi} };
+            private _bt = _g getVariable [QGVAR(bombaGT), -999];
+            if ((time - _bt) < 5) then { sleep ((3.5 - (time - _bt)) max 0); };
+        };
         if (call _iptalMi) exitWith {};
 
         // 2) Oda oda temizle
@@ -404,13 +412,31 @@ private _govde = {
         if (call _iptalMi) exitWith {};
         _temizBina = _temizBina + 1;
 
-        // 3) Cikis: giris takimi disarida halkaya katilir
+        // 2b) ODA PUSUSU (v8.598; kullanici: 'odalari arastirip onlarda pusabilsinler'): giris takimindan en cok 2 asker binanin en derin (giristen uzak, ayni kat) oda noktasinda bekler (fnc_odaPusu).
+        //   LAMBS Garrison / CQB gorevi / kal-bekle waypoint'li grupta atama yok (senaryoKapi sabit kapisi).
+        private _pusuS = missionNamespace getVariable ["lambs_danger_binaPusu", 90];
+        if (_pusuS > 0 && {!([_g, "odaPusu", true] call FUNC(senaryoKapi))}) then {
+            private _derin = [_secilen select {(abs ((_x select 2) - (_giris select 2))) < 1.8}, [], {-(_x distance2D _giris)}, "ASCEND"] call BIS_fnc_sortBy;
+            private _pusuUye = (_icerde select {alive _x && {_x isNotEqualTo (leader _g)} && {([_x] call _rolFn) isNotEqualTo "MEDIC"}}) select [0, 2];
+            {
+                private _poz = _derin param [_forEachIndex, []];
+                if (_poz isNotEqualTo []) then {
+                    _x setVariable [QGVAR(odaPusuBit), time + _pusuS];
+                    _x setVariable [QGVAR(odaPusuPoz), _poz];
+                    _x setVariable [QGVAR(odaPusuKapi), _giris getPos [3, _bPos getDir _giris]];
+                    _x setVariable [QGVAR(taktikKilit), time + _pusuS];
+                    diag_log format ["[ODA-PUSU] %1 | %2 | pusu noktasi giristen %3 m (z %4 m) | %5 sn", _grpAd, name _x, round (_poz distance2D _giris), (_poz select 2) toFixed 1, _pusuS];
+                };
+            } forEach _pusuUye;
+        };
+
+        // 3) Cikis: giris takimi disarida halkaya katilir (pusudakiler haric)
         {
             if (alive _x) then {
                 _x doWatch objNull;
                 _x doMove (_giris getPos [8, _bPos getDir _giris]);
             };
-        } forEach _icerde;
+        } forEach (_icerde select {(_x getVariable [QGVAR(odaPusuBit), 0]) <= time});
         [8, _postlar] call _bekle;
     } forEach _adaylar;
 
@@ -418,7 +444,7 @@ private _govde = {
     if !(call _iptalMi) then {
         private _tum = (units _g) select {
             alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
-            && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x getVariable [QGVAR(odaPusuBit), 0]) <= time}
         };
         if ((count _tum) >= 2) then {
             private _pk = [_sonMerkez, 14, _tehditYonu, _tum] call _halkaFn;
@@ -447,7 +473,7 @@ if (!isNull _g && {(_g getVariable [QGVAR(sweepToken), ""]) isEqualTo _token}) t
     if (!_baskaTaktik) then { _g setVariable [QGVAR(isExecutingTactic), nil]; };
 
     {
-        if (alive _x) then {
+        if (alive _x && {(_x getVariable [QGVAR(odaPusuBit), 0]) <= time}) then {   // v8.598: pusudakiler (fnc_odaPusu) kendi suresinde birakilir
             _x doWatch objNull;
             _x setUnitPos "AUTO";
             _x setVariable [QGVAR(swpMoveT), nil];
