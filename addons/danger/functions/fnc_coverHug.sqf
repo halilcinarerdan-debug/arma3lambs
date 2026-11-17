@@ -267,6 +267,10 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     };
                 };
 
+                // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)
+                for "_k" from 1 to ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0 min 2) do {
+                    _durus = switch (_durus) do { case "UP": {"MIDDLE"}; default {"DOWN"} };
+                };
                 // baski altinda bir kademe alcal
                 if ((getSuppression _u) > 0.35) then {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; case "MIDDLE": {"DOWN"}; default {"DOWN"} };
