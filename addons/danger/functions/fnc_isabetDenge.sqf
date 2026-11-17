@@ -10,6 +10,7 @@
  *   YEREL botlarin aimingAccuracy degerini (skill / eskiK) x yeniK olarak yeniden olcekler (becerisi varsayilanSkill ile atanmis, ALiVE / disableAI olmayan, oyunculu grupta olmayan birimler).
  * SINIRLAR: oyuncu / bot isabeti AYNI KOSULLARDA olculmez (siper, gorunurluk, silah, optik farkli): bant bazli karsilastirma yalniz mesafeyi esitler. Hit olayi atici ile kurbanin makinesine bagli: mermi turunu ('son mermi' degiskeni) yalniz
  *   ATICI YEREL ise okur (tek makine / host'ta tam, dedicated sunucuda uzak oyuncu isabeti eksik kalir -> o durumda oyuncu orani dusuk olcunur). Patlama / el bombasi hasari sayilmaz.
+ * ISABET SEVIYESI (v8.571, CBA isabetSeviye > 1): bot aimingAccuracy / aimingShake 1.0'a sabitlenir (eski deger saklanir, seviye <= 1 olunca geri yazilir) + yardim 1 - 1 / seviye; isabetDenge K olcekleme dongusu o zaman DURUR (olcum surer).
  * ISABET YARDIMI (v8.569, CBA isabetYardim, varsayilan 0): bkz. Fired isleyicisi - bot mermisinin yonu hataya gore duzeltilir (aimingAccuracy 1 siniri disina cikmak icin).
  * Log: [ISABET-DENGE] (60 sn'de bir: bant bazli oyuncu / bot atis + isabet + oran, K, aksiyon). Kapatma: CBA isabetDenge = false (olcum surer).
  *
@@ -47,6 +48,10 @@ lambs_danger_isabetBant = _bant;
     // v8.569 ISABET YARDIMI (kullanici: 'oyunun 1 limiti disinda'): aimingAccuracy en cok 1 olur; botun mermisinin yonu, hedefe (onculu + dusme telafili) olan HATANIN CBA isabetYardim orani kadari duzeltilir (hata <= 4 derece).
     //   Hile benzeri (aimbot yardimi): 0 = kapali (varsayilan). Yalniz oyuncusuz grup / bot, yerel mermi, <= 600 m.
     private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
+    // v8.571 ISABET SEVIYESI (kullanici: 'oyuncu 1.25 hatta 1.30 da siki, o seviyeye getir, 1 in ustune ciksin'): seviye S > 1 ise bot becerisi 1.0 (azami) olur ve mermi hatasi (1 - 1 / S) oraninda duzeltilir
+    //   (isabet seviyesi ~ 1 / hata: S = 1.25 -> hata x0.80 -> yardim 0.20; S = 1.30 -> 0.23; S = 1.5 -> 0.33). isabetYardim ile birlikte ise buyuk olan gecerli.
+    private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
+    if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
     // v8.570 TEST (kullanici: 'oyuncu olarak ayni seviyeyi istiyorum, bir test etmek icin'): CBA isabetYardimOyuncu aciksa AYNI yardim OYUNCUNUN mermisine de uygulanir (hedef = imlecin altindaki dusman asker)
     if (_yrd > 0 && {!isNull _proj} && {(!_oy && {((units group _u) findIf {isPlayer _x}) < 0}) || {_oy && {missionNamespace getVariable ["lambs_danger_isabetYardimOyuncu", false]}}}) then {
         private _v = velocity _proj;
@@ -148,6 +153,7 @@ if (isServer) then {
     while {true} do {
         sleep 20;
         if !(missionNamespace getVariable ["lambs_danger_isabetDenge", false]) then { continue };
+        if ((missionNamespace getVariable ["lambs_danger_isabetSeviye", 0]) > 1) then { continue };   // v8.571: seviye > 1 iken beceri 1.0'a sabit, K olcekleme yok
         private _k = missionNamespace getVariable ["lambs_danger_isabetK", 1];
         {
             private _u = _x;
@@ -158,6 +164,35 @@ if (isServer) then {
             _u setSkill ["aimingAccuracy", (((_a / _ku) * _k) max 0.05) min 1];
             _u setVariable ["lambs_danger_isabetKUyg", _k];
         } forEach (allUnits select {local _x && {alive _x} && {_x isKindOf "CAManBase"}});
+    };
+};
+// ---- v8.571: isabet seviyesi > 1 -> bot becerisi azami (5 sn'de bir; seviye <= 1 olunca eski deger) ----
+[] spawn {
+    private _logN = 0;
+    while {true} do {
+        sleep 5;
+        private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
+        {
+            private _u = _x;
+            private _bay = _u getVariable ["lambs_danger_isabetSevBay", false];
+            if (_sev > 1) then {
+                if (isPlayer _u || {((units group _u) findIf {isPlayer _x}) > -1} || {_u getVariable [QGVAR(disableAI), false]} || {[_u] call FUNC(aliveSahip)}) then { continue };
+                if (!_bay) then {
+                    _u setVariable ["lambs_danger_isabetSevEski", [_u skill "aimingAccuracy", _u skill "aimingShake"]];
+                    _u setVariable ["lambs_danger_isabetSevBay", true];
+                    if (_logN < 10) then { _logN = _logN + 1; diag_log format ["[ISABET-SEVIYE] %1 | seviye %2: aimingAccuracy %3 -> 1.00, aimingShake %4 -> 1.00 | mermi hatasi duzeltme orani %5", name _u, _sev toFixed 2, (_u skill "aimingAccuracy") toFixed 2, (_u skill "aimingShake") toFixed 2, (1 - (1 / _sev)) toFixed 2]; };
+                };
+                if ((_u skill "aimingAccuracy") < 0.99) then { _u setSkill ["aimingAccuracy", 1]; };
+                if ((_u skill "aimingShake") < 0.99) then { _u setSkill ["aimingShake", 1]; };
+            } else {
+                if (_bay) then {
+                    private _e = _u getVariable ["lambs_danger_isabetSevEski", []];
+                    if (_e isNotEqualTo []) then { _u setSkill ["aimingAccuracy", _e select 0]; _u setSkill ["aimingShake", _e select 1]; };
+                    _u setVariable ["lambs_danger_isabetSevBay", nil];
+                    _u setVariable ["lambs_danger_isabetSevEski", nil];
+                };
+            };
+        } forEach (allUnits select {local _x && {alive _x} && {_x isKindOf "CAManBase"} && {!isPlayer _x} && {(_sev > 1) || {_x getVariable ["lambs_danger_isabetSevBay", false]}}});
     };
 };
 true
