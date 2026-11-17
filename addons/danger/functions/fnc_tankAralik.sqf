@@ -95,7 +95,6 @@ lambs_danger_tankAralikStarted = true;
                         params ["_vv", "_dd2", "_bb"];
                         // 10 sn sonra hala ic icesiyse en yakin bos konuma tasi
                         if (alive _vv && {alive _bb} && {(_vv distance2D _bb) < 11}) then {
-                            private _p = (getPosATL _bb) vectorAdd [0, 0, 0];
                             private _kc = (getPosATL _bb) getDir (getPosATL _vv);
                             private _yeni = (getPosATL _bb) getPos [22, _kc];
                             _vv setVehiclePosition [_yeni, [], 6, "NONE"];

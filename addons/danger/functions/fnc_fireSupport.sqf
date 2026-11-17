@@ -32,7 +32,6 @@ lambs_danger_fireSupportStarted = true;
 diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watchdog baslatildi";
 
 [] spawn {
-    private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     // silahsiz mi (kullanilabilir ates silahi yok)
     private _silahsiz = {
         params ["_e"];

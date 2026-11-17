@@ -92,11 +92,6 @@ if (EGVAR(main,debug_functions) && {(time - (_group getVariable [QGVAR(cagriLogT
     diag_log format ["[TACTICS-CAGRI] unit: %1 | target: %2 | contact: %3", _unit, _target, _group getVariable ["lambs_danger_contact", 0]];
 };
 
-// CQB mode ~ disabled awaiting polish ~ nkenny
-//if (formation _unit in GVAR(cqb_formations)) exitWith {
-//    _unit call FUNC(tacticsCQB);
-//};
-
 // check if group AI disabled
 if (_group getVariable [QGVAR(disableGroupAI), false]) exitWith {false};
 
@@ -247,9 +242,6 @@ if (
     _temasKes = [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsBreakContact", {false}]);
 };
 if (_temasKes) exitWith {true};
-
-// ai profiles ~ here is where AI profiles will be extrapolated - nkenny
-// if (_unit call FUNC(tacticsProfiles)) exitWith {true};
 
 // Leader assessment
 // v8.256: mevzideki grup LAMBS tacticsAssess'e (Hide / Suppress / Flank / Assault secimi) hic dusmesin

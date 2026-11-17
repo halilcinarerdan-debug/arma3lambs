@@ -82,7 +82,6 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
             _v set [2, 0];
             private _hiz = vectorMagnitude _v;
             private _pL = getPosATL _l;
-            private _geri = [];
             private _takim = (units _g) select {
                 alive _x && {_x isNotEqualTo _l} && {isNull objectParent _x}
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}

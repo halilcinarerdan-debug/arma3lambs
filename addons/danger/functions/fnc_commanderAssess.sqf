@@ -194,7 +194,6 @@ private _factorCount = linearConversion [0.5, 2.0, _pwrRatio, 0.2, 1.0, true];
 // MG (kapasiteyle tespit) / launcher / zirh
 // ---------------------------------------------------------------------------
 private _firepower = _enemyMg + (_enemyAT * 1.5) + (_armorCount * 2);
-private _hasHeavyWeapon = (_enemyMg + _enemyAT + _armorCount) > 0;
 private _factorFirepower = linearConversion [0, 3, _firepower, 0.2, 1.0, true];
 
 // ---------------------------------------------------------------------------

@@ -25,7 +25,6 @@ lambs_danger_tehditBakisStarted = true;
 diag_log "[TEHDIT-BAKIS] tehdit yonu gozlem watchdog baslatildi";
 
 [] spawn {
-    private _logN = 0;
     while {true} do {
         sleep 6;
         if (missionNamespace getVariable ["lambs_danger_tehditBakisOff", false]) then { continue };

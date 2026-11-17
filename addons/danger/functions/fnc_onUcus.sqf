@@ -95,7 +95,6 @@ lambs_danger_onUcusStarted = true;
     // ---------------------------------------------------------------- 4 ARACLAR / TOPCU / IHA
     private _araclar = vehicles select { alive _x && {_x isKindOf "LandVehicle"} && {!isNull (driver _x)} && {!(unitIsUAV _x)} && {(getNumber (configOf _x >> "artilleryScanner")) <= 0} };
     private _kapTop = createHashMap;
-    private _yayaTop = createHashMap;
     {
         private _v = _x;
         private _idx = _forEachIndex;

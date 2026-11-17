@@ -32,7 +32,6 @@ lambs_danger_cqbReflexStarted = true;
 diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
 
 [] spawn {
-    private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 
     while {true} do {
         sleep 0.7;

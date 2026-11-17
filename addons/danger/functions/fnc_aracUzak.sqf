@@ -63,7 +63,6 @@ private _calis = {
                 if (isNull _kaynak) then { continue };
                 // hedef: kaynaktan uzakta, arada siper veren obje (tercih), yoksa dogrudan uzaklasma
                 private _ks = getPosATL _kaynak;
-                private _uzak = _pu getDir _ks;
                 private _tp = [];
                 private _objeler = (nearestTerrainObjects [_pu, ["TREE", "ROCK", "WALL", "BUILDING", "HIDE"], 45, true, true]) select {((getPosATL _x) distance2D _ks) >= _gerek};
                 if (_objeler isNotEqualTo []) then { _tp = (getPosATL (_objeler select 0)) getPos [2.2, _ks getDir (getPosATL (_objeler select 0))]; };

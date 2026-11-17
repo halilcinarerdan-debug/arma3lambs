@@ -23,10 +23,6 @@ if (!isNil "lambs_danger_mevziHafizaStarted") exitWith {false};
 lambs_danger_mevziHafizaStarted = true;
 diag_log "[MEVZI-HAFIZA] siper / ufuk / dusman atis noktasi hafizasi baslatildi (v8.529): oturum boyunca, taraf basina, yari omur 30 dk";
 
-private _yay = {
-    params ["_s", "_tur", "_pos", ["_sek", -1], ["_w", 1]];
-    ["lambs_danger_mevziKayit", [_s, _tur, _pos, _sek, _w]] call CBA_fnc_globalEvent;
-};
 
 // kayit olayi: her makine kendi hafizasina yazar
 ["lambs_danger_mevziKayit", {
@@ -39,12 +35,6 @@ private _yay = {
 }] call CBA_fnc_addEventHandler;
 
 // yardimci: saldirgan yonu sektoru (yalniz asker saldirganini biliyorsa)
-private _sektor = {
-    params ["_u", "_k"];
-    if (isNull _k) exitWith {-1};
-    if ((_u knowsAbout _k) < (["SEZILDI"] call FUNC(bilgiEsik))) exitWith {-1};
-    floor ((((_u getDir _k) + 22.5) mod 360) / 45)
-};
 
 // --- VURULDU (yerel AI) ---
 ["CAManBase", "Hit", {

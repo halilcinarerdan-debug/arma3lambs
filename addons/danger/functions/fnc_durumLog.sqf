@@ -105,7 +105,6 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 str (side _g), _etkinN, _oto, (count _qs) - _oto, _qOrt toFixed 2
             ];
 
-            private _lProj = 0;
             private _onde = 0;
             private _yigil = 0;
             private _baygin = 0;

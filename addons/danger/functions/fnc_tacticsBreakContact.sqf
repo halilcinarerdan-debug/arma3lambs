@@ -81,7 +81,6 @@ private _baski = 0;
 { _baski = _baski + (getSuppression _x); } forEach _birimler;
 _baski = _baski / _alive;
 
-private _yarali = (_birimler findIf {(damage _x) > 0.3}) > -1;
 
 private _kac =
     (_alive isEqualTo 1)   // TEK KALAN ASKER her zaman kacar (cmdInitialCount sonradan 1 olarak yazilmis olabiliyordu)

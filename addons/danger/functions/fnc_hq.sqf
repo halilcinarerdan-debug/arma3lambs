@@ -112,7 +112,6 @@ private _tahtaKur = {
 
 [_tahtaKur] spawn {
     params ["_tahtaKur"];
-    private _sonTahtaLog = 0;
     private _modSon = createHashMap;
     while {true} do {
         sleep 4;

@@ -39,7 +39,6 @@ if (isNull _enemy || { (side _group) isEqualTo (side group _enemy) } ) exitWith 
 _group setVariable [QGVAR(contact), time + 600];
 
 // set group task
-//_group setVariable [QGVAR(isExecutingTactic), true];
 _group setVariable [QEGVAR(main,currentTactic), "Contact!", EGVAR(main,debug_functions)];
 
 // change formation and attack state

@@ -74,7 +74,6 @@ if (_hedef isEqualTo []) then {
     private _bel = (missionNamespace getVariable [format ["lambs_danger_dtBellek_%1", _taraf], []]) select {(time - (_x select 1)) < 180};
     if (_bel isNotEqualTo []) then { _hedef = (([_bel, [], {_x select 2}, "DESCEND"] call BIS_fnc_sortBy) select 0) select 0; _kaynak = "taze temas kaydi (<180 sn)"; };
 };
-private _planObj = [];
 if (_hedef isEqualTo []) then {
     private _pl = (values (missionNamespace getVariable ["lambs_danger_planlar", createHashMap])) select {
         (_x get "taraf") isEqualTo _taraf && {(_x getOrDefault ["tip", 0]) isEqualTo 1} && {(_x getOrDefault ["faz", ""]) in ["MEVZI", "BEKLE"]} && {(_x getOrDefault ["tehditB", -1]) >= 0}

@@ -97,7 +97,6 @@ if ((count _iz) >= 3 && {(time - ((_iz select 0) select 0)) >= 6}) then {
                 private _nD = 0;
                 private _sonZ = -1e9;
                 { if ((_x - _sonZ) > 40) then { _nD = _nD + 1; _sonZ = _x; }; } forEach _zamanlar;
-                private _dronlar = keys _ilkZ;
                 private _kesX = [];
                 private _kesY = [];
                 for "_i" from 0 to ((count _obs) - 2) do {
@@ -258,7 +257,6 @@ private _n = 0;
                 private _bit = time + 6;
                 private _zN = 0;
                 private _min = 180;
-                private _wT = 0;
                 private _dT = 0;
                 private _tgt = false;
                 while {time < _bit && {alive _u} && {!isNull _dr} && {alive _dr} && {(_u ammo _w) > 0}} do {

@@ -111,7 +111,6 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 if (_yedek < ([3, 2] select (_rol isEqualTo "MG")) || {(_u ammo _w) < 8}) then { continue };
 
                 private _aim = _hedef getPos [random 3, random 360];
-                private _uASL = eyePos _u;
                 private _aASL = (ATLToASL _aim) vectorAdd [0, 0, 1];
                 // hatta dost / hedefte dost
                 private _mesafe = _u distance2D _aim;

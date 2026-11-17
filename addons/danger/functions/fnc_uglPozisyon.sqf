@@ -19,7 +19,6 @@ if (isNull _u || {isNull _t}) exitWith {[]};
 private _tPos = getPosATL _t;
 private _uPos = getPosATL _u;
 private _dir = _uPos getDir _tPos;
-private _dT = _uPos distance2D _tPos;
 
 private _adaylar = [];
 { _adaylar pushBack [_dir + 90, _x]; _adaylar pushBack [_dir - 90, _x]; } forEach [3, 6, 9];

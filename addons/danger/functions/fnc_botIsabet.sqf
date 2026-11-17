@@ -98,7 +98,6 @@ lambs_danger_botSayTop = [0, 0, 0, 0];   // oturum toplami: [atis, isabet, nisan
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
 [] spawn {
-    private _sonT = time;
     while {true} do {
         sleep 60;
         private _say = lambs_danger_botSay;

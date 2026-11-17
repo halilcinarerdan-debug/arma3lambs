@@ -41,7 +41,6 @@ lambs_danger_modUyumStarted = true;
         private _k = _c >> "artilleryScanner";
         private _top = isNumber _k && {(getNumber _k) > 0};
         private _uav = (getNumber (_c >> "isUav")) isEqualTo 1;
-        private _air = _ad isKindOf "Air";
         private _tank = _ad isKindOf "Tank";
         private _apc = (_ad isKindOf "APC_Tracked_01_base_F") || {_ad isKindOf "Wheeled_APC_F"} || {_ad isKindOf "APC_Wheeled_01_base_F"};
         if (_top) then { _say set [_mod + " topcu", (_say getOrDefault [_mod + " topcu", 0]) + 1]; };

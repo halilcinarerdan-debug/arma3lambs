@@ -21,7 +21,6 @@ diag_log "[TAKSI] arac taksisi watchdog'u baslatildi (v8.129)";
 
 private _calis = {
     missionNamespace setVariable ["lambs_danger_taksiAdim", "basladi"];
-    private _logN = 0;
     while {true} do {
         sleep 10;
         if (missionNamespace getVariable ["lambs_danger_taksiOff", false]) then { continue };

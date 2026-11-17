@@ -76,7 +76,6 @@ lambs_danger_agacSayFn = _agacSay;
             _islem = _islem + 1;
             _g setVariable [QGVAR(agacT), time];
             _g setVariable [QGVAR(agacGizli), [_en, time]];
-            private _dirB = (getPosATL _l) getDir _en;
             {
                 private _u = _x;
                 if (alive _u && {isNull objectParent _u} && {!isPlayer _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]}) then {

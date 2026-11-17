@@ -131,7 +131,6 @@ missionNamespace setVariable ["lambs_danger_zihinArazi", _arazi];
 
 // ---- analiz + etki + rapor ----
 private _calis = {
-    private _hizSayi = missionNamespace getVariable ["lambs_danger_zihinHiz", 1];
     private _logN = 0;
     private _ozetT = time + 300;
     private _etkiT = time + 45;

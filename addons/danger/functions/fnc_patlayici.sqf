@@ -38,7 +38,6 @@ lambs_danger_patlayiciDon = {
 };
 
 [] spawn {
-    private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     private _sayac = createHashMapFromArray [["bomba", 0], ["roket", 0], ["ugl_ek", 0], ["FAT", 0], ["FWF", 0], ["yok", 0]];
     private _sonOzet = time + 60;
     // el bombasi (frag) mi?
@@ -50,12 +49,6 @@ lambs_danger_patlayiciDon = {
         && {(_k find "smoke") < 0} && {(_k find "flare") < 0} && {(_k find "chem") < 0} && {(_k find "illum") < 0} && {(_k find "flash") < 0} && {(_k find "stun") < 0} && {(_k find "m84") < 0}
     };
     // 'Throw' muzzle -> sarjor haritasi (frag icin muzzle bul)
-    private _atMuzzle = {
-        params ["_m"];
-        private _mz = "";
-        { if ((toLower _m) in ([ "Throw", _x ] call FUNC(uglMags))) exitWith { _mz = _x; }; } forEach (getArray (configFile >> "CfgWeapons" >> "Throw" >> "muzzles"));
-        _mz
-    };
     // ---- EL BOMBASI: KONTROLLU ATIS (v8.311; kullanici: 'el bombasini bodoslama atiyorlar, kendi yonlerine'; RPT 23-10 08:19: fireAtTarget false + forceWeaponFire yonu bilmeden atiyordu -> mermi sayaci degismedi ('ates YOK') ama bomba askerin baktigi yone gidiyordu) ----
     //   forceWeaponFire / fireAtTarget hedefe nisan almaz ve menzili ayarlamaz -> bomba SCRIPT ile balistik firlatilir: hedefe dogru yatay yon + 40-60 derece yay + hesaplanan hiz (<= 26 m/sn), insani dagilim (yan +-4 m + %4 mesafe, boy +-5 %),
     //   yay uzerinde 6 noktada duvar / nesne denetimi (firlatanin onunde engel varsa ATILMAZ), once hedefe doWatch (<= 1.5 sn; govde 35 dereceden fazla sapmissa vazgecilir; setDir ile isinlama YOK), 'ThrowGrenade' animasyonu, magazin dusulur.
@@ -234,7 +227,6 @@ lambs_danger_patlayiciDon = {
             {
                 if (_butce <= 0) exitWith {};
                 private _u = _x;
-                private _uP = getPosASL _u;
                 // v8.566 CQB FRAG (kullanici: 'frag neredeyse hic kullanilmamis, cqb de frag kullanimini arttir'; RPT a3a55579: 60 dk'da el bombasi emri 0): CQB mesafesinde (CBA cqbBombaM, 25 m) bilinen dusmana DEGER SARTI aranmaz,
                 //   birim bekleme 20 -> 10 sn, grup araligi 4 -> 2 sn, 60 sn'de en cok 3 -> 5 bomba. Dost 12 m / guvenli minimum mesafe / yay temizligi kurallari AYNEN. CBA cqbBomba.
                 private _cqbBomba = missionNamespace getVariable ["lambs_danger_cqbBomba", true];
