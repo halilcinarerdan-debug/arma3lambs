@@ -162,7 +162,15 @@ lambs_danger_patlayiciDon = {
 
     while {true} do {
         sleep 2.5;
-        if (missionNamespace getVariable ["lambs_danger_patlayiciOff", false] || {!(missionNamespace getVariable ["lambs_danger_patlayiciAktif", true])}) then { continue };
+        if (missionNamespace getVariable ["lambs_danger_patlayiciOff", false] || {!(missionNamespace getVariable ["lambs_danger_patlayiciAktif", true])}) then {
+            // v8.590 TANI (RPT 8368382a: 52 dk oturumda [PATLAYICI-OZET] / [PATLAYICI-TANI] hic yok = izleyici calismadi): kapaliysa nedeni RPT'ye yaz (ilk 5, 60 sn'de bir)
+            if (time > _sonOzet && {(missionNamespace getVariable ["lambs_danger_patKapaliN", 0]) < 5}) then {
+                _sonOzet = time + 60;
+                missionNamespace setVariable ["lambs_danger_patKapaliN", (missionNamespace getVariable ["lambs_danger_patKapaliN", 0]) + 1];
+                diag_log format ["[PATLAYICI-OZET] KAPALI: patlayiciAktif %1 | patlayiciOff %2 (CBA 'ELITE patlayici' > ana anahtar)", missionNamespace getVariable ["lambs_danger_patlayiciAktif", true], missionNamespace getVariable ["lambs_danger_patlayiciOff", false]];
+            };
+            continue
+        };
         private _butce = 4;
 
         // ---- UGL ek mermi (bir kez / asker) ----
