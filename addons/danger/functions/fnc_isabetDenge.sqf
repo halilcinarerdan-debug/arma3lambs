@@ -47,7 +47,8 @@ lambs_danger_isabetBant = _bant;
     // v8.569 ISABET YARDIMI (kullanici: 'oyunun 1 limiti disinda'): aimingAccuracy en cok 1 olur; botun mermisinin yonu, hedefe (onculu + dusme telafili) olan HATANIN CBA isabetYardim orani kadari duzeltilir (hata <= 4 derece).
     //   Hile benzeri (aimbot yardimi): 0 = kapali (varsayilan). Yalniz oyuncusuz grup / bot, yerel mermi, <= 600 m.
     private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
-    if (_yrd > 0 && {!_oy} && {!isNull _proj} && {((units group _u) findIf {isPlayer _x}) < 0}) then {
+    // v8.570 TEST (kullanici: 'oyuncu olarak ayni seviyeyi istiyorum, bir test etmek icin'): CBA isabetYardimOyuncu aciksa AYNI yardim OYUNCUNUN mermisine de uygulanir (hedef = imlecin altindaki dusman asker)
+    if (_yrd > 0 && {!isNull _proj} && {(!_oy && {((units group _u) findIf {isPlayer _x}) < 0}) || {_oy && {missionNamespace getVariable ["lambs_danger_isabetYardimOyuncu", false]}}}) then {
         private _v = velocity _proj;
         private _sp = vectorMagnitude _v;
         private _vh = sqrt (((_v select 0) ^ 2) + ((_v select 1) ^ 2));
