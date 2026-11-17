@@ -28,8 +28,11 @@ if (((units _g) findIf {isPlayer _x}) > -1) exitWith {false};
 // v8.504 WAYPOINT UYUMU: kim yonetiyor? (fnc_wpSahip) - LAMBS gorevi / LAMBS AI-kapat / kal-bekle turu vanilla waypoint HER ZAMAN ELITE'i geri ceker;
 // hareket turu (MOVE / SAD / DESTROY / CYCLE) yalniz 'Senaryo modu' aciksa (varsayilan ACIK; kapsam 1 = tum AI gruplari)
 private _sahip = [_g] call FUNC(wpSahip);
+// v8.572 TEMASTA SERBEST (kullanici: 'botlar mala dondu'; RPT c12df16c: senaryo modu ACIK iken hareket waypoint'li bot dusmanin atesi altinda karar uretmeden waypoint'ine yuruyordu): CBA senaryoTemasSerbest (varsayilan ACIK) -
+//   grup TEMASTAyken (contact) HAREKET turu waypoint kapisi KALKAR (ELITE hucum / kanat / bastirma / saklanma kararlari calisir), temas bitince kapi geri kapanir. LAMBS gorevi / kal-bekle waypoint (LAMBS / TUTAN) HER ZAMAN kapali.
+private _temasSerbest = (missionNamespace getVariable ["lambs_danger_senaryoTemasSerbest", true]) && {(_g getVariable [QGVAR(contact), 0]) > time};
 private _kapi = if (_sahip in ["LAMBS", "TUTAN"]) then {true} else {
-    if (_sadeceSabit || {!(missionNamespace getVariable ["lambs_danger_senaryoModu", true])}) then {false} else {
+    if (_sadeceSabit || {_temasSerbest} || {!(missionNamespace getVariable ["lambs_danger_senaryoModu", true])}) then {false} else {
         ((missionNamespace getVariable ["lambs_danger_senaryoKapsam", 0]) isEqualTo 1) || {_sahip isEqualTo "HAREKET"}
     }
 };
