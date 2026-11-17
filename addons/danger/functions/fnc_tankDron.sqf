@@ -55,13 +55,29 @@ private _kap = if ((vectorMagnitude _yonT) > 1) then { (velocity _dr) vectorDotP
 } forEach ((_v nearEntities [["Tank", "Wheeled_APC_F", "Tracked_APC_F"], 900]) select {(side (group (effectiveCommander _x))) isEqualTo _taraf});
 
 private _eylem = [];
+// v8.564 FPV KISMA (kullanici: 'tanklar feci vuruyor dronu'; RPT dc3334c3: tank murettebati B_crew_F beceri 0.98 doWatch + doFire ile FPV'leri dusuruyordu; dronIsabetOran yalniz zorla atisi kisiyordu):
+//   saldiri tipi FPV / bomba dron icin (1) REAKSIYON: arac dronu ilk kez isledikten sonra CBA dronReaksiyon (3 sn x 0.6-1.4) boyunca murettebat dronu izlemez / ates etmez, (2) ates turunun olasiligi sqrt(CBA dronFpvKis).
+//   20 sn gorulmezse sayac sifirlanir. Gozlem dronlari etkilenmez.
+private _reakBekle = false;
+private _atesAtla = false;
+if (_tip in ["FPV-AT", "FPV-AP", "BOMBA"]) then {
+    private _kisT = (missionNamespace getVariable ["lambs_danger_dronFpvKis", 0.4]) max 0 min 1;
+    private _rkT = missionNamespace getVariable ["lambs_danger_dronReaksiyon", 3];
+    private _kkT = format ["%1_%2", QGVAR(tankReak), netId _v];
+    private _recT = _dr getVariable [_kkT, [-1, -999]];
+    if ((time - (_recT select 1)) > 20) then { _recT = [time + (_rkT * (0.6 + (random 0.8))), time]; };
+    _recT set [1, time];
+    _dr setVariable [_kkT, _recT];
+    _reakBekle = time < (_recT select 0);
+    _atesAtla = (random 1) > (sqrt _kisT);
+};
 // 2) YON: murettebat dronu izler
-if (_dist <= 600) then {
+if (_dist <= 600 && {!_reakBekle}) then {
     { if (alive _x) then { _x doWatch _dr; }; } forEach (crew _v);
     _eylem pushBack "YON";
 };
 // 3) ATES: komutan / nisanci makineli (taret ana topu disinda MG); v8.345: sessizlik / CBA dronAtesModu kapisi
-if (_dist <= 500 && {[group (commander _v), _dr, _dist] call FUNC(dronAtesIzin)}) then {
+if (_dist <= 500 && {!_reakBekle} && {!_atesAtla} && {[group (commander _v), _dr, _dist] call FUNC(dronAtesIzin)}) then {
     private _n = 0;
     {
         private _u = _x;
