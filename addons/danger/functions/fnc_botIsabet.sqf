@@ -2,7 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * BOT ISABETI: OYUNIN aimingAccuracy = 1 SINIRININ OTESI (v8.575; kullanici: 'oyuncunun isabeti ile ilgili her seyi kaldir, ben sadece botlarin 1 limitinden cikmasini istemistim').
- * BOT ISABET SAYACI (v8.577): bu makinedeki yerel botlarin TUM atislari (baski ateşi dahil) / dusman piyade isabetleri 60 sn'de bir [BOT-ISABET] logu (genel ve bant bazli mermi/isabet); oyuncu SAYILMAZ.
+ * BOT ISABET SAYACI (v8.577): bu makinedeki yerel botlarin TUM atislari (baski ateşi dahil) / dusman piyade isabetleri 60 sn'de bir [BOT-ISABET] logu (genel ve bant bazli mermi/isabet + mermi/OLUM, oturum toplami); oyuncu SAYILMAZ.
  * YALNIZ BOTLAR (oyuncu / oyuncu olcumu / oyuncu yardimi YOK; v8.565-v8.574'teki isabetDenge olcumu, hedef oran, oyuncu yardimi KALDIRILDI).
  * aimingAccuracy / aimingShake en cok 1.0'dir (setSkill siniri). Bu sinirin otesi iki ayarla:
  *   - CBA isabetSeviye (0 = kapali, 1.25 / 1.30 ...): > 1 ise (1) yerel botlarin aimingAccuracy / aimingShake degeri 1.0'a sabitlenir (5 sn'de bir; eski deger saklanir, seviye <= 1 olunca geri yazilir; oyunculu grup / ALiVE / disableAI haric),
@@ -24,8 +24,8 @@ diag_log "[ISABET-SEVIYE] bot isabeti (aimingAccuracy 1 siniri otesi: CBA isabet
 
 // ---- BOT ISABET SAYACI (v8.577; kullanici: 'genele vurdugunda ortalama kaba tahmin 100 ustudur'): YALNIZ botlar (oyuncu sayilmaz / olculmez). Bu makinedeki yerel botlarin TUM mermileri (baski ateşi dahil) ve dusman piyadeye ISABETLERI ----
 // sayac: [toplam atis, nisanli atis (bant 0/1/2), isabet (bant 0/1/2), toplam isabet]
-lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
-lambs_danger_botSayTop = [0, 0, 0];   // 60 sn araliklariyla toplanan [atis, isabet, nisanli atis]
+lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0, 0];   // [toplam atis, nisanli atis[3], isabet[3], toplam isabet, OLDURME]
+lambs_danger_botSayTop = [0, 0, 0, 0];   // oturum toplami: [atis, isabet, nisanli atis, OLDURME]
 
 ["CAManBase", "Fired", {
     params ["_u", "_wep", "", "", "_ammo", "", "_proj"];
@@ -73,6 +73,16 @@ lambs_danger_botSayTop = [0, 0, 0];   // 60 sn araliklariyla toplanan [atis, isa
     _proj setVelocity ([(sin _azN) * (cos _elN), (cos _azN) * (cos _elN), sin _elN] vectorMultiply _sp);
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
+// OLDURME (v8.578; kullanici: 'gercekten kac mermide dusmanin dustugu'): kaynak = yerel bot, kurban = dusman piyade (sagligi kalmayan; ACE / vanilla Killed olayi)
+["CAManBase", "Killed", {
+    params ["_unit", "_killer", "_ins"];
+    private _sh = if (!isNull _ins) then {_ins} else {_killer};
+    if (isNull _sh || {!(_sh isKindOf "CAManBase")} || {_sh isEqualTo _unit} || {!local _sh} || {isPlayer _sh}) exitWith {};
+    if (((side group _sh) getFriend (side group _unit)) >= 0.6) exitWith {};
+    private _say = lambs_danger_botSay;
+    _say set [4, (_say select 4) + 1];
+}, true, [], true] call CBA_fnc_addClassEventHandler;
+
 ["CAManBase", "Hit", {
     params ["_unit", "_src", "_dmg", "_ins"];
     private _sh = if (!isNull _ins) then {_ins} else {_src};
@@ -92,17 +102,18 @@ lambs_danger_botSayTop = [0, 0, 0];   // 60 sn araliklariyla toplanan [atis, isa
     while {true} do {
         sleep 60;
         private _say = lambs_danger_botSay;
-        _say params ["_at", "_na", "_ia", "_ih"];
+        _say params ["_at", "_na", "_ia", "_ih", "_ol"];
         private _top = lambs_danger_botSayTop;
         _top set [0, (_top select 0) + _at];
         _top set [1, (_top select 1) + _ih];
         _top set [2, (_top select 2) + (_na select 0) + (_na select 1) + (_na select 2)];
-        if (_at > 0) then {
+        _top set [3, (_top select 3) + _ol];
+        if (_at > 0 || {_ol > 0}) then {
             private _bantS = [0, 1, 2] apply { format ["%1: nisanli %2 atis / %3 isabet (%4 atis/isabet)", ["<120 m", "120-250 m", ">250 m"] select _x, _na select _x, _ia select _x, if ((_ia select _x) > 0) then { ((_na select _x) / (_ia select _x)) toFixed 0 } else {"-"}] };
-            diag_log format ["[BOT-ISABET] son 60 sn (bu makinedeki botlar): TUM atis %1 (baski ateşi dahil) | isabet %2 | GENEL %3 mermi/isabet | %4 || toplam (oturum): %5 atis / %6 isabet = %7 mermi/isabet",
-                _at, _ih, if (_ih > 0) then { (_at / _ih) toFixed 0 } else {"-"}, _bantS joinString " | ", _top select 0, _top select 1, if ((_top select 1) > 0) then { ((_top select 0) / (_top select 1)) toFixed 0 } else {"-"}];
+            diag_log format ["[BOT-ISABET] son 60 sn (bu makinedeki botlar): TUM atis %1 (baski ateşi dahil) | isabet %2 | GENEL %3 mermi/isabet | OLDURME %4 (%5 mermi/olum) | %6 || OTURUM: %7 atis / %8 isabet = %9 mermi/isabet | %10 olurme = %11 mermi/olum",
+                _at, _ih, if (_ih > 0) then { (_at / _ih) toFixed 0 } else {"-"}, _ol, if (_ol > 0) then { (_at / _ol) toFixed 0 } else {"-"}, _bantS joinString " | ", _top select 0, _top select 1, if ((_top select 1) > 0) then { ((_top select 0) / (_top select 1)) toFixed 0 } else {"-"}, _top select 3, if ((_top select 3) > 0) then { ((_top select 0) / (_top select 3)) toFixed 0 } else {"-"}];
         };
-        lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
+        lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0, 0];
     };
 };
 
