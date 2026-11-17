@@ -78,7 +78,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
     while {true} do {
         sleep 4;
         private _pt0 = diag_tickTime;
-        private _butce = 5;   // tikte en fazla bu kadar findCover (tum gruplar)
+        private _butce = 3;   // tikte en fazla bu kadar findCover (tum gruplar); v8.582: 5 -> 3 (RPT e1179774: roleStation tick 263 ms, ort 19.7 ms; istasyon atamasi en cok birkac tik gec)
 
         {
             private _g = _x;
@@ -309,7 +309,9 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                         private _stance = "MIDDLE";
                         private _kaynak = "siper";
 
+                        private _fc0 = diag_tickTime;
                         private _cvr = [_u, _dusman, 25, "ASCEND", 6, _t select 4] call EFUNC(main,findCover);
+                        ["roleStation-findCover", _fc0] call FUNC(perfKayit);   // v8.582: findCover payi
                         _butce = _butce - 1;
                         private _ci = _cvr findIf {[_x select 0, _lPos, _fwd, _t] call _uygunFn};
                         if (_ci > -1) then {
