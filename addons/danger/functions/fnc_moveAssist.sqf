@@ -67,7 +67,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
         private _uzakN = 0;   // v8.283: bu tick'te diger makinelere gonderilen birim sayisi (ag patlamasi siniri)
         // v8.587 GENEL ANIMASYON HIZI (kullanici: 'animasyon hizini yuzde 30a kadar slider ile arttir, acilip kapansin, default yuzde 20, senkronizasyon bozmasin'): tick basina bir kez okunur
         private _oyG = allPlayers apply {group _x};   // v8.589: oyuncu gruplari: animasyon artisi / sikisma adimi yok (oyuncu emirlerine uyum)
-        private _hizT = if (missionNamespace getVariable ["lambs_danger_animHizAktif", true]) then { 1 + (((missionNamespace getVariable ["lambs_danger_animHiz", 20]) max 0) min 30) / 100 } else {1};
+        private _hizT = if (missionNamespace getVariable ["lambs_danger_animHizAktif", true]) then { 1 + (((missionNamespace getVariable ["lambs_danger_animHiz", 20]) max 0) min 60) / 100 } else {1};
         // v8.580 PERFORMANS (Parca 2): birim LISTESI 0.6 sn'de bir yenilenir (eskiden her 0.15 sn'de allUnits taramasi); her tick'te yalniz canli / aracta degil / saglikli kontrolu (ucuz) yeniden yapilir
         if (time > _listeT) then {
             _listeT = time + 0.6;

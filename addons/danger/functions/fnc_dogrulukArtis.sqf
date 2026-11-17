@@ -38,7 +38,7 @@ diag_log "[DOGRULUK] sabit hedefe ardisik atista dogruluk artisi baslatildi (v8.
     };
     _u setVariable [QGVAR(dogrN), _n];
     _u setVariable [QGVAR(dogrT), time];
-    private _maks = (missionNamespace getVariable ["lambs_danger_dogrulukMaks", 0.15]) max 0 min 0.6;
+    private _maks = (missionNamespace getVariable ["lambs_danger_dogrulukMaks", 0.15]) max 0 min 1;
     private _bonus = (((_n - 2) max 0) * 0.03) min _maks;
     private _uyg = _u getVariable [QGVAR(dogrUyg), 0];
     if ((abs (_bonus - _uyg)) < 0.005) exitWith {};

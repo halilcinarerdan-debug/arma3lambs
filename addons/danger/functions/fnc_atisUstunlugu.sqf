@@ -39,7 +39,9 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
         if (missionNamespace getVariable ["lambs_danger_atisUstunluguOff", false] || {!(missionNamespace getVariable ["lambs_danger_atisUstunlugu", true])}) then { continue };
-        private _butce = 6;
+        // v8.592 COK AGRESIF BASTIRMA (kullanici: 'botlar cok daha agresif supresslesin'): bastirmaYogunluk 0-2; 1'in ustu (_ex 0..1) emir araligini, mermi kapisini, hedef tazeligini, alt mesafeyi ve tick butcesini gevsetir
+        private _ex = (((missionNamespace getVariable ["lambs_danger_bastirmaYogunluk", 0.5]) max 1) min 2) - 1;
+        private _butce = 6 + round (6 * _ex);
         private _supFn = missionNamespace getVariable ["lambs_main_fnc_shouldSuppressPosition", {true}];
 
         {
@@ -61,7 +63,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                     private _o = _x select 4;
                     !isNull _o && {alive _o} && {!([_o] call FUNC(teslimMi))} && {(_taraf getFriend (side (group _o))) < 0.6} && {(side (group _o)) isNotEqualTo civilian}
                     && {(_o isKindOf "CAManBase") || {_o isKindOf "StaticWeapon"}} && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
-                    && {((_l targetKnowledge _o) select 2) > (time - 25)} && {(_l distance2D _o) >= 30}
+                    && {((_l targetKnowledge _o) select 2) > (time - (25 + (20 * _ex)))} && {(_l distance2D _o) >= (30 - (10 * _ex))}
                 };
                 private _poz = [];
                 if (_adaylar isNotEqualTo []) then {
@@ -82,7 +84,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
             _g setVariable [QGVAR(atisSonT), time];
             // v8.368 BASTIRMA YOGUNLUGU (CBA lambs_danger_bastirmaYogunluk 0..1, varsayilan 0.5; kullanici: 'biraz daha fazla suppress atsinlar, silah sesleri artsin ama mermiyi bosa harcamasinlar'):
             //   ilk temas patlamasi 12 sn -> 12 + 14 x yogunluk sn; yogunluk >= 0.7 iken tufekliler 8 sn dilimi beklemeden hep birlikte atar. Mermi kapisi (>= 3 sarjor / yuklu > 8) DEGISMEZ.
-            private _yog = (missionNamespace getVariable ["lambs_danger_bastirmaYogunluk", 0.5]) max 0 min 1;
+            private _yog = (missionNamespace getVariable ["lambs_danger_bastirmaYogunluk", 0.5]) max 0 min 2;
             private _patlama = (time - (_g getVariable [QGVAR(atisBasT), -999])) < (12 + (14 * _yog));
             private _dilim = (floor (time / 8)) mod 2;
 
@@ -92,7 +94,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 if (
                     !alive _u || {!local _u} || {isPlayer _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                     || {captive _u} || {_u getVariable [QGVAR(teslim), false]}
-                    || {(speed _u) > 1.5} || {(time - (_u getVariable [QGVAR(atisT), -999])) < 4}
+                    || {(speed _u) > 1.5} || {(time - (_u getVariable [QGVAR(atisT), -999])) < (4 - (1.5 * _ex))}
                     || {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 2}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                     || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []}
@@ -108,7 +110,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 private _w = primaryWeapon _u;
                 private _uyum = (compatibleMagazines _w) apply {toLower _x};
                 private _yedek = {(toLower _x) in _uyum} count (magazines _u);
-                if (_yedek < ([3, 2] select (_rol isEqualTo "MG")) || {(_u ammo _w) < 8}) then { continue };
+                if (_yedek < ([[3, 2] select (_rol isEqualTo "MG"), [2, 1] select (_rol isEqualTo "MG")] select (_ex > 0)) || {(_u ammo _w) < ([8, 5] select (_ex > 0))}) then { continue };
 
                 private _aim = _hedef getPos [random 3, random 360];
                 private _aASL = (ATLToASL _aim) vectorAdd [0, 0, 1];
