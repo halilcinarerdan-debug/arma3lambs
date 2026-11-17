@@ -4,6 +4,7 @@
  * HAREKET YARDIMCISI — yerel AI piyadeler icin (0.3 sn'de bir, tek watchdog):
  *
  *   0) v8.283: YAT / KALK / COMEL (stance gecis animasyonu, "amov..._amov...") x lambs_danger_postureCoef (1.25) - yurume / sürunme / kosu degismez. Diger makinelere gonderim yalniz degisimde (+6 sn nabiz, tick basina <= 20 birim).
+ *   0b) v8.587: GENEL ANIMASYON HIZI ARTISI (CBA animHizAktif / animHiz, %0-30, varsayilan 20): taban animasyon katsayisi 1 + yuzde/100 (yurume / kosu / durus gecisi); geri cekilme / zirhtan kacis 1.15, donus 1.2 bunun altina inmez. Duvar korumasi tetiklenen asker 3 sn artissiz (1.0). Senkron: asagidaki mevcut yol (deger degisince + 6 sn nabiz, remoteExec) aynen kullanilir.
  *   1) SAGA / SOLA DONUS HIZI +%20 (lambs_danger_turnCoef = 1.2): sadece DONUS animasyonu ("turn")
  *      oynarken animasyon hizi 1.2, digerlerinde 1.0 (yurume / kosu hizi degismez -> duvara gomulme azalir).
  *      Geri cekilme / zirhtan kacista yurume 1.15 (o taktikler kendisi koyar), donus yine 1.2.
@@ -64,6 +65,8 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
         private _agir = (_tick % 2) isEqualTo 0;   // duvar korumasi / sikisma: 0.3 sn'de bir
 
         private _uzakN = 0;   // v8.283: bu tick'te diger makinelere gonderilen birim sayisi (ag patlamasi siniri)
+        // v8.587 GENEL ANIMASYON HIZI (kullanici: 'animasyon hizini yuzde 30a kadar slider ile arttir, acilip kapansin, default yuzde 20, senkronizasyon bozmasin'): tick basina bir kez okunur
+        private _hizT = if (missionNamespace getVariable ["lambs_danger_animHizAktif", true]) then { 1 + (((missionNamespace getVariable ["lambs_danger_animHiz", 20]) max 0) min 30) / 100 } else {1};
         // v8.580 PERFORMANS (Parca 2): birim LISTESI 0.6 sn'de bir yenilenir (eskiden her 0.15 sn'de allUnits taramasi); her tick'te yalniz canli / aracta degil / saglikli kontrolu (ucuz) yeniden yapilir
         if (time > _listeT) then {
             _listeT = time + 0.6;
@@ -88,8 +91,9 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _parca = _anAd splitString "_";
             private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;
-            private _tabanAnim = [1, 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
-            private _istenen = if (_donuyor) then {(missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)} else {
+            private _hizU = if (time < (_u getVariable [QGVAR(mvSlowUntil), 0])) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
+            private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
+            private _istenen = if (_donuyor) then {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
             };
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha
