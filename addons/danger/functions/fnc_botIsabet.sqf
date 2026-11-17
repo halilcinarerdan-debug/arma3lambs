@@ -2,6 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * BOT ISABETI: OYUNIN aimingAccuracy = 1 SINIRININ OTESI (v8.575; kullanici: 'oyuncunun isabeti ile ilgili her seyi kaldir, ben sadece botlarin 1 limitinden cikmasini istemistim').
+ * BOT ISABET SAYACI (v8.577): bu makinedeki yerel botlarin TUM atislari (baski ateşi dahil) / dusman piyade isabetleri 60 sn'de bir [BOT-ISABET] logu (genel ve bant bazli mermi/isabet); oyuncu SAYILMAZ.
  * YALNIZ BOTLAR (oyuncu / oyuncu olcumu / oyuncu yardimi YOK; v8.565-v8.574'teki isabetDenge olcumu, hedef oran, oyuncu yardimi KALDIRILDI).
  * aimingAccuracy / aimingShake en cok 1.0'dir (setSkill siniri). Bu sinirin otesi iki ayarla:
  *   - CBA isabetSeviye (0 = kapali, 1.25 / 1.30 ...): > 1 ise (1) yerel botlarin aimingAccuracy / aimingShake degeri 1.0'a sabitlenir (5 sn'de bir; eski deger saklanir, seviye <= 1 olunca geri yazilir; oyunculu grup / ALiVE / disableAI haric),
@@ -21,21 +22,35 @@ lambs_danger_botIsabetStarted = true;
 lambs_danger_isabetMermiOn = createHashMap;
 diag_log "[ISABET-SEVIYE] bot isabeti (aimingAccuracy 1 siniri otesi: CBA isabetSeviye / isabetYardim) baslatildi (v8.575)";
 
+// ---- BOT ISABET SAYACI (v8.577; kullanici: 'genele vurdugunda ortalama kaba tahmin 100 ustudur'): YALNIZ botlar (oyuncu sayilmaz / olculmez). Bu makinedeki yerel botlarin TUM mermileri (baski ateşi dahil) ve dusman piyadeye ISABETLERI ----
+// sayac: [toplam atis, nisanli atis (bant 0/1/2), isabet (bant 0/1/2), toplam isabet]
+lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
+lambs_danger_botSayTop = [0, 0, 0];   // 60 sn araliklariyla toplanan [atis, isabet, nisanli atis]
+
 ["CAManBase", "Fired", {
     params ["_u", "_wep", "", "", "_ammo", "", "_proj"];
-    if (!local _u || {isPlayer _u} || {isNull _proj} || {_wep isEqualTo (secondaryWeapon _u)}) exitWith {};
-    private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
-    private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
-    if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
-    if (_yrd <= 0 || {((units group _u) findIf {isPlayer _x}) > -1}) exitWith {};
+    if (!local _u || {isPlayer _u} || {_wep isEqualTo (secondaryWeapon _u)}) exitWith {};
     private _on = lambs_danger_isabetMermiOn;
     private _b = _on getOrDefault [_ammo, -1];
     if (_b < 0) then { _b = [0, 1] select (_ammo isKindOf ["BulletBase", configFile >> "CfgAmmo"]); _on set [_ammo, _b]; };
+    _u setVariable ["lambs_danger_sonMermiB", _b];
     if (_b isEqualTo 0) exitWith {};
+    private _say = lambs_danger_botSay;
+    _say set [0, (_say select 0) + 1];
     private _t = assignedTarget _u;
     if (isNull _t || {!(_t isKindOf "CAManBase")}) then { _t = _u findNearestEnemy _u; };
-    if (isNull _t || {!alive _t} || {!(_t isKindOf "CAManBase")} || {((side group _u) getFriend (side group _t)) >= 0.6}) exitWith {};
-    if ((_u distance _t) > 600) exitWith {};
+    private _gecerli = !isNull _t && {alive _t} && {_t isKindOf "CAManBase"} && {((side group _u) getFriend (side group _t)) < 0.6} && {(_u distance _t) <= 600};
+    if (_gecerli) then {
+        private _m = _u distance _t;
+        private _bn = if (_m >= 250) then {2} else { if (_m >= 120) then {1} else {0} };
+        private _na = _say select 1;
+        _na set [_bn, (_na select _bn) + 1];
+    };
+    // mermi yonu duzeltme (isabetSeviye / isabetYardim)
+    private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
+    private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
+    if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
+    if (_yrd <= 0 || {!_gecerli} || {isNull _proj} || {((units group _u) findIf {isPlayer _x}) > -1}) exitWith {};
     private _v = velocity _proj;
     private _sp = vectorMagnitude _v;
     private _vh = sqrt (((_v select 0) ^ 2) + ((_v select 1) ^ 2));
@@ -57,6 +72,39 @@ diag_log "[ISABET-SEVIYE] bot isabeti (aimingAccuracy 1 siniri otesi: CBA isabet
     private _elN = _elC + (_dEl * _yrd);
     _proj setVelocity ([(sin _azN) * (cos _elN), (cos _azN) * (cos _elN), sin _elN] vectorMultiply _sp);
 }, true, [], true] call CBA_fnc_addClassEventHandler;
+
+["CAManBase", "Hit", {
+    params ["_unit", "_src", "_dmg", "_ins"];
+    private _sh = if (!isNull _ins) then {_ins} else {_src};
+    if (isNull _sh || {!(_sh isKindOf "CAManBase")} || {_sh isEqualTo _unit} || {!local _sh} || {isPlayer _sh} || {_dmg <= 0}) exitWith {};
+    if ((_sh getVariable ["lambs_danger_sonMermiB", 0]) isNotEqualTo 1) exitWith {};
+    if (((side group _sh) getFriend (side group _unit)) >= 0.6) exitWith {};
+    private _m = _sh distance _unit;
+    private _bn = if (_m >= 250) then {2} else { if (_m >= 120) then {1} else {0} };
+    private _say = lambs_danger_botSay;
+    private _ia = _say select 2;
+    _ia set [_bn, (_ia select _bn) + 1];
+    _say set [3, (_say select 3) + 1];
+}, true, [], true] call CBA_fnc_addClassEventHandler;
+
+[] spawn {
+    private _sonT = time;
+    while {true} do {
+        sleep 60;
+        private _say = lambs_danger_botSay;
+        _say params ["_at", "_na", "_ia", "_ih"];
+        private _top = lambs_danger_botSayTop;
+        _top set [0, (_top select 0) + _at];
+        _top set [1, (_top select 1) + _ih];
+        _top set [2, (_top select 2) + (_na select 0) + (_na select 1) + (_na select 2)];
+        if (_at > 0) then {
+            private _bantS = [0, 1, 2] apply { format ["%1: nisanli %2 atis / %3 isabet (%4 atis/isabet)", ["<120 m", "120-250 m", ">250 m"] select _x, _na select _x, _ia select _x, if ((_ia select _x) > 0) then { ((_na select _x) / (_ia select _x)) toFixed 0 } else {"-"}] };
+            diag_log format ["[BOT-ISABET] son 60 sn (bu makinedeki botlar): TUM atis %1 (baski ateşi dahil) | isabet %2 | GENEL %3 mermi/isabet | %4 || toplam (oturum): %5 atis / %6 isabet = %7 mermi/isabet",
+                _at, _ih, if (_ih > 0) then { (_at / _ih) toFixed 0 } else {"-"}, _bantS joinString " | ", _top select 0, _top select 1, if ((_top select 1) > 0) then { ((_top select 0) / (_top select 1)) toFixed 0 } else {"-"}];
+        };
+        lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
+    };
+};
 
 // ---- isabet seviyesi > 1 -> bot becerisi azami (5 sn'de bir; seviye <= 1 olunca eski deger) ----
 [] spawn {
