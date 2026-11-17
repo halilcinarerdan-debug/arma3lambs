@@ -3758,3 +3758,8 @@ v8.596 (dal sade-waypoint) EL BOMBASI DOST GUVENLIGI (kullanici: 'kendilerini pa
  - DEGISIKLIK: yay denetimi tam (0.92 -> 1.0); dost guvenlik yaricapi CBA lambs_danger_bombaDostM (8-30, varsayilan 18; eskiden sabit 12). Onerilen: bombaMinM >= 12 (ACE parca yaricapi ~15 m).
  - SINIR / DOGRULANMADI: kendi grubuna zararin KAYNAGI (bomba mi, oyuncu / FPV mi) RPT'den kesin degil; oyunda denenmedi. NOT: istenen ama YAPILMAYAN: koordineli bina girisi (stack / kapi), oda arama + oda pususu (garnizon) - yeni modul, kullanici onayi bekleniyor.
 
+v8.597 (dal sade-waypoint) UST KAT PENCEREYE BOMBA (kullanici: '2. ve 3. kat pencereye de atsinlar; fiziksel olarak girecekse camlarin kirik olup olmadigina dikkat et; birkac metre yukseye atilabilsin').
+ - fnc_patlayici: yay acisi adaylarina 75 derece eklendi (dik yay), ust kat (>= +4 m) hedefe hiz tavani 26 -> 28 m/sn; yukseklik (dh) sinirsiz. Atilip atilmayacagini GEOM yay denetimi belirler: cam gecirmez / duvar kapaliysa yay engelli sayilir, ATILMAZ (geri sekme / kendini vurma riski v8.596'daki gibi onlenir).
+ - CAM DURUMU: kirik / saglam cam ayrimi bu surumde YAPILMADI (cam animasyonlari ve hitpoint temsili bina modeline gore degisiyor, dogrulanamadi). Teshis: hedef binadaysa ilk 8 denemede [PATLAYICI-CAM] (bina sinifi, hedef yuksekligi, 'glass' animasyon sayisi ve kirik sayisi, hitpoint sayisi, ornek adlar) RPT'ye yazilir; veriye gore sonraki surumde 'pencere acik mi' denetimi.
+ - SINIR / DOGRULANMADI: GEOM raycast saglam camin bombayi durdurup durdurmadigini kesin gostermiyor (cam GEOM'da kapali ise atilmaz, degilse bomba camdan sekebilir); oyunda denenmedi.
+

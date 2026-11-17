@@ -78,6 +78,15 @@ lambs_danger_patlayiciDon = {
                     // v8.595 YAY ACISI ARAMASI (RPT 38287827: 14 denemeden 12'si 'yay uzerinde engel'; engel Land_Radar_01_HQ_F yay noktasi 6-8/8 = hedefin binasi / pencere onu): eskiden yalniz 40 / 50 / 60 derece, ilk aci
                     //   secilip engel varsa vazgecilirdi. Simdi aci adaylari sirayla denenir (40, 50, 60, sonra DUZ yaylar 25 / 32 / 18 / 12 [pencere / kapidan iceri duz atis], 68); her aday icin hiz (<= 26 m/sn) + GEOM yay kontrolu;
                     //   ilk TEMIZ yay atilir; hicbiri temiz degilse ilk engelin adi loglanir. Bina duvari GEOM'da kapaliysa (pencere acik degilse) yine atilmaz (bomba geri seker).
+                    // v8.597 UST KAT PENCERE + CAM DURUMU (kullanici: '2. ve 3. kat pencereye de atsinlar, fiziksel olarak girecekse camlarin kirik olup olmadigina dikkat et, birkac metre yukseye atilabilsin'):
+                    //   yukseklik (dh) sinirsiz (aci 75 derece + hiz 28 m/sn); girip girmeyecegini GEOM yay denetimi belirler (cam gecirmezse yay kapali = atilmaz).
+                    //   Cam gosterimi bilinmiyor: binanin 'glass' animasyonlari + hitpoint sayisi RPT'ye yazilir ([PATLAYICI-CAM], ilk 8) - sonraki surumde kirik / saglam cam ayrimi bu veriye gore yapilir.
+                    if ((insideBuilding _t) > 0.2 && {(missionNamespace getVariable ["lambs_danger_camLogN", 0]) < 8}) then {
+                        missionNamespace setVariable ["lambs_danger_camLogN", (missionNamespace getVariable ["lambs_danger_camLogN", 0]) + 1];
+                        private _bn0 = nearestBuilding _t;
+                        private _cam = (animationNames _bn0) select {((toLower _x) find "glass") >= 0};
+                        diag_log format ["[PATLAYICI-CAM] %1 | hedef yuksekligi +%2 m | cam animasyonu %3 (kirik / gizli %4) | hitpoint %5 | ornek %6", typeOf _bn0, _dh toFixed 1, count _cam, {(_bn0 animationPhase _x) > 0.5} count _cam, count ((getAllHitPointsDamage _bn0) param [0, []]), _cam select [0, 4]];
+                    };
                     private _v = -1;
                     private _th = 0;
                     private _vel = [];
@@ -91,7 +100,7 @@ lambs_danger_patlayiciDon = {
                         private _payda = (_D * (tan _a)) - _dh;
                         if (_payda > 0.5) then {
                             private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _a) ^ 2) * _payda));
-                            if (_vv <= 26) then {
+                            if (_vv <= (26 + (2 * (((_dh / 4) max 0) min 1)))) then {   // v8.597: ust kat (>= +4 m) hedefe hiz tavani 26 -> 28 m/sn
                                 private _vk = _vv * (1 + ((random 0.1) - 0.05));
                                 private _vl = [(sin _yon) * (cos _a) * _vk, (cos _yon) * (cos _a) * _vk, (sin _a) * _vk];
                                 private _tTop = _D / ((cos _a) * _vk max 1);
@@ -117,7 +126,7 @@ lambs_danger_patlayiciDon = {
                                 } else { _v = _vk; _th = _a; _vel = _vl; };
                             };
                         };
-                    } forEach [40, 50, 60, 25, 32, 18, 12, 68];
+                    } forEach [40, 50, 60, 25, 32, 18, 12, 68, 75];   // v8.597: 75 derece (2. / 3. kat pencereye dik yay)
                     if (_v < 0) then {
                         _sonuc = if (_denenen isEqualTo 0) then {"menzil / yukseklik uygun degil"} else { format ["yay uzerinde engel (%1, yay noktasi %2/8; %3 aci denendi) - atilmadi", _engelAd, _engelI, _denenen] };
                     } else {
