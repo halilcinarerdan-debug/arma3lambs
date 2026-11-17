@@ -195,6 +195,7 @@ if (_elev > 40 && {(time - (_g getVariable [QGVAR(dronDikLogT), -99])) > 10}) th
 if (_kamikaze && {_egik <= 700} && {((getPosATL _dr) select 2) <= 200}) then { [_g, _dr, (_egik <= _menzil) && {_elev <= 40}, _egik <= 200] call FUNC(dronSakla); };
 if (_egik > _menzil || {((getPosATL _dr) select 2) > 200} || {_elev > 50}) exitWith {false};
 if ((time - (_g getVariable [QGVAR(dronAtesT), -99])) < 3) exitWith {true};
+private _atla = false;
 // v8.345: komutan niyeti sessizse (ya da CBA dronAtesModu kapaliysa) zorla ates yok; dagilma / siper yukarida zaten yapildi
 if !([_g, _dr, _egik] call FUNC(dronAtesIzin)) exitWith {
     if ((time - (_g getVariable [QGVAR(dronAtesYasakLogT), -99])) > 30) then {
@@ -203,6 +204,20 @@ if !([_g, _dr, _egik] call FUNC(dronAtesIzin)) exitWith {
     };
     false
 };
+// v8.562 FPV KISMA (kullanici: 'dronlar cok hizli vuruluyor, fpv dronu baya bir kis, cok hileli'): saldiri tipi FPV / bomba drona (1) REAKSIYON SURESI: grup dronu ilk kez ates kararina soktugundan itibaren
+//   lambs_danger_dronReaksiyon (3 sn) x (0.6..1.4) bekler (bu sure dagilma / siper surer; ates emri yok), (2) her ates turunda emir olasiligi sqrt(lambs_danger_dronFpvKis) (zorla atis olasiligi ayrica fnc_dronVurusOlasi'da sqrt(kis) ile carpilir;
+//   toplam ~ kis). 20 sn gorulmezse reaksiyon sayaci sifirlanir. Gozlem tipi / diger dronlar etkilenmez.
+if (_tip in ["FPV-AT", "FPV-AP", "BOMBA"]) then {
+    private _kis = (missionNamespace getVariable ["lambs_danger_dronFpvKis", 0.4]) max 0 min 1;
+    private _rk = missionNamespace getVariable ["lambs_danger_dronReaksiyon", 3];
+    private _kk = format ["%1_%2", QGVAR(dronReak), groupId _g];
+    private _rec = _dr getVariable [_kk, [-1, -999]];
+    if ((time - (_rec select 1)) > 20) then { _rec = [time + (_rk * (0.6 + (random 0.8))), time]; };
+    _rec set [1, time];
+    _dr setVariable [_kk, _rec];
+    if (time < (_rec select 0) || {(random 1) > (sqrt _kis)}) then { _atla = true; };
+};
+if (_atla) exitWith {false};
 _g setVariable [QGVAR(dronAtesT), time];
 if ((combatMode _g) in ["BLUE", "GREEN", "WHITE"]) then { _g setCombatMode "YELLOW"; };
 if ((behaviour _l) in ["SAFE", "CARELESS"]) then { _g setBehaviour "AWARE"; };
