@@ -10,6 +10,7 @@
  *   YEREL botlarin aimingAccuracy degerini (skill / eskiK) x yeniK olarak yeniden olcekler (becerisi varsayilanSkill ile atanmis, ALiVE / disableAI olmayan, oyunculu grupta olmayan birimler).
  * SINIRLAR: oyuncu / bot isabeti AYNI KOSULLARDA olculmez (siper, gorunurluk, silah, optik farkli): bant bazli karsilastirma yalniz mesafeyi esitler. Hit olayi atici ile kurbanin makinesine bagli: mermi turunu ('son mermi' degiskeni) yalniz
  *   ATICI YEREL ise okur (tek makine / host'ta tam, dedicated sunucuda uzak oyuncu isabeti eksik kalir -> o durumda oyuncu orani dusuk olcunur). Patlama / el bombasi hasari sayilmaz.
+ * ISABET YARDIMI (v8.569, CBA isabetYardim, varsayilan 0): bkz. Fired isleyicisi - bot mermisinin yonu hataya gore duzeltilir (aimingAccuracy 1 siniri disina cikmak icin).
  * Log: [ISABET-DENGE] (60 sn'de bir: bant bazli oyuncu / bot atis + isabet + oran, K, aksiyon). Kapatma: CBA isabetDenge = false (olcum surer).
  *
  * Arguments: None
@@ -30,7 +31,7 @@ lambs_danger_isabetBant = _bant;
 
 // ---- olcum: atis ----
 ["CAManBase", "Fired", {
-    params ["_u", "_wep", "", "", "_ammo"];
+    params ["_u", "_wep", "", "", "_ammo", "", "_proj"];
     if (!local _u || {_wep isEqualTo (secondaryWeapon _u)}) exitWith {};
     private _on = lambs_danger_isabetMermiOn;
     private _b = _on getOrDefault [_ammo, -1];
@@ -43,6 +44,32 @@ lambs_danger_isabetBant = _bant;
     if (isNull _t || {!alive _t} || {!(_t isKindOf "CAManBase")} || {((side group _u) getFriend (side group _t)) >= 0.6}) exitWith {};
     private _m = _u distance _t;
     if (_m > 600) exitWith {};
+    // v8.569 ISABET YARDIMI (kullanici: 'oyunun 1 limiti disinda'): aimingAccuracy en cok 1 olur; botun mermisinin yonu, hedefe (onculu + dusme telafili) olan HATANIN CBA isabetYardim orani kadari duzeltilir (hata <= 4 derece).
+    //   Hile benzeri (aimbot yardimi): 0 = kapali (varsayilan). Yalniz oyuncusuz grup / bot, yerel mermi, <= 600 m.
+    private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
+    if (_yrd > 0 && {!_oy} && {!isNull _proj} && {((units group _u) findIf {isPlayer _x}) < 0}) then {
+        private _v = velocity _proj;
+        private _sp = vectorMagnitude _v;
+        private _vh = sqrt (((_v select 0) ^ 2) + ((_v select 1) ^ 2));
+        if (_sp > 50 && {_vh > 1}) then {
+            private _p0 = getPosASL _proj;
+            private _tp = aimPos _t;
+            private _d = _tp vectorDiff _p0;
+            private _R = (sqrt (((_d select 0) ^ 2) + ((_d select 1) ^ 2))) max 1;
+            private _tof = _R / (_sp * 0.9);
+            private _d2 = (_tp vectorAdd ((velocity _t) vectorMultiply _tof)) vectorDiff _p0;
+            private _R2 = (sqrt (((_d2 select 0) ^ 2) + ((_d2 select 1) ^ 2))) max 1;
+            private _azI = (_d2 select 0) atan2 (_d2 select 1);
+            private _elI = atan ((((_d2 select 2) + (0.5 * 9.81 * _tof * _tof))) / _R2);
+            private _azC = (_v select 0) atan2 (_v select 1);
+            private _elC = atan ((_v select 2) / _vh);
+            private _dAz = ((((_azI - _azC) + 540) mod 360) - 180) max -4 min 4;
+            private _dEl = ((_elI - _elC) max -4) min 4;
+            private _azN = _azC + (_dAz * _yrd);
+            private _elN = _elC + (_dEl * _yrd);
+            _proj setVelocity ([(sin _azN) * (cos _elN), (cos _azN) * (cos _elN), sin _elN] vectorMultiply _sp);
+        };
+    };
     private _bn = [_m] call lambs_danger_isabetBant;
     private _y = lambs_danger_isabetYerel;
     private _a = _y select ([2, 0] select _oy);
