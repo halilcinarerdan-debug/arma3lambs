@@ -100,7 +100,7 @@ lambs_danger_patlayiciDon = {
                                 private _ad = "";
                                 private _ni = 0;
                                 for "_i" from 1 to 8 do {
-                                    private _tt = _tTop * (_i / 8) * 0.92;
+                                    private _tt = _tTop * (_i / 8);   // v8.596: 0.92 -> 1.0 (yayin SON %8'i de denetlenir: pencere / duvar onunde dusup geri sekme riski; RPT 38ac1efc: grup 10 -> 4 etkin)
                                     private _nokta = _rel vectorAdd [(_vl select 0) * _tt, (_vl select 1) * _tt, ((_vl select 2) * _tt) - (4.905 * _tt * _tt)];
                                     private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
                                     if (_ht isNotEqualTo []) exitWith {
@@ -321,7 +321,7 @@ lambs_danger_patlayiciDon = {
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");
                             private _icerde = (insideBuilding _u) > 0.5;
                             if (_bTM < _bombaMin) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
-                            private _dostYakin = (_bT nearEntities ["CAManBase", 12]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
+                            private _dostYakin = (_bT nearEntities ["CAManBase", ((missionNamespace getVariable ["lambs_danger_bombaDostM", 18]) max 8) min 30]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                             if (_dostYakin) then { _sayac set ["g_dost", (_sayac getOrDefault ["g_dost", 0]) + 1]; };
                             if (!_dostYakin && {(speed _u) < 6}) then {
                                 _u setVariable [QGVAR(bombaT), time];
