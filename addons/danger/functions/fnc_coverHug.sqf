@@ -64,6 +64,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
             private _g = _x;
             if (_butce <= 0) exitWith {};
             if (isNull _g || {!local _g}) then { continue };
+            if (((units _g) findIf {isPlayer _x}) > -1) then { continue };   // v8.589: oyuncu gruplari muaf (setPos / durus / doWatch oyuncu emirlerini eziyordu; koseTemkin / cqbCevik ile ayni kural)
             if ((_g getVariable [QGVAR(contact), 0]) <= time) then { continue };
             if (
                 (_g getVariable [QGVAR(isRetreating), false])

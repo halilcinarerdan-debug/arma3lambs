@@ -66,6 +66,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
 
         private _uzakN = 0;   // v8.283: bu tick'te diger makinelere gonderilen birim sayisi (ag patlamasi siniri)
         // v8.587 GENEL ANIMASYON HIZI (kullanici: 'animasyon hizini yuzde 30a kadar slider ile arttir, acilip kapansin, default yuzde 20, senkronizasyon bozmasin'): tick basina bir kez okunur
+        private _oyG = allPlayers apply {group _x};   // v8.589: oyuncu gruplari: animasyon artisi / sikisma adimi yok (oyuncu emirlerine uyum)
         private _hizT = if (missionNamespace getVariable ["lambs_danger_animHizAktif", true]) then { 1 + (((missionNamespace getVariable ["lambs_danger_animHiz", 20]) max 0) min 30) / 100 } else {1};
         // v8.580 PERFORMANS (Parca 2): birim LISTESI 0.6 sn'de bir yenilenir (eskiden her 0.15 sn'de allUnits taramasi); her tick'te yalniz canli / aracta degil / saglikli kontrolu (ucuz) yeniden yapilir
         if (time > _listeT) then {
@@ -91,7 +92,8 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _parca = _anAd splitString "_";
             private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;
-            private _hizU = if (time < (_u getVariable [QGVAR(mvSlowUntil), 0])) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
+            private _oyGrup = _g in _oyG;
+            private _hizU = if (_oyGrup || {time < (_u getVariable [QGVAR(mvSlowUntil), 0])}) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
             private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
             private _istenen = if (_donuyor) then {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
@@ -184,7 +186,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                 // TEMAS / TAKTIK / KOMUTAN: sikisma adimi SADECE sakin intikalde (temasta siperde bekleyen cift, bound bekleyen, komutan "dur-kalk" yapmasin)
 if (
     (speed _u) < 1 && {(stance _u) in ["STAND", "CROUCH"]} && {time > (_u getVariable [QGVAR(sideLast), 0])}
-    && {_u isNotEqualTo (leader _u)}
+    && {_u isNotEqualTo (leader _u)} && {!_oyGrup}
     && {((_g getVariable [QGVAR(contact), 0]) < time)}
     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])}
     && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
