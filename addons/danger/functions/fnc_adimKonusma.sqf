@@ -54,7 +54,15 @@ if (hasInterface) then {
                     _carpan = (((linearConversion [0, 1, _sv, 0.1, 1.3, true]) / 0.7) max 0.15) min 1.9;
                 };
             } else {
-                if (_tfar) then { _konusuyor = [player] call TFAR_fnc_isSpeaking; } else { _konusuyor = (getPlayerChannel player) >= 0; };
+                if (_tfar) then { _konusuyor = [player] call TFAR_fnc_isSpeaking; } else {
+                    // v8.574 (kullanici: 'oyuncu takiminin da konusma seslerini kullan'; RPT'lerde oyuncu konusmasi HIC algilanmadi): getPlayerChannel yolunun yaninda DOGRUDAN KONUSMA TUSU (inputAction PushToTalkDirect / PushToTalk > 0) da sayilir
+                    private _ptt = ((inputAction "PushToTalkDirect") > 0) || {(inputAction "PushToTalk") > 0};
+                    _konusuyor = ((getPlayerChannel player) >= 0) || _ptt;
+                    if (_konusuyor && {!(missionNamespace getVariable ["lambs_danger_konTusLog", false])}) then {
+                        missionNamespace setVariable ["lambs_danger_konTusLog", true];
+                        diag_log format ["[KONUSMA-TUS] oyuncu konusma algilandi | getPlayerChannel %1 | PushToTalkDirect %2 | PushToTalk %3", getPlayerChannel player, inputAction "PushToTalkDirect", inputAction "PushToTalk"];
+                    };
+                };
             };
             if (_konusuyor isEqualTo true) then {
                 player setVariable ["lambs_danger_konusmaCarpan", _carpan, true];
