@@ -436,7 +436,7 @@ if (EGVAR(main,debug_functions)) then {
             //   ya da davranis COMBAT'a donduyse: AI bayraklari yeniden kapatilir, doStop + doMove (birim basina en fazla 2.5 sn'de bir, grup logu ilk 30 olay).
             {
                 private _b = _x select 0;
-                if (alive _b && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5} && {(time - _t0) > 1.5}) then {
+                if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5} && {(time - _t0) > 1.5}) then {
                     private _kmt = currentCommand _b;
                     // v8.386: COMBAT artik bizim kendi davranisimiz (ezme sayilmaz); TARGET acikken motor ates ederken komutu ATTACK gosterebilir -> yalniz DURUYORSA (< 1 m/sn) ezme say
                     if (_kmt isNotEqualTo "MOVE" && {(_kmt isNotEqualTo "ATTACK") || {(speed _b) < 1}}) then {
@@ -463,7 +463,7 @@ if (EGVAR(main,debug_functions)) then {
             // Takilma tespiti: 3.5 sn'de < 1.5 m ilerleyen, hedefe uzak asker -> emri tazele; 2. takilmada dusmandan uzaga yeni nokta
             {
                 private _b = _x select 0;
-                if (alive _b && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12}) then {
+                if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(_b distance2D (_x select 1)) > 12}) then {
                     if ((_b distance2D (_x select 2)) > 1.5) then {
                         _x set [2, getPosATL _b];
                         _x set [3, time];
@@ -510,8 +510,8 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _varis;
 
-            private _vardi = _varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}};
-            private _canli = _varis select {alive (_x select 0)};
+            private _vardi = _varis select {((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) && {((_x select 0) distance2D (_x select 1)) <= 12}};
+            private _canli = _varis select {(alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}};
             private _gelmeyen = _canli select {
                 !((_x select 0) in _pinned)
                 && {((_x select 0) distance2D (_x select 1)) > 12}
@@ -523,11 +523,12 @@ if (EGVAR(main,debug_functions)) then {
         };
 
         // v8.380 ILERLEME TAKIBI (RPT 05:02: Alpha 1-1 PEEL ile 4 dk / 8 sicrama, her sicramada vardi 0/6; dusman 300 m'de, grup yerinde -> 'engage atmiyorlar'): art arda 2 sicramada varan < %20 ise cekilme birakilir
-        private _vardiSay = count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}});
+        private _vardiSay = count (_varis select {((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) && {((_x select 0) distance2D (_x select 1)) <= 12}});
+        // v8.568: sicrama sirasinda BAYGIN dusen (INCAPACITATED) askerler varis / mesafe / takilma olcumunden CIKARILDI (RPT a3a55579: TAKILI satirlarinin %43'u baygin askerdi -> '0 varis' ile cekilme erken bitiyordu)
         // v8.545 ILERLEME = varis VEYA gercek mesafe kazanci (RPT 14:21-15:07: 4 testte 'ilerleme yok (2 sicrama 0 varis)' ile cekilme 54 sn'de bitti; ormanda 12 m varis yaricapi tutmuyor, asker siperde durup mesafe kazaniyor)
         private _dSonra = 0;
         private _canliN = 0;
-        { if (alive (_x select 0)) then { _dSonra = _dSonra + ((_x select 0) distance2D _targetPos); _canliN = _canliN + 1; }; } forEach _varis;
+        { if ((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) then { _dSonra = _dSonra + ((_x select 0) distance2D _targetPos); _canliN = _canliN + 1; }; } forEach _varis;
         private _kazanc = if (_canliN > 0) then {(_dSonra / _canliN) - _dOnce} else {0};
         if ((_vardiSay * 5) < (count _varis) && {_kazanc < 8}) then {
             _grup setVariable [QGVAR(retSifirArd), (_grup getVariable [QGVAR(retSifirArd), 0]) + 1];
@@ -539,7 +540,7 @@ if (EGVAR(main,debug_functions)) then {
         diag_log format [
             "[GERI-CEKILME] %1 sicrama %2 sonuc | vardi:%3/%4 | ezilen:%5 | mesafe kazanci:%6 m",
             groupId _grup, _no,
-            count (_varis select {alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) <= 12}}),
+            count (_varis select {((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) && {((_x select 0) distance2D (_x select 1)) <= 12}}),
             count _varis, count _pinned, round _kazanc
         ];
 
