@@ -30,7 +30,6 @@ diag_log "[ISINLANMA] isinlanma korumasi baslatildi (v8.368): aractan inen / ara
     private _izlenen = [];   // v8.580: izlemeye alinan birimler (2 sn'de bir yenilenir); eskiden her 0.4 sn'de allUnits taramasi
     while {true} do {
         sleep 0.4;
-        private _pt0 = diag_tickTime;
         if (!(missionNamespace getVariable ["lambs_danger_isinlanmaAktif", true])) then { continue };
         // 2 sn'de bir: aracta olan yerel AI askerleri izlemeye al
         if (time > _taraT) then {
@@ -72,7 +71,6 @@ diag_log "[ISINLANMA] isinlanma korumasi baslatildi (v8.368): aractan inen / ara
                 };
             };
         } forEach (_izlenen select {(_x getVariable [QGVAR(isinIzle), 0]) > time && {!isPlayer _x} && {alive _x}});
-            ["isinlanmaKoruma", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

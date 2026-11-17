@@ -20,7 +20,6 @@ diag_log "[KAPI-AC] kapi bekcisi baslatildi (v8.506): yuruyen / kapiya bakan ask
     private _indeks = 0;
     while {true} do {
         sleep 1;
-        private _pt0 = diag_tickTime;
         if (missionNamespace getVariable ["lambs_danger_kapiAcOff", false]) then { continue };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
@@ -51,7 +50,6 @@ diag_log "[KAPI-AC] kapi bekcisi baslatildi (v8.506): yuruyen / kapiya bakan ask
             };
             _indeks = _indeks + _kesit;
         };
-            ["kapiBekci", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 true

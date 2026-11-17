@@ -86,7 +86,6 @@ private _fnLog = {
     private _tick = 0;
     while {true} do {
         sleep 1;
-        private _pt0 = diag_tickTime;
         _tick = _tick + 1;
         if (missionNamespace getVariable ["lambs_danger_fieldCraftOff", false]) then { continue };
 
@@ -253,7 +252,6 @@ private _fnLog = {
                 };
             } forEach _us;
         } forEach allGroups;
-            ["fieldCraft", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

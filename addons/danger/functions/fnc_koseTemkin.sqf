@@ -192,7 +192,6 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
 
     while {true} do {
         sleep 0.4;
-        private _pt0 = diag_tickTime;
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             if (((_sayac get "tespit") + (_sayac get "istif")) > 0) then {
@@ -285,7 +284,6 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
                 [_u, _g, _kose, _rol, _kimlik, _sayac, _olcek] spawn _sekans;
             } forEach (units _g);
         } forEach allGroups;
-            ["koseTemkin", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

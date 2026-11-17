@@ -36,7 +36,6 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
 
     while {true} do {
         sleep 0.7;
-        private _pt0 = diag_tickTime;
         private _butce = 4;   // tikte en fazla bu kadar findCover
 
         {
@@ -176,7 +175,6 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                 };
             } forEach (units _g);
         } forEach allGroups;
-            ["cqbReflex", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 
