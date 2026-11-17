@@ -12,25 +12,37 @@
  * 2: Yoksayilacak nesne 1 (atici / arac) <OBJECT>
  * 3: Yoksayilacak nesne 2 (hedef) <OBJECT>
  *
- * Return Value: [gecer mi <BOOL>, nesne sayisi <NUMBER>]
+ * 4: Bilinmeyen malzemeyi DENE (CBA penetreDeneme; <= 30 m, <= 2 nesne) <BOOL> (varsayilan false)
+ * Return Value: [gecer mi <BOOL>, nesne sayisi <NUMBER>, denemelik (bilinmeyen) nesne sayisi <NUMBER>]
  *
  * Public: No
 */
 
-params ["_a", "_b", ["_i1", objNull], ["_i2", objNull]];
-if (terrainIntersectASL [_a, _b]) exitWith {[false, -1]};
+params ["_a", "_b", ["_i1", objNull], ["_i2", objNull], ["_deneme", false]];
+if (terrainIntersectASL [_a, _b]) exitWith {[false, -1, 0]};
 private _hits = lineIntersectsSurfaces [_a, _b, _i1, _i2, true, 5, "FIRE", "NONE"];
-if (_hits isEqualTo []) exitWith {[true, 0]};
-if ((count _hits) > 3) exitWith {[false, count _hits]};
+if (_hits isEqualTo []) exitWith {[true, 0, 0]};
+if ((count _hits) > 3) exitWith {[false, count _hits, 0]};
 private _ekstra = missionNamespace getVariable ["lambs_danger_penetreJetonlari", [[], []]];
 private _pJ = ["wood", "plank", "fence", "tent", "tarp", "cloth", "sheet", "curtain", "camonet", "bamboo", "thatch", "straw", "hay", "hut", "shack", "shed", "crate", "barn", "plywood", "board", "pallet", "bush", "foliage", "palm", "reed", "mat_"] + (_ekstra select 0);
 private _sJ = ["concrete", "brick", "stone", "rock", "metal", "steel", "iron", "armor", "armour", "bunker", "sandbag", "container", "cinder", "block", "wreck", "pipe", "pillar", "tank", "vehicle"] + (_ekstra select 1);
 private _tamam = true;
+private _bil = 0;
+private _mes = _a distance _b;
 {
     private _o = _x select 2;
     if (isNull _o || {_o isKindOf "AllVehicles"}) exitWith { _tamam = false; };
     private _ad = toLower (((getModelInfo _o) select 0) + " " + (typeOf _o));
     if ((_sJ findIf {(_ad find _x) >= 0}) >= 0) exitWith { _tamam = false; };
-    if ((_pJ findIf {(_ad find _x) >= 0}) < 0) exitWith { _tamam = false; };
+    if ((_pJ findIf {(_ad find _x) >= 0}) < 0) then {
+        // v8.566 BILINMEYEN malzeme (RPT a3a55579: penetrasyon atesi 60 dk'da 2 kez; ev / baraka modelleri jeton listesinde yok -> 'gecmez' sayiliyordu): CBA penetreDeneme + <= 30 m + <= 2 nesne ise DENEME atesi (insan duvara sikar)
+        if (_deneme && {_mes <= 30} && {(count _hits) <= 2} && {(missionNamespace getVariable ["lambs_danger_penetreDeneme", true])}) then { _bil = _bil + 1; } else { _tamam = false; };
+        private _lg = missionNamespace getVariable ["lambs_danger_penetreBilLog", []];
+        if ((count _lg) < 30 && {!(_ad in _lg)}) then {
+            _lg pushBack _ad;
+            missionNamespace setVariable ["lambs_danger_penetreBilLog", _lg];
+            diag_log format ["[PENETRE-BILINMEYEN] jeton listesinde yok: %1 (mesafe %2 m, nesne %3) -> %4", _ad, round _mes, count _hits, ["gecmez sayildi", "DENEME atesi"] select (_deneme && {_mes <= 30})];
+        };
+    };
 } forEach _hits;
-[_tamam, count _hits]
+[_tamam, count _hits, _bil]

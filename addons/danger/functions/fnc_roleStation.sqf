@@ -116,6 +116,10 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 } forEach (units _g);
             };
 
+            // v8.566 SENARYO KAPISI (UGL kapi DISINDA): UGL ates gorevi hareket degil; CBA senaryoModu aciksa (DMP / waypoint) rol ISTASYONU (yer degistirme) geri cekilir ama bombaatar atesi surer
+            //   (RPT a3a55579: senaryo modu ACIK iken UGL-KARAR 0 - tum grup dongusu kapidan geciriliyordu)
+            if ([_g, "roleStation"] call FUNC(senaryoKapi)) then { continue };
+
             // Kendi hareket duzeni olan taktikler: atla
             if (
                 (_g getVariable [QGVAR(isBounding), false])
@@ -408,7 +412,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     };
                 };
             } forEach _tum;
-        } forEach (allGroups select {!([_x, "roleStation"] call FUNC(senaryoKapi))});   // v8.502 senaryo modu
+        } forEach allGroups;   // v8.502 senaryo modu (v8.566: kapi dongu icinde, UGL gorevinden sonra)
     };
 };
 

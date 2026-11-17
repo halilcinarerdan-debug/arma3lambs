@@ -100,20 +100,26 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 // ---- 1) PENETRASYON ATESI ----
                 if (_penetreAcik && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])}
                     && {[(_u ammo (primaryWeapon _u)) > 6, someAmmo (vehicle _u)] select _arac}) then {
-                    private _pm = [_uGoz, _hedefASL, [_u, vehicle _u] select _arac, _e] call FUNC(penetreMi);
+                    private _pm = [_uGoz, _hedefASL, [_u, vehicle _u] select _arac, _e, true] call FUNC(penetreMi);
                     if (_pm select 0) then {
                         private _dostEngel = ((_u nearEntities ["CAManBase", _d]) findIf {
                             alive _x && {_x isNotEqualTo _u} && {_x isNotEqualTo _e} && {((side group _x) getFriend (side _g)) >= 0.6} && {([getPosASL _x, _uGoz, _hedefASL] call _cizgiMes) < 1.5}
                         }) >= 0;
+                        private _denemeMi = (_pm select 2) > 0;
+                        // deneme (bilinmeyen malzeme): 8 sn arayla, ayni birim 40 sn'de en cok 4 kez
+                        if (_denemeMi) then {
+                            if ((time - (_u getVariable [QGVAR(penDenT), -999])) > 40) then { _u setVariable [QGVAR(penDenN), 0]; _u setVariable [QGVAR(penDenT), time]; };
+                            if ((_u getVariable [QGVAR(penDenN), 0]) >= 4) then { _dostEngel = true; } else { _u setVariable [QGVAR(penDenN), (_u getVariable [QGVAR(penDenN), 0]) + 1]; };
+                        };
                         if (!_dostEngel && {_pm select 1 > 0}) then {
                             _u doSuppressiveFire _hedefASL;
-                            _u setVariable [QGVAR(penetreT), time + 4];
+                            _u setVariable [QGVAR(penetreT), time + ([4, 8] select _denemeMi)];
                             _atesVerdi = true;
                             _say set [["penetre", "arac"] select _arac, (_say get (["penetre", "arac"] select _arac)) + 1];
                             if (_logN < 20) then {
                                 _logN = _logN + 1;
-                                diag_log format ["[PENETRE-ATES] %1 %2 | %3 (%4) -> %5 | %6 m | gorunmuyor (vis %7), hat %8 penetre edilebilir nesneden geciyor | xy %9 -> %10", str (side _g), groupId _g, name _u, ["piyade", "ARAC NISANCISI " + typeOf (vehicle _u)] select _arac, typeOf _e, round _d, _vis toFixed 2, _pm select 1,
-                                    (getPosATL _u) select [0, 2] apply { round _x }, (getPosATL _e) select [0, 2] apply { round _x }];
+                                diag_log format ["[PENETRE-ATES] %1 %2 | %3 (%4) -> %5 | %6 m | gorunmuyor (vis %7), hat %8 nesneden geciyor (%11) | xy %9 -> %10", str (side _g), groupId _g, name _u, ["piyade", "ARAC NISANCISI " + typeOf (vehicle _u)] select _arac, typeOf _e, round _d, _vis toFixed 2, _pm select 1,
+                                    (getPosATL _u) select [0, 2] apply { round _x }, (getPosATL _e) select [0, 2] apply { round _x }, ["bilinen penetre edilebilir", "BILINMEYEN malzeme DENEMESI"] select _denemeMi];
                             };
                         };
                     };

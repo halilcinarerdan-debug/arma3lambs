@@ -235,6 +235,10 @@ lambs_danger_patlayiciDon = {
                 if (_butce <= 0) exitWith {};
                 private _u = _x;
                 private _uP = getPosASL _u;
+                // v8.566 CQB FRAG (kullanici: 'frag neredeyse hic kullanilmamis, cqb de frag kullanimini arttir'; RPT a3a55579: 60 dk'da el bombasi emri 0): CQB mesafesinde (CBA cqbBombaM, 25 m) bilinen dusmana DEGER SARTI aranmaz,
+                //   birim bekleme 20 -> 10 sn, grup araligi 4 -> 2 sn, 60 sn'de en cok 3 -> 5 bomba. Dost 12 m / guvenli minimum mesafe / yay temizligi kurallari AYNEN. CBA cqbBomba.
+                private _cqbBomba = missionNamespace getVariable ["lambs_danger_cqbBomba", true];
+                private _cqbM = missionNamespace getVariable ["lambs_danger_cqbBombaM", 25];
                 // en yakin deger tasiyan hedef
                 private _enIyi = objNull;
                 private _enM = 1e9;
@@ -247,7 +251,7 @@ lambs_danger_patlayiciDon = {
                     private _k = ({ (_x select 4) isNotEqualTo _o && {(_x select 4) distance _o < 8} } count _dusman) + 1;
                     private _kp = lineIntersects [eyePos _u, eyePos _o, _u, _o];
                     private _bn = (insideBuilding _o) > 0.5;
-                    if (_m < _enM && {_k >= 2 || _kp || _bn || _baski || _pusu}) then { _enIyi = _o; _enM = _m; _kumeN = _k; _kapali = _kp; _binada = _bn; };
+                    if (_m < _enM && {_k >= 2 || _kp || _bn || _baski || _pusu || {_cqbBomba && {_m <= _cqbM}}}) then { _enIyi = _o; _enM = _m; _kumeN = _k; _kapali = _kp; _binada = _bn; };
                 } forEach _dusman;
                 // v8.316 DEGER SARTI VAR AMA ESNEK (kullanici: 'deger sarti olsun ama esnetilsin'; v8.315 sarti tamamen kaldirmisti): el bombasi hedefi 10-60 m, temasta bilinen dusman piyade ve ASAGIDAKILERDEN EN AZ BIRI:
     //   KUME (12 m icinde baska dusman) | BINADA | KAPALI HAT (bas ya da gogus hizasinda gorus hatti kesik) | ALCAK DURUS (CROUCH / PRONE) | DURAGAN (hiz < 1.5 m/sn, >= 20 m) | grupta EN AZ 1 askerde baski > 0.3 | pusu alarmi (son 30 sn).
@@ -263,7 +267,7 @@ lambs_danger_patlayiciDon = {
                         _bAday = true;
                         private _kk = ({ (_x select 4) isNotEqualTo _o && {((_x select 4) distance _o) < 12} } count _dusman) + 1;
                         private _deger = _kk >= 2 || {(insideBuilding _o) > 0.5} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
-                            || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu};
+                            || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu} || {_cqbBomba && {_m <= _cqbM}};
                         if (_deger) then { _bH = _o; _bM = _m; };
                     };
                 } forEach _dusman;
@@ -272,18 +276,19 @@ lambs_danger_patlayiciDon = {
                 private _bT = if (!isNull _enIyi && {_enM <= _bombaMax}) then { _enIyi } else { _bH };
                 private _bTM = if (isNull _bT) then { 1e9 } else { _u distance _bT };
                 private _bKume = if (!isNull _enIyi && {_bT isEqualTo _enIyi}) then { _kumeN } else { 1 };
+                private _cqbY = _cqbBomba && {_bTM <= _cqbM};
 
                 // --- EL BOMBASI ---
                 if (missionNamespace getVariable ["lambs_danger_elBombasiAktif", true]) then {
                     if (isNull _bT) then { _sayac set ["g_mesafe", (_sayac getOrDefault ["g_mesafe", 0]) + 1]; };
-                    if (!isNull _bT && {_bTM >= 10} && {_bTM <= _bombaMax} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > 20} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > 4}) then {
+                    if (!isNull _bT && {_bTM >= 10} && {_bTM <= _bombaMax} && {(time - (_u getVariable [QGVAR(bombaT), -999])) > ([20, 10] select _cqbY)} && {(time - (_g getVariable [QGVAR(bombaGT), -999])) > ([4, 2] select _cqbY)}) then {
                         private _fraglar = (magazines _u) select {[_x] call _fragMi};
                         if (_fraglar isEqualTo []) then { _sayac set ["g_frag_yok", (_sayac getOrDefault ["g_frag_yok", 0]) + 1]; };
                         private _gecmis = (_u getVariable [QGVAR(bombaListe), []]) select {(time - _x) < 60};
                         _u setVariable [QGVAR(bombaListe), _gecmis];
                         private _yedek = (count _fraglar) <= 1 && {_bKume < 3} && {!_baski} && {!_pusu} && {_bTM > 25};   // v8.315: son bomba yedek - baski / pusu / 25 m icinde ise yedek bozulur
                         if (_fraglar isNotEqualTo [] && {_yedek}) then { _sayac set ["g_yedek", (_sayac getOrDefault ["g_yedek", 0]) + 1]; };
-                        if (_fraglar isNotEqualTo [] && {!_yedek} && {(count _gecmis) < 3}) then {
+                        if (_fraglar isNotEqualTo [] && {!_yedek} && {(count _gecmis) < ([3, 5] select _cqbY)}) then {
                             private _mag = _fraglar select 0;
                             // v8.313: guvenli minimum mesafe = bombanin olum yaricapi (indirectHitRange) x 1.8, en az 12 m (eskiden sabit 15 m)
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");

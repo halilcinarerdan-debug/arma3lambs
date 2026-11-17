@@ -137,7 +137,8 @@ if (hasInterface) then {
                 private _yuzey = toLower (surfaceType _sPos);
                 private _yk = 1;
                 { if ((_yuzey find (_x select 0)) >= 0) exitWith { _yk = _x select 1; }; } forEach _hizTablo;
-                private _r = (1.6 * _spd * _durus * _yk) min 45;
+                private _cA = missionNamespace getVariable ["lambs_danger_botAdimCarpan", 1.5];   // v8.566 (kullanici: 'ayak sesi artsin'): menzil ve tavan x CBA botAdimCarpan
+                private _r = (1.6 * _cA * _spd * _durus * _yk) min (45 * _cA);
                 if (_r <= 1) then { continue };
                 _n = _n + 1;
                 private _sSide = side group _s;

@@ -34,7 +34,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
         };
         private _n = count _adaylar;
         if (_n > 0) then {
-            private _kesit = 10 min _n;
+            private _kesit = 24 min _n;   // v8.566: 10 -> 24 (kullanici: 'hala kor duvara bakis var'; 175 askerde birim ~35 sn'de bir kontrol ediliyordu)
             for "_i" from 0 to (_kesit - 1) do {
                 private _u = _adaylar select ((_indeks + _i) mod _n);
                 if (time < (_u getVariable [QGVAR(dvrBakT), 0])) then { continue };
@@ -75,8 +75,24 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
                     _u doWatch ((getPosATL _u) getPos [40, _by]);
                     _say set [0, (_say select 0) + 1];
                 } else {
-                    _u doWatch objNull;
-                    _say set [1, (_say select 1) + 1];
+                    // v8.566: hic acik yon yok (RPT a3a55579: 14 / 30 olay 'bakis serbest' -> AI ayni duvara geri bakiyordu): 8 yonde 15 m isin, EN ACIK yone cevir (>= 3.5 m); yoksa serbest
+                    private _enIyiYon = -999;
+                    private _enIyiM = 3.5;
+                    for "_ky" from 0 to 7 do {
+                        private _yy = _ky * 45;
+                        private _pp = _eye vectorAdd [(sin _yy) * 15, (cos _yy) * 15, 0];
+                        private _vv = lineIntersectsSurfaces [_eye, _pp, _u, objNull, true, 1, "VIEW", "NONE"];
+                        private _mm = if (_vv isEqualTo []) then {15} else { _eye distance ((_vv select 0) select 0) };
+                        if (_mm > _enIyiM) then { _enIyiM = _mm; _enIyiYon = _yy; };
+                    };
+                    if (_enIyiYon > -900) then {
+                        _u doWatch ((getPosATL _u) getPos [40, _enIyiYon]);
+                        _say set [0, (_say select 0) + 1];
+                        _by = _enIyiYon;
+                    } else {
+                        _u doWatch objNull;
+                        _say set [1, (_say select 1) + 1];
+                    };
                 };
                 if (_logN < 30) then {
                     _logN = _logN + 1;
