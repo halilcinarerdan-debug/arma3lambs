@@ -91,7 +91,9 @@ diag_log "[TANK-BILINEN] kesif atesi (bilinen konuma ates) baslatildi (v8.523; F
             };
 
             // bilinen konum + bilgi hatasi kadar sapma (kesif atesi: konum kesin degil)
-            private _err = ((_tk select 7) max 8) min 40;   // targetKnowledge [.. positionError = indeks 7 ..]
+            // v8.563 HATA (RPT dc3334c3: 'Error max: Type Bool, expected Number' - targetKnowledge indeks 7 BOOL doner; dizilim surume gore degisiyor): 7'den baslayan ilk SAYI = konum hatasi, yoksa 8 m
+            private _err = 8;
+            { if (_x isEqualType 0) exitWith { _err = (_x max 8) min 40; }; } forEach (_tk select [7, 3]);
             private _poz = (getPosATL _o) getPos [random _err, random 360];
             _poz set [2, 0];
             if (((_poz nearEntities ["CAManBase", 25]) findIf {alive _x && {(_tf getFriend (side group _x)) >= 0.6}}) > -1) then {

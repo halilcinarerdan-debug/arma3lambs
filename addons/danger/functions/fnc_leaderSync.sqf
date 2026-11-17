@@ -60,6 +60,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
                 || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]}
                 || {_g getVariable [QGVAR(isBounding), false]}
+                || {[_g, "leaderSync"] call FUNC(senaryoKapi)}   // v8.563: waypoint'li (DMP / tasarimci) grupta komutan beklemez (RPT dc3334c3: Alpha 2-5 / Bravo 1-2 devriyeleri 1 saatte ~290 kez YAVASLA / BEKLE)
                 || {((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]) && {(time - (_g getVariable [QGVAR(cmdSonKararZaman), -999])) < 30}};
             // TEMASTA / TAKTIKTE KOMUTAN BEKLEMEZ (RPT: temasta lider PATH kapali 13 sn donuyor = takim felci). Sadece sakin intikalde:
             // temas biteli 20 sn gecmis ve taktik yok.
