@@ -27,6 +27,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
     private _ozetT = time + 60;
     while {true} do {
         sleep 0.5;
+        private _pt0 = diag_tickTime;
         if !(missionNamespace getVariable ["lambs_danger_yakinHareket", true]) then { continue };
         // v8.526 DONEM: Ikinci Dunya Savasi = kapali (modern yan-adim yok); Soguk Savas / Vietnam = menzil x0.6, bekleme x1.6
         private _cag = ["cag"] call FUNC(cag);
@@ -130,6 +131,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
             };
             { _say set [_x, 0]; } forEach ["oyuncuya", "aiya", "yer_yok"];
         };
+            ["yakinHareket", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 true

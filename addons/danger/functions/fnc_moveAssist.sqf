@@ -55,16 +55,23 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
     };
 
     private _tick = 0;
+    private _listeT = 0;
+    private _listeC = [];
     while {true} do {
         sleep 0.15;
+        private _pt0 = diag_tickTime;
         if (missionNamespace getVariable ["lambs_danger_moveAssistOff", false]) then { continue };   // v8.304 (perfBisect)
         _tick = _tick + 1;
         private _agir = (_tick % 2) isEqualTo 0;   // duvar korumasi / sikisma: 0.3 sn'de bir
 
         private _uzakN = 0;   // v8.283: bu tick'te diger makinelere gonderilen birim sayisi (ag patlamasi siniri)
-        private _birimler = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x}
-            && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+        // v8.580 PERFORMANS (Parca 2): birim LISTESI 0.6 sn'de bir yenilenir (eskiden her 0.15 sn'de allUnits taramasi); her tick'te yalniz canli / aracta degil / saglikli kontrolu (ucuz) yeniden yapilir
+        if (time > _listeT) then {
+            _listeT = time + 0.6;
+            _listeC = allUnits select { local _x && {!isPlayer _x} };
+        };
+        private _birimler = _listeC select {
+            alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
         };
 
         {
@@ -237,6 +244,7 @@ if (
             };
             };   // _agir
         } forEach _birimler;
+            ["moveAssist", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

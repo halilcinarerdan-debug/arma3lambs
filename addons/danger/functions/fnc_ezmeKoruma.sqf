@@ -39,6 +39,7 @@ private _calis = {
     private _atlaSay = 0;
     while {true} do {
         sleep 0.25;
+        private _pt0 = diag_tickTime;
         if (missionNamespace getVariable ["lambs_danger_ezmeOff", false]) then { continue };
         {
             private _v = _x;
@@ -142,6 +143,7 @@ private _calis = {
             if (_aracSay > 0 || {_atlaSay > 0}) then { diag_log format ["[EZME-NABIZ] son 60 sn: hareketli arac turu %1 | seridde taranan yaya (toplam) %2 | fren turu %3 | atlanan (yerel degil / surucusuz / oyuncu) %4", _aracSay, _yayaSay, _frenSay, _atlaSay]; };
             _aracSay = 0; _yayaSay = 0; _frenSay = 0; _atlaSay = 0;
         };
+            ["ezmeKoruma", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

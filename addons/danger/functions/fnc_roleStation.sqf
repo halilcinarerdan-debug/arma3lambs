@@ -77,6 +77,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
 
     while {true} do {
         sleep 4;
+        private _pt0 = diag_tickTime;
         private _butce = 5;   // tikte en fazla bu kadar findCover (tum gruplar)
 
         {
@@ -413,6 +414,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 };
             } forEach _tum;
         } forEach allGroups;   // v8.502 senaryo modu (v8.566: kapi dongu icinde, UGL gorevinden sonra)
+            ["roleStation", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 

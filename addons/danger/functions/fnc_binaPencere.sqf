@@ -30,6 +30,7 @@ diag_log "[BINA-PENCERE] bina ici pencere / atis pozisyonu watchdog baslatildi (
 
     while {true} do {
         sleep 1.2;
+        private _pt0 = diag_tickTime;
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             if ((_sayac get "tespit") > 0) then {
@@ -132,6 +133,7 @@ diag_log "[BINA-PENCERE] bina ici pencere / atis pozisyonu watchdog baslatildi (
                 };
             } forEach (units _g);
         } forEach allGroups;
+            ["binaPencere", _pt0] call FUNC(perfKayit);   // v8.580 [PERF-FNC] (continue ile atlanan turlar sayilmaz)
     };
 };
 
