@@ -42,6 +42,8 @@ if (isNull _unit || {!alive _unit} || {isNull _target} || {!alive _target}) exit
 if (!isNull objectParent _unit) exitWith {false};
 // v8.379: baygin / etkisiz dusmana 40 mm atilmaz (kullanici: 'dusmani bitirmelerine ragmen mermi harcamaya devam ettiler')
 if ((lifeState _target) in ["INCAPACITATED", "UNCONSCIOUS"] || {_target getVariable ["ACE_isUnconscious", false]}) exitWith {false};
+// v8.581: teslim olmus / etkisiz (captive, ACE teslim / kelepce) dusmana 40 mm atilmaz
+if ([_target] call FUNC(teslimMi)) exitWith {false};
 
 // v8.62: NEDEN ATMADI sayaci (her cikis nedeni global sayac) + 30 sn'de bir [UGL-OZET] — UGL "hic kullanilmiyor" teshisi
 private _red = {

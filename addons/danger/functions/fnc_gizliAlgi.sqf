@@ -89,7 +89,7 @@ private _calis = {
                 if (_tepki >= 12) exitWith {};
                 if (!local _b || {isPlayer _b} || {!alive _b} || {!isNull objectParent _b}) then { continue };
                 if (((side _b) getFriend _pSide) >= 0.6 || {(side _b) isEqualTo civilian}) then { continue };
-                if ((lifeState _b) in ["INCAPACITATED", "UNCONSCIOUS"] || {_b getVariable ["ACE_isUnconscious", false]}) then { continue };
+                if ((lifeState _b) in ["INCAPACITATED", "UNCONSCIOUS"] || {_b getVariable ["ACE_isUnconscious", false]} || {[_b] call FUNC(teslimMi)}) then { continue };   // v8.581: teslim olan dinleyici bilgi toplamaz
                 private _bPos = getPosATL _b;
                 private _d = _pPos distance _bPos;
                 if (_d > _tara) then { continue };

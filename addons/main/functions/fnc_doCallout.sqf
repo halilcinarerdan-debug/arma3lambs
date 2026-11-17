@@ -27,7 +27,7 @@ params [
     ["_distance", 100, [0]]
 ];
 
-if (isPlayer _unit || {!(_unit call FUNC(isAlive))}) exitWith {};
+if (isPlayer _unit || {!(_unit call FUNC(isAlive))} || {captive _unit} || {_unit getVariable ["lambs_danger_teslim", false]}) exitWith {};   // v8.581: teslim olan / etkisiz asker callout yapmaz (bilgi kaynagi degil)
 
 // check timing
 private _time = _unit getVariable [QGVAR(calloutTime), 0];

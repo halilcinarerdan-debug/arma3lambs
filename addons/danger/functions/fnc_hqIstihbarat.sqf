@@ -65,7 +65,7 @@ private _temaslar = createHashMap;
 {
     private _g = _x get "g";
     private _l = leader _g;
-    if ((behaviour _l) isEqualTo "CARELESS") then { continue };
+    if ((behaviour _l) isEqualTo "CARELESS" || {[_l] call FUNC(teslimMi)} || {_g getVariable [QGVAR(teslimOldu), false]}) then { continue };   // v8.581: teslim olan grup / lider bilgi kaynagi degil
     if (_sis) then {
         private _rf = [_g] call _grupTelsiz;
         if (_rf <= 0) then { ["muhbir telsiz yok"] call _say; continue };
@@ -74,7 +74,7 @@ private _temaslar = createHashMap;
     };
     {
         _x params ["_pos", "_tip", "_ts", "_cost", "_obj"];
-        if (isNull _obj || {!alive _obj} || {(side _obj) getFriend _taraf >= 0.6} || {(side _obj) isEqualTo civilian}) then { continue };
+        if (isNull _obj || {!alive _obj} || {(side _obj) getFriend _taraf >= 0.6} || {(side _obj) isEqualTo civilian} || {[_obj] call FUNC(teslimMi)}) then { continue };
         private _k = _l knowsAbout _obj;
         if (_k < (["KESIN"] call FUNC(bilgiEsik))) then { continue };
         private _tk = _l targetKnowledge _obj;

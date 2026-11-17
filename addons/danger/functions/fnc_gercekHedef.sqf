@@ -17,4 +17,4 @@
 params [["_o", objNull, [objNull]]];
 if (isNull _o || {!alive _o}) exitWith {false};
 if (missionNamespace getVariable ["lambs_danger_gercekHedefOff", false]) exitWith {true};
-(_o isKindOf "CAManBase") || {(_o isKindOf "AllVehicles") && {(crew _o) findIf {alive _x} >= 0}}
+((_o isKindOf "CAManBase") && {!([_o] call FUNC(teslimMi))}) || {(_o isKindOf "AllVehicles") && {!(_o isKindOf "CAManBase")} && {(crew _o) findIf {alive _x} >= 0}}

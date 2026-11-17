@@ -59,7 +59,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 private _taraf = side _g;
                 private _adaylar = (_l nearTargets 400) select {
                     private _o = _x select 4;
-                    !isNull _o && {alive _o} && {(_taraf getFriend (side (group _o))) < 0.6} && {(side (group _o)) isNotEqualTo civilian}
+                    !isNull _o && {alive _o} && {!([_o] call FUNC(teslimMi))} && {(_taraf getFriend (side (group _o))) < 0.6} && {(side (group _o)) isNotEqualTo civilian}
                     && {(_o isKindOf "CAManBase") || {_o isKindOf "StaticWeapon"}} && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
                     && {((_l targetKnowledge _o) select 2) > (time - 25)} && {(_l distance2D _o) >= 30}
                 };

@@ -87,7 +87,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 private _ilkFaz = (time - (_g getVariable [QGVAR(hsBas), time])) <= _ilkSn;
                 private _arac = (vehicle _u) isNotEqualTo _u;
                 private _e = _u findNearestEnemy _u;
-                if (isNull _e || {!alive _e} || {captive _e} || {!(_e isKindOf "AllVehicles")}) then { continue };
+                if (isNull _e || {!alive _e} || {captive _e} || {!(_e isKindOf "AllVehicles")} || {[_e] call FUNC(teslimMi)}) then { continue };
                 if (_e isKindOf "CAManBase" && {(lifeState _e) in ["INCAPACITATED", "UNCONSCIOUS"]}) then { continue };
                 private _d = _u distance2D _e;
                 if (_d < 6 || {_d > ([200, 250] select _arac)}) then { continue };

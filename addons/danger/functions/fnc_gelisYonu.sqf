@@ -97,7 +97,7 @@ diag_log "[GELIS-YONU] dusman gelis yonu bakisi (acik gorus / yol / kapi) baslat
             private _l = leader _g;
             if (isNull _l || {!alive _l} || {isPlayer _l}) then { continue };
             private _e = if (_acik) then { _l findNearestEnemy _l } else { objNull };
-            private _bilgi = !isNull _e && {alive _e} && {(_l distance2D _e) <= 400} && {(_l knowsAbout _e) >= (["SEZILDI"] call FUNC(bilgiEsik))};
+            private _bilgi = !isNull _e && {alive _e} && {!([_e] call FUNC(teslimMi))} && {(_l distance2D _e) <= 400} && {(_l knowsAbout _e) >= (["SEZILDI"] call FUNC(bilgiEsik))};
             if (!_bilgi) then {
                 // izleme birak
                 { if ((_x getVariable [QGVAR(gelisBakT), 0]) > 0) then { _x setVariable [QGVAR(gelisBakT), 0]; if (alive _x && {local _x}) then { _x doWatch objNull; }; }; } forEach (units _g);

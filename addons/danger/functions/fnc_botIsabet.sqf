@@ -39,7 +39,7 @@ lambs_danger_botSayTop = [0, 0, 0, 0];   // oturum toplami: [atis, isabet, nisan
     _say set [0, (_say select 0) + 1];
     private _t = assignedTarget _u;
     if (isNull _t || {!(_t isKindOf "CAManBase")}) then { _t = _u findNearestEnemy _u; };
-    private _gecerli = !isNull _t && {alive _t} && {_t isKindOf "CAManBase"} && {((side group _u) getFriend (side group _t)) < 0.6} && {(_u distance _t) <= 600};
+    private _gecerli = !isNull _t && {alive _t} && {_t isKindOf "CAManBase"} && {!([_t] call FUNC(teslimMi))} && {((side group _u) getFriend (side group _t)) < 0.6} && {(_u distance _t) <= 600};
     if (_gecerli) then {
         private _m = _u distance _t;
         private _bn = if (_m >= 250) then {2} else { if (_m >= 120) then {1} else {0} };

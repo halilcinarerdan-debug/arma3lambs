@@ -27,6 +27,7 @@ if (isNull _u || {!alive _u} || {!isNull objectParent _u}) exitWith {false};
 _u setVariable [QGVAR(disableAI), true];
 _u setCaptive true;
 _u setVariable [QGVAR(teslim), true, true];
+[_u] call FUNC(teslimBaskiKes);   // v8.581: dusman bastirma emirleri iptal, dusman gruplar unutur
 _u setVariable [QGVAR(teslimAnimT), time];
 { _u disableAI _x; } forEach ["MOVE", "PATH", "TARGET", "AUTOTARGET", "FSM", "WEAPONAIM", "AUTOCOMBAT", "COVER", "SUPPRESSION"];
 doStop _u;

@@ -93,7 +93,7 @@ if (hasInterface) then {
         if (_konAcik) then {
             {
                 private _s = _x;
-                if ((behaviour _s) isEqualTo "STEALTH" || {!alive _s} || {(lifeState _s) in ["INCAPACITATED", "UNCONSCIOUS"]}) then { continue };
+                if ((behaviour _s) isEqualTo "STEALTH" || {!alive _s} || {(lifeState _s) in ["INCAPACITATED", "UNCONSCIOUS"]} || {[_s] call FUNC(teslimMi)}) then { continue };   // v8.581: teslim olan konusma kaynagi degil
                 private _sSide = side group _s;
                 if (_sSide isEqualTo civilian) then { continue };
                 private _sPos = getPosATL _s;
@@ -119,7 +119,7 @@ if (hasInterface) then {
                     if (!local _b || {isPlayer _b} || {!alive _b} || {_b isEqualTo _s} || {!isNull objectParent _b}) then { continue };
                     private _bSide = side group _b;
                     if (_bSide isEqualTo civilian || {(_bSide getFriend _sSide) >= 0.6}) then { continue };
-                    if ((lifeState _b) in ["INCAPACITATED", "UNCONSCIOUS"] || {_b getVariable ["ACE_isUnconscious", false]}) then { continue };
+                    if ((lifeState _b) in ["INCAPACITATED", "UNCONSCIOUS"] || {_b getVariable ["ACE_isUnconscious", false]} || {[_b] call FUNC(teslimMi)}) then { continue };
                     if (time < (_b getVariable [QGVAR(konT), 0])) then { continue };
                     private _d = _sPos distance (getPosATL _b);
                     private _dEtkin = _d * ([1, 1.8] select (lineIntersects [_sEye, eyePos _b, _s, _b]));

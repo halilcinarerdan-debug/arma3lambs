@@ -45,7 +45,7 @@ diag_log "[CQB-KUME] CQB kumelenme (kopuk askeri yakin dostuna cek) baslatildi (
                 { private _x2 = _x findNearestEnemy _x; if (!isNull _x2 && {alive _x2} && {(_x distance2D _x2) <= 45} && {(_x knowsAbout _x2) >= (["SUPHE"] call FUNC(bilgiEsik))}) exitWith { _bul = _x2; }; } forEach ((units _g) select {alive _x && {local _x}});
                 _e = _bul;
             };
-            if (isNull _e) then { continue };
+            if (isNull _e || {[_e] call FUNC(teslimMi)}) then { continue };
             private _saglam = (units _g) select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {isNull objectParent _x}};
             if ((count _saglam) < 3) then { continue };
             {
