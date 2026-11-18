@@ -242,8 +242,11 @@ private _govde = {
     {
         private _b = _x;
         if (call _iptalMi) exitWith {};
-        if ((time - _t0) > 300) exitWith {};
+        if ((time - _t0) > (300 max ((missionNamespace getVariable ["lambs_danger_binaSure", 240]) * 2))) exitWith {};
 
+        // v8.600 KARIS KARIS (kullanici: 'evin odalarini karis karis tutsunlar'): oda noktasi azami (CBA binaOdaMaks, varsayilan 24; eskiden 10), aralik 3.2 -> 2.8 m, bina suresi CBA binaSure (varsayilan 240 sn; eskiden 90)
+        private _odaMaks = ((missionNamespace getVariable ["lambs_danger_binaOdaMaks", 24]) max 4) min 60;
+        private _binaSure = ((missionNamespace getVariable ["lambs_danger_binaSure", 240]) max 60) min 600;
         private _bPos = getPosATL _b;
         private _yaricap = (((sizeOf (typeOf _b)) / 2) max 6) + 8;
         _sonMerkez = _bPos;
@@ -260,15 +263,17 @@ private _govde = {
         private _giris = if (_girisAdaylari isEqualTo []) then { _poslar select 0 } else { _girisAdaylari select 0 };
         private _kapi = [_b, _lider] call _kapiBul;
         // kapi noktasi yoksa: giris bina pozisyonunun 3.5 m DISINDA (eski davranisa yakin; bina icine yigilmasin)
-        private _disYon = if (_kapi isEqualTo []) then {_bPos getDir _giris} else {_bPos getDir _kapi};
+        // v8.600 DISARI YON (kullanici: 'kapiyi bulamiyorlar'; RPT 7f50df26: buyuk kompleks, yigilma noktalari bina MERKEZINDEN kapiya yonle hesaplaniyordu -> duvar / cit icine dusuyor, 'YURUMUYOR'): en yakin ICERI bina pozisyonundan kapiya yon (<= 8 m ise), yoksa eski
+        private _ic0 = if (_kapi isEqualTo []) then {[]} else {[_poslar select {(_x select 2) < 2.5}, [], {_x distance2D _kapi}, "ASCEND"] call BIS_fnc_sortBy};
+        private _disYon = if (_kapi isEqualTo []) then {_bPos getDir _giris} else { if (_ic0 isNotEqualTo [] && {((_ic0 select 0) distance2D _kapi) <= 8}) then {(_ic0 select 0) getDir _kapi} else {_bPos getDir _kapi} };
         private _kapiPos = if (_kapi isEqualTo []) then {_giris getPos [3.5, _disYon]} else {+_kapi};
         private _yigYan = ([[90, -90], "binaYigYan", [_g] call FUNC(birimId), true] call FUNC(rastgeleSec));
         private _sirali = [_poslar, [], {((round ((_x select 2) / 3)) * 1000) + (_x distance2D _giris)}, "ASCEND"] call BIS_fnc_sortBy;
         private _secilen = [];
         {
             private _p = _x;
-            if ((_secilen findIf {(_x distance _p) < 3.2}) < 0) then { _secilen pushBack _p; };
-            if ((count _secilen) >= 10) exitWith {};
+            if ((_secilen findIf {(_x distance _p) < 2.8}) < 0) then { _secilen pushBack _p; };
+            if ((count _secilen) >= _odaMaks) exitWith {};
         } forEach _sirali;
 
         // --- giris takimi: oncelik SMG > hafif > tufekli; yoksa siradakiler (liderler en son) ---
@@ -316,6 +321,10 @@ private _govde = {
             } forEach _tkY;
         } forEach _takimlar;
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
+        // v8.600 VARIS KONTROLU: yigilma noktasina 10 sn'de varamayan (6 m'den uzak, duruyor) giris takimi askerine kapi onune (3 m) dogrudan yeniden hareket emri
+        private _vb = time + 10;
+        waitUntil { sleep 1; (time > _vb) || {call _iptalMi} || {(_icerde findIf {alive _x && {(_x distance2D _kapiPos) > 6}}) < 0} };
+        { if (alive _x && {(_x distance2D _kapiPos) > 6} && {(speed _x) < 1}) then { _x forceSpeed -1; _x doMove (_kapiPos getPos [3, _disYon]); diag_log format ["[ODA] %1 | %2 | yigilma noktasina varamadi (%3 m) -> kapi onune yeniden emir", _grpAd, name _x, round (_x distance2D _kapiPos)]; }; } forEach _icerde;
         [([12, 6] select _saldiri), _postlar] call _bekle;   // v8.599: saldirida yigilma bekleme 12 -> 6 sn
         // v8.599 GIRIS BOMBASI (kapi yigilmasindan sonra, kapi ONUNDE duz yayla iceri; fnc_girisBombasi)
         if (_saldiri && {!(call _iptalMi)}) then { [_g, _icerde + (_uyeler - _icerde), _b, _kapiPos, _disYon, _poslar] call FUNC(girisBombasi); };
@@ -334,7 +343,7 @@ private _govde = {
         private _adim = (count (_listeler select 0)) max (count (_listeler select 1));
         for "_i" from 0 to (_adim - 1) do {
             if (call _iptalMi) exitWith {};
-            if ((time - _bT0) > 90) exitWith {};
+            if ((time - _bT0) > _binaSure) exitWith {};
 
             private _hedefler = [];
             {

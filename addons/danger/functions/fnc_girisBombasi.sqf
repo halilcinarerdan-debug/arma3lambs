@@ -54,7 +54,7 @@ if (((_ic nearEntities ["CAManBase", 8]) findIf {alive _x && {((side _g) getFrie
     diag_log format ["[GIRIS-BOMBASI] %1 | iceride dost var (8 m) - atilmadi", groupId _g]; false
 };
 
-[_b, _atan, 6] call FUNC(kapiAc);
+private _acilan = [_b, _atan, 6] call FUNC(kapiAc);
 private _atisPoz = _kapiPos getPos [2.6, _disYon];
 _atan setUnitPos "UP";
 _atan doMove _atisPoz;
@@ -117,6 +117,6 @@ if (_v < 0) then {
 };
 if ((missionNamespace getVariable ["lambs_danger_girisBombaLogN", 0]) < 20) then {
     missionNamespace setVariable ["lambs_danger_girisBombaLogN", (missionNamespace getVariable ["lambs_danger_girisBombaLogN", 0]) + 1];
-    diag_log format ["[GIRIS-BOMBASI] %1 | %2 | bina %3 | %4", groupId _g, name _atan, typeOf _b, _sonuc];
+    diag_log format ["[GIRIS-BOMBASI] %1 | %2 | bina %3 | %4 | kapi acilan %5 | disari yon %6 | atis noktasi kapidan %7 m (atici varis %8 m) | ic hedef %9 m", groupId _g, name _atan, typeOf _b, _sonuc, _acilan, round _disYon, 2.6, round (_atan distance2D _atisPoz), round (_ic distance2D _kapiPos)];
 };
 _v >= 0
