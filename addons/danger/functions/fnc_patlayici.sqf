@@ -63,7 +63,7 @@ lambs_danger_patlayiciDon = {
             private _aci = if (alive _u && {alive _t}) then { abs ((((_u getDir _t) - (getDir _u)) + 540) mod 360 - 180) } else { 180 };
             private _sonuc = "";
             if (!alive _u || {!alive _t}) then { _sonuc = "hedef / atici oldu"; }
-            else { if (_aci > 100) then { _sonuc = format ["donemedi (%1 derece)", round _aci]; }   // v8.591: 35 -> 100 (RPT b3f29106 / aa5e787e: 44-65 derecede 3 atis iptal; bomba yonu script ile hesaplanir, govde yonu dogrulugu etkilemez)
+            else { if (_aci > 130) then { _sonuc = format ["donemedi (%1 derece)", round _aci]; }   // v8.591: 35 -> 100 (RPT b3f29106 / aa5e787e: 44-65 derecede 3 atis iptal; bomba yonu script ile hesaplanir, govde yonu dogrulugu etkilemez)
             else { if (false) then {} else {
                 _u playActionNow "ThrowGrenade";
                 sleep 0.8;

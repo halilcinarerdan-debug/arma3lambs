@@ -64,7 +64,7 @@ private _iptalMi = {
                         if ((({alive _x && {isNull objectParent _x}} count (units _g)) < 3)) then { _sb = "az asker"; } else {
                             private _en = _l findNearestEnemy _l;
                             if (!_saldiri && {!isNull _en} && {alive _en} && {(_l distance2D _en) < 120}) then { _sb = "dusman yakin"; } else {
-                                if (({alive _x && {(getSuppression _x) > ([0.45, 0.8] select _saldiri)}} count (units _g)) > 0) then { _sb = "baski"; };
+                                if (({alive _x && {(getSuppression _x) > ([0.45, 1.2] select _saldiri)}} count (units _g)) > 0) then { _sb = "baski"; };
                             };
                         };
                     };
@@ -316,7 +316,9 @@ private _govde = {
             } forEach _tkY;
         } forEach _takimlar;
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
-        [12, _postlar] call _bekle;
+        [([12, 6] select _saldiri), _postlar] call _bekle;   // v8.599: saldirida yigilma bekleme 12 -> 6 sn
+        // v8.599 GIRIS BOMBASI (kapi yigilmasindan sonra, kapi ONUNDE duz yayla iceri; fnc_girisBombasi)
+        if (_saldiri && {!(call _iptalMi)}) then { [_g, _icerde + (_uyeler - _icerde), _b, _kapiPos, _disYon, _poslar] call FUNC(girisBombasi); };
         // v8.598 BOMBA SENKRONU (SALDIRI): yigilma sonrasi <= 6 sn patlayici izleyicisinin bombasini bekle; atildiysa ~3.5 sn (fitil) sonra gir
         if (_saldiri && {!(call _iptalMi)}) then {
             private _bk = time + 6;
