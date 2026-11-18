@@ -34,7 +34,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
 [] spawn {
 
     while {true} do {
-        sleep 0.7;
+        sleep ([0.7, false, true] call FUNC(dusunSure));
         private _butce = 4;   // tikte en fazla bu kadar findCover
 
         {

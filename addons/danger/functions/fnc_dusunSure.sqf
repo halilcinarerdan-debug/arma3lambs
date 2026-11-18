@@ -11,13 +11,14 @@
  * Arguments:
  * 0: Taban bekleme suresi (sn) <NUMBER>
  * 1: Onemli izleyici mi (%30 carpani) <BOOL> (varsayilan false)
+ * 2: CQB izleyicisi mi (v8.603: CBA lambs_danger_dusunHiziCqb, varsayilan 1.10 = %10; kullanici: 'cqbde islemci yuku artsin yuzde 10 daha hizli dusunsunler') <BOOL> (varsayilan false)
  *
  * Return Value: Bekleme suresi (sn) <NUMBER>
  * Public: No
 */
 
-params [["_s", 1, [0]], ["_onemli", false, [false]]];
-private _h = ((missionNamespace getVariable [["lambs_danger_dusunHizi", "lambs_danger_dusunHiziOnemli"] select _onemli, [1.25, 1.3] select _onemli]) max 0.5) min 2;
+params [["_s", 1, [0]], ["_onemli", false, [false]], ["_cqb", false, [false]]];
+private _h = ((missionNamespace getVariable [if (_cqb) then {"lambs_danger_dusunHiziCqb"} else {["lambs_danger_dusunHizi", "lambs_danger_dusunHiziOnemli"] select _onemli}, if (_cqb) then {1.1} else {[1.25, 1.3] select _onemli}]) max 0.5) min 2;
 if (_h isEqualTo 1) exitWith {_s};
 if (time > (missionNamespace getVariable ["lambs_danger_sicakT", -1])) then {
     missionNamespace setVariable ["lambs_danger_sicakT", time + 1];

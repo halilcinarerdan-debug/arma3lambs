@@ -341,6 +341,9 @@ private _govde = {
         private _bT0 = time;
         private _odaSayi = 0;
         private _adim = (count (_listeler select 0)) max (count (_listeler select 1));
+        // v8.603 LAMBS CQB (kullanici: 'cqbyi sifirdan yazmaya gerek yok, lambs cqb tetiklensin, daha profesyonel ve olumcul'): oda temizligini LAMBS taskCQB yurutur; ELITE: kapi yigilmasi + giris bombasi (oncesi), beceri artisi + sure / dusman denetimi + oda pususu (sonrasi)
+        private _lambsMi = ((missionNamespace getVariable ["lambs_danger_cqbMotor", 1]) isEqualTo 1) && {!isNil "lambs_wp_fnc_taskCQB"};
+        if (_lambsMi) then { _adim = 0; };
         for "_i" from 0 to (_adim - 1) do {
             if (call _iptalMi) exitWith {};
             if ((time - _bT0) > _binaSure) exitWith {};
@@ -415,6 +418,46 @@ private _govde = {
             } forEach _hedefler;
         };
 
+        if (_lambsMi && {!(call _iptalMi)}) then {
+            private _olumcul = missionNamespace getVariable ["lambs_danger_cqbOlumcul", true];
+            private _eskiBec = [];
+            if (_olumcul) then {
+                {
+                    private _uu = _x;
+                    _eskiBec pushBack [_uu, _uu skill "aimingAccuracy", _uu skill "aimingSpeed", _uu skill "spotDistance", _uu skill "spotTime"];
+                    _uu setSkill ["aimingAccuracy", ((_uu skill "aimingAccuracy") max 0.8)];
+                    _uu setSkill ["aimingSpeed", ((_uu skill "aimingSpeed") max 0.9)];
+                    _uu setSkill ["spotDistance", ((_uu skill "spotDistance") max 0.9)];
+                    _uu setSkill ["spotTime", ((_uu skill "spotTime") max 0.9)];
+                } forEach _uyeler;
+            };
+            _g setCombatMode "RED";
+            private _minS = (20 + ((count _secilen) * 6)) min _binaSure;
+            private _lh = [_g, _bPos, ((_yaricap max 15) min 60), 8, [], false] spawn (missionNamespace getVariable "lambs_wp_fnc_taskCQB");
+            diag_log format ["[BINA-TEMIZLE] %1 | BINA %2 | LAMBS CQB (taskCQB) basladi | beceri artisi:%3 | en az %4 sn, en cok %5 sn", _grpAd, typeOf _b, _olumcul, round _minS, round _binaSure];
+            private _dusYok = 0;
+            waitUntil {
+                sleep 1;
+                private _ds = (_b nearEntities ["CAManBase", 30]) select {alive _x && {((side _g) getFriend (side (group _x))) < 0.6} && {(insideBuilding _x) > 0.2}};
+                _dusYok = [_dusYok + 1, 0] select (_ds isNotEqualTo []);
+                ((time - _bT0) > _binaSure) || {call _iptalMi} || {scriptDone _lh} || {((time - _bT0) > _minS) && {_dusYok > 20}}
+            };
+            terminate _lh;
+            // taskCQB dongu sonu sifirlamasi terminate ile calismaz: elle geri al (disableAI bayragi, AUTOCOMBAT / SUPPRESSION, durus, saldiri izni, beceri)
+            {
+                if (alive _x) then {
+                    _x setVariable ["lambs_danger_disableAI", nil];
+                    _x enableAI "AUTOCOMBAT";
+                    _x enableAI "SUPPRESSION";
+                    _x setUnitPos "AUTO";
+                };
+            } forEach (units _g);
+            _g setVariable ["lambs_main_currentTactic", nil];
+            _g enableAttack true;
+            { _x params ["_uu", "_ba", "_bs", "_bd", "_bt"]; if (alive _uu) then { _uu setSkill ["aimingAccuracy", _ba]; _uu setSkill ["aimingSpeed", _bs]; _uu setSkill ["spotDistance", _bd]; _uu setSkill ["spotTime", _bt]; }; } forEach _eskiBec;
+            _odaSayi = count _secilen;
+            diag_log format ["[BINA-TEMIZLE] %1 | BINA %2 | LAMBS CQB bitti | %3 sn%4", _grpAd, typeOf _b, round (time - _bT0), if (call _iptalMi) then { format [" | ABORT: %1", _iptalSebep] } else { "" }];
+        };
         diag_log format [
             "[BINA-TEMIZLE] %1 | BINA %2 | %3/%4 oda temiz | %5 sn%6",
             _grpAd, typeOf _b, _odaSayi, count _secilen, round (time - _bT0),

@@ -26,7 +26,7 @@ diag_log "[YAKIN-ATES] yakin mesafe ates kalibrasyonu baslatildi (v8.510): bilin
     private _ozetT = time + 60;
     private _logN = 0;
     while {true} do {
-        sleep 0.3;
+        sleep ([0.3, false, true] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_yakinAtes", true]) then { continue };
         private _menzil = missionNamespace getVariable ["lambs_danger_yakinAtesM", 7];
         private _adaylar = allUnits select {

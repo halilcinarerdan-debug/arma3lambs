@@ -29,7 +29,7 @@ diag_log "[BINA-PENCERE] bina ici pencere / atis pozisyonu watchdog baslatildi (
     private _sonOzet = time;
 
     while {true} do {
-        sleep 1.2;
+        sleep ([1.2, false, true] call FUNC(dusunSure));
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             if ((_sayac get "tespit") > 0) then {

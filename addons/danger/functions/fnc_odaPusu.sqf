@@ -20,7 +20,7 @@ diag_log "[ODA-PUSU] oda pususu (temizlenen binanin derin odasinda bekle) izleyi
 [] spawn {
     private _logN = 0;
     while {true} do {
-        sleep 2;
+        sleep ([2, false, true] call FUNC(dusunSure));
         {
             private _u = _x;
             private _bit = _u getVariable [QGVAR(odaPusuBit), 0];
