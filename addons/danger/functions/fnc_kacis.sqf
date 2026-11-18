@@ -29,7 +29,7 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
     private _say = createHashMapFromArray [["tek", 0], ["mermi", 0], ["yer_yok", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([2] call FUNC(dusunSure));
+        sleep ([2, true] call FUNC(dusunSure));
         if !((missionNamespace getVariable ["lambs_danger_kacisAktif", true]) && {missionNamespace getVariable ["lambs_danger_kacisBireysel", true]}) then { continue };
         if ((["cag"] call FUNC(cag)) >= 2) then { continue };   // v8.555: Ikinci Dunya Savasi'nda bireysel 'tek kalan / mermisi az kosar' yok (grup kacis kilidi / geri cekilme ayri calisir)
         private _tekM = missionNamespace getVariable ["lambs_danger_kacisTekM", 40];

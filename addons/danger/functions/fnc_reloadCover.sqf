@@ -64,7 +64,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
     };
 
     while {true} do {
-        sleep ([1] call FUNC(dusunSure));
+        sleep ([1, true] call FUNC(dusunSure));
 
         {
             private _g = _x;

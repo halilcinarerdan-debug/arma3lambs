@@ -31,7 +31,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
     private _logN = 0;
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([1.5] call FUNC(dusunSure));
+        sleep ([1.5, true] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_ufukAlgi", true]) then { continue };
         private _menzil = missionNamespace getVariable ["lambs_danger_ufukSpotM", 700];
         private _spotHiz = (missionNamespace getVariable ["lambs_danger_ufukSpotHiz", 1]) max 0 min 6;

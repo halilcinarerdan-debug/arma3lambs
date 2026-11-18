@@ -45,7 +45,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
     };
 
     while {true} do {
-        sleep ([1.5] call FUNC(dusunSure));
+        sleep ([1.5, true] call FUNC(dusunSure));
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };

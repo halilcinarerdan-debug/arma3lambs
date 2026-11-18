@@ -158,7 +158,7 @@ if (
     //   5-10 asker ayni anda ayni karari yeniden hesapliyordu. Karar 1 sn icinde degisebilecek kadar hizli degismez; onbellek [zaman, karar]. CBA komutanKararOnbellek (acik); kapaliyken eski davranis.
     private _karar = "";
     private _onb = _group getVariable [QGVAR(cmdOnbellek), []];
-    if ((missionNamespace getVariable ["lambs_danger_komutanKararOnbellek", true]) && {_onb isNotEqualTo []} && {(time - (_onb select 0)) < ([1.0] call FUNC(dusunSure))}) then {
+    if ((missionNamespace getVariable ["lambs_danger_komutanKararOnbellek", true]) && {_onb isNotEqualTo []} && {(time - (_onb select 0)) < ([1.0, true] call FUNC(dusunSure))}) then {
         _karar = _onb select 1;
     } else {
         _karar = [_group, _target] call FUNC(commanderAssess);

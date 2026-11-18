@@ -3,19 +3,21 @@
  * Author: Cinar (ELITE fork)
  * DUSUNME HIZI (v8.601; kullanici: 'ai kodlarda kabaca yuzde 20 daha hizli dusunur, sicak temas kisimlarini; cqb boyle kalsin'): karar / algi izleyicilerinin dongu bekleme suresini SICAK TEMASTA kisaltir.
  * Sicak temas = yerel, oyuncusuz bir AI grubu temasta (QGVAR(contact) > time); bayrak 1 sn'de bir yenilenir (allGroups taramasi ucuz). Temas yokken sure DEGISMEZ (bosta ek yuk yok).
- * Carpan: CBA lambs_danger_dusunHizi (0.5-2, varsayilan 1.2 = %20 daha hizli; 1 = eski). Sure = bekleme / carpan.
+ * Carpan: CBA lambs_danger_dusunHizi (0.5-2, varsayilan 1.25 = %25 daha hizli; 1 = eski); ONEMLI izleyiciler (ikinci parametre true: ates ustunlugu, ates-hareket, pusu tepkisi, patlayici, kacis, hedef siper, ufuk / sektor / gizli algi,
+ *   yeniden doldurma siperi, lider senkronu, komutan karar onbellegi) CBA lambs_danger_dusunHiziOnemli (varsayilan 1.30 = %30). Sure = bekleme / carpan.
  * Kullanan izleyiciler (CQB izleyicileri KULLANMAZ): atisUstunlugu, atesHareket, hedefSiper, reloadCover, gizliAlgi, leaderSync, ozguven, pusuTepki, sektorBakis, ufukAlgi, acikBekleme, haltKur, kacis, kamuflaj,
  *   sinsiGeri, pusu, patlayici, buddyBond, dispersion, fireSupport, gelisYonu, noktaEleman, tehlikeAlani, rearGuard, mermiDisiplin, combatGevset, moral + fnc_tactics komutan karar onbellegi.
  *
  * Arguments:
  * 0: Taban bekleme suresi (sn) <NUMBER>
+ * 1: Onemli izleyici mi (%30 carpani) <BOOL> (varsayilan false)
  *
  * Return Value: Bekleme suresi (sn) <NUMBER>
  * Public: No
 */
 
-params [["_s", 1, [0]]];
-private _h = ((missionNamespace getVariable ["lambs_danger_dusunHizi", 1.2]) max 0.5) min 2;
+params [["_s", 1, [0]], ["_onemli", false, [false]]];
+private _h = ((missionNamespace getVariable [["lambs_danger_dusunHizi", "lambs_danger_dusunHiziOnemli"] select _onemli, [1.25, 1.3] select _onemli]) max 0.5) min 2;
 if (_h isEqualTo 1) exitWith {_s};
 if (time > (missionNamespace getVariable ["lambs_danger_sicakT", -1])) then {
     missionNamespace setVariable ["lambs_danger_sicakT", time + 1];
