@@ -30,7 +30,7 @@ diag_log "[YAKIN-ATES] yakin mesafe ates kalibrasyonu baslatildi (v8.510): bilin
         if !(missionNamespace getVariable ["lambs_danger_yakinAtes", true]) then { continue };
         private _menzil = missionNamespace getVariable ["lambs_danger_yakinAtesM", 7];
         private _adaylar = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
+            local _x && {alive _x} && {!isPlayer _x} && {!([_x] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
             && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x} && {!(_x getVariable [QGVAR(teslim), false])}
             && {(primaryWeapon _x) isNotEqualTo ""} && {time >= (_x getVariable [QGVAR(yakinAtesT), 0])}
         };

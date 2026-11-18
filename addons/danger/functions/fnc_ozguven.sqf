@@ -45,7 +45,7 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
         private _ozg = (missionNamespace getVariable ["lambs_danger_ozguven", 0.5]) max 0 min 1;
         private _etki = (missionNamespace getVariable ["lambs_danger_baskiEtki", 0.5]) max 0 min 1;
         if (_lSup) then { _etki = _etki * ((missionNamespace getVariable ["lambs_danger_baskiLambsCarpan", 0.4]) max 0 min 1); };
-        private _adaylar = allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, independent]}};
+        private _adaylar = allUnits select {local _x && {alive _x} && {!isPlayer _x} && {!([_x] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _x} && {(side group _x) in [west, east, independent]}};
         private _n = count _adaylar;
         if (_n isEqualTo 0) then { continue };
         if (_indeks >= _n) then { _indeks = 0; };

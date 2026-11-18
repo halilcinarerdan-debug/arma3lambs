@@ -35,7 +35,7 @@ private _calis = {
                 if (_ilkM > 0 && {_canM <= (_ilkM * 0.4)}) then { continue };
                 {
                     private _u = _x;
-                    if (!alive _u || {isPlayer _u} || {!isNull objectParent _u}) then { continue };
+                    if (!alive _u || {isPlayer _u} || {[_u] call FUNC(oyuncuKomutaMi)} || {!isNull objectParent _u}) then { continue };
                     private _np = _u getVariable [QGVAR(hendekNokta), []];
                     if (_np isEqualTo []) then { continue };
                     if (!((lifeState _u) in ["HEALTHY", "INJURED"]) || {_u getVariable ["ACE_isUnconscious", false]}) then { continue };

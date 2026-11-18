@@ -51,7 +51,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
             {
                 private _u = _x;
                 if (
-                    alive _u && {local _u} && {!isPlayer _u} && {isNull objectParent _u}
+                    alive _u && {local _u} && {!isPlayer _u} && {!([_u] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _u}
                     && {(lifeState _u) in ["HEALTHY", "INJURED"]}
                     && {!(captive _u)} && {!(_u getVariable [QGVAR(teslim), false])}   // v8.352: teslim olan / esir silahsiz asker refleks ates / siper aramaz (RPT 30-10: teslim Habibzai 'CQB refleks' + ACIK-SIPER doMove)
                     && {!(_u getVariable [QGVAR(forceMove), false])} && {(_u getVariable [QGVAR(taktikKilit), 0]) <= time}

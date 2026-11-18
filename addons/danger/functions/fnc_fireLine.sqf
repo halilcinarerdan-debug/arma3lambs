@@ -61,7 +61,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (v8.388: gercek atista tet
     // kayabilir mi?
     private _kayabilir = {
         params ["_u"];
-        alive _u && {local _u} && {!isPlayer _u} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])}
+        alive _u && {local _u} && {!isPlayer _u} && {!([_u] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])}
         && {!(_u getVariable [QGVAR(forceMove), false])} && {time >= (_u getVariable [QGVAR(flLast), 0])} && {(getSuppression _u) < 0.6}
         && {time >= (_u getVariable [QGVAR(tcccBusy), 0])} && {(_u getVariable [QGVAR(grState), []]) isEqualTo []}
     };
@@ -166,7 +166,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (v8.388: gercek atista tet
                 _u setVariable [QGVAR(flBak), time + 6];
             };
         } forEach (allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            local _x && {alive _x} && {!isPlayer _x} && {!([_x] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
             && {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 1.5}
         });
     };

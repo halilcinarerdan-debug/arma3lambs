@@ -29,7 +29,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
         sleep 2;
         if (missionNamespace getVariable ["lambs_danger_duvarBakisOff", false]) then { continue };
         private _adaylar = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
+            local _x && {alive _x} && {!isPlayer _x} && {!([_x] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
             && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(stance _x) in ["STAND", "CROUCH"]} && {(speed _x) < 1}
         };
         private _n = count _adaylar;

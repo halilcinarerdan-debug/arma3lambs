@@ -37,7 +37,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
         private _spotHiz = (missionNamespace getVariable ["lambs_danger_ufukSpotHiz", 1]) max 0 min 6;
         private _gece = (sunOrMoon < 0.2);
         private _adaylar = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
+            local _x && {alive _x} && {!isPlayer _x} && {!([_x] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}
             && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(behaviour _x) in ["AWARE", "COMBAT", "STEALTH"]}
             && {(primaryWeapon _x) isNotEqualTo ""} && {!(_x getVariable [QGVAR(teslim), false])}
         };
