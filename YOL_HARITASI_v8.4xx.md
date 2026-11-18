@@ -110,6 +110,25 @@ Karar (kullanıcı): botlara senkron combined arms yaptırmak sürdürülemez; *
 - **v8.504 — waypoint uyumu:** Karakol / Garnizon / Gözetleme / Karakol KALDIR modülleri de kaldırıldı (LAMBS Garrison / Camp / Patrol waypoint'leri bunu yapar). `fnc_wpSahip` grubu `LAMBS` (lambs_wp görevi, `lambs_danger_disableGroupAI`) / `TUTAN` (Görev Ata HARIC, HOLD / SENTRY / GUARD / SCRIPTED …) / `HAREKET` (MOVE / SAD / DESTROY / CYCLE) / `""` diye sınıflar; LAMBS + TUTAN'da ELITE hareket-taktik katmanları HER ZAMAN geri çekilir, HAREKET'te `Waypoint uyumu` ayarına (varsayılan AÇIK) bağlı. Geri çekilme / panik / tıbbi / ateş disiplini her durumda kalır. Görev Ata rolleri: HARIC / MEDEVAC / TOPCU / TOPCU_YOK / OYUNCU / ELITE_TAM.
 - **Açık / sonraki:** (1) oyunda doğrulama (hiçbir şey denenmedi: boş mission + Kumanda / Karakol / İHA modülü + ön uçuş çıktısı); (2) tank düellosunun waypoint-dostu yeniden yazımı (mevcut tankIzle üstüne) — istenirse; (3) Karakol "savunma" davranışı artık yalnız garnizon; (4) rpt_ozet `--karne` eski plan satırları YOK / KONTROL gösterebilir (bilinen).
 
+## Aşama 11 — CQB OVERHAUL + HİBRİT HAREKET MODELİ (dal: `claude/sade-waypoint`, v8.600 sonrası; durum: PLANLANDI, hiçbiri oyunda doğrulanmadı = "T")
+Kaynak: RPT 38ac1efc / 82df5647 / 7f50df26 (bina saldırısı, giriş bombası, kapı yığılması, oda tarama). Her oturum = bir test turu + bir RPT; doğrulanmayan oturum bir sonrakine geçmez. Bayrak: her özellik CBA ile kapatılabilir.
+
+| # | Oturum | Hedef | Kabul ölçütü (RPT) |
+|---|---|---|---|
+| 1 | Kapı ve yığılma | erişilebilir kapı seçimi, dışarı yön (v8.600 iç pozisyondan), yığılma noktaları, varış kontrolü | `YURUMUYOR` yok; `[ODA] ... yigilma noktasina varamadi` az; kapıda yığılma var |
+| 2 | Giriş bombası | kapı açılması (`kapiAc` sonucu), kapıdan iç hedefe düz yay, cam durumu (`glass_N` hitpoint hasarı + `glass_N_unhide` animasyon fazı; `[PATLAYICI-CAM]` verisi), fitil sonrası giriş | `[GIRIS-BOMBASI] ATILDI` oranı yüksek; kendi kayıpları (etkin sayısı düşüşü) yok |
+| 3 | Oda tarama + pusu | oda oda temizleme (`binaOdaMaks` / `binaSure`), merdiven / üst kat, oda pususu (`binaPusu`); HİBRİT HAREKET MODELİ prototipi (aşağıda) | evin odaları sıralı temizleniyor, süre makul, `[ODA-PUSU]` tetikleniyor |
+| 4 | Koordinasyon | takım içi eşzamanlılık, iki takım dönüşümlü, bölge paylaşımı, LAMBS Garrison / CQB uyumu (`senaryoKapi` sabit kapısı), savunan tarafta garnizon pusu | LAMBS görevli gruplarla çakışma yok |
+| 5 | Denge ve FPS | süre / ölçek ayarı, CPU maliyeti, CBA sadeleştirme, regresyon | 100+ AI'da FPS düşmüyor, ayarlar anlaşılır |
+
+### HİBRİT HAREKET MODELİ (kullanıcı kararı: "yapılacaklara ekle"; öneri: Oturum 3'te prototip)
+Amaç: bina içi / kapı geçişi gibi KISA segmentlerde AI'nın yol bulma takılmasını ("stutter", `YURUMUYOR`) ortadan kaldırmak; algı, hedef alma ve ateş motorda kalır. Açık arazide motor yürümesi KALIR (tam "ray" bilinçli olarak yapılmıyor).
+- **Ne:** segment başına (3-10 m, `buildingPos` noktaları arası) `disableAI "PATH"` + betikle hız (`setVelocity` / `setVelocityTransformation`) + uyumlu animasyon (`playMove` / `switchMove`, `setAnimSpeedCoef`); segment bitince `enableAI "PATH"`. Kapsam: yalnız bina saldırısı / oda tarama / yığılma → kapı geçişi.
+- **Önkoşul (ölçüm):** "stutter" türünü ayır: yol bulma takılması mı (`ANOMALI YURUMUYOR`, `moveToFailed`), animasyon geçişi mi (`HIZ-ANOMALI`, katsayı titremesi), ağ titremesi mi (istemci gözlemi). Çözüm türe göre değişir; ray yalnız birincisi için.
+- **Riskler:** engel / duvar / diğer asker kaçınması yok (kendi çarpışma denetimi gerekir), merdiven ve tırmanma animasyonu, ağda 15-20 Hz güncelleme (istemci titremesi), kare başı betik maliyeti (200 AI sunucuda 47 FPS), motorun formasyon / hız modu ile çatışma, `disableAI` geri açılmazsa asker donar (her yolda geri açma + zaman aşımı şart).
+- **Kabul ölçütü:** prototip binada `YURUMUYOR` / `YIGILMA-VARAMADI` sıfıra yakın; FPS etkisi ölçülmüş; CBA bayrağı ile kapatılınca eski davranış.
+- **Bilinen kaynaklar:** `BIS_fnc_unitPlay` (kaydedilmiş piyade hareketi oynatma) yöntemin var olduğunu gösteriyor; betik tabanlı kural-yürütme T (denenmedi).
+
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
 - Doğrulanmayan davranış belgede "T" (doğrulanmadı) işaretlenir.
