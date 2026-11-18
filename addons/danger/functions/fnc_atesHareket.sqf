@@ -88,7 +88,7 @@ lambs_danger_atesHareketSay = createHashMapFromArray [["rush", 0], ["b_mod", 0],
     };
 
     while {true} do {
-        sleep 1;
+        sleep ([1] call FUNC(dusunSure));
         // ---- kurtarma: AI kapatma suresi dolanlar ----
         {
             [_x] call lambs_danger_fhGeriAc;

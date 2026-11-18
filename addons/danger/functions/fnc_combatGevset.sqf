@@ -21,7 +21,7 @@ diag_log "[COMBAT-GEVSE] temassiz uzun COMBAT -> AWARE izleyicisi baslatildi (v8
     private _say = 0;
     private _ozetT = time + 60;
     while {true} do {
-        sleep 5;
+        sleep ([5] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_combatGevset", true]) then { continue };
         {
             private _g = _x;

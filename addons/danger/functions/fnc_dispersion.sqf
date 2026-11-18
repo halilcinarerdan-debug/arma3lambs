@@ -35,7 +35,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
 
 [] spawn {
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         private _butce = 6;   // tikte en fazla bu kadar findCover (tum gruplar)
 
         {

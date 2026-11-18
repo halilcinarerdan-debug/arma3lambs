@@ -32,7 +32,7 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
     private _ozetT = time + 60;
     private _say = createHashMapFromArray [["atama", 0], ["ses", 0], ["kapali", 0]];
     while {true} do {
-        sleep 1.5;
+        sleep ([1.5] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 60;
             if (((_say get "atama") + (_say get "ses")) > 0) then {

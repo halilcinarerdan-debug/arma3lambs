@@ -25,7 +25,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
 [] spawn {
     private _logN = 0;
     while {true} do {
-        sleep 1.5;
+        sleep ([1.5] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_pusuTepkiOff", false] || {!(missionNamespace getVariable ["lambs_danger_pusuTepkiAktif", true])}) then { continue };
         {
             private _g = _x;

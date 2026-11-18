@@ -37,7 +37,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
 [] spawn {
     private _gonder = missionNamespace getVariable ["lambs_danger_fnc_olayGonder", {false}];
     while {true} do {
-        sleep 2;
+        sleep ([2] call FUNC(dusunSure));
         if (!(missionNamespace getVariable ["lambs_danger_pusuV1", true])) then { continue };
         {
             private _g = _x;

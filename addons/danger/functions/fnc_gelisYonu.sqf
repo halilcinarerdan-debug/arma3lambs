@@ -85,7 +85,7 @@ diag_log "[GELIS-YONU] dusman gelis yonu bakisi (acik gorus / yol / kapi) baslat
         [_hedef, _tur]
     };
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         private _acik = missionNamespace getVariable ["lambs_danger_gelisYonu", true];
         private _butce = 6;
         {

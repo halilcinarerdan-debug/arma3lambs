@@ -43,7 +43,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
     };
 
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_fireSupportOff", false]) then { continue };
 
         {

@@ -36,7 +36,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
     private _sonOzet = time;
     private _teslimSay = 0;
     while {true} do {
-        sleep 5;
+        sleep ([5] call FUNC(dusunSure));
         if (!(missionNamespace getVariable ["lambs_danger_moralV1", true])) then { continue };
         private _gSay = 0;
         private _dusukSay = 0;

@@ -32,7 +32,7 @@ private _calis = {
     private _nedenSay = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _nedenSay > 0) then { diag_log format ["[ZEKA-NOKTA] OZET (son 90 sn grup-tur sayaci) %1", (keys _nedenSay) apply {format ["%1:%2", _x, _nedenSay get _x]}]; };

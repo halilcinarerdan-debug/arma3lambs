@@ -50,7 +50,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
     };
 
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };

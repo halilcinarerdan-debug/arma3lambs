@@ -242,7 +242,7 @@ private _calis = {
     private _say = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_tehlikeAlaniOff", false]) then { continue };
         {
             private _g = _x;

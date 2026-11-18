@@ -38,7 +38,7 @@ diag_log "[BUDDY] buddy bagi (cohesion) watchdog baslatildi";
     private _pairFn = missionNamespace getVariable ["lambs_danger_fnc_buddyPairs", {[_this select 0]}];
 
     while {true} do {
-        sleep 3;
+        sleep ([3] call FUNC(dusunSure));
 
         {
             private _g = _x;
