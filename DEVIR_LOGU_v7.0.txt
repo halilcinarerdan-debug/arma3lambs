@@ -3970,3 +3970,8 @@ v8.637 (dal sade-waypoint) COVERA 3 KAT YAKINLIK (kullanici: 'agaca mesafe falan
  - ONEMLI: CBA profilinde onceki degerler kayitliysa varsayilan degisikligi UYGULANMAZ: coverHugMesafe = 0.06 ve siperUzaklik = 3 elle ayarlanmali.
  - SINIR: 0.03-0.06 m karakter geometriyi / duvari kesebilir (yarilma, 'gomulme'); calisan sistemde gozle kontrol; coverHug yalniz kapali sert yuzey bulursa; kalan uzakligin kaynagi RPT'de [SIPER-YAPIS] / [SIPER-YAPIS-OZET] ile izlenir; oyunda DENENMEDI.
 
+v8.638 (dal sade-waypoint) AGAC KENARINA OTURMA (kullanici: 'agac kenarlarina hala cok uzaklar').
+ - NEDEN (kod okumasi; yeni RPT yok): fnc_siperZorla varis kosulu 'siper noktasina < 1.2 m' ve ardindan yalniz siperTut; asker govdenin 0.15 m arkasindaki hedefe oturmadan ~1.2 m'de duruyordu (tolerans). Sure (1.2 + 2.3 x risk sn) dolunca varmamis asker oldugu yerde kaliyordu (siperTut / durus yok). v8.634 kayma yalniz coverHug 'acikta' dalinda ve acikSiperHedef <= 3.5 m ile calisiyordu.
+ - DEGISIKLIK: (a) varista (< 1.2 m) kalan 0.15-1.6 m mesafe 8 adimda yumusak kayarak (setPosATL) hedefe kapatilir; (b) sure dolup 1.2-9 m kalmissa koşuya 4 sn daha devam (forceSpeed -1, doMove), varinca siperTut + ayni oturma.
+ - SINIR: setPosATL kisa kayma; hedef nokta govde / duvara cok yakinsa (0.03-0.15 m) yarilma riski; 9 m'den uzakta kalan asker degismedi; oyunda DENENMEDI.
+

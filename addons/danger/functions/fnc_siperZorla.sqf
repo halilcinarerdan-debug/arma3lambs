@@ -139,6 +139,21 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         _uu setVariable [QGVAR(zorlaBitis), 0];
         _uu setUnitPosWeak _dd;
         [_uu] call FUNC(siperTut);   // v8.521: varinca siperde bekle (formasyon slotuna geri yuruyup git-gel yapmasin)
+        // v8.638 SIPER NOKTASINA OTUR (kullanici: 'agac kenarlarina hala cok uzaklar'; varis toleransi 1.2 m: doMove bitince asker hedef noktaya (govdenin 0.15 m arkasi) kadar yaklasmadan duruyor): varista 0.15-1.6 m kalan mesafe 8 adimda yumusak kayarak hedef noktaya kapatilir
+        [_uu, _pp] spawn {
+            params ["_a", "_p"];
+            private _p1 = +_p;
+            _p1 set [2, (getPosATL _a) select 2];
+            private _d0 = (getPosATL _a) distance2D _p1;
+            if (alive _a && {_d0 >= 0.15} && {_d0 <= 1.6} && {!surfaceIsWater _p1}) then {
+                private _p0 = getPosATL _a;
+                for "_k" from 1 to 8 do {
+                    if (!alive _a) exitWith {};
+                    _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 8)));
+                    sleep 0.06;
+                };
+            };
+        };
         if (_ak && {(missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) < 30}) then {
             missionNamespace setVariable ["lambs_danger_kosuAtesLogN", (missionNamespace getVariable ["lambs_danger_kosuAtesLogN", 0]) + 1];
             diag_log format ["[KOSU-ATES] %1 | %2 | kosarken atilan mermi: %3 (muzzle %4)", groupId (group _uu), name _uu, (_mm0 - (_uu ammo (currentMuzzle _uu))) max 0, currentMuzzle _uu];
@@ -151,6 +166,32 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
+        // v8.638 SURE DOLDU AMA SIPERE VARMADI: 9 m icindeyse kosuya 4 sn daha devam, varista noktaya otur (eskiden orada durup acikta kaliyordu)
+        if ((_uu distance2D _pp) > 1.2 && {(_uu distance2D _pp) <= 9}) then {
+            _uu forceSpeed -1;
+            _uu setSpeedMode "FULL";
+            _uu doMove _pp;
+            [{ params ["_a", "_p"]; !alive _a || {(_a distance2D _p) < 1.2} }, {
+                params ["_a", "_p"];
+                if (alive _a) then {
+                    [_a] call FUNC(siperTut);
+                    [_a, _p] spawn {
+                        params ["_b", "_q"];
+                        private _q1 = +_q;
+                        _q1 set [2, (getPosATL _b) select 2];
+                        private _e0 = (getPosATL _b) distance2D _q1;
+                        if (alive _b && {_e0 >= 0.15} && {_e0 <= 1.6} && {!surfaceIsWater _q1}) then {
+                            private _q0 = getPosATL _b;
+                            for "_k" from 1 to 8 do {
+                                if (!alive _b) exitWith {};
+                                _b setPosATL (_q0 vectorAdd ((_q1 vectorDiff _q0) vectorMultiply (_k / 8)));
+                                sleep 0.06;
+                            };
+                        };
+                    };
+                };
+            }, [_uu, _pp], 4, {}] call CBA_fnc_waitUntilAndExecute;
+        };
     };
 }] call CBA_fnc_waitUntilAndExecute;
 true
