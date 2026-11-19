@@ -232,6 +232,39 @@ lambs_danger_patlayiciDon = {
             } forEach (allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side (group _x)) isNotEqualTo civilian}});
         };
 
+        // ---- EL BOMBASI EK (v8.607; kullanici: 'el bombasi class name ekleme ayari ekle'): CBA elBombasiSinif (sarjor sinif adi, virgullu liste: HandGrenade, rhs_mag_rgd5) + elBombasiEk (asker basina en az bu kadar); ayar degisince yeniden uygulanir ----
+        private _bSinif = missionNamespace getVariable ["lambs_danger_elBombasiSinif", ""];
+        private _bAdet = missionNamespace getVariable ["lambs_danger_elBombasiEk", 0];
+        if (_bSinif isNotEqualTo "" && {_bAdet > 0}) then {
+            private _anahtar = format ["%1|%2", _bSinif, _bAdet];
+            private _sinifListe = (_bSinif splitString ", ;") select {isClass (configFile >> "CfgMagazines" >> _x)};
+            if (_sinifListe isEqualTo [] && {(missionNamespace getVariable ["lambs_danger_bombaEkUyari", ""]) isNotEqualTo _anahtar}) then {
+                missionNamespace setVariable ["lambs_danger_bombaEkUyari", _anahtar];
+                diag_log format ["[PATLAYICI] el bombasi ek: GECERLI SINIF YOK (CfgMagazines'te bulunamadi): '%1'", _bSinif];
+            };
+            {
+                private _u = _x;
+                if ((_u getVariable [QGVAR(bombaEkAnahtar), ""]) isNotEqualTo _anahtar) then {
+                    _u setVariable [QGVAR(bombaEkAnahtar), _anahtar];
+                    {
+                        private _cls = _x;
+                        if ([_cls] call _fragMi) then {
+                            private _once = {_x isEqualTo _cls} count (magazines _u);
+                            private _eksik = _bAdet - _once;
+                            if (_eksik > 0) then {
+                                _u addMagazines [_cls, _eksik];
+                                private _eklenen = ({_x isEqualTo _cls} count (magazines _u)) - _once;
+                                if (_eklenen > 0 && {(missionNamespace getVariable ["lambs_danger_bombaEkLogN", 0]) < 10}) then {
+                                    missionNamespace setVariable ["lambs_danger_bombaEkLogN", (missionNamespace getVariable ["lambs_danger_bombaEkLogN", 0]) + 1];
+                                    diag_log format ["[PATLAYICI] el bombasi eklendi | %1 | %2 x%3 (envanter dolu ise eksik kalabilir)", name _u, _cls, _eklenen];
+                                };
+                            };
+                        };
+                    } forEach _sinifListe;
+                };
+            } forEach (allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side (group _x)) isNotEqualTo civilian} && {!([_x] call FUNC(oyuncuKomutaMi))}});
+        };
+
         // ---- temasta gruplar ----
         {
             if (_butce <= 0) exitWith {};

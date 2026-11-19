@@ -3815,3 +3815,7 @@ v8.606 (dal sade-waypoint) AGAC SIPERI: GOVDE YARICAPI (kullanici: 'bu haritada 
  - DEGISIKLIK: agac modelleri (t_ / tree / picea / pinus) icin _r = govde yaricapi: modelde bir kez FIRE LOD yanal tarama (1.1 m yukseklik, +-3 m, 0.1 m adim, merkezin 1.5 m'sindeki isabetler; FIRE LOD yoksa 0.5 m) olculur ve onbelleklenir (lambs_danger_govdeRH); nokta = govde + (yaricap + 0.55) m (~0.9 m). Kaya / duvar / konteyner eski bbox yaricapi.
  - SINIR / DOGRULANMADI: govde taramasi tek yukseklikte (1.1 m) yapiliyor; cok govdeli / egik agaclarda hata payi; ince govdede (0.48 m) 0.75 m arkada vucut golgesi tam kapanmayabilir (UP durus yerine MIDDLE secilir); oyunda DENENMEDI. NOT: oyunda denenmedi.
 
+v8.607 (dal sade-waypoint) EL BOMBASI EKLEME AYARI (kullanici: 'el bombasi class name ekleme ayari ekle'; RPT 762aabfd: 'frag tasiyan 0' ile bomba atilamadi).
+ - CBA elBombasiSinif (EDITBOX; sarjor sinif adi, virgullu liste, ornek HandGrenade, rhs_mag_rgd5; bos = kapali) + elBombasiEk (0-8, varsayilan 0 = kapali): fnc_patlayici her yerel AI askerde (oyuncu / oyuncu komutasindaki grup / sivil / aracta haric) sinif basina en az bu kadar bulundurur (addMagazines; eksik olan eklenir, ayar degisince yeniden). Yalniz frag (simulation shotGrenade; duman / flare / sok / m84 haric); gecersiz sinif RPT'ye yazilir. Log [PATLAYICI] el bombasi eklendi (ilk 10).
+ - SINIR / DOGRULANMADI: envanter doluysa eksik kalabilir (addMagazines sigmayani eklemez); bomba sayisini artirmak kendi kayip riskini de artirir (bombaMinM / bombaDostM); oyunda DENENMEDI. NOT: oyunda denenmedi.
+
