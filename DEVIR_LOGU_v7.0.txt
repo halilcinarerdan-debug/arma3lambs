@@ -3975,3 +3975,8 @@ v8.638 (dal sade-waypoint) AGAC KENARINA OTURMA (kullanici: 'agac kenarlarina ha
  - DEGISIKLIK: (a) varista (< 1.2 m) kalan 0.15-1.6 m mesafe 8 adimda yumusak kayarak (setPosATL) hedefe kapatilir; (b) sure dolup 1.2-9 m kalmissa koşuya 4 sn daha devam (forceSpeed -1, doMove), varinca siperTut + ayni oturma.
  - SINIR: setPosATL kisa kayma; hedef nokta govde / duvara cok yakinsa (0.03-0.15 m) yarilma riski; 9 m'den uzakta kalan asker degismedi; oyunda DENENMEDI.
 
+v8.639 (dal sade-waypoint) AGAC / CALI DIBINE GIR, 3.3 KAT YAKIN (kullanici: 'agac cali iyice dibine girsinler', '3.30 kat artsin').
+ - DEGISIKLIK (fnc_acikSiper): sert nesne / agac arkasi payi 0.15 -> 0.05 m (v8.637 0.45 -> 0.15; toplam ~9 kat); cali / fidan gizlenmesi payi 0.5 -> 0.15 m ve yaricap x 0.6 (yaprak ortusunun ICINE); agac gizlenmesi 0.2 -> 0.05 m. Gorunmezlik / yan isin dogrulamasi (VIEW LOD) ayni.
+ - NOT: CBA siperUzaklik slider'i 0.1 adimli: kullanicinin '3.30' ifadesi bu ayar icin 3.3 olarak da okunabilir (arama menzili / 3.3, uzaklik cezasi x3.3; aralik 1-4).
+ - SINIR: govde yaricapi olculemeyen (FIRE LOD yok) agaclarda yaricap 0.5 varsayilir, o zaman asker govdeye 0.55 m'de durur; cali ici (yaricap x 0.6) yarilma / yaprak icinde durma; oyunda DENENMEDI.
+
