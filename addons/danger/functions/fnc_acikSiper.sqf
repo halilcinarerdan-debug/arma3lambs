@@ -168,9 +168,18 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
                     private _vh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _h], _en, _u, true, 1, "VIEW", "NONE"];
                     private _tamam = (_vh isNotEqualTo []) && {((_vh select 0) select 2) isEqualTo _o};
                     if (_tamam && {_uzun}) then {
-                        // v8.643: yan isin testi (+-0.2 m) CUP / A2 agaclarinda govde / yaprak seyrek oldugu icin elenirdi; MODEL PROFILI: bu yukseklikte VIEW genisligi >= 0.3 m ise govde / ortu gercekten gizler
-                        private _pr = [_o] call FUNC(agacProfil);
-                        _tamam = (_pr select ([3, 4] select (_h >= 0.9))) >= 0.3;
+                        if (missionNamespace getVariable ["lambs_danger_agacProfil", true]) then {
+                            // v8.643: yan isin testi (+-0.2 m) CUP / A2 agaclarinda govde / yaprak seyrek oldugu icin elenirdi; MODEL PROFILI: bu yukseklikte VIEW genisligi >= 0.3 m ise govde / ortu gercekten gizler
+                            private _pr = [_o] call FUNC(agacProfil);
+                            _tamam = (_pr select ([3, 4] select (_h >= 0.9))) >= 0.3;
+                        } else {
+                            // eski (v8.621): govde ince oldugu icin gorus hatti ortada + +-0.2 m yanlarda da agaca carpmali
+                            private _pd = (_en getDir _o) + 90;
+                            {
+                                private _yh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [(sin _pd) * _x, (cos _pd) * _x, _h], _en, _u, true, 1, "VIEW", "NONE"];
+                                if (_yh isEqualTo [] || {((_yh select 0) select 2) isNotEqualTo _o}) exitWith { _tamam = false; };
+                            } forEach [-0.2, 0.2];
+                        };
                     };
                     _tamam
                 };
@@ -203,7 +212,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _sk = (_u distance2D _pos) + 8;
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
-                if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = (if ((_pr select 5) >= 0.3) then {"UP"} else { if ((_pr select 4) >= 0.3) then {"MIDDLE"} else { if ((_pr select 3) >= 0.3) then {"DOWN"} else {"MIDDLE"} } }); _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
+                if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = (if (!(missionNamespace getVariable ["lambs_danger_agacProfil", true])) then {"MIDDLE"} else { if ((_pr select 5) >= 0.3) then {"UP"} else { if ((_pr select 4) >= 0.3) then {"MIDDLE"} else { if ((_pr select 3) >= 0.3) then {"DOWN"} else {"MIDDLE"} } } }); _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
             };
         };
     } forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], ((_yar * 1.5) max 30) min 45, false, true]);
