@@ -92,6 +92,8 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
             _say set [["mermi", "tek"] select _tek, (_say get (["mermi", "tek"] select _tek)) + 1];
             _u setVariable [QGVAR(forceMove), true];
             _u setVariable [QGVAR(taktikKilit), time + 30];
+            private _kTok = time;
+            _u setVariable [QGVAR(kacisTok), _kTok];   // v8.670: geri cekilme baslarsa (fnc_tacticsRetreat) belirtec silinir -> asagidaki geri cagrilar iptal (RPT c6c1f3e6: kacis 12:12:21, geri cekilme 12:12:24, ayni askere iki emir kaynagi)
             _u disableAI "AUTOTARGET";
             _u disableAI "TARGET";
             _u setBehaviour "AWARE";
@@ -108,8 +110,9 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
                 params ["_uu", "_pp"];
                 !alive _uu || {(_uu distance2D _pp) < 4}
             }, {
-                params ["_uu", "_pp"];
-                if (alive _uu) then {
+                params ["_uu", "_pp", "_tk"];
+                if (alive _uu && {(_uu getVariable [QGVAR(kacisTok), -1]) isEqualTo _tk}) then {
+                    _uu setVariable [QGVAR(kacisTok), nil];
                     _uu enableAI "AUTOTARGET";
                     _uu enableAI "TARGET";
                     _uu setVariable [QGVAR(forceMove), nil];
@@ -117,9 +120,10 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
                     _uu setUnitPosWeak "DOWN";
                     [_uu] call FUNC(siperTut);
                 };
-            }, [_u, _en2], 28, {
-                params ["_uu", "_pp"];
-                if (alive _uu) then {
+            }, [_u, _en2, _kTok], 28, {
+                params ["_uu", "_pp", "_tk"];
+                if (alive _uu && {(_uu getVariable [QGVAR(kacisTok), -1]) isEqualTo _tk}) then {
+                    _uu setVariable [QGVAR(kacisTok), nil];
                     _uu enableAI "AUTOTARGET";
                     _uu enableAI "TARGET";
                     _uu setVariable [QGVAR(forceMove), nil];

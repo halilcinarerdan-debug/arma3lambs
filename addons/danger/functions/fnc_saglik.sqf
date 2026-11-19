@@ -79,7 +79,7 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             };
 
             // AI-KAPALI-SIZINTI (grup)
-            if (!_bayrakVar && {_g getVariable [QGVAR(disableGroupAI), false]}) then {
+            if (!_bayrakVar && {_g getVariable [QGVAR(disableGroupAI), false]} && {time >= (_g getVariable [QGVAR(toparlanBitisT), 0])}) then {   // v8.670: geri cekilme sonrasi bilincli toparlanma penceresinde alarm yok (RPT c6c1f3e6: 20 / 80 sn yanlis alarm)
                 if ((_g getVariable [QGVAR(saglikDgaT), -1]) < 0) then { _g setVariable [QGVAR(saglikDgaT), time]; };
                 if ((time - (_g getVariable [QGVAR(saglikDgaT), time])) > 20) then {
                     ["AI-KAPALI-SIZINTI", _g, format ["disableGroupAI acik, tactik bayragi yok | %1 sn", round (time - (_g getVariable [QGVAR(saglikDgaT), time]))]] call _isaretle;

@@ -365,6 +365,9 @@ if (EGVAR(main,debug_functions)) then {
                     _x setVariable [QGVAR(forceMove), true];
                     _x setVariable [QEGVAR(main,currentTask), "Retreat/Bound", EGVAR(main,debug_functions)];
                     _x setUnitPos "UP";   // v8.22: SERT durus (zayif "UP" yetmedi: RPT 17:30 lider 2 dk boyunca PRONE surunerek ilerledi)
+                    // v8.670 BIRINCIL SILAH (RPT c6c1f3e6: tek kalan lider durbunle yuruyordu, sonra Binocular -> PKM silah degisimi, 9 sn yerinde kaldi): elde durbun / roketatar / tabanca ise kosu oncesi birincil silaha gec (silahDegisimOff kapatir)
+                    if (!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) && {(primaryWeapon _x) isNotEqualTo ""} && {(currentWeapon _x) isNotEqualTo (primaryWeapon _x)}) then { _x selectWeapon (primaryWeapon _x); };
+                    _x setVariable [QGVAR(kacisTok), nil];   // v8.670: bireysel kacis (fnc_kacis) bu cekilmeyle ayni askere emir vermesin; kacis geri cagrilari belirtece bakar
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
                     _varis pushBack [_x, _p, getPosATL _x, time, 0];
@@ -482,8 +485,8 @@ if (EGVAR(main,debug_functions)) then {
                                 private _enT = _b findNearestEnemy _b;
                                 private _enMes = if (isNull _enT) then {"-"} else {str (round (_b distance2D _enT))};
                                 private _enGor = if (isNull _enT) then {"-"} else {([_b, "VIEW", _enT] checkVisibility [eyePos _b, eyePos _enT]) toFixed 2};
-                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13 | AI PATH:%14 MOVE:%15 ANIM:%16 FSM:%17 | v8.560 TANI: moveToFailed:%18 moveToCompleted:%19 anim:%20 baski:%21 en yakin dusman:%22 m gorunurluk:%23", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true]), _b checkAIFeature "PATH", _b checkAIFeature "MOVE", _b checkAIFeature "ANIM", _b checkAIFeature "FSM", moveToFailed _b, moveToCompleted _b, animationState _b, (getSuppression _b) toFixed 2,
-                                    _enMes, _enGor];
+                                diag_log format ["[GERI-CEKILME-TAKILI] %1 | %2%3 | hedefe %4 m | komut:%5 | hiz:%6 | stance:%7 | beh:%8 | ready:%9 | beklenen hedef:%10 | takilma:%11 | binada:%12 | yakin nesne:%13 | AI PATH:%14 MOVE:%15 ANIM:%16 FSM:%17 | v8.560 TANI: moveToFailed:%18 moveToCompleted:%19 anim:%20 baski:%21 en yakin dusman:%22 m gorunurluk:%23 | v8.670 TANI: silah:%24 (birincil %25) unitPos:%26 speedMode:%27 kacisTok:%28 forceMove:%29", groupId _grup, name _b, ["", " (K)"] select (_b isEqualTo (leader _grup)), round (_b distance2D (_x select 1)), currentCommand _b, round (speed _b), stance _b, behaviour _b, unitReady _b, expectedDestination _b, (_x select 4), round (insideBuilding _b * 100), count (nearestTerrainObjects [_b, ["BUILDING", "HOUSE", "WALL", "FENCE", "ROCK", "TREE"], 3, false, true]), _b checkAIFeature "PATH", _b checkAIFeature "MOVE", _b checkAIFeature "ANIM", _b checkAIFeature "FSM", moveToFailed _b, moveToCompleted _b, animationState _b, (getSuppression _b) toFixed 2,
+                                    _enMes, _enGor, currentWeapon _b, primaryWeapon _b, unitPos _b, speedMode _b, !isNil {_b getVariable QGVAR(kacisTok)}, _b getVariable [QGVAR(forceMove), false]];
                             };
                             // v8.560: yol bulma BASARISIZ (moveToFailed) ise ayni noktayi tekrar tekrar emretmek anlamsiz: ilk takilmada hemen dusmandan uzaga yeni nokta (doStop YOK, komut sifirlanmaz)
                             if (moveToFailed _b && {(_x select 4) < 2}) then {
@@ -493,6 +496,8 @@ if (EGVAR(main,debug_functions)) then {
                                 lambs_danger_retYolHataN = lambs_danger_retYolHataN + 1;
                                 if (lambs_danger_retYolHataN <= 20) then { diag_log format ["[GERI-CEKILME-YOLHATA] %1 | %2 | moveToFailed -> yeni nokta %3 m | toplam %4", groupId _grup, name _b, round (_b distance2D (_x select 1)), lambs_danger_retYolHataN]; };
                             };
+                            // v8.670: takilmada elde durbun / baska silah varsa birincile don (silah degisimi animasyonu yurumeyi bekletiyordu)
+                            if (!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) && {(primaryWeapon _b) isNotEqualTo ""} && {(currentWeapon _b) isNotEqualTo (primaryWeapon _b)}) then { _b selectWeapon (primaryWeapon _b); };
                             // her takilmada hareket bayraklari yeniden acilir
                             _b enableAI "PATH";
                             _b enableAI "MOVE";
@@ -535,7 +540,7 @@ if (EGVAR(main,debug_functions)) then {
         private _canliN = 0;
         { if ((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) then { _dSonra = _dSonra + ((_x select 0) distance2D _targetPos); _canliN = _canliN + 1; }; } forEach _varis;
         private _kazanc = if (_canliN > 0) then {(_dSonra / _canliN) - _dOnce} else {0};
-        if ((_vardiSay * 5) < (count _varis) && {_kazanc < 8}) then {
+        if (_canliN > 0 && {(_vardiSay * 5) < (count _varis)} && {_kazanc < 8}) then {   // v8.670: kosucularin hepsi baygin / olduyse (_canliN 0) ilerleme yok DEGIL (RPT c6c1f3e6: tek kalan lider vuruldu, 2 sicrama 0/1, erken bitis)
             _grup setVariable [QGVAR(retSifirArd), (_grup getVariable [QGVAR(retSifirArd), 0]) + 1];
         } else {
             _grup setVariable [QGVAR(retSifirArd), 0];
@@ -757,6 +762,7 @@ if (EGVAR(main,debug_functions)) then {
         if ((_ekNeden select [0, 9]) isEqualTo "ilerleme ") then { _konsS = _konsS min 15; };   // v8.380: cekilme ilerlemedi -> 90 sn hucumsuz bekleme yerine 15 sn
         if (_konsS > 0 && {({alive _x} count (units _group)) >= 2}) then {
             _group setVariable [QGVAR(disableGroupAI), true];
+            _group setVariable [QGVAR(toparlanBitisT), time + _konsS + 10];   // v8.670: bilincli 'disableGroupAI' penceresi (fnc_saglik AI-KAPALI-SIZINTI yanlis alarmi vermesin)
             diag_log format ["[GERI-CEKILME-TOPLAN] %1 | %2 sn toparlanma: LAMBS grup taktigi kapali (hemen geri hucum yok)", groupId _group, _konsS];
             [_group, _eskiDGAk, _konsS] spawn {
                 params ["_g", "_e", "_s"];
