@@ -91,21 +91,9 @@ private _talepYaz = {
 private _govdeR = {
     params ["_o", "_bbR"];
     private _m = toLower ((getModelInfo _o) select 0);
-    if !(((_m find "t_") isEqualTo 0) || {(_m find "tree") >= 0} || {(_m find "picea") >= 0} || {(_m find "pinus") >= 0}) exitWith { _bbR };
-    if (isNil "lambs_danger_govdeRH") then { lambs_danger_govdeRH = createHashMap; };
-    private _c = lambs_danger_govdeRH get _m;
-    if (!isNil "_c") exitWith { _c };
-    private _tp = getPosASL _o;
-    private _bas = _tp vectorAdd [0, 0, 1.1];
-    private _n = 0;
-    for "_i" from -15 to 15 do {
-        private _ofs = _i * 0.1;
-        private _h = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -3, 0], _bas vectorAdd [_ofs, 3, 0], objNull, objNull, true, 3, "FIRE", "NONE"];
-        if ((_h findIf {(((_x select 0) distance2D _tp) < 1.5) && {((_x select 2) isEqualTo _o)}}) > -1) then { _n = _n + 1; };
-    };
-    private _rr = if (_n isEqualTo 0) then {0.5} else { ((_n * 0.1) / 2) max 0.2 min 0.7 };   // v8.633: 1.2 -> 0.7 (RPT a3b57501: t_picea2s FIRE LOD tarama 3.00 m = dal / yaprak; govde yaricapi 1.2 m olunca asker govdenin ~1.75 m gerisine geciyordu -> 'sipere cok uzaklar, tam gizlenemiyorlar')
-    lambs_danger_govdeRH set [_m, _rr];
-    _rr
+    if !(((_m find "t_") isEqualTo 0) || {(_m find "tree") >= 0} || {(_m find "picea") >= 0} || {(_m find "pinus") >= 0} || {(_m find "populus") >= 0}) exitWith { _bbR };
+    // v8.643: govde yaricapi MODEL PROFILINDEN (FIRE / GEOM / VIEW olcumu, onbellekli; fnc_agacProfil)
+    (([_o] call FUNC(agacProfil)) select 0)
 };
 private _geriMax = [3, 10] select ((getSuppression _u) >= 0.5);
 private _obj = [];
@@ -180,11 +168,9 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
                     private _vh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _h], _en, _u, true, 1, "VIEW", "NONE"];
                     private _tamam = (_vh isNotEqualTo []) && {((_vh select 0) select 2) isEqualTo _o};
                     if (_tamam && {_uzun}) then {
-                        private _pd = (_en getDir _o) + 90;
-                        { 
-                            private _yh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [(sin _pd) * _x, (cos _pd) * _x, _h], _en, _u, true, 1, "VIEW", "NONE"];
-                            if (_yh isEqualTo [] || {((_yh select 0) select 2) isNotEqualTo _o}) exitWith { _tamam = false; };
-                        } forEach [-0.2, 0.2];
+                        // v8.643: yan isin testi (+-0.2 m) CUP / A2 agaclarinda govde / yaprak seyrek oldugu icin elenirdi; MODEL PROFILI: bu yukseklikte VIEW genisligi >= 0.3 m ise govde / ortu gercekten gizler
+                        private _pr = [_o] call FUNC(agacProfil);
+                        _tamam = (_pr select ([3, 4] select (_h >= 0.9))) >= 0.3;
                     };
                     _tamam
                 };
@@ -211,12 +197,13 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
         private _bb = boundingBoxReal _o;
         private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
         if (_yk > 4) then {
-            private _r = ([_o, ((((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5)] call _govdeR) min 0.7;
+            private _pr = [_o] call FUNC(agacProfil);   // v8.643: model profili (CUP / A2 agac olcumu)
+            private _r = (_pr select 0) min 0.7;
             private _pos = _op getPos [_r + 0.1, _en getDir _o];
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _sk = (_u distance2D _pos) + 8;
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
-                if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = "MIDDLE"; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
+                if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = (if ((_pr select 5) >= 0.3) then {"UP"} else { if ((_pr select 4) >= 0.3) then {"MIDDLE"} else { if ((_pr select 3) >= 0.3) then {"DOWN"} else {"MIDDLE"} } }); _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
             };
         };
     } forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], ((_yar * 1.5) max 30) min 45, false, true]);
