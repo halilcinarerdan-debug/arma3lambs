@@ -51,7 +51,10 @@ _group setVariable [QGVAR(isExecutingTactic), true];
     },
     {
         params [["_group", grpNull], "", ["_speedMode", "NORMAL"], ["_formation", "WEDGE"]];
-        if (!isNull _group) then {
+        // v8.679 GECIKEN TAKTIK ZAMANLAYICISI KORUMASI (RPT 657502f7: koşucular MOVE komutunda ama hedef modu 'LEADER PLANNED' = liderin / formasyonun planini izliyor (doFollow), lider durunca yerinde bekliyor; 5 / 20 varis):
+        //   bu zamanlayici taktik cagrildiktan _delay sn sonra (kanat 120 sn) HER KOSULDA tum birimlere doFollow / forceMove nil / setUnitPos AUTO veriyor ve grubun isExecutingTactic bayragini (geri cekilmeninkini de) siliyordu.
+        //   FLANK -> kayip -> WITHDRAW sirasi cok yaygin; geri cekilme / bounding / kacis / kacma sirasinda zamanlayici HICBIR sey yapmaz (kendi temizligini ilgili taktik yapar).
+        if (!isNull _group && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isBounding), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])} && {!(_group getVariable [QGVAR(isEvading), false])}) then {
             _group setVariable [QGVAR(isExecutingTactic), nil];
             _group setVariable [QEGVAR(main,currentTactic), nil];
             _group setSpeedMode _speedMode;

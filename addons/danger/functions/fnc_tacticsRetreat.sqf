@@ -401,7 +401,7 @@ if (EGVAR(main,debug_functions)) then {
                         private _cmd = currentCommand _b;
                         private _rd = unitReady _b;
                         private _dm = (expectedDestination _b) select 1;
-                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0}) then {
+                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0} || {(_dm find "LEADER") >= 0}) then {   // v8.679: 'LEADER PLANNED' (doFollow / formasyon) de ezme sayilir (kendi doMove emri 'DoNotPlan' gosterir)
                             _gor pushBack _b;
                             if ((missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) < 40) then {
                                 missionNamespace setVariable ["lambs_danger_retEzmeTaniN", (missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) + 1];
@@ -521,7 +521,9 @@ if (EGVAR(main,debug_functions)) then {
                         _x set [2, getPosATL _b];
                         _x set [3, time];
                     } else {
-                        if ((time - (_x select 3)) > 7) then {   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
+                        // v8.679: hedef modu 'LEADER PLANNED' / 'Formation' = asker kendi doMove emrini degil lider / formasyon planini izliyor (emir ezilmis; yol hesabi gecikmesi DEGIL) -> 2.5 sn'de yeniden emir (yol hesabi sifirlama riski yok); diger durumlarda 7 sn
+                        private _ezMod = ((((expectedDestination _b) select 1) find "LEADER") >= 0) || {(((expectedDestination _b) select 1) find "Formation") >= 0};
+                        if ((time - (_x select 3)) > ([7, 2.5] select _ezMod)) then {   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
                             _x set [4, (_x select 4) + 1];
                             // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
                             if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
