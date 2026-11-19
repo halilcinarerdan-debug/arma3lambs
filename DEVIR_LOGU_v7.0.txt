@@ -4002,3 +4002,9 @@ v8.643 (dal sade-waypoint) CUP / A2 AGAC MODEL PROFILI (kullanici: 'cup objeleri
  - v8.643b: OPSIYONEL (kullanici: 'bunu cbadan opsiyonel yap'): CBA lambs_danger_agacProfil (CHECKBOX, varsayilan ACIK, 'ELITE siper'). Kapaliyken: govde yaricapi yalniz FIRE taramasindan (0.2-0.7 m, FIRE yoksa 0.5), agac gizlenmesi eski +-0.2 m VIEW yan isin testi, gevsek blok durusu MIDDLE; GEOM / VIEW olcumu yapilmaz. Profil onbellegi ayri anahtarla ('|eski').
  - DUZELTME: ilk v8.643 commit'inde (7354e55) yardimci betik hata verdi ama commit atildi: fnc_agacProfil CBA anahtarini okuyor, ayar tanimi / acikSiper dali eksikti; bu commit eksigi tamamlar.
 
+v8.644 (dal sade-waypoint) SIPER OTUR DUZELTME (RPT 18ce6e97, v8.643 ilk saha sonucu).
+ - SONUC: [AGAC-PROFIL]: t_picea3f FIRE / GEOM / VIEW 0.7 m (her yukseklikte, govde yaricapi 0.35), t_pinusn2s 0.8 m, t_picea2s FIRE 4.2 / GEOM 2.8 ama VIEW 0.0 (anormal), t_populusf2s_ep1 hepsi 0.0 (olculemedi, durdurmaz). [ACIK-SIPER]: dusman 121-138 m, agaca 6-14 m ( t_picea3f / t_pinusn2s ), 4 secim [ACIK-SIPER-OZET] nesne=4 / aday_yok=12-17 / dk; [SIPER-OTUR] YALNIZ 1 satir (2.72 m kaldi -> oturtuldu); [SIPER-MIKRO] ve 'agac_gevsek' sayaci YOK; [SIPER-ZORLA] yok (secim dogrudan _nesneGit doMove).
+ - NEDEN (kod okumasi): v8.641 tamamlayici, siper hedefi (acikSiperHedef) ilk hedeften degisirse (acikSiper 10 sn'de bir yeniden degerlendirir) tamamen vazgeciyordu; ayrica 8 m + hiz < 0.8 kosulu hareketin baslangicinda erken tetikleyebilirdi.
+ - DEGISIKLIK: tamamlayici SON hedefe (acikSiperHedef) bakar; bekleme 2 sn; varis = hedefe 4 m + hiz < 0.8 (ya da 12 sn); oturtulamazsa neden logu ('oturtulamadi: kalan X m').
+ - KALAN: aday_yok 12-17 / dk (agac_gevsek hic cikmadi: 45 m'de uygun agac yok); [ACIKTA-SINIF-OZET] 'hic yok' 52-84 / dk (coverHug'un 20 m taramasi); populus modeli olculemedi.
+

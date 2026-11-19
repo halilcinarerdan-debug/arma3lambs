@@ -255,19 +255,23 @@ private _nesneGit = {
     // v8.641 SIPER NOKTASINA OTUR (kullanici: 'arada 2 metre var', RPT 47dde7ed: [SIPER-YAPIS] YAPISTI satiri HIC yok -> coverHug kayma kolu bu askerlerde calismiyor; asker doMove toleransinda (~1-2 m) duruyor):
     //   bu dalin KENDI tamamlayicisi: hareket 1.2 sn sonra baslar, asker durdugunda (< 0.8 m/sn, 8 m icinde) ya da 12 sn sonra, hedef hala ayni siper noktasiysa 0.15-6 m kalan mesafe yumusak kayarak (ayak hatti GEOM acik) kapatilir; hat kapaliysa (govde araya girer) doMove tekrar
     [_u, _obj] spawn {
-        params ["_a", "_pt"];
-        sleep 1.2;
+        params ["_a", "_pt0"];
+        sleep 2;
         private _bit = time + 12;
+        // v8.644: varis = SON siper hedefine 4 m icinde + durmus (eski: ilk hedef degisirse tamamen vazgeciyor + 8 m / 1.2 sn erken tetik: RPT 18ce6e97 4 secimden 1 [SIPER-OTUR]; acikSiper 10 sn'de bir yeniden degerlendirip hedefi degistiriyor)
         waitUntil {
             sleep 0.4;
-            !alive _a || {time > _bit} || {((_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0) isNotEqualTo _pt} || {(((getPosATL _a) distance2D _pt) < 8) && {(speed _a) < 0.8}}
+            private _h = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0;
+            !alive _a || {time > _bit} || {_h isNotEqualTo [] && {(((getPosATL _a) distance2D _h) < 4) && {(speed _a) < 0.8}}}
         };
-        if (!alive _a || {((_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0) isNotEqualTo _pt}) exitWith {};
+        if (!alive _a) exitWith {};
+        private _pt = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0;
+        if (_pt isEqualTo []) exitWith {};
         private _p1 = +_pt;
         _p1 set [2, (getPosATL _a) select 2];
         private _p0 = getPosATL _a;
         private _d0 = _p0 distance2D _p1;
-        if (_d0 >= 0.15 && {_d0 <= 6} && {!surfaceIsWater _p1}) then {
+        if (_d0 >= 0.15 && {_d0 <= 6} && {(speed _a) < 1.5} && {!surfaceIsWater _p1}) then {
             if ((lineIntersectsSurfaces [(getPosASL _a) vectorAdd [0, 0, 0.6], (AGLToASL _p1) vectorAdd [0, 0, 0.6], _a, objNull, true, 1, "GEOM", "NONE"]) isEqualTo []) then {
                 private _ad = (ceil (_d0 * 4)) max 6 min 24;
                 for "_k" from 1 to _ad do {
@@ -281,6 +285,11 @@ private _nesneGit = {
                 };
             } else {
                 _a doMove _pt;
+            };
+        } else {
+            if ((missionNamespace getVariable ["lambs_danger_siperOturLogN2", 0]) < 15) then {
+                missionNamespace setVariable ["lambs_danger_siperOturLogN2", (missionNamespace getVariable ["lambs_danger_siperOturLogN2", 0]) + 1];
+                diag_log format ["[SIPER-OTUR] %1 | %2 | oturtulamadi: kalan %3 m, hiz %4 km/sa", groupId (group _a), name _a, _d0 toFixed 1, round (speed _a)];
             };
         };
     };
