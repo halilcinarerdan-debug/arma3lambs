@@ -37,6 +37,8 @@ if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
 private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
 if (GVAR(disableAutonomousSmokeGrenades)) exitWith {false};
+// v8.703 GAFIL AVLAMA: oyuncu farkinda degilken (savas baslamadan) sis YOK (fnc_gafilAvla bayragi)
+if ((_group getVariable [QGVAR(gafilAktif), false]) isEqualTo true) exitWith {false};
 
 // cooldown
 // v8.10: temas kesmede perde daha sik tazelenir (30 sn), diger modlarda 45 sn

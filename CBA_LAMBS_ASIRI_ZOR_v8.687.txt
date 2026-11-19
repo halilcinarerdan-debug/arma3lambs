@@ -312,10 +312,6 @@ force lambs_danger_bilgiTaban = 2.5;   // EN ZORLU (onceki 1.5)
 force lambs_danger_bilgiMenzil = 600;   // EN ZORLU (onceki 400)
 force lambs_danger_bilgiSure = 90;   // EN ZORLU (onceki 45)
 force lambs_danger_bilgiYalnizOyuncu = true;   // YENI: yalniz insan oyuncular hedef (false = tum dusmanlar)
-force lambs_danger_zigzag = true;   // YENI: acik arazide zikzak
-force lambs_danger_zigzagYanMin = 12;   // v8.699 STRAFE
-force lambs_danger_zigzagYanMax = 16;   // v8.699 STRAFE
-force lambs_danger_zigzagMaxM = 700;   // v8.696 (kodda ust sinir 800)
 force lambs_danger_roketBirimBekle = 20;   // EN ZORLU (onceki 35)
 force lambs_danger_roketGrupBekle = 6;   // EN ZORLU (onceki 10)
 force lambs_danger_roketPiyade = true;   // YENI v8.689 (opsiyonel): ELITE piyadeye de roket atar, LAMBS RPG yuklu olsa bile (false = eski)
@@ -348,14 +344,18 @@ force lambs_danger_sahteSans = 0.6;
 force lambs_danger_sahteSure = 75;
 force lambs_danger_roketMaxM = 450;   // YENI v8.695: roket azami atis mesafesi 450 m (varsayilan 300)
 force lambs_danger_roketGevsek = true;   // YENI v8.695: roket icin kume / bina / baski sarti yok; menzildeki her bilinen piyadeye (gorunur olsun)
-force lambs_danger_zigzagGenis = true;   // YENI v8.696: acik arazide GENIS zikzak
-force lambs_danger_zigzagGenisCarpan = 2.5;   // v8.699 STRAFE
-force lambs_danger_zigzagIleriMin = 3;   // YENI v8.699: ileri adim en az 3 m
-force lambs_danger_zigzagIleriMax = 6;   // YENI v8.699: ileri adim en cok 6 m (strafe gibi: yana > ileri)
-force lambs_danger_zigzagAdimS = 1.2;   // YENI v8.699: sik yon degistirme (acikta x1.33 = 1.6 sn)
 force lambs_danger_sesCarpan = 2.2;   // YENI v8.702: silah sesi duyulma menzili x2.2 (varsayilan 1.2)
 force lambs_danger_sesSeviyeEk = 0.6;   // YENI v8.702: ses bilgi seviyesine +0.6 (daha net yon / konum)
 force lambs_danger_sesDinleyiciMax = 25;   // YENI v8.702: atis basina en cok 25 grup duyar (varsayilan 10)
+force lambs_danger_gafilAvla = true;   // YENI v8.703: oyuncuya ozel gafil avlama (sis yok, botlar hazirda bekler)
+force lambs_danger_gafilGozlemS = 5;   // 5 sn kesintisiz bakis gozlemi (guvenli)
+force lambs_danger_gafilAci = 30;
+force lambs_danger_gafilMenzil = 400;
+force lambs_danger_gafilTetikM = 70;   // oyuncu 70 m'ye girince hep birden ates
+force lambs_danger_gafilSure = 150;
+force lambs_danger_gafilBekle = 240;
+force lambs_danger_gafilMinAsker = 4;
+force lambs_danger_gafilSquadMax = 4;   // oyuncu squadi (oyuncu dahil) 4'ten buyukse botlar beklemez
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;
