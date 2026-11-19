@@ -4090,3 +4090,8 @@ v8.659 (dal sade-waypoint) PLANLI BOUNDING ILK SAHA SONUCU (RPT c46fdbc6, v8.658
  - DEGISIKLIK: planli kosucu icin varis izleyici: kosucu bacak noktasina 8 m (<= 25 sn) yaklasinca plan indeksi (bndPlanI) bir artar -> siradaki ekip (FSE / es) bir ONDEKI bacaga sicrar (leapfrog).
  - SINIR: plan hedef > 40 m oynayinca yeniden hesaplanir ve indeks 0'a doner (ilerleme kaybolur); gercek ilerleme icin hedefin sabitlenmesi gerekir; kosucu bacaga hic varamazsa (25 sn) indeks ilerlemez (dinamik secim devreye girer); oyunda DENENMEDI.
 
+v8.660 (dal sade-waypoint) 'COVER VE PIYADE MANEVRALARI ICIN 10 UZERINDEN 10' (kullanici hedefi; oz degerlendirme Altis 6.5, PMC 5; kalan en onemli eksikler: siperden kalk-ates-alcal ve bounding ilerleme sureklilig).
+ - YENI fnc_siperPeek (1.2 sn, tur basina <= 6 asker, CBA siperPeek varsayilan ACIK): siperdeki asker alcak durusta (PRONE / CROUCH), dusman 40-350 m (>= SUPHE) VIEW hattiyla goruntulenemiyor (3.5 m icindeki nesne) ama bir kademe kalkinca (goz +0.5 m) hat aciliyorsa -> 1.4-2.0 sn kalkar, doWatch + doTarget + doFire, sonra eski duruşa alcalir; 4-8 sn bekleme. Atlananlar: baski >= 0.6, sarjor degistirme, oyuncu komutasi, forceMove / taktikKilit / kose temkini, bayginlik, bina ici. Log [SIPER-PEEK] (ilk 15) + [SIPER-PEEK-OZET].
+ - fnc_bndPlan: ilerleme kalici: grubun ULASTIGI en ileri bacak noktasi (bndPlanSon) hedef kayinca yeni planin baslangici (lider noktasindan hedefe >= 15 m yakin ve 250 m icindeyse).
+ - SINIR: peek yalniz tek dusman (findNearestEnemy) icin; peek sirasinda motor baska hedef secebilir; kalkis kisa ama mermiye acik (tasarim geregi); bounding bacak sirasi dusman buyuk yer degistirirse yine yeniden hesaplanir; oyunda DENENMEDI.
+

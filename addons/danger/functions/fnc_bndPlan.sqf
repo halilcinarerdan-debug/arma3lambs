@@ -25,6 +25,9 @@ if (isNull _l || {!alive _l}) exitWith {[]};
 private _bitis = [_g, "bndBitisM", 40] call FUNC(dk);
 private _legMax = 40;
 private _cur = getPosATL _l;
+// v8.660 ILERLEME KALICI (RPT c46fdbc6: hedef kaydikca plan sifirlaniyor, grup ilerlemiyordu): grubun EN ILERI ulastigi bacak noktasi (QGVAR(bndPlanSon)) lider noktasindan hedefe >= 15 m yakin ve 250 m icindeyse plan oradan baslar
+private _son = _g getVariable [QGVAR(bndPlanSon), []];
+if (_son isNotEqualTo [] && {(_son distance2D _hedef) < ((_cur distance2D _hedef) - 15)} && {(_son distance2D _cur) < 250}) then { _cur = +_son; };
 private _plan = [];
 private _sipN = 0;
 for "_i" from 1 to 8 do {

@@ -607,6 +607,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                         waitUntil { sleep 0.5; !alive _k || {time > _bt} || {((getPosATL _k) distance2D _q) < 8} };
                         if (alive _k && {((getPosATL _k) distance2D _q) < 8} && {(_gr getVariable [QGVAR(bndPlanI), 0]) <= _i}) then {
                             _gr setVariable [QGVAR(bndPlanI), _i + 1];
+                            _gr setVariable [QGVAR(bndPlanSon), getPosATL _k];   // v8.660: en ileri ulasilan nokta (plan yenilenince oradan baslar)
                         };
                     };
                     if ((missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) < 30) then {
