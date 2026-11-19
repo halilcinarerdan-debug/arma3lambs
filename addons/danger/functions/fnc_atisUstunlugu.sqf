@@ -122,7 +122,17 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                     && {((_x distance2D _aim) < 12) || {((abs ((((_u getDir _x) - _yon) + 540) mod 360 - 180)) < 8) && {(_u distance2D _x) < _mesafe}}}
                 });
                 if (_dost isNotEqualTo []) then { _sayac set ["hatDost", (_sayac get "hatDost") + 1]; _u setVariable [QGVAR(atisT), time]; continue };
-                if (!([_u, _aASL vectorAdd [0, 0, 4]] call _supFn) || {!([_u, _aim] call FUNC(atesHatiAcik))}) then { _sayac set ["duvar", (_sayac get "duvar") + 1]; _u setVariable [QGVAR(atisT), time]; continue };
+                if (!([_u, _aASL vectorAdd [0, 0, 4]] call _supFn) || {!([_u, _aim] call FUNC(atesHatiAcik))}) then {
+                    // v8.604 PENCERE ATESI (kullanici: 'bilinen duvar arkasi atesi icin pencere yonune ates acsinlar, gorusunun oldugu ic bolgeye'): hedef duvar arkasindaysa pencere / kapidan GORULEN ic noktayi bastir (fnc_pencereNoktasi)
+                    private _pw = if (missionNamespace getVariable ["lambs_danger_pencereAtesi", true]) then { [_u, _aim] call FUNC(pencereNoktasi) } else { [] };
+                    if (_pw isEqualTo []) then { _sayac set ["duvar", (_sayac get "duvar") + 1]; _u setVariable [QGVAR(atisT), time]; continue };
+                    _aim = _pw;
+                    _sayac set ["pencere", (_sayac getOrDefault ["pencere", 0]) + 1];
+                    if ((missionNamespace getVariable ["lambs_danger_pencereLogN", 0]) < 15) then {
+                        missionNamespace setVariable ["lambs_danger_pencereLogN", (missionNamespace getVariable ["lambs_danger_pencereLogN", 0]) + 1];
+                        diag_log format ["[PENCERE-ATES] %1 | %2 | duvar arkasi bilinen dusman -> pencereden gorulen ic nokta (%3 m)", groupId _g, name _u, round (_u distance2D _pw)];
+                    };
+                };
 
                 _u setVariable [QGVAR(atisT), time];
                 _u doSuppressiveFire _aim;

@@ -194,7 +194,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                 } else {
                     // ---- ATES unsuru: kalk (yatiksa) + hedefe ates ----
                     if (!_goruyor) then {
-                        if (_civili) then { _u setUnitPosWeak "MIDDLE"; _u doWatch _en; _sayac set ["kalk", (_sayac get "kalk") + 1]; _u setVariable [QGVAR(cevikT), time - 2]; };
+                        if (_civili) then { _u setUnitPosWeak "MIDDLE"; if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch _en; }; _sayac set ["kalk", (_sayac get "kalk") + 1]; _u setVariable [QGVAR(cevikT), time - 2]; };
                         continue
                     };
                     private _st = stance _u;

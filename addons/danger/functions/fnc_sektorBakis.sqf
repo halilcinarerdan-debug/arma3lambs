@@ -151,7 +151,7 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
                     !(lineIntersects [_eyeS, _pS, _u, objNull]) && {!(terrainIntersectASL [_eyeS, _pS])}
                 };   // v8.376: ses yonunde 20 m icinde duvar varsa sese donulmez (duvara bakmak anlamsiz)
                 private _hedefYon = if (_sesAcik) then { _sesYon } else { _b };
-                _u doWatch ((eyePos _u) getPos [100, _hedefYon]);
+                if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch ((eyePos _u) getPos [100, _hedefYon]); };   // v8.605: bina icinde sektor bakisi namlu kaldirmaz
                 private _eskiYon = _u getVariable [QGVAR(sektorYon), -999];
                 _u setVariable [QGVAR(sektorYon), _hedefYon];
                 if (_sese) then {

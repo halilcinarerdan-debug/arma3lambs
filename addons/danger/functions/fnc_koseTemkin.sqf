@@ -62,7 +62,8 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
         params ["_u", "_h", "_icerde"];
         private _eye = eyePos _u;
         private _L = [24, 14] select _icerde;
-        private _esikFark = [4, 3] select _icerde;
+        private _hs = missionNamespace getVariable ["lambs_danger_koseIcHassas", true];   // v8.605 BINA ICI EKSTRA HASSASIYET (kullanici: 'koselere ekstra hassasiyet, koselere cevirsinler namlulari, acarak ilerlesinler')
+        private _esikFark = [4, [3, 2.2] select _hs] select _icerde;
         private _d = [];
         { _d pushBack ([_u, _eye, _h, _x, _L] call _isin); } forEach _acilar;
         private _sonuc = [];
@@ -70,7 +71,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
         for "_i" from 0 to ((count _acilar) - 2) do {
             private _dA = _d select _i;
             private _dB = _d select (_i + 1);
-            if ((abs (_dA - _dB)) >= _esikFark && {(_dA min _dB) <= ([14, 8] select _icerde)}) then {
+            if ((abs (_dA - _dB)) >= _esikFark && {(_dA min _dB) <= ([14, [8, 10] select _hs] select _icerde)}) then {
                 // kisa / uzun isin; 3 kez ikiye bol (sahte siçrama eleme)
                 private _aK = _acilar select ([_i, _i + 1] select (_dB < _dA));
                 private _aU = _acilar select ([_i + 1, _i] select (_dB < _dA));
@@ -88,9 +89,9 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
                 private _aci = (_aK + _aU) / 2;
                 private _ileri = _dK * (cos _aci);
                 if (
-                    (_dU - _dK) >= ([5, 4] select _icerde)
-                    && {_dU >= ([12, 8] select _icerde)} && {_dK <= ([14, 8] select _icerde)}
-                    && {_ileri >= 1.8} && {_ileri <= ([12, 7] select _icerde)} && {(abs _aci) <= 52}
+                    (_dU - _dK) >= ([5, [4, 3] select _hs] select _icerde)
+                    && {_dU >= ([12, [8, 6] select _hs] select _icerde)} && {_dK <= ([14, [8, 10] select _hs] select _icerde)}
+                    && {_ileri >= 1.8} && {_ileri <= ([12, [7, 9] select _hs] select _icerde)} && {(abs _aci) <= ([52, 60] select (_icerde && _hs))}
                     && {_ileri < _enIleri}
                 ) then {
                     _enIleri = _ileri;
@@ -244,7 +245,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
                 _u setVariable [QGVAR(koseChk), time];
 
                 private _icerde = (insideBuilding _u) > 0.5;
-                if (_icerde && {_temasT <= time}) then { continue };   // bina icinde yalniz AKTIF temasta (damga > time)
+                if (_icerde && {_temasT <= time} && {!((group _u) getVariable [QGVAR(isSweeping), false])}) then { continue };   // bina icinde AKTIF temasta (damga > time) ya da bina temizleme / LAMBS CQB sirasinda (v8.605)
                 if (!_icerde && {(count (nearestTerrainObjects [_u, ["BUILDING", "HOUSE", "WALL"], 25, false, true])) isEqualTo 0}) then { continue };
 
                 // bilinen yakin dusman: kose temkini degil, normal savas (cqbReflex / coverHug)

@@ -69,7 +69,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
             if ((combatMode _g) in ["BLUE", "GREEN", "WHITE"]) then { _g setCombatMode "YELLOW"; };
             if (_est isNotEqualTo []) then {
                 private _bak = [_uye, [], {_x distance2D _est}, "ASCEND"] call BIS_fnc_sortBy;
-                { _x doWatch _est; [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x], 7] call CBA_fnc_waitAndExecute; } forEach (_bak select [0, 3]);
+                { if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _x) <= 0.5}) then { _x doWatch _est; [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x], 7] call CBA_fnc_waitAndExecute; }; } forEach (_bak select [0, 3]);   // v8.605: bina icinde tahmine namlu yok
                 private _mesafe = _l distance2D _est;
                 if (_mesafe >= 25) then {
                     private _atici = ([_uye select {(primaryWeapon _x) isNotEqualTo "" && {(_x ammo (primaryWeapon _x)) > 0}}, [], {_x distance2D _est}, "ASCEND"] call BIS_fnc_sortBy) select [0, 2];
@@ -86,7 +86,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
                         _g2 setVariable [QGVAR(sesSonZaman), time];
                         _g2 setVariable [QGVAR(sesSonPos), _est];
                         if ((behaviour (leader _g2)) in ["SAFE", "CARELESS"]) then { _g2 setBehaviour "AWARE"; };
-                        { _x doWatch _est; [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x], 7] call CBA_fnc_waitAndExecute; } forEach (((units _g2) select {alive _x && {isNull objectParent _x}}) select [0, 2]);
+                        { if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _x) <= 0.5}) then { _x doWatch _est; [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x], 7] call CBA_fnc_waitAndExecute; }; } forEach (((units _g2) select {alive _x && {isNull objectParent _x}}) select [0, 2]);
                         _komsuN = _komsuN + 1;
                     };
                 } forEach allGroups;

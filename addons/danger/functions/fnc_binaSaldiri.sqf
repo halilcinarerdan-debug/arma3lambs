@@ -28,7 +28,7 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
             if (isNull _g || {!local _g}) then { continue };
             if (((units _g) findIf {isPlayer _x}) > -1) then { continue };
             if (_g getVariable [QGVAR(isSweeping), false] || {time < (_g getVariable [QGVAR(saldiriT), 0])} || {time < (_g getVariable [QGVAR(sweepCooldown), 0])}) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) <= time) then { continue };
+            private _temas = (_g getVariable [QGVAR(contact), 0]) > time;   // v8.604: temas YOKSA da bilinen binadaki dusmana gider (asagida bilgi / son gorulme sarti)
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]} || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(sniperTeam), false]}
@@ -41,11 +41,12 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
             if ((count _uyeler) < 4 || {((count _uyeler) / ((count (units _g)) max 1)) < 0.6}) then { continue };
             if (({(getSuppression _x) > 0.8} count _uyeler) > 0) then { continue };
             private _taraf = side _g;
-            private _hedefler = (_l nearTargets 90) select {
+            private _hedefler = (_l nearTargets 120) select {
                 private _o = _x select 4;
                 !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {!([_o] call FUNC(teslimMi))} && {(_taraf getFriend (side (group _o))) < 0.6}
-                && {(side (group _o)) isNotEqualTo civilian} && {(insideBuilding _o) > 0.3} && {(_l distance2D _o) >= 12}
+                && {(side (group _o)) isNotEqualTo civilian} && {(insideBuilding _o) > 0.15} && {(_l distance2D _o) >= 12}
                 && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
+                && {_temas || {((_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))) && {((_l targetKnowledge _o) select 2) > (time - 240)}}}
             };
             if (_hedefler isEqualTo []) then { continue };
             _hedefler = [_hedefler, [], {(_x select 4) distance2D _l}, "ASCEND"] call BIS_fnc_sortBy;

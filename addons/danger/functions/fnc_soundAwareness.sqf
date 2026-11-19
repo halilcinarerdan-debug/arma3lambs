@@ -168,8 +168,11 @@ private _say = 0;
                 private _hata = (_d * ([0.12, 0.04] select _gorulur)) + ([0, 25] select _catlama);
                 private _tahmin = _pos getPos [random _hata, random 360];
                 if (((_g getVariable [QGVAR(contact), 0]) < time) && {isNull (assignedTarget _k)}) then {
-                    _k doWatch _tahmin;
-                    [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_k], 6] call CBA_fnc_waitAndExecute;
+                    // v8.605 BINA ICI: ses yonune namlu kaldirma YOK (kullanici: 'cqb icinde tuflekleri ses yonune / bilinen dusman yonune kaldirmasinlar, ev icinde'; koselere bakis: fnc_koseTemkin)
+                    if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _k) <= 0.5}) then {
+                        _k doWatch _tahmin;
+                        [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_k], 6] call CBA_fnc_waitAndExecute;
+                    };
                     if (_lvl >= 0.8 && {(behaviour _k) in ["SAFE", "CARELESS"]}) then { _g setBehaviour "AWARE"; };
                     // v8.368 STEALTH SESE TEPKI (kullanici: 'stealthdaki adamlar sese karsilik vermiyor ya da sesten kaciyorlar'): STEALTH yukaridaki listede YOKTU -> ates sesi / parlama yalniz doWatch'tan oteye gitmiyor,
                     //   uzerine fnc_kamuflaj 'bilinen dusman >= 60 m' diye askeri YATIRIP ufuk disina TASIYORDU (sesten kacis). Simdi: yuksek seviyeli ses / parlama (>= 0.7) STEALTH'i AWARE'e cevirir

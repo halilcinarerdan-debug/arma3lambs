@@ -72,7 +72,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
                 if (_hdfGizli) then { _say set [4, (_say select 4) + 1]; };
                 _u setVariable [QGVAR(dvrBakT), time + 8];
                 if (_by > -900) then {
-                    _u doWatch ((getPosATL _u) getPos [40, _by]);
+                    if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch ((getPosATL _u) getPos [40, _by]); };
                     _say set [0, (_say select 0) + 1];
                 } else {
                     // v8.566: hic acik yon yok (RPT a3a55579: 14 / 30 olay 'bakis serbest' -> AI ayni duvara geri bakiyordu): 8 yonde 15 m isin, EN ACIK yone cevir (>= 3.5 m); yoksa serbest
@@ -86,7 +86,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
                         if (_mm > _enIyiM) then { _enIyiM = _mm; _enIyiYon = _yy; };
                     };
                     if (_enIyiYon > -900) then {
-                        _u doWatch ((getPosATL _u) getPos [40, _enIyiYon]);
+                        if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch ((getPosATL _u) getPos [40, _enIyiYon]); };
                         _say set [0, (_say select 0) + 1];
                         _by = _enIyiYon;
                     } else {
