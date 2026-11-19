@@ -253,7 +253,7 @@ lambs_danger_patlayiciDon = {
                 };
             };
             sleep 1;
-            private _sonuc = if (_atildi && {(_u ammo _ls) < _say0}) then {"ATILDI"} else { if (_atildi) then {"EMIR VERILDI (mermi sayaci degismedi)"} else {format ["VAZGECILDI (hizalanamadi, en kucuk aci %1 derece, silah secildi: %2, secme denemesi %3, elde: %4, anim: %5)", round _min, _secildi, _deneme, currentWeapon _u, animationState _u]} };
+            private _sonuc = if (_atildi && {(_u ammo _ls) < _say0}) then {"ATILDI"} else { if (_atildi) then {"EMIR VERILDI (mermi sayaci degismedi)"} else {format ["VAZGECILDI (hizalanamadi, en kucuk aci %1 derece, silah secildi: %2, secme denemesi %3, elde: %4, anim: %5, LAMBS munisyon degisimi kapali: %6)", round _min, _secildi, _deneme, currentWeapon _u, animationState _u, missionNamespace getVariable ["lambs_main_disableAutonomousMunitionSwitching", false]]} };
             diag_log format ["[PATLAYICI] roket | %1 | %2 -> hedef %3 (%4 m) | HIZALAMA KAPILI ATIS: %5 | grup %6", name _u, _ls, typeOf _t, round (_u distance _t), _sonuc, groupId (group _u)];
             _u doWatch objNull;
             [{ params ["_uu"]; if (alive _uu && {!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false])}) then { _uu selectWeapon (primaryWeapon _uu); }; }, [_u], 1.5] call CBA_fnc_waitAndExecute;

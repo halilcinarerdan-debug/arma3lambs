@@ -315,12 +315,13 @@ force lambs_danger_bilgiYalnizOyuncu = true;   // YENI: yalniz insan oyuncular h
 force lambs_danger_zigzag = true;   // YENI: acik arazide zikzak
 force lambs_danger_zigzagYanMin = 7;   // YENI
 force lambs_danger_zigzagYanMax = 10;   // YENI
-force lambs_danger_zigzagMaxM = 350;   // YENI
+force lambs_danger_zigzagMaxM = 500;   // v8.692 en cok 500 m
 force lambs_danger_roketBirimBekle = 20;   // EN ZORLU (onceki 35)
 force lambs_danger_roketGrupBekle = 6;   // EN ZORLU (onceki 10)
 force lambs_danger_roketPiyade = true;   // YENI v8.689 (opsiyonel): ELITE piyadeye de roket atar, LAMBS RPG yuklu olsa bile (false = eski)
 force lambs_danger_noktaOnM = 130;   // EN ZORLU (onceki 110)
 force lambs_danger_noktaMaxM = 240;   // EN ZORLU (onceki 200)
+force lambs_danger_cekilKosuModu = true;   // YENI v8.692 (DENEME): geri cekilmede takilan asker hedef almayi birakip kosar (kosarken karsilik vermez; sorun olursa false)
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;
@@ -340,7 +341,7 @@ lambs_main_disableAICallouts = false;
 lambs_main_disableAIDodge = false;
 lambs_main_disableAIFleeing = false;
 lambs_main_disableAIGestures = false;
-lambs_main_disableAutonomousMunitionSwitching = false;
+force lambs_main_disableAutonomousMunitionSwitching = true;   // v8.692 DENEME: LAMBS roketatari piyade hedefinde tufege geri almasin (roket piyadeye atilabilsin); sorun: LAMBS araca roket secimi etkilenebilir
 lambs_main_disablePlayerGroupSuppression = false;
 force lambs_main_indoorMove = 0.1;
 force lambs_main_maxRevealValue = 1;

@@ -32,7 +32,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
         if !(missionNamespace getVariable ["lambs_danger_zigzag", true]) then { continue };
         private _yMin = ((missionNamespace getVariable ["lambs_danger_zigzagYanMin", 7]) max 3) min 15;
         private _yMax = ((missionNamespace getVariable ["lambs_danger_zigzagYanMax", 10]) max _yMin) min 20;
-        private _enMax = ((missionNamespace getVariable ["lambs_danger_zigzagMaxM", 350]) max 100) min 500;
+        private _enMax = ((missionNamespace getVariable ["lambs_danger_zigzagMaxM", 500]) max 100) min 500;
         private _n = 0;
         {
             private _u = _x;
@@ -48,7 +48,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 private _neden = "";
                 if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { _neden = "temas yok"; } else {
                 if (isPlayer (leader _g)) then { _neden = "oyuncu liderli grup"; } else {
-                if ((currentCommand _u) isNotEqualTo "MOVE") then { _neden = "komut MOVE degil"; } else {
+                if (false) then { _neden = "komut MOVE degil"; } else {   // v8.692: komut sarti kalkti (RPT 29ac2821: aday askerlerin ~%40'i komut ATTACK / bos iken kosuyordu -> zikzak hic yapilmiyordu; hedef expectedDestination'dan alinir)
                 if ((insideBuilding _u) >= 0.5) then { _neden = "binada"; } else {
                 if ((time - (((_u getVariable [QGVAR(acikSiperHedef), [0, -999]]) param [1, -999]))) < 8 || {(time - (_u getVariable [QGVAR(hugAt), -999])) < 8}) then { _neden = "siper kosusu"; }; }; }; }; };
                 if (_neden isNotEqualTo "") then { _uygun = false; _red set [_neden, (_red getOrDefault [_neden, 0]) + 1]; };

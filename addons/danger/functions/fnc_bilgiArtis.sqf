@@ -57,17 +57,21 @@ diag_log "[BILGI-ARTIS] genel bilgi artisi (bilinen dusmanin bilgisi / konum net
                 { _cur = _cur max (_x knowsAbout _e); } forEach _uy;
                 if (_cur < _esik) then { continue };
                 private _key = netId _e;
-                private _ent = _h getOrDefault [_key, -999];
-                if (time > (_ent + (_sure * 3))) then { _ent = time; _h set [_key, _ent]; };
-                if (time > (_ent + _sure)) then { continue };
-                private _yeni = (((_cur * (1 + _k)) max _tb)) min 4;
+                // v8.692: kayit [baslangicT, sonSeviye, taban]; artis ONCEKI artisin USTUNE binmez (RPT 29ac2821: 0.27 -> 2.50 -> 4.00, her 2 sn'de x1.6 birikip tam konuma cikiyordu)
+                private _ent = _h getOrDefault [_key, [-999, 0, 0]];
+                if (time > ((_ent select 0) + (_sure * 3))) then { _ent = [time, 0, _cur]; _h set [_key, _ent]; };
+                if (time > ((_ent select 0) + _sure)) then { continue };
+                if (_cur > ((_ent select 1) + 0.05)) then { _ent set [2, (_ent select 2) max _cur]; };   // gercek (dogal) bilgi bizim seviyemizin ustune ciktiysa taban yukselir
+                private _taban = _ent select 2;
+                private _yeni = (((_taban * (1 + _k)) max _tb)) min 4;
                 if (_yeni > (_cur + 0.05)) then {
                     _g reveal [_e, _yeni];
+                    _ent set [1, _yeni];
                     _say = _say + 1;
                     _bu = true;
                     if (_logN < 15) then {
                         _logN = _logN + 1;
-                        diag_log format ["[BILGI-ARTIS] %1 | hedef %2 (%3 m) | bilgi %4 -> %5 | artis x%6 taban %7 | sure %8 / %9 sn", groupId _g, name _e, round (_l distance2D _e), _cur toFixed 2, _yeni toFixed 2, 1 + _k, _tb, round (time - _ent), _sure];
+                        diag_log format ["[BILGI-ARTIS] %1 | hedef %2 (%3 m) | bilgi %4 -> %5 (taban %6) | artis x%7 asgari %8 | sure %9 / %10 sn", groupId _g, name _e, round (_l distance2D _e), _cur toFixed 2, _yeni toFixed 2, _taban toFixed 2, 1 + _k, _tb, round (time - (_ent select 0)), _sure];
                     };
                 };
             } forEach (_l targets [true, _r, [], 40]);
