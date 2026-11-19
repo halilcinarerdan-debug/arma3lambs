@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.667"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.668"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -175,6 +175,18 @@ def ozet(path):
         for l in ps[:6]: print("  ", l.split('"')[1][:150] if '"' in l else l[:150])
     else:
         print("  yok (pusu: 90-260 m yaklasan piyade dusman + temas yok gerekir)")
+    dd = [l for l in satirlar if "[DURUS-DISIPLIN-OZET]" in l]
+    print("\n-- DURUS DISIPLINI (v8.668: temasta hareketsiz ayakta asker) --")
+    if dd:
+        for l in dd[-4:]: print("  ", l.split('"')[1][:260] if '"' in l else l[:260])
+        top = [0, 0, 0, 0]
+        for l in dd:
+            for i, k in enumerate(["durgun + ayakta \\(temasta\\) (\\d+)", "yat (\\d+)", "comel (\\d+)", "direnen\\) (\\d+)"]):
+                m = re.search(k, l)
+                if m: top[i] += int(m.group(1))
+        print("  toplam: durgun+ayakta %d | yat %d | comel %d | AI ayaga kaldirdi %d" % tuple(top))
+    else:
+        print("  yok (temasta hareketsiz AYAKTA asker bulunmadi ya da durusDisiplin kapali; v8.668+ gerekir)")
     ek = [l for l in satirlar if "[GERI-CEKILME-EK]" in l]
     print("\n-- RETREAT EK SICRAMA --")
     print("  ek sicrama satiri:", len(ek))
