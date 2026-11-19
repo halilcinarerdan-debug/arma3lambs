@@ -68,7 +68,7 @@ if (_muzzleItem isNotEqualTo "") then {
 };
 // v8.280 CEVRE FARKINDALIGI (kullanici: 'susturucu cok guclu, bizi fark edemiyorlar'): susturucu menzili eskiden x(audibleFire max 0.1)x1.3 (>= 40 m) idi -> susturuculu 5.56 tufek ~60 m'de duyuluyordu.
 //   Yeni: x(audibleFire max susturucuAlt 0.3)x1.6 (>= 120 m) -> ~215 m (5.56) / ~310 m (7.62); tum silahlarin taban menzili x sesCarpan (1.2). Eski degerler: lambs_danger_susturucuAlt = 0.1, lambs_danger_sesCarpan = 1.
-_menzil = _menzil * (missionNamespace getVariable ["lambs_danger_sesCarpan", 1.2]);
+_menzil = _menzil * ((missionNamespace getVariable ["lambs_danger_sesCarpan", 1.2]) max 0.3);   // v8.702: sesCarpan CBA (0.5-4)
 private _susturucu = _audK < 0.5;
 if (_susturucu) then {
     _menzil = (_menzil * (((_audK max (missionNamespace getVariable ["lambs_danger_susturucuAlt", 0.3])) * 1.6))) max 120;
@@ -122,7 +122,7 @@ private _gruplar = [];
 private _say = 0;
 {
     private _g = group _x;
-    if (!(_g in _gruplar) && {_say < 10}) then {
+    if (!(_g in _gruplar) && {_say < ((missionNamespace getVariable ["lambs_danger_sesDinleyiciMax", 10]) max 3)}) then {   // v8.702: CBA sesDinleyiciMax (varsayilan 10)
         _gruplar pushBack _g;
         private _k = _x;
         // grubun atici ile en yakin askeri
@@ -158,7 +158,8 @@ private _say = 0;
                     0.25 + (0.9 * (1 - (_d / (_menzil max 1))))
                 };
                 if (_catlama && {!_gorulur}) then { _lvl = _lvl min 0.5; };
-                _lvl = (_lvl max 0.2) min 1.8;
+                private _sEk = ((missionNamespace getVariable ["lambs_danger_sesSeviyeEk", 0]) max 0) min 1.5;   // v8.702: CBA sesSeviyeEk: ses / parlama bilgi seviyesine eklenir (yon / konum netligi)
+                _lvl = ((_lvl + _sEk) max 0.2) min (1.8 + _sEk);
 
                 if (_lvl > (_k knowsAbout _unit)) then {
                     _k reveal [_unit, _lvl];

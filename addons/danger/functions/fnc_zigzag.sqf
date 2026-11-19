@@ -83,6 +83,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             private _ep = (expectedDestination _u) select 0;
             if (_uygun) then {
                 // baska sistem yeni emir verdiyse (ara noktamiz degil): o yeni GERCEK hedef
+                if (_son isNotEqualTo [] && {(_ep distance2D _son) > 4}) then { _u setVariable [QGVAR(zigEzildi), true]; };   // v8.702: baska sistem ara noktamizi ezdi (iz icin)
                 if (_son isEqualTo [] || {(_ep distance2D _son) > 4}) then {
                     // v8.690: formasyon izleyen asker (kendi emri yok): gercek hedef = formasyon slotu; zikzak bitince doFollowGuvenli ile lidere / formasyona donulur
                     _u setVariable [QGVAR(zigForm), !_kosEmir];
@@ -96,6 +97,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 if (_gercek isEqualTo [] || {(_gercek distance2D [0, 0, 0]) < 5} || {(_u distance2D _gercek) < 14}) then { _uygun = false; };   // v8.697: 25 -> 14 m (bounding sicramalari 22-40 m; 25 m alti kalinca zikzak bitiyordu)
             };
             if (!_uygun) then {
+                if (_u getVariable [QGVAR(zigWatch), false]) then { _u setVariable [QGVAR(zigWatch), nil]; _u doWatch objNull; };
                 // zikzak bitti: ara noktamizdaysa gercek hedefe don (baska sistem emir vermediyse)
                 if (_son isNotEqualTo [] && {_gercek isNotEqualTo []} && {(_ep distance2D _son) <= 4}) then {
                     if (_u getVariable [QGVAR(zigForm), false]) then { [_u, leader _g] call FUNC(doFollowGuvenli); } else { _u doMove _gercek; };
@@ -108,7 +110,8 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             if (time < (_u getVariable [QGVAR(zigT), 0])) then { continue };
             // v8.701 VARIS TABANLI TEMPO (kullanici: 'animasyon hizli olunca zikzak yolu hizli bitiyor, belirgin degil'): sabit adim suresi yerine yeni adim, asker ARA NOKTAYA VARINCA (<= 3.5 m) verilir (en gec zigTmax'ta);
             //   animHiz x1.6 ile asker sabit sureden once varip genligi yarida kesiyordu / yon degistirmeden dogru gidiyordu
-            if (_son isNotEqualTo [] && {time < (_u getVariable [QGVAR(zigTmax), 0])} && {(_u distance2D _son) > 3.5}) then { continue };
+            // v8.702 ONDEN ADIM (kullanici: 'zikzak atarken hic dur-kalk yapmasin'; RPT ea572072: adim hizlari 5-29 km/sa dalgali = noktaya varip yavaslama / durma): yeni adim ARA NOKTAYA VARMADAN, ~0.8 sn'lik yol kala (5-12 m) verilir -> asker yavaslamaz
+            if (_son isNotEqualTo [] && {time < (_u getVariable [QGVAR(zigTmax), 0])} && {(_u distance2D _son) > ((5 max (((speed _u) / 3.6) * 0.8)) min 12)}) then { continue };
             private _dir = _u getDir _gercek;
             // v8.696 GENIS ZIKZAK (kullanici: 'eger varsa baya genis alsinlar, adami vurmak cok zor olsun'): 25 m icinde <= 1 sert nesne = AÇIK ARAZI -> yan adim x zigzagGenisCarpan (varsayilan 2: 14-20 m), adim suresi 2.4 sn
             private _acikGenis = _genis && {(count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE"], 25, false, true])) <= 1};
@@ -130,8 +133,9 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 private _gy = (_vv vectorDotProduct [sin (_d0 + 90), cos (_d0 + 90), 0]) * (_p0 select 2);
                 private _gi = _vv vectorDotProduct [sin _d0, cos _d0, 0];
                 missionNamespace setVariable ["lambs_danger_zigIzN", (missionNamespace getVariable ["lambs_danger_zigIzN", 0]) + 1];
-                diag_log format ["[ZIGZAG-IZ] %1 | onceki adim %2 sn once: komut yan %3 m ileri %4 m | GERCEKLESEN yan %5 m ileri %6 m | ara noktaya kalan %7 m | hiz %8 km/sa", name _u, (time - (_p0 select 0)) toFixed 1, round (_p0 select 4), round (_p0 select 5), round _gy, round _gi, round (_u distance2D (if (_son isEqualTo []) then { getPosATL _u } else { _son })), round (speed _u)];
+                diag_log format ["[ZIGZAG-IZ] %1 | onceki adim %2 sn once: komut yan %3 m ileri %4 m | GERCEKLESEN yan %5 m ileri %6 m | ara noktaya kalan %7 m | hiz %8 km/sa | %9", name _u, (time - (_p0 select 0)) toFixed 1, round (_p0 select 4), round (_p0 select 5), round _gy, round _gi, round (_u distance2D (if (_son isEqualTo []) then { getPosATL _u } else { _son })), round (speed _u), (if ((_u getVariable [QGVAR(zigEzildi), false]) isEqualTo true) then { "EMIR EZILDI (baska sistem)" } else { "emir korundu" })];
             };
+            _u setVariable [QGVAR(zigEzildi), nil];
             _u setVariable [QGVAR(zigP0), [time, getPosATL _u, _isaret, _dir, _yan, _ileri]];
             _u setVariable [QGVAR(zigYon), _isaret];
             _u setVariable [QGVAR(zigNokta), _pt];
@@ -142,6 +146,8 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             _u setVariable [QGVAR(zigT), time + ((_tYol * 0.75) max (_adimS * 0.5))];
             _u setVariable [QGVAR(zigTmax), time + ((_tYol * 1.5) max _adimS)];
             _u doMove _pt;
+            _u doWatch (_u getPos [250, _dir]);   // v8.702 STRAFE: bakis hedefe dogru sabit -> govde yon degistirmek icin durup donmez (kosu yonu bakis yonunden bagimsiz)
+            _u setVariable [QGVAR(zigWatch), true];
             _say = _say + 1;
             if (_logN < 20) then {
                 _logN = _logN + 1;

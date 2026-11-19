@@ -353,6 +353,9 @@ force lambs_danger_zigzagGenisCarpan = 2.5;   // v8.699 STRAFE
 force lambs_danger_zigzagIleriMin = 3;   // YENI v8.699: ileri adim en az 3 m
 force lambs_danger_zigzagIleriMax = 6;   // YENI v8.699: ileri adim en cok 6 m (strafe gibi: yana > ileri)
 force lambs_danger_zigzagAdimS = 1.2;   // YENI v8.699: sik yon degistirme (acikta x1.33 = 1.6 sn)
+force lambs_danger_sesCarpan = 2.2;   // YENI v8.702: silah sesi duyulma menzili x2.2 (varsayilan 1.2)
+force lambs_danger_sesSeviyeEk = 0.6;   // YENI v8.702: ses bilgi seviyesine +0.6 (daha net yon / konum)
+force lambs_danger_sesDinleyiciMax = 25;   // YENI v8.702: atis basina en cok 25 grup duyar (varsayilan 10)
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;

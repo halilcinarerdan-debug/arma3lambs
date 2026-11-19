@@ -39,6 +39,7 @@ lambs_danger_patlayiciDon = {
 
 [] spawn {
     private _sayac = createHashMapFromArray [["bomba", 0], ["roket", 0], ["ugl_ek", 0], ["FAT", 0], ["FWF", 0], ["yok", 0]];
+    private _rkt = createHashMap;   // v8.702: roket neden atilmadi sayaclari (asker-tur)
     private _sonOzet = time + 60;
     // el bombasi (frag) mi?
     private _fragMi = {
@@ -494,28 +495,45 @@ lambs_danger_patlayiciDon = {
                 };
 
                 // --- ROKET (omuz roketatari) ---
-                // v8.387 LAMBS RPG uyumu: mod yukluyken (config: AI roketi piyadeye bosa atmaz, helikopter / arac icin kullanir) script roketi piyadeye atilmaz (CBA lambs_danger_lambsRpgUyum)
-                if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli} && {(missionNamespace getVariable ["lambs_danger_roketPiyade", false]) || {!(([] call FUNC(lambsRpgMi)) && {missionNamespace getVariable ["lambs_danger_lambsRpgUyum", true]})}}) then {   // v8.689: roketPiyade (opsiyonel) LAMBS RPG yuklu olsa bile ELITE script roketini piyadeye de atar
-                    private _ls = secondaryWeapon _u;
-                    if (!isNull _enIyi && {_ls isNotEqualTo ""} && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
-                        && {_enM >= _roketMin} && {_enM <= _roketMax} && {(missionNamespace getVariable ["lambs_danger_roketGevsek", false]) || {_binada} || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu} || {_enM <= 60}}
-                        && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > (missionNamespace getVariable ["lambs_danger_roketBirimBekle", 60])} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > (missionNamespace getVariable ["lambs_danger_roketGrupBekle", 20])}) then {
-                        private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
-                        private _arkada = ((_u nearEntities ["CAManBase", 8]) findIf {_x isNotEqualTo _u && {alive _x} && {(_taraf getFriend (side (group _x))) >= 0.6} && {((abs (((_u getRelDir _x) + 180) mod 360 - 180)) >= 60)}}) >= 0;
-                        if (!_dostYakin && {!_arkada}) then {
-                            _u setVariable [QGVAR(roketT), time];
-                            _g setVariable [QGVAR(roketGT), time];
-                            [_u, _enIyi, _ls] call _roketAt;
-                            _sayac set ["roket", (_sayac get "roket") + 1];
-                            _butce = _butce - 1;
-                        };
-                    };
+                // v8.387 LAMBS RPG uyumu: mod yukluyken (config: AI roketi piyadeye bosa atmaz, helikopter / arac icin kullanir) script roketi piyadeye atilmaz (CBA lambs_danger_lambsRpgUyum; roketPiyade acikken yok sayilir)
+                // v8.702 NEDEN SAYACLARI (kullanici: 'rpg kullanmiyor'; RPT ea572072: roket 0, [PATLAYICI-TANI] bilinen dusman 233 m): her asker-tur icin ilk engelleyen kosul [PATLAYICI-ROKET-OZET]'e sayilir
+                private _ls = secondaryWeapon _u;
+                private _rNeden = call {
+                    if !(missionNamespace getVariable ["lambs_danger_roketAktif", true]) exitWith { "roketAktif kapali" };
+                    if (_zirhli) exitWith { "zirhli hedef var (AT mantigi)" };
+                    if !((missionNamespace getVariable ["lambs_danger_roketPiyade", false]) || {!(([] call FUNC(lambsRpgMi)) && {missionNamespace getVariable ["lambs_danger_lambsRpgUyum", true]})}) exitWith { "LAMBS RPG uyumu" };
+                    if (_ls isEqualTo "") exitWith { "roketatar yok" };
+                    if ((getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) != 4) exitWith { "ikincil silah roketatar degil" };
+                    if ((_u ammo _ls) <= 0) exitWith { "roketatar mermisi yok" };
+                    if (isNull _enIyi) exitWith { "bilinen dusman yok" };
+                    if ((insideBuilding _u) >= 0.5) exitWith { "binada" };
+                    if (_enM < _roketMin) exitWith { "dusman cok yakin" };
+                    if (_enM > _roketMax) exitWith { "dusman menzil disi" };
+                    if !((missionNamespace getVariable ["lambs_danger_roketGevsek", false]) || {_binada} || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu} || {_enM <= 60}) exitWith { "deger sarti (kume / bina / baski)" };
+                    if ((speed _u) >= 2) exitWith { "asker hareket ediyor" };
+                    if ((time - (_u getVariable [QGVAR(roketT), -999])) <= (missionNamespace getVariable ["lambs_danger_roketBirimBekle", 60])) exitWith { "asker bekleme suresi" };
+                    if ((time - (_g getVariable [QGVAR(roketGT), -999])) <= (missionNamespace getVariable ["lambs_danger_roketGrupBekle", 20])) exitWith { "grup bekleme suresi" };
+                    ""
                 };
+                if (_rNeden isEqualTo "") then {
+                    private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
+                    private _arkada = ((_u nearEntities ["CAManBase", 8]) findIf {_x isNotEqualTo _u && {alive _x} && {(_taraf getFriend (side (group _x))) >= 0.6} && {((abs (((_u getRelDir _x) + 180) mod 360 - 180)) >= 60)}}) >= 0;
+                    if (_dostYakin) then { _rNeden = "hedefin 20 m'inde dost"; } else { if (_arkada) then { _rNeden = "atici arkasinda dost (8 m)"; } else {
+                        _u setVariable [QGVAR(roketT), time];
+                        _g setVariable [QGVAR(roketGT), time];
+                        [_u, _enIyi, _ls] call _roketAt;
+                        _sayac set ["roket", (_sayac get "roket") + 1];
+                        _butce = _butce - 1;
+                        _rNeden = "ATILDI";
+                    }; };
+                };
+                _rkt set [_rNeden, (_rkt getOrDefault [_rNeden, 0]) + 1];
             } forEach _uyeler;
         } forEach allGroups;
 
         if (time > _sonOzet) then {
             _sonOzet = time + 60;
+            if (count _rkt > 0) then { diag_log format ["[PATLAYICI-ROKET-OZET] 60 sn: roket karar nedenleri (asker-tur): %1", (keys _rkt) apply { format ["%1=%2", _x, _rkt get _x] }]; _rkt = createHashMap; };
             private _ys = missionNamespace getVariable ["lambs_danger_patlayiciSayac", createHashMap];
             diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 roket %2 | UGL ek mermi verilen %3 | bomba firlatma sonucu (toplam): atildi %4 | atilmadi %5 | bomba neden atilmadi: mesafe %6 frag_yok %7 yedek %8 yakin %9 dost %10 deger_yok %11", _sayac get "bomba", _sayac get "roket", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0], _sayac getOrDefault ["g_mesafe", 0], _sayac getOrDefault ["g_frag_yok", 0], _sayac getOrDefault ["g_yedek", 0], _sayac getOrDefault ["g_yakin", 0], _sayac getOrDefault ["g_dost", 0], _sayac getOrDefault ["g_deger", 0]];
             { _sayac set [_x, 0]; } forEach ["bomba", "roket", "g_mesafe", "g_frag_yok", "g_yedek", "g_yakin", "g_dost", "g_deger"];
