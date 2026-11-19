@@ -498,6 +498,18 @@ if (EGVAR(main,debug_functions)) then {
                             };
                             // v8.670: takilmada elde durbun / baska silah varsa birincile don (silah degisimi animasyonu yurumeyi bekletiyordu)
                             if (!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) && {(primaryWeapon _b) isNotEqualTo ""} && {(currentWeapon _b) isNotEqualTo (primaryWeapon _b)}) then { _b selectWeapon (primaryWeapon _b); };
+                            // v8.671 KOSU MODU (RPT 04a53ab5: 5 asker COMBAT + hedef alma acik iken 17-25 sn MOVE komutuyla STAND / hiz 0 kaldi, baski 0, dusman gorunurlugu 0, doStop + yeni doMove bile islemedi; bu sirada 3 asker vuruldu):
+                            //   ilk takilmada (baski < 0.3) o asker eski kosu moduna alinir: AWARE + TARGET / AUTOTARGET kapali (motorun 'hedefe dur / nisan al' alt durumu devre disi); sicrama sonunda (4) COMBAT + hedef alma geri verilir.
+                            //   Kapatma: lambs_danger_cekilKosuModuOff = true. Log: [GERI-CEKILME-KOSU-MODU] (ilk 20). Kok neden KANITLANMADI: bu bir DENEY (sonraki RPT'de takilma suresi kisaldi mi bakilir).
+                            if ((_x select 4) >= 1 && {(getSuppression _b) < 0.3} && {!(missionNamespace getVariable ["lambs_danger_cekilKosuModuOff", false])} && {!(_b getVariable [QGVAR(retKosuModu), false])}) then {
+                                _b setVariable [QGVAR(retKosuModu), true];
+                                _b disableAI "TARGET";
+                                _b disableAI "AUTOTARGET";
+                                _b setBehaviour "AWARE";
+                                if (isNil "lambs_danger_retKosuN") then { lambs_danger_retKosuN = 0; };
+                                lambs_danger_retKosuN = lambs_danger_retKosuN + 1;
+                                if (lambs_danger_retKosuN <= 20) then { diag_log format ["[GERI-CEKILME-KOSU-MODU] %1 | %2 | takilma %3 -> AWARE + hedef alma kapali (kosu modu) | hedefe %4 m", groupId _grup, name _b, _x select 4, round (_b distance2D (_x select 1))]; };
+                            };
                             // her takilmada hareket bayraklari yeniden acilir
                             _b enableAI "PATH";
                             _b enableAI "MOVE";
@@ -559,6 +571,7 @@ if (EGVAR(main,debug_functions)) then {
             private _b = _x select 0;
             if (alive _b) then {
                 _b setVariable [QGVAR(forceMove), nil];
+                _b setVariable [QGVAR(retKosuModu), nil];   // v8.671: kosu modu sicrama sonunda biter
                 _b enableAI "TARGET";
                 _b enableAI "AUTOTARGET";
                 _b enableAI "AUTOCOMBAT";
