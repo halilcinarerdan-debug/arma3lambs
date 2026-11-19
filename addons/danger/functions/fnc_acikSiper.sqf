@@ -166,13 +166,25 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
         private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
         if (_yk >= 0.3 && {(_u distance2D _op) <= _yar}) then {
             private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2;
+            // v8.621 AGAC GIZLENMESI (kullanici: 'ince agaclarda da kendilerini gizlesinler, yalniz siper icin degil gizlenmek icin'): normal AGAC (TREE sinifi, yukseklik > 4 m) da gizlenme adayi; govdeye YAKIN (yaricap <= 0.6 m, govdenin ~1.1 m arkasi)
+            //   ve govde ince oldugu icin gorus hatti yalniz ortada degil +-0.2 m yanlarda da agaca carpmali (yarim acik durmasin)
+            private _uzun = _yk > 4;
+            if (_uzun) then { _r = _r min 0.6; };
             private _pos = _op getPos [_r + 0.5, _en getDir _o];
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
                 private _gizli = {
                     params ["_h"];
                     private _vh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _h], _en, _u, true, 1, "VIEW", "NONE"];
-                    (_vh isNotEqualTo []) && {((_vh select 0) select 2) isEqualTo _o}
+                    private _tamam = (_vh isNotEqualTo []) && {((_vh select 0) select 2) isEqualTo _o};
+                    if (_tamam && {_uzun}) then {
+                        private _pd = (_en getDir _o) + 90;
+                        { 
+                            private _yh = lineIntersectsSurfaces [_eASL, _gASL vectorAdd [(sin _pd) * _x, (cos _pd) * _x, _h], _en, _u, true, 1, "VIEW", "NONE"];
+                            if (_yh isEqualTo [] || {((_yh select 0) select 2) isNotEqualTo _o}) exitWith { _tamam = false; };
+                        } forEach [-0.2, 0.2];
+                    };
+                    _tamam
                 };
                 private _ds = "";
                 private _dc = 0;
@@ -184,7 +196,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
                 };
             };
         };
-    } forEach (nearestTerrainObjects [_p, ["BUSH", "SMALL TREE"], _yar, false, true]);
+    } forEach (nearestTerrainObjects [_p, ["BUSH", "SMALL TREE", "TREE"], _yar, false, true]);
 };
 
 // v8.516 ARAZI KIVRIMI ARKASI (RPT 13:27 chernarus_summer: agaclarin %75'inde FIRE LOD yok, gövde genisligi medyan 0.00 m; nesne siperi gorus keser ama mermi durdurmaz): nesne siperi de bulunamazsa
