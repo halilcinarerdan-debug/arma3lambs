@@ -3905,3 +3905,8 @@ v8.625 (dal sade-waypoint) TUM GRUP TOPLUCA GIRER (kullanici: 'askerler topluca 
  - YENI: saldirida giris takimi = grubun TUM saglam askerleri (en cok 12), tek takim; kapidan 0.4 sn arayla, 2 kisi yan yana, sonrakiler 0.9 m derine. Dis emniyet halkasi saldirida bos. (Saldiri disi bina temizliginde eski 2 + 2 takim secimi ayni.)
  - SINIR: MG / AT / saglikci da iceri girer (dar mekanda MG / roketatar riski); yigilma 25 sn zorlamasi (v8.624) tum gruba uygulanir; oyunda DENENMEDI.
 
+v8.626 (dal sade-waypoint) GIRIS DOGRULAMA (kullanici: 'etrafta dolasmazlar mi, emin misin, eve girecekler abi').
+ - RPT 1a697d94: 'kapi:11395525 (bina pozisyonu)' = Door_N_trigger bulunamadi, yigilma gercek kapida degil; giris 39 sn.
+ - YENI: ESZAMANLI GIRIS 8 sn beklemesinden sonra iceride (insideBuilding >= 0.5) olmayan giris askerine 3 deneme x 6 sn en yakin zemin kat ic noktasina dogrudan doMove (motor yolu kendisi bulur); [ODA] GIRIS DOGRULAMA: iceride X / Y. Gercek kapi yoksa yigilma bekleme 25 -> 8 sn.
+ - SINIR: kapali kapi / ulasilamaz buildingPos'ta yine girilemeyebilir (3 deneme sonra LAMBS CQB'ye devredilir); 'girecekler' GARANTI DEGIL, oyunda DENENMEDI; log satirina bak.
+

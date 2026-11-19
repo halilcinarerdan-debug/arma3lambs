@@ -342,7 +342,7 @@ private _govde = {
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
         // v8.600 VARIS KONTROLU: yigilma noktasina 10 sn'de varamayan (6 m'den uzak, duruyor) giris takimi askerine kapi onune (3 m) dogrudan yeniden hareket emri
         // v8.624 YIGILMAYI ZORLA (kullanici: 'adamlar hala girmiyorlar'; RPT 1a697d94: yigilma 0/4, ort. aralik 21-26 m, LAMBS 'Contact!' / ATTACK / STOP emirleri doMove'u eziyor, giris 39 sn sonra): saldirida 25 sn boyunca 2.5 sn'de bir, kapidan > 6 m uzaktaki HER giris askerine (durmasa da) kapi onune yeniden hareket emri + taktikKilit 4 sn (diger izleyiciler emir vermesin)
-        private _vb = time + ([10, 25] select _saldiri);
+        private _vb = time + ([10, [25, 8] select (_kapi isEqualTo [])] select _saldiri);   // v8.626: gercek kapi yoksa (bina pozisyonu) yigilma 8 sn (duvar onunde bekleme)
         private _sonEmir = 0;
         waitUntil {
             sleep 1;
@@ -376,6 +376,22 @@ private _govde = {
             } forEach _gir;
             private _gb = time + 8;
             waitUntil { sleep 0.5; (time > _gb) || {call _iptalMi} || {(_gir findIf {alive _x && {(_x distance2D _icKapi) > 4}}) < 0} };
+            // v8.626 GIRIS DOGRULAMA (kullanici: 'etrafta dolasmazlar mi, emin misin, eve girecekler'): 8 sn sonra iceride olmayan (insideBuilding < 0.5) giris askerine, 3 deneme x 6 sn, en yakin zemin kat ic noktasina dogrudan doMove (kapi bulunamasa da motor yolu kendisi bulur); sonuc [ODA] GIRIS DOGRULAMA
+            private _icNoktalar = _poslar select {(_x select 2) < 2.2};
+            for "_dn" from 1 to 3 do {
+                private _disda = _gir select {alive _x && {(insideBuilding _x) < 0.5}};
+                if (_disda isEqualTo [] || {call _iptalMi} || {_icNoktalar isEqualTo []}) exitWith {};
+                {
+                    private _ux = _x;
+                    private _np = ([_icNoktalar, [], {_x distance2D _ux}, "ASCEND"] call BIS_fnc_sortBy);
+                    _x forceSpeed -1;
+                    _x setVariable [QGVAR(taktikKilit), time + 7];
+                    _x doMove (_np select (_forEachIndex min ((count _np) - 1)));
+                } forEach _disda;
+                private _dBit = time + 6;
+                waitUntil { sleep 0.5; (time > _dBit) || {call _iptalMi} || {(_gir findIf {alive _x && {(insideBuilding _x) < 0.5}}) < 0} };
+            };
+            diag_log format ["[ODA] %1 | GIRIS DOGRULAMA: iceride %2 / %3 asker", _grpAd, {alive _x && {(insideBuilding _x) >= 0.5}} count _gir, {alive _x} count _gir];
             _g setBehaviour "COMBAT";
             diag_log format ["[ODA] %1 | BINA %2 | ESZAMANLI GIRIS: %3 asker kapidan iceri (%4 sn) | CQB hiz artisi +%5 m/sn (CBA cqbGirisHizi)", _grpAd, typeOf _b, count _gir, round (time - (_gb - 8)), missionNamespace getVariable ["lambs_danger_cqbGirisHizi", 2]];
         };
