@@ -871,14 +871,14 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
 
         if (_fseSicrama) then {
             // BRAVO ileri sicrar (MG kosmaz, kapsamada kalir); ALPHA durup ates eder
-            private _bk = _bravoE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            private _bk = [_bravoE, 1] call FUNC(rolManevra);   // v8.661: yalniz MG degil: saglikci / nisanci / AT de kosucu olmaz (RIFLE / UGL oncelikli)
             if (_bk isEqualTo []) then { _bk = +_bravoE; };
             _hareketEdecek = _bk;
             _kapsama = _alphaE + (_bravoE - _bk);
         } else {
             _rushN = _rushN + 1;
             // ALPHA ileri sicrar (MG kosmaz); BRAVO durup ates eder
-            private _ak = _alphaE select {([_x] call _rolFn) isNotEqualTo "MG"};
+            private _ak = [_alphaE, 1] call FUNC(rolManevra);   // v8.661
             if (_ak isEqualTo []) then { _ak = +_alphaE; };
             _hareketEdecek = _ak;
             _kapsama = _bravoE + (_alphaE - _ak);

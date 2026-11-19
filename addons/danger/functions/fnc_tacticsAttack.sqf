@@ -59,6 +59,7 @@ _group setVariable [QEGVAR(main,currentTactic), "Attacking", EGVAR(main,debug_fu
 if (_units isEqualTo []) then {
     _units = [_unit] call EFUNC(main,findReadyUnits);
 };
+_units = [_units] call FUNC(rolManevra);   // v8.661 ROL DISIPLINI
 
 // set tasks
 _unit setVariable [QEGVAR(main,currentTarget), _target, EGVAR(main,debug_functions)];

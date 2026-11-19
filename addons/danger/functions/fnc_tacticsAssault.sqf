@@ -121,6 +121,7 @@ if ((formation _group) isNotEqualTo "LINE") then { [_group, "LINE", "assault", 1
 if (_units isEqualTo []) then {
     _units = [_unit, 250] call EFUNC(main,findReadyUnits);
 };
+_units = [_units] call FUNC(rolManevra);   // v8.661 ROL DISIPLINI: MG / saglikci / nisanci hucumda KOSMAZ
 if (_units isEqualTo []) exitWith {false};
 
 // sort potential targets

@@ -76,6 +76,7 @@ if (_units isEqualTo []) then {
 
 // add loaded units
 _units append ((units _unit) select {((assignedVehicleRole _x) select 0) isEqualTo "cargo"});
+_units = [_units] call FUNC(rolManevra);   // v8.661 ROL DISIPLINI: MG / saglikci / nisanci kanatta KOSMAZ
 if (_units isEqualTo []) exitWith {false};
 
 // find vehicles
