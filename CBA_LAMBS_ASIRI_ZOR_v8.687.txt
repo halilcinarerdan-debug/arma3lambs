@@ -315,7 +315,7 @@ force lambs_danger_bilgiYalnizOyuncu = true;   // YENI: yalniz insan oyuncular h
 force lambs_danger_zigzag = true;   // YENI: acik arazide zikzak
 force lambs_danger_zigzagYanMin = 7;   // YENI
 force lambs_danger_zigzagYanMax = 10;   // YENI
-force lambs_danger_zigzagMaxM = 600;   // v8.695 gevsek
+force lambs_danger_zigzagMaxM = 700;   // v8.696 (kodda ust sinir 800)
 force lambs_danger_roketBirimBekle = 20;   // EN ZORLU (onceki 35)
 force lambs_danger_roketGrupBekle = 6;   // EN ZORLU (onceki 10)
 force lambs_danger_roketPiyade = true;   // YENI v8.689 (opsiyonel): ELITE piyadeye de roket atar, LAMBS RPG yuklu olsa bile (false = eski)
@@ -348,6 +348,8 @@ force lambs_danger_sahteSans = 0.6;
 force lambs_danger_sahteSure = 75;
 force lambs_danger_roketMaxM = 450;   // YENI v8.695: roket azami atis mesafesi 450 m (varsayilan 300)
 force lambs_danger_roketGevsek = true;   // YENI v8.695: roket icin kume / bina / baski sarti yok; menzildeki her bilinen piyadeye (gorunur olsun)
+force lambs_danger_zigzagGenis = true;   // YENI v8.696: acik arazide GENIS zikzak
+force lambs_danger_zigzagGenisCarpan = 2.2;   // YENI v8.696: 7-10 m x 2.2 = 15-22 m
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;
