@@ -45,6 +45,20 @@ _g setVariable [QGVAR(isSweeping), true];
 _g setVariable [QGVAR(isExecutingTactic), true];
 
 private _origBeh = behaviour (leader _g);
+// v8.618 WAYPOINT ASKIYA (kullanici: 'bir de destroy atiyorum iceriye girmemeye cok zorluyorlar'; RPT eec0f873: Zeus DESTROY waypoint'li grupta 'yigilma noktasina varamadi (18-26 m)', 'Suppress -> MOVE', askerler yigilmaya degil waypoint'e yurur):
+//   grubun AKTIF vanilla hareket waypoint'i (MOVE / SAD / DESTROY / CYCLE; fnc_wpSahip = HAREKET) varken motor her turda askerlere waypoint'e hareket emri verir ve doMove (yigilma / giris) emirlerini ezer.
+//   Supurme suresince grubun waypoint'i gecici 'ELITE_SWEEP_HOLD' (HOLD, grubun bulundugu yerde) ile degistirilir; temizlikte silinir, eski waypoint (indeks) geri aktif edilir. wpSahip adi 'ELITE' ile baslayani saymaz.
+private _wpHold = [];
+private _wpCur = -1;
+if (([_g] call FUNC(wpSahip)) isEqualTo "HAREKET") then {
+    _wpCur = currentWaypoint _g;
+    private _hw = _g addWaypoint [getPosATL (leader _g), 0];
+    _hw setWaypointType "HOLD";
+    _hw setWaypointName "ELITE_SWEEP_HOLD";
+    _g setCurrentWaypoint _hw;
+    _wpHold = _hw;
+    diag_log format ["[BINA-TEMIZLE] %1 | aktif hareket waypoint'i (indeks %2) supurme suresince askiya alindi (ELITE_SWEEP_HOLD)", groupId _g, _wpCur];
+};
 private _t0 = time;
 private _iptalSebep = "";
 
@@ -535,6 +549,10 @@ call _govde;
 // TEMIZLIK (her zaman): bayraklar + emirler
 // ---------------------------------------------------------------------------
 private _iptalOldu = (_iptalSebep isNotEqualTo "");
+if (_wpHold isNotEqualTo [] && {!isNull _g}) then {   // v8.618: askidaki waypoint'i geri ver
+    deleteWaypoint _wpHold;
+    if (_wpCur >= 1 && {_wpCur < (count (waypoints _g))}) then { _g setCurrentWaypoint [_g, _wpCur]; };
+};
 if (!isNull _g && {(_g getVariable [QGVAR(sweepToken), ""]) isEqualTo _token}) then {
     private _baskaTaktik = (_g getVariable [QGVAR(isBounding), false])
         || {_g getVariable [QGVAR(isRetreating), false]}

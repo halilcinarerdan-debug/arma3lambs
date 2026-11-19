@@ -3867,3 +3867,8 @@ v8.617 (dal sade-waypoint) BINA ICI BAKIS DENETCISI (kullanici: 'bakis yonu kusu
  - OLCUM: [IC-BAKIS-OZET] 60 sn: bina ici asker / dusman bilen / duvar arkasi namlu dusmana <= 30 derece (duzeltme oncesi) / duzeltilen; [IC-BAKIS] ilk 15 duzeltme.
  - DOGRULANMADI / SINIR: LAMBS taskCQB ve motorun otomatik hedef donusu 0.7 sn'lik denetimle geri alinir ama arada kisa sure (<= 0.7 sn) namlu dusmana donebilir; doTarget objNull ile hedef temizleme denenmedi (belirsiz); acik yon hesabi bina ici lineIntersects (12 / 6 m) ile, yol bulma (path) YOK; oyunda DENENMEDI; CPU: 0.7 sn'de bir bina ici askerler (ray bascina 1-2).
 
+v8.618 (dal sade-waypoint) DESTROY / HAREKET WAYPOINT'LI GRUP BINAYA GIRSIN (kullanici: 'bir de destroy atiyorum iceriye girmemeye cok zorluyorlar'; RPT eec0f873: 'Destroy waypoint not linked to a target' + Alpha 1-2 'yigilma noktasina varamadi (18-26 m)').
+ - NEDEN (hipotez, RPT'den dolayli): fnc_wpSahip DESTROY'u HAREKET sayar, binaSaldiri kapisi bunu engellemez; fakat aktif vanilla waypoint varken motor askerlere waypoint'e hareket emri verir ve buildingClearRun'in doMove (yigilma / giris) emirlerini ezer.
+ - DEGISIKLIK: fnc_buildingClearRun: wpSahip = HAREKET ise supurme suresince grubun waypoint'i gecici 'ELITE_SWEEP_HOLD' (HOLD) ile degistirilir (setCurrentWaypoint), temizlikte silinir ve eski waypoint indeksi geri aktif edilir. LAMBS / kal-bekle gruplari zaten bu yola girmez.
+ - DOGRULANMADI: HOLD waypoint'in doMove'u ezmedigi / eski waypoint'in dogru indeksle geri geldigi oyunda DENENMEDI; Zeus DESTROY'un hedefsiz (not linked) olmasi motorun 'yakin hedef secimini' yavaslatiyor (motor mesaji), bu degismedi; 'destroy' ile kastedilen baska bir sey ise (Zeus emri / bina yikma) ayri incelenmeli.
+
