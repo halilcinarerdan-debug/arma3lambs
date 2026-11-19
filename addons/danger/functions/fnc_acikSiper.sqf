@@ -221,7 +221,10 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
         if (_yk > 4) then {
             _gvS set [1, (_gvS select 1) + 1];
             private _pr = [_o] call FUNC(agacProfil);   // v8.643: model profili (CUP / A2 agac olcumu)
-            private _r = (_pr select 0) min 0.7;
+            // v8.654: gizleme genisligi hicbir LOD'da olculemeyen agac (kavak t_populusf2s_ep1: FIRE / GEOM / VIEW hep 0.0) gizlemez -> aday degil (CBA agacProfil acikken)
+            private _gizler = !(missionNamespace getVariable ["lambs_danger_agacProfil", true]) || {(_pr select 1) >= 0.3} || {(_pr select 3) >= 0.3} || {(_pr select 4) >= 0.3} || {(_pr select 5) >= 0.3};
+            if (!_gizler) then { continue };
+            private _r = (_pr select 0) min 1.5;   // v8.654: genis etekli ladin icin 0.7 -> 1.5
             private _pos = _op getPos [_r + 0.1, _en getDir _o];
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)}) then { _gvS set [2, (_gvS select 2) + 1]; if !([_pos, _aralik] call _doluMu) then { _gvS set [3, (_gvS select 3) + 1]; }; };
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {

@@ -4058,3 +4058,8 @@ v8.653 (dal sade-waypoint) RPT 27f2781f (v8.652, pmc_ukraine_donetsk).
  - DEGISIKLIK: fnc_yumusakKay, acikSiper tamamlayicisi ve siperZorla zaman asimi devami lifeState HEALTHY / INJURED (ve ACE_isUnconscious degil) sartini arar; baygin asker kaydirilmaz / kosturulmaz.
  - KALAN: populus modeli olculemiyor; t_picea2s anormal olcum; baygin askerlerin cogu oyuncu atesi (kullanici testi).
 
+v8.654 (dal sade-waypoint) PMC UKRAINE'IN TEK AGACLARI (kullanici: 'zaten bu mapte tek bunlar var': t_picea (3f / 2s), t_pinus (n2s / s3s_ep1 / e2s_ep1), t_populusf2s_ep1).
+ - t_populusf2s_ep1 (kavak, A2 OA / ep1): FIRE / GEOM / VIEW (0.4 / 1.0 / 1.6 m) HEP 0.0 -> gizleyecek genislik yok (ince govde / tarama cozunurlugu 0.1 m / LOD'da govde yok): fnc_acikSiper agac gevsek blogunda artik ADAY DEGIL (CBA agacProfil acikken); gorunmeyen noktada 'gizli' sanip beklemesin.
+ - t_picea2s (ladin): FIRE 4.3 / GEOM 2.1 / VIEW 2.5-4.4 m = DAL ETEGI (govde degil): fnc_agacProfil'de VIEW 1.0 m >= 1.5 m ise govde yaricapi = (VIEW / 2 x 0.6) (<= 1.5 m); acikSiper agac gevsek blogunda yaricap ust siniri 0.7 -> 1.5 m: asker etegin icine / kenarina oturur (govde 0.4 m varsayimi yerine).
+ - SINIR: kavak 'gizlemez' kararinin kaynagi olcum (taramada 0.1 m cozunurluk; < 0.1 m govde kacabilir); ladin etek yaricapi tahmini (%60); kavak tek agacsa bolgede aday azalabilir (aday_yok artar) - [ACIK-SIPER-OZET] / [ACIK-SIPER-RED]'de gorulur; oyunda DENENMEDI.
+
