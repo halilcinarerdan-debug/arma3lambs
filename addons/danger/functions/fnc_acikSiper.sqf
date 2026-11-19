@@ -125,7 +125,7 @@ private _objAd = "";
     if (!_sahte && {((toLower ((getModelInfo _o) select 0)) select [0, 2]) isEqualTo "b_"}) then { _sahte = true; };
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
         private _r = [_o, (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5] call _govdeR;
-        private _pos = _op getPos [_r + 0.45, _en getDir _o];   // v8.633: 0.55 -> 0.45 (govdeye daha yakin)
+        private _pos = _op getPos [_r + 0.15, _en getDir _o];   // v8.637: 0.45 -> 0.15 (3 kat yakin; kullanici: 'cover halinde elemanlar coverdan ayi gibi uzak', 'covera yakinlik 3 kat artsin')
         if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
             private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, (missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]), "NONE"]) isNotEqualTo [] };
@@ -171,7 +171,7 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
             //   ve govde ince oldugu icin gorus hatti yalniz ortada degil +-0.2 m yanlarda da agaca carpmali (yarim acik durmasin)
             private _uzun = _yk > 4;
             if (_uzun) then { _r = _r min 0.6; };
-            private _pos = _op getPos [_r + 0.5, _en getDir _o];
+            private _pos = _op getPos [_r + ([0.5, 0.2] select _uzun), _en getDir _o];   // v8.637: agac gizlenmesi govdeye 0.2 m (cali 0.5 ayni)
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
                 private _gizli = {

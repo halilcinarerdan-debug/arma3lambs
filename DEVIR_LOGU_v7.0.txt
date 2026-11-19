@@ -3965,3 +3965,8 @@ v8.636b (dal sade-waypoint) BOMBA DISIPLINI AYARLANABILIR (kullanici: 'bomba atm
  - v8.636'daki 'sinirsiz' varsayilan geri alindi: disiplin VAR ama CBA'dan ayarlanir: bombaInisMaks (30-85, varsayilan 62) ve bombaMesafeMaks (15-100, varsayilan 60) = orta disiplin (62 derece sinir sabit ayni kat lobu ile ayni, 60 m = elBombasiMaxMesafe ile ayni: siklik eski haline en yakin, geri tepen en dik atislar elenir). Sinirsiz icin 85 / 100, siki icin 52 / 40.
  - HATA DUZELTME: v8.636 commit'inde kacisTekM aciklamasi yanlislikla degismisti (tutarlilik denetimi HATA=1, '&&' zincirinde tail exit kodu hatayi gizledi); geri alindi.
 
+v8.637 (dal sade-waypoint) COVERA 3 KAT YAKINLIK (kullanici: 'agaca mesafe falan 3 kat artsin, covera yakinlik 3 kat artsin', 'cover halinde elemanlar coverdan ayi gibi uzak').
+ - DEGISIKLIK: (1) coverHugMesafe varsayilan 0.17 -> 0.06 (alt sinir 0.10 -> 0.03; CBA ve kod ayni). (2) fnc_acikSiper nesne / agac arkasi payi 0.45 -> 0.15 m, agac gizlenmesi 0.5 -> 0.2 m (cali 0.5 ayni). (3) siperUzaklik varsayilan 2 -> 3 (siper ~3 kat daha yakin secilir: arama menzili / 3, uzaklik cezasi x3).
+ - ONEMLI: CBA profilinde onceki degerler kayitliysa varsayilan degisikligi UYGULANMAZ: coverHugMesafe = 0.06 ve siperUzaklik = 3 elle ayarlanmali.
+ - SINIR: 0.03-0.06 m karakter geometriyi / duvari kesebilir (yarilma, 'gomulme'); calisan sistemde gozle kontrol; coverHug yalniz kapali sert yuzey bulursa; kalan uzakligin kaynagi RPT'de [SIPER-YAPIS] / [SIPER-YAPIS-OZET] ile izlenir; oyunda DENENMEDI.
+

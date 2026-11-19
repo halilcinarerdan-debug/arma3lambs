@@ -217,7 +217,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 // v8.588 HASSAS SIPER NOKTASI (kullanici: 'sipere yapisma yakinligini arttir, daha profesyonel raycast hesaplasin, daha dogru ve daha yakin'): eskiden hedef nokta = dusman tarafindaki ILK yuzey + hug mesafesi (isin yonunde);
                 //   kalin engelde (duvar / kaya / bina kosesi) bu nokta engelin ICINE dusebiliyor, egik isinda gercek mesafe de hug x cos(aci) kaliyordu. Simdi: askerden dusmana TERS isin -> askere BAKAN ilk sert yuz;
                 //   hedef = o yuz + yuzey NORMALI (yatay izdusum, askere bakacak sekilde yonlendirilmis) x hug. Yuz yok / cok uzak (> 2.5 m kalinlik) / yatay yuzey ise eski formul (yedek).
-                private _hugM = ((missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.17]) max 0.1) min 0.7;
+                private _hugM = ((missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.06]) max 0.03) min 0.7;   // v8.637: 0.17 -> 0.06 (3 kat yakin), alt sinir 0.10 -> 0.03
                 private _tASL = _hP vectorAdd (_dir vectorMultiply _hugM);
                 private _nokta = "yedek";
                 private _ters = lineIntersectsSurfaces [_uASL, _eASL, _u, _en, true, 1, _lodK, "NONE"];
