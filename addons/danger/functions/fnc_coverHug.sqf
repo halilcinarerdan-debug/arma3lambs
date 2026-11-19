@@ -174,6 +174,33 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                             diag_log format ["[ACIKTA-SINIF] %1 | %2 | acikta ama %3 m'de sert siper var: %4 | stance %5 | grup %6 | acikSiperKilit %7 sn | taktikKilit %8 sn | dusman %9 m", groupId _g, name _u, round (_u distance2D _en0), _mdl, stance _u, _grD, round (((_u getVariable [QGVAR(acikSiperT), 0]) - time) max 0), round (((_u getVariable [QGVAR(taktikKilit), 0]) - time) max 0), round _ed];
                         };
                     };
+                    // v8.634 AGAC / NESNE ARKASINA YAPIS (kullanici: 'abi botlar gercekten sipere yakinlassin'; RPT a3b57501: [SIPER-YAPIS-OZET] ayarlandi:0 / acikta 60-81 dk, [SIPER-YAPIS-TANI] 'yuzey: YOK (govde genisliginde kapali yuzey yok)': ince govdeli agac govde genisligi testini gecemedigi icin yapisma HIC calismiyor,
+                    //   asker acikSiper'in hedef noktasina doMove ile ~1-2 m toleransla yaklasip duruyordu): fnc_acikSiper'in SON hedef noktasi (acikSiperHedef, <= 40 sn) 3.5 m icindeyse ve asker durmusa (< 1.5 m/sn) nokta (govdenin 0.45 m arkasi) 8 adimda yumusak kayarak (setPosATL, <= 0.5 sn) hedefe oturtulur
+                    private _ah = _u getVariable [QGVAR(acikSiperHedef), []];
+                    if (_ah isNotEqualTo [] && {(time - (_ah select 1)) < 40} && {(speed _u) < 1.5} && {time > (_u getVariable [QGVAR(agacYapT), 0])}) then {
+                        private _apt = +(_ah select 0);
+                        _apt set [2, (getPosATL _u) select 2];
+                        private _add = (getPosATL _u) distance2D _apt;
+                        if (_add >= 0.15 && {_add <= 3.5} && {!surfaceIsWater _apt}) then {
+                            _u setVariable [QGVAR(agacYapT), time + 6];
+                            [_u, getPosATL _u, _apt] spawn {
+                                params ["_a", "_p0", "_p1"];
+                                for "_k" from 1 to 8 do {
+                                    if (!alive _a) exitWith {};
+                                    _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 8)));
+                                    sleep 0.06;
+                                };
+                            };
+                            _u doWatch _en;
+                            _u setVariable [QGVAR(hugPos), _apt];
+                            _u setVariable [QGVAR(hugAt), time];
+                            if ((missionNamespace getVariable ["lambs_danger_agacYapLogN", 0]) < 20) then {
+                                missionNamespace setVariable ["lambs_danger_agacYapLogN", (missionNamespace getVariable ["lambs_danger_agacYapLogN", 0]) + 1];
+                                diag_log format ["[SIPER-YAPIS] %1 | %2 | nesne arkasi hedefe YAPISTI (%3 m kayma) | nesne %4 | dusman %5 m", groupId _g, name _u, _add toFixed 2, _ah param [2, "?"], round _ed];
+                            };
+                            continue
+                        };
+                    };
                     // v8.303 ACIKTA + yakinda BINA (kullanici: 'arkada ev var adam acikta ama evi siper kullanmiyor'): sert yuzey yok / uzaksa 28 m icindeki binada dusmandan gizli bir noktaya git
                     [_u, _en] call FUNC(acikSiper);
                     // v8.595 BOS HARITA: 20 m icinde hicbir siper sinifi yoksa arazi ortusu / yatis (fnc_aciktaGizlen)
