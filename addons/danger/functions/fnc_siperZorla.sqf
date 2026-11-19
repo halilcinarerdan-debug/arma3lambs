@@ -157,7 +157,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
         // v8.638 SURE DOLDU AMA SIPERE VARMADI: 9 m icindeyse kosuya 4 sn daha devam, varista noktaya otur (eskiden orada durup acikta kaliyordu)
-        if ((_uu distance2D _pp) > 1.2 && {(_uu distance2D _pp) <= 25}) then {
+        if ((_uu distance2D _pp) > 1.2 && {(_uu distance2D _pp) <= 25} && {(lifeState _uu) in ["HEALTHY", "INJURED"]}) then {   // v8.653: baygin asker kosturulmaz
             _uu forceSpeed -1;
             _uu setSpeedMode "FULL";
             _uu doMove _pp;

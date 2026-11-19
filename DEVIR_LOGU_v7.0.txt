@@ -4052,3 +4052,9 @@ v8.652 (dal sade-waypoint) 'BUNLAR 2 TAKIMA BOLUNUYOR' (kullanici sorusu; RPT d6
  - DEGISIKLIK: (a) yetimKatil sniperTeam grubunu atlar; (b) YENI CBA lambs_danger_sniperTimAyri (varsayilan ACIK, 'ELITE siper'): kapaliysa nisanci ana timden AYRILMAZ.
  - SINIR: ayrilma tasarim geregi acik kalir (CBA kapatilirsa ana timde kalir); oyunda DENENMEDI.
 
+v8.653 (dal sade-waypoint) RPT 27f2781f (v8.652, pmc_ukraine_donetsk).
+ - IYI: [AGAC-PROFIL] tutarli (3 ornegin en buyugu): t_picea3f 0.7, t_pinusn2s 0.8, t_pinuse2s_ep1 0.7 / 0.9 (onceden 0.0), t_populusf2s_ep1 hala 0.0, t_picea2s anormal 4.3. aday_yok (Alpha, >= 15 m) 0; aday_yok_yakin=14 (HQ kuklalari); nesne=24, agac_gevsek=2. [SNIPER] 1 ekip / grup; [ZEKA-YETIM] KATILDI 1 kez (sniperTeam bayragi atlaniyor).
+ - HATA: [SIPER-OTUR] 'oturtuldu: 12.85 / 11.73 / 15.44 / 22.63 m' - [DURUM] satirlari bu askerlerin BAYGIN oldugunu gosteriyor (anim 'ousrevivedefault' / 'onsciousfacedown', durus UNDEFINED); acikSiper tamamlayicisi / yumusakKay / siperZorla zaman asimi baygin askere de yuruyus + kayma uyguluyordu.
+ - DEGISIKLIK: fnc_yumusakKay, acikSiper tamamlayicisi ve siperZorla zaman asimi devami lifeState HEALTHY / INJURED (ve ACE_isUnconscious degil) sartini arar; baygin asker kaydirilmaz / kosturulmaz.
+ - KALAN: populus modeli olculemiyor; t_picea2s anormal olcum; baygin askerlerin cogu oyuncu atesi (kullanici testi).
+

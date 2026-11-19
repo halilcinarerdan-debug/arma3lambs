@@ -277,9 +277,9 @@ private _nesneGit = {
         waitUntil {
             sleep 0.4;
             private _h = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0;
-            !alive _a || {time > _bit} || {_h isNotEqualTo [] && {(((getPosATL _a) distance2D _h) < 4) && {(speed _a) < 0.8}}}
+            !alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {time > _bit} || {_h isNotEqualTo [] && {(((getPosATL _a) distance2D _h) < 4) && {(speed _a) < 0.8}}}
         };
-        if (!alive _a) exitWith {};
+        if (!alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {_a getVariable ["ACE_isUnconscious", false]}) exitWith {};   // v8.653: baygin asker oturtulmaz
         private _pt = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0;
         if (_pt isEqualTo []) exitWith {};
         private _p1 = +_pt;

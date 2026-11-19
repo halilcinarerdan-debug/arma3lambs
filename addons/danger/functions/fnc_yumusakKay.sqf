@@ -17,26 +17,28 @@
 */
 
 params [["_a", objNull, [objNull]], ["_hedef", [], [[]]]];
-if (isNull _a || {!alive _a} || {_hedef isEqualTo []}) exitWith {};
+// v8.653: baygin / yarali dusen (vanilla revive INCAPACITATED / ACE) asker kaydirilmaz (RPT 27f2781f: 'oturtuldu 12-22 m' satirlari 'unconsciousfacedown' / 'ousrevivedefault' animasyonlu askerlerdi)
+private _saglam = { alive _a && {(lifeState _a) in ["HEALTHY", "INJURED"]} && {!(_a getVariable ["ACE_isUnconscious", false])} };
+if (isNull _a || {!alive _a} || {_hedef isEqualTo []} || {!(call _saglam)}) exitWith {};
 private _p1 = +_hedef;
 _p1 set [2, (getPosATL _a) select 2];
 if ((getPosATL _a) distance2D _p1 > 0.9) then {
     _a forceSpeed -1;
     _a doMove _p1;
     private _bit = time + ((((getPosATL _a) distance2D _p1) / 3) max 5) min 9;   // v8.649: uzak siperde sure mesafeye gore (5-9 sn)
-    waitUntil { sleep 0.2; !alive _a || {time > _bit} || {((getPosATL _a) distance2D _p1) < 0.9} };
+    waitUntil { sleep 0.2; !(call _saglam) || {time > _bit} || {((getPosATL _a) distance2D _p1) < 0.9} };
 };
-if (!alive _a) exitWith {};
+if (!(call _saglam)) exitWith {};
 _p1 set [2, (getPosATL _a) select 2];
 private _p0 = getPosATL _a;
 private _d = _p0 distance2D _p1;
 if (_d < 0.1 || {_d > 1.6} || {surfaceIsWater _p1}) exitWith {};
 private _sure = ((_d / 1.0) max 0.45) min 1.6;
 private _t0 = time;
-while {alive _a && {(time - _t0) < _sure}} do {
+while {(call _saglam) && {(time - _t0) < _sure}} do {
     private _k = ((time - _t0) / _sure) min 1;
     private _e = _k * _k * (3 - (2 * _k));
     _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply _e));
     sleep 0.02;
 };
-if (alive _a) then { _a setPosATL _p1; };
+if (call _saglam) then { _a setPosATL _p1; };
