@@ -155,6 +155,7 @@ private _wps = [_wp1, _wp2, _wp3, _wp3];
 private _baslangic = time;
 _group setVariable [QGVAR(isRetreating), true];
 _group setVariable [QGVAR(retSifirArd), 0];
+_group setVariable [QGVAR(retDurgunArd), 0];
 // LAMBS taban "sympathetic assault / Advance" tepkileri retreat emrini eziyordu (RPT: RET sirasinda "TACTICS ASSAULT (... with 2 units)").
 // Retreat boyunca grup LAMBS reaksiyonlarina kapatilir (disableGroupAI); bitisinde / valfte ESKI degere donulur.
 _group setVariable [QGVAR(retreatEskiDGA), _group getVariable [QGVAR(disableGroupAI), false]];
@@ -435,7 +436,9 @@ if (EGVAR(main,debug_functions)) then {
         private _bitis = time + ((12 max ((_uzak / 3.5) + 4)) min 26);
         private _pinned = [];
         private _erken = [];
+        private _maxHiz = 0;   // v8.685: sicrama boyunca kosucularin en yuksek hizi (km/sa) - 'hic kalkmadi' (durgun) sicramayi 'kalkti ama varamadi' sicramadan ayirir
         while {time < _bitis && {!isNull _grup}} do {
+            { if (alive (_x select 0)) then { _maxHiz = _maxHiz max (abs (speed (_x select 0))); }; } forEach _varis;
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
             {
                 private _b = _x select 0;
@@ -620,11 +623,20 @@ if (EGVAR(main,debug_functions)) then {
         private _canliN = 0;
         { if ((alive (_x select 0)) && {(lifeState (_x select 0)) in ["HEALTHY", "INJURED"]}) then { _dSonra = _dSonra + ((_x select 0) distance2D _targetPos); _canliN = _canliN + 1; }; } forEach _varis;
         private _kazanc = if (_canliN > 0) then {(_dSonra / _canliN) - _dOnce} else {0};
-        if (_canliN > 0 && {(_vardiSay * 5) < (count _varis)} && {_kazanc < 8}) then {   // v8.670: kosucularin hepsi baygin / olduyse (_canliN 0) ilerleme yok DEGIL (RPT c6c1f3e6: tek kalan lider vuruldu, 2 sicrama 0/1, erken bitis)
+        // v8.685 DURGUN SICRAMA (RPT aab64830: 3 kisilik cekilme, tum kosucular iki sicramanin ilk 10-25 sn'sinde komut MOVE / hiz 0 ile durdu, KORUMA 11 kez yeniden emir verdi; asker ~16:29:20'de (cekilme baslayali 23 sn) kosmaya basladi
+        //   ama '2 sicrama 0 varis' kurali 16:29:29'da (27 sn) cekilmeyi BITIRDI = askerler kalkarken). Sicrama boyunca kimse 4 km/sa'i gecmediyse (durgun) 'ilerleme yok' sayilmaz: ayri sayac; 3 durgun sicramada yine biter (sonsuz bekleme yok).
+        private _durgun = _maxHiz < 4;
+        if (_canliN > 0 && {(_vardiSay * 5) < (count _varis)} && {_kazanc < 8} && {_durgun}) then {
+            _grup setVariable [QGVAR(retDurgunArd), (_grup getVariable [QGVAR(retDurgunArd), 0]) + 1];
+            if ((_grup getVariable [QGVAR(retDurgunArd), 0]) >= 3) then { _grup setVariable [QGVAR(retSifirArd), 2]; };
+            diag_log format ["[GERI-CEKILME-DURGUN] %1 sicrama %2 | kosucular sicrama boyunca 4 km/sa'i gecmedi (en yuksek %3 km/sa) | durgun sicrama %4 / 3 | sayilmadi: ilerleme yok kurali", groupId _grup, _no, round _maxHiz, _grup getVariable [QGVAR(retDurgunArd), 0]];
+        } else { if (_canliN > 0 && {(_vardiSay * 5) < (count _varis)} && {_kazanc < 8}) then {   // v8.670: kosucularin hepsi baygin / olduyse (_canliN 0) ilerleme yok DEGIL (RPT c6c1f3e6: tek kalan lider vuruldu, 2 sicrama 0/1, erken bitis)
             _grup setVariable [QGVAR(retSifirArd), (_grup getVariable [QGVAR(retSifirArd), 0]) + 1];
+            _grup setVariable [QGVAR(retDurgunArd), 0];
         } else {
             _grup setVariable [QGVAR(retSifirArd), 0];
-        };
+            _grup setVariable [QGVAR(retDurgunArd), 0];
+        }; };
 
         // Sicrama sonucu (diagnostik): kac asker gercekten vardi
         diag_log format [

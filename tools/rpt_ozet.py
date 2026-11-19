@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.684"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.685"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -320,7 +320,10 @@ def kabul(path):
         ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (%.0f%%) | %s" % (st, tr, oran, son))
         td = [l for l in L if "[EMIR-TERS-DONUS]" in l]
         gv = collections.Counter(re.search(r"g:([^,\]]+)", l).group(1) for l in td if re.search(r"g:([^,\]]+)", l))
-        if td: ekle("  ters donus imzalari", "BILGI", "%d satir | gorev dagilimi %s | ornek: %s" % (len(td), dict(gv.most_common(4)), re.sub(r"^.*\[EMIR-TERS-DONUS\] ", "", td[0])[:170]))
+        if td:
+            # kaynak siniflamasi (imza belirtecleri): acikSiper = siper arama mikro-hareketi, RET = geri cekilme sirasinda, digeri
+            sinif = collections.Counter(("RET" if "RET" in im.split(",") else ("acikSiper" if "acikSiper" in im else "diger")) for im in [re.search(r"imza \(STOP aninda\): ([^|]+)", l).group(1) for l in td if re.search(r"imza \(STOP aninda\): ([^|]+)", l)])
+            ekle("  ters donus kaynaklari", "BILGI", "%d satir | RET (geri cekilme sirasinda): %d | acikSiper (siper arama mikro-hareketi): %d | diger: %d | gorev dagilimi %s | ornek: %s" % (len(td), sinif["RET"], sinif["acikSiper"], sinif["diger"], dict(gv.most_common(4)), re.sub(r"^.*\[EMIR-TERS-DONUS\] ", "", td[0])[:150]))
     else:
         ekle("EMIR GIDIP-GELME", "VERI YOK", "[EMIR-GIDIP-GELME] yok (v8.684+ ve temasli grup gerekir)")
 
@@ -328,7 +331,7 @@ def kabul(path):
     vr = [(int(m.group(1)), int(m.group(2))) for l in L for m in [re.search(r"sonuc \| vardi:(\d+)/(\d+)", l)] if m]
     if vr:
         a_, b_ = sum(x for x, _ in vr), sum(y for _, y in vr)
-        ekle("RETREAT VARIS", "GECTI" if a_ >= 0.5 * b_ else "KALDI", "%d/%d (%.0f%%) | koruma yeniden-emir:%d  doFollow atlandi:%d  ezme tanisi:%d" % (a_, b_, 100.0 * a_ / max(b_, 1), say("GERI-CEKILME-KORUMA"), say("DOFOLLOW-ATLA"), say("GERI-CEKILME-EZME-TANI")))
+        ekle("RETREAT VARIS", "GECTI" if a_ >= 0.5 * b_ else "KALDI", "%d/%d (%.0f%%) | koruma yeniden-emir:%d  doFollow atlandi:%d  ezme tanisi:%d  durgun sicrama:%d" % (a_, b_, 100.0 * a_ / max(b_, 1), say("GERI-CEKILME-KORUMA"), say("DOFOLLOW-ATLA"), say("GERI-CEKILME-EZME-TANI"), say("GERI-CEKILME-DURGUN")))
     else:
         ekle("RETREAT VARIS", "VERI YOK", "retreat olmadi (senaryo B: zayif grup)")
 
