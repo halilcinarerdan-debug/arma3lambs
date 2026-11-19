@@ -384,6 +384,40 @@ if (EGVAR(main,debug_functions)) then {
                 };
             } forEach _cift;
         } forEach _ciftler;
+        // v8.677 EMIR EZME TANISI (RPT aa324317 Altis: 21 takilmanin 14'u 'ready:true + DoNotPlanFormation' = koşu emri IPTAL olmus, asker formasyon yerinde bos; Lythium'da ise ready:false + LEADER PLANNED; kimin ezdigi bilinmiyor):
+        //   her sicramada koşucular 12 sn boyunca 0.5 sn aralikla izlenir; emir MOVE'dan cikinca / unitReady true / hedef modu 'Formation' olunca (ilk 1.5 sn sonrasi) BIR KEZ loglanir:
+        //   birimin ve grubun lambs_danger_* degiskenlerinden SON 4 SN icinde dokunulmus (zaman damgasi) olanlar = suclu adaylar. Log: [GERI-CEKILME-EZME-TANI] (ilk 40).
+        [_varis, _grup, _no] spawn {
+            params ["_v", "_g", "_n"];
+            private _t0 = time;
+            private _gor = [];
+            while {(time - _t0) < 12 && {!isNull _g}} do {
+                sleep 0.5;
+                {
+                    private _b = _x select 0;
+                    if (alive _b && {!(_b in _gor)} && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {(time - _t0) > 1.5} && {(_b distance2D (_x select 1)) > 12}) then {
+                        private _cmd = currentCommand _b;
+                        private _rd = unitReady _b;
+                        private _dm = (expectedDestination _b) select 1;
+                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0}) then {
+                            _gor pushBack _b;
+                            if ((missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) < 40) then {
+                                missionNamespace setVariable ["lambs_danger_retEzmeTaniN", (missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) + 1];
+                                private _taze = {
+                                    params ["_o"];
+                                    ((allVariables _o) select { (_x find "lambs_danger_") == 0 }) apply { [_x, _o getVariable _x] } select { (_x select 1) isEqualType 0 && {abs ((_x select 1) - time) < 4} } apply { format ["%1=%2", (_x select 0) select [13], ((_x select 1) - time) toFixed 1] }
+                                };
+                                diag_log format [
+                                    "[GERI-CEKILME-EZME-TANI] %1 | sicrama %2 | %3%4 | emir %5 sn sonra bozuldu: komut %6, ready %7, hedef modu %8, hiz %9 | hedefe %10 m | gorev %11 | AI PATH:%12 MOVE:%13 | birim taze degiskenler (zaman farki sn): %14 | grup taze degiskenler: %15 | lider hiz %16 km/sa",
+                                    groupId _g, _n, name _b, ["", " (K)"] select (_b isEqualTo (leader _g)), (time - _t0) toFixed 1, _cmd, _rd, _dm, round (speed _b), round (_b distance2D (_x select 1)),
+                                    _b getVariable [QEGVAR(main,currentTask), "-"], _b checkAIFeature "PATH", _b checkAIFeature "MOVE", [_b] call _taze, [_g] call _taze, round (speed (leader _g))
+                                ];
+                            };
+                        };
+                    };
+                } forEach _v;
+            };
+        };
         // v8.545: sicrama ONCESI ortalama tehdit mesafesi (ilerleme olcusu: varis yerine GERCEK mesafe kazanci)
         private _dOnce = 0;
         { _dOnce = _dOnce + ((_x select 0) distance2D _targetPos); } forEach _varis;

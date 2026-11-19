@@ -197,7 +197,12 @@ if (
             if ((time - (_group getVariable [QGVAR(delayBasT), -999])) > 30) then {
                 _group setVariable [QGVAR(delayBasT), time];
                 _group setVariable [QGVAR(isExecutingTactic), true];
-                [_group, _target, false, 25] call FUNC(tacticsHide);
+                // v8.677 YAKIN TEMAS: dusman 45-120 m ve 35 m icinde 'iyi' bir yer varsa tum grup toplu saklanmak yerine o yere ates-manevra ile gecer (fnc_savunmaYerlesim YAKIN); yoksa eski tacticsHide
+                if ([_group, _target] call FUNC(savunmaYerlesim)) then {
+                    [{ params ["_g"]; if (!isNull _g) then { _g setVariable [QGVAR(isExecutingTactic), nil]; }; }, [_group], 45] call CBA_fnc_waitAndExecute;
+                } else {
+                    [_group, _target, false, 25] call FUNC(tacticsHide);
+                };
                 [_group, _target, "BREAK_CONTACT"] call (missionNamespace getVariable ["lambs_danger_fnc_tacticalSmoke", {false}]);
             };
         };

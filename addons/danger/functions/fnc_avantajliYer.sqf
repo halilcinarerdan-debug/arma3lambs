@@ -28,10 +28,10 @@
  * Public: No
 */
 
-params [["_c", [], [[]]], ["_t", [], [[]]], ["_yar", -1, [0]], ["_mod", "GERI", [""]]];
+params [["_c", [], [[]]], ["_t", [], [[]]], ["_yar", -1, [0]], ["_mod", "GERI", [""]], ["_minS", -1, [0]], ["_mar", -1, [0]]];   // v8.677: 5. / 6. parametre: kabul esigi / merkezden fazla puan (varsayilan kipe gore)
 // v8.675 KIPLAR: "GERI" (geri cekilme: tehdidin tersi konide, GIZLILIK oncelikli, esik 22), "SAVUNMA" / "BND" (savunma mevzii / bounding ates ussu: TAM halka, ATIS ALANI KAPSAMI zorunlu (yatik gozden hedef gorulmeli),
 //   gizlilik yerine ufuk cizgisi cezasi, dusmana 60 m'den yakin / merkezden 10 m'den fazla yaklasan elenir, esik 45 = 'mis gibi yer', merkezden >= 15 iyi)
-private _savun = _mod in ["SAVUNMA", "BND"];
+private _savun = _mod in ["SAVUNMA", "BND", "YAKIN"];
 if ((count _c) < 2 || {(count _t) < 2} || {!(missionNamespace getVariable ["lambs_danger_avantajliYer", true])}) exitWith {[]};
 
 private _R = if (_yar > 0) then { _yar } else { ((missionNamespace getVariable ["lambs_danger_avantajYaricap", 150]) max 60) min 300 };
@@ -101,7 +101,7 @@ private _enS = -1e9;
         if (surfaceIsWater _pt) then { continue };
         if (((surfaceNormal _pt) select 2) < 0.7) then { continue };
         private _dT = _pt distance2D _t;
-        if (_dT < (_d0 - ([5, 10] select _savun)) || {_savun && {_dT < 60}}) then { continue };
+        if (_dT < (_d0 - ([5, 10] select _savun)) || {_savun && {_dT < ([60, 40] select (_mod isEqualTo "YAKIN"))}}) then { continue };
         private _s = [_pt] call _skor;
         if (_s < -900) then { continue };
         private _mid = _c getPos [(_c distance2D _pt) / 2, _c getDir _pt];
@@ -112,7 +112,7 @@ private _enS = -1e9;
 } forEach [0.35, 0.55, 0.8, 1.0];
 
 if (_en isEqualTo []) exitWith {[]};
-if (_enS < ([22, 45] select _savun) || {_enS < (_s0 + ([8, 15] select _savun))}) exitWith {[]};
+if (_enS < ([[22, 45] select _savun, _minS] select (_minS >= 0)) || {_enS < (_s0 + ([[8, 15] select _savun, _mar] select (_mar >= 0)))}) exitWith {[]};
 
 private _nb = count (nearestTerrainObjects [_en, _bSinif, 40, false, true]);
 private _ozet = format ["skor %1 (merkez %2) | yukseklik %3 m | bina %4 (40 m) | %5 m uzakta | tehdide %6 m", round _enS, round _s0, ((getTerrainHeightASL _en) - _tH) toFixed 1, _nb, round (_c distance2D _en), round (_en distance2D _t)];
