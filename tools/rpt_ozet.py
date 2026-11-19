@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.699"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.700"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -410,6 +410,19 @@ def kabul(path):
         ekle("UGL SIKLIGI", "GECTI" if dk <= 6 else "KONTROL", "%d karar, %d atici, en sik atici %.1f karar/dk, en yakin hedef %d m (uglGrupAralik / uglCooldown CBA ile ayarlanir)" % (sum(len(v) for v in ugl.values()), len(ugl), dk, mn))
     else:
         ekle("UGL SIKLIGI", "VERI YOK", "UGL karari yok")
+
+    # --- 8b) ZIKZAK GERCEKLESME (v8.700): komut yan mesafe vs askerin gercekte kat ettigi yan mesafe
+    zi = []
+    for l in L:
+        m = re.search(r"\[ZIGZAG-IZ\].*komut yan (-?\d+) m ileri (-?\d+) m \| GERCEKLESEN yan (-?\d+) m ileri (-?\d+) m", l)
+        if m: zi.append((int(m.group(1)), int(m.group(3)), int(m.group(4))))
+    if zi:
+        ky = sum(abs(a_) for a_, _, _ in zi) / len(zi)
+        gy = sum(max(b_, 0) for _, b_, _ in zi) / len(zi)
+        oran = 100.0 * gy / max(ky, 1)
+        ekle("ZIKZAK GERCEKLESME", "GECTI" if oran >= 50 else ("KONTROL" if oran >= 25 else "KALDI"), "%d adim | komut yan ort %.1f m, GERCEKLESEN (komut yonunde) yan ort %.1f m (%%%.0f) | ileri ort %.1f m" % (len(zi), ky, gy, oran, sum(c_ for _, _, c_ in zi) / len(zi)))
+    else:
+        ekle("ZIKZAK GERCEKLESME", "VERI YOK", "[ZIGZAG-IZ] yok (v8.700+ ve zikzak adimi gerekir)")
 
     # --- 9) senaryo kapsami (tetiklenmeyen ozellikler)
     for ad, tag, ipucu in [

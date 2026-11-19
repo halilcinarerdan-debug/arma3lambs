@@ -119,6 +119,17 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 _isaret = -_isaret;
             };
             if (_pt isEqualTo []) then { _u setVariable [QGVAR(zigT), time + 1]; continue };
+            // v8.700 GERCEKLESME IZI (kullanici: 'zikzak yok'; RPT 4648beb0: 15 adim LOGLANDI ama ekranda gorunup gorunmedigi bilinmiyordu): onceki adimin KOMUT yan / ileri mesafesi ile askerin GERCEKTE kat ettigi yan / ileri mesafe karsilastirilir
+            private _p0 = _u getVariable [QGVAR(zigP0), []];
+            if (_p0 isNotEqualTo [] && {(time - (_p0 select 0)) < 6} && {(missionNamespace getVariable ["lambs_danger_zigIzN", 0]) < 80}) then {
+                private _d0 = _p0 select 3;
+                private _vv = (getPosATL _u) vectorDiff (_p0 select 1);
+                private _gy = (_vv vectorDotProduct [sin (_d0 + 90), cos (_d0 + 90), 0]) * (_p0 select 2);
+                private _gi = _vv vectorDotProduct [sin _d0, cos _d0, 0];
+                missionNamespace setVariable ["lambs_danger_zigIzN", (missionNamespace getVariable ["lambs_danger_zigIzN", 0]) + 1];
+                diag_log format ["[ZIGZAG-IZ] %1 | onceki adim %2 sn once: komut yan %3 m ileri %4 m | GERCEKLESEN yan %5 m ileri %6 m | ara noktaya kalan %7 m | hiz %8 km/sa", name _u, (time - (_p0 select 0)) toFixed 1, round (_p0 select 4), round (_p0 select 5), round _gy, round _gi, round (_u distance2D (if (_son isEqualTo []) then { getPosATL _u } else { _son })), round (speed _u)];
+            };
+            _u setVariable [QGVAR(zigP0), [time, getPosATL _u, _isaret, _dir, _yan, _ileri]];
             _u setVariable [QGVAR(zigYon), _isaret];
             _u setVariable [QGVAR(zigNokta), _pt];
             _u setVariable [QGVAR(zigT), time + (_adimS * ([1, 1.33] select _acikGenis))];   // v8.699: CBA zigzagAdimS (varsayilan 1.8; acik arazi genis x1.33 = 2.4)
