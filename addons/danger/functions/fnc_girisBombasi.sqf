@@ -104,6 +104,23 @@ private _engelAd = "";
 private _sonuc = "";
 if (_v < 0) then {
     _sonuc = format ["yay engelli (%1)", _engelAd];
+    // v8.613 HILE (kullanici: 'evin icine tuttursun, hileye basvurabilirsin'): fiziksel yay yoksa animasyon + ucus suresi sonra bomba ic hedef noktaya (_ic) dogrudan yaratilir (sifir hiz, fitil yanar)
+    if (missionNamespace getVariable ["lambs_danger_bombaHile", true]) then {
+        _atan playActionNow "ThrowGrenade";
+        sleep 0.8;
+        if (!alive _atan || {((magazines _atan) findIf {_x isEqualTo _mag}) < 0}) then { _sonuc = "atici oldu / bomba kayboldu (hile: animasyon sirasinda)"; } else {
+            sleep ((_D / 14) min 1.6);
+            private _hp2 = AGLToASL (_ic vectorAdd [0, 0, 0.3]);
+            private _gr = createVehicle [_ammo, ASLToAGL _hp2, [], 0, "CAN_COLLIDE"];
+            _gr setPosASL _hp2;
+            _gr setVelocity [0, 0, 0];
+            _gr setShotParents [_atan, _atan];
+            _atan removeMagazine _mag;
+            _g setVariable [QGVAR(bombaGT), time];
+            _v = 0;
+            _sonuc = format ["ATILDI (HILE: yay engelli, bomba ic hedefe yaratildi; kapidan %1 m)", round (_ic distance2D _kapiPos)];
+        };
+    };
 } else {
     _atan playActionNow "ThrowGrenade";
     sleep 0.8;

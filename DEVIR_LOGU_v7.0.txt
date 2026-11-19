@@ -3839,3 +3839,8 @@ v8.612 (dal sade-waypoint) 4 KISI ESZAMANLI GIRIS + HIZLI YURUYUS (kullanici: 't
  - CQB yuruyus hizi: addons/main fnc_doAssaultSpeed (LAMBS forceSpeed 3-4 m/sn tavani) ELITE bina saldirisi / temizleme grubunda (lambs_danger_isSweeping) CBA cqbGirisHizi (0-4, varsayilan +2 m/sn) kadar yukselir.
  - SINIR / DOGRULANMADI: LAMBS taskCQB oda temizliginde kendi forceSpeed 4'unu da koyar (hizlanma yalniz doAssaultSpeed uzerinden); hizli giriste kayip riski; oyunda DENENMEDI. NOT: oyunda denenmedi.
 
+v8.613 (dal sade-waypoint) EL BOMBASI PENCERE / EV ICI HILE (kullanici: 'el bombasi atma kalsin pencereye ve evin icine ama tuttursun, burada hileye basvurabilirsin'; RPT e120b9e9: 13 'yay uzerinde engel - atilmadi').
+ - CBA bombaHile (varsayilan ACIK): fnc_patlayici - hedef BINADAYSA (insideBuilding > 0.15, <= 45 m) ve fiziksel yay bulunamazsa (duvar / kapali cam / ust kat) asker ThrowGrenade animasyonu + ucus suresi (min(D / 14, 1.6) sn) sonra bomba hedefin YANINA (<= 1.2 m, +0.3 m yukseklik) dogrudan yaratilir (setVelocity 0, fitil yanar); atici / hedef olurse iptal. fnc_girisBombasi - yay engelliyse bomba ic hedef noktaya (_ic) yaratilir (bombaGT yazilir -> giris takimi fitil sonrasi girer).
+ - HILE: yay fizigini atlar (bomba duvardan 'gecer'); kapatmak icin bombaHile = false (yay engelliyse atilmaz). Dost yaricapi (bombaDostM 8 m), menzil ve diger kurallar aynen.
+ - SINIR / DOGRULANMADI: hedef binadan cikmissa 'insideBuilding' dusuk olabilir (hile calismaz); yaratilan bomba hedefin 1.2 m yaninda patlar (hedef olurse atilmaz); oyunda DENENMEDI. NOT: oyunda denenmedi.
+

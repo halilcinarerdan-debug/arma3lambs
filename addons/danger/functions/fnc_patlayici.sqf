@@ -128,6 +128,24 @@ lambs_danger_patlayiciDon = {
                     } forEach [40, 50, 60, 25, 32, 18, 12, 68, 75];   // v8.597: 75 derece (2. / 3. kat pencereye dik yay)
                     if (_v < 0) then {
                         _sonuc = if (_denenen isEqualTo 0) then {"menzil / yukseklik uygun degil"} else { format ["yay uzerinde engel (%1, yay noktasi %2/8; %3 aci denendi) - atilmadi", _engelAd, _engelI, _denenen] };
+                        // v8.613 HILE: PENCERE / EVIN ICI (kullanici: 'el bombasi atma kalsin pencereye ve evin icine ama tuttursun, burada hileye basvurabilirsin'): hedef BINADAYSA ve fiziksel yay yoksa (duvar / kapali cam / ust kat) animasyon + ucus suresi
+                        //   sonra bomba hedefin YANINA (<= 1.2 m) dogrudan yaratilir (sifir hizla, fitil yanar). CBA bombaHile (varsayilan ACIK); atici / hedef olurse iptal.
+                        if (missionNamespace getVariable ["lambs_danger_bombaHile", true] && {(insideBuilding _t) > 0.15} && {_D <= 45}) then {
+                            _u playActionNow "ThrowGrenade";
+                            sleep 0.8;
+                            if (!alive _u || {!alive _t} || {((magazines _u) findIf {_x isEqualTo _mag}) < 0}) then { _sonuc = "atici / hedef oldu (hile: animasyon sirasinda)"; } else {
+                                sleep ((_D / 14) min 1.6);
+                                if (!alive _t) then { _sonuc = "hedef oldu (hile: ucus sirasinda)"; } else {
+                                    private _hp2 = AGLToASL (((getPosATL _t) getPos [random 1.2, random 360]) vectorAdd [0, 0, 0.3]);
+                                    private _gr = createVehicle [_ammo, ASLToAGL _hp2, [], 0, "CAN_COLLIDE"];
+                                    _gr setPosASL _hp2;
+                                    _gr setVelocity [0, 0, 0];
+                                    _gr setShotParents [_u, _u];
+                                    _u removeMagazine _mag;
+                                    _sonuc = format ["ATILDI (HILE: yay engelli, bomba hedefin yanina yaratildi; hedef %1 m)", round _D];
+                                };
+                            };
+                        };
                     } else {
                         _u playActionNow "ThrowGrenade";
                         sleep 0.8;
