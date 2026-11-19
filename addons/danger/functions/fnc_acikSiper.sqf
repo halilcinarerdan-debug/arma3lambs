@@ -121,6 +121,9 @@ private _govdeR = {
     (([_o] call FUNC(agacProfil)) select 0)
 };
 private _geriMax = [3, 10] select ((getSuppression _u) >= 0.5);
+// v8.664 MESAFEYE OLCEKLI BAND (RPT 5b2735f6 lythium: dusman 316-354 m, agac 22-29 m ileride / 23-28 m geride, 'mesafe bandinda 0' -> aday_yok 14; sabit band [ed - 10, ed + 3] 330 m'de 25 m'lik agaci eliyordu): dusman > 150 m ise ileri sinir ed x 0.12 (10-40 m), geri sinir +ed x 0.03 (<= 12 m)
+private _ileriM = if (_ed > 150) then { ((_ed * 0.12) max 10) min 40 } else {10};
+private _geriG = _geriMax + (if (_ed > 150) then { (_ed * 0.03) min 12 } else {0});
 private _obj = [];
 private _objS = 1e9;
 private _objDurus = "";
@@ -139,7 +142,7 @@ private _objAd = "";
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
         private _r = [_o, (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5] call _govdeR;
         private _pos = _op getPos [_r + 0.05, _en getDir _o];   // v8.639: 0.15 -> 0.05 (3.3 kat yakin; v8.637 0.45 -> 0.15; kullanici: 'agac iyice dibine girsinler', '3.30 kat artsin')
-        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
+        if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - _ileriM)} && {(_pos distance2D _en) <= (_ed + _geriG)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
             private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, (missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]), "NONE"]) isNotEqualTo [] };
             // en yuksek durus: ortadaki isin kapali VE govde genisligi (+-0.25 m) kapali (ince direk / tel siper sayilmaz)
@@ -193,7 +196,7 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
             if (_uzun) then { _r = _r min 0.6; };
             if (!_uzun) then { _r = _r * 0.6; };   // v8.639: cali / fidan: govdeye / yaprak ortusunun ICINE (iyice dibine) gir; gorunmezlik asagidaki VIEW LOD ile dogrulanir
             private _pos = _op getPos [_r + ([0.15, 0.05] select _uzun), _en getDir _o];   // v8.639: cali 0.5 -> 0.15 (+ yaricap x 0.6), agac 0.2 -> 0.05 (3.3 kat yakin)   // v8.637: agac gizlenmesi govdeye 0.2 m (cali 0.5 ayni)
-            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - _ileriM)} && {(_pos distance2D _en) <= (_ed + _geriG)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
                 private _gizli = {
                     params ["_h"];
@@ -248,8 +251,8 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
             if (!_gizler) then { continue };
             private _r = (_pr select 0) min 2.5;   // v8.655: genis geometrili ladin (GEOM kenari) icin 1.5 -> 2.5
             private _pos = _op getPos [_r + 0.1, _en getDir _o];
-            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)}) then { _gvS set [2, (_gvS select 2) + 1]; if !([_pos, _aralik] call _doluMu) then { _gvS set [3, (_gvS select 3) + 1]; }; };
-            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - (_ileriM max 15))} && {(_pos distance2D _en) <= (_ed + (_geriG max 16))}) then { _gvS set [2, (_gvS select 2) + 1]; if !([_pos, _aralik] call _doluMu) then { _gvS set [3, (_gvS select 3) + 1]; }; };
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - (_ileriM max 15))} && {(_pos distance2D _en) <= (_ed + (_geriG max 16))} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _sk = (_u distance2D _pos) + 8;
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
                 if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = (if (!(missionNamespace getVariable ["lambs_danger_agacProfil", true])) then {"MIDDLE"} else { if ((_pr select 5) >= 0.3) then {"UP"} else { if ((_pr select 4) >= 0.3) then {"MIDDLE"} else { if ((_pr select 3) >= 0.3) then {"DOWN"} else {"MIDDLE"} } } }); _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };

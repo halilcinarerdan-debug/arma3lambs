@@ -44,7 +44,7 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             if (_lider) then { _sayac set ["lider", (_sayac get "lider") + 1]; } else {
                 _sayac set ["rol" + _rol, (_sayac getOrDefault ["rol" + _rol, 0]) + 1];
                 // v8.662: rol disiplini: bounding / siper kosucusu (forceMove) olan komutan disi MG / AT / saglikci / nisanci sayilir (eski: hiz > 8 km/sa = grup yuruyusunu de sayiyordu)
-                if (_u getVariable [QGVAR(forceMove), false]) then { _sayac set ["fm" + _rol, (_sayac getOrDefault ["fm" + _rol, 0]) + 1]; };
+                if ((time - (_u getVariable [QGVAR(bndSonKos), -999])) < 20) then { _sayac set ["fm" + _rol, (_sayac getOrDefault ["fm" + _rol, 0]) + 1]; };   // v8.664: forceMove 30+ farkli kaynaktan (geri cekilme, kacis, sarjor siperi, MG yer degistirme...) set edilir; rol ihlali = son 20 sn BOUNDING kosucusu
             };
             // v8.662: GIZLILIK SINIFI: 'siper' = dusman hatti askerin <= 4 m onundeki nesneye carpiyor (gercek siper / gizlenme); 'uzak' = daha uzak nesne / arazi (dogal engel, cover degil); 'acik' = hat acik
             private _pa = (getPosASL _u) vectorAdd [0, 0, 0.9];
@@ -67,7 +67,7 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             private _n = _sayac get "n";
             if (_n > 0) then {
                 private _sN = (_sayac get "sN") max 1;
-                diag_log format ["[COVER-OLCUM] 60 sn: ornek %1 | SIPER (<= 4 m nesne) %2 %% / UZAK ENGEL (arazi / uzak nesne) %3 %% / ACIKTA %4 %% | KUMELENME (4 m icinde >= 2 dost) %5 %% | ort. en yakin dost %6 m | HAREKETSIZ %7 asker: STAND %8 %% CROUCH %9 %% PRONE %10 %% | HAREKETLI %11 | ROL (komutan disi): MG %12 AT %13 MEDIC %14 MARKSMAN %15 RIFLE %16 (komutan %17) | KOSUCU (forceMove) ROLE GORE: RIFLE %18 MG %19 AT %20 MEDIC %21 MARKSMAN %22",
+                diag_log format ["[COVER-OLCUM] 60 sn: ornek %1 | SIPER (<= 4 m nesne) %2 %% / UZAK ENGEL (arazi / uzak nesne) %3 %% / ACIKTA %4 %% | KUMELENME (4 m icinde >= 2 dost) %5 %% | ort. en yakin dost %6 m | HAREKETSIZ %7 asker: STAND %8 %% CROUCH %9 %% PRONE %10 %% | HAREKETLI %11 | ROL (komutan disi): MG %12 AT %13 MEDIC %14 MARKSMAN %15 RIFLE %16 (komutan %17) | BOUNDING KOSUCUSU (son 20 sn) ROLE GORE: RIFLE %18 MG %19 AT %20 MEDIC %21 MARKSMAN %22",
                     _n, round (100 * (_sayac get "siper") / _n), round (100 * (_sayac get "uzak") / _n), round (100 * (_sayac get "acik") / _n), round (100 * (_sayac get "kume") / _n), ((_sayac get "dostMes") / _n) toFixed 1,
                     _sayac get "sN", round (100 * (_sayac get "sSTAND") / _sN), round (100 * (_sayac get "sCROUCH") / _sN), round (100 * (_sayac get "sPRONE") / _sN), _sayac get "hN",
                     _sayac get "rolMG", _sayac get "rolAT", _sayac get "rolMEDIC", _sayac get "rolMARKSMAN", _sayac get "rolRIFLE", _sayac get "lider",

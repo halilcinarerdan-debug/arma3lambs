@@ -601,13 +601,14 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                     _hop = _atl;
                     _acik = 0;
                     // v8.659 BACAK ILERLEME (RPT c46fdbc6: 3 cycle boyunca hep 'bacak 1 / 2'; her kosucu ayni 1. bacaga gidiyor, grup ilerlemiyor: indeks yalniz SONRAKI kosucu bacagin 8 m yakininda basladiginda artiyordu): kosucu bacak noktasina 8 m yaklasinca (<= 25 sn) plan indeksi bir sonraki bacaga gecer -> siradaki ekip (FSE / es) ONDEKI bacaga sicrar (gercek leapfrog)
-                    [_kosan, _pq, group _kosan, _li] spawn {
-                        params ["_k", "_q", "_gr", "_i"];
+                    [_kosan, _pq, group _kosan, _li, _atl] spawn {
+                        params ["_k", "_q", "_gr", "_i", "_hopU"];
                         private _bt = time + 25;
                         waitUntil { sleep 0.5; !alive _k || {time > _bt} || {((getPosATL _k) distance2D _q) < 8} };
-                        if (alive _k && {((getPosATL _k) distance2D _q) < 8} && {(_gr getVariable [QGVAR(bndPlanI), 0]) <= _i}) then {
+                        // v8.664 ILERLEME ESIGI (RPT 5b2735f6: Alpha 1-2 3 cycle boyunca hep 'bacak 1 / 8'; kosucu baski / dusman gorusu yuzunden 8 m yakina varamadan duruyordu): bacagin %60'indan fazlasi alindiysa (kalan <= max(12 m, sicramanin %40'i)) bacak SAYILIR
+                        if (alive _k && {((getPosATL _k) distance2D _q) < ((_hopU * 0.4) max 12)} && {(_gr getVariable [QGVAR(bndPlanI), 0]) <= _i}) then {
                             _gr setVariable [QGVAR(bndPlanI), _i + 1];
-                            _gr setVariable [QGVAR(bndPlanSon), getPosATL _k];   // v8.660: en ileri ulasilan nokta (plan yenilenince oradan baslar)
+                            _gr setVariable [QGVAR(bndPlanSon), getPosATL _k];
                         };
                     };
                     if ((missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) < 30) then {
@@ -649,9 +650,9 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         // v8.533 SICRAMA GUNLUGU (kullanici: 'koordinat eklesene xy'): her sicrama icin kosucu xy -> hedef xy, uzunluk, durus, dusman xy (ilk 80)
         if ((missionNamespace getVariable ["lambs_danger_bndHopLogN", 0]) < 80) then {
             missionNamespace setVariable ["lambs_danger_bndHopLogN", (missionNamespace getVariable ["lambs_danger_bndHopLogN", 0]) + 1];
-            diag_log format ["[BND-HOP] %9 %1 | %2 | xy %3 -> %4 | sicrama %5 m | durus %6 | dusmana %7 m | dusman xy %8",
+            diag_log format ["[BND-HOP] %9 %1 | %2 (%10) | xy %3 -> %4 | sicrama %5 m | durus %6 | dusmana %7 m | dusman xy %8",
                 groupId (group _kosan), name _kosan, (getPosATL _kosan) select [0, 2] apply { round _x }, _movePos select [0, 2] apply { round _x },
-                round (_kosan distance2D _movePos), _stance, round _mesafe, _hedef select [0, 2] apply { round _x }, str (side group _kosan)];
+                round (_kosan distance2D _movePos), _stance, round _mesafe, _hedef select [0, 2] apply { round _x }, str (side group _kosan), [_kosan] call _rolFn];   // v8.664: kosucu ROLU logda
         };
         [_kosan, _movePos, _stance, _hop, _acik]
     };
