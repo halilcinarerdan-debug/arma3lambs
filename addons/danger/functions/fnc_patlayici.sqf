@@ -366,7 +366,7 @@ lambs_danger_patlayiciDon = {
                         _bAday = true;
                         private _kk = ({ (_x select 4) isNotEqualTo _o && {((_x select 4) distance _o) < 12} } count _dusman) + 1;
                         private _deger = _kk >= 2 || {(insideBuilding _o) > 0.2} || {lineIntersects [eyePos _u, eyePos _o, _u, _o]} || {lineIntersects [eyePos _u, (getPosASL _o) vectorAdd [0, 0, 0.6], _u, _o]}
-                            || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu} || {_cqbBomba && {_m <= _cqbM}};
+                            || {(stance _o) in ["CROUCH", "PRONE"]} || {(speed _o) < 1.5 && {_m >= 20}} || {_baskiGev} || {_pusu} || {_cqbBomba && {_m <= _cqbM}} || {missionNamespace getVariable ["lambs_danger_bombaAcik", true]};   // v8.609: acik arazi - deger sarti aranmaz (CBA bombaAcik)
                         if (_deger) then { _bH = _o; _bM = _m; };
                     };
                 } forEach _dusman;
