@@ -232,6 +232,36 @@ lambs_danger_patlayiciDon = {
             } forEach (allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side (group _x)) isNotEqualTo civilian}});
         };
 
+        // ---- SPAWN BOMBASI (v8.608; kullanici: 'her adama zeusta dahil spawnlandiginda envanterine 1 tane m67 ya da f1 tarzi bomba eklensin'): her yerel AI askere (Zeus dahil, her yeni asker) BIR KEZ CBA spawnBomba kadar frag bombasi eklenir; sinif: spawnBombaSinif
+        //   (bos = taraf otomatik: BLUFOR rhs_mag_m67 / HandGrenade; OPFOR rhs_mag_f1 / rhs_mag_rgd5 / MiniGrenade; INDEPENDENT rhs_mag_f1 / HandGrenade; ilk bulunan, frag olan) ----
+        private _sp = missionNamespace getVariable ["lambs_danger_spawnBomba", 1];
+        if (_sp > 0) then {
+            private _spSinif = missionNamespace getVariable ["lambs_danger_spawnBombaSinif", ""];
+            {
+                private _u = _x;
+                if !(_u getVariable [QGVAR(bombaSpawn), false]) then {
+                    _u setVariable [QGVAR(bombaSpawn), true];
+                    private _adayL = if (_spSinif isNotEqualTo "") then { _spSinif splitString ", ;" } else {
+                        switch (side (group _u)) do {
+                            case west: { ["rhs_mag_m67", "HandGrenade"] };
+                            case east: { ["rhs_mag_f1", "rhs_mag_rgd5", "MiniGrenade"] };
+                            default { ["rhs_mag_f1", "HandGrenade"] };
+                        }
+                    };
+                    private _cls = (_adayL select {isClass (configFile >> "CfgMagazines" >> _x) && {[_x] call _fragMi}}) param [0, ""];
+                    if (_cls isNotEqualTo "") then {
+                        private _once = {_x isEqualTo _cls} count (magazines _u);
+                        _u addMagazines [_cls, _sp];
+                        private _eklenen = ({_x isEqualTo _cls} count (magazines _u)) - _once;
+                        if (_eklenen > 0 && {(missionNamespace getVariable ["lambs_danger_spawnBombaLogN", 0]) < 10}) then {
+                            missionNamespace setVariable ["lambs_danger_spawnBombaLogN", (missionNamespace getVariable ["lambs_danger_spawnBombaLogN", 0]) + 1];
+                            diag_log format ["[PATLAYICI] spawn bombasi | %1 | %2 | %3 x%4", name _u, side (group _u), _cls, _eklenen];
+                        };
+                    };
+                };
+            } forEach (allUnits select {local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side (group _x)) isNotEqualTo civilian}});
+        };
+
         // ---- EL BOMBASI EK (v8.607; kullanici: 'el bombasi class name ekleme ayari ekle'): CBA elBombasiSinif (sarjor sinif adi, virgullu liste: HandGrenade, rhs_mag_rgd5) + elBombasiEk (asker basina en az bu kadar); ayar degisince yeniden uygulanir ----
         private _bSinif = missionNamespace getVariable ["lambs_danger_elBombasiSinif", ""];
         private _bAdet = missionNamespace getVariable ["lambs_danger_elBombasiEk", 0];
