@@ -199,16 +199,21 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
 // v8.642 AGAC GEVSEK KULLANIM (kullanici: 'agaclar var zaten agaclari kullanmiyorlar', 'cup agaclari pmc tactical ukraine'; RPT 47dde7ed: aday_yok 14-17 / dk, [AGAC-GIZLEN] 35 m'de 12 agaclik var):
 //   nedenler: (1) CUP / A2 agaclarinin (t_picea / t_pinus / t_populus) cogunda FIRE LOD yok / dar -> sert siper testi ve +-0.2 m yan isin gizlenme testi gecmiyor; (2) aday nokta dusmana mesafe bandi [ed - 10, ed + 3] (geri cekilme siniri 3 m): 100 m'deki dusmana 25 m'den yanal agac bandin disinda kaliyordu.
 //   Son care (hicbir nesne / bitki bulunamadiysa; CBA siperAgacGevsek): yaricap x 1.5 (30-45 m), band [ed - 15, ed + 16]; nokta govdenin dusmana GORE ARKASI (dusman -> govde dogrultusunda, govde + 0.1 m), raycast YOK (geometri: govde dusman ile asker arasinda), durus MIDDLE; en yakin agac (mevzi hafizasi / dolu nokta elenir).
+private _gvS = [0, 0, 0, 0, 1e9, -999];   // v8.645 TANI: [taranan agac, uzun (> 4 m), mesafe bandinda, dolu degil, en yakin agac m, en yakin agacin bant sapmasi m]
 if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacGevsek", true]}) then {
     {
         private _o = _x;
+        _gvS set [0, (_gvS select 0) + 1];
+        if ((_u distance2D _o) < (_gvS select 4)) then { _gvS set [4, _u distance2D _o]; _gvS set [5, ((getPosATL _o) distance2D _en) - _ed]; };
         private _op = getPosATL _o;
         private _bb = boundingBoxReal _o;
         private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
         if (_yk > 4) then {
+            _gvS set [1, (_gvS select 1) + 1];
             private _pr = [_o] call FUNC(agacProfil);   // v8.643: model profili (CUP / A2 agac olcumu)
             private _r = (_pr select 0) min 0.7;
             private _pos = _op getPos [_r + 0.1, _en getDir _o];
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)}) then { _gvS set [2, (_gvS select 2) + 1]; if !([_pos, _aralik] call _doluMu) then { _gvS set [3, (_gvS select 3) + 1]; }; };
             if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {
                 private _sk = (_u distance2D _pos) + 8;
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
@@ -365,7 +370,15 @@ private _edir = _p getDir _en;
 } forEach ((nearestObjects [_p, ["House"], _yar + 12]) select {(count (_x buildingPos -1)) > 0});
 
 if (_en_iyi isEqualTo []) exitWith {
-    if (_obj isNotEqualTo []) then { call _nesneGit } else { _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1]; false }
+    if (_obj isNotEqualTo []) then { call _nesneGit } else {
+        _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1];
+        // v8.645 TANI (kullanici: 'etraflarinda agac var'): aday yoksa 45 m'deki agaclar neden elendi?
+        if ((missionNamespace getVariable ["lambs_danger_adayYokLogN", 0]) < 15) then {
+            missionNamespace setVariable ["lambs_danger_adayYokLogN", (missionNamespace getVariable ["lambs_danger_adayYokLogN", 0]) + 1];
+            diag_log format ["[ACIK-SIPER-RED] %1 | %2 | dusman %3 m | 45 m'de agac %4 | uzun (> 4 m) %5 | mesafe bandinda (dusman %3 m: %6..%7) %8 | dolu degil %9 | en yakin agac %10 m (bant sapmasi %11 m) | gevsek %12 | yaricap %13 m | geriMax %14 m", groupId _g, name _u, round _ed, _gvS select 0, _gvS select 1, round (_ed - 15), round (_ed + 16), _gvS select 2, _gvS select 3, round (_gvS select 4), round (_gvS select 5), missionNamespace getVariable ["lambs_danger_siperAgacGevsek", true], _yar, _geriMax];
+        };
+        false
+    }
 };
 if (_kentsel) then { _sayAS set ["kentsel_bina", (_sayAS getOrDefault ["kentsel_bina", 0]) + 1]; };
 

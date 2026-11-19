@@ -4008,3 +4008,7 @@ v8.644 (dal sade-waypoint) SIPER OTUR DUZELTME (RPT 18ce6e97, v8.643 ilk saha so
  - DEGISIKLIK: tamamlayici SON hedefe (acikSiperHedef) bakar; bekleme 2 sn; varis = hedefe 4 m + hiz < 0.8 (ya da 12 sn); oturtulamazsa neden logu ('oturtulamadi: kalan X m').
  - KALAN: aday_yok 12-17 / dk (agac_gevsek hic cikmadi: 45 m'de uygun agac yok); [ACIKTA-SINIF-OZET] 'hic yok' 52-84 / dk (coverHug'un 20 m taramasi); populus modeli olculemedi.
 
+v8.645 (dal sade-waypoint) ADAY YOK TANISI (kullanici: 'hayir etraflarinda agac var' - aday_yok 12-17 / dk).
+ - RPT 18ce6e97: script hatasi YOK; agac_gevsek sayaci 0; yani gevsek blok calisiyor ama hicbir agaci aday yapmiyor. Kod okumasi: gevsek blok SMALL TREE / TREE, yukseklik > 4 m, mesafe bandi [ed - 15, ed + 16], dolu nokta (yigilmaAralik 6 m + 3 m dost + 8 sn talep) filtresi.
+ - TANI: aday bulunamayan ilk 15 durumda [ACIK-SIPER-RED]: 45 m'deki agac sayisi / uzun (> 4 m) / mesafe bandinda / dolu degil / en yakin agac mesafesi ve bant sapmasi / gevsek acik mi / yaricap / geriMax. Davranis degismedi; hangi filtre eliyor sonraki RPT'de gorulur.
+
