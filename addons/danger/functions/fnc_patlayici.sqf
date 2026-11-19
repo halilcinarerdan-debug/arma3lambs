@@ -93,13 +93,28 @@ lambs_danger_patlayiciDon = {
                     private _engelI = 0;
                     private _denenen = 0;
                     private _yon = _rel getDir _hedef;
+                    // v8.614 NISAN NOKTASI LISTESI (kullanici: 'el bombasi pencereye ve evin icine ama daha iyi tuttursunlar'; hile KALDIRILDI): hedef BINADAYSA yalniz hedef noktasi degil, hedefin <= 5 m'sindeki ayni kat (+-2.5 m) ic pozisyonlari
+                    //   (pencere / kapidan gorulen noktalar dahil) da denenir (bomba olum yaricapi ~5 m: hedefin yakinina duserse yeter); ilk TEMIZ yay (aci x nisan noktasi) atilir.
+                    private _aimList = [_hedef];
+                    if ((insideBuilding _t) > 0.15) then {
+                        private _tAGL = ASLToAGL _hp;
+                        private _icP = ((nearestBuilding _t) buildingPos -1) select {((_x distance2D _tAGL) <= 5) && {(abs ((_x select 2) - (_tAGL select 2))) <= 2.5}};
+                        _icP = [_icP, [], {_x distance2D _tAGL}, "ASCEND"] call BIS_fnc_sortBy;
+                        { _aimList pushBack (AGLToASL (_x vectorAdd [0, 0, 0.3])); } forEach (_icP select [0, 6]);
+                    };
+                    {
+                        if (_v >= 0) then { continue };
+                        _hedef = _x;
+                        _D = sqrt ((((_rel select 0) - (_hedef select 0)) ^ 2) + (((_rel select 1) - (_hedef select 1)) ^ 2));
+                        _dh = ((_hedef select 2) + 0.3) - (_rel select 2);
+                        _yon = _rel getDir _hedef;
                     {
                         if (_v >= 0) then { continue };
                         private _a = _x;
                         private _payda = (_D * (tan _a)) - _dh;
                         if (_payda > 0.5) then {
                             private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _a) ^ 2) * _payda));
-                            if (_vv <= (26 + (2 * (((_dh / 4) max 0) min 1)))) then {   // v8.597: ust kat (>= +4 m) hedefe hiz tavani 26 -> 28 m/sn
+                            if (_vv <= (26 + (4 * (((_dh / 4) max 0) min 1)))) then {   // v8.597: ust kat (>= +4 m) hedefe hiz tavani 26 -> 28 m/sn
                                 private _vk = _vv * (1 + ((random 0.1) - 0.05));
                                 private _vl = [(sin _yon) * (cos _a) * _vk, (cos _yon) * (cos _a) * _vk, (sin _a) * _vk];
                                 private _tTop = _D / ((cos _a) * _vk max 1);
@@ -125,27 +140,10 @@ lambs_danger_patlayiciDon = {
                                 } else { _v = _vk; _th = _a; _vel = _vl; };
                             };
                         };
-                    } forEach [40, 50, 60, 25, 32, 18, 12, 68, 75];   // v8.597: 75 derece (2. / 3. kat pencereye dik yay)
+                    } forEach [40, 50, 60, 45, 55, 35, 30, 25, 20, 15, 12, 68, 72, 76, 80];   // v8.614: 2. / 3. kat (kullanici: '2. kata falan atsinlar'): dik yaylar 72 / 76 / 80 derece, ust kat (>= +4 m) hiz tavani 30 m/sn
+                    } forEach _aimList;   // v8.597: 75 derece (2. / 3. kat pencereye dik yay)
                     if (_v < 0) then {
                         _sonuc = if (_denenen isEqualTo 0) then {"menzil / yukseklik uygun degil"} else { format ["yay uzerinde engel (%1, yay noktasi %2/8; %3 aci denendi) - atilmadi", _engelAd, _engelI, _denenen] };
-                        // v8.613 HILE: PENCERE / EVIN ICI (kullanici: 'el bombasi atma kalsin pencereye ve evin icine ama tuttursun, burada hileye basvurabilirsin'): hedef BINADAYSA ve fiziksel yay yoksa (duvar / kapali cam / ust kat) animasyon + ucus suresi
-                        //   sonra bomba hedefin YANINA (<= 1.2 m) dogrudan yaratilir (sifir hizla, fitil yanar). CBA bombaHile (varsayilan ACIK); atici / hedef olurse iptal.
-                        if (missionNamespace getVariable ["lambs_danger_bombaHile", true] && {(insideBuilding _t) > 0.15} && {_D <= 45}) then {
-                            _u playActionNow "ThrowGrenade";
-                            sleep 0.8;
-                            if (!alive _u || {!alive _t} || {((magazines _u) findIf {_x isEqualTo _mag}) < 0}) then { _sonuc = "atici / hedef oldu (hile: animasyon sirasinda)"; } else {
-                                sleep ((_D / 14) min 1.6);
-                                if (!alive _t) then { _sonuc = "hedef oldu (hile: ucus sirasinda)"; } else {
-                                    private _hp2 = AGLToASL (((getPosATL _t) getPos [random 1.2, random 360]) vectorAdd [0, 0, 0.3]);
-                                    private _gr = createVehicle [_ammo, ASLToAGL _hp2, [], 0, "CAN_COLLIDE"];
-                                    _gr setPosASL _hp2;
-                                    _gr setVelocity [0, 0, 0];
-                                    _gr setShotParents [_u, _u];
-                                    _u removeMagazine _mag;
-                                    _sonuc = format ["ATILDI (HILE: yay engelli, bomba hedefin yanina yaratildi; hedef %1 m)", round _D];
-                                };
-                            };
-                        };
                     } else {
                         _u playActionNow "ThrowGrenade";
                         sleep 0.8;

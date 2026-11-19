@@ -145,7 +145,10 @@ diag_log "[GELIS-YONU] dusman gelis yonu bakisi (acik gorus / yol / kapi) baslat
                 private _hedef = _sn select 0;
                 private _tur = _sn select 1;
                 if (_hedef isNotEqualTo []) then {
-                    if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch (_hedef vectorAdd [0, 0, 1.4]); };   // v8.605: bina icinde geliş yonune namlu yok
+                    if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _u) <= 0.5}) then { _u doWatch (_hedef vectorAdd [0, 0, 1.4]); } else {
+                        private _iw = [_u, _u getDir _hedef] call FUNC(icBakisYonu);   // v8.614: bina icinde gelis yonu = acik yon / merdiven
+                        if (_iw isNotEqualTo []) then { _u doWatch _iw; };
+                    };   // v8.605: bina icinde geliş yonune namlu yok
                     _u setVariable [QGVAR(gelisBakT), time + 12];
                     _say set [0, (_say select 0) + 1];
                     if (_logN < 20) then {
