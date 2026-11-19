@@ -147,7 +147,11 @@ Hedef: cover ve piyade manevrasında gözlemlenen davranışı eğitimli bir piy
 10. **Ağaç / nesne verisi:** kavak (`t_populus`) ölçümü ve ladin (`t_picea2s`, VIEW 0,0) kararı; Lythium / Altis / PMC A/B testleri.
 11. **Kalınlık / penetrasyon (T):** gerçek penetrasyon (ACE balistik) yerine genişlik tabanlı kalınlık; mermi geçirmezlik tablosu.
 
-**8,5 / 10 ne demek (öneri ölçütler; kullanıcı onayı bekler, motor değeri değil):** eğitimli bir gözlemci çoğu senaryoda botu "yetkin eğitimli bir ekip" gibi görür; hatalar nadir ve sinir bozucu değil. Somut eşikler (madde 1 ölçümleri): temas anında açıkta kalma < %10; ort. siper-gövde mesafesi ≤ 1,0 m (karakter çapı yüzünden ~0,7 m fiziksel alt sınır); kümelenme < %5; aynı duruşta kalan < %60; 15 sn içinde yeniden seçim < %10; bounding ortalama ilerleme ≥ 25 m / dk (açık arazide); peek tetiği görüş kapalıyken > %0 ve kalkışların >%80'i ateşle sonuçlanır; baskı altında koşan asker ölümü ≤ gözlenen insan oyuncu benzeri (karşılaştırma testi, T).
+**8,5 / 10 ne demek (revize; ilk taslaktaki sabit eşikler kaynaksız / uydurmaydı, kaldırıldı):** ölçütler sabit sayı değil, İNSAN REFERANSI ile karşılaştırma:
+- Aynı senaryo, aynı harita / bölge, aynı mesafe ve düşman düzeninde deneyimli bir insan oyuncu (kullanıcı) bir takımı yönetir; madde 1'in ölçüm katmanı o oyunun sayılarını kaydeder (açıkta kalma %, ort. siper-gövde mesafesi, kümelenme, duruş dağılımı, 15 sn içinde yeniden seçim, bounding ilerleme m / dk, peek / kalkış sayısı, kayıp).
+- AI aynı sayılarda insan referansının ±%20 bandına girerse o ölçüt "geçti"; ölçütlerin çoğu bantta ve gözlemci "yetkin eğitimli ekip" diyorsa ~8,5. Ölçütler haritaya, düşman sayısına ve mesafeye göre değiştiği için sabit eşik KULLANILMAZ.
+- Doktrin sayıları (bounding hızı, siper aralığı) yalnız kaynağı doğrulanırsa eklenir (TC 3-21.8 / MCWP 3-11.1 gibi kaynakların sayfa / bölümü okunmadan yazılmaz; şu an doğrulanmadı = T).
+- Motor sınırları (lean yok, gecikmeli emir, ince navmesh yok) nedeniyle 10/10 hedef değildir; tavan öz değerlendirme ile 8–8,5.
 
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
