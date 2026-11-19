@@ -284,27 +284,28 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
 if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
     {
         private _r = _x;
-        for "_ai" from 0 to 7 do {
-            private _pt = _p getPos [_r, (_ai * 45) + (_u getDir _en)];
+        for "_ai" from 0 to 11 do {   // v8.673: 8 -> 12 yon (cukur / yamac aramasi daha sik)
+            private _pt = _p getPos [_r, (_ai * 30) + (_u getDir _en)];
             if (!surfaceIsWater _pt && {(_pt distance2D _en) >= (_ed - 10)} && {(_pt distance2D _en) <= (_ed + _geriMax)} && {!([_pt, _aralik] call _doluMu)}) then {
                 private _ptASL = AGLToASL [_pt select 0, _pt select 1, 0];
                 private _dn = "";
                 private _dc = 0;
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
-                    private _sk = _r + _dc + 6;
+                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 4]) max 0 min 12);   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar')
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
                 };
             };
         };
-    } forEach [4, 8, 12];
+    } forEach [4, 8, 12, 18, 25];   // v8.673: 18 / 25 m halkalari (yamac / cukur 25 m'ye kadar)
 };
 
 // v8.520 KENTSEL ONCELIK (kullanici: 'ev ici ve meskun mahalde oncelik'; RPT 14:10 Altis 'cover': 55 kurtarmanin 0'i bina, 34'u cam agaci - cevrede dukkan / ev varken): girilebilir >= 2 bina varsa (_yar + 10 m)
 //   NESNE (agac / kaya / duvar) sonucu ERTELENIR, once BINA (atis pozisyonu / gizli nokta) aranir; bina bulunamazsa ertelenen nesne uygulanir. CBA lambs_danger_kentselOncelik (varsayilan acik).
 private _nesneGit = {
     _sayAS set ["nesne", (_sayAS getOrDefault ["nesne", 0]) + 1];
+    if (_objAd isEqualTo "ARAZI KIVRIMI") then { _sayAS set ["arazi_kivrimi", (_sayAS getOrDefault ["arazi_kivrimi", 0]) + 1]; };   // v8.673: arazi (cukur / yamac) secimi sayaci
     _dolu pushBack [_obj, time];
     missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
     [_obj, _objAd] call _talepYaz;
