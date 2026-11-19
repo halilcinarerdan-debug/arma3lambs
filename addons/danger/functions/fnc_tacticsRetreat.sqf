@@ -439,6 +439,21 @@ if (EGVAR(main,debug_functions)) then {
         private _maxHiz = 0;   // v8.685: sicrama boyunca kosucularin en yuksek hizi (km/sa) - 'hic kalkmadi' (durgun) sicramayi 'kalkti ama varamadi' sicramadan ayirir
         while {time < _bitis && {!isNull _grup}} do {
             { if (alive (_x select 0)) then { _maxHiz = _maxHiz max (abs (speed (_x select 0))); }; } forEach _varis;
+            // v8.686 ILK SANIYELER IZI (kullanici: 'sonraki rpt'den sonra fixlediginde saglikli olur mu'; kok neden kanitsiz: kosucular ilk 10-25 sn komut MOVE / hiz 0 ile durdu): sicramanin ilk 20 sn'sinde her kosucu icin 1 sn'de bir
+            //   hiz / animasyon / komut / hedef modu / durus / baski / unitReady / hedef (saldiri hedefi) / son ates / aktif tutucu degiskenler; en cok 160 satir. YALNIZ OLCUM.
+            if ((time - _t0) <= 20 && {(missionNamespace getVariable ["lambs_danger_retIzN", 0]) < 160}) then {
+                {
+                    private _bI = _x select 0;
+                    if (alive _bI && {!(_bI in _pinned)}) then {
+                        missionNamespace setVariable ["lambs_danger_retIzN", (missionNamespace getVariable ["lambs_danger_retIzN", 0]) + 1];
+                        private _atk = getAttackTarget _bI;
+                        diag_log format ["[GERI-CEKILME-IZ] %1 sicrama %2 t+%3 | %4%5 | hiz %6 | anim %7 | komut %8 | hedef modu %9 | durus %10 / unitPos %11 | baski %12 | ready %13 | saldiri hedefi %14 | son ates %15 sn | tutucu: tk %16 hug %17 acikSiper %18 | hedefe %19 m",
+                            groupId _grup, _no, round (time - _t0), name _bI, ["", " (K)"] select (_bI isEqualTo (leader _grup)), round (speed _bI), animationState _bI, currentCommand _bI, ((expectedDestination _bI) select 1), stance _bI, unitPos _bI,
+                            (getSuppression _bI) toFixed 2, unitReady _bI, (if (isNull _atk) then {"-"} else {str (round (_bI distance2D _atk)) + " m"}), round (time - (_bI getVariable [QGVAR(sonAtisT), -999])),
+                            (if (time < (_bI getVariable [QGVAR(taktikKilit), 0])) then {"1"} else {"0"}), (if ((time - (_bI getVariable [QGVAR(hugAt), -999])) < 8) then {"1"} else {"0"}), (if (!isNil {_bI getVariable QGVAR(acikSiperHedef)}) then {"1"} else {"0"}), round (_bI distance2D (_x select 1))];
+                    };
+                } forEach _varis;
+            };
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
             {
                 private _b = _x select 0;
