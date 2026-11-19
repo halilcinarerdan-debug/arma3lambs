@@ -234,6 +234,38 @@ private _nesneGit = {
     _u forceSpeed -1;
     _u setSpeedMode "FULL";
     _u doMove _obj;
+    // v8.641 SIPER NOKTASINA OTUR (kullanici: 'arada 2 metre var', RPT 47dde7ed: [SIPER-YAPIS] YAPISTI satiri HIC yok -> coverHug kayma kolu bu askerlerde calismiyor; asker doMove toleransinda (~1-2 m) duruyor):
+    //   bu dalin KENDI tamamlayicisi: hareket 1.2 sn sonra baslar, asker durdugunda (< 0.8 m/sn, 8 m icinde) ya da 12 sn sonra, hedef hala ayni siper noktasiysa 0.15-6 m kalan mesafe yumusak kayarak (ayak hatti GEOM acik) kapatilir; hat kapaliysa (govde araya girer) doMove tekrar
+    [_u, _obj] spawn {
+        params ["_a", "_pt"];
+        sleep 1.2;
+        private _bit = time + 12;
+        waitUntil {
+            sleep 0.4;
+            !alive _a || {time > _bit} || {((_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0) isNotEqualTo _pt} || {(((getPosATL _a) distance2D _pt) < 8) && {(speed _a) < 0.8}}
+        };
+        if (!alive _a || {((_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0) isNotEqualTo _pt}) exitWith {};
+        private _p1 = +_pt;
+        _p1 set [2, (getPosATL _a) select 2];
+        private _p0 = getPosATL _a;
+        private _d0 = _p0 distance2D _p1;
+        if (_d0 >= 0.15 && {_d0 <= 6} && {!surfaceIsWater _p1}) then {
+            if ((lineIntersectsSurfaces [(getPosASL _a) vectorAdd [0, 0, 0.6], (AGLToASL _p1) vectorAdd [0, 0, 0.6], _a, objNull, true, 1, "GEOM", "NONE"]) isEqualTo []) then {
+                private _ad = (ceil (_d0 * 4)) max 6 min 24;
+                for "_k" from 1 to _ad do {
+                    if (!alive _a) exitWith {};
+                    _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / _ad)));
+                    sleep 0.05;
+                };
+                if ((missionNamespace getVariable ["lambs_danger_siperOturLogN", 0]) < 25) then {
+                    missionNamespace setVariable ["lambs_danger_siperOturLogN", (missionNamespace getVariable ["lambs_danger_siperOturLogN", 0]) + 1];
+                    diag_log format ["[SIPER-OTUR] %1 | %2 | siper noktasina %3 m kaldi -> oturtuldu", groupId (group _a), name _a, _d0 toFixed 2];
+                };
+            } else {
+                _a doMove _pt;
+            };
+        };
+    };
     _u setUnitPos "UP";
     [_u, _obj, _en, _objDurus] call FUNC(siperZorla);   // v8.510: ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
     [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
