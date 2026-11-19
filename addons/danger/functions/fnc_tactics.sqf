@@ -186,6 +186,7 @@ if (
         case "HOLD": {
             // tacticsHold(_group, _delay): 2. parametre SURE (sn); kilidi ve enableAttack'i kendisi geri verir
             _group setVariable [QGVAR(isExecutingTactic), true];
+            [_group, _target] call FUNC(savunmaYerlesim);   // v8.675: 'mis gibi' avantajli yer varsa manga oraya yerlesir (fnc_avantajliYer SAVUNMA; CBA avantajBagla)
             [_group, 20] call FUNC(tacticsHold);
         };
         case "DELAY": {

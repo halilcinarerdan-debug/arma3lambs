@@ -950,6 +950,13 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         if (_cycleCount isEqualTo 1) then {
             private _kurulum = [];
             private _hakimMaxM = 0;   // v8.669: hakim noktaya en uzun yol (kurulum bekleme suresi icin)
+            // v8.675 AVANTAJLI YER BAGLANTISI (kullanici: 'mis gibi yer varsa manga orayi kullansin'): ates ekibi (FSE) icin 80 m icinde 'mis gibi' bir yer (fnc_avantajliYer BND: atis alani + yukseklik + koy / ev + siper) varsa
+            //   MG / nisanci / AT disindaki ates ekibi askerleri o yerin etrafinda dusman yonune dik hatta 5 m arayla dizilir (MG / nisanci / AT kendi hakimNokta secimini korur). CBA avantajBagla.
+            private _yerB = [];
+            private _yerBi = 0;
+            if ((missionNamespace getVariable ["lambs_danger_avantajBagla", true]) && {missionNamespace getVariable ["lambs_danger_avantajliYer", true]}) then {
+                _yerB = [getPosATL (leader _group), _target, 80, "BND"] call FUNC(avantajliYer);
+            };
             {
                 if (alive _x && {isNull objectParent _x}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
@@ -971,6 +978,16 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                         if (_hk isNotEqualTo []) then {
                             _ow = [[_hk select 0, "DOWN"]];
                             diag_log format ["[ARAZI-KOMUTAN] %1 | %2 hakim noktaya gozetleme: +%3 m yuksek", groupId _group, name _x, (_hk select 1) toFixed 1];
+                        };
+                    };
+                    if (_hkN isEqualTo [] && {_yerB isNotEqualTo []}) then {
+                        private _yb = _yerB select 0;
+                        private _offB = ((_yerBi mod 5) - 2) * 5;
+                        _yerBi = _yerBi + 1;
+                        private _pB = _yb getPos [abs _offB, (_yb getDir _target) + ([90, -90] select (_offB < 0))];
+                        if (!surfaceIsWater _pB) then {
+                            _ow = [[_pB, ["MIDDLE", "DOWN"] select ((_pB distance2D _target) >= 150)]];
+                            _hakimMaxM = _hakimMaxM max (_x distance2D _pB);
                         };
                     };
                     if (_ow isNotEqualTo []) then {

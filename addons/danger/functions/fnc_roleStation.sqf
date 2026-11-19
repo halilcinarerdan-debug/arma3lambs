@@ -349,14 +349,27 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                 // ---------------------------------------------------------
                 // UGL: piyadeye 40mm (tacticalUGL kendi cooldown / uygunluk kontrolunu yapar); v8.284: salvo normalde de 2 (eskiden 1)
                 if (_glM isNotEqualTo "") then {
+                    // v8.675 UGL ADAY TARAMASI (kullanici: 'ugl kullanimi asiri nadir, ellerinde var degerlendirmiyorlar'; RPT 8f8a8871: BATI'nin 2 M203'lusu 2.5 dk'da 13 karar, her denemede YALNIZ en yakin dusman): en yakin dusman menzil disi / dost yakin / hat engelli ise
+                    //   atis hic denenmiyordu. Simdi en yakin + bilinen (SUPHE) diger piyadeler (400 m): once hatti KAPALI (siperde / saklanan: 40 mm ust eger), sonra yakin olan; ilk 3 aday sirayla denenir, biri atinca durulur.
+                    //   Kapatma: lambs_danger_uglAdayTara = false.
                     private _e = _u findNearestEnemy _u;
-                    if (!isNull _e && {_e isKindOf "CAManBase"}) then {
-                        // v8.62: hucum ailesi kararinda (ASSAULT / SUPPRESS_ASSAULT / FLANK) UGL HAZIRLIK ATESI zorla (kontroller atlanir; guvenlik / menzil / mermi / dost yine kontrol edilir)
-                        private _zorla = ((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["ASSAULT", "SUPPRESS_ASSAULT", "FLANK"]);
-                        if ([_u, _e, _zorla, 2] call _uglFn) then {
-                            diag_log format ["[ROL-GOREV] %1 | %2 | UGL -> %3 (%4m)", groupId _g, name _u, name _e, round (_u distance2D _e)];
+                    private _uglAd = [];
+                    if (!isNull _e && {_e isKindOf "CAManBase"}) then { _uglAd pushBack _e; };
+                    if (missionNamespace getVariable ["lambs_danger_uglAdayTara", true]) then {
+                        private _uEsik = ["SUPHE"] call FUNC(bilgiEsik);
+                        private _tg = ((_u targets [true, 400]) select {alive _x && {_x isKindOf "CAManBase"} && {_x isNotEqualTo _e} && {(_u knowsAbout _x) >= _uEsik}}) apply {
+                            [[1, 0] select (lineIntersects [eyePos _u, eyePos _x, _u, _x]), (_u distance2D _x) + (random 0.001), _x]
                         };
+                        _tg sort true;
+                        { _uglAd pushBack (_x select 2); } forEach (_tg select [0, 3]);
                     };
+                    // v8.62: hucum ailesi kararinda (ASSAULT / SUPPRESS_ASSAULT / FLANK) UGL HAZIRLIK ATESI zorla (kontroller atlanir; guvenlik / menzil / mermi / dost yine kontrol edilir)
+                    private _zorla = ((_g getVariable [QGVAR(cmdLastDecision), ""]) in ["ASSAULT", "SUPPRESS_ASSAULT", "FLANK"]);
+                    {
+                        if ([_u, _x, _zorla, 2] call _uglFn) exitWith {
+                            diag_log format ["[ROL-GOREV] %1 | %2 | UGL -> %3 (%4m)%5", groupId _g, name _u, name _x, round (_u distance2D _x), ["", " [aday " + str (_forEachIndex + 1) + "]"] select (_forEachIndex > 0)];
+                        };
+                    } forEach _uglAd;
                 };
 
                 // MG: hat kapaliysa alana baski (atis ussu ates kesmesin)

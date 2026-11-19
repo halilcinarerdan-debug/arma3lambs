@@ -22,7 +22,7 @@ Varsayilan deger = eski sabit => profil yoksa / "GENEL" ise davranis degismez.
 | cekilKayip | 0.4 | Bu kayip oraninda WITHDRAW |
 | peelOran / peelKayip | 1.6 / 0.1 | Guc dezavantaji + kayip -> PEEL |
 | kucukEkip / yakinM | 3 / 60 | Kucuk ekip veya yakin dusman: kosarak kacma yerine DELAY |
-| uglUzakM / uglUzakAralik | 200 / 25 | Uzak 40mm atis araligi |
+| uglUzakM / uglUzakAralik | 300 / 6 (v8.675) | Uzak 40mm atis araligi |
 | uglRezerv / uglRezervM | 3 / 120 | Mermi rezervi ve uzak atis siniri |
 | arkaGuvenlik / arkaGuvenlikMinKisi | true / 6 | CQB arka guvenlik askeri |
 
