@@ -52,7 +52,7 @@ private _red = {
     if (isNil "lambs_danger_uglOzetBasladi") then {
         lambs_danger_uglOzetBasladi = true;
         [] spawn {
-            private _adlar = ["cooldown", "mermi_yok", "menzil", "uzak_aralik", "dost_yakin", "guvenlik", "uygun_degil", "rezerv", "yuklu_HE_yok", "isik_duman", "ATIS"];
+            private _adlar = ["cooldown", "mermi_yok", "menzil", "uzak_aralik", "dost_yakin", "guvenlik", "uygun_degil", "rezerv", "yuklu_HE_yok", "isik_duman", "grup_aralik", "ATIS"];
             private _onceki = [];
             while {true} do {
                 sleep 30;
@@ -72,6 +72,10 @@ private _red = {
 };
 // v8.284 UGL SIKLIGI BOOST (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla'): birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown)
 if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < ((missionNamespace getVariable ["lambs_danger_uglCooldown", 2]) * ([1, 1, 3] select (["cag"] call FUNC(cag))))) exitWith {"cooldown" call _red};
+// v8.676 GRUP UGL ARALIGI (RPT aa324317 Altis: 8-10 bombaatar, ilk 30 sn'de 47, 2.5 dk'da 118 atis = ~1.5 atis / sn; ses 'dongusu' + motor ses hatasi (ugl_distshot_02.wss multi-stream)): ayni grubun iki 40 mm atisi arasi en az lambs_danger_uglGrupAralik sn
+//   (varsayilan 3; zorla / hucum hazirligi yarisi; 0 = kapali). Birim cooldown'a EK sinirdir.
+private _gAr = ((missionNamespace getVariable ["lambs_danger_uglGrupAralik", 3]) max 0) * ([1, 0.5] select _force);
+if (_gAr > 0 && {(time - ((group _unit) getVariable [QGVAR(uglGrupLast), -999])) < _gAr}) exitWith {"grup_aralik" call _red};
 
 // ---------------------------------------------------------------------------
 // UGL muzzle (silah basina onbellek) + mermi var mi
@@ -196,6 +200,7 @@ if (_isik || {_isikli} || {_guc <= 0}) exitWith {"isik_duman" call _red};
 // ATIS — dogrudan HE: muzzle sec, hedefe bak, 1.5 sn sonra fireAtTarget, 2 sn sonra tufege don
 // ---------------------------------------------------------------------------
 _unit setVariable [QGVAR(uglLast), time];
+(group _unit) setVariable [QGVAR(uglGrupLast), time];
 "ATIS" call _red;
 if ((missionNamespace getVariable ["lambs_danger_uglKararN", 0]) < 60) then {
     missionNamespace setVariable ["lambs_danger_uglKararN", (missionNamespace getVariable ["lambs_danger_uglKararN", 0]) + 1];
