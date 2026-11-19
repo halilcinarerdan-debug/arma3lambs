@@ -126,7 +126,7 @@ lambs_danger_patlayiciDon = {
                                 // v8.624 DIK INIS YASAK (kullanici: 'el bombalarini pencereye tutturamiyorlar'; RPT 1a697d94: 76-80 derece lob, 14-17 m, bomba cati / duvara dusup geri teper; ayrica 49-57 m'ye atis): bina ici hedefte son inis acisi > 52 derece ya da mesafe > 40 m ise yay 'engelli' sayilir (pencere / kapidan girmek icin yatay inis gerekir)
                                 private _inis = (-((_vl select 2) - (9.81 * _tTop))) atan2 ((cos _a) * _vk);
                                 private _binaHedef = (insideBuilding _t) > 0.15;
-                                if (_binaHedef && {(_inis > 52) || {_D > 40}}) then {
+                                if (_binaHedef && {(_inis > (missionNamespace getVariable ["lambs_danger_bombaInisMaks", 52])) || {_D > (missionNamespace getVariable ["lambs_danger_bombaMesafeMaks", 40])}}) then {   // v8.635: CBA bombaInisMaks / bombaMesafeMaks
                                     _engel = true;
                                     _ni = 0;
                                     _ad = format ["dik inis %1 derece / mesafe %2 m (pencereye girmez)", round _inis, round _D];

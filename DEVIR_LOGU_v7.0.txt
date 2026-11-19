@@ -3952,3 +3952,7 @@ v8.634 (dal sade-waypoint) SIPERE GERCEKTEN YAKLASSINLAR (kullanici: 'abi botlar
  - DEGISIKLIK: fnc_coverHug 'acikta' dalinda: fnc_acikSiper'in SON hedef noktasi (acikSiperHedef, <= 40 sn) 3.5 m icindeyse ve asker durmussa (< 1.5 m/sn), 6 sn'de bir nokta (nesnenin 0.45 m arkasi) 8 adimda yumusak kayarak (setPosATL, ~0.5 sn) hedefe oturtulur; [SIPER-YAPIS] ... YAPISTI logu (ilk 20). Diger yapisma mantigi ayni.
  - SINIR: acikSiper hedefi doMove ile secilmis, asker varista ~0-3.5 m sapmis olabilir; 0.15 m altinda kayma yapilmaz; setPosATL kisa kayma gorulur (agac icine / govdeye gomulme riski dusuk: nokta zaten govdenin 0.45 m arkasi); bu haritada 18 m icinde hic nesne olmayan bolgelerde (SIPER-TANI TREE:0) siper adayi YOK (kod cozemez); oyunda DENENMEDI.
 
+v8.635 (dal sade-waypoint) BOMBA INIS ACISI / MESAFE CBA (kullanici: '3 kat fixlenir', 'ver bana ayarliyim cbadan').
+ - v8.624'te sabit kodlanan bina ici hedef siniri (son inis acisi <= 52 derece, mesafe <= 40 m) CBA'ya tasindi: lambs_danger_bombaInisMaks (30-85, varsayilan 52) ve lambs_danger_bombaMesafeMaks (15-80, varsayilan 40); kategori 'patlayici'. 2. / 3. kat pencere icin inis acisi 60-75'e cikarilabilir (geri tepme riski artar).
+ - NOT: oyunda DENENMEDI; '3 kat' ifadesinin 3. kat bomba atisi anlamina geldigi VARSAYILDI.
+
