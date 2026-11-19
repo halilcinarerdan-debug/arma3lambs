@@ -26,7 +26,8 @@ if (_hits isEqualTo []) exitWith {[true, 0, 0, 0, _eg]};
 private _tablo = [
     [["cloth", "tarp", "tent", "curtain", "camonet", "thatch", "straw", "hay"], 4, 0.02],
     [["bush", "foliage", "palm", "leaf", "branch", "hedge"], 10, 0.3],
-    [["wood", "plank", "plywood", "board", "pallet", "fence", "crate", "barn", "hut", "shack", "shed", "door"], 30, 0.04],
+    // v8.672 AGAC / ODUN (kullanici: 'mermi engellemiyor', Lythium jbad_t_amygdalusc2s govde 0.2-0.3 m; RPT 04a53ab5 [AGAC-PROFIL] 'mermi durdurur true'): odun 30 -> 6 / m (5.56 ~2.1 etkili guc: 0.3 m gövde 1.8 GECER, 0.5 m 3.0 durdurur; 7.62 ~3.0: 0.5 m gecer); agac adlari (t_ / tree / tur adlari) odun satirinda (eskiden bilinmeyen = direnc 40 -> her agac durdurur sayiliyordu)
+    [["wood", "plank", "plywood", "board", "pallet", "fence", "crate", "barn", "hut", "shack", "shed", "door", "_t_", "tree", "picea", "populus", "amygdal", "pinus", "quercus", "fagus", "betula", "olea", "fraxinus"], 6, 0.3],
     [["sandbag", "hesco", "gabion"], 50, 0.4],
     [["brick", "block", "cinder"], 60, 0.2],
     [["concrete", "bunker", "pillar", "cement"], 100, 0.2],

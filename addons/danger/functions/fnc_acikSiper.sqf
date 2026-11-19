@@ -280,7 +280,8 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
 
 // v8.516 ARAZI KIVRIMI ARKASI (RPT 13:27 chernarus_summer: agaclarin %75'inde FIRE LOD yok, gövde genisligi medyan 0.00 m; nesne siperi gorus keser ama mermi durdurmaz): nesne siperi de bulunamazsa
 //   cevrede (4 / 8 / 12 m halkalarda 8 yon) dusman gozunden arazi kivrimiyle (terrainIntersectASL) gizlenen en yakin nokta: 0.4 m kapali = yat, 1.0 m kapali = comel. Kapatma: lambs_danger_siperArazi = false.
-if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi", true]}) then {
+// v8.672: artik nesne bulunsa da ARAZI adaylari nesneyle YARISIR (kullanici: 'mermi engellemiyor'; Lythium'da tek nesne siper ince agac = yalniz gizlenme, mermi gecer): arazi kivrimi hem gizler hem mermiyi durdurur; sabit 8 -> 6.
+if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
     {
         private _r = _x;
         for "_ai" from 0 to 7 do {
@@ -291,7 +292,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi
                 private _dc = 0;
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
-                    private _sk = _r + _dc + 8;
+                    private _sk = _r + _dc + 6;
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
                 };
