@@ -4041,3 +4041,8 @@ v8.650 (dal sade-waypoint) KENDI SIPERINDE KAL (RPT d6ee1c87, v8.649, pmc_ukrain
  - DEGISIKLIK: fnc_acikSiper basinda: asker son 60 sn'de KENDI sectigi siper noktasinin 1.5 m icindeyse ve dusman gozunden hala gizliyse (VIEW LOD / arazi hatti arada) yeniden secim yok (baski >= 0.9 ise yine bakar); 6 sn bekleme.
  - SINIR: gizlilik VIEW LOD'a gore (yaprak seyrek ise yanlis 'gizli'); dusman yer degistirirse 60 sn'ye kadar eski siperde kalabilir (gorus hatti acilirsa yeniden secer); oyunda DENENMEDI.
 
+v8.651 (dal sade-waypoint) KALAN SORUNLAR (kullanici: 'kalan sorunlari duzelt').
+ - (1) AGAC-PROFIL tutarsiz (t_picea3f 0.7 <-> 0.0, populus / pinuse2s_ep1 0.0): eslestirme 'ayni nesne' yerine 'ayni nesne YA DA ayni MODEL' (terrain nesne tutamaci farkli donebilir); ayni modelin ilk 3 ornegi olculur, her alanin EN BUYUK degeri alinir, 3. ornekte onbellege yazilir (log '3 ornegin en buyugu', ilk 40 model).
+ - (2) aday_yok istatistigi: HQ test kuklalari (dusman 4 m) sayiyi sisiriyordu; dusman < 15 m ayri sayac 'aday_yok_yakin', [ACIK-SIPER-RED] logu yalniz >= 15 m.
+ - DEGISMEYEN / BILINEN: t_picea2s anormal FIRE 4.2-4.4 m (VIEW dar); uzak siperde (> 25 m) varamayan askerler ('kalan 39 m'); ates birakma (uzak kosu); yatik duruste gorus daralmasi (SIPER-MIKRO nadir tetikliyor); oyunda DENENMEDI.
+

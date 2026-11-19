@@ -381,9 +381,9 @@ private _edir = _p getDir _en;
 
 if (_en_iyi isEqualTo []) exitWith {
     if (_obj isNotEqualTo []) then { call _nesneGit } else {
-        _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1];
+        if (_ed >= 15) then { _sayAS set ["aday_yok", (_sayAS getOrDefault ["aday_yok", 0]) + 1]; } else { _sayAS set ["aday_yok_yakin", (_sayAS getOrDefault ["aday_yok_yakin", 0]) + 1]; };   // v8.651: dusman < 15 m (CQB / acikta duran test kuklasi) ayri sayilir
         // v8.645 TANI (kullanici: 'etraflarinda agac var'): aday yoksa 45 m'deki agaclar neden elendi?
-        if ((missionNamespace getVariable ["lambs_danger_adayYokLogN", 0]) < 15) then {
+        if (_ed >= 15 && {(missionNamespace getVariable ["lambs_danger_adayYokLogN", 0]) < 15}) then {
             missionNamespace setVariable ["lambs_danger_adayYokLogN", (missionNamespace getVariable ["lambs_danger_adayYokLogN", 0]) + 1];
             diag_log format ["[ACIK-SIPER-RED] %1 | %2 | dusman %3 m | 45 m'de agac %4 | uzun (> 4 m) %5 | mesafe bandinda (dusman %3 m: %6..%7) %8 | dolu degil %9 | en yakin agac %10 m (bant sapmasi %11 m) | gevsek %12 | yaricap %13 m | geriMax %14 m", groupId _g, name _u, round _ed, _gvS select 0, _gvS select 1, round (_ed - 15), round (_ed + 16), _gvS select 2, _gvS select 3, round (_gvS select 4), round (_gvS select 5), missionNamespace getVariable ["lambs_danger_siperAgacGevsek", true], _yar, _geriMax];
         };

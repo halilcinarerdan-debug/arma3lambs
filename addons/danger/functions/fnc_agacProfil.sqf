@@ -36,9 +36,9 @@ private _tara = {
     for "_i" from -30 to 30 do {
         private _ofs = _i * 0.1;
         private _hA = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -6, 0], _bas vectorAdd [_ofs, 6, 0], objNull, objNull, true, 3, _lod, "NONE"];
-        if ((_hA findIf {(((_x select 0) distance2D _tp) < 3) && {((_x select 2) isEqualTo _o)}}) > -1) then { _nA = _nA + 1; };
+        if ((_hA findIf {(((_x select 0) distance2D _tp) < 3) && {(((_x select 2) isEqualTo _o) || {!isNull (_x select 2) && {(toLower ((getModelInfo (_x select 2)) select 0)) isEqualTo _m}})}}) > -1) then { _nA = _nA + 1; };
         private _hB = lineIntersectsSurfaces [_bas vectorAdd [-6, _ofs, 0], _bas vectorAdd [6, _ofs, 0], objNull, objNull, true, 3, _lod, "NONE"];
-        if ((_hB findIf {(((_x select 0) distance2D _tp) < 3) && {((_x select 2) isEqualTo _o)}}) > -1) then { _nB = _nB + 1; };
+        if ((_hB findIf {(((_x select 0) distance2D _tp) < 3) && {(((_x select 2) isEqualTo _o) || {!isNull (_x select 2) && {(toLower ((getModelInfo (_x select 2)) select 0)) isEqualTo _m}})}}) > -1) then { _nB = _nB + 1; };
     };
     (_nA max _nB) * 0.1
 };
@@ -47,12 +47,22 @@ private _geom = 0;
 private _v04 = 0;
 private _v10 = 0;
 private _v16 = 0;
-private _r = 0.4;
 if (_acik) then {
     _geom = ["GEOM", 1.1] call _tara;
     _v04 = ["VIEW", 0.4] call _tara;
     _v10 = ["VIEW", 1.0] call _tara;
     _v16 = ["VIEW", 1.6] call _tara;
+};
+// v8.651 BIRLESTIR (RPT aff9b168 / d6ee1c87: ayni model kosudan kosuya 0.0 <-> 0.7 m: tek ornekten olcum guvenilmez): ayni modelin ilk 3 ornegi olculur, her alanin EN BUYUK degeri alinir; 3. ornekte onbellege yazilir
+private _acc = lambs_danger_agacProfilH getOrDefault [_anahtar + "#acc", [0, 0, 0, 0, 0]];
+_fire = _fire max (_acc select 0);
+_geom = _geom max (_acc select 1);
+_v04 = _v04 max (_acc select 2);
+_v10 = _v10 max (_acc select 3);
+_v16 = _v16 max (_acc select 4);
+lambs_danger_agacProfilH set [_anahtar + "#acc", [_fire, _geom, _v04, _v10, _v16]];
+private _r = 0.4;
+if (_acik) then {
     {
         private _rr = _x / 2;
         if (_rr >= 0.1 && {_rr <= 1.0}) exitWith { _r = _rr; };
@@ -61,14 +71,11 @@ if (_acik) then {
     _r = if (_fire <= 0) then {0.5} else { ((_fire / 2) max 0.2) min 0.7 };
 };
 private _p = [_r, _fire, _geom, _v04, _v10, _v16, _fire >= 0.15];
-// hicbir LOD'da hicbir sey olculemediyse (hepsi 0) bu ORNEK kotu olabilir: onbellege ALMA, sonraki 2 ornekte tekrar dene (3. denemede 0'la onbellekle)
-if (_fire <= 0 && {_geom <= 0} && {_v04 <= 0} && {_v10 <= 0} && {_v16 <= 0}) then {
-    private _den = (lambs_danger_agacProfilH getOrDefault [_anahtar + "#n", 0]) + 1;
-    lambs_danger_agacProfilH set [_anahtar + "#n", _den];
-    if (_den < 3) exitWith { _p };
-};
+private _n = (lambs_danger_agacProfilH getOrDefault [_anahtar + "#n", 0]) + 1;
+lambs_danger_agacProfilH set [_anahtar + "#n", _n];
+if (_n < 3) exitWith { _p };
 lambs_danger_agacProfilH set [_anahtar, _p];
-if ((count lambs_danger_agacProfilH) <= 12) then {
-    diag_log format ["[AGAC-PROFIL] %1 | FIRE %2 m | GEOM %3 m | VIEW 0.4 m %4 / 1.0 m %5 / 1.6 m %6 | govde yaricapi %7 m | mermi durdurur %8", _m, _fire toFixed 1, _geom toFixed 1, _v04 toFixed 1, _v10 toFixed 1, _v16 toFixed 1, _r toFixed 2, _fire >= 0.15];
+if ((count lambs_danger_agacProfilH) <= 40) then {
+    diag_log format ["[AGAC-PROFIL] %1 | FIRE %2 m | GEOM %3 m | VIEW 0.4 m %4 / 1.0 m %5 / 1.6 m %6 | govde yaricapi %7 m | mermi durdurur %8 | 3 ornegin en buyugu", _m, _fire toFixed 1, _geom toFixed 1, _v04 toFixed 1, _v10 toFixed 1, _v16 toFixed 1, _r toFixed 2, _fire >= 0.15];
 };
 _p
