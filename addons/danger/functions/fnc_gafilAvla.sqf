@@ -23,12 +23,16 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
     private _logN = 0;
     private _say = createHashMapFromArray [["basladi", 0], ["tetik", 0], ["bakis", 0], ["ates", 0], ["sure", 0], ["kayboldu", 0], ["iptal", 0]];
     private _ozetT = time + 60;
+    private _red = createHashMap;   // v8.704: aday grubun NEDEN gafil beklemeye girmedigi sayaclari
+    private _durumT = time + 20;
     while {true} do {
         sleep 0.75;
+        if (time > _durumT) then { _durumT = time + 1e9; diag_log format ["[GAFIL] CBA gafilAvla = %1 (ilk kontrol; false ise preset / CBA ayari yuklenmemis)", missionNamespace getVariable ["lambs_danger_gafilAvla", false]]; };
         if (time > _ozetT) then {
             _ozetT = time + 60;
             private _t = 0;
             { _t = _t + (_say get _x); } forEach (keys _say);
+            if ((count _red) > 0) then { diag_log format ["[GAFIL-OZET] 60 sn: aday grup-tur ret nedenleri: %1", (keys _red) apply { format ["%1=%2", _x, _red get _x] }]; _red = createHashMap; };
             if (_t > 0) then { diag_log format ["[GAFIL-OZET] 60 sn: bekleme basladi %1 | bitis: tetik (olum alani) %2, bakis eslesti %3, ates / baski / kayip %4, sure doldu %5, oyuncu kayboldu %6, iptal %7", _say get "basladi", _say get "tetik", _say get "bakis", _say get "ates", _say get "sure", _say get "kayboldu", _say get "iptal"]; };
             { _say set [_x, 0]; } forEach (keys _say);
         };
@@ -54,31 +58,31 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                 || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isSweeping), false]}
                 || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]} || {(_g getVariable [QGVAR(sahteAktif), false]) isEqualTo true}
                 || {([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]} || {(insideBuilding _l) > 0.5}
-            ) then { continue };
+            ) then { _red set ["grup durumu (taktik / geri cekilme / bina / LAMBS gorevi)", (_red getOrDefault ["grup durumu (taktik / geri cekilme / bina / LAMBS gorevi)", 0]) + 1]; continue };
             private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
             private _sayiN = count _us;
             // kayip takibi (son 60 sn)
             private _onc = _g getVariable [QGVAR(gafilSayi), _sayiN];
             if (_sayiN < _onc) then { _g setVariable [QGVAR(gafilKayipT), time]; };
             _g setVariable [QGVAR(gafilSayi), _sayiN];
-            if (_sayiN < _minA) then { continue };
-            if ((time - (_g getVariable [QGVAR(gafilKayipT), -999])) < 60) then { continue };
+            if (_sayiN < _minA) then { _red set ["grupta asker az", (_red getOrDefault ["grupta asker az", 0]) + 1]; continue };
+            if ((time - (_g getVariable [QGVAR(gafilKayipT), -999])) < 60) then { _red set ["son 60 sn kayip", (_red getOrDefault ["son 60 sn kayip", 0]) + 1]; continue };
             _n = _n + 1;
             // savas basladi mi?
             private _bsk = 0;
             { _bsk = _bsk max (getSuppression _x); } forEach _us;
-            if (_bsk > 0.1) then { continue };
-            if ((_us findIf {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 25}) >= 0) then { continue };
+            if (_bsk > 0.1) then { _red set ["savas basladi (baski / son 25 sn ates)", (_red getOrDefault ["savas basladi (baski / son 25 sn ates)", 0]) + 1]; continue };
+            if ((_us findIf {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 25}) >= 0) then { _red set ["savas basladi (baski / son 25 sn ates)", (_red getOrDefault ["savas basladi (baski / son 25 sn ates)", 0]) + 1]; continue };
             // bilinen oyuncu hedefi; baska bilinen AI dusman varsa savas var
             private _tum = _l targets [true, _menzil, [], 90];
             private _hedef = _tum select {isPlayer _x || {((crew _x) findIf {isPlayer _x}) >= 0}};
-            if (_hedef isEqualTo []) then { continue };
+            if (_hedef isEqualTo []) then { _red set ["bilinen oyuncu yok", (_red getOrDefault ["bilinen oyuncu yok", 0]) + 1]; continue };
             if (((_l targets [true, 350, [], 30]) findIf {!(isPlayer _x) && {((crew _x) findIf {isPlayer _x}) < 0}}) >= 0) then { continue };
             _hedef = [_hedef, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy;
             private _p = _hedef select 0;
-            if ((_l distance2D _p) <= (_tetik + 15)) then { continue };
+            if ((_l distance2D _p) <= (_tetik + 15)) then { _red set ["oyuncu tetik mesafesinde (zaten cok yakin)", (_red getOrDefault ["oyuncu tetik mesafesinde (zaten cok yakin)", 0]) + 1]; continue };
             // v8.703: OYUNCU SQUADI (oyuncu + AI dostlari, canli) gafilSquadMax'tan (4) buyukse bekleme YOK: AI dostlar botlari gorur / ates eder, gafil avlama anlamsiz
-            if ((count ((units (group _p)) select {alive _x})) > _sqMax) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; continue };
+            if ((count ((units (group _p)) select {alive _x})) > _sqMax) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; _red set ["oyuncu squadi buyuk", (_red getOrDefault ["oyuncu squadi buyuk", 0]) + 1]; continue };
             // oyuncu farkinda mi? (bakis konisi + gorus hatti) / ates ediyor mu?
             private _eye = eyePos _p;
             private _dir = if (local _p) then { getCameraViewDirection _p } else { eyeDirection _p };
@@ -93,14 +97,14 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                 private _d = vectorMagnitude _v;
                 (_d > 5) && {_d <= _menzil} && {(acos ((((_dir vectorDotProduct _v) / _d) min 1) max -1)) <= (_aci * 1.5)} && {!(terrainIntersectASL [_eye, _tg])} && {!(lineIntersects [_eye, _tg, _p, _x])}
             }) >= 0;
-            if (_farkinda || {(time - (_p getVariable [QGVAR(sonAtisT), -999])) < 20} || {(time - (_g getVariable [QGVAR(sesSonZaman), -999])) < 10}) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; continue };
+            if (_farkinda || {(time - (_p getVariable [QGVAR(sonAtisT), -999])) < 20} || {(time - (_g getVariable [QGVAR(sesSonZaman), -999])) < 10}) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; _red set ["oyuncu farkinda (bakis konisi) / ates / ates sesi", (_red getOrDefault ["oyuncu farkinda (bakis konisi) / ates / ates sesi", 0]) + 1]; continue };
             if ((time - (_g getVariable [QGVAR(gafilGozlemSon), -999])) > 3) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; };
             _g setVariable [QGVAR(gafilGozlemSon), time];
             private _gb = _g getVariable [QGVAR(gafilGozlemBas), -1];
             if (_gb < 0) then { _g setVariable [QGVAR(gafilGozlemBas), time]; _g setVariable [QGVAR(gafilGozlemN), 1]; continue };
             private _gn = (_g getVariable [QGVAR(gafilGozlemN), 0]) + 1;
             _g setVariable [QGVAR(gafilGozlemN), _gn];
-            if ((time - _gb) < _gozlem || {_gn < 4}) then { continue };
+            if ((time - _gb) < _gozlem || {_gn < 4}) then { _red set ["gozlem suruyor (oyuncu bakisi izleniyor)", (_red getOrDefault ["gozlem suruyor (oyuncu bakisi izleniyor)", 0]) + 1]; continue };
             _g setVariable [QGVAR(gafilGozlemBas), nil];
 
             // ---- GAFIL BEKLEME BASLAT
