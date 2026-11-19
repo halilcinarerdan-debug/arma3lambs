@@ -3961,3 +3961,7 @@ v8.636 (dal sade-waypoint) EL BOMBASI ATMA SIKLIGI KORUNSUN (kullanici: 'el bomb
  - KALAN korumalar (siklik azaltabilir, bilincli): ayni kat hedefe > 62 derece lob yok (v8.619); fitil sonunda bombaDostM icinde dost varsa bomba silinir (v8.619); dost yaricap / yay engeli kontrolleri.
  - RISK: dik inis siniri kalkinca RPT 1a697d94 benzeri cati / duvara dusup geri teper (kendini vurma). Oyunda DENENMEDI.
 
+v8.636b (dal sade-waypoint) BOMBA DISIPLINI AYARLANABILIR (kullanici: 'bomba atma disiplini olsun ama ayarlanabilsin', 'atma sikligi kalsin').
+ - v8.636'daki 'sinirsiz' varsayilan geri alindi: disiplin VAR ama CBA'dan ayarlanir: bombaInisMaks (30-85, varsayilan 62) ve bombaMesafeMaks (15-100, varsayilan 60) = orta disiplin (62 derece sinir sabit ayni kat lobu ile ayni, 60 m = elBombasiMaxMesafe ile ayni: siklik eski haline en yakin, geri tepen en dik atislar elenir). Sinirsiz icin 85 / 100, siki icin 52 / 40.
+ - HATA DUZELTME: v8.636 commit'inde kacisTekM aciklamasi yanlislikla degismisti (tutarlilik denetimi HATA=1, '&&' zincirinde tail exit kodu hatayi gizledi); geri alindi.
+
