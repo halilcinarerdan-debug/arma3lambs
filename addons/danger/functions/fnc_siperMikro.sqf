@@ -24,7 +24,7 @@ diag_log "[SIPER-MIKRO] siperde mikro duzeltme (gorus acisi yoksa yanal kayma / 
     private _say = createHashMapFromArray [["kontrol", 0], ["kapali", 0], ["duzeltilen", 0], ["durus", 0], ["bulunamadi", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([1, true, true] call FUNC(dusunSure));
+        sleep ([1, true, true, "siperMikro"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_siperMikro", true]) then { continue };
         private _maks = ((missionNamespace getVariable ["lambs_danger_siperMikroM", 1]) max 0.3) min 2;
         private _esik = ["SEZILDI"] call FUNC(bilgiEsik);

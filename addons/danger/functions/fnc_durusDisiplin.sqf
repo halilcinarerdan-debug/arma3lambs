@@ -34,7 +34,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
     private _say = createHashMapFromArray [["durgunAyakta", 0], ["comel", 0], ["yat", 0], ["direnen", 0], ["gizliComel", 0], ["gorusYok", 0], ["yakin", 0], ["serbest", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([1, true] call FUNC(dusunSure));
+        sleep ([1, true, false, "durusDisiplin"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_durusDisiplin", true]) then { continue };
         private _sn = ((missionNamespace getVariable ["lambs_danger_durusDisiplinSn", 2.5]) max 1) min 10;
         private _yatM = ((missionNamespace getVariable ["lambs_danger_durusYatMesafe", 100]) max 40) min 400;

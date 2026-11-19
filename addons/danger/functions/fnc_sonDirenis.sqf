@@ -144,7 +144,7 @@ diag_log format ["[SON-DIRENIS] %1 | BASLADI | %2 asker | kayip %3%% | dusman %4
                 _u setVariable [QGVAR(forceMove), nil];
                 _u setUnitPos "AUTO";
                 _u doWatch objNull;
-                _u doFollow (leader _u);
+                [_u] call FUNC(doFollowGuvenli);
             };
         } forEach _atamalar;
         diag_log format ["[SON-DIRENIS] %1 | BITTI | neden:%2 | sure:%3 sn | kalan:%4", groupId _g, _neden, round (time - _t0), count ((units _g) select {alive _x})];

@@ -52,7 +52,7 @@ if (_st isNotEqualTo []) exitWith {
         };
     };
     if (_bit isNotEqualTo "") then {
-        { if (alive _x) then { _x setVariable [QGVAR(forceMove), nil]; _x setVariable [QGVAR(destekAsker), nil]; _x doWatch objNull; if (_x isNotEqualTo _l) then { _x doFollow _l; }; }; } forEach (units _g);
+        { if (alive _x) then { _x setVariable [QGVAR(forceMove), nil]; _x setVariable [QGVAR(destekAsker), nil]; _x doWatch objNull; if (_x isNotEqualTo _l) then { [_x, _l] call FUNC(doFollowGuvenli); }; }; } forEach (units _g);
         if (!isNull _g && {!_planli}) then { _g setVariable [QGVAR(isExecutingTactic), nil]; };
         if (alive _l) then { _l doMove _org; };
         missionNamespace setVariable [_k, []];

@@ -151,11 +151,12 @@ if (!([_unit, _target, "UGL"] call (missionNamespace getVariable ["lambs_danger_
             diag_log format ["[UGL-YAN] %1 | %2 | namlu onunde engel -> %3 m yandaki temiz noktaya geciyor (hedef %4 m)", groupId (group _unit), name _unit, round (_unit distance2D _yp), round _d];
             [{ params ["_u", "_t", "_p"]; !alive _u || {isNull _t} || {!alive _t} || {(_u distance2D _p) < 2.5} }, {
                 params ["_u", "_t", "_p"];
-                _u setVariable [QGVAR(taktikKilit), 0];
+                // v8.681: yalniz KENDI kilidimiz (<= 9.5 sn) ve zorla kosu / geri cekilme yokken sifirla (baska sistemin sonradan koydugu kilidi silmesin)
+                if (!((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) && {!((group _u) getVariable [QGVAR(isRetreating), false])} && {((_u getVariable [QGVAR(taktikKilit), 0]) - time) <= 9.5}) then { _u setVariable [QGVAR(taktikKilit), 0]; };
                 if (alive _u && {!isNull _t} && {alive _t}) then { _u setVariable [QGVAR(uglLast), -999]; [_u, _t, true, 2] call FUNC(tacticalUGL); };
             }, [_unit, _target, _yp], 9, {
                 params ["_u", "_t", "_p"];
-                _u setVariable [QGVAR(taktikKilit), 0];
+                if (!((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) && {!((group _u) getVariable [QGVAR(isRetreating), false])} && {((_u getVariable [QGVAR(taktikKilit), 0]) - time) <= 9.5}) then { _u setVariable [QGVAR(taktikKilit), 0]; };
             }] call CBA_fnc_waitUntilAndExecute;
         };
     };

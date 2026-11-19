@@ -31,7 +31,7 @@ diag_log "[ACIK-BEKLE] acikta bekleme denetimi baslatildi (v8.377): duran + ayak
     private _say = createHashMapFromArray [["siper", 0], ["comel", 0]];
     private _sert = ["TREE", "SMALL TREE", "ROCK", "ROCKS", "WALL", "FENCE", "BUILDING", "HOUSE"];
     while {true} do {
-        sleep ([2] call FUNC(dusunSure));
+        sleep ([2, false, false, "acikBekleme"] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 60;
             if (((_say get "siper") + (_say get "comel")) > 0) then {

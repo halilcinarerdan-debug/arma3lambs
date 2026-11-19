@@ -47,7 +47,7 @@ private _calis = {
     private _ozetT = time + 90;
     private _hizTablo = [["road", 1.3], ["conc", 1.3], ["asph", 1.3], ["rock", 1.3], ["stone", 1.3]];
     while {true} do {
-        sleep ([1, true] call FUNC(dusunSure));
+        sleep ([1, true, false, "gizliAlgi"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_gizliAlgiOff", false]) then { continue };
         private _adimAcik = !(missionNamespace getVariable ["lambs_danger_adimSesOff", false]);
         private _isikAcik = _komutOk && {!(missionNamespace getVariable ["lambs_danger_isikAlgiOff", false])};

@@ -27,7 +27,7 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
     private _say = createHashMapFromArray [["ic", 0], ["bilen", 0], ["yanlis", 0], ["duzelt", 0], ["acik", 0], ["tarama", 0], ["yuruyus", 0], ["gorunen", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([0.5, true, true] call FUNC(dusunSure));
+        sleep ([0.5, true, true, "icBakisDenetci"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) then {
             { _x enableAI "AUTOTARGET"; _x enableAI "TARGET"; _x setVariable [QGVAR(icHedefKapali), nil]; } forEach (allUnits select {local _x && {_x getVariable [QGVAR(icHedefKapali), false]}});
             continue

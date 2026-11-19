@@ -38,7 +38,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
     private _ozetT = time + 60;
     private _logN = 0;
     while {true} do {
-        sleep ([1.2, false, true] call FUNC(dusunSure));
+        sleep ([1.2, false, true, "cqbCevik"] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 60;
             if (((_sayac get "yanal") + (_sayac get "ates") + (_sayac get "kalk")) > 0) then {

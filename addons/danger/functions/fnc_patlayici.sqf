@@ -262,7 +262,7 @@ lambs_danger_patlayiciDon = {
     };
 
     while {true} do {
-        sleep ([2.5, true] call FUNC(dusunSure));
+        sleep ([2.5, true, false, "patlayici"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_patlayiciOff", false] || {!(missionNamespace getVariable ["lambs_danger_patlayiciAktif", true])}) then {
             // v8.590 TANI (RPT 8368382a: 52 dk oturumda [PATLAYICI-OZET] / [PATLAYICI-TANI] hic yok = izleyici calismadi): kapaliysa nedeni RPT'ye yaz (ilk 5, 60 sn'de bir)
             if (time > _sonOzet && {(missionNamespace getVariable ["lambs_danger_patKapaliN", 0]) < 5}) then {

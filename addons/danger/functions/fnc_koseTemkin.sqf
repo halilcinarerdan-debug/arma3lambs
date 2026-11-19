@@ -192,7 +192,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
     private _sonOzet = time;
 
     while {true} do {
-        sleep ([0.4, false, true] call FUNC(dusunSure));
+        sleep ([0.4, false, true, "koseTemkin"] call FUNC(dusunSure));
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             if (((_sayac get "tespit") + (_sayac get "istif")) > 0) then {

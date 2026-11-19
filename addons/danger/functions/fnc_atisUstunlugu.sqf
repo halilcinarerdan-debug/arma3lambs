@@ -30,7 +30,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
     private _logN = 0;
 
     while {true} do {
-        sleep ([0.8, true] call FUNC(dusunSure));
+        sleep ([0.8, true, false, "atisUstunlugu"] call FUNC(dusunSure));
         if ((time - _sonOzet) >= 60) then {
             _sonOzet = time;
             if ((_sayac get "emir") > 0) then {

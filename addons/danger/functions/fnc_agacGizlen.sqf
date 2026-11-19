@@ -39,7 +39,7 @@ lambs_danger_agacSayFn = _agacSay;
                 private _birak = ((_g getVariable ["lambs_danger_contact", -999]) > (time - 5)) || {_g getVariable ["lambs_danger_planAktif", false]} || {(_l distance2D (_gz select 0)) > 40 && {(time - (_gz select 1)) > 20}};
                 if (_birak) then {
                     _g setVariable [QGVAR(agacGizli), nil];
-                    { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doFollow _l; }; } forEach (units _g);
+                    { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; [_x, _l] call FUNC(doFollowGuvenli); }; } forEach (units _g);
                 };
                 continue;
             };

@@ -63,9 +63,10 @@ private _agacN = 0;
         _n = _n + 1;
         continue
     };
-    _u setVariable [QGVAR(taktikKilit), time + 40];   // v8.292: 25 -> 40 sn
+    private _drKit = time + 40;
+    _u setVariable [QGVAR(taktikKilit), _drKit];   // v8.292: 25 -> 40 sn; v8.681: kilit degeri geri cagriya tasinir (baska sistemin sonradan koydugu kilidi silmesin)
     // v8.298: 40 sn'de kilit acilir ama saklandigi noktadaysa durus korunur; durus 90 sn'de AUTO'ya doner
-    [{ params ["_uu"]; if (alive _uu) then { _uu setVariable [QGVAR(taktikKilit), nil]; private _gp = _uu getVariable [QGVAR(dronGizliP), []]; if (_gp isEqualTo [] || {(_uu distance2D _gp) >= 8}) then { _uu setUnitPos "AUTO"; }; }; }, [_u], 40] call CBA_fnc_waitAndExecute;
+    [{ params ["_uu", "_kt"]; if (alive _uu) then { if ((_uu getVariable [QGVAR(taktikKilit), 0]) isEqualTo _kt) then { _uu setVariable [QGVAR(taktikKilit), nil]; }; private _gp = _uu getVariable [QGVAR(dronGizliP), []]; if (_gp isEqualTo [] || {(_uu distance2D _gp) >= 8}) then { _uu setUnitPos "AUTO"; }; }; }, [_u, _drKit], 40] call CBA_fnc_waitAndExecute;
     [{ params ["_uu"]; if (alive _uu && {(time - (_uu getVariable [QGVAR(dronGizliT), -999])) >= 85}) then { _uu setUnitPos "AUTO"; }; }, [_u], 90] call CBA_fnc_waitAndExecute;
     if (_u in _atesci) then {
         _u setUnitPos "MIDDLE";

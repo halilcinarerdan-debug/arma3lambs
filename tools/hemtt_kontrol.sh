@@ -60,8 +60,12 @@ if [ "$n12" != "0" ]; then grep -A4 'warning\[L-S12\]' "$P/cikti.txt" | head -40
 # v8.364: statik tutarlilik denetimi (PREP / olay / ayar / degisken / kapanis kapsami / surum)
 python3 "$KOK/tools/tutarlilik_denetimi.py" > "$P/tutarlilik.txt" || true
 tail -15 "$P/tutarlilik.txt"
+# v8.681: emir ezme denetimi (korumasiz gecikmeli geri cagri / ham doFollow; tools/emir_ezme_denetimi.py)
+python3 "$KOK/tools/emir_ezme_denetimi.py" > "$P/emir_ezme.txt" || true
+cat "$P/emir_ezme.txt"
+n_ezme=$(grep -c '^  UYARI' "$P/emir_ezme.txt" || true)
 # v8.500: CI icin cikis kodu - HEMTT 'error' ya da tutarlilik 'HATA' varsa 1
 n_err=$(grep -c '^error' "$P/cikti.txt" || true)
 n_tut=$(grep -c '^  HATA' "$P/tutarlilik.txt" || true)
-if [ "$n_err" != "0" ] || [ "$n_tut" != "0" ] || [ "$n12" != "0" ]; then echo "KONTROL BASARISIZ: hemtt error=$n_err, L-S12=$n12, tutarlilik HATA=$n_tut"; exit 1; fi
+if [ "$n_err" != "0" ] || [ "$n_tut" != "0" ] || [ "$n12" != "0" ] || [ "$n_ezme" != "0" ]; then echo "KONTROL BASARISIZ: hemtt error=$n_err, L-S12=$n12, tutarlilik HATA=$n_tut, emir ezme UYARI=$n_ezme"; exit 1; fi
 echo "KONTROL BASARILI"

@@ -19,7 +19,7 @@ diag_log "[KAPI-AC] kapi bekcisi baslatildi (v8.506): yuruyen / kapiya bakan ask
 [] spawn {
     private _indeks = 0;
     while {true} do {
-        sleep ([1, false, true] call FUNC(dusunSure));
+        sleep ([1, false, true, "kapiBekci"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_kapiAcOff", false]) then { continue };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(side group _x) in [west, east, resistance]}

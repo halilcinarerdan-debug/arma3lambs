@@ -33,7 +33,7 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
     private _ozetT = time + 90;
     private _say = createHashMapFromArray [["courage", 0], ["cezali", 0], ["toplamCeza", 0]];
     while {true} do {
-        sleep ([1.5] call FUNC(dusunSure));
+        sleep ([1.5, false, false, "ozguven"] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if ((_say get "courage") + (_say get "cezali") > 0) then {

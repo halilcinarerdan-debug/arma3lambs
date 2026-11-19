@@ -20,7 +20,7 @@ diag_log "[ODA-PUSU] oda pususu (temizlenen binanin derin odasinda bekle) izleyi
 [] spawn {
     private _logN = 0;
     while {true} do {
-        sleep ([2, false, true] call FUNC(dusunSure));
+        sleep ([2, false, true, "odaPusu"] call FUNC(dusunSure));
         {
             private _u = _x;
             private _bit = _u getVariable [QGVAR(odaPusuBit), 0];
@@ -45,7 +45,7 @@ diag_log "[ODA-PUSU] oda pususu (temizlenen binanin derin odasinda bekle) izleyi
                 if (alive _u) then {
                     _u setUnitPos "AUTO";
                     _u doWatch objNull;
-                    if (_sebep isNotEqualTo "dusman yakin (pusu tetigi)" && {!isNull (leader _g)} && {_u isNotEqualTo (leader _g)}) then { _u doFollow (leader _g); };
+                    if (_sebep isNotEqualTo "dusman yakin (pusu tetigi)" && {!isNull (leader _g)} && {_u isNotEqualTo (leader _g)}) then { [_u, leader _g] call FUNC(doFollowGuvenli); };
                 };
                 if (_logN < 20) then { _logN = _logN + 1; diag_log format ["[ODA-PUSU] %1 | %2 | pususu bitti: %3", groupId _g, name _u, _sebep]; };
                 continue

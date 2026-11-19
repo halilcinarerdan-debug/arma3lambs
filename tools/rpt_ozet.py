@@ -23,7 +23,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.680"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.681"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -198,12 +198,16 @@ def ozet(path):
         ("[SAVUNMA-YER]", "HOLD: manga avantajli yere yerlesti"),
         ("[GERI-CEKILME-EZME-TANI]", "geri cekilme: koşu emri bozuldu (ezen sistem adaylari)"),
         ("[GERI-CEKILME-KORUMA]", "geri cekilme: formasyona donen koşu emri yeniden verildi"),
+        ("[DOFOLLOW-ATLA]", "korumali doFollow: retreat / temas kes / kacis sirasinda serbest birakma atlandi"),
         ("[SNIPER-GOZLEMCI]", "sniper gozlemcisi nisanciya yaklastirildi"),
         ("[GERI-CEKILME-KOSU-MODU]", "geri cekilme: takilan asker kosu moduna alindi (AWARE + hedef alma kapali)"),
     ]:
         ls = [l for l in satirlar if etiket in l]
         print("  %s %s: %d satir" % (etiket, aciklama, len(ls)))
         for l in ls[:3]: print("     ", l.split('"')[1][:230] if '"' in l else l[:230])
+    pd = [l for l in satirlar if "[PERF-DUSUN]" in l]
+    print("  [PERF-DUSUN] izleyici dongu hizi (gerceklesen / istenen; ~1-1.5 saglikli, >= 2 yavas): %d ozet" % len(pd))
+    for l in pd[-2:]: print("     ", l.split('"')[1][:420] if '"' in l else l[:420])
     fv = [l for l in satirlar if "[FOV-OLCUM]" in l and "derece" in l]
     if fv:
         print("  [FOV-OLCUM] bakis acisi kovalarina gore bilinen dusman orani (son %d ozet):" % min(3, len(fv)))

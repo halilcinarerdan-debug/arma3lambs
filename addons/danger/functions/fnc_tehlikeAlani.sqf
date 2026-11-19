@@ -47,7 +47,7 @@ private _gecis = {
                 _x setVariable [QGVAR(taktikKilit), nil];
                 _x setUnitPos "AUTO";
                 _x doWatch objNull;
-                _x doFollow (leader _g);
+                [_x, leader _g] call FUNC(doFollowGuvenli);
             };
         } forEach (units _g);
         if (!isNull (leader _g) && {currentWaypoint _g > 0 || {(count (waypoints _g)) > 0}}) then { _g setCurrentWaypoint [_g, currentWaypoint _g]; };
@@ -113,7 +113,7 @@ private _acikGecis = {
                 _x setVariable [QGVAR(forceMove), nil];
                 _x setUnitPos "AUTO";
                 _x doWatch objNull;
-                _x doFollow (leader _g);
+                [_x, leader _g] call FUNC(doFollowGuvenli);
             };
         } forEach (units _g);
         if (!isNull (leader _g) && {currentWaypoint _g > 0 || {(count (waypoints _g)) > 0}}) then { _g setCurrentWaypoint [_g, currentWaypoint _g]; };
@@ -242,7 +242,7 @@ private _calis = {
     private _say = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep ([3] call FUNC(dusunSure));
+        sleep ([3, false, false, "tehlikeAlani"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_tehlikeAlaniOff", false]) then { continue };
         {
             private _g = _x;

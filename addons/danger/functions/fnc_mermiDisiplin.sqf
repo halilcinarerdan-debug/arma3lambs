@@ -27,7 +27,7 @@ private _calis = {
     private _say = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep ([3] call FUNC(dusunSure));
+        sleep ([3, false, false, "mermiDisiplin"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_mermiDisiplinOff", false]) then { continue };
         {
             private _g = _x;

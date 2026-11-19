@@ -47,7 +47,7 @@ lambs_danger_hendekBLogN = 0;
                 // CIKIS: temas bitti + 45 sn, ya da plana alindi
                 if (_plan || {!_topUyari && {(time - _temas) > _cikisS} && {(time - (_durum select 0)) > 20}}) then {
                     _g setVariable [QGVAR(hendekB), nil];
-                    { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; _x doFollow _l; }; } forEach (units _g);
+                    { if (alive _x && {isNull objectParent _x}) then { _x setUnitPos "AUTO"; [_x, _l] call FUNC(doFollowGuvenli); }; } forEach (units _g);
                     diag_log format ["[HENDEK-BILINC] %1 | hendekten CIKTI (%2)", groupId _g, [format ["temas bitti + %1 sn", _cikisS], "plana alindi"] select _plan];
                 };
                 continue;

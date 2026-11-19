@@ -25,7 +25,7 @@ private _calis = {
     private _say = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep ([2] call FUNC(dusunSure));
+        sleep ([2, false, false, "haltKur"] call FUNC(dusunSure));
         if (missionNamespace getVariable ["lambs_danger_haltOff", false]) then { continue };
         {
             private _g = _x;
@@ -53,7 +53,7 @@ private _calis = {
                     //   YENI emri (retreat doMove, zorla kosu, baska sistemin kilidi) formasyon planina ezilirdi. Simdi yalniz baska emri / kilidi olmayan, grup retreat yapmayan askere doFollow.
                     {
                         _x setVariable [QGVAR(haltOldu), nil];
-                        if (!((_x getVariable [QGVAR(forceMove), false]) isEqualTo true) && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_g getVariable [QGVAR(isRetreating), false])}) then { _x doFollow _l; };
+                        if (!((_x getVariable [QGVAR(forceMove), false]) isEqualTo true) && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}) then { [_x, _l] call FUNC(doFollowGuvenli); };
                     } forEach _haltli;
                     _say set ["serbest", (_say getOrDefault ["serbest", 0]) + (count _haltli)];
                 };

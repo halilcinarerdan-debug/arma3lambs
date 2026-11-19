@@ -75,7 +75,7 @@ if (_hedef isEqualTo [] || {surfaceIsWater _hedef} || {(_lp distance2D _hedef) >
         if (alive _uu) then {
             _uu setVariable [QGVAR(taktikKilit), nil];
             _uu doWatch objNull;
-            if (!isNull _gg && {!isNull (leader _gg)}) then { _uu doFollow (leader _gg); };
+            if (!isNull _gg && {!isNull (leader _gg)}) then { [_uu, leader _gg] call FUNC(doFollowGuvenli); };
         };
     }, [_u, _g], _sure] call CBA_fnc_waitAndExecute;
 } forEach _kisi;

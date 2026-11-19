@@ -147,7 +147,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                         if (alive _x && {local _x} && {!isPlayer _x}) then {
                             _x doWatch objNull;
                             _x setUnitPosWeak "AUTO";
-                            _x doFollow _leader;
+                            [_x, _leader] call FUNC(doFollowGuvenli);
                         };
                     };
                 } forEach _tum;

@@ -86,7 +86,7 @@ private _bolum = {
         _u setVariable [QGVAR(taktikKilit), nil];
         _u setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
         _u setVariable [QGVAR(panikBagT), time + 40];
-        if (!isNull (leader _g) && {_u isNotEqualTo (leader _g)}) then { _u doFollow (leader _g); };
+        if (!isNull (leader _g) && {_u isNotEqualTo (leader _g)}) then { [_u, leader _g] call FUNC(doFollowGuvenli); };
     };
 };
 missionNamespace setVariable ["lambs_danger_panikBolumFn", _bolum];

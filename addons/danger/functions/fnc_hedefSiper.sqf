@@ -38,7 +38,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
         _p distance2D [(_a select 0) + (_t * (_ab select 0)), (_a select 1) + (_t * (_ab select 1))]
     };
     while {true} do {
-        sleep ([1, true] call FUNC(dusunSure));
+        sleep ([1, true, false, "hedefSiper"] call FUNC(dusunSure));
         // ---- siperli tutma birakma ----
         {
             private _u = _x;

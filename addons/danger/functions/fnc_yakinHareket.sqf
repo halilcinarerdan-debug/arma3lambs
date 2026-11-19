@@ -26,7 +26,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
     private _logN = 0;
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([0.5, false, true] call FUNC(dusunSure));
+        sleep ([0.5, false, true, "yakinHareket"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_yakinHareket", true]) then { continue };
         // v8.526 DONEM: Ikinci Dunya Savasi = kapali (modern yan-adim yok); Soguk Savas / Vietnam = menzil x0.6, bekleme x1.6
         private _cag = ["cag"] call FUNC(cag);

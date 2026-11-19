@@ -21,7 +21,7 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
 [] spawn {
     private _logN = 0;
     while {true} do {
-        sleep ([3, false, true] call FUNC(dusunSure));
+        sleep ([3, false, true, "binaSaldiri"] call FUNC(dusunSure));
         if (!(missionNamespace getVariable ["lambs_danger_binaSaldiri", true]) || {missionNamespace getVariable ["lambs_danger_buildingClearOff", false]}) then { continue };
         {
             private _g = _x;

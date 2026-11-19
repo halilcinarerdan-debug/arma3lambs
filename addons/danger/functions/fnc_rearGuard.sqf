@@ -43,14 +43,14 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
             _u setVariable [QGVAR(stationPos), nil];
             _u doWatch objNull;
             _u setUnitPos "AUTO";
-            _u doFollow (leader _u);
+            [_u] call FUNC(doFollowGuvenli);
         };
         _g setVariable [QGVAR(rearGuardU), objNull];
         _g setVariable [QGVAR(rearGuardPos), nil];
     };
 
     while {true} do {
-        sleep ([3] call FUNC(dusunSure));
+        sleep ([3, false, false, "rearGuard"] call FUNC(dusunSure));
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };

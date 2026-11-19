@@ -32,7 +32,7 @@ private _calis = {
     private _nedenSay = createHashMap;
     private _ozetT = time + 90;
     while {true} do {
-        sleep ([3] call FUNC(dusunSure));
+        sleep ([3, false, false, "noktaEleman"] call FUNC(dusunSure));
         if (time > _ozetT) then {
             _ozetT = time + 90;
             if (count _nedenSay > 0) then { diag_log format ["[ZEKA-NOKTA] OZET (son 90 sn grup-tur sayaci) %1", (keys _nedenSay) apply {format ["%1:%2", _x, _nedenSay get _x]}]; };
@@ -92,7 +92,7 @@ private _calis = {
                     {
                         _x setVariable [QGVAR(noktaEk), nil];
                         _x setVariable [QGVAR(taktikKilit), nil];
-                        _x doFollow _l;
+                        [_x, _l] call FUNC(doFollowGuvenli);
                     } forEach _eski;
                     _g setVariable [QGVAR(noktaListe), []];
                     _g setVariable [QGVAR(noktaGecT), time];
@@ -105,7 +105,7 @@ private _calis = {
             if (_neden isEqualTo "" && {(count (nearestTerrainObjects [getPosATL _l, ["BUILDING", "HOUSE", "WALL"], 30, false, true])) >= 3}) then {
                 _neden = "yerlesim / bina yakini";
                 if (_eski isNotEqualTo []) then {
-                    { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; _x doFollow _l; } forEach _eski;
+                    { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; [_x, _l] call FUNC(doFollowGuvenli); } forEach _eski;
                     _g setVariable [QGVAR(noktaListe), []];
                     _g setVariable [QGVAR(noktaGecT), time];
                 };
@@ -133,7 +133,7 @@ private _calis = {
             if ((count _eski) > _hedefN) then {
                 // grup kuculdu (ornek 6 -> 5): fazla nokta elemani serbest
                 private _fazla = _eski select [_hedefN, count _eski];
-                { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; _x doFollow _l; } forEach _fazla;
+                { _x setVariable [QGVAR(noktaEk), nil]; _x setVariable [QGVAR(taktikKilit), nil]; [_x, _l] call FUNC(doFollowGuvenli); } forEach _fazla;
                 _eski = _eski select [0, _hedefN];
             };
             if ((count _eski) < _hedefN) then {

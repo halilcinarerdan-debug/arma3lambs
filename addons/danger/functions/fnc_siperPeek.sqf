@@ -23,7 +23,7 @@ diag_log "[SIPER-PEEK] siperden kalk-nisan-alcal (peek) katmani baslatildi (v8.6
     private _say = createHashMapFromArray [["kontrol", 0], ["peek", 0], ["gorus_acik", 0], ["kilit", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([1.2, true, true] call FUNC(dusunSure));
+        sleep ([1.2, true, true, "siperPeek"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_siperPeek", true]) then { continue };
         private _esik = ["SUPHE"] call FUNC(bilgiEsik);
         private _n = 0;

@@ -153,7 +153,7 @@ lambs_danger_topIzle = {
             if (alive _u) then {
                 _u setUnitPos "AUTO";
                 // hendekteki birim formasyona geri kosmaz: hendek bilinci / SAVUN gruplari kendi cikis kurallariyla serbest birakir
-                if (!_hendekteydi) then { _u doFollow (leader (group _u)); };
+                if (!_hendekteydi) then { [_u] call FUNC(doFollowGuvenli); };
             };
             _u setVariable [QGVAR(topAktif), nil];
         };

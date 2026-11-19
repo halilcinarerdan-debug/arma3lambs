@@ -33,7 +33,7 @@ diag_log "[KAMUFLAJ] kamuflaj bilinci baslatildi (ufuk / hareket / isik katsayis
     private _ufukFn = missionNamespace getVariable ["lambs_danger_fnc_ufukMu", {false}];
     private _indeks = 0;
     while {true} do {
-        sleep ([2] call FUNC(dusunSure));
+        sleep ([2, false, false, "kamuflaj"] call FUNC(dusunSure));
         if (!(missionNamespace getVariable ["lambs_danger_kamuflajV1", true])) then { continue };
 
         // ortam (tek sefer / tick)

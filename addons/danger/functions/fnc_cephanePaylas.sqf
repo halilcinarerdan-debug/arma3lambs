@@ -49,7 +49,7 @@ private _aktar = {
     if (!alive _v || {!alive _a} || {(_v distance2D _a) > 8}) exitWith {
         _g setVariable [QGVAR(cephaneAktif), nil]; _a setVariable [QGVAR(cephaneAliciBusy), nil]; _a setVariable [QGVAR(cephaneAliciT), time];
         _v setVariable [QGVAR(taktikKilit), nil]; _a setVariable [QGVAR(taktikKilit), nil];
-        if (alive _v) then { _v doFollow (leader _g); };
+        if (alive _v) then { [_v] call FUNC(doFollowGuvenli); };
         diag_log format ["[CEPHANE] %1 | %2 -> %3 | %4 x%5 | IPTAL (ulasilamadi / temas / oldu)", groupId _g, name _v, name _a, _sinif, _adet];
     };
     // 2) verici YERE BIRAKIR (PutDown animasyonu): yer esyasi aliciya dogru 1.5 m onunde; alici GIDIP ALIR
@@ -85,7 +85,7 @@ private _aktar = {
         { _tutucu addMagazineAmmoCargo [_sinif, 1, _x select 1]; } forEach _liste;
     };
     sleep 0.8;
-    if (alive _v) then { _v doFollow (leader _g); _v setVariable [QGVAR(taktikKilit), nil]; };
+    if (alive _v) then { [_v] call FUNC(doFollowGuvenli); _v setVariable [QGVAR(taktikKilit), nil]; };
     // 3) alici gidip yerden alir
     if (!isNull _tutucu && {alive _a}) then {
         _a doMove (getPosATL _tutucu);
@@ -109,7 +109,7 @@ private _aktar = {
     _g setVariable [QGVAR(cephaneAktif), nil];
     _a setVariable [QGVAR(cephaneAliciBusy), nil];
     _a setVariable [QGVAR(cephaneAliciT), time];
-    if (alive _a) then { _a doFollow (leader _g); };
+    if (alive _a) then { [_a] call FUNC(doFollowGuvenli); };
     diag_log format ["[CEPHANE] %1 | %2 -> %3 | %4 x%5 (%6) | yere birakti -> aldi: %7 | %8 | %9 sn", groupId _g, name _v, name _a, _sinif, count _liste, _tur, _yapilan > 0, _sebep, round (time - _t0)];
     private _sonra = [uniform _v, vest _v, backpack _v, uniform _a, vest _a, backpack _a];
     if (_sonra isNotEqualTo _once) then {
@@ -132,7 +132,7 @@ private _oyuncuAktar = {
         params ["_vv", "_pp", "_gg"];
         _gg setVariable [QGVAR(cephaneAktif), nil];
         if (!isNull _pp) then { _pp setVariable [QGVAR(cephaneAliciBusy), nil]; _pp setVariable [QGVAR(cephaneAliciT), time]; };
-        if (alive _vv) then { _vv setVariable [QGVAR(taktikKilit), nil]; _vv doWatch objNull; _vv doFollow (leader _gg); };
+        if (alive _vv) then { _vv setVariable [QGVAR(taktikKilit), nil]; _vv doWatch objNull; [_vv] call FUNC(doFollowGuvenli); };
     };
     // 1) verici oyuncuya yaklasir (<= 5 m): oyuncu hareket ediyorsa hedef 1 sn'de bir tazelenir
     if ((_v distance2D _p) > 5) then {
