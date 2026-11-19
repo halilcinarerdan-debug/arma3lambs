@@ -133,9 +133,18 @@ private _wpSec = {
     } forEach [1, 0.7, 1.3];
     _best
 };
-private _wp1 = [_leaderPos, _threatDir] call _wpSec;
-private _wp2 = [_wp1, _threatDir] call _wpSec;
-private _wp3 = [_wp2, _threatDir] call _wpSec;
+// v8.674 AVANTAJLI YER (kullanici: 'araziye gore avantajli yer analiz edilsin, koy / ev barindiran bolgeler avantajli sayilsin'; RPT 8f8a8871 'retreat avantajli pozisyonu ele gecirmiyor'): geri cekilme
+//   yalniz 'dusmandan uzaga' degil, fnc_avantajliYer ile secilen yere (yukseklik + gizlilik + koy / ev kumesi + gizli gidis yolu) yonelir; yer yoksa eski yon (tehdidin tersi).
+private _yer = [];
+if (missionNamespace getVariable ["lambs_danger_avantajliYer", true]) then { _yer = [_leaderPos, _targetPos, -1, "GERI"] call FUNC(avantajliYer); };
+private _yonK = {
+    params ["_o"];
+    if (_yer isNotEqualTo [] && {(_o distance2D (_yer select 0)) > 25}) then { _o getDir (_yer select 0) } else { _threatDir }
+};
+private _wp1 = [_leaderPos, [_leaderPos] call _yonK] call _wpSec;
+private _wp2 = [_wp1, [_wp1] call _yonK] call _wpSec;
+private _wp3 = [_wp2, [_wp2] call _yonK] call _wpSec;
+if (_yer isNotEqualTo [] && {(_wp2 distance2D (_yer select 0)) <= (_adimBoy * 1.6)}) then { _wp3 = _yer select 0; };   // son bacak dogrudan avantajli yer
 _wp1 = [_wp1, _leaderPos] call _suKontrol;
 _wp2 = [_wp2, _wp1] call _suKontrol;
 _wp3 = [_wp3, _wp2] call _suKontrol;
@@ -208,8 +217,8 @@ if (EGVAR(main,debug_functions)) then {
     systemChat _msgBasla;
 };
 
-[_group, _unit, _targetPos, _wps, _baslangic, _wpSec, _suKontrol, _adimBoy] spawn {
-    params ["_group", "_unit", "_targetPos", "_wps", "_baslangic", "_wpSec", "_suKontrol", "_adimBoy"];
+[_group, _unit, _targetPos, _wps, _baslangic, _wpSec, _suKontrol, _adimBoy, _yer] spawn {
+    params ["_group", "_unit", "_targetPos", "_wps", "_baslangic", "_wpSec", "_suKontrol", "_adimBoy", ["_yer", []]];
 
     private _origCombat = combatMode _group;
     private _origBeh = behaviour (leader _group);   // v7.5b: bitince AWARE'de KALMASIN
@@ -476,7 +485,7 @@ if (EGVAR(main,debug_functions)) then {
                         _x set [2, getPosATL _b];
                         _x set [3, time];
                     } else {
-                        if ((time - (_x select 3)) > 3.5) then {
+                        if ((time - (_x select 3)) > 7) then {   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
                             _x set [4, (_x select 4) + 1];
                             // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
                             if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
@@ -500,8 +509,8 @@ if (EGVAR(main,debug_functions)) then {
                             if (!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) && {(primaryWeapon _b) isNotEqualTo ""} && {(currentWeapon _b) isNotEqualTo (primaryWeapon _b)}) then { _b selectWeapon (primaryWeapon _b); };
                             // v8.671 KOSU MODU (RPT 04a53ab5: 5 asker COMBAT + hedef alma acik iken 17-25 sn MOVE komutuyla STAND / hiz 0 kaldi, baski 0, dusman gorunurlugu 0, doStop + yeni doMove bile islemedi; bu sirada 3 asker vuruldu):
                             //   ilk takilmada (baski < 0.3) o asker eski kosu moduna alinir: AWARE + TARGET / AUTOTARGET kapali (motorun 'hedefe dur / nisan al' alt durumu devre disi); sicrama sonunda (4) COMBAT + hedef alma geri verilir.
-                            //   Kapatma: lambs_danger_cekilKosuModuOff = true. Log: [GERI-CEKILME-KOSU-MODU] (ilk 20). Kok neden KANITLANMADI: bu bir DENEY (sonraki RPT'de takilma suresi kisaldi mi bakilir).
-                            if ((_x select 4) >= 1 && {(getSuppression _b) < 0.3} && {!(missionNamespace getVariable ["lambs_danger_cekilKosuModuOff", false])} && {!(_b getVariable [QGVAR(retKosuModu), false])}) then {
+                            //   v8.674: VARSAYILAN KAPALI (RPT 8f8a8871: takilma tespiti her sicramanin ~5. sn'sinde TUM kosucularda tetiklendi = normal baslama gecikmesi; 5 askeri AWARE + hedef alma kapali yapti -> 'nisan alip karsilik vermiyorlar'). Acmak: lambs_danger_cekilKosuModu = true.
+                            if ((_x select 4) >= 1 && {(getSuppression _b) < 0.3} && {missionNamespace getVariable ["lambs_danger_cekilKosuModu", false]} && {!(_b getVariable [QGVAR(retKosuModu), false])}) then {
                                 _b setVariable [QGVAR(retKosuModu), true];
                                 _b disableAI "TARGET";
                                 _b disableAI "AUTOTARGET";
@@ -672,7 +681,7 @@ if (EGVAR(main,debug_functions)) then {
                 _targetPos = _tpY;
                 _targetASL = AGLToASL _tpY;
                 private _oY = getPosATL _arkaY;
-                private _wpY = [_oY, _tpY getDir _oY] call _wpSec;
+                private _wpY = [_oY, if (_yer isNotEqualTo [] && {(_oY distance2D (_yer select 0)) > 25}) then { _oY getDir (_yer select 0) } else { _tpY getDir _oY }] call _wpSec;   // v8.674: avantajli yere dogru
                 _wpY = [_wpY, _oY] call _suKontrol;
                 if (_wpY isNotEqualTo [] && {!(surfaceIsWater _wpY)}) then {
                     diag_log format ["[GERI-CEKILME-BACAK] %1 | bacak %2 YENILENDI | dusman %3 m yon %4 | planlanan noktadan %5 m farkli", groupId _group, _wpIdx + 1, round (_oY distance2D _tpY), round (_tpY getDir _oY), round (_wpL distance2D _wpY)];
@@ -731,7 +740,7 @@ if (EGVAR(main,debug_functions)) then {
         { if ((_x distance2D _tp) > (_arka distance2D _tp)) then { _arka = _x; }; } forEach _canli;
         _adimBoy = _adimBoy max 50;
         private _o = getPosATL _arka;
-        private _wpE = [_o, _tp getDir _o] call _wpSec;
+        private _wpE = [_o, if (_yer isNotEqualTo [] && {(_o distance2D (_yer select 0)) > 25}) then { _o getDir (_yer select 0) } else { _tp getDir _o }] call _wpSec;   // v8.674: avantajli yere dogru
         _wpE = [_wpE, _o] call _suKontrol;
         private _ciftMi = (_ekNo % 2) isEqualTo 0;
         private _hr = if (_bravo isEqualTo []) then {_alpha} else {[_bravo, _alpha] select _ciftMi};

@@ -197,6 +197,25 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             if (isNull _dusman || {!alive _dusman}) then { _dusman = _s findNearestEnemy _s; };
             private _savas = ((_pg getVariable [QGVAR(contact), 0]) > time) && {!isNull _dusman} && {alive _dusman};
 
+            // v8.674 GOZLEMCI TAKIPCISI (kullanici: 'sniper teamindeki 1 asker hareket etmedi'; RPT 8f8a8871: gozlemci Hasib Wardak 13:47:44-13:48:09 ayni noktada STAND / 0 km/sa, nisanci 14 km/sa ile 108 m uzaklasti):
+            //   yalniz nisanciya doMove veriliyordu, gozlemcinin formasyonla takip edecegi varsayiliyordu (yeni gruba joinSilent sonrasi eski emir / duraklama kaliyor). Gozlemci nisancidan > 14 m uzak ve yavassa 6 sn'de bir
+            //   nisancinin 4-8 m cevresine doMove (> 40 m FULL hiz). Kapatma: lambs_danger_gozlemciTakipOff = true. Log: [SNIPER-GOZLEMCI] (ilk 12).
+            if (!isNull _sp && {alive _sp} && {!isPlayer _sp} && {!(missionNamespace getVariable ["lambs_danger_gozlemciTakipOff", false])}) then {
+                private _dg = _sp distance2D _s;
+                if (_dg > 14 && {(speed _sp) < 3} && {time > (_sp getVariable [QGVAR(gozTakipT), 0])} && {time >= (_sp getVariable [QGVAR(tcccBusy), 0])}) then {
+                    _sp setVariable [QGVAR(gozTakipT), time + 6];
+                    _sp enableAI "PATH";
+                    _sp enableAI "MOVE";
+                    _sp forceSpeed -1;
+                    _sp setSpeedMode (["NORMAL", "FULL"] select (_dg > 40));
+                    _sp doMove (_s getPos [4 + random 4, (getDir _s) + 120 + random 120]);
+                    if ((missionNamespace getVariable ["lambs_danger_gozTakipLogN", 0]) < 12) then {
+                        missionNamespace setVariable ["lambs_danger_gozTakipLogN", (missionNamespace getVariable ["lambs_danger_gozTakipLogN", 0]) + 1];
+                        diag_log format ["[SNIPER-GOZLEMCI] %1 | gozlemci %2 nisanciden %3 m uzakta, hiz %4 km/sa -> nisanciya yaklasiyor | durus %5 | komut %6", groupId _ng, name _sp, round _dg, round (speed _sp), stance _sp, currentCommand _sp];
+                    };
+                };
+            };
+
             // ---------------------------------------------------------
             // KESIF GOZLEMI: ekip dusman gorduyse ana komutana bildir (ates YOK, emir bekler)
             // ---------------------------------------------------------

@@ -872,14 +872,14 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
 
         if (_fseSicrama) then {
             // BRAVO ileri sicrar (MG kosmaz, kapsamada kalir); ALPHA durup ates eder
-            private _bk = [_bravoE, 1] call FUNC(rolManevra);   // v8.661: yalniz MG degil: saglikci / nisanci / AT de kosucu olmaz (RIFLE / UGL oncelikli)
+            private _bk = [_bravoE, [1, ((ceil ((count _bravoE) * 0.5)) max 2)] select (missionNamespace getVariable ["lambs_danger_bndAktifKosucu", true])] call FUNC(rolManevra);   // v8.674: en az ekibin yarisi (>= 2) kosar (RPT 8f8a8871: 8 askerde sicrama basina 1 kosucu)   // v8.661: yalniz MG degil: saglikci / nisanci / AT de kosucu olmaz (RIFLE / UGL oncelikli)
             if (_bk isEqualTo []) then { _bk = +_bravoE; };
             _hareketEdecek = _bk;
             _kapsama = _alphaE + (_bravoE - _bk);
         } else {
             _rushN = _rushN + 1;
             // ALPHA ileri sicrar (MG kosmaz); BRAVO durup ates eder
-            private _ak = [_alphaE, 1] call FUNC(rolManevra);   // v8.661
+            private _ak = [_alphaE, [1, ((ceil ((count _alphaE) * 0.5)) max 2)] select (missionNamespace getVariable ["lambs_danger_bndAktifKosucu", true])] call FUNC(rolManevra);   // v8.661; v8.674: en az ekibin yarisi (>= 2)
             if (_ak isEqualTo []) then { _ak = +_alphaE; };
             _hareketEdecek = _ak;
             _kapsama = _bravoE + (_alphaE - _ak);
@@ -898,7 +898,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
 
         // v8.379 BUDDY ATILIMI (kullanici: 'ikisi ayni anda hareket ediyor, senkron degil'): hareket takiminda her buddy cifti icinde ayni anda YALNIZ BIR es kosar, es kapsama ateşi verir;
         //   en eski kosan sirada (bndSonKos) -> sonraki sicramada es kosar (cift ici leapfrog)
-        if ((count _hareketEdecek) >= 2) then {
+        if ((count _hareketEdecek) >= ([2, 4] select (missionNamespace getVariable ["lambs_danger_bndAktifKosucu", true]))) then {   // v8.674: buddy (ciftte tek kosucu) kurali yalniz >= 4 kosucuda; aksi halde 2-3 kisilik ekipten 1 kisi kaliyordu
             private _bciftler = [_hareketEdecek] call _pairFn;
             private _kosacak = [];
             {
