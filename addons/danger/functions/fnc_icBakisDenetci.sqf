@@ -2,7 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * BINA ICI BAKIS DENETCISI (v8.617; kullanici: 'bakis yonu kusursuz olsun'; RPT eec0f873: bina ici namlu hala duvar arkasi dusmana / sese donuk, bakis tek tek watcher'lara dagilmisti):
- * TEK YETKILI bakis denetcisi, 0.7 sn'de bir (cqb izleyici hizi) bina ICINDEKI her yerel AI askere bakar:
+ * TEK YETKILI bakis denetcisi, 0.5 sn'de bir (cqb izleyici hizi); kor iken motorun hedef secimi (AUTOTARGET / TARGET) kapatilir, gorus acilinca acilir (v8.619) bina ICINDEKI her yerel AI askere bakar:
  *   - Bilinen dusman (knowsAbout >= SEZILDI, <= 150 m) var VE gorus hatti (FIRE) kapali (fnc_icKorMu) ise namlu dusmana / sese degil, tehdit yonundeki ACIK yone (fnc_icBakisYonu: merdiven / kapi / pencere / koridor)
  *     verilir; acik yon yoksa 12 yonlu tarama ile en uzun acik yon (dusman yonunun +-40 derecesi haric); doWatch HER turda tazelenir (baska bir izleyici / motor namluyu kaydirsa da geri alinir).
  *   - Dusman GORUNUYORSA (hat acik) denetci karismaz: refleks / yakinAtes dusmana doner ve ates eder.
@@ -27,8 +27,11 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
     private _say = createHashMapFromArray [["ic", 0], ["bilen", 0], ["yanlis", 0], ["duzelt", 0], ["acik", 0], ["tarama", 0], ["yuruyus", 0], ["gorunen", 0]];
     private _ozetT = time + 60;
     while {true} do {
-        sleep ([0.7, true, true] call FUNC(dusunSure));
-        if !(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) then { continue };
+        sleep ([0.5, true, true] call FUNC(dusunSure));
+        if !(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) then {
+            { _x enableAI "AUTOTARGET"; _x enableAI "TARGET"; _x setVariable [QGVAR(icHedefKapali), nil]; } forEach (allUnits select {local _x && {_x getVariable [QGVAR(icHedefKapali), false]}});
+            continue
+        };
         private _esik = ["SEZILDI"] call FUNC(bilgiEsik);
         {
             private _u = _x;
@@ -38,7 +41,10 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
                 || {_u getVariable [QGVAR(forceMove), false]} || {!isNil {_u getVariable QGVAR(koseAktif)}}
                 || {(_u getVariable [QGVAR(odaPusuPoz), []]) isNotEqualTo []}
                 || {[_u] call FUNC(oyuncuKomutaMi)}
-            ) then { continue };
+            ) then {
+                if (local _u && {alive _u} && {_u getVariable [QGVAR(icHedefKapali), false]}) then { _u enableAI "AUTOTARGET"; _u enableAI "TARGET"; _u setVariable [QGVAR(icHedefKapali), nil]; };
+                continue
+            };
             private _g = group _u;
             _say set ["ic", (_say get "ic") + 1];
             private _e = _u findNearestEnemy _u;
@@ -49,8 +55,11 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
                 _say set ["bilen", (_say get "bilen") + 1];
                 if !([_u, _e] call FUNC(icKorMu)) then {
                     _say set ["gorunen", (_say get "gorunen") + 1];
+                    if (_u getVariable [QGVAR(icHedefKapali), false]) then { _u enableAI "AUTOTARGET"; _u enableAI "TARGET"; _u setVariable [QGVAR(icHedefKapali), nil]; };   // gorus acildi: motor hedef secimi geri
                     continue
                 };
+                // v8.619 MOTOR HEDEF SECIMI KAPAT (kullanici: 'hala dogru yere bakamiyorlar'; RPT 39835e40: duvar arkasi dusman 4-9 m, bilgi 4.00 -> motor namluyu 0.5 sn icinde dusmana ceviriyor, [IC-BAKIS-OZET] 32 duvar arkasi askerin 11'i <= 30 derece): kor iken AUTOTARGET + TARGET kapali, gorus acilinca (yukari) acilir
+                if !(_u getVariable [QGVAR(icHedefKapali), false]) then { _u disableAI "AUTOTARGET"; _u disableAI "TARGET"; _u setVariable [QGVAR(icHedefKapali), true]; };
                 private _brg = _u getDir _e;
                 private _wd = _u weaponDirection (currentWeapon _u);
                 private _fark = abs ((((_wd select 0) atan2 (_wd select 1)) - _brg + 540) mod 360 - 180);
@@ -90,6 +99,7 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
                     if (_fark <= 30) then { _say set ["duzelt", (_say get "duzelt") + 1]; };
                 };
             } else {
+                if (_u getVariable [QGVAR(icHedefKapali), false]) then { _u enableAI "AUTOTARGET"; _u enableAI "TARGET"; _u setVariable [QGVAR(icHedefKapali), nil]; };
                 if ((_g getVariable [QGVAR(isSweeping), false]) && {(speed _u) > 1.5}) then {
                     private _v = velocity _u;
                     private _vb = (_v select 0) atan2 (_v select 1);

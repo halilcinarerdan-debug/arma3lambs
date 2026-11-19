@@ -97,8 +97,19 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 private _vis = [_u, "VIEW", _e] checkVisibility [_uGoz, eyePos _e];
                 private _atesVerdi = false;
 
+                // v8.619 DUVARA DEGIL PENCEREYE (kullanici: 'sadece pencereye ates etsinler duvara degil'; RPT 39835e40 / eec0f873: [PENETRE-ATES] duvar arkasi dusmana 'BILINMEYEN malzeme DENEMESI'): dusman BINADAYSA ve CBA pencereAtesi aciksa duvar penetrasyonu YOK; yalniz pencere / kapidan gorulen ic noktaya bastirma (fnc_pencereNoktasi)
+                private _binaPen = (missionNamespace getVariable ["lambs_danger_pencereAtesi", true]) && {!_arac} && {(insideBuilding _e) > 0.15};
+                if (_binaPen && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])} && {(_u ammo (primaryWeapon _u)) > 6}) then {
+                    private _pw = [_u, getPosATL _e] call FUNC(pencereNoktasi);
+                    _u setVariable [QGVAR(penetreT), time + 4];
+                    if (_pw isNotEqualTo []) then {
+                        _u doSuppressiveFire (AGLToASL _pw);
+                        _atesVerdi = true;
+                    };
+                };
+
                 // ---- 1) PENETRASYON ATESI ----
-                if (_penetreAcik && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])}
+                if (!_binaPen && {_penetreAcik} && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])}
                     && {[(_u ammo (primaryWeapon _u)) > 6, someAmmo (vehicle _u)] select _arac}) then {
                     private _pm = [_uGoz, _hedefASL, [_u, vehicle _u] select _arac, _e, true] call FUNC(penetreMi);
                     if (_pm select 0) then {

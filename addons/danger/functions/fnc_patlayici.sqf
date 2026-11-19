@@ -111,6 +111,7 @@ lambs_danger_patlayiciDon = {
                     {
                         if (_v >= 0) then { continue };
                         private _a = _x;
+                        if (_a > 62 && {_dh < 2.5}) then { continue };   // v8.619: ayni kat hedefe dik (> 62 derece) lob YOK (RPT 39835e40: 80 derece, 10 m hedef -> bomba atici yaninda (0 m) dustu / geri tepti); dik yay yalniz ust kat (>= +2.5 m)
                         private _payda = (_D * (tan _a)) - _dh;
                         if (_payda > 0.5) then {
                             private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _a) ^ 2) * _payda));
@@ -152,6 +153,24 @@ lambs_danger_patlayiciDon = {
                             _gr setPosASL _rel;
                             _gr setVelocity _vel;
                             _gr setShotParents [_u, _u];
+                            // v8.619 PATLAMA ONCESI DOST GUVENLIGI (kullanici: 'kendilerini oldurduyorlar'; RPT 39835e40: el bombasi atici / giris takimi yaninda (0-6 m) patladi, Fu Hou / Zhen Jao baygin): fitilin son 0.3 sn'sinde bomba bombaDostM icinde dost (atici dahil) varsa bomba SILINIR (patlamaz)
+                            [_gr, _u] spawn {
+                                params ["_gr", "_u"];
+                                private _fit = getNumber (configFile >> "CfgAmmo" >> (typeOf _gr) >> "explosionTime");
+                                if (_fit <= 0) then { _fit = 5; };
+                                private _bit = time + (_fit - 0.3);
+                                waitUntil { sleep 0.05; isNull _gr || {time >= _bit} };
+                                if (!isNull _gr) then {
+                                    private _gp = getPosATL _gr;
+                                    private _dm = missionNamespace getVariable ["lambs_danger_bombaDostM", 8];
+                                    private _tr = side (group _u);
+                                    private _yak = allUnits select {alive _x && {(_x distance _gr) < _dm} && {(_tr getFriend (side group _x)) >= 0.6}};
+                                    if (_yak isNotEqualTo []) then {
+                                        deleteVehicle _gr;
+                                        diag_log format ["[PATLAYICI] bomba patlamadan SILINDI | %1 | yakin dost %2 (en yakin %3 m, atici %4 m) | grup %5", name _u, count _yak, round (((_yak apply {_x distance _gp}) call BIS_fnc_arithmeticMean) min 99), round (_u distance _gp), groupId (group _u)];
+                                    };
+                                };
+                            };
                             _u removeMagazine _mag;
                             _sonuc = format ["ATILDI (hedef %1 m, aci %2, hiz %3 m/sn, dagilma %4 m)", round _D, _th, _v toFixed 1, _dag toFixed 1];
                         };
