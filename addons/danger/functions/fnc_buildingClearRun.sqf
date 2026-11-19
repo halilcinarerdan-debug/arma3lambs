@@ -280,11 +280,16 @@ private _govde = {
         private _siraliUye = [_uyeler, [], {[_x] call _skorFn}, "ASCEND"] call BIS_fnc_sortBy;
         private _birincil = _siraliUye select {([_x] call _skorFn) <= 2};
         private _icerde = [];
+        if (_saldiri) then {
+            // v8.616 SALDIRIDA 4 KISI (kullanici: 'tek kisi giriyorlar topluca degil'; RPT eec0f873: 4 kisilik grupta 'ESZAMANLI GIRIS: 2 asker' - rol puani <= 2 suzgeci AT / MG / saglikciyi disarida birakip 2 kisi birakiyordu): puana gore en iyi 4 (ayni suzgec), eksikse siradaki en dusuk puanlilar eklenir; lider en sonda
+            _icerde = _siraliUye select [0, 4];
+        } else {
         if ((count _birincil) >= 2) then {
             _icerde = _birincil select [0, 4];   // v8.612: saldirida 4 kisi TEK takim olarak girer (v8.611: 6 idi; kullanici: 'ciddi 4 kisi giris yapsinlar'); MG / AT / saglikci / lider disarida kalir
         } else {
             _icerde = (_siraliUye select {([_x] call _skorFn) < 8}) select [0, 2];
             if ((count _icerde) < 2) then { _icerde = _siraliUye select [0, 2]; };
+        };
         };
         if ((count _icerde) < 2) exitWith {};
 

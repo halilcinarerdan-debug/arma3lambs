@@ -114,10 +114,19 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                                 if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { _u selectWeapon (primaryWeapon _u) };
                             };
 
-                            _u doWatch _e;
-                            if (!_siperGitti) then {
-                                _u doTarget _e;
-                                _u doFire _e;
+                            // v8.616 BINA ICI: duvarin ARKASINDAKI bilinen dusmana namlu cevrilmez (kullanici: 'hala ses yonune bakiyorlar'; RPT eec0f873: [CQB] refleks 27-43 m'de duvar arkasi dusmana doWatch + doTarget + doFire, onceki bakis duzeltmelerini eziyordu)
+            //   ic mekanda gorus hatti (FIRE) kapaliysa: hedef alma / ates YOK, namlu fnc_icBakisYonu ile acik yone (kapi / merdiven / koridor); hat acilirsa (gorus var) refleks normal
+                            private _icKor = (missionNamespace getVariable ["lambs_danger_icBakisKose", true]) && {(insideBuilding _u) > 0.5}
+                                && {(lineIntersectsSurfaces [eyePos _u, aimPos _e, _u, _e, true, 1, "FIRE", "NONE"]) isNotEqualTo []};
+                            if (_icKor) then {
+                                private _ib = [_u, _u getDir _e] call FUNC(icBakisYonu);
+                                if (_ib isNotEqualTo []) then { _u doWatch _ib; };
+                            } else {
+                                _u doWatch _e;
+                                if (!_siperGitti) then {
+                                    _u doTarget _e;
+                                    _u doFire _e;
+                                };
                             };
 
                             if (!_siperGitti && {_d <= 15} && {(stance _u) isEqualTo "STAND"} && {(getSuppression _u) < 0.7}) then {

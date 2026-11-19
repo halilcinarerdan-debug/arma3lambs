@@ -3855,3 +3855,9 @@ v8.615 (dal sade-waypoint) AGAC / NESNE SIPERI INCELEMESI (kullanici: 'ayrica ag
  - DEGISIKLIK: fnc_acikSiper sert siper aday elemesine 'weaponholder' (dusen silah / esya) ve cali modelleri (model adi 'b_' ile baslar) eklendi; cali yalniz bitki ortusu blogunda (gizlenme, +6 ceza) degerlendirilir. Agac govde yaricapi (v8.606) ayni.
  - SINIR / DOGRULANMADI: govde taramasi (1.1 m, +-3 m) agac modelinin cizgisinde govde ofsetliyse 0'a duser (0.5 m varsayim); FIRE LOD'u olmayan agaclar (%25-50) mermiyi durdurmaz, yalniz gorus keser (VIEW kalibrasyonu: siperLod); oyunda DENENMEDI. NOT: oyunda denenmedi.
 
+v8.616 (dal sade-waypoint) BINA ICI BAKIS + GIRIS TAKIMI (kullanici: 'hala ses yonune bakiyorlar, dusmanin gelecegi yone bakmiyorlar, tek kisi giriyorlar topluca degil'; RPT eec0f873, v8.615).
+ - NEDEN 1 (bakis): fnc_cqbReflex duvar arkasindaki bilinen dusmana (27-43 m, knows 4.00) doWatch + doTarget + doFire veriyordu; icBakisKose yalniz sektorBakis / gelisYonu / soundAwareness / duvarBakis / cqbCevik'i kapsiyordu, reflex ve bu satirlar eziyordu. RPT'de hic bina ici bakis kaydi yok.
+ - NEDEN 2 (giris): fnc_buildingClearRun giris takimi rol puani <= 2 suzgeciyle secilirdi; 4 kisilik grupta AT / MG / saglikci disarida kalinca 'ESZAMANLI GIRIS: 2 asker' (2 kisi). Ayrica 'yigilma noktasina varamadi (18-26 m)' (AT / uye kapidan 18-26 m uzakta).
+ - DEGISIKLIK: (a) cqbReflex: bina ici + FIRE gorus hatti kapaliysa doTarget / doFire / doWatch(dusman) YOK, namlu fnc_icBakisYonu ile acik yone; hat acikken refleks degismedi. (b) buildingClearRun: saldiri modunda giris takimi = puana gore en iyi 4 (eksik kadro tamamlanir; lider en sonda).
+ - DOGRULANMADI / SINIR: cqbCevik'in kosu-oncesi doTarget (satir 168 / 212) hala ic mekanda dusmana doner (atilim kisa, dusman GORUNUYORSA); LAMBS taskCQB'in kendi bakisi (kod bizim degil) engellenmedi; giris takimina AT / MG de dahil olabilir; oyunda DENENMEDI.
+
