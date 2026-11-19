@@ -401,7 +401,7 @@ if (EGVAR(main,debug_functions)) then {
                         private _cmd = currentCommand _b;
                         private _rd = unitReady _b;
                         private _dm = (expectedDestination _b) select 1;
-                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0} || {(_dm find "LEADER") >= 0}) then {   // v8.679: 'LEADER PLANNED' (doFollow / formasyon) de ezme sayilir (kendi doMove emri 'DoNotPlan' gosterir)
+                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0} || {((_dm find "LEADER") >= 0) && {_b isNotEqualTo (leader _g)}}) then {   // v8.680: lider icin 'LEADER PLANNED' NORMAL (kendi doMove emri bile boyle gorunur) -> yalniz lider olmayanda; v8.679: 'LEADER PLANNED' (doFollow / formasyon) de ezme sayilir (kendi doMove emri 'DoNotPlan' gosterir)
                             _gor pushBack _b;
                             if ((missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) < 40) then {
                                 missionNamespace setVariable ["lambs_danger_retEzmeTaniN", (missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) + 1];
@@ -509,6 +509,27 @@ if (EGVAR(main,debug_functions)) then {
                         _b forceSpeed -1;
                         doStop _b;
                         _b doMove (_x select 1);
+                    };
+                };
+            } forEach _varis;
+
+            // v8.680 EMIR KORUMASI (RPT 0e8cb384: haltKur / roleStation / noktaEleman vb. 10+ yerde gecikmeli 'doFollow' serbest birakmasi koşu emrini formasyon planina ('LEADER PLANNED' / 'Formation') ezebiliyor): LIDER OLMAYAN
+            //   kosucunun hedef modu formasyona donduyse (ve yavassa) 1.5 sn'den once degil, birim basina 1.5 sn arayla emir doStop OLMADAN yeniden verilir (yol hesabini sifirlayan doStop yok). Log: [GERI-CEKILME-KORUMA] (ilk 20).
+            {
+                private _bR = _x select 0;
+                if (alive _bR && {(lifeState _bR) in ["HEALTHY", "INJURED"]} && {!(_bR in _pinned)} && {_bR isNotEqualTo (leader _grup)} && {(time - _t0) > 1} && {(_bR distance2D (_x select 1)) > 12}
+                    && {(time - (_bR getVariable [QGVAR(retReasT), -999])) > 1.5} && {(speed _bR) < 3}) then {
+                    private _dmR = (expectedDestination _bR) select 1;
+                    if ((_dmR find "LEADER") >= 0 || {(_dmR find "Formation") >= 0}) then {
+                        _bR setVariable [QGVAR(retReasT), time];
+                        _bR enableAI "PATH";
+                        _bR enableAI "MOVE";
+                        _bR forceSpeed -1;
+                        _bR doMove (_x select 1);
+                        if ((missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) < 20) then {
+                            missionNamespace setVariable ["lambs_danger_retKorumaN", (missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) + 1];
+                            diag_log format ["[GERI-CEKILME-KORUMA] %1 | %2 | hedef modu %3 (formasyon planina donmus) -> koşu emri yeniden | hedefe %4 m | hiz %5 km/sa", groupId _grup, name _bR, _dmR, round (_bR distance2D (_x select 1)), round (speed _bR)];
+                        };
                     };
                 };
             } forEach _varis;

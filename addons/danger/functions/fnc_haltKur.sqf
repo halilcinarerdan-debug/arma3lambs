@@ -49,7 +49,12 @@ private _calis = {
             if (_engel) then {
                 // serbest birak
                 if (_haltli isNotEqualTo []) then {
-                    { _x setVariable [QGVAR(haltOldu), nil]; _x doFollow _l; } forEach _haltli;
+                    // v8.680 (RPT 0e8cb384: [GERI-CEKILME-EZME-TANI] grup taze degisken 'haltharekett', koşucu hedef modu 'LEADER PLANNED'): serbest birakma KOSULSUZ doFollow veriyordu; temas / retreat baslayinca onceden durdurulan askerin
+                    //   YENI emri (retreat doMove, zorla kosu, baska sistemin kilidi) formasyon planina ezilirdi. Simdi yalniz baska emri / kilidi olmayan, grup retreat yapmayan askere doFollow.
+                    {
+                        _x setVariable [QGVAR(haltOldu), nil];
+                        if (!((_x getVariable [QGVAR(forceMove), false]) isEqualTo true) && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_g getVariable [QGVAR(isRetreating), false])}) then { _x doFollow _l; };
+                    } forEach _haltli;
                     _say set ["serbest", (_say getOrDefault ["serbest", 0]) + (count _haltli)];
                 };
                 continue;
