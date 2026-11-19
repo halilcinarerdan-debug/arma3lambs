@@ -585,6 +585,28 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
             };
         };
 
+        // v8.658 PLANLI SICRAMA: kosucu planlanan siper zincirinin gecerli bacagina gider (yan ofset +-2.5 m, kosucu ciftinde); gecerli degilse dinamik secim korunur
+        private _planL = (group _kosan) getVariable [QGVAR(bndPlan), []];
+        if ((missionNamespace getVariable ["lambs_danger_bndPlanli", true]) && {_planL isNotEqualTo []} && {!_kanatKosucu}) then {
+            private _li = (group _kosan) getVariable [QGVAR(bndPlanI), 0];
+            while {_li < (count _planL) && {(_kPos distance2D ((_planL select _li) select 0)) < 8}} do { _li = _li + 1; };
+            (group _kosan) setVariable [QGVAR(bndPlanI), _li];
+            if (_li < (count _planL)) then {
+                private _pp = (_planL select _li) select 0;
+                private _pq = _pp getPos [[2.5, -2.5] select ((((units (group _kosan)) find _kosan) max 0) % 2), (_kPos getDir _pp) + 90];
+                private _atl = _kPos distance2D _pq;
+                if (!surfaceIsWater _pq && {_atl >= 6} && {_atl <= (_atMax + 10)} && {(_mesafe - (_pq distance2D _hedef)) >= (_kazMin min 6)}) then {
+                    _movePos = _pq;
+                    _stance = "MIDDLE";
+                    _hop = _atl;
+                    _acik = 0;
+                    if ((missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) < 30) then {
+                        missionNamespace setVariable ["lambs_danger_bndPlanAdimN", (missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) + 1];
+                        diag_log format ["[BND-PLAN-ADIM] %1 | %2 | bacak %3 / %4 (%5) | sicrama %6 m", groupId (group _kosan), name _kosan, _li + 1, count _planL, (_planL select _li) select 1, round _atl];
+                    };
+                };
+            };
+        };
         if (_movePos isEqualTo []) then {
             private _kayma = if (_aci isNotEqualTo 0) then {_aci} else {[-30, 30] select ((((units (group _kosan)) find _kosan) max 0) % 2)};
             private _kalan = (_mesafe - _hucumMenzil) max 0;
@@ -1024,6 +1046,14 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         { _x setVariable [QGVAR(bndBaskiYon), nil]; _x setVariable [QGVAR(bndBaskiDevam), nil]; } forEach _hareketEdecek;   // v8.388: hop basi baski yonlendirme bayraklari
         // v8.7 ROTA PLANLAMA: ortulu yaklasma yonu (sapma acisi); yelpaze bu acinin etrafinda kurulur (toplam en fazla +-75 derece)
         private _rotaAci = [_group, _target] call FUNC(rotaPlan);
+        // v8.658 PLANLI BOUNDING: siper zinciri (plan yok / hedef > 40 m oynadi / 90 sn'den eski ise yenile)
+        if (missionNamespace getVariable ["lambs_danger_bndPlanli", true]) then {
+            private _pl = _group getVariable [QGVAR(bndPlan), []];
+            private _ph = _group getVariable [QGVAR(bndPlanHedef), []];
+            if (_pl isEqualTo [] || {_ph isEqualTo []} || {(_ph distance2D _target) > 40} || {(time - (_group getVariable [QGVAR(bndPlanT), -999])) > 90} || {(_group getVariable [QGVAR(bndPlanI), 0]) >= (count _pl)}) then {
+                [_group, _target, _rotaAci] call FUNC(bndPlan);
+            };
+        };
         {
             private _h = [_x, _target, _BND_COVER_RANGE, _BND_ASSAULT_RANGE, ["TeamBound/Move", "Leapfrog/Move"] select (_fseSicrama), ([(_rotaAci + ([30, -30, 0] select ((_forEachIndex + _cycleCount) % 3))) max -75 min 75, _kanatYon * 70] select (_kanatAktif && {_x in _alphaE}))] call _kosanHareket;
             if (_h isNotEqualTo []) then { _hareketler pushBack _h; };
