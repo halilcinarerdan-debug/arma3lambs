@@ -129,6 +129,26 @@ Amaç: bina içi / kapı geçişi gibi KISA segmentlerde AI'nın yol bulma takı
 - **Kabul ölçütü:** prototip binada `YURUMUYOR` / `YIGILMA-VARAMADI` sıfıra yakın; FPS etkisi ölçülmüş; CBA bayrağı ile kapatılınca eski davranış.
 - **Bilinen kaynaklar:** `BIS_fnc_unitPlay` (kaydedilmiş piyade hareketi oynatma) yöntemin var olduğunu gösteriyor; betik tabanlı kural-yürütme T (denenmedi).
 
+## Aşama 12 — COVER VE PİYADE MANEVRALARI (dal: `claude/sade-waypoint`, v8.660 sonrası; kullanıcı kararı: "hepsini yapılacaklara ekle")
+Hedef: cover ve piyade manevrasında gözlemlenen davranışı eğitimli bir piyade ekibine yaklaştırmak. Öz değerlendirme (tahmin, ölçüm değil): Altis 6,5 / PMC Ukraine 5 (v8.658); hedef tavan 8–8,5 (motor sınırları: AI için güvenilir lean yok, emirler gecikmeli işleniyor, ince navmesh yok, kare kare kontrol yok).
+
+**Yapıldı (T = oyunda tam doğrulanmadı):** `acikSiper` (aday skoru: mesafe, gizlilik, kalınlık, dost aralığı, çoklu tehdit, mevzi hafızası), uzak sipere atılış `siperZorla` (v8.649), yumuşak oturma `yumusakKay` (v8.647), duruş çeşitliliği (v8.656), ağaç model profili `agacProfil` (v8.643–655), kendi siperinde kal (v8.650), mikro düzeltme `siperMikro` (v8.640), planlı bounding `bndPlan` (v8.658–660), peek `siperPeek` (v8.660, T).
+
+**Yapılacak (öncelik sırası; hepsi "T" ile başlar):**
+1. **Ölçüm katmanı (önce):** RPT'ye otomatik "cover kalite" özeti: temas anında açıkta kalma %, ortalama siper-gövde mesafesi, kümelenme (4 m içinde ≥ 3 asker %), aynı duruşta kalan %, 15 sn içinde yeniden seçim %, bounding ilerleme (m/dk), peek sayısı. Sonraki maddelerin kabul ölçütü bu sayılar.
+2. **Ateş sektörü ataması:** her askere / ekibe planlı sektör (sol / sağ / ileri / yan koruma); `sektorBakis` ile birleştir.
+3. **Gerçek kanat manevrası:** baskı ekibi + manevra ekibi zamanlı (baskı bitmeden manevra ekibi kanada çıkmaz; `kanatBounding` güçlendirme).
+4. **Geri çekilme bounding'i:** siperden siper geri (bir ekip ateş, diğeri geri), `kacis` / `erkenCekilme` ile birleştir.
+5. **Peek'i çoklu hedefe genişlet:** tek `findNearestEnemy` yerine grubun ortak hedef listesi; köşe peek (yanal kayma + duruş) ve olası lean yolunun araştırılması (T: AI için script ile lean var mı).
+6. **Ateş hattı / ölü alan tahmini:** yer değiştirmeden önce düşmanın ateş hattını (enfilade, açık koridor) tahmin edip kaçınma; plan bacaklarını ateş hattı testinden geçirme (şimdi planlı noktalar düşman gözünden test edilmiyor).
+7. **Ağır silah takımı planlı konumlanma:** MG / AT overwatch pozisyonlarını bounding planıyla birlikte planla.
+8. **Ortak hedef paylaşımı:** el işareti / jest ile hedef işaretleme ( `cqbSessiz` ile birlikte), hedef listesi paylaşımı.
+9. **Plan kararlılığı:** düşman büyük yer değiştirince plan sıfırlanması yerine bacak yeniden bağlama; `bndPlanSon` ile başladı.
+10. **Ağaç / nesne verisi:** kavak (`t_populus`) ölçümü ve ladin (`t_picea2s`, VIEW 0,0) kararı; Lythium / Altis / PMC A/B testleri.
+11. **Kalınlık / penetrasyon (T):** gerçek penetrasyon (ACE balistik) yerine genişlik tabanlı kalınlık; mermi geçirmezlik tablosu.
+
+**8,5 / 10 ne demek (öneri ölçütler; kullanıcı onayı bekler, motor değeri değil):** eğitimli bir gözlemci çoğu senaryoda botu "yetkin eğitimli bir ekip" gibi görür; hatalar nadir ve sinir bozucu değil. Somut eşikler (madde 1 ölçümleri): temas anında açıkta kalma < %10; ort. siper-gövde mesafesi ≤ 1,0 m (karakter çapı yüzünden ~0,7 m fiziksel alt sınır); kümelenme < %5; aynı duruşta kalan < %60; 15 sn içinde yeniden seçim < %10; bounding ortalama ilerleme ≥ 25 m / dk (açık arazide); peek tetiği görüş kapalıyken > %0 ve kalkışların >%80'i ateşle sonuçlanır; baskı altında koşan asker ölümü ≤ gözlenen insan oyuncu benzeri (karşılaştırma testi, T).
+
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
 - Doğrulanmayan davranış belgede "T" (doğrulanmadı) işaretlenir.
