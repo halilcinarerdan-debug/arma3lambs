@@ -4074,3 +4074,7 @@ v8.656 (dal sade-waypoint) EGITIMLI ASKERE YAKINLIK (kullanici: 'sence egitimli 
  - DEGISIKLIK: (1) YENI CBA siperDurusCesit (0-1, varsayilan 0.5): baski <= 0.35 iken (MG haric) askerlerin bu orani siperDusuk'un verdigi durustan bir kademe YUKSEK durur (yatma -> comelme); kisi basina sabit (birimId + rastgele 'siperDurusCesit'). (2) YENI CBA siperDostAralik (1-8 m, varsayilan 4.5): siper noktasi o anda orada duran dosta bu mesafeden yakinsa (yigilmaAralik'tan kucuk) aday elenir (eski sabit 3 m).
  - SINIR: dagilma yalniz SIPER SECIMINDE (aday eleme); zaten kumelenmis askerleri disari itmiyor; siperDurusCesit cogu zaman comelme verir (ayakta degil); gercek egitimli takimdaki planli siperden siper atlama / yan ve arka kapanma yok; oyunda DENENMEDI.
 
+v8.657 (dal sade-waypoint) 'ZAYIF OLANLARI YAP' (kullanici; egitimli asker karsilastirma tablosundaki zayif maddeler).
+ - YAPILAN: (1) COKLU TEHDIT (yan / arka aci): fnc_acikSiper sert siper skorlamasina: en yakin dusman disinda bilinen (>= SEZILDI) <= 3 dusman (250 m), aday noktaya FIRE LOD hatti ACIKSA +5 / dusman (CBA siperCokluTehdit, varsayilan ACIK). (2) KALINLIK: agac modeli (t_*) govde genisligi (profil FIRE / GEOM) < 0.5 m ise +4, >= 0.7 m ise -1 (CBA agacProfil acikken).
+ - YAPILMAYAN (sinirli / kapsam disi): planli siperden siper atlama (bounding; mevcut yeniden secim 10 sn), gölge / bitki ile gizlenme iyilestirmesi, bina ici cover, gercek mermi penetrasyonu (kalinlik yalniz genislikten). Oyunda DENENMEDI.
+

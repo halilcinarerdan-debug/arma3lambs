@@ -71,6 +71,21 @@ private _doluMu = {
     params ["_pt", "_r"];
     ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min (missionNamespace getVariable ["lambs_danger_siperDostAralik", 4.5]))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
 };
+// v8.657 COKLU TEHDIT (kullanici: 'dediklerini yap / zayif olanlari yap'; egitimli asker yan ve arka acidan da korunur): en yakin dusman (_en) disinda BILINEN (>= SEZILDI) en cok 3 baska dusman (<= 250 m) icin aday siper noktasinin (1.0 m) FIRE LOD hatti ACIKSA +5 ceza / dusman (CBA siperCokluTehdit)
+private _digerE = [];
+if (missionNamespace getVariable ["lambs_danger_siperCokluTehdit", true]) then {
+    private _esikC = ["SEZILDI"] call FUNC(bilgiEsik);
+    _digerE = ((_u nearTargets 250) select {
+        private _o2 = _x select 4;
+        !isNull _o2 && {alive _o2} && {_o2 isNotEqualTo _en} && {_o2 isKindOf "CAManBase"} && {((side group _u) getFriend (side group _o2)) < 0.6} && {(_u knowsAbout _o2) >= _esikC}
+    }) apply { eyePos (_x select 4) };
+    _digerE = _digerE select [0, 3];
+};
+private _coklu = {
+    params ["_pt"];
+    private _pa = (AGLToASL [_pt select 0, _pt select 1, 0]) vectorAdd [0, 0, 1.0];
+    5 * ({ ((lineIntersectsSurfaces [_x, _pa, objNull, _u, true, 1, "FIRE", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_x, _pa])} } count _digerE)
+};
 // govde genisligi testi: istenen durus yuksekliginde hedef noktanin +-0.25 m yanindan da isin nesneye carpmali
 private _govdeKapali = {
     params ["_eA", "_gA", "_hh", "_enm", "_unt"];
@@ -136,6 +151,13 @@ private _objAd = "";
             if ((_ds select 0) isNotEqualTo "") then {
                 private _sk = (_u distance2D _pos) + (_ds select 1);
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));   // v8.529 mevzi hafizasi (puan yuksek = iyi -> maliyet duser)
+                _sk = _sk + ([_pos] call _coklu);   // v8.657: diger bilinen dusmanlara acik nokta +5 / dusman
+                // v8.657 KALINLIK (egitimli asker kalin siper secer): agac modeli govdesi (model profili FIRE / GEOM genisligi) < 0.5 m ise +4, >= 0.7 m ise -1
+                if ((missionNamespace getVariable ["lambs_danger_agacProfil", true]) && {(toLower ((getModelInfo _o) select 0)) find "t_" isEqualTo 0}) then {
+                    private _kp = [_o] call FUNC(agacProfil);
+                    private _kw = (_kp select 1) max (_kp select 2);
+                    _sk = _sk + (if (_kw < 0.5) then {4} else { if (_kw >= 0.7) then {-1} else {0} });
+                };
                 // v8.517: haritada agaclar mermi durdurmuyorsa (kalibrasyon LOD = VIEW) agac yalniz GIZLER -> kaya / duvar / konteyner gibi gercek siperler +10 puanla (m) one gecer
                 private _mdl = toLower ((getModelInfo _o) select 0);
                 if ((missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]) isEqualTo "VIEW" && {((_mdl find "t_") isEqualTo 0) || {(_mdl find "tree") >= 0} || {(_mdl find "picea") >= 0}}) then { _sk = _sk + 10; };
