@@ -21,13 +21,13 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["bakilan", 0], ["kacis", 0], ["siper", 0], ["comel", 0], ["atlandi", 0]];
+    private _say = createHashMapFromArray [["bakilan", 0], ["kacis", 0], ["siper", 0], ["comel", 0], ["atlandi", 0], ["oyuncuAday", 0], ["konide", 0], ["gorusKapali", 0], ["bilmiyor", 0], ["bekleme", 0]];
     private _ozetT = time + 60;
     while {true} do {
         sleep 0.5;
         if (time > _ozetT) then {
             _ozetT = time + 60;
-            if ((_say get "bakilan") + (_say get "kacis") + (_say get "siper") + (_say get "comel") > 0) then { diag_log format ["[BAKIS-FARK-OZET] 60 sn: tepki: kacis %1 | siper mikro %2 | comel / yat %3 | bakilip tepki verilmeyen (kilit / bina / tactic) %4", _say get "kacis", _say get "siper", _say get "comel", _say get "atlandi"]; };
+            if ((_say get "konide") + (_say get "kacis") + (_say get "siper") + (_say get "comel") > 0) then { diag_log format ["[BAKIS-FARK-OZET] 60 sn: oyuncu-tur %1 | bakis konisinde bot-tur %2 (gorus kapali %3, oyuncuyu bilmiyor %4, bakilma suresi dolmadi %5) | tepki: kacis %6, siper mikro %7, comel / yat %8 | bakilip tepki verilmeyen (kilit / bina / taktik) %9", _say get "oyuncuAday", _say get "konide", _say get "gorusKapali", _say get "bilmiyor", _say get "bekleme", _say get "kacis", _say get "siper", _say get "comel", _say get "atlandi"]; };
             { _say set [_x, 0]; } forEach (keys _say);
         };
         if !(missionNamespace getVariable ["lambs_danger_bakisFarkAktif", false]) then { continue };
@@ -41,6 +41,7 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
         {
             private _p = _x;
             if (!alive _p || {!isNull objectParent _p} || {(lifeState _p) in ["INCAPACITATED", "UNCONSCIOUS"]}) then { continue };
+            _say set ["oyuncuAday", (_say get "oyuncuAday") + 1];
             private _eye = eyePos _p;
             private _dir = if (local _p) then { getCameraViewDirection _p } else { eyeDirection _p };
             if ((vectorMagnitude _dir) < 0.1) then { continue };
@@ -62,11 +63,13 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
                     if (!isNil {_u getVariable QGVAR(bakilmaT)} && {time > ((_u getVariable [QGVAR(bakilmaSon), 0]) + 1.5)}) then { _u setVariable [QGVAR(bakilmaT), nil]; };
                     continue
                 };
-                if ((terrainIntersectASL [_eye, _tgt]) || {lineIntersects [_eye, _tgt, _p, _u]} || {(_u knowsAbout _p) < _esik}) then { continue };
+                _say set ["konide", (_say get "konide") + 1];
+                if ((terrainIntersectASL [_eye, _tgt]) || {lineIntersects [_eye, _tgt, _p, _u]}) then { _say set ["gorusKapali", (_say get "gorusKapali") + 1]; continue };
+                if ((_u knowsAbout _p) < _esik) then { _say set ["bilmiyor", (_say get "bilmiyor") + 1]; continue };
                 _u setVariable [QGVAR(bakilmaSon), time];
                 private _t0 = _u getVariable [QGVAR(bakilmaT), -1];
                 if (_t0 < 0) then { _u setVariable [QGVAR(bakilmaT), time]; continue };
-                if ((time - _t0) < _bekle) then { continue };
+                if ((time - _t0) < _bekle) then { _say set ["bekleme", (_say get "bekleme") + 1]; continue };
                 if (time < (_u getVariable [QGVAR(bakisTepkiT), 0])) then { continue };
                 private _g = group _u;
                 if (

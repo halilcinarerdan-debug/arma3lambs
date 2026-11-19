@@ -106,10 +106,21 @@ diag_log "[YEM] yem + taciz atesi (oyuncu grubuna: en basit asker farkli bolgede
                 private _iptal = {
                     params ["_gg", "_uu"];
                     isNull _gg || {!alive _uu} || {!((lifeState _uu) in ["HEALTHY", "INJURED"])} || {_gg getVariable [QGVAR(isRetreating), false]} || {_gg getVariable [QGVAR(isBreakingContact), false]}
-                    || {_gg getVariable [QGVAR(isEvading), false]} || {_gg getVariable [QGVAR(isBounding), false]} || {_gg getVariable [QGVAR(isExecutingTactic), false]}
+                    || {_gg getVariable [QGVAR(isEvading), false]}
                 };
                 private _vBit = time + 35;
-                waitUntil { sleep 0.5; ([_g, _u] call _iptal) || {(_u distance2D _pt) <= 6} || {time > _vBit} };
+                private _tazeT = 0;
+                waitUntil {
+                    sleep 0.5;
+                    // v8.694 EMIR TAZELEME: baska sistem (bounding sonu / komutan) emri bozduysa (hedef modu farkli / forceMove silindi) yem hedefine yeniden gonderilir (2 sn'de en cok bir)
+                    if (alive _u && {time > _tazeT} && {(_u distance2D _pt) > 8} && {((((expectedDestination _u) select 0) distance2D _pt) > 8) || {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true}}) then {
+                        _tazeT = time + 2;
+                        _u setVariable [QGVAR(forceMove), true];
+                        _u setVariable [QGVAR(taktikKilit), time + 60];
+                        _u doMove _pt;
+                    };
+                    ([_g, _u] call _iptal) || {(_u distance2D _pt) <= 6} || {time > _vBit}
+                };
                 if !([_g, _u] call _iptal) then {
                     private _bit = time + _sure;
                     private _sonAtis = 0;

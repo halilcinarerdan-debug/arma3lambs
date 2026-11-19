@@ -162,10 +162,11 @@ if (_units isEqualTo []) then {
     _units = _unit call lambs_main_fnc_findReadyUnits;
 };
 if (count _units < 4) then {
-    _units = (units _group) select {alive _x && {isNull objectParent _x}};
+    _units = (units _group) select {alive _x && {isNull objectParent _x} && {(_x getVariable [QGVAR(yemBirim), false]) isNotEqualTo true} && {(_x getVariable [QGVAR(sahteGozcu), false]) isNotEqualTo true}};   // v8.694: yem birimi / sahte cekilme gozetleyicisi (ayrilmis eleman) bounding kadrosuna alinmaz (RPT f9c7a1b9: komutan temasta 2 sn icinde BOUNDING baslatip yemin emrini eziyordu)
 };
 // v8.85: TCCC gorevindeki hekim (tcccBusy) bounding emirlerinden MUAF — RPT 820408cd: hekimin gorevi 'Bound/Cover(Maneuver)' ile eziliyor, yaraliya 25 sn'de varamiyor (IPTAL: sure doldu)
 _units = _units select {time > (_x getVariable [QGVAR(tcccBusy), 0])};
+_units = _units select {(_x getVariable [QGVAR(yemBirim), false]) isNotEqualTo true && {(_x getVariable [QGVAR(sahteGozcu), false]) isNotEqualTo true}};   // v8.694: ayrilmis eleman (yem birimi / sahte cekilme gozetleyicisi) hazir birlik listesinden de cikarilir (findReadyUnits yolu)
 if (count _units < 4) exitWith {
     _group setVariable [QGVAR(bndToken), nil];   // 79. satirdaki temizlik zamanlayicisi bu calismaya dokunmasin
     _group setVariable ["lambs_danger_isBounding", nil];
