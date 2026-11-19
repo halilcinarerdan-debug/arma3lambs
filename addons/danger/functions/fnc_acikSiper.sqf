@@ -119,7 +119,10 @@ private _objAd = "";
     private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
     // v8.375 SAHTE SIPER ELEME (RPT 04:04: 'Land_PowerLine_01_wire_50m_F 24 m', 'Land_PowerPoleWooden_L 1 m' -> asker tel / direge kosup acikta kaldi): elektrik teli / direk / lamba / kablo / anten nesneleri siper degildir (duvar / ev etkilenmez)
     private _ad0 = toLower ([typeOf _o, (getModelInfo _o) select 0] select ((typeOf _o) isEqualTo ""));
-    private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon"] findIf {(_ad0 find _x) >= 0}) >= 0;
+    private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon", "weaponholder"] findIf {(_ad0 find _x) >= 0}) >= 0;
+    // v8.615 SAHTE SIPER (RPT b24f0608: 'NESNE ARKASI WeaponHolderSimulated' 5 kez = yere dusen silah / esya; 'b_pistacial1s_ep1 / b_pinusm1s_ep1' = CALI sert siper sayiliyor, UP duruslu): dusen silah / esya (weaponholder) ve cali modelleri (b_ ile baslayan model adi) SERT siper degildir;
+    //   cali yalniz asagidaki BITKI / CALI ORTUSU blogunda (gizlenme, +6 ceza, comelme / yatma) degerlendirilir
+    if (!_sahte && {((toLower ((getModelInfo _o) select 0)) select [0, 2]) isEqualTo "b_"}) then { _sahte = true; };
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
         private _r = [_o, (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5] call _govdeR;
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
