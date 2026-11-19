@@ -3827,3 +3827,5 @@ v8.609 (dal sade-waypoint) EL BOMBASI ACIK ARAZIDE (kullanici: 'acik arazide ats
  - fnc_patlayici: bomba hedefi 'deger' sarti (kume / bina / kapali hat / alcak durus / duragan >= 20 m / baski / pusu / cqbBombaM) CBA bombaAcik (varsayilan ACIK) ile ARANMAZ: bilinen dusman piyade bombaMinM - elBombasiMaxMesafe icindeyse acik arazide kosan / duran dusmana da atilir. MENZIL, dost yaricapi (bombaDostM), yay denetimi (GEOM), asker 20 sn / grup 4 sn bekleme, 60 sn'de <= 3 (CQB 5) bomba, yedek (son) bomba kurallari AYNEN.
  - SINIR / DOGRULANMADI: bomba harcamasi artar (spawnBomba / elBombasiEk ile birlikte kullan); acikta hareketli hedefe atis isabeti dusuk (bomba hedef noktaya + insani dagilma); oyunda DENENMEDI. NOT: oyunda denenmedi.
 
+v8.610 (dal sade-waypoint) BOMBA DOST YARICAPI 8 m (kullanici: 'bomba dost 8 metre'): CBA lambs_danger_bombaDostM varsayilan 18 -> 8 (slider alt siniri 8; kodda yedek deger de 8). RISK: ACE frag yaricapi ~15 m, hedefin 8-15 m'sinde dost varsa dost parca yiyebilir (v8.596'da 12 -> 18 yapilmisti, RPT 38ac1efc: etkin sayisi 10 -> 4); gozle: kendi askerini yaralarsa 12-15'e cikar. NOT: oyunda denenmedi.
+

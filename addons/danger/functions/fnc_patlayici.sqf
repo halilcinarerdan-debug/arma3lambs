@@ -393,7 +393,7 @@ lambs_danger_patlayiciDon = {
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");
                             private _icerde = (insideBuilding _u) > 0.5;
                             if (_bTM < _bombaMin) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
-                            private _dostYakin = (_bT nearEntities ["CAManBase", ((missionNamespace getVariable ["lambs_danger_bombaDostM", 18]) max 8) min 30]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
+                            private _dostYakin = (_bT nearEntities ["CAManBase", ((missionNamespace getVariable ["lambs_danger_bombaDostM", 8]) max 8) min 30]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                             if (_dostYakin) then { _sayac set ["g_dost", (_sayac getOrDefault ["g_dost", 0]) + 1]; };
                             if (!_dostYakin && {(speed _u) < 6}) then {
                                 _u setVariable [QGVAR(bombaT), time];
