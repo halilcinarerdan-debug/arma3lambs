@@ -221,6 +221,12 @@ lambs_danger_patlayiciDon = {
         [_u, _t, _ls] spawn {
             params ["_u", "_t", "_ls"];
             private _say0 = _u ammo _ls;
+            // v8.698 DUR + AYAKTA (RPT 4648beb0: roket karari verildi, anim 'amovppnemsprslowwrfldf' = surunerek hareket ediyordu; hizalama dongusu 'speed < 2' sartiyla hic calismadi: aci 180, silah secildi true ama elde tufek):
+            //   once askerin hareketi durdurulur (forceSpeed 0, taktikKilit) ve hiz < 1 km/sa olana dek (en cok 2 sn) beklenir; silah secildikten sonra ROKETATAR KALDIRMA animasyonu ('lnr' iceren anim, en cok 3 sn) beklenir
+            _u setVariable [QGVAR(taktikKilit), time + 18];
+            _u forceSpeed 0;
+            private _durBit = time + 2;
+            waitUntil { sleep 0.2; (speed _u) < 1 || {time > _durBit} || {!alive _u} };
             // v8.591 (RPT b3f29106 / aa5e787e: 8 roket denemesinin 8'i 'hizalanamadi', en kucuk aci 14-180 derece; 180 = silah hala sirtta / degismedi): omuzdan indirme animasyonu beklenir, hizalama penceresi ONDAN SONRA baslar
             // v8.691 (kullanici: 'roket atsin duzelt'; RPT 37ff0405: roket karari verildi ama 'silah secildi: false', aci 59 = roketatar elde degil): tek selectWeapon + 4 sn bekleme yetmiyordu (motor hedef piyadeyse silahi tufege geri aliyor olabilir - KANITSIZ) ->
             //   silah secilene dek 0.15 sn'de bir TEKRAR selectWeapon (en cok 6 sn) + hizalama dongusunde de silah elden dustuyse yeniden secilir; basarisizlikta elde ne var / animasyon / deneme sayisi loglanir
@@ -232,10 +238,12 @@ lambs_danger_patlayiciDon = {
                 sleep 0.15;
             };
             private _secildi = (currentWeapon _u) isEqualTo _ls;
+            private _anBit = time + 3;
+            waitUntil { sleep 0.2; ((toLower (animationState _u)) find "lnr") >= 0 || {time > _anBit} || {!alive _u} };
             private _bit = time + 6;
             private _min = 180;
             private _atildi = false;
-            while {time < _bit && {!_atildi} && {alive _u} && {alive _t} && {(_u ammo _ls) > 0} && {(speed _u) < 2}} do {
+            while {time < _bit && {!_atildi} && {alive _u} && {alive _t} && {(_u ammo _ls) > 0} && {(speed _u) < 6}} do {
                 if ((currentWeapon _u) isNotEqualTo _ls) then { _u selectWeapon _ls; _deneme = _deneme + 1; };
                 _u doWatch (aimPos _t);
                 _u doTarget _t;
@@ -256,7 +264,7 @@ lambs_danger_patlayiciDon = {
             private _sonuc = if (_atildi && {(_u ammo _ls) < _say0}) then {"ATILDI"} else { if (_atildi) then {"EMIR VERILDI (mermi sayaci degismedi)"} else {format ["VAZGECILDI (hizalanamadi, en kucuk aci %1 derece, silah secildi: %2, secme denemesi %3, elde: %4, anim: %5, LAMBS munisyon degisimi kapali: %6)", round _min, _secildi, _deneme, currentWeapon _u, animationState _u, missionNamespace getVariable ["lambs_main_disableAutonomousMunitionSwitching", false]]} };
             diag_log format ["[PATLAYICI] roket | %1 | %2 -> hedef %3 (%4 m) | HIZALAMA KAPILI ATIS: %5 | grup %6", name _u, _ls, typeOf _t, round (_u distance _t), _sonuc, groupId (group _u)];
             _u doWatch objNull;
-            [{ params ["_uu"]; if (alive _uu && {!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false])}) then { _uu selectWeapon (primaryWeapon _uu); }; }, [_u], 1.5] call CBA_fnc_waitAndExecute;
+            [{ params ["_uu"]; if (alive _uu) then { if (!((_uu getVariable [QGVAR(forceMove), false]) isEqualTo true)) then { _uu forceSpeed -1; _uu setVariable [QGVAR(taktikKilit), nil]; }; if (!(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false])) then { _uu selectWeapon (primaryWeapon _uu); }; }; }, [_u], 1.5] call CBA_fnc_waitAndExecute;
         };
     };
     private _hepsiHE = {
