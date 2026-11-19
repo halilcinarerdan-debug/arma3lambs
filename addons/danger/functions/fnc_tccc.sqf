@@ -87,7 +87,9 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             private _acik = false;
             {
                 private _o = _x select 4;
+                // v8.683: BAYGIN / TESLIM DUSMAN TEHDIT DEGIL (RPT c1221443: dusman grubu tamamen baygindi (etkin 0), 40 m'de 'bilinen dusman' sayildigi icin hekim yaraliya 126 sn gitmedi; komutan baygin dusmani v8.380'den beri sayiyordu, TCCC saymiyordu)
                 if (!isNull _o && {alive _o} && {(_o isKindOf "CAManBase") || {_o isKindOf "LandVehicle"}} && {((side _m) getFriend (side (group _o))) < 0.6} && {(side (group _o)) isNotEqualTo civilian}
+                    && {!((lifeState _o) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_o getVariable ["ACE_isUnconscious", false])} && {!captive _o}
                     && {(_m knowsAbout _o) >= _esik} && {((_m targetKnowledge _o) select 2) > (time - 25)}) then {
                     private _dm = _m distance2D _o;
                     if (_dm < 60) then { _yakin = true; };
