@@ -123,17 +123,26 @@ lambs_danger_patlayiciDon = {
                                 private _engel = false;
                                 private _ad = "";
                                 private _ni = 0;
+                                // v8.624 DIK INIS YASAK (kullanici: 'el bombalarini pencereye tutturamiyorlar'; RPT 1a697d94: 76-80 derece lob, 14-17 m, bomba cati / duvara dusup geri teper; ayrica 49-57 m'ye atis): bina ici hedefte son inis acisi > 52 derece ya da mesafe > 40 m ise yay 'engelli' sayilir (pencere / kapidan girmek icin yatay inis gerekir)
+                                private _inis = (-((_vl select 2) - (9.81 * _tTop))) atan2 ((cos _a) * _vk);
+                                private _binaHedef = (insideBuilding _t) > 0.15;
+                                if (_binaHedef && {(_inis > 52) || {_D > 40}}) then {
+                                    _engel = true;
+                                    _ni = 0;
+                                    _ad = format ["dik inis %1 derece / mesafe %2 m (pencereye girmez)", round _inis, round _D];
+                                } else {
                                 for "_i" from 1 to 8 do {
-                                    private _tt = _tTop * (_i / 8);   // v8.596: 0.92 -> 1.0 (yayin SON %8'i de denetlenir: pencere / duvar onunde dusup geri sekme riski; RPT 38ac1efc: grup 10 -> 4 etkin)
-                                    private _nokta = _rel vectorAdd [(_vl select 0) * _tt, (_vl select 1) * _tt, ((_vl select 2) * _tt) - (4.905 * _tt * _tt)];
-                                    private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
-                                    if (_ht isNotEqualTo []) exitWith {
-                                        _engel = true;
-                                        _ni = _i;
-                                        private _eo = (_ht select 0) select 2;
-                                        _ad = if (isNull _eo) then {"arazi / nesne"} else { [typeOf _eo, (getModelInfo _eo) select 0] select ((typeOf _eo) isEqualTo "") };
+                                        private _tt = _tTop * (_i / 8);   // v8.596: 0.92 -> 1.0 (yayin SON %8'i de denetlenir: pencere / duvar onunde dusup geri sekme riski; RPT 38ac1efc: grup 10 -> 4 etkin)
+                                        private _nokta = _rel vectorAdd [(_vl select 0) * _tt, (_vl select 1) * _tt, ((_vl select 2) * _tt) - (4.905 * _tt * _tt)];
+                                        private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
+                                        if (_ht isNotEqualTo []) exitWith {
+                                            _engel = true;
+                                            _ni = _i;
+                                            private _eo = (_ht select 0) select 2;
+                                            _ad = if (isNull _eo) then {"arazi / nesne"} else { [typeOf _eo, (getModelInfo _eo) select 0] select ((typeOf _eo) isEqualTo "") };
+                                        };
+                                        _onceki = _nokta;
                                     };
-                                    _onceki = _nokta;
                                 };
                                 _denenen = _denenen + 1;
                                 if (_engel) then {
@@ -154,13 +163,34 @@ lambs_danger_patlayiciDon = {
                             _gr setVelocity _vel;
                             _gr setShotParents [_u, _u];
                             // v8.619 PATLAMA ONCESI DOST GUVENLIGI (kullanici: 'kendilerini oldurduyorlar'; RPT 39835e40: el bombasi atici / giris takimi yaninda (0-6 m) patladi, Fu Hou / Zhen Jao baygin): fitilin son 0.3 sn'sinde bomba bombaDostM icinde dost (atici dahil) varsa bomba SILINIR (patlamaz)
-                            [_gr, _u] spawn {
-                                params ["_gr", "_u"];
+                            [_gr, _u, _hedef] spawn {
+                                params ["_gr", "_u", "_hd"];
                                 private _fit = getNumber (configFile >> "CfgAmmo" >> (typeOf _gr) >> "explosionTime");
                                 if (_fit <= 0) then { _fit = 5; };
                                 private _bit = time + (_fit - 0.3);
-                                waitUntil { sleep 0.05; isNull _gr || {time >= _bit} };
+                                // v8.624 BOMBA IZI (tani; kullanici: 'pencereye tutturamiyorlar'): ilk carpma (hiz > %45 duser) noktasi / nesnesi + fitil sonu konumu (hedefe uzaklik, bina altinda mi)
+                                private _oncePos = getPosASL _gr;
+                                private _onceHiz = vectorMagnitude (velocity _gr);
+                                private _carpma = [];
+                                waitUntil {
+                                    sleep 0.05;
+                                    if (!isNull _gr && {_carpma isEqualTo []}) then {
+                                        private _h = vectorMagnitude (velocity _gr);
+                                        if (_onceHiz > 6 && {_h < (_onceHiz * 0.55)}) then {
+                                            private _ht = lineIntersectsSurfaces [_oncePos, (getPosASL _gr) vectorAdd ((vectorNormalized ((getPosASL _gr) vectorDiff _oncePos)) vectorMultiply 1.5), _gr, _u, true, 1, "GEOM", "NONE"];
+                                            private _eo = if (_ht isEqualTo []) then {objNull} else {(_ht select 0) select 2};
+                                            _carpma = [getPosASL _gr, if (isNull _eo) then {"arazi / bilinmeyen"} else {[typeOf _eo, (getModelInfo _eo) select 0] select ((typeOf _eo) isEqualTo "")}];
+                                        };
+                                        _oncePos = getPosASL _gr;
+                                        _onceHiz = _h;
+                                    };
+                                    isNull _gr || {time >= _bit}
+                                };
                                 if (!isNull _gr) then {
+                                    private _son = getPosASL _gr;
+                                    private _ustte = lineIntersectsSurfaces [_son vectorAdd [0, 0, 25], _son vectorAdd [0, 0, 0.3], _gr, objNull, true, 1, "GEOM", "NONE"];
+                                    private _bAltinda = _ustte isNotEqualTo [] && {((_ustte select 0) select 2) isKindOf "House"};
+                                    diag_log format ["[BOMBA-IZI] %1 | hedefe %2 m | atici %3 m | ilk carpma %4 | bina altinda %5", name _u, round (_son distance _hd), round (_son distance _u), if (_carpma isEqualTo []) then {"yok (havada / son)"} else {format ["%1 m atici, nesne %2, yukseklik +%3 m", round ((_carpma select 0) distance _u), _carpma select 1, (((_carpma select 0) select 2) - ((getPosASL _u) select 2)) toFixed 1]}, _bAltinda];
                                     private _gp = getPosATL _gr;
                                     private _dm = missionNamespace getVariable ["lambs_danger_bombaDostM", 8];
                                     private _tr = side (group _u);

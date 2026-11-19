@@ -3895,3 +3895,13 @@ v8.623 (dal sade-waypoint) GARRISON'DA CQB BAKISI (kullanici: 'cqb olayi garriso
  - YENI: fnc_garnizonMu (lambs_main_currentTactic 'garrison' ya da aktif waypoint script'i garrison). gelisYonu ve duvarBakis'te kapi garnizon icin kalkti (yalniz BAKIS katmanlari). Hareket eden CQB katmanlari (cqbCevik / yakinHareket / cqbKume / binaSaldiri) garnizonda KAPALI kalir (yerini terk etmesin).
  - DOGRULANMADI: lambs_main_currentTactic degerinin tam adi ('taskGarrison' varsayildi, 'garrison' alt dizgisi aranir); LAMBS Garrison'in kendi doWatch'i denetciyle (0.5 sn) cakisabilir; oyunda DENENMEDI.
 
+v8.624 (dal sade-waypoint) GIRIS + BOMBA (kullanici: 'adamlar hala girmiyorlar, el bombalarini pencereye tutturamiyorlar', sinirli; RPT 1a697d94, v8.623).
+ - BULGULAR: saldiri 6:40:10 basladi, ESZAMANLI GIRIS 6:40:49 (39 sn); yigilma(<2.5 m) 0/4, ort. aralik 21-26 m; LAMBS gorev 'Contact!' + KOMUT MOVE -> ATTACK / STOP / 'Throwing smoke grenade' yigilma doMove'unu eziyor; v8.600 varis kontrolu yalniz BIR kez, yalniz duran askere emir veriyordu. [DOKTRIN] baygin:2. Bombalar: 8 atis, 49-57 m'ye (3) ve 76-80 derece lobla 14-24 m'ye (4); [GIRIS-BOMBASI] 'yay engelli'.
+ - DEGISIKLIK: (1) buildingClearRun: saldirida yigilma bekleme 25 sn; 2.5 sn'de bir kapidan > 6 m uzaktaki HER giris askerine kapi onune doMove + forceSpeed -1 + taktikKilit 4 sn. (2) patlayici: bina ici hedefte son inis acisi > 52 derece ya da yatay mesafe > 40 m ise yay engelli (pencereye girmez, cati / duvara dusup geri teper). (3) TANI [BOMBA-IZI]: her bomba icin ilk carpma (hiz %45 duser) nesnesi / yuksekligi, fitil sonu hedefe uzaklik, bina altinda mi.
+ - SINIR: bomba hedefleri pencerenin gercek acikligina gore secilmiyor (buildingPos + 5 m liste); cam kirik / saglam denetimi yok; > 52 derece engeli ust kat hedeflerini cogu kez eler (atilmaz, bu bilincli); yigilma zorlamasi LAMBS / HQ emirleriyle 2.5 sn'lik yaris olusturabilir; oyunda DENENMEDI.
+
+v8.625 (dal sade-waypoint) TUM GRUP TOPLUCA GIRER (kullanici: 'askerler topluca girsin onu da').
+ - ESKI: saldirida giris takimi puana gore en iyi 4 (v8.616); MG / AT / saglikci / lider disarida emniyet halkasinda kaliyordu.
+ - YENI: saldirida giris takimi = grubun TUM saglam askerleri (en cok 12), tek takim; kapidan 0.4 sn arayla, 2 kisi yan yana, sonrakiler 0.9 m derine. Dis emniyet halkasi saldirida bos. (Saldiri disi bina temizliginde eski 2 + 2 takim secimi ayni.)
+ - SINIR: MG / AT / saglikci da iceri girer (dar mekanda MG / roketatar riski); yigilma 25 sn zorlamasi (v8.624) tum gruba uygulanir; oyunda DENENMEDI.
+

@@ -296,7 +296,7 @@ private _govde = {
         private _icerde = [];
         if (_saldiri) then {
             // v8.616 SALDIRIDA 4 KISI (kullanici: 'tek kisi giriyorlar topluca degil'; RPT eec0f873: 4 kisilik grupta 'ESZAMANLI GIRIS: 2 asker' - rol puani <= 2 suzgeci AT / MG / saglikciyi disarida birakip 2 kisi birakiyordu): puana gore en iyi 4 (ayni suzgec), eksikse siradaki en dusuk puanlilar eklenir; lider en sonda
-            _icerde = _siraliUye select [0, 4];
+            _icerde = _siraliUye select [0, 12];   // v8.625: saldirida TUM grup topluca girer (kullanici: 'askerler topluca girsin onu da'; v8.616: en iyi 4 -> MG / AT / saglikci / lider disarida kaliyordu)
         } else {
         if ((count _birincil) >= 2) then {
             _icerde = _birincil select [0, 4];   // v8.612: saldirida 4 kisi TEK takim olarak girer (v8.611: 6 idi; kullanici: 'ciddi 4 kisi giris yapsinlar'); MG / AT / saglikci / lider disarida kalir
@@ -341,8 +341,17 @@ private _govde = {
         } forEach _takimlar;
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
         // v8.600 VARIS KONTROLU: yigilma noktasina 10 sn'de varamayan (6 m'den uzak, duruyor) giris takimi askerine kapi onune (3 m) dogrudan yeniden hareket emri
-        private _vb = time + 10;
-        waitUntil { sleep 1; (time > _vb) || {call _iptalMi} || {(_icerde findIf {alive _x && {(_x distance2D _kapiPos) > 6}}) < 0} };
+        // v8.624 YIGILMAYI ZORLA (kullanici: 'adamlar hala girmiyorlar'; RPT 1a697d94: yigilma 0/4, ort. aralik 21-26 m, LAMBS 'Contact!' / ATTACK / STOP emirleri doMove'u eziyor, giris 39 sn sonra): saldirida 25 sn boyunca 2.5 sn'de bir, kapidan > 6 m uzaktaki HER giris askerine (durmasa da) kapi onune yeniden hareket emri + taktikKilit 4 sn (diger izleyiciler emir vermesin)
+        private _vb = time + ([10, 25] select _saldiri);
+        private _sonEmir = 0;
+        waitUntil {
+            sleep 1;
+            if (_saldiri && {time > _sonEmir}) then {
+                _sonEmir = time + 2.5;
+                { if (alive _x && {(_x distance2D _kapiPos) > 6}) then { _x forceSpeed -1; _x setVariable [QGVAR(taktikKilit), time + 4]; _x doMove (_kapiPos getPos [3, _disYon]); }; } forEach _icerde;
+            };
+            (time > _vb) || {call _iptalMi} || {(_icerde findIf {alive _x && {(_x distance2D _kapiPos) > 6}}) < 0}
+        };
         { if (alive _x && {(_x distance2D _kapiPos) > 6} && {(speed _x) < 1}) then { _x forceSpeed -1; _x doMove (_kapiPos getPos [3, _disYon]); diag_log format ["[ODA] %1 | %2 | yigilma noktasina varamadi (%3 m) -> kapi onune yeniden emir", _grpAd, name _x, round (_x distance2D _kapiPos)]; }; } forEach _icerde;
         [([12, 6] select _saldiri), _postlar] call _bekle;   // v8.599: saldirida yigilma bekleme 12 -> 6 sn
         // v8.599 GIRIS BOMBASI (kapi yigilmasindan sonra, kapi ONUNDE duz yayla iceri; fnc_girisBombasi)
@@ -362,7 +371,7 @@ private _govde = {
             {
                 _x setUnitPos "UP";
                 _x forceSpeed -1;
-                _x doMove (_icKapi getPos [0.9, _disYon + (90 * ([-1, 1] select ((_forEachIndex mod 2) isEqualTo 0)))]);
+                _x doMove ((_icKapi getPos [0.9, _disYon + (90 * ([-1, 1] select ((_forEachIndex mod 2) isEqualTo 0)))]) getPos [0.9 * (floor (_forEachIndex / 2)), _disYon + 180]);   // v8.625: 2 kisi yan yana, sonrakiler 0.9 m derine (kapi tikanmasin)
                 sleep 0.4;
             } forEach _gir;
             private _gb = time + 8;
