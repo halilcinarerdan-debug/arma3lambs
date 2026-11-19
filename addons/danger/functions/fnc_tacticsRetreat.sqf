@@ -35,6 +35,8 @@ if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
 if ((units _group) isEqualTo []) exitWith {false};
 if (({alive _x} count (units _group)) < 1) exitWith {false};   // v8.10: bos (hepsi olu) grup retreat baslatmaz (RPT: toplam:0)
+// v8.678: etkin (saglikli / yarali, yaya) asker <= 1 ise GRUP geri cekilmesi anlamsiz (RPT 19e02c4e: 'ALPHA:1 BRAVO:0 toplam:1', emir 8 kez STOP'a dondu, 75 sn takildi); tek kalani fnc_kacis (TEK KALAN) yonetir.
+if (({alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x}} count (units _group)) <= 1) exitWith {false};
 
 private _unit = leader _group;
 if (isNull _unit) exitWith {false};

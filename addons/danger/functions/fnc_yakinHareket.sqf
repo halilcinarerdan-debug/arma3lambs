@@ -112,14 +112,18 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
                     !alive _uu || {(_uu distance2D _pp) < 1}
                 }, {
                     params ["_uu", "_pp", "_ee"];
+                    // v8.678 GECIKEN GERI CAGRI KORUMASI (RPT 19e02c4e: [GERI-CEKILME-EZME-TANI] 'emir 1.5 sn sonra bozuldu: komut STOP', taze degisken ykhrkt): yan adim bittikten 2.8 sn sonra bu geri cagri 'doStop' + kilit sifirlama yapiyor;
+                    //   o arada geri cekilme / zorla kosu / baska bir sistemin kilidi baslamissa YENI emri eziyordu. Yalniz kendi kilidimiz (<= 3 sn) ve geri cekilme / zorla kosu yokken calisir.
                     if (alive _uu) then {
-                        _uu setVariable [QGVAR(taktikKilit), 0];
-                        if (!isNull _ee && {alive _ee}) then { _uu doWatch _ee; };
-                        doStop _uu;
+                        if (!((_uu getVariable [QGVAR(forceMove), false]) isEqualTo true) && {!((group _uu) getVariable [QGVAR(isRetreating), false])} && {((_uu getVariable [QGVAR(taktikKilit), 0]) - time) <= 3}) then {
+                            _uu setVariable [QGVAR(taktikKilit), 0];
+                            if (!isNull _ee && {alive _ee}) then { _uu doWatch _ee; };
+                            doStop _uu;
+                        };
                     };
                 }, [_u, _en, _e], 2.8, {
                     params ["_uu", "_pp", "_ee"];
-                    if (alive _uu) then { _uu setVariable [QGVAR(taktikKilit), 0]; };
+                    if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) isEqualTo true)} && {!((group _uu) getVariable [QGVAR(isRetreating), false])} && {((_uu getVariable [QGVAR(taktikKilit), 0]) - time) <= 3}) then { _uu setVariable [QGVAR(taktikKilit), 0]; };
                 }] call CBA_fnc_waitUntilAndExecute;
             };
             _indeks = _indeks + _kesit;

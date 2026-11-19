@@ -581,7 +581,7 @@ private _kacisOn = missionNamespace getVariable ["lambs_danger_kacisAktif", true
 if (_kacisOn && {_decision in ["WITHDRAW", "PEEL", "DELAY"]} && {_lossRatio >= (missionNamespace getVariable ["lambs_danger_kacisKayip", 0.3])}) then {
     _group setVariable [QGVAR(kacisKilitBit), time + (missionNamespace getVariable ["lambs_danger_kacisKilitS", 150])];
 };
-private _kacisKilitli = _kacisOn && {time < (_group getVariable [QGVAR(kacisKilitBit), 0])} && {_closest >= (missionNamespace getVariable ["lambs_danger_kacisKilitMinM", 50])} && {_ownCount > 0};   // v8.676: 25 -> CBA kacisKilitMinM (50): Altis RPT aa324317'de 4 kisilik gruplar kilit nedeniyle 24-55 m'de kosarak cekildi (vardi 0/2, dusman 24 m)
+private _kacisKilitli = _kacisOn && {time < (_group getVariable [QGVAR(kacisKilitBit), 0])} && {_closest >= (missionNamespace getVariable ["lambs_danger_kacisKilitMinM", 50])} && {_ownCount > 2};   // v8.678: <= 2 askerlik grup kilit nedeniyle grup olarak kosmaz (RPT 19e02c4e: tek kalan Sadat Kakar'a retreat + kacis + hekim + yan adim ayni anda emir verdi, emir 3 sn'de bir STOP'a dondu); bu durumda veto (DELAY) + bireysel kacis (fnc_kacis) devrede   // v8.676: 25 -> CBA kacisKilitMinM (50): Altis RPT aa324317'de 4 kisilik gruplar kilit nedeniyle 24-55 m'de kosarak cekildi (vardi 0/2, dusman 24 m)
 if (_kacisKilitli && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT", "DELAY"]}) then {
     _push = false;
     _reason = format ["kacis kilidi (kayip %1%%): dusman sayisi azaldi diye riske girilmez, daha da geri", round (_lossRatio * 100)];

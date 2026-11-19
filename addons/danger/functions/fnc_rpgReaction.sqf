@@ -95,7 +95,8 @@ private _sayi = 0;
     [{
         params ["_gr", "_uy"];
         {
-            if (alive _x) then {
+            // v8.678: 6 sn sonra formasyon takibi geri cekilme / zorla kosu / taktik yurutenin emrini ezmesin
+            if (alive _x && {!((_x getVariable [QGVAR(forceMove), false]) isEqualTo true)} && {!(_gr getVariable [QGVAR(isRetreating), false])} && {!(_gr getVariable [QGVAR(isExecutingTactic), false])}) then {
                 _x setUnitPos "AUTO";
                 _x doWatch objNull;
                 _x doFollow (leader _gr);
