@@ -72,7 +72,7 @@ params [
 private _mevziFn = missionNamespace getVariable ["lambs_danger_fnc_mevziPuan", {0}];
 // v8.513 SIPER YAKINLIGI (kullanici: 'botlar cok uzaga siper aliyor, 2 kat yakinlastirman lazim'): savunma / gozetleme / hayatta kalma siperlerinde (DEFEND / OVERWATCH / SURVIVE) arama menzili / k ve uzaklik cezasi x k
 //   (CBA lambs_danger_siperUzaklik, varsayilan 2; 1 = eski). ADVANCE (bounding sicramasi: ilerleme bilincli) ve EVADE (zirhtan kacis: uzaklasma bilincli) etkilenmez; bounding UZAK ADAY aramasi (arama merkezi verilen) da.
-private _yakinK = ((missionNamespace getVariable ["lambs_danger_siperUzaklik", 2]) max 1) min 4;
+private _yakinK = ((missionNamespace getVariable ["lambs_danger_siperUzaklik", 3]) max 1) min 4;
 private _yakinMod = !(_mode in ["ADVANCE", "EVADE"]);
 if (_yakinMod && {_orijin isEqualTo []}) then { _range = (_range / _yakinK) max (_range min 8); };
 
