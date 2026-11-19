@@ -85,6 +85,28 @@ private _talepYaz = {
 //   14 m icindeki sert nesneler (agac / kaya / duvar, yukseklik >= 0.7 m): dusmandan nesneye dogru yonde nesnenin 0.55 m ARKASI hesaplanir; dusmanin gozunden o noktaya (1.5 / 1.0 / 0.4 m) hat nesne
 //   tarafindan kesiliyorsa aday (en yuksek korunan durus: UP > MIDDLE > DOWN); skor = mesafe + durus cezasi (0 / 2 / 5); dusmana 10 m'den fazla yaklasmaz.
 // v8.521 GERI SINIRI (kullanici: 'bir one gidiyor sonra bir arkaya gidiyor'): siper dusmandan mevcut konumdan en fazla 3 m daha UZAK olabilir (ciddi baski >= 0.5 iken 10 m); eskiden sinirsiz geri (RPT 14:26: bina 16-22 m, hep geride) -> git-gel
+// v8.606 AGAC GOVDE YARICAPI (kullanici: 'bu haritada neden agaclarin uzagina siper aliyorlar'; RPT 762aabfd pmc_ukraine_donetsk: t_picea3f gövde FIRE LOD 0.70 m ama bounding-box 11.0 m -> eski _r = bbox / 2 (en cok 2.5 m) + 0.55 = askerin
+//   agac govdesinin ~3 m ARKASINDA durmasi): agac modelleri icin govde yaricapi FIRE LOD yanal taramayla (1.1 m yukseklik, +-3 m, 0.1 m adim, agac merkezinin 1.5 m'sindeki isabetler) modelde bir kez olculur ve onbelleklenir
+//   (lambs_danger_govdeRH); FIRE LOD yoksa 0.5 m. Agac disi nesneler (kaya / duvar / konteyner) eski bbox yaricapini kullanir.
+private _govdeR = {
+    params ["_o", "_bbR"];
+    private _m = toLower ((getModelInfo _o) select 0);
+    if !(((_m find "t_") isEqualTo 0) || {(_m find "tree") >= 0} || {(_m find "picea") >= 0} || {(_m find "pinus") >= 0}) exitWith { _bbR };
+    if (isNil "lambs_danger_govdeRH") then { lambs_danger_govdeRH = createHashMap; };
+    private _c = lambs_danger_govdeRH get _m;
+    if (!isNil "_c") exitWith { _c };
+    private _tp = getPosASL _o;
+    private _bas = _tp vectorAdd [0, 0, 1.1];
+    private _n = 0;
+    for "_i" from -15 to 15 do {
+        private _ofs = _i * 0.1;
+        private _h = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -3, 0], _bas vectorAdd [_ofs, 3, 0], objNull, objNull, true, 3, "FIRE", "NONE"];
+        if ((_h findIf {(((_x select 0) distance2D _tp) < 1.5) && {((_x select 2) isEqualTo _o)}}) > -1) then { _n = _n + 1; };
+    };
+    private _rr = if (_n isEqualTo 0) then {0.5} else { ((_n * 0.1) / 2) max 0.2 min 1.2 };
+    lambs_danger_govdeRH set [_m, _rr];
+    _rr
+};
 private _geriMax = [3, 10] select ((getSuppression _u) >= 0.5);
 private _obj = [];
 private _objS = 1e9;
@@ -99,7 +121,7 @@ private _objAd = "";
     private _ad0 = toLower ([typeOf _o, (getModelInfo _o) select 0] select ((typeOf _o) isEqualTo ""));
     private _sahte = (["wire", "powerline", "powerpole", "pole", "cable", "lamp", "antenna", "pylon"] findIf {(_ad0 find _x) >= 0}) >= 0;
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
-        private _r = (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5;
+        private _r = [_o, (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5] call _govdeR;
         private _pos = _op getPos [_r + 0.55, _en getDir _o];
         if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
