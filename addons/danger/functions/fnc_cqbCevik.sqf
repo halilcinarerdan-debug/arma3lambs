@@ -165,7 +165,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                         _u setUnitPosWeak "AUTO";
                         _u forceSpeed -1;
                         _u setSpeedMode "FULL";
-                        _u doTarget _en;
+                        if !([_u, _en] call FUNC(icKorMu)) then { _u doTarget _en; };   // v8.617: bina ici duvar arkasi dusmana namlu cevrilmez
                         _u doMove _enIyi;
                         // v8.500x CQB HAREKET HALINDE ATES (kullanici: 'cqb de hareket halinde ates baya artabilir'): atilim suresince (en fazla 6 sn) her ~0.9 sn'de lambs_danger_cqbHareketAtesOran olasiligiyla
                         //   dusmana doFire (gorus hatti aciksa, mermi varsa). Eskiden yalniz varista ates ediliyordu.
@@ -209,8 +209,10 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                     if (((_u ammo _w) >= 6 || {_yedek > 0}) && {(time - (_u getVariable [QGVAR(cevikAtesT), -999])) > 3}) then {
                         _u setVariable [QGVAR(cevikAtesT), time];
                         _u setVariable [QGVAR(cevikT), time - 2];
-                        _u doTarget _en;
-                        _u doFire _en;
+                        if !([_u, _en] call FUNC(icKorMu)) then {   // v8.617: bina ici duvar arkasi dusmana hedef alma / ates yok
+                            _u doTarget _en;
+                            _u doFire _en;
+                        };
                         _butce = _butce - 1;
                         _sayac set ["ates", (_sayac get "ates") + 1];
                     };
