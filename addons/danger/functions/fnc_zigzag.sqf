@@ -33,6 +33,9 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
         private _yMin = ((missionNamespace getVariable ["lambs_danger_zigzagYanMin", 7]) max 3) min 15;
         private _yMax = ((missionNamespace getVariable ["lambs_danger_zigzagYanMax", 10]) max _yMin) min 20;
         private _enMax = ((missionNamespace getVariable ["lambs_danger_zigzagMaxM", 600]) max 100) min 800;   // v8.696: ust sinir 500 -> 800 (CBA kaydirgaci 800'e kadar, varsayilan 600; eskiden sessizce 500'e kirpiliyordu)
+        private _ilMax = ((missionNamespace getVariable ["lambs_danger_zigzagIleriMax", 14]) max 4) min 20;
+        private _ilMin = ((missionNamespace getVariable ["lambs_danger_zigzagIleriMin", 6]) max 3) min _ilMax;
+        private _adimS = ((missionNamespace getVariable ["lambs_danger_zigzagAdimS", 1.8]) max 0.8) min 4;
         private _genis = missionNamespace getVariable ["lambs_danger_zigzagGenis", false];
         private _gCarp = ((missionNamespace getVariable ["lambs_danger_zigzagGenisCarpan", 2]) max 1) min 3;
         private _n = 0;
@@ -108,7 +111,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             private _acikGenis = _genis && {(count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE"], 25, false, true])) <= 1};
             private _yan = ((_yMin + (random (_yMax - _yMin))) * ([1, _gCarp] select _acikGenis)) min ((_u distance2D _gercek) * 0.7);   // v8.697: kisa bacakta yan adim bacak boyunun %70'ini gecmez
             private _isaret = -(_u getVariable [QGVAR(zigYon), 1]);
-            private _ileri = (((_u distance2D _gercek) - 8) min (6 + (random 8))) max 4;
+            private _ileri = (((_u distance2D _gercek) - 8) min (_ilMin + (random (_ilMax - _ilMin)))) max 3;   // v8.699: CBA zigzagIleriMin / Max (varsayilan 6-14); kucuk ileri adim + buyuk yan adim = STRAFE gibi
             private _pt = [];
             for "_t" from 0 to 2 do {
                 private _c = (_u getPos [_ileri, _dir]) getPos [_yan * ([1, 1, 0.55] select _t), _dir + (90 * _isaret)];
@@ -118,7 +121,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             if (_pt isEqualTo []) then { _u setVariable [QGVAR(zigT), time + 1]; continue };
             _u setVariable [QGVAR(zigYon), _isaret];
             _u setVariable [QGVAR(zigNokta), _pt];
-            _u setVariable [QGVAR(zigT), time + ([1.8, 2.4] select _acikGenis)];
+            _u setVariable [QGVAR(zigT), time + (_adimS * ([1, 1.33] select _acikGenis))];   // v8.699: CBA zigzagAdimS (varsayilan 1.8; acik arazi genis x1.33 = 2.4)
             _u doMove _pt;
             _say = _say + 1;
             if (_logN < 20) then {
