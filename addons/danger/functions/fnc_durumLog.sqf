@@ -29,8 +29,47 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
 
 // KOMUT GECISLERI: "ilerle / dur" spam'ini gormek icin temasli gruplarin askerlerinde currentCommand degisimi (1 sn'de bir kontrol,
 // asker basina en fazla 3 sn'de bir satir, toplam 400 satir)
+// v8.684 GIDIP GELME OLCUMU (kullanici: '1 2 3 yap' -> 2: birim MOVE -> STOP -> MOVE ters donusu 22 gecisin 5'i (<= 4 sn), kimin durdurdugu bilinmiyor; 'gorev:Assault' cogunlukta = LAMBS taban kodu repoda yok):
+//   STOP'a her gecis aninda o birimin / grubun AKTIF SISTEM IMZASI cikarilir (forceMove, taktikKilit, yeni ates, baski, grup bayraklari, komutan karari, LAMBS gorevi, en yakin dusman mesafesi);
+//   <= 4 sn icinde MOVE geri gelirse (MOVE -> STOP -> MOVE) imza 'ters donus' sayilir. 60 sn'de bir [EMIR-GIDIP-GELME]: gecis / ters donus orani + belirtec sikligi (ters donuslerde / tum STOP'larda) + en sik imza;
+//   ilk 30 ters donus [EMIR-TERS-DONUS] olarak tek tek yazilir. YALNIZ OLCUM; emir akisini degistirmez; 400 satir / 3 sn sinirindan bagimsiz sayar.
 [] spawn {
     private _n = 0;
+    private _top = 0;
+    private _stopS = 0;
+    private _ters = 0;
+    private _bAll = createHashMap;
+    private _bTers = createHashMap;
+    private _imzaH = createHashMap;
+    private _tersLog = 0;
+    private _ozetT = time + 60;
+    private _imza = {
+        params ["_u", "_g"];
+        private _t = [];
+        if (_u getVariable [QGVAR(forceMove), false]) then { _t pushBack "fm"; };
+        if (time < (_u getVariable [QGVAR(taktikKilit), 0])) then { _t pushBack "tk"; };
+        if ((time - (_u getVariable [QGVAR(sonAtisT), -999])) < 3) then { _t pushBack "atis"; };
+        if ((getSuppression _u) > 0.3) then { _t pushBack "baski"; };
+        if ((time - (_u getVariable [QGVAR(hugAt), -999])) < 8) then { _t pushBack "hug"; };
+        private _ah = _u getVariable [QGVAR(acikSiperHedef), [0, -999]];
+        if ((time - (_ah param [1, -999])) < 8) then { _t pushBack "acikSiper"; };
+        if (!isNil {_u getVariable QGVAR(kacisTok)}) then { _t pushBack "kacis"; };
+        if (time < (_u getVariable [QGVAR(tcccBusy), 0])) then { _t pushBack "tccc"; };
+        { if (_g getVariable [_x select 0, false]) then { _t pushBack (_x select 1); }; } forEach [
+            [QGVAR(isBounding), "BND"], [QGVAR(isRetreating), "RET"], [QGVAR(isEvading), "EVD"], [QGVAR(isBreakingContact), "BRK"],
+            [QGVAR(isExecutingTactic), "TAK"], [QGVAR(isAmbushing), "AMB"], [QGVAR(isSweeping), "SWP"]
+        ];
+        private _kar = _g getVariable [QGVAR(cmdSonKarar), ""];
+        if (_kar isNotEqualTo "") then { _t pushBack ("k:" + _kar); };
+        private _gv = _u getVariable [QEGVAR(main,currentTask), ""];
+        if (_gv isEqualType "" && {_gv isNotEqualTo ""}) then { _t pushBack ("g:" + (_gv select [0, 12])); };
+        private _en = _u findNearestEnemy _u;
+        if (!isNull _en) then {
+            private _dd = _u distance2D _en;
+            _t pushBack (if (_dd < 25) then { "<25m" } else { if (_dd < 60) then { "<60m" } else { if (_dd < 120) then { "<120m" } else { ">=120m" } } });
+        };
+        _t
+    };
     while {true} do {
         sleep 1;
         if (missionNamespace getVariable ["lambs_danger_durumLogOff", false]) then { continue };
@@ -45,6 +84,29 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 private _o = _u getVariable [QGVAR(durumKomut), ""];
                 if (_c isNotEqualTo _o) then {
                     _u setVariable [QGVAR(durumKomut), _c];
+                    if (_o isNotEqualTo "") then {
+                        _top = _top + 1;
+                        private _prev = _u getVariable [QGVAR(durumGecis), []];
+                        // ters donus: onceki gecis MOVE -> STOP idi, <= 4 sn icinde yeniden MOVE
+                        if (_prev isNotEqualTo [] && {(_prev select 2) isEqualTo "STOP"} && {(_prev select 1) isEqualTo "MOVE"} && {_o isEqualTo "STOP"} && {_c isEqualTo "MOVE"} && {(time - (_prev select 0)) <= 4}) then {
+                            _ters = _ters + 1;
+                            private _im = _prev select 3;
+                            { _bTers set [_x, (_bTers getOrDefault [_x, 0]) + 1]; } forEach _im;
+                            private _ik = _im joinString ",";
+                            _imzaH set [_ik, (_imzaH getOrDefault [_ik, 0]) + 1];
+                            if (_tersLog < 30) then {
+                                _tersLog = _tersLog + 1;
+                                diag_log format ["[EMIR-TERS-DONUS] %1 | %2 | MOVE -> STOP -> MOVE %3 sn | imza (STOP aninda): %4 | hiz:%5", groupId _g, name _u, (time - (_prev select 0)) toFixed 1, _ik, round (speed _u)];
+                            };
+                        };
+                        private _imN = [];
+                        if (_c isEqualTo "STOP" && {_o isEqualTo "MOVE"}) then {
+                            _stopS = _stopS + 1;
+                            _imN = [_u, _g] call _imza;
+                            { _bAll set [_x, (_bAll getOrDefault [_x, 0]) + 1]; } forEach _imN;
+                        };
+                        _u setVariable [QGVAR(durumGecis), [time, _o, _c, _imN]];
+                    };
                     if (_o isNotEqualTo "" && {_n < 400} && {time > (_u getVariable [QGVAR(durumKomutT), 0])}) then {
                         _u setVariable [QGVAR(durumKomutT), time + 3];
                         _n = _n + 1;
@@ -53,6 +115,19 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 };
             } forEach (units _g);
         } forEach allGroups;
+        if (time > _ozetT) then {
+            _ozetT = time + 60;
+            if (_top > 0) then {
+                private _bel = (keys _bAll) apply { [_bAll get _x, _x] };
+                _bel sort false;
+                private _belS = (_bel select [0, 10]) apply { format ["%1 %2/%3", _x select 1, _bTers getOrDefault [_x select 1, 0], _x select 0] };
+                private _iz = (keys _imzaH) apply { [_imzaH get _x, _x] };
+                _iz sort false;
+                diag_log format ["[EMIR-GIDIP-GELME] 60 sn: komut gecisi %1 | MOVE -> STOP %2 | ters donus (MOVE -> STOP -> MOVE <= 4 sn) %3 (%4 %% of STOP) | belirtec (ters donuslerde / tum STOP'larda): %5 | en sik imza: %6",
+                    _top, _stopS, _ters, (if (_stopS > 0) then { round (100 * _ters / _stopS) } else { 0 }), _belS joinString ", ", ((_iz select [0, 3]) apply { format ["%1x [%2]", _x select 0, _x select 1] }) joinString " ; "];
+            };
+            _top = 0; _stopS = 0; _ters = 0; _bAll = createHashMap; _bTers = createHashMap; _imzaH = createHashMap;
+        };
     };
 };
 

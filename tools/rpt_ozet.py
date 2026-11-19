@@ -5,6 +5,7 @@ RPT OZETLEYICI (lambs_danger ELITE fork)
 Kullanim:  python tools/rpt_ozet.py Arma3_x64_....rpt [baska.rpt ...]
            --onucus             ON UCUS karnesi (v8.500l): oyun basinda yapilandirma durumu: oturumlar, 3DEN nitelik (EDEN-IFADE dahil), grup / arac / topcu / IHA envanteri, kapasite, UYARI listesi
            --karne              TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit (en hizli okuma)
+           --kabul              KABUL TESTI (v8.684): v8.656+ degisikliklerinin oyunda dogrulanmasi; her madde GECTI / KALDI / KONTROL / VERI YOK + kanit (TEST_PROTOKOLU.md ile)
            --form               FORMASYON DEGISIM TESHISI: grup basina [FORM-DEGISIM] sayisi, <20 sn aralikli salinim (felc) tespiti
            --tani               NET TANI (v8.255): [OLUM-TANI] [HENDEK-DURUM] [ARAC-TERK] [ARAC-HAREKET] [TANI-TOPCU] [KAYIP-DEGERLENDIRME] [ARAC-DUMAN] ozeti + otomatik cikarim
            --kayip              KAYIP TABLOSU (v8.90): taraf basina OLU + BAYILAN (ACE etkisiz) + oran; gercek hayat hedefiyle karsilastirma icin
@@ -23,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.683"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.684"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -251,6 +252,183 @@ def ozet(path):
             print("  %dx %s" % (n, h))
     else:
         print("  yok")
+
+def kabul(path):
+    """KABUL TESTI (v8.684): her madde GECTI / KALDI / KONTROL / VERI YOK + kanit. VERI YOK = senaryo o ozelligi tetiklemedi (TEST_PROTOKOLU.md'deki ilgili senaryoyu calistir)."""
+    L = open(path, encoding="utf-8", errors="replace").read().splitlines()
+    t = "\n".join(L)
+    sat = []
+    def ekle(ad, d, k): sat.append((ad, d, k))
+    def say(etiket): return len([1 for l in L if ("[%s]" % etiket) in l])
+    def zaman(l):
+        m = re.match(r"\s*(\d+:\d\d:\d\d)", l)
+        return sn(m.group(1)) if m else None
+    b = re.search(r"build (v[0-9.]+[A-Z-]*)", t)
+    ekle("SURUM", "GECTI" if b and b.group(1).startswith(BEKLENEN_SURUM) else "KALDI", ("%s (beklenen %s)" % (b.group(1), BEKLENEN_SURUM)) if b else "boot satiri yok")
+    hata = 0
+    for i, l in enumerate(L):
+        if ("Error in expression" in l or "Error position" in l or "Error Undefined" in l or "Error Type" in l or "Error Zero" in l) and not any(n in " ".join(L[i:i + 3]) for n in NOISE):
+            hata += 1
+    ekle("SCRIPT HATASI", "GECTI" if hata == 0 else "KALDI", "%d satir" % hata)
+
+    # --- 1) DUSUNME HIZI (izleyici dongu hizi; n >= 20 olanlar; ~1-1.5 saglikli, >= 2 yavas)
+    oranlar = []
+    for l in L:
+        if "[PERF-DUSUN]" not in l: continue
+        for m in re.finditer(r"(\w+) x([0-9.]+) \(n (\d+),", l):
+            if int(m.group(3)) >= 20: oranlar.append((float(m.group(2)), m.group(1), int(m.group(3))))
+    if oranlar:
+        mx = max(oranlar)
+        ekle("DUSUNME HIZI", "GECTI" if mx[0] < 2.0 else "KALDI", "en yavas izleyici %s x%.2f (n %d); %d izleyici-penceresi olculdu, >= 2.0 olan: %d" % (mx[1], mx[0], mx[2], len(oranlar), len([1 for o in oranlar if o[0] >= 2.0])))
+    else:
+        ekle("DUSUNME HIZI", "VERI YOK", "[PERF-DUSUN] yok (60 sn dolmadi ya da perfOlcum kapali)")
+
+    # --- 2) KOMUTAN KARARLILIGI (TELEMETRI-GRUP: karar:X (N sn once) -> karar baslangic zamani = satir zamani - N)
+    ser = collections.defaultdict(list)
+    for l in L:
+        m = re.search(r"\[TELEMETRI-GRUP\] (Alpha [\d-]+|[^|]+?) \| (\w+) \|.*?\| karar:([A-Z_]+) \((\d+) sn once\)", l)
+        z = zaman(l)
+        if m and z is not None:
+            ser[(m.group(1).strip(), m.group(2))].append((z - int(m.group(4)), m.group(3), z))
+    ATAK = {"BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"}
+    SAV = {"DELAY", "HOLD"}
+    kisa, gecis, aba = [], 0, 0
+    for k, v in ser.items():
+        v.sort()
+        kar = []
+        for bs, kr, z in v:
+            if kar and kar[-1][1] == kr and abs(kar[-1][0] - bs) <= 4: continue
+            kar.append([bs, kr])
+        for i in range(len(kar) - 1):
+            gecis += 1
+            if kar[i][1] in SAV and kar[i + 1][1] in ATAK:
+                if kar[i + 1][0] - kar[i][0] < 25: kisa.append((k, kar[i][1], kar[i + 1][1], kar[i + 1][0] - kar[i][0]))
+        for i in range(len(kar) - 2):
+            if kar[i][1] in ATAK and kar[i + 1][1] in SAV and kar[i + 2][1] in ATAK and kar[i + 2][0] - kar[i][0] < 90: aba += 1
+    if ser:
+        ekle("KOMUTAN KARARLILIGI", "GECTI" if not kisa else "KALDI", "%d grup, %d karar gecisi | savunma -> hucum 25 sn'den kisa: %d %s | hucum-savunma-hucum (90 sn icinde): %d" % (len(ser), gecis, len(kisa), kisa[:2] if kisa else "", aba))
+    else:
+        ekle("KOMUTAN KARARLILIGI", "VERI YOK", "[TELEMETRI-GRUP] karar satiri yok")
+
+    # --- 3) BIRIM EMIR GIDIP-GELME (MOVE -> STOP -> MOVE <= 4 sn)
+    eg = [l for l in L if "[EMIR-GIDIP-GELME]" in l]
+    if eg:
+        st = sum(int(m.group(1)) for l in eg for m in [re.search(r"MOVE -> STOP (\d+)", l)] if m)
+        tr = sum(int(m.group(1)) for l in eg for m in [re.search(r"ters donus \(.*?\) (\d+)", l)] if m)
+        oran = 100.0 * tr / max(st, 1)
+        son = re.sub(r"^.*\[EMIR-GIDIP-GELME\] ", "", max(eg, key=lambda x: len(x)))[:230]
+        ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (%.0f%%) | %s" % (st, tr, oran, son))
+        td = [l for l in L if "[EMIR-TERS-DONUS]" in l]
+        gv = collections.Counter(re.search(r"g:([^,\]]+)", l).group(1) for l in td if re.search(r"g:([^,\]]+)", l))
+        if td: ekle("  ters donus imzalari", "BILGI", "%d satir | gorev dagilimi %s | ornek: %s" % (len(td), dict(gv.most_common(4)), re.sub(r"^.*\[EMIR-TERS-DONUS\] ", "", td[0])[:170]))
+    else:
+        ekle("EMIR GIDIP-GELME", "VERI YOK", "[EMIR-GIDIP-GELME] yok (v8.684+ ve temasli grup gerekir)")
+
+    # --- 4) RETREAT (varis, koruma, ezme tanisi)
+    vr = [(int(m.group(1)), int(m.group(2))) for l in L for m in [re.search(r"sonuc \| vardi:(\d+)/(\d+)", l)] if m]
+    if vr:
+        a_, b_ = sum(x for x, _ in vr), sum(y for _, y in vr)
+        ekle("RETREAT VARIS", "GECTI" if a_ >= 0.5 * b_ else "KALDI", "%d/%d (%.0f%%) | koruma yeniden-emir:%d  doFollow atlandi:%d  ezme tanisi:%d" % (a_, b_, 100.0 * a_ / max(b_, 1), say("GERI-CEKILME-KORUMA"), say("DOFOLLOW-ATLA"), say("GERI-CEKILME-EZME-TANI")))
+    else:
+        ekle("RETREAT VARIS", "VERI YOK", "retreat olmadi (senaryo B: zayif grup)")
+
+    # --- 5) TCCC BEKLEME (baygin dusman artik tehdit degil)
+    bk = [int(m.group(1)) for l in L for m in [re.search(r"\[TCCC-BEKLE\].*bekliyor (\d+) sn", l)] if m]
+    tc = len([1 for l in L if "[TCCC]" in l and "hekim" in l and "IPTAL" not in l])
+    if bk or tc:
+        mb = max(bk) if bk else 0
+        ekle("TCCC BEKLEME", "GECTI" if mb <= 90 else ("KONTROL" if mb <= 180 else "KALDI"), "en uzun bekleme %d sn (%d satir) | tedaviye giden hekim: %d (grup ya da dusman hala ayaktaysa bekleme normal)" % (mb, len(bk), tc))
+    else:
+        ekle("TCCC BEKLEME", "VERI YOK", "yarali / hekim olayi yok")
+
+    # --- 6) DURUS DISIPLINI + TEMAS SONRASI + COMBAT
+    dd = [l for l in L if "[DURUS-DISIPLIN-OZET]" in l]
+    if dd:
+        ekle("DURUS DISIPLINI", "GECTI", "%d ozet | son: %s" % (len(dd), re.sub(r"^.*\[DURUS-DISIPLIN-OZET\] ", "", dd[-1])[:150]))
+    else:
+        ekle("DURUS DISIPLINI", "VERI YOK", "hareketsiz ayakta asker olusmadi (temas + durma gerekir)")
+    tyc = len([1 for l in L if "[ANOMALI] TEMAS-YOK-COMBAT" in l])
+    ekle("COMBAT'TA KALMA", "GECTI" if tyc == 0 else "KALDI", "TEMAS-YOK-COMBAT anomali:%d | temas-sonrasi gevseme:%d" % (tyc, len([1 for l in L if "[TEMAS-SONRASI]" in l and "sessizlik" in l and "baslatildi" not in l])))
+    yy = len([1 for l in L if "[ANOMALI] YURUMUYOR" in l])
+    ekle("YURUMUYOR ANOMALISI", "GECTI" if yy <= 3 else "KONTROL", "%d satir (kisa acik-siper / bomba kacisi anlari normal; kalici takilma degil)" % yy)
+
+    # --- 7) FOV / ALGI KAYNAGI (mesafe x aci)
+    fv = [l for l in L if "[FOV-OLCUM] 60 sn" in l]
+    if fv:
+        blok = collections.defaultdict(lambda: {"cift": 0, "bilen": 0.0, "arkaC": 0, "arkaB": 0.0, "kaynak": [0, 0, 0, 0]})
+        for l in fv:
+            for bl in l.split(" || "):
+                m = re.search(r"MESAFE (.+?) \(toplam (\d+)\)", bl)
+                if not m: continue
+                ad = m.group(1)
+                if "KAPALI" in ad: ad = "yakin (azaltici KAPALI)"
+                for mm in re.finditer(r"(\d+)-(\d+): (\d+) cift (\d+) %", bl):
+                    lo, c, p = int(mm.group(1)), int(mm.group(3)), int(mm.group(4))
+                    blok[ad]["cift"] += c; blok[ad]["bilen"] += c * p / 100.0
+                    if lo >= 90: blok[ad]["arkaC"] += c; blok[ad]["arkaB"] += c * p / 100.0
+                mk = re.search(r"ses (\d+) / grup (\d+) / yakin (\d+) / aciklanamayan (\d+)", bl)
+                if mk:
+                    for i in range(4): blok[ad]["kaynak"][i] += int(mk.group(i + 1))
+        parcalar = []
+        yorum = ""
+        yak = uz = None
+        for ad, v in blok.items():
+            pc = 100.0 * v["arkaB"] / v["arkaC"] if v["arkaC"] else None
+            tp = 100.0 * v["bilen"] / v["cift"] if v["cift"] else None
+            k = v["kaynak"]
+            parcalar.append("%s: cift %d, bilen %s, ARKA(>=90) cift %d bilen %s | kaynak ses/grup/yakin/aciklanamayan %d/%d/%d/%d" % (ad, v["cift"], ("%.0f%%" % tp) if tp is not None else "-", v["arkaC"], ("%.0f%%" % pc) if pc is not None else "-", k[0], k[1], k[2], k[3]))
+            if ad.startswith("yakin") and v["arkaC"] >= 5: yak = pc
+            if ad.startswith("60-250") and v["arkaC"] >= 5: uz = pc
+        if yak is not None and uz is not None:
+            if yak >= 80 and uz <= 50: yorum = "YORUM: arka yari algisi yakinda ~yuksek, uzakta dusuk -> azaltici katmanlarin yakinda kapanmasi (yakinAlgiM) kullanici hipotezini DESTEKLIYOR"
+            elif uz >= 80: yorum = "YORUM: arka yari algisi UZAK mesafede de yuksek -> neden yakinAlgi DEGIL; kaynak sutunlarina bak (aciklanamayan agirlikliysa motor / 360 derece algi)"
+            else: yorum = "YORUM: karma sonuc; daha fazla ornek gerekir"
+        ekle("ALGI KAYNAGI (FOV)", "BILGI", " || ".join(parcalar) + (" || " + yorum if yorum else ""))
+    else:
+        ekle("ALGI KAYNAGI (FOV)", "VERI YOK", "[FOV-OLCUM] yok (hatti acik 12-250 m dusman, >= 20 cift ve >= 60 sn temas gerekir)")
+    kz = [l for l in L if "[FOV-OLCUM-KAMUFLAJ]" in l]
+    ya = [l for l in L if "[YAKIN-ALGI-OZET]" in l]
+    sfr = sum(int(m.group(1)) for l in kz for m in [re.search(r"<= 0.05 olan ornek (\d+)", l)] if m) + sum(int(m.group(1)) for l in ya for m in [re.search(r"<= 0.05 olup 1.0 sayilan (\d+)", l)] if m)
+    sfr += len([1 for l in L if re.search(r"\[YAKIN-ALGI\] .*camouflageCoef 0\.0[0-5] ->", l)])   # eski surum (v8.683-) 0.00'i dogrudan loglar; yeni surum 1.0 sayip ozette bildirir
+    ekle("camouflageCoef <= 0.05", "GECTI" if (kz or ya) and sfr == 0 else ("KONTROL" if sfr else "VERI YOK"), "sifira yakin katsayi gorulen ornek / giris: %d (0.00 = 'gorunmez'; yakinAlgi artik 1.0 sayar, kaynagi arastirilmali)" % sfr if (kz or ya) else "olcum satiri yok")
+    yg = [l for l in L if "[YAKIN-ALGI]" in l and "dusman <=" in l]
+    if yg or ya:
+        ekle("YAKIN ALGI KATMANI", "BILGI", "azaltici katmanlar kapanan giris: %d (ilk 15 log) | %s" % (len(yg), re.sub(r"^.*\[YAKIN-ALGI-OZET\] ", "", ya[-1])[:140].rstrip('"') if ya else ""))
+
+    # --- 8) UGL SIKLIGI (atici basina dakika)
+    ugl = collections.defaultdict(list)
+    for l in L:
+        m = re.search(r"\[UGL-KARAR\] (Alpha [\d-]+) \| ([^|]+?) \| hedef (\d+) m", l)
+        z = zaman(l)
+        if m and z is not None: ugl[(m.group(1), m.group(2))].append(z)
+    if ugl:
+        dk = max((len(v) / max((max(v) - min(v)) / 60.0, 1.0)) for v in ugl.values())
+        mn = min(int(m.group(1)) for l in L for m in [re.search(r"\[UGL-KARAR\].*hedef (\d+) m", l)] if m)
+        ekle("UGL SIKLIGI", "GECTI" if dk <= 6 else "KONTROL", "%d karar, %d atici, en sik atici %.1f karar/dk, en yakin hedef %d m (uglGrupAralik / uglCooldown CBA ile ayarlanir)" % (sum(len(v) for v in ugl.values()), len(ugl), dk, mn))
+    else:
+        ekle("UGL SIKLIGI", "VERI YOK", "UGL karari yok")
+
+    # --- 9) senaryo kapsami (tetiklenmeyen ozellikler)
+    for ad, tag, ipucu in [
+        ("SAVUNMA YERLESIM", "SAVUNMA-YER", "senaryo C: >= 3 kisilik HOLD / DELAY grubu, dusman 45-250 m"),
+        ("AVANTAJLI YER", "AVANTAJLI-YER", "senaryo B / C (geri cekilme, savunma)"),
+        ("MG HAKIM NOKTA", "MG-HAKIM", "MG'li grup + dusman 100-300 m"),
+        ("KANAT BASKISI", "KANAT-BASKI", "FLANK karari (baski ekibi >= 2)"),
+        ("SEKTOR PLANI", "SEKTOR-PLAN", "temasli grup >= 2 aday"),
+        ("SNIPER GOZLEMCI", "SNIPER-GOZLEMCI", "sniper takimi (nisanci + gozlemci)"),
+        ("TEMAS SONRASI GEVSEME", "TEMAS-SONRASI", "temas bittikten sonra >= 75 sn sessizlik"),
+    ]:
+        n = len([1 for l in L if ("[%s]" % tag) in l and "baslatildi" not in l])
+        ekle(ad, "GECTI" if n else "VERI YOK", ("%d satir" % n) if n else ipucu)
+
+    print("=" * 100); print("KABUL TESTI |", path)
+    for ad, d, k in sat:
+        print("  [%-8s] %-24s %s" % (d, ad, k))
+    sy = collections.Counter(d for _, d, _ in sat)
+    print("  GECTI:%d  KALDI:%d  KONTROL:%d  VERI YOK:%d  (BILGI:%d)" % (sy["GECTI"], sy["KALDI"], sy["KONTROL"], sy["VERI YOK"], sy["BILGI"]))
+    if sy["VERI YOK"]:
+        print("  VERI YOK olanlar o ozelligi tetikleyen senaryo calismadi; TEST_PROTOKOLU.md'deki senaryolarla tamamlanir.")
+
 
 def karne(path):
     """TOPLU TEST KARNESI: her ozellik icin OK / KONTROL / YOK + kanit."""
@@ -1051,6 +1229,7 @@ if __name__ == "__main__":
     grup = aralik = None
     sadece_anomali = False
     karne_modu = False
+    kabul_modu = False
     onucus_modu = False
     hava_ied_modu = False
     zeka_modu = False
@@ -1066,6 +1245,8 @@ if __name__ == "__main__":
             aralik = args[i + 1]; i += 2
         elif args[i] == "--karne":
             karne_modu = True; i += 1
+        elif args[i] == "--kabul":
+            kabul_modu = True; i += 1
         elif args[i] == "--onucus":
             onucus_modu = True; i += 1
         elif args[i] == "--anomali":
@@ -1086,7 +1267,9 @@ if __name__ == "__main__":
         print(__doc__)
         sys.exit(1)
     for p in yollar:
-        if tani_modu:
+        if kabul_modu:
+            kabul(p)
+        elif tani_modu:
             tani(p)
         elif kayip_modu:
             kayip_tablosu(p)

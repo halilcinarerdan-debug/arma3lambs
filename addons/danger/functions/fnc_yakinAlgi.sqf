@@ -23,6 +23,7 @@ diag_log "[YAKIN-ALGI] yakin mesafe algisi (kamuflaj / spot dusurucu katmanlari 
     private _giren = 0;
     private _cikan = 0;
     private _ozetT = time + 60;
+    private _sifir = 0;
     private _dusmanVar = {
         params ["_u", "_m"];
         private _s = side group _u;
@@ -58,6 +59,8 @@ diag_log "[YAKIN-ALGI] yakin mesafe algisi (kamuflaj / spot dusurucu katmanlari 
                 private _u = _adaylar select ((_indeks + _i) mod _n);
                 if !([_u, _m] call _dusmanVar) then { continue };
                 private _kc = _u getUnitTrait "camouflageCoef";
+                // v8.684: RPT c1221443'te 3 / 15 birimde okunan eski camouflageCoef 0.00'di (kamuflaj yazmaz, alt siniri 0.6); 0.00 'gorunmez' demektir ve cikista GERI YAZILIRDI. <= 0.05 = anlamsiz taban -> 1.0 (varsayilan) sayilir
+                if (_kc <= 0.05) then { _kc = 1; _sifir = _sifir + 1; };
                 private _sd = _u skill "spotDistance";
                 private _st = _u skill "spotTime";
                 _u setVariable [QGVAR(yakinAlgiEski), [_sd, _st, _kc]];
@@ -75,8 +78,8 @@ diag_log "[YAKIN-ALGI] yakin mesafe algisi (kamuflaj / spot dusurucu katmanlari 
         };
         if (time > _ozetT) then {
             _ozetT = time + 60;
-            if (_giren + _cikan > 0) then { diag_log format ["[YAKIN-ALGI-OZET] 60 sn: yakin algiya giren %1 | cikan %2 | su an kapsamda %3", _giren, _cikan, count (allUnits select {_x getVariable [QGVAR(yakinAlgi), false]})]; };
-            _giren = 0; _cikan = 0;
+            if (_giren + _cikan > 0) then { diag_log format ["[YAKIN-ALGI-OZET] 60 sn: yakin algiya giren %1 | cikan %2 | su an kapsamda %3 | eski camouflageCoef <= 0.05 olup 1.0 sayilan %4", _giren, _cikan, count (allUnits select {_x getVariable [QGVAR(yakinAlgi), false]}), _sifir]; };
+            _giren = 0; _cikan = 0; _sifir = 0;
         };
     };
 };
