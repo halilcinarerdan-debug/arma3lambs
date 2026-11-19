@@ -106,6 +106,9 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             };
             _n = _n + 1;
             if (time < (_u getVariable [QGVAR(zigT), 0])) then { continue };
+            // v8.701 VARIS TABANLI TEMPO (kullanici: 'animasyon hizli olunca zikzak yolu hizli bitiyor, belirgin degil'): sabit adim suresi yerine yeni adim, asker ARA NOKTAYA VARINCA (<= 3.5 m) verilir (en gec zigTmax'ta);
+            //   animHiz x1.6 ile asker sabit sureden once varip genligi yarida kesiyordu / yon degistirmeden dogru gidiyordu
+            if (_son isNotEqualTo [] && {time < (_u getVariable [QGVAR(zigTmax), 0])} && {(_u distance2D _son) > 3.5}) then { continue };
             private _dir = _u getDir _gercek;
             // v8.696 GENIS ZIKZAK (kullanici: 'eger varsa baya genis alsinlar, adami vurmak cok zor olsun'): 25 m icinde <= 1 sert nesne = AÇIK ARAZI -> yan adim x zigzagGenisCarpan (varsayilan 2: 14-20 m), adim suresi 2.4 sn
             private _acikGenis = _genis && {(count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE"], 25, false, true])) <= 1};
@@ -132,7 +135,12 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             _u setVariable [QGVAR(zigP0), [time, getPosATL _u, _isaret, _dir, _yan, _ileri]];
             _u setVariable [QGVAR(zigYon), _isaret];
             _u setVariable [QGVAR(zigNokta), _pt];
-            _u setVariable [QGVAR(zigT), time + (_adimS * ([1, 1.33] select _acikGenis))];   // v8.699: CBA zigzagAdimS (varsayilan 1.8; acik arazi genis x1.33 = 2.4)
+            // adim suresi: yol uzunlugu / askerin GERCEK hizi (animHiz dahil); en erken %75'inde (varis beklenir), en gec %150'sinde (takilma / ezilme guvenligi); CBA zigzagAdimS = alt sinir
+            private _yolU = sqrt ((_ileri * _ileri) + (_yan * _yan));
+            private _vMs = (((speed _u) / 3.6) max 3.5);
+            private _tYol = _yolU / _vMs;
+            _u setVariable [QGVAR(zigT), time + ((_tYol * 0.75) max (_adimS * 0.5))];
+            _u setVariable [QGVAR(zigTmax), time + ((_tYol * 1.5) max _adimS)];
             _u doMove _pt;
             _say = _say + 1;
             if (_logN < 20) then {
