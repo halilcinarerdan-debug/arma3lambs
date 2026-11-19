@@ -293,9 +293,14 @@ private _nesneGit = {
             };
         };
     };
+    // v8.648 SIPERDE ALCAK DURUS (kullanici: 'asil ona bak'; RPT 949d7eff: dusman 106-190 m, secilen agac / nesne arkasi [ACIK-SIPER] 'durus UP' hep ayakta; CBA siperDusuk (kullanici 2) YALNIZ coverHug'da uygulaniyordu, acikSiper'in nesne dalinda yoktu):
+    //   gizli en yuksek durus (_objDurus) CBA siperDusuk kademe (0-2) alcaltilir (UP -> MIDDLE -> DOWN), baski > 0.35 ise bir kademe daha; son durus setUnitPosWeak (ates gerekirse motor kalkar)
+    private _dusukK = ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0) min 2;
+    if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
+    for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
     _u setUnitPos "UP";
     [_u, _obj, _en, _objDurus] call FUNC(siperZorla);   // v8.510: ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
-    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPosWeak _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
         missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];

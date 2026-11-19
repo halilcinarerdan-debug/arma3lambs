@@ -4024,3 +4024,8 @@ v8.647 (dal sade-waypoint) SIPER OTURMA YUMUSAK (kullanici: 'siper oturtma baya 
  - YENI: fnc_yumusakKay [birim, hedef ATL]: (1) kalan > 0.9 m ise DOGAL yuruyus (doMove + forceSpeed -1, <= 5 sn); (2) kalan 0.1-1.6 m son kisim smoothstep egrisi (yavas basla / yavas bitir), ~1.0 m/sn (0.45-1.6 sn), ~50 Hz; (3) kalan > 1.6 m ise kaydirma yok. Tum siper kaydirmalari bunu kullanir: acikSiper tamamlayicisi, coverHug (agac / yuzey), siperZorla (varis / sure dolunca), siperMikro (yanal).
  - SINIR: yumusak kayma icin animasyon zorlanmaz (asker kisa sure durur pozda kayar gorunebilir, sicrama degil); doMove dogal yuruyus 5 sn'ye kadar uzatabilir; oyunda DENENMEDI.
 
+v8.648 (dal sade-waypoint) AGAC / NESNE ARKASINDA ALCAK DURUS (kullanici: 'asil ona bak' - cover iyi mi sorusunda ayakta durma).
+ - BULGU (RPT 949d7eff): dusman 106-190 m, [ACIK-SIPER] Alpha'larin ~hepsi 'durus UP' (t_picea3f / t_pinusn2s / t_picea2s arkasi). Neden: fnc_acikSiper nesne dalinda durus = dusmandan gizli en yuksek durus (_objDurus) ve setUnitPos (guclu) ile uygulaniyordu; CBA siperDusuk (kullanicinin ayari 2) ve baski alcaltmasi yalniz fnc_coverHug'daydi, acikSiper'e girmiyordu.
+ - DEGISIKLIK: _nesneGit'te _objDurus CBA siperDusuk (0-2) kademe alcaltilir (UP -> MIDDLE -> DOWN), baski > 0.35 ise bir kademe daha; varista durus setUnitPosWeak (ates gerekirse motor kalkabilir; eskiden guclu setUnitPos). Log [ACIK-SIPER] 'durus' artik alcaltilmis durusu yazar.
+ - SINIR: DOWN'da (yatma) gorus / atis acisi daralir (sonraki RPT'de [SIPER-MIKRO-OZET] 'gorus kapali' artabilir; mikro duzeltme kalkmayi / kaymayi dener); bina / arazi dalinin duruslari degismedi; oyunda DENENMEDI.
+
