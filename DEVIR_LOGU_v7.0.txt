@@ -4084,3 +4084,9 @@ v8.658 (dal sade-waypoint) PLANLI BOUNDING (kullanici: 'boundingi kesinlikle pla
  - DEGISMEYEN: ates ustunlugu kapisi, FSE / maneuver dönüşümü, overwatch kurulumu, yorgunluk / mesafe bantlari ayni.
  - SINIR: plan tek bir 'findCover' cagrisiyla hesaplanir (arazi degisirse / siper sonradan kapanirsa guncellenmez, 90 sn / 40 m kuralı hariç); planli nokta dusman gozunden test EDILMEZ (dinamik secimde yol acikligi hesabi var); buddy ciftlerinin ikisi ayni bacaga gider; 'kesinlikle planli' = planli bacak gecerliyse HER ZAMAN o bacak (gecersizse dinamik geri donus); oyunda DENENMEDI.
 
+v8.659 (dal sade-waypoint) PLANLI BOUNDING ILK SAHA SONUCU (RPT c46fdbc6, v8.658, kisa kosu).
+ - CALISAN: [BND-PLAN] 185 m'de 6 bacak (siper 6 / arazi 0) zincir xy; [BND-PLAN-ADIM] 'bacak 1 / 6 (SIPER) sicrama 33-41 m'; [BND-HOP] planli kosucular; [BND] cycle 1-4 (buddy / FSE-sicrama dönüşümü).
+ - SORUN: cycle 2-4'te hedef kaymasiyla plan yenilendi (185 m -> 120 m, 2 bacak) ve her cycle FARKLI kosucu AYNI 'bacak 1 / 2' noktasina gitti (xy [18238,12390] -> [18273,12367] x3); hedefe mesafe 192 -> 136 -> 109 -> 147 -> 149 m: grup ilerlemedi. Neden: plan indeksi yalniz bir SONRAKI kosucu bacak noktasinin 8 m yakininda BASLADIGINDA artiyordu (kosucu varinca degil).
+ - DEGISIKLIK: planli kosucu icin varis izleyici: kosucu bacak noktasina 8 m (<= 25 sn) yaklasinca plan indeksi (bndPlanI) bir artar -> siradaki ekip (FSE / es) bir ONDEKI bacaga sicrar (leapfrog).
+ - SINIR: plan hedef > 40 m oynayinca yeniden hesaplanir ve indeks 0'a doner (ilerleme kaybolur); gercek ilerleme icin hedefin sabitlenmesi gerekir; kosucu bacaga hic varamazsa (25 sn) indeks ilerlemez (dinamik secim devreye girer); oyunda DENENMEDI.
+

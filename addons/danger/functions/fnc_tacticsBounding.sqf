@@ -600,6 +600,15 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                     _stance = "MIDDLE";
                     _hop = _atl;
                     _acik = 0;
+                    // v8.659 BACAK ILERLEME (RPT c46fdbc6: 3 cycle boyunca hep 'bacak 1 / 2'; her kosucu ayni 1. bacaga gidiyor, grup ilerlemiyor: indeks yalniz SONRAKI kosucu bacagin 8 m yakininda basladiginda artiyordu): kosucu bacak noktasina 8 m yaklasinca (<= 25 sn) plan indeksi bir sonraki bacaga gecer -> siradaki ekip (FSE / es) ONDEKI bacaga sicrar (gercek leapfrog)
+                    [_kosan, _pq, group _kosan, _li] spawn {
+                        params ["_k", "_q", "_gr", "_i"];
+                        private _bt = time + 25;
+                        waitUntil { sleep 0.5; !alive _k || {time > _bt} || {((getPosATL _k) distance2D _q) < 8} };
+                        if (alive _k && {((getPosATL _k) distance2D _q) < 8} && {(_gr getVariable [QGVAR(bndPlanI), 0]) <= _i}) then {
+                            _gr setVariable [QGVAR(bndPlanI), _i + 1];
+                        };
+                    };
                     if ((missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) < 30) then {
                         missionNamespace setVariable ["lambs_danger_bndPlanAdimN", (missionNamespace getVariable ["lambs_danger_bndPlanAdimN", 0]) + 1];
                         diag_log format ["[BND-PLAN-ADIM] %1 | %2 | bacak %3 / %4 (%5) | sicrama %6 m", groupId (group _kosan), name _kosan, _li + 1, count _planL, (_planL select _li) select 1, round _atl];
