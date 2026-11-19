@@ -1,4 +1,4 @@
-// LAMBS DANGER ELITE - ASIRI ZOR, v8.687 (YALNIZ LAMBS; mevcut hicbir degerine DOKUNULMADI, yalniz yeni ayarlar eklendi)
+// LAMBS DANGER ELITE - ASIRI ZOR, v8.687 (YALNIZ LAMBS; yeni ayarlar eklendi + algi / spot hizi %30: esik_* x0.7, ufukSpotHiz x1.3, konusmaM / combatShareRange x1.3; baska deger DEGISMEDI)
 // LAMBS Danger
 force lambs_danger_aciktaGizlen = true;
 force lambs_danger_agacProfil = true;
@@ -91,12 +91,12 @@ force lambs_danger_elBombasiSinif = "rhs_mag_m67, rhs_mag_f1";
 force lambs_danger_erkenCekilme = true;
 force lambs_danger_erkenKayipHiz = 3;
 force lambs_danger_erkenKayipOran = 0.25;
-force lambs_danger_esik_ISARET = 0.05;
-force lambs_danger_esik_KESIN = 0.6;
-force lambs_danger_esik_SEZILDI = 0.12;
-force lambs_danger_esik_SUPHE = 0.2;
-force lambs_danger_esik_TAM = 0.9;
-force lambs_danger_esik_TESPIT = 0.35;
+force lambs_danger_esik_ISARET = 0.035;   // %30 ARTIS (eski 0.05)
+force lambs_danger_esik_KESIN = 0.42;   // %30 ARTIS (eski 0.6)
+force lambs_danger_esik_SEZILDI = 0.084;   // %30 ARTIS (eski 0.12)
+force lambs_danger_esik_SUPHE = 0.14;   // %30 ARTIS (eski 0.2)
+force lambs_danger_esik_TAM = 0.63;   // %30 ARTIS (eski 0.9)
+force lambs_danger_esik_TESPIT = 0.245;   // %30 ARTIS (eski 0.35)
 force lambs_danger_fireLineOn = true;
 force lambs_danger_foAktif = true;
 force lambs_danger_foHakimAktif = true;
@@ -136,7 +136,7 @@ force lambs_danger_komutanKisilikEast = "SALDIRGAN";
 force lambs_danger_komutanKisilikInd = "SALDIRGAN";
 force lambs_danger_komutanKisilikWest = "SALDIRGAN";
 force lambs_danger_konusmaAlgi = true;
-force lambs_danger_konusmaM = 200;
+force lambs_danger_konusmaM = 260;   // %30 ARTIS (eski 200)
 force lambs_danger_koseIcHassas = true;
 force lambs_danger_lambsRpgUyum = true;
 force lambs_danger_mevziAgirlik = 1;
@@ -249,7 +249,7 @@ force lambs_danger_turnAgirlikMax = 0.15;
 force lambs_danger_turretEkipAktif = true;
 force lambs_danger_turretEkipSkill = 1;
 force lambs_danger_ufukAlgi = true;
-force lambs_danger_ufukSpotHiz = 3.01107;
+force lambs_danger_ufukSpotHiz = 3.9;   // %30 ARTIS (eski 3.01107)
 force lambs_danger_ufukSpotM = 1800;
 force lambs_danger_uglCooldown = 1;
 force lambs_danger_uglDostM = 8;
@@ -314,7 +314,7 @@ force lambs_eventhandlers_ExplosionReactionTime = 9;
 force lambs_wp_autoAddArtillery = false;
 
 // LAMBS Main
-force lambs_main_combatShareRange = 200;
+force lambs_main_combatShareRange = 260;   // %30 ARTIS (eski 200)
 force lambs_main_debug_drawAllUnitsInVehicles = false;
 force lambs_main_debug_Drawing = false;
 force lambs_main_debug_FSM = false;
