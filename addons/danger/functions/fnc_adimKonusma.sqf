@@ -198,7 +198,7 @@ if (hasInterface) then {
         if (time > _ozetT) then {
             _ozetT = time + 60;
             if (((_say get "adim") + (_say get "konusma") + (_say get "olay")) > 0) then {
-                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: bot ayak sesi duyulma %1 | konusma olayi %2 (en yakin dusman %3 m) | konusma duyulma %4", _say get "adim", _say get "olay", if ((_say get "enYakin") > 399) then {">400"} else {str (round (_say get "enYakin"))}, _say get "konusma"];
+                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: CQB sessiz (el isareti) %5 / %6 m | bot ayak sesi duyulma %1 | konusma olayi %2 (en yakin dusman %3 m) | konusma duyulma %4", _say get "adim", _say get "olay", if ((_say get "enYakin") > 399) then {">400"} else {str (round (_say get "enYakin"))}, _say get "konusma", missionNamespace getVariable ["lambs_danger_cqbSessiz", true], missionNamespace getVariable ["lambs_danger_cqbSessizM", 50]];
             };
             { _say set [_x, 0]; } forEach ["adim", "konusma", "olay"];
             _say set ["enYakin", 1e9];
