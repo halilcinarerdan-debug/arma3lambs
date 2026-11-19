@@ -96,7 +96,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _hizU = if (_oyGrup || {time < (_u getVariable [QGVAR(mvSlowUntil), 0])}) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
             // v8.628 EV ICI EK HIZ + AYAKTA YURUME (kullanici: 'animasyonlari cok yavas'; RPT 035e0def [HIZ-TANI]: supurme sirasinda bina icinde durus CROUCH / unitPos Middle, anim amovpknlmtacs / wlks = 4-6 km/sa, ort. 1-8 km/sa, sik donme duraklari):
             //   (a) bina supurmesinde (isSweeping) bina ICINDE CBA cqbAnimEk (%) carpan; (b) v8.629: comelme (unitPos Middle) LAMBS taskCQB'nin isi; ELITE onu UP'a ZORLAMAZ (LAMBS her turda geri yazarsa ayakta / comelme gecisi titreme yapar)
-            if (!_oyGrup && {_hizU > 1} && {_g getVariable [QGVAR(isSweeping), false]} && {(insideBuilding _u) > 0.5}) then {
+            if (!_oyGrup && {_hizU > 1} && {(insideBuilding _u) > 0.5}) then {   // v8.631: yalniz bina ICINDE (supurme sarti kaldirildi: kullanici 'sadece ev icinde de animasyon ayari, ekstra hizlandirabilelim')
                 _hizU = _hizU * (1 + ((missionNamespace getVariable ["lambs_danger_cqbAnimEk", 30]) max 0) / 100);
             };
             private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});

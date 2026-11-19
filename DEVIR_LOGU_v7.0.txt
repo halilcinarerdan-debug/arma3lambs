@@ -3931,3 +3931,8 @@ v8.630 (dal sade-waypoint) VANILLA REVIVE KONTROLU (kullanici: 'ayrica vanilla r
  - DEGISIKLIK: yigilma / giris / dogrulama beklemeleri, giris listesi ve 'az asker' sayimi lifeState HEALTHY / INJURED ile sinirlandi (baygin beklenmez, sayilmaz). Vanilla revive'in kendisi (kim kaldirir, AI hekim, BIS revive degiskenleri) ELITE tarafindan yonetilmiyor / degistirilmedi.
  - DOGRULANMADI: vanilla revive AI'in yaraliyi kaldirma davranisi (kosu / durma) ve ACE-vanilla birlikte kullanimi; oyunda DENENMEDI.
 
+v8.631 (dal sade-waypoint) EV ICI ANIMASYON AYARI GENISLETILDI (kullanici: 'sadece ev icinde de animasyon ayari ekle, ekstra hizlandirabilelim').
+ - ESKI (v8.628): lambs_danger_cqbAnimEk yalniz bina SUPURMESI (isSweeping) sirasinda bina icindeki askere uygulaniyordu, aralik 0-80.
+ - YENI: supurme sarti kaldirildi: bina ICINDEKI (insideBuilding > 0.5) her AI piyadeye (baskin, garnizon, dolasma) genel animasyon artisinin USTUNE carpan; aralik 0-100, varsayilan 30; 0 = kapali. Oyuncu grubu etkilenmez; disarida yalniz genel animHiz.
+ - SINIR: yuksek degerde kayma / duvara gomulme; Garrison askeri yerinde durdugu icin pratik etkisi yok denecek kadar az; oyunda DENENMEDI.
+
