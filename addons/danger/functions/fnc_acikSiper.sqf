@@ -155,11 +155,27 @@ private _objAd = "";
                 private _sk = (_u distance2D _pos) + (_ds select 1);
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));   // v8.529 mevzi hafizasi (puan yuksek = iyi -> maliyet duser)
                 _sk = _sk + ([_pos] call _coklu);   // v8.657: diger bilinen dusmanlara acik nokta +5 / dusman
+                // v8.666 PENETRASYON FARKINDALIGI (siper secimi): dusmanin SU ANKI mermisi bu siperi (malzeme x kalinlik) AŞIYORSA yumusak siper: +6 m ceza (CBA siperPenetrasyon)
+                if (missionNamespace getVariable ["lambs_danger_siperPenetrasyon", true]) then {
+                    private _gP = [_en] call FUNC(munisyonGucu);
+                    private _pP = (AGLToASL [_pos select 0, _pos select 1, 0]) vectorAdd [0, 0, 1.0];
+                    private _pr = [eyePos _en, _pP, _en, _u, _gP] call FUNC(penetreGuc);
+                    if ((_pr select 0) && {(_pr select 1) > 0}) then {
+                        _sk = _sk + (missionNamespace getVariable ["lambs_danger_siperMermiOncelik", 8]);   // v8.667: CBA siperMermiOncelik (mermi geciren siper cezasi, m)
+                        _sayAS set ["siper_yumusak", (_sayAS getOrDefault ["siper_yumusak", 0]) + 1];
+                    };
+                };
                 // v8.657 KALINLIK (egitimli asker kalin siper secer): agac modeli govdesi (model profili FIRE / GEOM genisligi) < 0.5 m ise +4, >= 0.7 m ise -1
                 if ((missionNamespace getVariable ["lambs_danger_agacProfil", true]) && {(toLower ((getModelInfo _o) select 0)) find "t_" isEqualTo 0}) then {
                     private _kp = [_o] call FUNC(agacProfil);
                     private _kw = (_kp select 1) max (_kp select 2);
                     _sk = _sk + (if (_kw < 0.5) then {4} else { if (_kw >= 0.7) then {-1} else {0} });
+                };
+                // v8.667 GIZLENME GEREKSINIMI (kullanici: 'cover seciminde mermi gecirmeyene oncelik versinler ama gizlenme gereksinimini de unutma'): sert siper mermiyi durdursa bile dusman gozunden (VIEW LOD) GORUNUYORSA (CUP / A2 modellerinde VIEW LOD yok / dar: t_picea2s VIEW 0.0) +siperGorunurCeza (CBA, 8 m)
+                private _hh = [1.5, 1.0, 0.4] select (["UP", "MIDDLE", "DOWN"] find (_ds select 0));
+                if ((lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _hh max 0.4], _en, _u, true, 1, "VIEW", "NONE"]) isEqualTo [] && {!(terrainIntersectASL [_eASL, _gASL vectorAdd [0, 0, _hh max 0.4]])}) then {
+                    _sk = _sk + (missionNamespace getVariable ["lambs_danger_siperGorunurCeza", 8]);
+                    _sayAS set ["siper_gorunur", (_sayAS getOrDefault ["siper_gorunur", 0]) + 1];
                 };
                 // v8.517: haritada agaclar mermi durdurmuyorsa (kalibrasyon LOD = VIEW) agac yalniz GIZLER -> kaya / duvar / konteyner gibi gercek siperler +10 puanla (m) one gecer
                 private _mdl = toLower ((getModelInfo _o) select 0);
@@ -222,7 +238,7 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
                 private _dc = 0;
                 if ([1.0] call _gizli) then { _ds = "MIDDLE"; _dc = 2; } else { if ([0.4] call _gizli) then { _ds = "DOWN"; _dc = 5; }; };
                 if (_ds isNotEqualTo "") then {
-                    private _sk = (_u distance2D _pos) + _dc + ([6, 2] select _esitG);
+                    private _sk = (_u distance2D _pos) + _dc + ([6, missionNamespace getVariable ["lambs_danger_siperMermiOncelik", 8]] select _esitG);   // v8.667: gizlenme-only (mermi durdurmaz) adayi: mermi oncelikli ceza (varsayilan 8; eski 2)
                     _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
                 };

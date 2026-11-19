@@ -108,10 +108,23 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                     };
                 };
 
+                // v8.666 PENETRASYON FARKINDALIGI (kullanici: 'penetrasyonu farkindaligi ekle, bu duvar arkasi atislar icin de gelsin'): dusman BINADAYSA artik duvara KOSULSUZ yasak degil; mermi gucu (fnc_munisyonGucu) malzeme x kalinlik direncini (fnc_penetreGuc) asarsa VE malzeme bilinen ise duvar arkasina penetrasyon atesi, degilse pencereye (eski)
+                private _binaGec = false;
+                private _pgB = [false, 0, 0, 0, 0];
+                if (_binaPen && {_vis < 0.15} && {_d <= _penetreM} && {missionNamespace getVariable ["lambs_danger_penetreGuc", true]}) then {
+                    _pgB = [_uGoz, _hedefASL, _u, _e, [_u] call FUNC(munisyonGucu)] call FUNC(penetreGuc);
+                    _binaGec = (_pgB select 0) && {(_pgB select 2) isEqualTo 0} && {(_pgB select 1) > 0};
+                };
+
                 // ---- 1) PENETRASYON ATESI ----
-                if (!_binaPen && {_penetreAcik} && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])}
+                if ((!_binaPen || {_binaGec}) && {_penetreAcik} && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])}
                     && {[(_u ammo (primaryWeapon _u)) > 6, someAmmo (vehicle _u)] select _arac}) then {
-                    private _pm = [_uGoz, _hedefASL, [_u, vehicle _u] select _arac, _e, true] call FUNC(penetreMi);
+                    private _pm = if (_binaGec) then {_pgB} else {[_uGoz, _hedefASL, [_u, vehicle _u] select _arac, _e, true] call FUNC(penetreMi)};
+                    // v8.666: bilinen malzeme (deneme degil) penetrasyonu da MERMI GUCU x KALINLIK ile sinanir (ince gövde / kalin tahta / buyuk kalibre farki)
+                    if (!_arac && {!_binaGec} && {_pm select 0} && {(_pm select 2) isEqualTo 0} && {(_pm select 1) > 0} && {missionNamespace getVariable ["lambs_danger_penetreGuc", true]}) then {
+                        private _pgK = [_uGoz, _hedefASL, _u, _e, [_u] call FUNC(munisyonGucu)] call FUNC(penetreGuc);
+                        if !(_pgK select 0) then { _pm = [false, 0, 0]; };
+                    };
                     if (_pm select 0) then {
                         private _dostEngel = ((_u nearEntities ["CAManBase", _d]) findIf {
                             alive _x && {_x isNotEqualTo _u} && {_x isNotEqualTo _e} && {((side group _x) getFriend (side _g)) >= 0.6} && {([getPosASL _x, _uGoz, _hedefASL] call _cizgiMes) < 1.5}
