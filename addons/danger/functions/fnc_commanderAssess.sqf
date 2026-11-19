@@ -581,11 +581,21 @@ private _kacisOn = missionNamespace getVariable ["lambs_danger_kacisAktif", true
 if (_kacisOn && {_decision in ["WITHDRAW", "PEEL", "DELAY"]} && {_lossRatio >= (missionNamespace getVariable ["lambs_danger_kacisKayip", 0.3])}) then {
     _group setVariable [QGVAR(kacisKilitBit), time + (missionNamespace getVariable ["lambs_danger_kacisKilitS", 150])];
 };
-private _kacisKilitli = _kacisOn && {time < (_group getVariable [QGVAR(kacisKilitBit), 0])} && {_closest >= (missionNamespace getVariable ["lambs_danger_kacisKilitMinM", 50])} && {_ownCount > 2};   // v8.678: <= 2 askerlik grup kilit nedeniyle grup olarak kosmaz (RPT 19e02c4e: tek kalan Sadat Kakar'a retreat + kacis + hekim + yan adim ayni anda emir verdi, emir 3 sn'de bir STOP'a dondu); bu durumda veto (DELAY) + bireysel kacis (fnc_kacis) devrede   // v8.676: 25 -> CBA kacisKilitMinM (50): Altis RPT aa324317'de 4 kisilik gruplar kilit nedeniyle 24-55 m'de kosarak cekildi (vardi 0/2, dusman 24 m)
+// v8.682 KILIDIN IKI ROLU AYRILDI (kullanici: 'botlar smooth dusunsun, kararsiz kalmasin'; RPT de30958b: EAST Alpha 1-1 kayip %86, guc orani 10, DELAY -> ~50 sn sonra BOUNDING -> DELAY -> BOUNDING gidip geliyor):
+//   (a) SALDIRI ENGELI: kilit suresince (kacisKilitS) hucum ailesi HER mesafede / grup buyuklugunde yasak (v8.676 / v8.678 'dusman >= 50 m' ve '> 2 asker' sartlari bu rolu de kapatmisti);
+//   (b) 'kosarak GERI CEKIL' (WITHDRAW) donusumu yalniz dusman >= kacisKilitMinM ve > 2 askerde. Dusman yakin / grup kucukse saldiri yerine DELAY (siper al + sis).
+private _kilitSure = _kacisOn && {time < (_group getVariable [QGVAR(kacisKilitBit), 0])} && {_ownCount > 0};
+private _kacisKilitli = _kilitSure && {_closest >= (missionNamespace getVariable ["lambs_danger_kacisKilitMinM", 50])} && {_ownCount > 2};   // v8.678: <= 2 askerlik grup kilit nedeniyle grup olarak kosmaz (RPT 19e02c4e: tek kalan Sadat Kakar'a retreat + kacis + hekim + yan adim ayni anda emir verdi, emir 3 sn'de bir STOP'a dondu); bu durumda veto (DELAY) + bireysel kacis (fnc_kacis) devrede   // v8.676: 25 -> CBA kacisKilitMinM (50): Altis RPT aa324317'de 4 kisilik gruplar kilit nedeniyle 24-55 m'de kosarak cekildi (vardi 0/2, dusman 24 m)
 if (_kacisKilitli && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT", "DELAY"]}) then {
     _push = false;
     _reason = format ["kacis kilidi (kayip %1%%): dusman sayisi azaldi diye riske girilmez, daha da geri", round (_lossRatio * 100)];
     _decision = "WITHDRAW";
+} else {
+    if (_kilitSure && {_decision in ["BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"]}) then {
+        _push = false;
+        _reason = format ["kayip kilidi (kayip %1%%): dusman %2 m / %3 asker kosarak kacilmaz -> saldiri yok, siper al (DELAY)", round (_lossRatio * 100), round _closest, _ownCount];
+        _decision = "DELAY";
+    };
 };
 
 // KUCUK EKIP / YAKIN TEMAS: cekilme (koşarak kacma) ONERILMEZ — 60 m'den yakin dusmana sirt cevirmek olum; <= 3 kisi acikta kosamaz.
@@ -621,7 +631,13 @@ if (_decision isNotEqualTo _sonKarar) then {
         _decision = _sonKarar;
         _reason = "taahhut: karar korunuyor";
     } else {
-        _group setVariable [QGVAR(cmdKarBas), time];
+        // v8.682 SAVUNMA TAAHHUDU: DELAY / HOLD (siper al, bekle) kararindan hucum ailesine DONUS en az 30 sn sonra (kararsizlik: DELAY -> BOUNDING -> DELAY ... 40-50 sn'de bir); PUSH (guc ustunlugu) aninda gecer
+        if (!_push && {_decision in _aile} && {_sonKarar in ["DELAY", "HOLD"]} && {(time - _karBas) < 30}) then {
+            _decision = _sonKarar;
+            _reason = format ["taahhut: %1 kararinda en az 30 sn kal (kararsizlik onleme)", _sonKarar];
+        } else {
+            _group setVariable [QGVAR(cmdKarBas), time];
+        };
     };
 };
 
