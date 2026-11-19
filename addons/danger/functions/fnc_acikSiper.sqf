@@ -201,6 +201,28 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
     } forEach (nearestTerrainObjects [_p, ["BUSH", "SMALL TREE", "TREE"], _yar, false, true]);
 };
 
+// v8.642 AGAC GEVSEK KULLANIM (kullanici: 'agaclar var zaten agaclari kullanmiyorlar', 'cup agaclari pmc tactical ukraine'; RPT 47dde7ed: aday_yok 14-17 / dk, [AGAC-GIZLEN] 35 m'de 12 agaclik var):
+//   nedenler: (1) CUP / A2 agaclarinin (t_picea / t_pinus / t_populus) cogunda FIRE LOD yok / dar -> sert siper testi ve +-0.2 m yan isin gizlenme testi gecmiyor; (2) aday nokta dusmana mesafe bandi [ed - 10, ed + 3] (geri cekilme siniri 3 m): 100 m'deki dusmana 25 m'den yanal agac bandin disinda kaliyordu.
+//   Son care (hicbir nesne / bitki bulunamadiysa; CBA siperAgacGevsek): yaricap x 1.5 (30-45 m), band [ed - 15, ed + 16]; nokta govdenin dusmana GORE ARKASI (dusman -> govde dogrultusunda, govde + 0.1 m), raycast YOK (geometri: govde dusman ile asker arasinda), durus MIDDLE; en yakin agac (mevzi hafizasi / dolu nokta elenir).
+if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacGevsek", true]}) then {
+    {
+        private _o = _x;
+        private _op = getPosATL _o;
+        private _bb = boundingBoxReal _o;
+        private _yk = ((_bb select 1) select 2) - ((_bb select 0) select 2);
+        if (_yk > 4) then {
+            private _r = ([_o, ((((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5)] call _govdeR) min 0.7;
+            private _pos = _op getPos [_r + 0.1, _en getDir _o];
+            if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 15)} && {(_pos distance2D _en) <= (_ed + 16)} && {!([_pos, _aralik] call _doluMu)}) then {
+                private _sk = (_u distance2D _pos) + 8;
+                _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
+                if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = "MIDDLE"; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
+            };
+        };
+    } forEach (nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], ((_yar * 1.5) max 30) min 45, false, true]);
+    if (_obj isNotEqualTo []) then { _sayAS set ["agac_gevsek", (_sayAS getOrDefault ["agac_gevsek", 0]) + 1]; };
+};
+
 // v8.516 ARAZI KIVRIMI ARKASI (RPT 13:27 chernarus_summer: agaclarin %75'inde FIRE LOD yok, gövde genisligi medyan 0.00 m; nesne siperi gorus keser ama mermi durdurmaz): nesne siperi de bulunamazsa
 //   cevrede (4 / 8 / 12 m halkalarda 8 yon) dusman gozunden arazi kivrimiyle (terrainIntersectASL) gizlenen en yakin nokta: 0.4 m kapali = yat, 1.0 m kapali = comel. Kapatma: lambs_danger_siperArazi = false.
 if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperArazi", true]}) then {
