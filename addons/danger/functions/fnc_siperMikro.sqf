@@ -75,14 +75,7 @@ diag_log "[SIPER-MIKRO] siperde mikro duzeltme (gorus acisi yoksa yanal kayma / 
                     _u setVariable [QGVAR(acikSiperHedef), [_p1, time, "mikro"]];
                     _u setVariable [QGVAR(hugPos), _p1];
                     _u setVariable [QGVAR(hugAt), time];
-                    [_u, _p0, _p1] spawn {
-                        params ["_a", "_q0", "_q1"];
-                        for "_k" from 1 to 8 do {
-                            if (!alive _a) exitWith {};
-                            _a setPosATL (_q0 vectorAdd ((_q1 vectorDiff _q0) vectorMultiply (_k / 8)));
-                            sleep 0.06;
-                        };
-                    };
+                    [_u, _p1] spawn FUNC(yumusakKay);
                     _say set ["duzeltilen", (_say get "duzeltilen") + 1];
                     if (_logN < 20) then { _logN = _logN + 1; diag_log format ["[SIPER-MIKRO] %1 | %2 | dusman %3 m | gorus hatti %4 m onundeki nesne tarafindan kapaliydi -> yanal kayma %5 m | durus %6", groupId (group _u), name _u, round (_u distance _e), round (((_ht select 0) select 0) distance _eye), _sec toFixed 1, stance _u]; };
                     continue

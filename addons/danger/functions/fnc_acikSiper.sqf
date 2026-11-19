@@ -278,12 +278,7 @@ private _nesneGit = {
         private _d0 = _p0 distance2D _p1;
         if (_d0 >= 0.15 && {_d0 <= 6} && {(speed _a) < 1.5} && {!surfaceIsWater _p1}) then {
             if ((lineIntersectsSurfaces [(getPosASL _a) vectorAdd [0, 0, 0.6], (AGLToASL _p1) vectorAdd [0, 0, 0.6], _a, objNull, true, 1, "GEOM", "NONE"]) isEqualTo []) then {
-                private _ad = (ceil (_d0 * 4)) max 6 min 24;
-                for "_k" from 1 to _ad do {
-                    if (!alive _a) exitWith {};
-                    _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / _ad)));
-                    sleep 0.05;
-                };
+                [_a, _p1] spawn FUNC(yumusakKay);   // v8.647: yumusak (yuruyus + smoothstep), eski sabit adimli setPosATL kaldirildi
                 if ((missionNamespace getVariable ["lambs_danger_siperOturLogN", 0]) < 25) then {
                     missionNamespace setVariable ["lambs_danger_siperOturLogN", (missionNamespace getVariable ["lambs_danger_siperOturLogN", 0]) + 1];
                     diag_log format ["[SIPER-OTUR] %1 | %2 | siper noktasina %3 m kaldi -> oturtuldu", groupId (group _a), name _a, _d0 toFixed 2];

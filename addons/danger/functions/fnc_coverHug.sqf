@@ -183,14 +183,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                         private _add = (getPosATL _u) distance2D _apt;
                         if (_add >= 0.15 && {_add <= 3.5} && {!surfaceIsWater _apt}) then {
                             _u setVariable [QGVAR(agacYapT), time + 6];
-                            [_u, getPosATL _u, _apt] spawn {
-                                params ["_a", "_p0", "_p1"];
-                                for "_k" from 1 to 8 do {
-                                    if (!alive _a) exitWith {};
-                                    _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 8)));
-                                    sleep 0.06;
-                                };
-                            };
+                            [_u, _apt] spawn FUNC(yumusakKay);
                             _u doWatch _en;
                             _u setVariable [QGVAR(hugPos), _apt];
                             _u setVariable [QGVAR(hugAt), time];
@@ -286,14 +279,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
 
                 // TEK yumusak kayma: son nokta (yuzey + 35 cm + yanal ince ayar); en fazla 4.5 m, 8 adim
                 if (!surfaceIsWater _t && {((getPosATL _u) distance2D _t) >= 0.08} && {((getPosATL _u) distance2D _t) <= 4.5}) then {
-                    [_u, getPosATL _u, _t] spawn {
-                        params ["_a", "_p0", "_p1"];
-                        for "_k" from 1 to 8 do {
-                            if (!alive _a) exitWith {};
-                            _a setPosATL (_p0 vectorAdd ((_p1 vectorDiff _p0) vectorMultiply (_k / 8)));
-                            sleep 0.06;
-                        };
-                    };
+                    [_u, _t] spawn FUNC(yumusakKay);
                 };
 
                 // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)

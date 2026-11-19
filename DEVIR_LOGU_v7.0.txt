@@ -4018,3 +4018,9 @@ v8.646 (dal sade-waypoint) ALTIS A/B TESTI + AGAC PROFILI DUZELTME (RPT c528674a
  - DEGISIKLIK: fnc_agacProfil iki eksende (x ve y dogrultulu) tarar, buyuk genisligi alir; tum LOD'larda 0 olculurse onbellege ALINMAZ (sonraki ornekte tekrar; 3. denemede 0'la onbellek).
  - KALAN: pmc_ukraine_donetsk'te aday yok nedeni [ACIK-SIPER-RED] ile ayri RPT'de gorulecek (Altis'te aday_yok yok, log cikmadi).
 
+v8.647 (dal sade-waypoint) SIPER OTURMA YUMUSAK (kullanici: 'siper oturtma baya yumusasin'; RPT 949d7eff, v8.646).
+ - RPT: [SIPER-OTUR] 'oturtuldu' 0.27-3.68 m (8 satir), 'oturtulamadi: kalan 0.0-0.1 m' (zaten oturmus), 6.6 / 34.3 m (varamadi); [SIPER-YAPIS] YAPISTI 1.71 / 2.91 m. Eski kayma: 6-24 sabit adimli (0.05-0.06 sn) setPosATL, 1.2 sn'ye kadar -> gorunur sicrama.
+ - ONEMLI GOZLEM: [ACIK-SIPER-RED] satirlarinin TUMU 'HQ' tek kisilik test gruplarindan (dusman 4 m, 45 m'de agac 0); Alpha timlerinde aday_yok YOK -> onceki 'aday_yok 12-17 / dk' pmc haritasinda Alpha'larin degil acikta duran HQ kuklalarinin sayisiymis.
+ - YENI: fnc_yumusakKay [birim, hedef ATL]: (1) kalan > 0.9 m ise DOGAL yuruyus (doMove + forceSpeed -1, <= 5 sn); (2) kalan 0.1-1.6 m son kisim smoothstep egrisi (yavas basla / yavas bitir), ~1.0 m/sn (0.45-1.6 sn), ~50 Hz; (3) kalan > 1.6 m ise kaydirma yok. Tum siper kaydirmalari bunu kullanir: acikSiper tamamlayicisi, coverHug (agac / yuzey), siperZorla (varis / sure dolunca), siperMikro (yanal).
+ - SINIR: yumusak kayma icin animasyon zorlanmaz (asker kisa sure durur pozda kayar gorunebilir, sicrama degil); doMove dogal yuruyus 5 sn'ye kadar uzatabilir; oyunda DENENMEDI.
+
