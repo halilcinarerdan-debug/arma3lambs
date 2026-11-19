@@ -33,6 +33,16 @@ private _aday = [];
         if (terrainIntersectASL [_eASL, (ATLToASL _p) vectorAdd [0, 0, 0.45]]) then { _aday pushBack [_r, _p]; };
     };
 } forEach [[8, 90], [8, -90], [8, 180], [14, 90], [14, -90], [14, 135], [14, -135], [22, 90], [22, -90], [22, 180]];
+// v8.665 UZAK DUSMAN = DAHA GENIS ARAZI ARAMASI (RPT 5b2735f6 lythium: dusman 316-361 m, 8 / 14 / 22 m'de arazi ortusu yok -> 'yat (arazi ortusu yok)' 8 / 8; uzak dusmanda sure var, 45 m'ye kadar cukur / sirt aranabilir): dusman >= 200 m ise 32 / 45 m halkalari, 8 yonlu
+if (_aday isEqualTo [] && {_ed >= 200}) then {
+    {
+        _x params ["_r", "_ofs"];
+        private _p = _u getPos [_r, _yonE + _ofs];
+        if (!surfaceIsWater _p && {(_p distance2D _en) >= (_ed - 6)}) then {
+            if (terrainIntersectASL [_eASL, (ATLToASL _p) vectorAdd [0, 0, 0.45]]) then { _aday pushBack [_r, _p]; };
+        };
+    } forEach [[32, 90], [32, -90], [32, 135], [32, -135], [32, 180], [45, 90], [45, -90], [45, 135], [45, -135], [45, 180], [45, 45], [45, -45]];
+};
 private _sonuc = "";
 if (_aday isNotEqualTo []) then {
     _aday sort true;
