@@ -283,7 +283,10 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 };
 
                 // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)
-                for "_k" from 1 to ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0 min 2) do {
+                // v8.662 DURUS CESITLILIGI coverHug'da da (RPT 4a0e73e9: hareketsiz askerlerin 34 / 41'i PRONE, 4 CROUCH, 3 STAND; acikSiper'deki siperDurusCesit yalniz nesne dalinda uyguluyordu): baski <= 0.35 ve MG degilse CBA siperDurusCesit orani bir kademe az alcalir
+private _dusukKH = ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0) min 2;
+if ((getSuppression _u) <= 0.35 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < ((missionNamespace getVariable ["lambs_danger_siperDurusCesit", 0.5]) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
+for "_k" from 1 to _dusukKH do {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; default {"DOWN"} };
                 };
                 // baski altinda bir kademe alcal
