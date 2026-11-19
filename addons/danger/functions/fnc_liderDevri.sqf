@@ -136,6 +136,30 @@ private _calis = {
                     ["devirDuzeltme", format ["[LIDER-DEVRI] %1 | MOTOR SECIMI DUZELTILDI: %2 (%3 | puan %4) -> %5 (%6 | rutbe %7 | puan %8) | aday tablosu: %9", groupId _g, name _l, rank _l, round _lSkor, name _en, rank _en, rankId _en, round _enSkor, [_puanli, _rolFn] call _tabloMetin]] call _logla;
                 };
             };
+            // v8.663 DEVIR 3 - KOMUTAN ROLU (kullanici: 'komutan mg sorununu duzelt'; RPT 4a0e73e9: Alpha 1-1 komutani MG (Jamal Habibzai), acilista motor rutbe / sira ile secmisti; DEVIR 1 / 2 yalniz bayilma / lider degisimi anini yakaliyordu):
+            //   komutan destek rolundeyse (MG / saglikci / nisanci / AT) ve gruptaki en iyi TUFEKLI (RIFLE) aday puanca en fazla 90 geride ise (rutbe farki <= ~1) komutan o tufekliye devredilir;
+            //   120 sn'de bir, temas / bounding / supurme / geri cekilme sirasinda DEGIL (ani liderlik degisimi taktik karisikligi yaratmasin); CBA komutanRolDuzelt (varsayilan ACIK)
+            if (
+                (missionNamespace getVariable ["lambs_danger_komutanRolDuzelt", true])
+                && {(time - (_g getVariable [QGVAR(liderDevirT), -999])) > 120}
+                && {((_g getVariable [QGVAR(contact), 0]) < time) || {(time - ((_g getVariable [QGVAR(contact), 0]) - 600)) > 30}}
+                && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isSweeping), false])} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])}
+            ) then {
+                private _lRol = [_l] call _rolFn;
+                if (_lRol in ["MG", "MEDIC", "MARKSMAN", "AT"] || {_l getUnitTrait "Medic"}) then {
+                    private _tufekli = _puanli select { ([_x select 1] call _rolFn) isEqualTo "RIFLE" && {!((_x select 1) getUnitTrait "Medic")} && {(_x select 1) isNotEqualTo _l} };
+                    if (_tufekli isNotEqualTo []) then {
+                        private _lS = [_l] call _puanFn;
+                        private _t = _tufekli select 0;
+                        if ((_t select 0) >= (_lS - 90)) then {
+                            private _yeni = _t select 1;
+                            _g selectLeader _yeni;
+                            _g setVariable [QGVAR(liderDevirT), time];
+                            ["devirRol", format ["[LIDER-DEVRI] %1 | KOMUTAN ROLU DUZELTILDI: %2 (%3 | rol %4 | puan %5) -> %6 (%7 | rol RIFLE | puan %8)", groupId _g, name _l, rank _l, _lRol, round _lS, name _yeni, rank _yeni, round (_t select 0)]] call _logla;
+                        };
+                    };
+                };
+            };
         } forEach allGroups;
         if (time > _ozetT) then {
             _ozetT = time + 120;
