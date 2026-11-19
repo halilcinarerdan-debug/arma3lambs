@@ -30,13 +30,17 @@ private _tp = getPosASL _o;
 private _tara = {
     params ["_lod", "_h"];
     private _bas = _tp vectorAdd [0, 0, _h];
-    private _n = 0;
+    // v8.646: IKI eksende tara (RPT c528674a: ayni model t_pinuss2s_f FIRE 0.4 m / 0.0 m, t_pinuss2s_b_f 0.0 m / 0.7 m: tek eksenli tarama ornege / yone gore govdeyi kaciriyordu); en buyuk genislik
+    private _nA = 0;
+    private _nB = 0;
     for "_i" from -30 to 30 do {
         private _ofs = _i * 0.1;
-        private _hh = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -6, 0], _bas vectorAdd [_ofs, 6, 0], objNull, objNull, true, 3, _lod, "NONE"];
-        if ((_hh findIf {(((_x select 0) distance2D _tp) < 3) && {((_x select 2) isEqualTo _o)}}) > -1) then { _n = _n + 1; };
+        private _hA = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -6, 0], _bas vectorAdd [_ofs, 6, 0], objNull, objNull, true, 3, _lod, "NONE"];
+        if ((_hA findIf {(((_x select 0) distance2D _tp) < 3) && {((_x select 2) isEqualTo _o)}}) > -1) then { _nA = _nA + 1; };
+        private _hB = lineIntersectsSurfaces [_bas vectorAdd [-6, _ofs, 0], _bas vectorAdd [6, _ofs, 0], objNull, objNull, true, 3, _lod, "NONE"];
+        if ((_hB findIf {(((_x select 0) distance2D _tp) < 3) && {((_x select 2) isEqualTo _o)}}) > -1) then { _nB = _nB + 1; };
     };
-    _n * 0.1
+    (_nA max _nB) * 0.1
 };
 private _fire = ["FIRE", 1.1] call _tara;
 private _geom = 0;
@@ -57,6 +61,12 @@ if (_acik) then {
     _r = if (_fire <= 0) then {0.5} else { ((_fire / 2) max 0.2) min 0.7 };
 };
 private _p = [_r, _fire, _geom, _v04, _v10, _v16, _fire >= 0.15];
+// hicbir LOD'da hicbir sey olculemediyse (hepsi 0) bu ORNEK kotu olabilir: onbellege ALMA, sonraki 2 ornekte tekrar dene (3. denemede 0'la onbellekle)
+if (_fire <= 0 && {_geom <= 0} && {_v04 <= 0} && {_v10 <= 0} && {_v16 <= 0}) then {
+    private _den = (lambs_danger_agacProfilH getOrDefault [_anahtar + "#n", 0]) + 1;
+    lambs_danger_agacProfilH set [_anahtar + "#n", _den];
+    if (_den < 3) exitWith { _p };
+};
 lambs_danger_agacProfilH set [_anahtar, _p];
 if ((count lambs_danger_agacProfilH) <= 12) then {
     diag_log format ["[AGAC-PROFIL] %1 | FIRE %2 m | GEOM %3 m | VIEW 0.4 m %4 / 1.0 m %5 / 1.6 m %6 | govde yaricapi %7 m | mermi durdurur %8", _m, _fire toFixed 1, _geom toFixed 1, _v04 toFixed 1, _v10 toFixed 1, _v16 toFixed 1, _r toFixed 2, _fire >= 0.15];
