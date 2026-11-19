@@ -79,6 +79,22 @@ _units append ((units _unit) select {((assignedVehicleRole _x) select 0) isEqual
 _units = [_units] call FUNC(rolManevra);   // v8.661 ROL DISIPLINI: MG / saglikci / nisanci kanatta KOSMAZ
 if (_units isEqualTo []) exitWith {false};
 
+// v8.669 ZAMANLI KANAT (yol haritasi madde 3): BASKI EKIBI = manevra disinda kalan canli, hazir piyadeler (MG / AT / saglikci / nisanci); yoksa ve >= 4 manevra askeri varsa dusmana en yakin 1/3'u
+//   (lider haric) baski ekibi olur. Manevra ekibi baski kurulana kadar BEKLER (fnc_kanatBaski). CBA lambs_danger_kanatZamanli (kapali = eski: 2-10 sn sonra dogrudan doGroupFlank).
+private _kanatDestek = [];
+if (missionNamespace getVariable ["lambs_danger_kanatZamanli", true]) then {
+    _kanatDestek = (units _group) select {
+        alive _x && {isNull objectParent _x} && {!(_x in _units)} && {_x isNotEqualTo _unit} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+        && {!captive _x} && {time >= (_x getVariable [QGVAR(tcccBusy), 0])} && {(_x getVariable [QGVAR(reloadState), []]) isEqualTo []} && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
+    };
+    if (_kanatDestek isEqualTo [] && {(count _units) >= 4}) then {
+        private _havuz = (_units select {_x isNotEqualTo _unit}) apply {[_x distance2D _target, _x]};
+        _havuz sort true;
+        _kanatDestek = (_havuz select [0, ceil ((count _units) / 3)]) apply {_x select 1};
+        _units = _units - _kanatDestek;
+    };
+};
+
 // find vehicles
 private _vehicles = [_unit] call EFUNC(main,findReadyVehicles);
 
@@ -133,7 +149,12 @@ if ((formation _group) isNotEqualTo "COLUMN") then { [_group, "COLUMN", "flank",
 if (!GVAR(disableAutonomousSmokeGrenades) && {[_group, "DIGER"] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])}) then {_unit setVariable [QGVAR(sisIzin), time + 15]; [_unit, _overwatch] call EFUNC(main,doSmoke);};   // v8.330: ortak sis butcesi
 
 // function
-[{_this call EFUNC(main,doGroupFlank)}, [_group, _units, _vehicles, _posList, _overwatch], 2 + random 8] call CBA_fnc_waitAndExecute;
+if (_kanatDestek isEqualTo []) then {
+    [{_this call EFUNC(main,doGroupFlank)}, [_group, _units, _vehicles, _posList, _overwatch], 2 + random 8] call CBA_fnc_waitAndExecute;
+} else {
+    // v8.669: baski ekibi ates kurar, sonra manevra baslar; baski manevra boyunca tazelenir
+    [_group, _target, _kanatDestek, [_group, _units, _vehicles, _posList, _overwatch]] call FUNC(kanatBaski);
+};
 
 // debug
 if (EGVAR(main,debug_functions)) then {

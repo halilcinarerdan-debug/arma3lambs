@@ -949,11 +949,23 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         // -------------------------------------------------------------------
         if (_cycleCount isEqualTo 1) then {
             private _kurulum = [];
+            private _hakimMaxM = 0;   // v8.669: hakim noktaya en uzun yol (kurulum bekleme suresi icin)
             {
                 if (alive _x && {isNull objectParent _x}) then {
                     private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                    // v8.669 PLANLI HAKIM NOKTA (madde 12 + 7): MG / nisanci / AT icin yukseklik + atis alani kapsami + menzil + siper puanlamasi (fnc_hakimNokta); yoksa eski araziAnaliz hakim noktasi
+                    private _rlH = [_x] call _rolFn;
+                    private _hkN = [];
+                    if (_rlH in ["MG", "MARKSMAN", "AT"]) then {
+                        _hkN = [_x, _target, _rlH] call FUNC(hakimNokta);
+                        if (_hkN isNotEqualTo []) then {
+                            _ow = [[_hkN select 0, _hkN select 1]];
+                            _hakimMaxM = _hakimMaxM max (_x distance2D (_hkN select 0));
+                            _x setVariable [QGVAR(hakimT), time];
+                        };
+                    };
                     // v8.13 KOMUTAN ARAZI BILINCI: MG / nisanci icin HAKIM NOKTA (>= 2.5 m yuksek, tehdidi goren, ufukta olmayan) 45 m icindeyse oraya
-                    if (([_x] call _rolFn) in ["MG", "MARKSMAN"]) then {
+                    if (_hkN isEqualTo [] && {_rlH in ["MG", "MARKSMAN"]}) then {
                         private _arz = [getPosATL _x, 45, _target] call FUNC(araziAnaliz);
                         private _hk = _arz getOrDefault ["hakim", []];
                         if (_hk isNotEqualTo []) then {
@@ -976,7 +988,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                 };
             } forEach _fse;
 
-            private _kurBitis = time + ([_group, "owKurulumS", 5] call FUNC(dk));   // spawn icinde: dis kapsam degiskeni (_dkOwKurulum) GORUNMEZ -> dogrudan oku   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
+            private _kurBitis = time + (([_group, "owKurulumS", 5] call FUNC(dk)) max (if (_hakimMaxM > 0) then { 4 + ((_hakimMaxM / 2.2) min 12) } else { 0 }));   // v8.669: hakim noktaya yuruyen MG icin tavan 4 + mesafe / 2.2 sn (en cok 16 sn)   // spawn icinde: dis kapsam degiskeni (_dkOwKurulum) GORUNMEZ -> dogrudan oku   // overwatch kurulum tavani (eskiden 8 sn: ilk bound'a 14-16 sn gec basliyordu)
             waitUntil {
                 sleep 0.5;
                 {
@@ -1009,6 +1021,14 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                 {
                     if (alive _x && {isNull objectParent _x} && {([_x] call _rolFn) in ["MG", "MARKSMAN"]}) then {
                         private _ow = [_x, _target, 30, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+                        // v8.669: yenilemede de hakim nokta (45 sn'de bir, tasinmak icin marj 14: surekli yer degistirme yok)
+                        if ((time - (_x getVariable [QGVAR(hakimT), -999])) > 45) then {
+                            private _hk3 = [_x, _target, [_x] call _rolFn, -1, 14] call FUNC(hakimNokta);
+                            if (_hk3 isNotEqualTo []) then {
+                                _ow = [[_hk3 select 0, _hk3 select 1]];
+                                _x setVariable [QGVAR(hakimT), time];
+                            };
+                        };
                         if (_ow isNotEqualTo []) then {
                             private _owPos = (_ow select 0) select 0;
                             if ((_x distance2D _owPos) > 4) then {

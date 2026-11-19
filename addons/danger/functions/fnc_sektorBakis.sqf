@@ -101,11 +101,46 @@ diag_log "[SEKTOR-BAKIS] CQB / temas sektor bakisi baslatildi (v8.371): ates etm
 
             private _sektorOfs = [0, -45, 45, -90, 90];
             private _n = count _adaylar;
+            // v8.669 PLANLI SEKTOR ATAMASI (yol haritasi madde 2): eskiden sektor 'units' sirasina gore dagitiliyordu (soldaki asker saga, sagdaki sola bakabiliyor; capraz bakis).
+            //   Simdi aday askerler tehdit eksenine gore YANAL konumlariyla siralanir (en sol -> en sag) ve sektorler soldan saga yayilir: m asker icin +-S (S = en cok 90, 35 x (m - 1)) araliginda esit aralikli.
+            //   >= 4 adayda tehdit eksenine gore EN GERIDEKI asker arka guvenlik (180 derece) alir. Siralama yanal konuma bagli oldugundan sektor askerle birlikte KARARLI kalir. CBA lambs_danger_sektorPlan (kapali = eski dagitim).
+            private _ofsDizi = [];
+            if (missionNamespace getVariable ["lambs_danger_sektorPlan", true]) then {
+                private _ileriV = [sin _yon, cos _yon, 0];
+                private _sagV = [cos _yon, -(sin _yon), 0];
+                private _lp = getPosATL _l;
+                private _ol = [];
+                {
+                    private _dv = (getPosATL _x) vectorDiff _lp;
+                    _ol pushBack [(_dv vectorDotProduct _sagV) + (_forEachIndex * 0.000001), _dv vectorDotProduct _ileriV, _x];
+                } forEach _adaylar;
+                private _arkaU = objNull;
+                if (_n >= 4) then {
+                    private _mn = 1e9;
+                    { if ((_x select 1) < _mn) then { _mn = _x select 1; _arkaU = _x select 2; }; } forEach _ol;
+                };
+                private _yan = _ol select { (_x select 2) isNotEqualTo _arkaU };
+                _yan sort true;
+                private _m = count _yan;
+                private _S = 90 min (35 * (_m - 1));
+                _ofsDizi = _adaylar apply { 0 };
+                {
+                    private _of = if (_m <= 1) then { 0 } else { (-_S) + (_forEachIndex * ((2 * _S) / (_m - 1))) };
+                    _ofsDizi set [_adaylar find (_x select 2), _of];
+                } forEach _yan;
+                if (!isNull _arkaU) then { _ofsDizi set [_adaylar find _arkaU, 180]; };
+                private _imza = str (_ofsDizi apply { round _x });
+                if (_imza isNotEqualTo (_g getVariable [QGVAR(sektorPlanImza), ""]) && {(missionNamespace getVariable ["lambs_danger_sektorPlanLogN", 0]) < 12}) then {
+                    missionNamespace setVariable ["lambs_danger_sektorPlanLogN", (missionNamespace getVariable ["lambs_danger_sektorPlanLogN", 0]) + 1];
+                    diag_log format ["[SEKTOR-PLAN] %1 | tehdit yonu %2 | %3 aday | yanal sirali sektor (derece, tehdide gore): %4", groupId _g, round _yon, _n, (_adaylar apply { format ["%1 %2", name _x, round (_ofsDizi select (_adaylar find _x))] }) joinString ", "];
+                };
+                _g setVariable [QGVAR(sektorPlanImza), _imza];
+            };
             private _dirler = [];
             {
                 private _u = _x;
                 private _i = _forEachIndex;
-                private _ofs = if (_n >= 4 && {_i == _n - 1} && {_i >= 5}) then {180} else {_sektorOfs select (_i mod 5)};
+                private _ofs = if (_ofsDizi isNotEqualTo []) then { _ofsDizi select _i } else { if (_n >= 4 && {_i == _n - 1} && {_i >= 5}) then {180} else {_sektorOfs select (_i mod 5)} };
                 private _eye = eyePos _u;
                 private _secildi = -999;
                 // v8.376 KOR DUVARA BAKMA (kullanici: 'botlar mal mal duvara bakiyor'): eskiden yalniz 8 m acik olmasi yetiyordu (9 m'deki duvara bakilirdi). Simdi once 40 m, olmazsa 20 m gorus acik yon aranir; hicbiri yoksa asker dokunulmaz

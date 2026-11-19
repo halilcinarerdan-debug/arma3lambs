@@ -122,6 +122,11 @@ private _wpSec = {
             if (terrainIntersectASL [_eASL, _cASL] || {lineIntersects [_eASL, _cASL, objNull, objNull]}) then { _s = _s + 35; };
             if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "HIDE", "BUSH", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 10; };
             if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
+            // v8.669 BACAK ORTASI GIZLI (yol haritasi madde 4 / 6): kosu yolunun orta noktasi da dusman gozunden arazi / nesneyle kesiliyorsa (olu arazi) +15; sicrama acikta gecen sure azalir
+            if (missionNamespace getVariable ["lambs_danger_cekilBacakYenile", true]) then {
+                private _mASL = AGLToASL [((_o select 0) + (_c select 0)) / 2, ((_o select 1) + (_c select 1)) / 2, 1.0];
+                if (terrainIntersectASL [_eASL, _mASL] || {lineIntersects [_eASL, _mASL, objNull, objNull]}) then { _s = _s + 15; };
+            };
             if ((_c distance2D _targetPos) < (_o distance2D _targetPos)) then { _s = _s - 40; };
             if (_s > _bestS) then { _bestS = _s; _best = _c; };
         } forEach [0, 25, -25, 50, -50, 75, -75];
@@ -633,11 +638,35 @@ if (EGVAR(main,debug_functions)) then {
         if (isNull _group) exitWith {};
         if ((_hareket select {alive _x}) isEqualTo []) then { continue };
         if ((_group getVariable [QGVAR(retSifirArd), 0]) >= 2) exitWith {};   // v8.380: ilerleme yok -> kalan sicramalar atlanir
+        // v8.669 BACAK YENILEME (yol haritasi madde 4 / 6): ilk bacak disindakiler eskiden BASLANGICTA bir kez planlaniyordu (dusman yon degistirse / yaklassa ya da ekip planlanan yere varamasa da ayni nokta).
+        //   Simdi her bacak o andaki GERCEK durumdan yeniden secilir: baslangic = grubun (hareket + kapsama) dusmandan EN UZAK askeri (sicrama ekibi digerini GECER: leapfrog), yon = guncel dusmanin tersi,
+        //   aday puani ayni _wpSec (siper / gorus kesilmesi / bina / yaklasma) + yeni 'bacak ortasi dusman gozunden gizli' (+15). Dusman bilinmiyorsa planlanan nokta kullanilir. CBA lambs_danger_cekilBacakYenile.
+        private _wpL = _wps select _wpIdx;
+        if (_wpIdx >= 1 && {missionNamespace getVariable ["lambs_danger_cekilBacakYenile", true]}) then {
+            private _hmY = _hareket select {alive _x};
+            private _tumY = (_hmY + (_kapsama select {alive _x}));
+            private _d0u = _hmY select 0;
+            private _dusY = _d0u findNearestEnemy _d0u;
+            if (!isNull _dusY && {alive _dusY} && {(_d0u knowsAbout _dusY) >= (["SEZILDI"] call FUNC(bilgiEsik))}) then {
+                private _tpY = getPosATL _dusY;
+                private _arkaY = _d0u;
+                { if ((_x distance2D _tpY) > (_arkaY distance2D _tpY)) then { _arkaY = _x; }; } forEach _tumY;
+                _targetPos = _tpY;
+                _targetASL = AGLToASL _tpY;
+                private _oY = getPosATL _arkaY;
+                private _wpY = [_oY, _tpY getDir _oY] call _wpSec;
+                _wpY = [_wpY, _oY] call _suKontrol;
+                if (_wpY isNotEqualTo [] && {!(surfaceIsWater _wpY)}) then {
+                    diag_log format ["[GERI-CEKILME-BACAK] %1 | bacak %2 YENILENDI | dusman %3 m yon %4 | planlanan noktadan %5 m farkli", groupId _group, _wpIdx + 1, round (_oY distance2D _tpY), round (_tpY getDir _oY), round (_wpL distance2D _wpY)];
+                    _wpL = _wpY;
+                };
+            };
+        };
         [
             _group,
             _hareket select {alive _x},
             _kapsama select {alive _x},
-            _wps select _wpIdx,
+            _wpL,
             _targetASL,
             _wpIdx + 1
         ] call _sicra;
