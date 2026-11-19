@@ -3980,3 +3980,8 @@ v8.639 (dal sade-waypoint) AGAC / CALI DIBINE GIR, 3.3 KAT YAKIN (kullanici: 'ag
  - NOT: CBA siperUzaklik slider'i 0.1 adimli: kullanicinin '3.30' ifadesi bu ayar icin 3.3 olarak da okunabilir (arama menzili / 3.3, uzaklik cezasi x3.3; aralik 1-4).
  - SINIR: govde yaricapi olculemeyen (FIRE LOD yok) agaclarda yaricap 0.5 varsayilir, o zaman asker govdeye 0.55 m'de durur; cali ici (yaricap x 0.6) yarilma / yaprak icinde durma; oyunda DENENMEDI.
 
+v8.640 (dal sade-waypoint) SIPERDE MIKRO DUZELTME KATMANI (kullanici: 'eger gorus acisi yoksa siperde mikro duzeltme katmani ekle, calilarda falan ise yarar').
+ - NEDEN: v8.639 ile asker cali / agac DIBINE giriyor; yaprak / govde gorus hattini kapatirsa dusmani goremez, ates edemez.
+ - YENI: fnc_siperMikro (1 sn, tur basina <= 10 asker): temasli, yakin zamanda sipere yapismis (hugAt 25 sn / acikSiperHedef 40 sn), durmus, bina disi AI; bilinen dusman 15-300 m; VIEW LOD hatti 3.5 m icindeki nesne tarafindan 2 sn boyunca kapali ise: dusman yonune dik 0.3 / 0.6 / 1.0 m (CBA siperMikroM'e kadar) yer hatti (GEOM) acik + yeni goz noktasindan hat acik olan EN KUCUK kayma 8 adimda uygulanir; kayma yoksa bir durus kademe kalkma (goz +0.5 m). Bekleme 4 sn (bulunamazsa 6 sn). CBA: siperMikro (acik), siperMikroM (0.3-2, varsayilan 1.0). Log [SIPER-MIKRO] (ilk 20) + [SIPER-MIKRO-OZET] 60 sn.
+ - SINIR: gorus hatti VIEW LOD'a gore (yaprak yarim saydam gorunebilir), 'dusman gorunur' ile 'ates edebilir' ayni degil; kayma sonrasi bot ayni sipere geri yapismak isteyebilir (coverHug 0.8 sn) -> git-gel riski; setPosATL kayma; oyunda DENENMEDI.
+
