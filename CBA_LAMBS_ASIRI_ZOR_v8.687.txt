@@ -356,6 +356,7 @@ force lambs_danger_gafilSure = 150;
 force lambs_danger_gafilBekle = 240;
 force lambs_danger_gafilMinAsker = 4;
 force lambs_danger_gafilSquadMax = 4;   // oyuncu squadi (oyuncu dahil) 4'ten buyukse botlar beklemez
+force lambs_danger_roketScript = true;   // YENI v8.705: motor roketatari atamazsa roket mermisi script ile atilir (RPG calissin)
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;

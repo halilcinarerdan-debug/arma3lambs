@@ -26,7 +26,7 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
     private _red = createHashMap;   // v8.704: aday grubun NEDEN gafil beklemeye girmedigi sayaclari
     private _durumT = time + 20;
     while {true} do {
-        sleep 0.75;
+        sleep 0.4;
         if (time > _durumT) then { _durumT = time + 1e9; diag_log format ["[GAFIL] CBA gafilAvla = %1 (ilk kontrol; false ise preset / CBA ayari yuklenmemis)", missionNamespace getVariable ["lambs_danger_gafilAvla", false]]; };
         if (time > _ozetT) then {
             _ozetT = time + 60;
@@ -53,12 +53,13 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if ((_g getVariable [QGVAR(gafilAktif), false]) isEqualTo true) then { continue };
             if (time < (_g getVariable [QGVAR(gafilT), 0])) then { continue };
-            if (
-                (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
-                || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isSweeping), false]}
-                || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]} || {(_g getVariable [QGVAR(sahteAktif), false]) isEqualTo true}
-                || {([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]} || {(insideBuilding _l) > 0.5}
-            ) then { _red set ["grup durumu (taktik / geri cekilme / bina / LAMBS gorevi)", (_red getOrDefault ["grup durumu (taktik / geri cekilme / bina / LAMBS gorevi)", 0]) + 1]; continue };
+            private _gr = "";
+            if ((_g getVariable [QGVAR(isExecutingTactic), false]) || {_g getVariable [QGVAR(isBounding), false]}) then { _gr = "taktik yurutuyor (TAK / BND)"; } else {
+            if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}) then { _gr = "geri cekilme / kacis / temas kes"; } else {
+            if ((insideBuilding _l) > 0.5) then { _gr = "binada"; } else {
+            if (([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]) then { _gr = "LAMBS gorevi / TUTAN waypoint"; } else {
+            if ((_g getVariable [QGVAR(isSweeping), false]) || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]} || {(_g getVariable [QGVAR(sahteAktif), false]) isEqualTo true}) then { _gr = "pusu / supurme / sniper / sahte cekilme"; }; }; }; }; };
+            if (_gr isNotEqualTo "") then { _red set [_gr, (_red getOrDefault [_gr, 0]) + 1]; continue };
             private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
             private _sayiN = count _us;
             // kayip takibi (son 60 sn)
@@ -98,14 +99,7 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                 (_d > 5) && {_d <= _menzil} && {(acos ((((_dir vectorDotProduct _v) / _d) min 1) max -1)) <= (_aci * 1.5)} && {!(terrainIntersectASL [_eye, _tg])} && {!(lineIntersects [_eye, _tg, _p, _x])}
             }) >= 0;
             if (_farkinda || {(time - (_p getVariable [QGVAR(sonAtisT), -999])) < 20} || {(time - (_g getVariable [QGVAR(sesSonZaman), -999])) < 10}) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; _red set ["oyuncu farkinda (bakis konisi) / ates / ates sesi", (_red getOrDefault ["oyuncu farkinda (bakis konisi) / ates / ates sesi", 0]) + 1]; continue };
-            if ((time - (_g getVariable [QGVAR(gafilGozlemSon), -999])) > 3) then { _g setVariable [QGVAR(gafilGozlemBas), nil]; };
-            _g setVariable [QGVAR(gafilGozlemSon), time];
-            private _gb = _g getVariable [QGVAR(gafilGozlemBas), -1];
-            if (_gb < 0) then { _g setVariable [QGVAR(gafilGozlemBas), time]; _g setVariable [QGVAR(gafilGozlemN), 1]; continue };
-            private _gn = (_g getVariable [QGVAR(gafilGozlemN), 0]) + 1;
-            _g setVariable [QGVAR(gafilGozlemN), _gn];
-            if ((time - _gb) < _gozlem || {_gn < 4}) then { _red set ["gozlem suruyor (oyuncu bakisi izleniyor)", (_red getOrDefault ["gozlem suruyor (oyuncu bakisi izleniyor)", 0]) + 1]; continue };
-            _g setVariable [QGVAR(gafilGozlemBas), nil];
+            // v8.705: gozlem artik BEKLEME ICINDE (taktikler ilk temasta saniyeler icinde basladigi icin 5 sn once-gozlem hic bitmiyordu: RPT f743a43c 'taktik yurutuyor' 40-125 ret / dk): hemen hazirda beklemeye gecilir, gozlem penceresi (gafilGozlemS) bekleme basinda
 
             // ---- GAFIL BEKLEME BASLAT
             _say set ["basladi", (_say get "basladi") + 1];
@@ -124,11 +118,12 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
             } forEach _us;
             if (_logN < 25) then {
                 _logN = _logN + 1;
-                diag_log format ["[GAFIL] %1 | BEKLEME BASLADI | oyuncu %2 (%3 m) farkinda degil: %7 sn / %8 ornek boyunca bakis konisine (%9 derece) HIC girmedi, ates yok | %4 asker hazirda, SIS YOK | tetik %5 m, sure %6 sn", groupId _g, name _p, round (_l distance2D _p), _sayiN, _tetik, _sure, (time - _gb) toFixed 1, _gn, round (_aci * 1.5)];
+                diag_log format ["[GAFIL] %1 | BEKLEME BASLADI | oyuncu %2 (%3 m) su an bakmiyor (koni %8 derece, gorus hatti) ve ates etmiyor | %4 asker HAZIRDA BEKLER (ilk bilgide, taktik baslamadan), SIS YOK | gozlem %7 sn: bakis eslesirse savas, eslesmezse pusu | tetik %5 m, sure %6 sn", groupId _g, name _p, round (_l distance2D _p), _sayiN, _tetik, _sure, _gozlem, round (_aci * 1.5)];
             };
 
-            [_g, _p, _us, _eskiCM, _eskiBeh, _sure, _tetik, _aci, _menzil, _bekle, _say] spawn {
-                params ["_g", "_p", "_us", "_eskiCM", "_eskiBeh", "_sure", "_tetik", "_aci", "_menzil", "_bekle", "_say"];
+            [_g, _p, _us, _eskiCM, _eskiBeh, _sure, _tetik, _aci, _menzil, _bekle, _say, _gozlem] spawn {
+                params ["_g", "_p", "_us", "_eskiCM", "_eskiBeh", "_sure", "_tetik", "_aci", "_menzil", "_bekle", "_say", "_gozlem"];
+                private _gozlemLog = false;
                 private _bas = time;
                 private _sonGor = time;
                 private _dwell = -1;
@@ -164,6 +159,7 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                         } >= 0;
                     };
                     if (_farkinda) then { if (_dwell < 0) then { _dwell = time; }; if ((time - _dwell) >= 1) exitWith { _sebep = "bakis"; }; } else { _dwell = -1; };
+                    if (!_gozlemLog && {(time - _bas) >= _gozlem}) then { _gozlemLog = true; diag_log format ["[GAFIL] %1 | GOZLEM TAMAM: oyuncu %2 sn boyunca bakis konisine girmedi, ates etmedi -> PUSU (tetik %3 m)", groupId _g, _gozlem, _tetik]; };
                     // oyuncu hala biliniyor mu
                     if (((leader _g) targets [true, _menzil + 100, [], 45]) findIf {_x isEqualTo _p || {(crew _x) findIf {_x isEqualTo _p} >= 0}} >= 0) then { _sonGor = time; };
                     if ((time - _sonGor) > 45) exitWith { _sebep = "kayboldu"; };

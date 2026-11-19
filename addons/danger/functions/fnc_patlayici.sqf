@@ -270,6 +270,34 @@ lambs_danger_patlayiciDon = {
                 _fat = format [" | fireAtTarget yedegi: %1", _fr];
             };
             sleep 1;
+            // v8.705 SCRIPT ATISI (kullanici: 'lutfen artik bu roket olayini duzelt'; RPT f743a43c: silah secildi ama anim 'amovpknlmstpsraswrfldnon' = TUFEK elde, mermi 1 -> 1, fireAtTarget yedegi calismadi; 6 RPT'de 15+ deneme, motor piyade hedefine roketatar secmiyor):
+            //   motor atisi basarisiz olduysa (mermi sayaci ayni) ROKET MERMISI SCRIPT ile firlatilir: kasanin mermi sinifi (weaponState), omuz hizasindan hedefe (mesafeye gore yukselis + %1 dagilim), createVehicle + setVelocity 130 m/sn + setShotParents (oldurme atifi atici); roketatar mermisi 1 azaltilir.
+            //   CBA lambs_danger_roketScript (varsayilan ACIK). Ses / arka alev (backblast) YOK; roketin kendi ucus sesi / patlamasi var.
+            private _scr = "";
+            if ((_u ammo _ls) >= _say0 && {alive _u} && {alive _t} && {missionNamespace getVariable ["lambs_danger_roketScript", true]}) then {
+                private _ws = _u weaponState _ls;
+                private _mag = if (_ws isEqualType [] && {(count _ws) > 3}) then { _ws select 3 } else { "" };
+                if (_mag isEqualTo "") then { _mag = (secondaryWeaponMagazine _u) param [0, ""]; };
+                private _ammoC = if (_mag isEqualTo "") then { "" } else { getText (configFile >> "CfgMagazines" >> _mag >> "ammo") };
+                if (_ammoC isNotEqualTo "") then {
+                    private _bas = (eyePos _u) vectorAdd [0, 0, -0.2];
+                    private _hdf = AGLToASL (aimPos _t);
+                    private _dm = _bas distance _hdf;
+                    _hdf = _hdf vectorAdd [(((random 2) - 1) * _dm * 0.01), (((random 2) - 1) * _dm * 0.01), ((_dm * _dm) / 40000)];
+                    private _dv = vectorNormalized (_hdf vectorDiff _bas);
+                    _bas = _bas vectorAdd (_dv vectorMultiply 1.2);
+                    private _r = createVehicle [_ammoC, ASLToAGL _bas, [], 0, "CAN_COLLIDE"];
+                    if (!isNull _r) then {
+                        _r setPosASL _bas;
+                        _r setVectorDirAndUp [_dv, [0, 0, 1]];
+                        _r setVelocity (_dv vectorMultiply 130);
+                        _r setShotParents [_u, _u];
+                        _u setAmmo [_ls, ((_u ammo _ls) - 1) max 0];
+                        _scr = format [" | SCRIPT ATISI (motor roketatari secmedi): mermi sinifi %1, %2 m", _ammoC, round _dm];
+                    } else { _scr = format [" | script atis BASARISIZ (createVehicle %1 bos)", _ammoC]; };
+                } else { _scr = " | script atis atlandi (mermi sinifi okunamadi)"; };
+            };
+            _fat = _fat + _scr;
             private _sonuc = if ((_u ammo _ls) < _say0) then {"ATILDI"} else { if (_atildi) then {"EMIR VERILDI (mermi sayaci degismedi)"} else {format ["VAZGECILDI (hizalanamadi, en kucuk aci %1 derece, silah secildi: %2, secme denemesi %3, elde: %4, anim: %5, LAMBS munisyon degisimi kapali: %6)", round _min, _secildi, _deneme, currentWeapon _u, animationState _u, missionNamespace getVariable ["lambs_main_disableAutonomousMunitionSwitching", false]]} };
             diag_log format ["[PATLAYICI] roket | %1 | %2 -> hedef %3 (%4 m) | HIZALAMA KAPILI ATIS: %5%7 | mermi %8 -> %9 | grup %6", name _u, _ls, typeOf _t, round (_u distance _t), _sonuc, groupId (group _u), _fat, _say0, _u ammo _ls];
             _u doWatch objNull;
