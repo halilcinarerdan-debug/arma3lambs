@@ -32,7 +32,20 @@ if (!isNull _en && {alive _en}) then {
     };
 };
 if (_sonuc isEqualTo []) then {
-    private _by = [_u, _yon, [0, 25, -25, 50, -50, 75, -75], [12, 6]] call FUNC(bakisAcikYon);
-    if (_by > -900) then { _sonuc = (eyePos _u) getPos [20, _by]; };
+    // v8.632 EN YAKIN ACIK YON (kullanici: 'bilinen yone ve gelis yonune bakis pek iyi degil'; RPT 2857f308: dusman yonu 351 -> secilen yon 109 (118 derece sapma), 350 -> 141, 40 -> 321; eski +-75 derece penceresi disinda kalinca 12 yonlu 'en uzun acik yon' dusman yonunun tam tersini seciyordu):
+    //   24 yon (15 derece), her yonde 12 / 8 / 5 / 3 m gorus hatti acik mi; acik (>= 3 m) yonlerden skor = dusman yonune aci farki - 1.5 x acik mesafe (kapi / koridor hafif bonus) EN DUSUK olan secilir -> hep tehdide en yakin ACIK yon
+    private _eye = eyePos _u;
+    private _enB = -999;
+    private _enS = 1e9;
+    for "_k" from 0 to 23 do {
+        private _b = _k * 15;
+        private _m = 0;
+        { if (!(lineIntersects [_eye, _eye vectorAdd [(sin _b) * _x, (cos _b) * _x, 0], _u, objNull])) exitWith { _m = _x; }; } forEach [12, 8, 5, 3];
+        if (_m >= 3) then {
+            private _s = (abs ((_b - _yon + 540) mod 360 - 180)) - (1.5 * _m);
+            if (_s < _enS) then { _enS = _s; _enB = _b; };
+        };
+    };
+    if (_enB > -900) then { _sonuc = _eye getPos [20, _enB]; };
 };
 _sonuc

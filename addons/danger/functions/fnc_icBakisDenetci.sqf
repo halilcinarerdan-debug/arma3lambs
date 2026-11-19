@@ -66,10 +66,12 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
                 if (_fark <= 30) then { _say set ["yanlis", (_say get "yanlis") + 1]; };
                 // yumusatma: ayni tehdit, ayni yon -> mevcut nokta (1.5 sn)
                 private _eski = _u getVariable [QGVAR(icBakisPoz), []];
-                if (_eski isNotEqualTo [] && {(time - (_u getVariable [QGVAR(icBakisT), -999])) < 1.5} && {(abs (((_u getDir _eski) - _brg + 540) mod 360 - 180)) > 40}) then {
+                // v8.632: yumusatma ters isliyordu (eski yon dusman yonunden > 40 derece UZAKSA korunuyordu -> 30-120 derece sapma; RPT 2857f308): artik yeni hesaplanan acik yon eski yonle <= 25 derece ayniysa eski korunur (titreme onleme), degilse yeni yon uygulanir
+                private _yeni = [_u, _brg] call FUNC(icBakisYonu);
+                if (_eski isNotEqualTo [] && {_yeni isNotEqualTo []} && {(time - (_u getVariable [QGVAR(icBakisT), -999])) < 1.2} && {(abs (((_u getDir _eski) - (_u getDir _yeni) + 540) mod 360 - 180)) < 25}) then {
                     _hedefPoz = _eski; _kaynak = "korundu";
                 } else {
-                    _hedefPoz = [_u, _brg] call FUNC(icBakisYonu);
+                    _hedefPoz = _yeni;
                     if (_hedefPoz isNotEqualTo []) then {
                         _kaynak = "acik yon";
                         _say set ["acik", (_say get "acik") + 1];
@@ -94,7 +96,7 @@ diag_log "[IC-BAKIS] bina ici bakis denetcisi (duvar arkasi dusmana / sese namlu
                 if (_hedefPoz isNotEqualTo []) then {
                     if (_fark <= 30 && {_logN < 15}) then {
                         _logN = _logN + 1;
-                        diag_log format ["[IC-BAKIS] %1 | %2 | dusman %3 m duvar arkasi (yon %4) | namlu dusmana %5 derece idi -> %6 (yon %7)", groupId _g, name _u, round (_u distance _e), round _brg, round _fark, _kaynak, round (_u getDir _hedefPoz)];
+                        diag_log format ["[IC-BAKIS] %1 | %2 | dusman %3 m duvar arkasi (yon %4) | namlu dusmana %5 derece idi -> %6 (yon %7, dusman yonune sapma %8 derece)", groupId _g, name _u, round (_u distance _e), round _brg, round _fark, _kaynak, round (_u getDir _hedefPoz), round (abs (((_u getDir _hedefPoz) - _brg + 540) mod 360 - 180))];
                     };
                     if (_fark <= 30) then { _say set ["duzelt", (_say get "duzelt") + 1]; };
                 };
