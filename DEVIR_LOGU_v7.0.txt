@@ -3890,3 +3890,8 @@ v8.622 (dal sade-waypoint) GIZLENME ESIT ONCELIK (kullanici: 'dediklerine varim'
  - YENI CBA: lambs_danger_siperGizlenmeEsit (varsayilan ACIK, 'ELITE siper'): fnc_acikSiper bitki / agac gizlenme blogu artik sert siper BULUNSA da calisir ve sert siperle ayni skorda yarisir; gizlenme cezasi +6 -> +2 (kapaliyken eski davranis: yalniz sert siper yoksa, +6).
  - RISK / SINIR: gizlenme mermiyi durdurmaz; bot, 2 m daha yakin cali / ince agaci gercek siperin yerine secebilir (ates altinda daha savunmasiz). Istenirse ceza 2 -> 4 yapilir ya da CBA kapatilir. Oyunda DENENMEDI.
 
+v8.623 (dal sade-waypoint) GARRISON'DA CQB BAKISI (kullanici: 'cqb olayi garrisonda da olsun, gelis yonune bakma falan').
+ - NEDEN: LAMBS gorevi (Garrison) senaryoKapi'da 'LAMBS' sahipli: fnc_gelisYonu ve fnc_duvarBakis bu grubu atliyordu; fnc_icBakisDenetci (v8.617) senaryo kapisina bakmaz, garnizon bina ici askerine zaten uygulaniyordu.
+ - YENI: fnc_garnizonMu (lambs_main_currentTactic 'garrison' ya da aktif waypoint script'i garrison). gelisYonu ve duvarBakis'te kapi garnizon icin kalkti (yalniz BAKIS katmanlari). Hareket eden CQB katmanlari (cqbCevik / yakinHareket / cqbKume / binaSaldiri) garnizonda KAPALI kalir (yerini terk etmesin).
+ - DOGRULANMADI: lambs_main_currentTactic degerinin tam adi ('taskGarrison' varsayildi, 'garrison' alt dizgisi aranir); LAMBS Garrison'in kendi doWatch'i denetciyle (0.5 sn) cakisabilir; oyunda DENENMEDI.
+

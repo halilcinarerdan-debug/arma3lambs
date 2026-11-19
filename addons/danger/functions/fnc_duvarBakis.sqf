@@ -40,7 +40,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
                 if (time < (_u getVariable [QGVAR(dvrBakT), 0])) then { continue };
                 private _bina = (insideBuilding _u) > 0.5;
                 // LAMBS gorevi (Garrison / Camp ...) ya da kal-bekle waypoint'li grubun bina ici nobetcisi bilerek baktigi yone bakar: dokunma
-                if (_bina && {[group _u, "duvarBakis", true] call FUNC(senaryoKapi)}) then { continue };
+                if (_bina && {[group _u, "duvarBakis", true] call FUNC(senaryoKapi)} && {!([group _u] call FUNC(garnizonMu))}) then { continue };   // v8.623: Garrison bina ici nobetcisi de duvara / kor noktaya bakmaz
                 private _hdf = getAttackTarget _u;
                 private _hdfGizli = false;
                 if (!isNull _hdf) then {

@@ -104,7 +104,7 @@ diag_log "[GELIS-YONU] dusman gelis yonu bakisi (acik gorus / yol / kapi) baslat
                 _g setVariable [QGVAR(gelisGT), time + 5];
                 continue
             };
-            if ([_g, "gelisYonu", true] call FUNC(senaryoKapi)) then { continue };
+            if ([_g, "gelisYonu", true] call FUNC(senaryoKapi) && {!([_g] call FUNC(garnizonMu))}) then { continue };   // v8.623: LAMBS Garrison grubunda gelis yonu bakisi acik
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isATEngage), false]}
