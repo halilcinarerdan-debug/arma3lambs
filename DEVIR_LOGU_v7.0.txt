@@ -3915,3 +3915,8 @@ v8.627 (dal sade-waypoint) BINA KAYNAGI TANISI (kullanici: 'objeyi zeustan koydu
  - YENI: [ODA] BINA KAYNAGI: harita (terrain) objesi mi / DINAMIK mi (nearestTerrainObjects ile). Davranis degismedi.
  - SONRAKI (kullanici karari): dinamik binada giris zorlama (ic noktaya isinlama = hile) ya da haritadaki gercek binayi kullanma / 3DEN'de yerlestirme (mission baslangicinda path agi olusur).
 
+v8.628 (dal sade-waypoint) EV ICI ANIMASYON HIZI (kullanici: 'animasyonlari cok yavas'; RPT 035e0def, v8.627).
+ - BULGULAR: [ODA] BINA KAYNAGI DINAMIK (Land_i_House_Big_01_V3_F), Door_N_trigger bulundu, GIRIS DOGRULAMA iceride 4 / 4 (giris 48 sn sonra). [HIZ-TANI] supurme (LAMBS gorev 'taskCQB', speedMode FULL, KAPALI AI: AUTOCOMBAT / SUPPRESSION, bazen TARGET / AUTOTARGET): bina icinde durus CROUCH, unitPos Middle, anim amovpknlmtacs / wlks (comelme yurumesi), hiz 4-6 km/sa, ort. 1-8; sik 'turnr' donus duraklari; CBA animHiz katsayisi 1.50 UYGULANIYOR (sorun katsayi degil, comelme yurumesi + donme). LAMBS taskCQB AUTOCOMBAT / SUPPRESSION'u kapatiyor (kanit).
+ - DEGISIKLIK: (a) YENI CBA lambs_danger_cqbAnimEk (0-80, varsayilan 30; 'ELITE ozellik'): bina supurmesinde bina icindeki AI'ya genel animasyon artisinin USTUNE carpan (x1.30). (b) moveAssist: supurmede bina icinde unitPos Middle zorlamasi, baski < 0.4 ve dusman >= 6 m ise UP yapilir (1 sn'de bir).
+ - SINIR: LAMBS taskCQB unitPos'u kendisi tekrar yazabilir (1 sn'lik yaris); setAnimSpeedCoef yuksek degerde kayma / duvara gomulme riski; oyunda DENENMEDI. Zhen Jao ayni anda baygin (anim unconsciousfacedown 7:03:14): bomba atilmadi (BOMBA-IZI yok) -> neden baska (oyuncu / ACE).
+

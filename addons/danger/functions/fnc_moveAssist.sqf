@@ -94,6 +94,16 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _g = group _u;
             private _oyGrup = _g in _oyG;
             private _hizU = if (_oyGrup || {time < (_u getVariable [QGVAR(mvSlowUntil), 0])}) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
+            // v8.628 EV ICI EK HIZ + AYAKTA YURUME (kullanici: 'animasyonlari cok yavas'; RPT 035e0def [HIZ-TANI]: supurme sirasinda bina icinde durus CROUCH / unitPos Middle, anim amovpknlmtacs / wlks = 4-6 km/sa, ort. 1-8 km/sa, sik donme duraklari):
+            //   (a) bina supurmesinde (isSweeping) bina ICINDE CBA cqbAnimEk (%) carpan; (b) comelme zorlamasi (unitPos Middle) baski < 0.4 ve dusman >= 6 m ise AYAKTA (UP) yapilir (LAMBS / ELITE comelmesi hareketi yavaslatiyordu)
+            if (!_oyGrup && {_hizU > 1} && {_g getVariable [QGVAR(isSweeping), false]} && {(insideBuilding _u) > 0.5}) then {
+                _hizU = _hizU * (1 + ((missionNamespace getVariable ["lambs_danger_cqbAnimEk", 30]) max 0) / 100);
+                if (time > (_u getVariable [QGVAR(mvAyaktaT), 0]) && {(speed _u) > 1} && {(toLower (unitPos _u)) isEqualTo "middle"} && {(getSuppression _u) < 0.4}) then {
+                    _u setVariable [QGVAR(mvAyaktaT), time + 1];
+                    private _en = _u findNearestEnemy _u;
+                    if (isNull _en || {(_u distance _en) >= 6}) then { _u setUnitPos "UP"; };
+                };
+            };
             private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
             private _istenen = if (_donuyor) then {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
