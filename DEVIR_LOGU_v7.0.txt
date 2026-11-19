@@ -3926,3 +3926,8 @@ v8.629 (dal sade-waypoint) LAMBS taskCQB ETKISI KONTROLU (kullanici: 'ben vurdum
  - ONERI: yavaslik yetmezse cqbAnimEk 40-50'ye cikar; ya da cqbMotor = ELITE (comelmesiz oda dongusu, daha yavas karar) ya da LAMBS CQB'yi yalniz giris sonrasi kisa sure calistir.
  - Zhen Jao'yu oyuncu vurdu (kullanici): baygin = kendi bombasi degil.
 
+v8.630 (dal sade-waypoint) VANILLA REVIVE KONTROLU (kullanici: 'ayrica vanilla reviveyi de check et').
+ - BULGU: RPT 035e0def'te 'unconsciousfacedown' / 'unconsciousrevivedefault' animasyonlari (vanilla revive / ACE baygin). Kodda vanilla revive'a ozel yol YOK; genel filtreler lifeState INCAPACITATED / UNCONSCIOUS'u kapsiyor (TCCC, medevac, lider devri, HQ). buildingClearRun uye listesi baslangicta lifeState suzgeciyle olusur, ama SURERKEN baygin dusen asker listede kaliyordu: yigilma / giris bekleme kosullari (findIf alive) baygini beklerdi (25 sn zaman asimi), 'az asker' abort sayimi bayginlari ayakta sayardi, giris dogrulama sayisi baygini icerdi.
+ - DEGISIKLIK: yigilma / giris / dogrulama beklemeleri, giris listesi ve 'az asker' sayimi lifeState HEALTHY / INJURED ile sinirlandi (baygin beklenmez, sayilmaz). Vanilla revive'in kendisi (kim kaldirir, AI hekim, BIS revive degiskenleri) ELITE tarafindan yonetilmiyor / degistirilmedi.
+ - DOGRULANMADI: vanilla revive AI'in yaraliyi kaldirma davranisi (kosu / durma) ve ACE-vanilla birlikte kullanimi; oyunda DENENMEDI.
+

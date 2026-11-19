@@ -75,7 +75,7 @@ private _iptalMi = {
             if (missionNamespace getVariable ["lambs_danger_buildingClearOff", false]) then { _sb = "kapatma anahtari"; } else {
                 if (isNull _l || {isPlayer _l}) then { _sb = "lider gecersiz"; } else {
                     if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isATEngage), false]}) then { _sb = "taktik basladi"; } else {
-                        if ((({alive _x && {isNull objectParent _x}} count (units _g)) < 3)) then { _sb = "az asker"; } else {
+                        if ((({alive _x && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}} count (units _g)) < 3)) then { _sb = "az asker"; } else {
                             private _en = _l findNearestEnemy _l;
                             if (!_saldiri && {!isNull _en} && {alive _en} && {(_l distance2D _en) < 120}) then { _sb = "dusman yakin"; } else {
                                 if (({alive _x && {(getSuppression _x) > ([0.45, 1.2] select _saldiri)}} count (units _g)) > 0) then { _sb = "baski"; };
@@ -351,9 +351,9 @@ private _govde = {
             sleep 1;
             if (_saldiri && {time > _sonEmir}) then {
                 _sonEmir = time + 2.5;
-                { if (alive _x && {(_x distance2D _kapiPos) > 6}) then { _x forceSpeed -1; _x setVariable [QGVAR(taktikKilit), time + 4]; _x doMove (_kapiPos getPos [3, _disYon]); }; } forEach _icerde;
+                { if (alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _kapiPos) > 6}) then { _x forceSpeed -1; _x setVariable [QGVAR(taktikKilit), time + 4]; _x doMove (_kapiPos getPos [3, _disYon]); }; } forEach _icerde;
             };
-            (time > _vb) || {call _iptalMi} || {(_icerde findIf {alive _x && {(_x distance2D _kapiPos) > 6}}) < 0}
+            (time > _vb) || {call _iptalMi} || {(_icerde findIf {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _kapiPos) > 6}}) < 0}
         };
         { if (alive _x && {(_x distance2D _kapiPos) > 6} && {(speed _x) < 1}) then { _x forceSpeed -1; _x doMove (_kapiPos getPos [3, _disYon]); diag_log format ["[ODA] %1 | %2 | yigilma noktasina varamadi (%3 m) -> kapi onune yeniden emir", _grpAd, name _x, round (_x distance2D _kapiPos)]; }; } forEach _icerde;
         [([12, 6] select _saldiri), _postlar] call _bekle;   // v8.599: saldirida yigilma bekleme 12 -> 6 sn
@@ -369,7 +369,7 @@ private _govde = {
         // v8.612 ESZAMANLI DORTLU GIRIS (kullanici: 'tek tek girmesinler, ciddi 4 kisi giris yapsinlar, yuruyus hizlari yavas hizlansin'): saldirida giris takimi (4) kapidan iceri 0.4 sn arayla (tren) AWARE / hizli (forceSpeed -1) kapi ici noktaya akar; hepsi icerideyse (<= 4 m) COMBAT'a doner, sonra oda temizligi (LAMBS CQB / ELITE)
         if (_saldiri && {!(call _iptalMi)}) then {
             private _icKapi = _kapiPos getPos [2.5, _disYon + 180];
-            private _gir = _icerde select {alive _x};
+            private _gir = _icerde select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]}};   // v8.630: bayginlar (vanilla revive INCAPACITATED / ACE) beklenmez
             _g setBehaviour "AWARE";
             {
                 _x setUnitPos "UP";
@@ -378,7 +378,7 @@ private _govde = {
                 sleep 0.4;
             } forEach _gir;
             private _gb = time + 8;
-            waitUntil { sleep 0.5; (time > _gb) || {call _iptalMi} || {(_gir findIf {alive _x && {(_x distance2D _icKapi) > 4}}) < 0} };
+            waitUntil { sleep 0.5; (time > _gb) || {call _iptalMi} || {(_gir findIf {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(_x distance2D _icKapi) > 4}}) < 0} };
             // v8.626 GIRIS DOGRULAMA (kullanici: 'etrafta dolasmazlar mi, emin misin, eve girecekler'): 8 sn sonra iceride olmayan (insideBuilding < 0.5) giris askerine, 3 deneme x 6 sn, en yakin zemin kat ic noktasina dogrudan doMove (kapi bulunamasa da motor yolu kendisi bulur); sonuc [ODA] GIRIS DOGRULAMA
             private _icNoktalar = _poslar select {(_x select 2) < 2.2};
             for "_dn" from 1 to 3 do {
@@ -392,9 +392,9 @@ private _govde = {
                     _x doMove (_np select (_forEachIndex min ((count _np) - 1)));
                 } forEach _disda;
                 private _dBit = time + 6;
-                waitUntil { sleep 0.5; (time > _dBit) || {call _iptalMi} || {(_gir findIf {alive _x && {(insideBuilding _x) < 0.5}}) < 0} };
+                waitUntil { sleep 0.5; (time > _dBit) || {call _iptalMi} || {(_gir findIf {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(insideBuilding _x) < 0.5}}) < 0} };
             };
-            diag_log format ["[ODA] %1 | GIRIS DOGRULAMA: iceride %2 / %3 asker", _grpAd, {alive _x && {(insideBuilding _x) >= 0.5}} count _gir, {alive _x} count _gir];
+            diag_log format ["[ODA] %1 | GIRIS DOGRULAMA: iceride %2 / %3 asker", _grpAd, {alive _x && {(insideBuilding _x) >= 0.5}} count _gir, count _gir];
             _g setBehaviour "COMBAT";
             diag_log format ["[ODA] %1 | BINA %2 | ESZAMANLI GIRIS: %3 asker kapidan iceri (%4 sn) | CQB hiz artisi +%5 m/sn (CBA cqbGirisHizi)", _grpAd, typeOf _b, count _gir, round (time - (_gb - 8)), missionNamespace getVariable ["lambs_danger_cqbGirisHizi", 2]];
         };
