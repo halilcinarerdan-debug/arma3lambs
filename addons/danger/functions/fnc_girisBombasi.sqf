@@ -63,9 +63,7 @@ waitUntil { sleep 0.3; (time > _bit) || {(_atan distance2D _atisPoz) < 1.5} || {
 if (!alive _atan) exitWith { false };
 _atan doWatch _ic;
 sleep 0.5;
-_atan playActionNow "ThrowGrenade";
-sleep 0.8;
-if (!alive _atan || {((magazines _atan) findIf {_x isEqualTo _mag}) < 0}) exitWith { false };
+if (!alive _atan || {((magazines _atan) findIf {_x isEqualTo _mag}) < 0}) exitWith { false };   // v8.611: ThrowGrenade animasyonu yay temizlendikten SONRA (asagida)
 
 private _rel = (eyePos _atan) vectorAdd [0, 0, -0.1];
 private _hedef = AGLToASL (_ic vectorAdd [0, 0, 0.3]);
@@ -107,13 +105,17 @@ private _sonuc = "";
 if (_v < 0) then {
     _sonuc = format ["yay engelli (%1)", _engelAd];
 } else {
-    private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
-    _gr setPosASL _rel;
-    _gr setVelocity _vel;
-    _gr setShotParents [_atan, _atan];
-    _atan removeMagazine _mag;
-    _g setVariable [QGVAR(bombaGT), time];
-    _sonuc = format ["ATILDI (kapidan %1 m iceri, aci %2, hiz %3 m/sn)", round (_ic distance2D _kapiPos), _th, _v toFixed 1];
+    _atan playActionNow "ThrowGrenade";
+    sleep 0.8;
+    if (!alive _atan || {((magazines _atan) findIf {_x isEqualTo _mag}) < 0}) then { _sonuc = "atici oldu / bomba kayboldu (animasyon sirasinda)"; _v = -1; } else {
+        private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
+        _gr setPosASL _rel;
+        _gr setVelocity _vel;
+        _gr setShotParents [_atan, _atan];
+        _atan removeMagazine _mag;
+        _g setVariable [QGVAR(bombaGT), time];
+        _sonuc = format ["ATILDI (kapidan %1 m iceri, aci %2, hiz %3 m/sn)", round (_ic distance2D _kapiPos), _th, _v toFixed 1];
+    };
 };
 if ((missionNamespace getVariable ["lambs_danger_girisBombaLogN", 0]) < 20) then {
     missionNamespace setVariable ["lambs_danger_girisBombaLogN", (missionNamespace getVariable ["lambs_danger_girisBombaLogN", 0]) + 1];

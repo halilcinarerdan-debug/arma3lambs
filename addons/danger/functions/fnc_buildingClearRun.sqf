@@ -281,14 +281,14 @@ private _govde = {
         private _birincil = _siraliUye select {([_x] call _skorFn) <= 2};
         private _icerde = [];
         if ((count _birincil) >= 2) then {
-            _icerde = _birincil select [0, 4];
+            _icerde = _birincil select [0, 4];   // v8.612: saldirida 4 kisi TEK takim olarak girer (v8.611: 6 idi; kullanici: 'ciddi 4 kisi giris yapsinlar'); MG / AT / saglikci / lider disarida kalir
         } else {
             _icerde = (_siraliUye select {([_x] call _skorFn) < 8}) select [0, 2];
             if ((count _icerde) < 2) then { _icerde = _siraliUye select [0, 2]; };
         };
         if ((count _icerde) < 2) exitWith {};
 
-        private _takimlar = if ((count _icerde) >= 4) then {
+        private _takimlar = if ((count _icerde) >= 4 && {!_saldiri}) then {   // v8.612: saldirida bolunmez: 4 kisi bir arada (tek tek girmesinler)
             [_icerde select [0, 2], _icerde select [2, (count _icerde) - 2]]
         } else {
             [_icerde]
@@ -334,6 +334,22 @@ private _govde = {
             waitUntil { sleep 0.5; (time > _bk) || {(time - (_g getVariable [QGVAR(bombaGT), -999])) < 5} || {call _iptalMi} };
             private _bt = _g getVariable [QGVAR(bombaGT), -999];
             if ((time - _bt) < 5) then { sleep ((3.5 - (time - _bt)) max 0); };
+        };
+        // v8.612 ESZAMANLI DORTLU GIRIS (kullanici: 'tek tek girmesinler, ciddi 4 kisi giris yapsinlar, yuruyus hizlari yavas hizlansin'): saldirida giris takimi (4) kapidan iceri 0.4 sn arayla (tren) AWARE / hizli (forceSpeed -1) kapi ici noktaya akar; hepsi icerideyse (<= 4 m) COMBAT'a doner, sonra oda temizligi (LAMBS CQB / ELITE)
+        if (_saldiri && {!(call _iptalMi)}) then {
+            private _icKapi = _kapiPos getPos [2.5, _disYon + 180];
+            private _gir = _icerde select {alive _x};
+            _g setBehaviour "AWARE";
+            {
+                _x setUnitPos "UP";
+                _x forceSpeed -1;
+                _x doMove (_icKapi getPos [0.9, _disYon + (90 * ([-1, 1] select ((_forEachIndex mod 2) isEqualTo 0)))]);
+                sleep 0.4;
+            } forEach _gir;
+            private _gb = time + 8;
+            waitUntil { sleep 0.5; (time > _gb) || {call _iptalMi} || {(_gir findIf {alive _x && {(_x distance2D _icKapi) > 4}}) < 0} };
+            _g setBehaviour "COMBAT";
+            diag_log format ["[ODA] %1 | BINA %2 | ESZAMANLI GIRIS: %3 asker kapidan iceri (%4 sn) | CQB hiz artisi +%5 m/sn (CBA cqbGirisHizi)", _grpAd, typeOf _b, count _gir, round (time - (_gb - 8)), missionNamespace getVariable ["lambs_danger_cqbGirisHizi", 2]];
         };
         if (call _iptalMi) exitWith {};
 

@@ -65,8 +65,7 @@ lambs_danger_patlayiciDon = {
             if (!alive _u || {!alive _t}) then { _sonuc = "hedef / atici oldu"; }
             else { if (_aci > 130) then { _sonuc = format ["donemedi (%1 derece)", round _aci]; }   // v8.591: 35 -> 100 (RPT b3f29106 / aa5e787e: 44-65 derecede 3 atis iptal; bomba yonu script ile hesaplanir, govde yonu dogrulugu etkilemez)
             else { if (false) then {} else {
-                _u playActionNow "ThrowGrenade";
-                sleep 0.8;
+                // v8.611 ANIMASYON SONRA (kullanici: 'animasyonu var el bombasi yok'; RPT e120b9e9: 'yay uzerinde engel - atilmadi' satirlarinda asker ThrowGrenade animasyonuna girip bomba atmiyordu): animasyon yalniz TEMIZ yay bulunduktan sonra oynatilir
                 if (alive _u && {alive _t} && {(magazines _u) findIf {_x isEqualTo _mag} >= 0}) then {
                     private _rel = (eyePos _u) vectorAdd [0, 0, -0.1];
                     private _hp = getPosASL _t;
@@ -130,12 +129,16 @@ lambs_danger_patlayiciDon = {
                     if (_v < 0) then {
                         _sonuc = if (_denenen isEqualTo 0) then {"menzil / yukseklik uygun degil"} else { format ["yay uzerinde engel (%1, yay noktasi %2/8; %3 aci denendi) - atilmadi", _engelAd, _engelI, _denenen] };
                     } else {
-                        private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
-                        _gr setPosASL _rel;
-                        _gr setVelocity _vel;
-                        _gr setShotParents [_u, _u];
-                        _u removeMagazine _mag;
-                        _sonuc = format ["ATILDI (hedef %1 m, aci %2, hiz %3 m/sn, dagilma %4 m)", round _D, _th, _v toFixed 1, _dag toFixed 1];
+                        _u playActionNow "ThrowGrenade";
+                        sleep 0.8;
+                        if (!alive _u || {((magazines _u) findIf {_x isEqualTo _mag}) < 0}) then { _sonuc = "atici oldu / bomba kayboldu (animasyon sirasinda)"; } else {
+                            private _gr = createVehicle [_ammo, ASLToAGL _rel, [], 0, "CAN_COLLIDE"];
+                            _gr setPosASL _rel;
+                            _gr setVelocity _vel;
+                            _gr setShotParents [_u, _u];
+                            _u removeMagazine _mag;
+                            _sonuc = format ["ATILDI (hedef %1 m, aci %2, hiz %3 m/sn, dagilma %4 m)", round _D, _th, _v toFixed 1, _dag toFixed 1];
+                        };
                     };
                 } else { _sonuc = "hedef / bomba kayboldu"; };
             }; }; };
