@@ -90,7 +90,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 } else {
                     if (_u getVariable [QGVAR(zigForm), false]) then { _gercek = formationPosition _u; _u setVariable [QGVAR(zigGercek), _gercek]; };
                 };
-                if (_gercek isEqualTo [] || {(_gercek distance2D [0, 0, 0]) < 5} || {(_u distance2D _gercek) < 25}) then { _uygun = false; };
+                if (_gercek isEqualTo [] || {(_gercek distance2D [0, 0, 0]) < 5} || {(_u distance2D _gercek) < 14}) then { _uygun = false; };   // v8.697: 25 -> 14 m (bounding sicramalari 22-40 m; 25 m alti kalinca zikzak bitiyordu)
             };
             if (!_uygun) then {
                 // zikzak bitti: ara noktamizdaysa gercek hedefe don (baska sistem emir vermediyse)
@@ -106,9 +106,9 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             private _dir = _u getDir _gercek;
             // v8.696 GENIS ZIKZAK (kullanici: 'eger varsa baya genis alsinlar, adami vurmak cok zor olsun'): 25 m icinde <= 1 sert nesne = AÇIK ARAZI -> yan adim x zigzagGenisCarpan (varsayilan 2: 14-20 m), adim suresi 2.4 sn
             private _acikGenis = _genis && {(count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE"], 25, false, true])) <= 1};
-            private _yan = (_yMin + (random (_yMax - _yMin))) * ([1, _gCarp] select _acikGenis);
+            private _yan = ((_yMin + (random (_yMax - _yMin))) * ([1, _gCarp] select _acikGenis)) min ((_u distance2D _gercek) * 0.7);   // v8.697: kisa bacakta yan adim bacak boyunun %70'ini gecmez
             private _isaret = -(_u getVariable [QGVAR(zigYon), 1]);
-            private _ileri = (((_u distance2D _gercek) - 15) min (6 + (random 8))) max 6;
+            private _ileri = (((_u distance2D _gercek) - 8) min (6 + (random 8))) max 4;
             private _pt = [];
             for "_t" from 0 to 2 do {
                 private _c = (_u getPos [_ileri, _dir]) getPos [_yan * ([1, 1, 0.55] select _t), _dir + (90 * _isaret)];
