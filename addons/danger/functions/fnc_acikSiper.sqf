@@ -276,7 +276,7 @@ private _nesneGit = {
         _p1 set [2, (getPosATL _a) select 2];
         private _p0 = getPosATL _a;
         private _d0 = _p0 distance2D _p1;
-        if (_d0 >= 0.15 && {_d0 <= 6} && {(speed _a) < 1.5} && {!surfaceIsWater _p1}) then {
+        if (_d0 >= 0.15 && {_d0 <= 25} && {(speed _a) < 1.5} && {!surfaceIsWater _p1}) then {   // v8.649: 6 -> 25 m (yumusakKay uzak kismi yuruyerek gider)
             if ((lineIntersectsSurfaces [(getPosASL _a) vectorAdd [0, 0, 0.6], (AGLToASL _p1) vectorAdd [0, 0, 0.6], _a, objNull, true, 1, "GEOM", "NONE"]) isEqualTo []) then {
                 [_a, _p1] spawn FUNC(yumusakKay);   // v8.647: yumusak (yuruyus + smoothstep), eski sabit adimli setPosATL kaldirildi
                 if ((missionNamespace getVariable ["lambs_danger_siperOturLogN", 0]) < 25) then {
@@ -299,7 +299,7 @@ private _nesneGit = {
     if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
     _u setUnitPos "UP";
-    [_u, _obj, _en, _objDurus] call FUNC(siperZorla);   // v8.510: ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
+    [_u, _obj, _en, _objDurus, true, true] call FUNC(siperZorla);   // v8.510; v8.649: riskAtla + uzakIzin (acikta kalan asker risk esigi aranmadan, 40 m'ye kadar atilisla): ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
     [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPosWeak _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
     [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {

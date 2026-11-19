@@ -23,7 +23,7 @@
  * Public: No
 */
 
-params [["_u", objNull, [objNull]], ["_pos", [], [[]]], ["_e", objNull, [objNull]], ["_ds", "MIDDLE", [""]], ["_riskAtla", false, [false]]];
+params [["_u", objNull, [objNull]], ["_pos", [], [[]]], ["_e", objNull, [objNull]], ["_ds", "MIDDLE", [""]], ["_riskAtla", false, [false]], ["_uzakIzin", false, [false]]];   // v8.649: 5. _uzakIzin (fnc_acikSiper: uzak siper 40 m'ye kadar atilisli)
 if (!(missionNamespace getVariable ["lambs_danger_siperZorla", true])) exitWith {false};
 if (isNull _u || {!alive _u} || {_pos isEqualTo []} || {!local _u} || {isPlayer _u} || {!isNull objectParent _u}) exitWith {false};
 if ((lifeState _u) in ["INCAPACITATED", "UNCONSCIOUS"] || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {_u getVariable [QGVAR(forceMove), false]}) exitWith {false};
@@ -35,7 +35,10 @@ if (isNull _e || {!alive _e}) exitWith {false};
 
 private _uPos = getPosATL _u;
 private _mes = _uPos distance2D _pos;
-if (_mes < 1.2 || {_mes > (20 / (((missionNamespace getVariable ["lambs_danger_siperUzaklik", 3]) max 1) min 4))}) exitWith {false};   // v8.513: 20 m / siperUzaklik (2) = 10 m
+// v8.649 UZAK SIPER ATILISI (kullanici: 'altisteki gibi almiyorlar'; RPT aff9b168: [SIPER-OTUR] 'oturtulamadi: kalan 7.5-13.9 m, hiz 0' - siperUzaklik 3-4 iken atilis siniri 20 / siperUzaklik = 5-6.7 m: daha uzak siper secilince siperZorla HIC calismiyor, asker duz doMove'da dusmani gorup duruyordu): acikSiper'in sectigi siper (_uzakIzin) 40 m'ye kadar atilisla gidilir
+private _lim = 20 / (((missionNamespace getVariable ["lambs_danger_siperUzaklik", 3]) max 1) min 4);
+if (_uzakIzin) then { _lim = _lim max 40; };
+if (_mes < 1.2 || {_mes > _lim}) exitWith {false};   // v8.513: 20 m / siperUzaklik (2) = 10 m
 private _ed = _u distance2D _e;
 if (_ed <= 8) exitWith {false};   // yakin dovus: kacma, ates et (fnc_yakinAtes)
 if ((_pos distance2D _e) < (_ed - 4)) exitWith {false};   // dusmana 4 m'den fazla yaklastirmaz
@@ -71,7 +74,7 @@ _mesF = (_mesF min 1);
 private _risk = (((_baz + (_bask * 0.4)) min 1) * _mesF) min 1;
 if (_tehdit < 1.5 && {!_agir} && {!_atesUst}) then { _risk = 0; };   // 1 kisi ve ates ustunlugu kurmuyor (bastirmiyor): savas, kacma
 if (!_riskAtla && {_risk < (missionNamespace getVariable ["lambs_danger_zorlaRisk", 0.25])}) exitWith {false};   // v8.522: _riskAtla (sarjor degistirme siperi): acikta reload tehlikeli, risk esigi aranmaz
-private _sure = (1.2 + (2.3 * _risk)) max ([0, 1.8] select _riskAtla);
+private _sure = ((1.2 + (2.3 * _risk)) max ([0, 1.8] select _riskAtla)) max ([0, (((_mes / 5.5) + 0.8) min 8)] select _uzakIzin);   // v8.649: uzak sipere mesafeye gore sure (~5.5 m/sn + 0.8 sn, en cok 8 sn)
 
 // RAYCAST (a): siper dusman gozunden gizli mi
 private _eASL = eyePos _e;
@@ -154,7 +157,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
         // v8.638 SURE DOLDU AMA SIPERE VARMADI: 9 m icindeyse kosuya 4 sn daha devam, varista noktaya otur (eskiden orada durup acikta kaliyordu)
-        if ((_uu distance2D _pp) > 1.2 && {(_uu distance2D _pp) <= 9}) then {
+        if ((_uu distance2D _pp) > 1.2 && {(_uu distance2D _pp) <= 25}) then {
             _uu forceSpeed -1;
             _uu setSpeedMode "FULL";
             _uu doMove _pp;
@@ -164,7 +167,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
                     [_a] call FUNC(siperTut);
                     [_a, _p] spawn FUNC(yumusakKay);
                 };
-            }, [_uu, _pp], 4, {}] call CBA_fnc_waitUntilAndExecute;
+            }, [_uu, _pp], 8, {}] call CBA_fnc_waitUntilAndExecute;
         };
     };
 }] call CBA_fnc_waitUntilAndExecute;
