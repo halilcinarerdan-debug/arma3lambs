@@ -384,7 +384,8 @@ lambs_danger_patlayiciDon = {
             private _baskiGev = ({(getSuppression _x) > 0.3} count _uyeler) >= 1;   // v8.316: esnek baski (bomba icin)
             private _pusu = (time - (_g getVariable [QGVAR(pusuT), -999])) < 30;   // v8.313: pusu alarmi (fnc_pusuTepki) son 30 sn -> bilinen atici icin bomba / roket 'deger tasir' sayilir
             private _taraf = side _g;
-            private _tr = _l nearTargets 320;
+            private _roketMax = ((missionNamespace getVariable ["lambs_danger_roketMaxM", 300]) max 150) min 600;   // v8.695: CBA roketMaxM (varsayilan 300): roket menzili + dusman tarama yaricapi
+            private _tr = _l nearTargets (320 max (_roketMax + 20));
             private _dusman = _tr select {
                 private _o = _x select 4;
                 !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {!([_o] call FUNC(teslimMi))} && {(lifeState _o) in ["HEALTHY", "INJURED"]} && {!(_o getVariable ["ACE_isUnconscious", false])} && {(_taraf getFriend (side (group _o))) < 0.6} && {(_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))}   // v8.384: baygin dusmana bomba atilmaz; v8.315: 1.0 -> 0.6 (kullanici: 'kosullari esnet')
@@ -489,7 +490,7 @@ lambs_danger_patlayiciDon = {
                 if (missionNamespace getVariable ["lambs_danger_roketAktif", true] && {!_zirhli} && {(missionNamespace getVariable ["lambs_danger_roketPiyade", false]) || {!(([] call FUNC(lambsRpgMi)) && {missionNamespace getVariable ["lambs_danger_lambsRpgUyum", true]})}}) then {   // v8.689: roketPiyade (opsiyonel) LAMBS RPG yuklu olsa bile ELITE script roketini piyadeye de atar
                     private _ls = secondaryWeapon _u;
                     if (!isNull _enIyi && {_ls isNotEqualTo ""} && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
-                        && {_enM >= _roketMin} && {_enM <= 300} && {_binada || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu} || {_enM <= 60}}
+                        && {_enM >= _roketMin} && {_enM <= _roketMax} && {(missionNamespace getVariable ["lambs_danger_roketGevsek", false]) || {_binada} || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu} || {_enM <= 60}}
                         && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > (missionNamespace getVariable ["lambs_danger_roketBirimBekle", 60])} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > (missionNamespace getVariable ["lambs_danger_roketGrupBekle", 20])}) then {
                         private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                         private _arkada = ((_u nearEntities ["CAManBase", 8]) findIf {_x isNotEqualTo _u && {alive _x} && {(_taraf getFriend (side (group _x))) >= 0.6} && {((abs (((_u getRelDir _x) + 180) mod 360 - 180)) >= 60)}}) >= 0;

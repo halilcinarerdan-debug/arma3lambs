@@ -21,13 +21,13 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["bakilan", 0], ["kacis", 0], ["siper", 0], ["comel", 0], ["atlandi", 0], ["oyuncuAday", 0], ["konide", 0], ["gorusKapali", 0], ["bilmiyor", 0], ["bekleme", 0]];
+    private _say = createHashMapFromArray [["bakilan", 0], ["kacis", 0], ["siper", 0], ["comel", 0], ["atlandi", 0], ["atlRet", 0], ["atlKosucu", 0], ["atlKilit", 0], ["atlBina", 0], ["atlDiger", 0], ["oyuncuAday", 0], ["konide", 0], ["gorusKapali", 0], ["bilmiyor", 0], ["bekleme", 0]];
     private _ozetT = time + 60;
     while {true} do {
         sleep 0.5;
         if (time > _ozetT) then {
             _ozetT = time + 60;
-            if ((_say get "konide") + (_say get "kacis") + (_say get "siper") + (_say get "comel") > 0) then { diag_log format ["[BAKIS-FARK-OZET] 60 sn: oyuncu-tur %1 | bakis konisinde bot-tur %2 (gorus kapali %3, oyuncuyu bilmiyor %4, bakilma suresi dolmadi %5) | tepki: kacis %6, siper mikro %7, comel / yat %8 | bakilip tepki verilmeyen (kilit / bina / taktik) %9", _say get "oyuncuAday", _say get "konide", _say get "gorusKapali", _say get "bilmiyor", _say get "bekleme", _say get "kacis", _say get "siper", _say get "comel", _say get "atlandi"]; };
+            if ((_say get "konide") + (_say get "kacis") + (_say get "siper") + (_say get "comel") > 0) then { diag_log format ["[BAKIS-FARK-OZET] 60 sn: oyuncu-tur %1 | bakis konisinde bot-tur %2 (gorus kapali %3, oyuncuyu bilmiyor %4, bakilma suresi dolmadi %5) | tepki: kacis %6, siper mikro %7, comel / yat %8 | bakilip tepki verilmeyen %9 (geri cekilme %10, kosucu %11, kilit %12, bina %13, diger %14)", _say get "oyuncuAday", _say get "konide", _say get "gorusKapali", _say get "bilmiyor", _say get "bekleme", _say get "kacis", _say get "siper", _say get "comel", _say get "atlandi", _say get "atlRet", _say get "atlKosucu", _say get "atlKilit", _say get "atlBina", _say get "atlDiger"]; };
             { _say set [_x, 0]; } forEach (keys _say);
         };
         if !(missionNamespace getVariable ["lambs_danger_bakisFarkAktif", false]) then { continue };
@@ -72,11 +72,16 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
                 if ((time - _t0) < _bekle) then { _say set ["bekleme", (_say get "bekleme") + 1]; continue };
                 if (time < (_u getVariable [QGVAR(bakisTepkiT), 0])) then { continue };
                 private _g = group _u;
-                if (
-                    (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBounding), false]}
-                    || {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true} || {time < (_u getVariable [QGVAR(taktikKilit), 0])} || {(insideBuilding _u) > 0.5}
-                    || {_u getVariable [QGVAR(teslim), false]} || {(_u getVariable [QGVAR(yemBirim), false]) isEqualTo true} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
-                ) then { _say set ["atlandi", (_say get "atlandi") + 1]; _u setVariable [QGVAR(bakisTepkiT), time + 3]; continue };
+                // v8.695: bounding KAPSAMA / bekleyen uyesi (kosucu degil) tepki verebilir (grup bayragi ve bounding'in 30 sn kilidi engellemez); atlama nedenleri sayilir
+                private _bndUye = (_g getVariable [QGVAR(isBounding), false]) && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true};
+                private _atl = "";
+                if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isEvading), false]}) then { _atl = "atlRet"; } else {
+                if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) then { _atl = "atlKosucu"; } else {
+                if ((time < (_u getVariable [QGVAR(taktikKilit), 0])) && {!_bndUye}) then { _atl = "atlKilit"; } else {
+                if ((insideBuilding _u) > 0.5) then { _atl = "atlBina"; } else {
+                if ((_u getVariable [QGVAR(teslim), false]) || {(_u getVariable [QGVAR(yemBirim), false]) isEqualTo true} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}) then { _atl = "atlDiger"; }; }; }; }; };
+                if (_atl isNotEqualTo "") then { _say set ["atlandi", (_say get "atlandi") + 1]; _say set [_atl, (_say get _atl) + 1]; _u setVariable [QGVAR(bakisTepkiT), time + 3]; continue };
+                if (_bndUye) then { _u setVariable [QGVAR(taktikKilit), nil]; };
                 _u setVariable [QGVAR(bakisTepkiT), time + _cool];
                 _u setVariable [QGVAR(bakilmaT), nil];
                 _tepkiN = _tepkiN + 1;

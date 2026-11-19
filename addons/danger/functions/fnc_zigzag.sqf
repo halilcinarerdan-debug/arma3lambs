@@ -32,7 +32,7 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
         if !(missionNamespace getVariable ["lambs_danger_zigzag", true]) then { continue };
         private _yMin = ((missionNamespace getVariable ["lambs_danger_zigzagYanMin", 7]) max 3) min 15;
         private _yMax = ((missionNamespace getVariable ["lambs_danger_zigzagYanMax", 10]) max _yMin) min 20;
-        private _enMax = ((missionNamespace getVariable ["lambs_danger_zigzagMaxM", 500]) max 100) min 500;
+        private _enMax = ((missionNamespace getVariable ["lambs_danger_zigzagMaxM", 600]) max 100) min 500;
         private _n = 0;
         {
             private _u = _x;
@@ -43,14 +43,13 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
             // zikzak kosullari (v8.690 GENISLETILDI: 'zigzag yok' - taktik bayragi sarti kalkti; temasli grupta kosan her asker: forceMove (taktik kosucusu) YA DA kendi doMove emri (expectedDestination 'DoNotPlan'); formasyon izleyen asker haric)
             private _mod = (expectedDestination _u) select 1;
             private _kosEmir = ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) || {_mod isEqualTo "DoNotPlan"};
-            private _uygun = (speed _u) > 6;
+            // v8.695 BAYA GEVSEK (kullanici: 'baya bi gevset gorulur olsun'): temas bayragi / gorus testi YOK; kosan (> 4 km/sa) her asker, bilinen dusman 30 m - zigzagMaxM, cevre cok kapali degilse zikzak yapar
+            private _uygun = (speed _u) > 4;
             if (_uygun) then {
                 private _neden = "";
-                if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { _neden = "temas yok"; } else {
                 if (isPlayer (leader _g)) then { _neden = "oyuncu liderli grup"; } else {
-                if (false) then { _neden = "komut MOVE degil"; } else {   // v8.692: komut sarti kalkti (RPT 29ac2821: aday askerlerin ~%40'i komut ATTACK / bos iken kosuyordu -> zikzak hic yapilmiyordu; hedef expectedDestination'dan alinir)
                 if ((insideBuilding _u) >= 0.5) then { _neden = "binada"; } else {
-                if ((time - (((_u getVariable [QGVAR(acikSiperHedef), [0, -999]]) param [1, -999]))) < 8 || {(time - (_u getVariable [QGVAR(hugAt), -999])) < 8}) then { _neden = "siper kosusu"; }; }; }; }; };
+                if ((time - (((_u getVariable [QGVAR(acikSiperHedef), [0, -999]]) param [1, -999]))) < 8 || {(time - (_u getVariable [QGVAR(hugAt), -999])) < 8}) then { _neden = "siper kosusu"; }; }; };
                 if (_neden isNotEqualTo "") then { _uygun = false; _red set [_neden, (_red getOrDefault [_neden, 0]) + 1]; };
             };
             private _en = objNull;
@@ -60,10 +59,9 @@ diag_log "[ZIGZAG] acik arazide zikzak (kosan asker 7-10 m yana, ters yon) basla
                 _en = _u findNearestEnemy _u;
                 if (isNull _en || {!alive _en}) then { _neden = "dusman yok"; } else {
                     _ed = _u distance2D _en;
-                    if (_ed < 40) then { _neden = "dusman < 40 m"; } else {
+                    if (_ed < 30) then { _neden = "dusman < 30 m"; } else {
                     if (_ed > _enMax) then { _neden = "dusman uzak"; } else {
-                    if ((terrainIntersectASL [eyePos _en, eyePos _u]) || {lineIntersects [eyePos _en, eyePos _u, _en, _u]}) then { _neden = "gorus kapali (gizli)"; } else {
-                    if (count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE", "HIDE"], 10, false, true]) >= 3) then { _neden = "cevre kapali (>= 3 nesne)"; }; }; }; };
+                    if (count (nearestTerrainObjects [_u, ["TREE", "ROCK", "ROCKS", "WALL", "BUILDING", "HOUSE"], 10, false, true]) >= 6) then { _neden = "cevre cok kapali (>= 6 agac / kaya / duvar / bina)"; }; }; };
                 };
                 if (_neden isNotEqualTo "") then { _uygun = false; _red set [_neden, (_red getOrDefault [_neden, 0]) + 1]; };
             };
