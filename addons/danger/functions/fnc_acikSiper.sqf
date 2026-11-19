@@ -158,7 +158,8 @@ private _objAd = "";
 // v8.509 BITKI / CALI ORTUSU (kullanici: 'siperden uzak kalmasinlar, agaclara en ufak bitkiyi degerlendirsinler, acikta durmasinlar'): sert siper (agac govdesi / kaya / duvar) bulunamazsa GIZLENME:
 //   cali / fidan / kucuk agac (yukseklik >= 0.3 m) arkasi; mermiyi durdurmaz ama gorusu keser (VIEW LOD: dusmanin gozunden o noktaya hattin ILK carpani bitkinin kendisi olmali), comelerek / yatarak gizlenir.
 //   Sert siper her zaman once; yalniz hic sert siper yoksa (+6 gizlenme cezasi: sert siper 6 m daha uzak olsa bile tercih edilir). Kapatma: lambs_danger_siperBitki = false.
-if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki", true]}) then {
+private _esitG = missionNamespace getVariable ["lambs_danger_siperGizlenmeEsit", true];   // v8.622: gizlenme sert siperle ESIT oncelikli (ceza +6 -> +2)
+if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_danger_siperBitki", true]}) then {
     {
         private _o = _x;
         private _op = getPosATL _o;
@@ -190,7 +191,7 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperBitki
                 private _dc = 0;
                 if ([1.0] call _gizli) then { _ds = "MIDDLE"; _dc = 2; } else { if ([0.4] call _gizli) then { _ds = "DOWN"; _dc = 5; }; };
                 if (_ds isNotEqualTo "") then {
-                    private _sk = (_u distance2D _pos) + _dc + 6;
+                    private _sk = (_u distance2D _pos) + _dc + ([6, 2] select _esitG);
                     _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
                 };
