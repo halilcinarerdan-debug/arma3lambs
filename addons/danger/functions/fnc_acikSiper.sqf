@@ -22,6 +22,16 @@ params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]]];
 if (isNull _u || {isNull _en} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};
 if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   // v8.352: teslim olan / esir asker nesne arkasina gonderilmez (STOP -> MOVE salinimi)
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
+// v8.650 KENDI SIPERINDE KAL (kullanici: 'altisteki gibi almiyorlar'; RPT d6ee1c87: [SIPER-OTUR] oturtuldu 2.8-8.7 m, ayni asker 10-15 sn arayla yeniden secip yeniden kosuyor: coverHug CUP / A2 agacinda (FIRE LOD yok / dar) 'siperde' saymiyor -> acikta -> acikSiper 10 sn'de bir yeniden sec -> git-gel):
+//   asker son 60 sn'de KENDI sectigi siper noktasinin 1.5 m icindeyse ve dusman gozunden hala GIZLIyse (VIEW LOD hatti arada nesneye carpiyor) yeniden secim YOK (baski >= 0.9 ise yine de yeniden bakar)
+private _ah0 = _u getVariable [QGVAR(acikSiperHedef), []];
+if (_ah0 isNotEqualTo [] && {(time - (_ah0 select 1)) < 60} && {((getPosATL _u) distance2D (_ah0 select 0)) < 1.5} && {(getSuppression _u) < 0.9}) then {
+    private _gz = (lineIntersectsSurfaces [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 0.9], _en, _u, true, 1, "VIEW", "NONE"]) isNotEqualTo [];
+    if (_gz || {terrainIntersectASL [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 0.9]]}) exitWith {
+        _u setVariable [QGVAR(acikSiperT), time + 6];
+        false
+    };
+};
 // v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
 private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
 private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 16];

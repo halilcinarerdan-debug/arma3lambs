@@ -4035,3 +4035,9 @@ v8.649 (dal sade-waypoint) UZAK SIPERE GIDEMEYEN ASKER (kullanici: 'altisteki gi
  - DEGISIKLIK: siperZorla 5. parametre _uzakIzin: acikSiper nesne dalinda true -> sinir 40 m, risk esigi aranmaz (riskAtla true), sure = max(eski, mesafe / 5.5 + 0.8 sn, en cok 8 sn); sure dolup 25 m'ye kadar kalmissa kosu 8 sn daha devam; acikSiper tamamlayicisi 25 m'ye kadar (yumusakKay yuruyerek gider, 5-9 sn).
  - KALAN / SINIR: AGAC-PROFIL ayni model kosudan kosuya 0.0 / 0.7 (olcum orneklenen agaca bagli; sifir olcum 3. denemede kalici); uzak atilis dusmana ates etmeyi birakir (siperZorla mantigi: hedef secimi kapali veya 'kosarken bastirma'); oyunda DENENMEDI.
 
+v8.650 (dal sade-waypoint) KENDI SIPERINDE KAL (RPT d6ee1c87, v8.649, pmc_ukraine_donetsk).
+ - SONUC (v8.649): [SIPER-ZORLA] uzak sipere (11 / 12 / 16 / 18 m) ARTIK calisiyor (sure 2.8-4.0 sn), nesne=23 / dk, agac_gevsek=3; 'oturtulamadi' 6 (kalan 0.0 / 0.1 m = oturmus, 9.3 / 39.1 m = varamadi), 'oturtuldu' 18 (0.26-8.69 m); durus DOWN / UP; [SIPER-MIKRO-OZET] kontrol 22, kapali 0.
+ - SORUN: ayni asker 10-15 sn arayla yeniden siper seciyor ([SIPER-ZORLA] ... 15 sn sonra [SIPER-OTUR] 5.06 m kaldi: ayni siper noktasi degil, YENI hedef): [ACIKTA-SINIF-OZET] 'yalniz agac 18' = agacin yaninda ama coverHug 'siperde' saymiyor (CUP / A2 agaclarinda FIRE LOD yok / dar: yuzey testi gecmiyor) -> acikta sayilip fnc_acikSiper 10 sn'de bir yeniden cagriliyor -> git-gel.
+ - DEGISIKLIK: fnc_acikSiper basinda: asker son 60 sn'de KENDI sectigi siper noktasinin 1.5 m icindeyse ve dusman gozunden hala gizliyse (VIEW LOD / arazi hatti arada) yeniden secim yok (baski >= 0.9 ise yine bakar); 6 sn bekleme.
+ - SINIR: gizlilik VIEW LOD'a gore (yaprak seyrek ise yanlis 'gizli'); dusman yer degistirirse 60 sn'ye kadar eski siperde kalabilir (gorus hatti acilirsa yeniden secer); oyunda DENENMEDI.
+
