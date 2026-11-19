@@ -33,6 +33,12 @@ KORUMA = ["isRetreating", "isBreakingContact", "isEvading", "isBounding", "isExe
 EZEN = re.compile(r"\bdoStop\b|\bdoFollow\b|taktikKilit\)\s*,\s*(?:0|nil)\s*\]|forceMove\)\s*,\s*nil\s*\]")
 
 
+# v8.687 KURAL C (BILGI, basarisizlik DEGIL): gecikmeli geri cagri setUnitPos / setUnitPosWeak / doMove yapiyor ve dizide KORUMA belirteci yok.
+#   Neden: RPT 6a939f32 - fnc_acikSiper'in gecikmeli geri cagrilari (durus yaz, siper noktasina kaydir / doMove) geri cekilen askerin durusunu / yonunu eziyordu (acikSiper duzeltildi). Kalan adaylar listelenir; hepsi retreat'le ilgili degil
+#   (hava / dron / IED vb.) - tek tek incelenip korunur, sonra kural B'ye tasinir.
+EZEN_C = re.compile(r"\bsetUnitPos(?:Weak)?\b|\bdoMove\b")
+
+
 def yorumsuz(s):
     s = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), s, flags=re.S)   # blok yorumlari (satir sayisi korunur)
     return yorumsuz2(s)
@@ -83,6 +89,7 @@ def dizi_baslangic(s, son):
 def main():
     siki = "--siki" in sys.argv
     uyari = []
+    bilgi = []
     for yol in sorted(glob.glob(os.path.join(FONK, "fnc_*.sqf"))):
         ad = os.path.basename(yol)
         ham = open(yol, encoding="utf-8", errors="replace").read()
@@ -102,6 +109,9 @@ def main():
             if EZEN.search(govde) and not any(k in govde for k in KORUMA) and not kilit_kars:
                 satir = s[:bas].count("\n") + 1
                 uyari.append((ad, satir, "B", "gecikmeli geri cagri doStop / doFollow / kilit-bayrak sifirlama yapiyor ama dizide KORUMA belirteci yok"))
+            elif EZEN_C.search(govde) and not any(k in govde for k in KORUMA):
+                satir = s[:bas].count("\n") + 1
+                bilgi.append((ad, satir))
     # tekrarlari ele
     gor = set()
     sonuc = []
@@ -112,6 +122,8 @@ def main():
     for ad, satir, kural, ileti in sonuc:
         print("  UYARI : [%s] %s:%d | %s" % (kural, ad, satir, ileti))
     print("-- %d UYARI (A: ham doFollow, B: korumasiz gecikmeli geri cagri) --" % len(sonuc))
+    bd = sorted(set(bilgi))
+    print("-- BILGI [C]: gecikmeli geri cagri setUnitPos / doMove, KORUMA belirteci yok: %d aday (basarisizlik DEGIL) %s" % (len(bd), ", ".join("%s:%d" % (a_.replace("fnc_", "").replace(".sqf", ""), l_) for a_, l_ in bd[:30])))
     return 1 if (siki and sonuc) else 0
 
 

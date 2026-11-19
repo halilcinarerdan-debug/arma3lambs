@@ -326,6 +326,7 @@ private _nesneGit = {
             !alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {time > _bit} || {_h isNotEqualTo [] && {(((getPosATL _a) distance2D _h) < 4) && {(speed _a) < 0.8}}}
         };
         if (!alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {_a getVariable ["ACE_isUnconscious", false]}) exitWith {};   // v8.653: baygin asker oturtulmaz
+        if ((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]}) exitWith {};   // v8.687: geri cekilen / kosucu askeri siper noktasina geri KAYDIRMA / doMove ile cekme (RPT 6a939f32)
         private _pt = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) select 0;
         if (_pt isEqualTo []) exitWith {};
         private _p1 = +_pt;
@@ -359,8 +360,8 @@ private _nesneGit = {
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
     _u setUnitPos "UP";
     [_u, _obj, _en, _objDurus, true, true] call FUNC(siperZorla);   // v8.510; v8.649: riskAtla + uzakIzin (acikta kalan asker risk esigi aranmadan, 40 m'ye kadar atilisla): ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
-    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPosWeak _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
-    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPosWeak _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos "AUTO"; }; }, [_u], 25] call CBA_fnc_waitAndExecute;   // v8.687: gecikmeli geri cagrilar geri cekilme / temas kes / kacis / forceMove kosucusunun durusunu EZMEZ (RPT 6a939f32)
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
         missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
         diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> NESNE ARKASI %4 (%5 m, durus %6, dusmandan gizli)", groupId _g, name _u, round _ed, _objAd, round (_u distance2D _obj), _objDurus];
@@ -452,8 +453,8 @@ _u setUnitPos "AUTO";
 _u doMove _en_iyi;
 // v8.354: atis pozisyonuna varinca durus + dusmana bak (pasif beklemesin); 45 sn sonra serbest
 if (_atisVar) then {
-    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; [_uu] call FUNC(siperTut); }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;
-    [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; _uu doWatch objNull; }; }, [_u], 45] call CBA_fnc_waitAndExecute;
+    [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; [_uu] call FUNC(siperTut); }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;
+    [{ params ["_uu"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos "AUTO"; _uu doWatch objNull; }; }, [_u], 45] call CBA_fnc_waitAndExecute;
 };
 if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
