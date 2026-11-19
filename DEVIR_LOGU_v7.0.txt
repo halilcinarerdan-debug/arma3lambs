@@ -3956,3 +3956,8 @@ v8.635 (dal sade-waypoint) BOMBA INIS ACISI / MESAFE CBA (kullanici: '3 kat fixl
  - v8.624'te sabit kodlanan bina ici hedef siniri (son inis acisi <= 52 derece, mesafe <= 40 m) CBA'ya tasindi: lambs_danger_bombaInisMaks (30-85, varsayilan 52) ve lambs_danger_bombaMesafeMaks (15-80, varsayilan 40); kategori 'patlayici'. 2. / 3. kat pencere icin inis acisi 60-75'e cikarilabilir (geri tepme riski artar).
  - NOT: oyunda DENENMEDI; '3 kat' ifadesinin 3. kat bomba atisi anlamina geldigi VARSAYILDI.
 
+v8.636 (dal sade-waypoint) EL BOMBASI ATMA SIKLIGI KORUNSUN (kullanici: 'el bombasi atma sikligi kalsin').
+ - v8.624 bina ici hedef siniri (inis acisi <= 52 derece, mesafe <= 40 m) atislari azaltiyordu; CBA varsayilanlari sinirsiz yapildi: bombaInisMaks 85 (= kapali), bombaMesafeMaks 80 (elBombasiMaxMesafe ayrica gecerli). Eski 'guvenli' degerler isteyen icin: 52 / 40.
+ - KALAN korumalar (siklik azaltabilir, bilincli): ayni kat hedefe > 62 derece lob yok (v8.619); fitil sonunda bombaDostM icinde dost varsa bomba silinir (v8.619); dost yaricap / yay engeli kontrolleri.
+ - RISK: dik inis siniri kalkinca RPT 1a697d94 benzeri cati / duvara dusup geri teper (kendini vurma). Oyunda DENENMEDI.
+
