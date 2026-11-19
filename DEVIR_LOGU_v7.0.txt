@@ -4046,3 +4046,9 @@ v8.651 (dal sade-waypoint) KALAN SORUNLAR (kullanici: 'kalan sorunlari duzelt').
  - (2) aday_yok istatistigi: HQ test kuklalari (dusman 4 m) sayiyi sisiriyordu; dusman < 15 m ayri sayac 'aday_yok_yakin', [ACIK-SIPER-RED] logu yalniz >= 15 m.
  - DEGISMEYEN / BILINEN: t_picea2s anormal FIRE 4.2-4.4 m (VIEW dar); uzak siperde (> 25 m) varamayan askerler ('kalan 39 m'); ates birakma (uzak kosu); yatik duruste gorus daralmasi (SIPER-MIKRO nadir tetikliyor); oyunda DENENMEDI.
 
+v8.652 (dal sade-waypoint) 'BUNLAR 2 TAKIMA BOLUNUYOR' (kullanici sorusu; RPT d6ee1c87).
+ - GOZLEM: [DURUM-GRUP] WEST Alpha 1-4 '6 kisi' + Alpha 1-5 / 1-6 / 2-1 '2 kisi (otomatik 1 / yari-bolt 1)'; 9:31:49-59 [ZEKA-YETIM] '2 kisi kaldi -> Alpha 1-4'e katilacak ... KATILDI (yeni grup boyu 8)'.
+ - NEDEN: fnc_sniperTeam (tasarim): grupta keskin nisanci varsa nisanci + gozlemci AYRI '<grup> SNIPER' grubuna cikarilir (ana timden bagimsiz kesif / ates). fnc_yetimKatil ise <= 2 kisilik gruplari 'yetim' sayip squad'a geri katiyordu -> bolunme / birlesme git-gel (sniperTeam bayragi yetimKatil'de elenmiyordu).
+ - DEGISIKLIK: (a) yetimKatil sniperTeam grubunu atlar; (b) YENI CBA lambs_danger_sniperTimAyri (varsayilan ACIK, 'ELITE siper'): kapaliysa nisanci ana timden AYRILMAZ.
+ - SINIR: ayrilma tasarim geregi acik kalir (CBA kapatilirsa ana timde kalir); oyunda DENENMEDI.
+

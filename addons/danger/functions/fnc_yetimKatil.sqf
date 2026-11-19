@@ -37,6 +37,7 @@ private _calis = {
             private _canli = (units _g) select {alive _x};
             private _n = count _canli;
             if (_n < 1 || {_n > 2} || {(_canli findIf {isPlayer _x}) > -1}) then { continue };
+            if (_g getVariable [QGVAR(sniperTeam), false]) then { continue };   // v8.652: keskin nisanci takimi (nisanci + gozlemci, bilincli 2 kisilik ayri grup) yetim sayilip squad'a geri katilmaz (RPT d6ee1c87: sniperTeam bolunmesi ile ZEKA-YETIM birlestirmesi git-gel)
             if ((_canli findIf {!isNull objectParent _x}) > -1) then { continue };
             // v8.500n LOJISTIK / ARAC MURETTEBATI KATILMAZ (kullanici, RPT cf8911fb: 'HEMTT soforu asker squadlarina katildi; lojistikle gorevli, tank / mekanize piyade ile karistirma'): gorevi lojistik olan (TASIMA / RECON_ARAC / MEDEVAC / TOPCU / KARAKOL_ARAC)
             //   ya da atanmis (assignedVehicle) CANLI araci olan grup piyade squad'ina katilmaz; araca doner. Kapatma: lambs_danger_yetimMurettebatKatilsin = true.

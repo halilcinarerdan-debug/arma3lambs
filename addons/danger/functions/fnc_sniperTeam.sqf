@@ -144,6 +144,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                 };
             };
 
+            if !(missionNamespace getVariable ["lambs_danger_sniperTimAyri", true]) then { continue };   // v8.652: CBA sniperTimAyri kapaliysa nisanci ana timden AYRILMAZ
             private _takim = [_s];
             if (!isNull _sp) then { _takim pushBack _sp; };
             if (((count (units _g)) - (count _takim)) < 2) then { continue };
