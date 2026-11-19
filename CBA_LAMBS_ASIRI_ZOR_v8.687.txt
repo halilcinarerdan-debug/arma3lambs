@@ -138,7 +138,7 @@ force lambs_danger_komutanKisilikWest = "SALDIRGAN";
 force lambs_danger_konusmaAlgi = true;
 force lambs_danger_konusmaM = 260;   // %30 ARTIS (eski 200)
 force lambs_danger_koseIcHassas = false;   // CQB BEKLEME YOK: ev ici kose temkini hassas degil (eski true)
-force lambs_danger_lambsRpgUyum = false;   // RPG HIZLI KARAR: ELITE kendi roket karari de devrede (eski true)
+force lambs_danger_lambsRpgUyum = true;   // (eski deger geri alindi; piyadeye roket artik roketPiyade ile)
 force lambs_danger_mevziAgirlik = 1;
 force lambs_danger_mevziHafiza = true;
 force lambs_danger_mevziYariOmur = 1800;
@@ -318,6 +318,9 @@ force lambs_danger_zigzagYanMax = 10;   // YENI
 force lambs_danger_zigzagMaxM = 350;   // YENI
 force lambs_danger_roketBirimBekle = 35;   // YENI: asker basina roket bekleme (varsayilan 60)
 force lambs_danger_roketGrupBekle = 10;   // YENI: grup basina roket bekleme (varsayilan 20)
+force lambs_danger_roketPiyade = true;   // YENI v8.689 (opsiyonel): ELITE piyadeye de roket atar, LAMBS RPG yuklu olsa bile (false = eski)
+force lambs_danger_noktaOnM = 110;   // YENI v8.689: nokta elemani (ileri gozlemci) ana govdenin 110 m onunde (varsayilan 55)
+force lambs_danger_noktaMaxM = 200;   // YENI v8.689: lidere azami uzaklik 200 m (varsayilan 95)
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;

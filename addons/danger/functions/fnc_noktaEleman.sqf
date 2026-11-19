@@ -116,8 +116,8 @@ private _calis = {
             private _v = velocity _l;
             private _dir = if (((_v select 0) ^ 2 + (_v select 1) ^ 2) > 0.5) then { (_v select 0) atan2 (_v select 1) } else { getDir _l };
             private _lp = getPosATL _l;
-            private _ileri = 55;
-            if ((count (nearestTerrainObjects [_lp, ["BUILDING", "HOUSE"], 25, false, true])) >= 3) then { _ileri = 25; };   // yerlesim: yakin onde
+            private _ileri = ((missionNamespace getVariable ["lambs_danger_noktaOnM", 55]) max 25) min 200;   // v8.689: CBA noktaOnM (varsayilan 55): nokta elemani ana govdenin ne kadar onunde
+            if ((count (nearestTerrainObjects [_lp, ["BUILDING", "HOUSE"], 25, false, true])) >= 3) then { _ileri = _ileri min 25; };   // yerlesim: yakin onde
             private _hedefEd = (expectedDestination _l) select 0;
             if (_hedefEd isNotEqualTo [0, 0, 0] && {(_lp distance2D _hedefEd) < _ileri} && {(_lp distance2D _hedefEd) > 8}) then { _ileri = (_lp distance2D _hedefEd); _dir = _lp getDir _hedefEd; };
             private _P = _lp getPos [_ileri, _dir];
@@ -162,8 +162,8 @@ private _calis = {
                 private _Pi = if ((count _eski) < 2) then { _P } else { _P getPos [7, _dir + ([90, -90] select (_forEachIndex mod 2))] };
                 _u setVariable [QGVAR(noktaEk), true];
                 _u setVariable [QGVAR(taktikKilit), time + 8];
-                // lidere 95 m'den uzaga kacmasin
-                if ((_u distance2D _l) > 95) then { _Pi = _lp getPos [30, _dir]; };
+                // lidere CBA noktaMaxM (varsayilan 95 m; en az noktaOnM + 40) uzaga kacmasin
+                if ((_u distance2D _l) > (((missionNamespace getVariable ["lambs_danger_noktaMaxM", 95]) max (_ileri + 40)) min 300)) then { _Pi = _lp getPos [30 min _ileri, _dir]; };
                 if ((_u distance2D _Pi) > 10) then { _u doMove _Pi; _hareket = _hareket + 1; };
             } forEach _eski;
             _g setVariable [QGVAR(noktaListe), _eski];
