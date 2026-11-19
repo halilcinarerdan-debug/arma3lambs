@@ -44,6 +44,25 @@ private _grp = group _unit;
 private _acil = (toLowerANSI _callout) in ["mandown", "panic", "eject", "grenadeout"];
 if (!_acil && {((_grp getVariable ["lambs_main_calloutGrupZaman", 0]) > time) || {(_grp getVariable [format ["lambs_main_callout_%1", toLowerANSI _callout], 0]) > time}}) exitWith {};
 
+// v8.633 CQB SESSIZ (kullanici: 'cqb menzili icinde konusmalarini kapatabilecegimiz bir ayar ekle, konusmasinlar el hareketleri ile iletisim kursunlar'): CBA cqbSessiz acikken bilinen dusman cqbSessizM (m) icindeyse sesli callout YOK; yerine el isareti (jest) oynatilir, 'konusuyor' bayragi (dusmana bilgi) yazilmaz
+private _sessiz = false;
+if (missionNamespace getVariable ["lambs_danger_cqbSessiz", true]) then {
+    private _enS = _unit findNearestEnemy _unit;
+    _sessiz = !isNull _enS && {alive _enS} && {(_unit distance _enS) <= (missionNamespace getVariable ["lambs_danger_cqbSessizM", 50])};
+};
+if (_sessiz) exitWith {
+    private _jest = switch (toLowerANSI _callout) do {
+        case "contact": {"gesturePoint"};
+        case "grenadeout": {"gestureFreeze"};
+        case "mandown": {"gestureCover"};
+        case "suppress": {"gestureCeaseFire"};
+        default {["gestureGo", "gestureAdvance", "gestureFollow"]};
+    };
+    [_unit, _jest] call FUNC(doGesture);
+    _unit setVariable [QGVAR(calloutTime), time + 4, true];
+    _grp setVariable ["lambs_main_calloutGrupZaman", time + 16];
+};
+
 private _speaker = speaker _unit;
 if (toUpperANSI(_speaker) in ["", "ACE_NOVOICE"]) exitWith {}; // Early Exit if Unit is "Mute"
 

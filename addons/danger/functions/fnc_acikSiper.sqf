@@ -103,7 +103,7 @@ private _govdeR = {
         private _h = lineIntersectsSurfaces [_bas vectorAdd [_ofs, -3, 0], _bas vectorAdd [_ofs, 3, 0], objNull, objNull, true, 3, "FIRE", "NONE"];
         if ((_h findIf {(((_x select 0) distance2D _tp) < 1.5) && {((_x select 2) isEqualTo _o)}}) > -1) then { _n = _n + 1; };
     };
-    private _rr = if (_n isEqualTo 0) then {0.5} else { ((_n * 0.1) / 2) max 0.2 min 1.2 };
+    private _rr = if (_n isEqualTo 0) then {0.5} else { ((_n * 0.1) / 2) max 0.2 min 0.7 };   // v8.633: 1.2 -> 0.7 (RPT a3b57501: t_picea2s FIRE LOD tarama 3.00 m = dal / yaprak; govde yaricapi 1.2 m olunca asker govdenin ~1.75 m gerisine geciyordu -> 'sipere cok uzaklar, tam gizlenemiyorlar')
     lambs_danger_govdeRH set [_m, _rr];
     _rr
 };
@@ -125,7 +125,7 @@ private _objAd = "";
     if (!_sahte && {((toLower ((getModelInfo _o) select 0)) select [0, 2]) isEqualTo "b_"}) then { _sahte = true; };
     if (!_sahte && {_yk >= 0.7} && {(_u distance2D _op) <= _yar}) then {
         private _r = [_o, (((((_bb select 1) select 0) - ((_bb select 0) select 0)) max (((_bb select 1) select 1) - ((_bb select 0) select 1))) / 2) min 2.5] call _govdeR;
-        private _pos = _op getPos [_r + 0.55, _en getDir _o];
+        private _pos = _op getPos [_r + 0.45, _en getDir _o];   // v8.633: 0.55 -> 0.45 (govdeye daha yakin)
         if (!surfaceIsWater _pos && {(_pos distance2D _en) >= (_ed - 10)} && {(_pos distance2D _en) <= (_ed + _geriMax)} && {!([_pos, _aralik] call _doluMu)}) then {
             private _gASL = ATLToASL [_pos select 0, _pos select 1, 0];
             private _bl = [1.5, 1.0, 0.4] apply { (lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _x], _en, _u, true, 1, (missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]), "NONE"]) isNotEqualTo [] };
