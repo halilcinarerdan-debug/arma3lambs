@@ -339,6 +339,9 @@ private _govde = {
                 };
             } forEach _tkY;
         } forEach _takimlar;
+        // v8.627 BINA KAYNAGI (kullanici: 'objeyi zeustan koyduk'): harita (terrain) objesi mi, calisma aninda yaratilmis (Zeus / 3DEN) mi? Dinamik binada AI yol agi (path LOD) ic mekani icermeyebilir -> girememe / dolasma beklenir
+        private _terrain = ((nearestTerrainObjects [getPosATL _b, ["BUILDING", "HOUSE", "CHURCH", "CHAPEL", "BUNKER", "FORTRESS", "FUELSTATION", "HOSPITAL", "LIGHTHOUSE", "TOURISM"], 6, false, true]) findIf {_x isEqualTo _b}) >= 0;
+        diag_log format ["[ODA] %1 | BINA KAYNAGI: %2 | %3 | ic nokta %4 | AI yol agi ic mekani icermeyebilir (dinamik ise)", _grpAd, ["DINAMIK (Zeus / 3DEN / createVehicle)", "harita (terrain) objesi"] select _terrain, typeOf _b, count _poslar];
         diag_log format ["[ODA] %1 | BINA %2 | kapi:%3 (%4) | yigilma yani:%5 | takim:%6", _grpAd, typeOf _b, mapGridPosition _kapiPos, ["bina pozisyonu", "Door_N_trigger"] select (_kapi isNotEqualTo []), _yigYan, count _takimlar];
         // v8.600 VARIS KONTROLU: yigilma noktasina 10 sn'de varamayan (6 m'den uzak, duruyor) giris takimi askerine kapi onune (3 m) dogrudan yeniden hareket emri
         // v8.624 YIGILMAYI ZORLA (kullanici: 'adamlar hala girmiyorlar'; RPT 1a697d94: yigilma 0/4, ort. aralik 21-26 m, LAMBS 'Contact!' / ATTACK / STOP emirleri doMove'u eziyor, giris 39 sn sonra): saldirida 25 sn boyunca 2.5 sn'de bir, kapidan > 6 m uzaktaki HER giris askerine (durmasa da) kapi onune yeniden hareket emri + taktikKilit 4 sn (diger izleyiciler emir vermesin)

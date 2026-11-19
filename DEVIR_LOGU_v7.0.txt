@@ -3910,3 +3910,8 @@ v8.626 (dal sade-waypoint) GIRIS DOGRULAMA (kullanici: 'etrafta dolasmazlar mi, 
  - YENI: ESZAMANLI GIRIS 8 sn beklemesinden sonra iceride (insideBuilding >= 0.5) olmayan giris askerine 3 deneme x 6 sn en yakin zemin kat ic noktasina dogrudan doMove (motor yolu kendisi bulur); [ODA] GIRIS DOGRULAMA: iceride X / Y. Gercek kapi yoksa yigilma bekleme 25 -> 8 sn.
  - SINIR: kapali kapi / ulasilamaz buildingPos'ta yine girilemeyebilir (3 deneme sonra LAMBS CQB'ye devredilir); 'girecekler' GARANTI DEGIL, oyunda DENENMEDI; log satirina bak.
 
+v8.627 (dal sade-waypoint) BINA KAYNAGI TANISI (kullanici: 'objeyi zeustan koyduk').
+ - HIPOTEZ: Zeus / createVehicle ile calisma aninda yaratilan bina harita (terrain) objesi degil; AI yol agi (path LOD) ic mekani icermeyebilir -> AI kapiya yigilir ama iceri giremez / dolasir, Door_N_trigger bulunamayabilir (RPT 1a697d94: 'kapi: bina pozisyonu', 'yigilma noktasina varamadi'). KANITLANMADI.
+ - YENI: [ODA] BINA KAYNAGI: harita (terrain) objesi mi / DINAMIK mi (nearestTerrainObjects ile). Davranis degismedi.
+ - SONRAKI (kullanici karari): dinamik binada giris zorlama (ic noktaya isinlama = hile) ya da haritadaki gercek binayi kullanma / 3DEN'de yerlestirme (mission baslangicinda path agi olusur).
+
