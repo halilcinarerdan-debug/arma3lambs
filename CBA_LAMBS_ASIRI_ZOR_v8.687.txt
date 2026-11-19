@@ -138,7 +138,7 @@ force lambs_danger_komutanKisilikWest = "SALDIRGAN";
 force lambs_danger_konusmaAlgi = true;
 force lambs_danger_konusmaM = 260;   // %30 ARTIS (eski 200)
 force lambs_danger_koseIcHassas = false;   // CQB BEKLEME YOK: ev ici kose temkini hassas degil (eski true)
-force lambs_danger_lambsRpgUyum = true;
+force lambs_danger_lambsRpgUyum = false;   // RPG HIZLI KARAR: ELITE kendi roket karari de devrede (eski true)
 force lambs_danger_mevziAgirlik = 1;
 force lambs_danger_mevziHafiza = true;
 force lambs_danger_mevziYariOmur = 1800;
@@ -306,6 +306,18 @@ force lambs_danger_uglGrupAralik = 2;   // grup basina UGL atis araligi sn (vars
 force lambs_danger_fovOlcum = false;   // OLCUM: oyun icin kapali (test turunda true)
 force lambs_danger_perfOlcum = false;   // OLCUM: oyun icin kapali (test turunda true)
 force lambs_danger_coverOlcum = false;   // OLCUM: oyun icin kapali (test turunda true)
+// --- v8.688 YENI: genel bilgi artisi (op modu: yerimizi daha net tahmin etsinler), zikzak, roket karar hizi ---
+force lambs_danger_bilgiArtis = 0.3;   // YENI: bilinen dusmanin bilgisi +%30 (0 = kapali)
+force lambs_danger_bilgiTaban = 1.5;   // YENI: asgari bilgi seviyesi (~yaklasik konum; 4 = tam konum)
+force lambs_danger_bilgiMenzil = 400;   // YENI
+force lambs_danger_bilgiSure = 45;   // YENI: ayni grup + hedef icin artis en cok 45 sn, sonra 135 sn dinlenme (surekli duvar hilesi yok)
+force lambs_danger_bilgiYalnizOyuncu = true;   // YENI: yalniz insan oyuncular hedef (false = tum dusmanlar)
+force lambs_danger_zigzag = true;   // YENI: acik arazide zikzak
+force lambs_danger_zigzagYanMin = 7;   // YENI
+force lambs_danger_zigzagYanMax = 10;   // YENI
+force lambs_danger_zigzagMaxM = 350;   // YENI
+force lambs_danger_roketBirimBekle = 35;   // YENI: asker basina roket bekleme (varsayilan 60)
+force lambs_danger_roketGrupBekle = 10;   // YENI: grup basina roket bekleme (varsayilan 20)
 // LAMBS Danger Eventhandlers
 force lambs_eventhandlers_ExplosionEventHandlerEnabled = true;
 force lambs_eventhandlers_ExplosionReactionTime = 9;

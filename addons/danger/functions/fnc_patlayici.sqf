@@ -483,7 +483,7 @@ lambs_danger_patlayiciDon = {
                     private _ls = secondaryWeapon _u;
                     if (!isNull _enIyi && {_ls isNotEqualTo ""} && {(insideBuilding _u) < 0.5} && {(getNumber (configFile >> "CfgWeapons" >> _ls >> "type")) == 4} && {(_u ammo _ls) > 0}
                         && {_enM >= _roketMin} && {_enM <= 300} && {_binada || {_kumeN >= 2} || {_kapali} || {_baski && {_kumeN >= 1}} || {_pusu} || {_enM <= 60}}
-                        && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > 60} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > 20}) then {
+                        && {(speed _u) < 2} && {(time - (_u getVariable [QGVAR(roketT), -999])) > (missionNamespace getVariable ["lambs_danger_roketBirimBekle", 60])} && {(time - (_g getVariable [QGVAR(roketGT), -999])) > (missionNamespace getVariable ["lambs_danger_roketGrupBekle", 20])}) then {
                         private _dostYakin = (_enIyi nearEntities ["CAManBase", 20]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                         private _arkada = ((_u nearEntities ["CAManBase", 8]) findIf {_x isNotEqualTo _u && {alive _x} && {(_taraf getFriend (side (group _x))) >= 0.6} && {((abs (((_u getRelDir _x) + 180) mod 360 - 180)) >= 60)}}) >= 0;
                         if (!_dostYakin && {!_arkada}) then {
