@@ -3920,3 +3920,9 @@ v8.628 (dal sade-waypoint) EV ICI ANIMASYON HIZI (kullanici: 'animasyonlari cok 
  - DEGISIKLIK: (a) YENI CBA lambs_danger_cqbAnimEk (0-80, varsayilan 30; 'ELITE ozellik'): bina supurmesinde bina icindeki AI'ya genel animasyon artisinin USTUNE carpan (x1.30). (b) moveAssist: supurmede bina icinde unitPos Middle zorlamasi, baski < 0.4 ve dusman >= 6 m ise UP yapilir (1 sn'de bir).
  - SINIR: LAMBS taskCQB unitPos'u kendisi tekrar yazabilir (1 sn'lik yaris); setAnimSpeedCoef yuksek degerde kayma / duvara gomulme riski; oyunda DENENMEDI. Zhen Jao ayni anda baygin (anim unconsciousfacedown 7:03:14): bomba atilmadi (BOMBA-IZI yok) -> neden baska (oyuncu / ACE).
 
+v8.629 (dal sade-waypoint) LAMBS taskCQB ETKISI KONTROLU (kullanici: 'ben vurdum, lambs cqb etkileyip etkilemedigini check et'; RPT 035e0def).
+ - KANIT (zaman sirasi): 7:02:58 taskCQB'den ONCE: unitPos Up, KAPALI AI [], hiz 16 km/sa, anim amovpercm* (ayakta). 7:03:01 'LAMBS CQB (taskCQB) basladi'. 7:03:02 (1 sn sonra) DORT askerde: unitPos Middle, durus CROUCH, KAPALI AI [AUTOCOMBAT, SUPPRESSION], hiz 0-4 km/sa, anim amovpknlm* (comelme). ELITE'in cqbReflex / cqbCevik'i o anda Alpha 1-2'ye dokunmadi ([CQB] refleks satirlari yalniz HQ grubu), buildingClearRun'in kendi MIDDLE satirlari yalniz ELITE oda dongusunde (LAMBS dalinda _adim = 0). SONUC: yavaslik LAMBS taskCQB kaynakli (comelme + AUTOCOMBAT / SUPPRESSION kapama); LAMBS kaynak kodu elde degil, dogrudan kanit RPT zaman sirasi.
+ - DEGISIKLIK: v8.628'deki 'unitPos Middle -> UP zorla' kaldirildi (LAMBS geri yazarsa comelme / ayakta gecisi titreme + yavaslik yapar). cqbAnimEk (ev ici ek animasyon hizi, varsayilan 30) KALDI: comelme yurumesinin hizini telafi eder.
+ - ONERI: yavaslik yetmezse cqbAnimEk 40-50'ye cikar; ya da cqbMotor = ELITE (comelmesiz oda dongusu, daha yavas karar) ya da LAMBS CQB'yi yalniz giris sonrasi kisa sure calistir.
+ - Zhen Jao'yu oyuncu vurdu (kullanici): baygin = kendi bombasi degil.
+
