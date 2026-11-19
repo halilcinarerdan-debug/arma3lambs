@@ -70,8 +70,8 @@ if (_acik) then {
 } else {
     _r = if (_fire <= 0) then {0.5} else { ((_fire / 2) max 0.2) min 0.7 };
 };
-// v8.654 GENIS ETEKLI AGAC (ladin t_picea2s: VIEW 1.0 m genisligi 2.9 m, dal eteklik): govde yaricapi yerine eteklik yaricapinin %60'i (<= 1.5 m): asker govdeye degil yaprak eteginin ICINE / kenarina oturur
-if (_acik && {_v10 >= 1.5}) then { _r = (((_v10 / 2) * 0.6) max _r) min 1.5; };
+// v8.655 GENIS GEOMETRILI AGAC (ladin t_picea2s: RPT 77e57bce FIRE 5.6 m / GEOM 3.0 m / VIEW 0.0 m; ekran goruntusu: asker dal etegi geometrisinin ~1 m DISINDA yatiyor - geometriye giremiyor): GEOM genisligi >= 1.5 m ise hedef govde degil GEOMETRI KENARI: yaricap = GEOM / 2 + 0.1 (<= 2.5 m)
+if (_acik && {_geom >= 1.5}) then { _r = ((_geom / 2) + 0.1) min 2.5; };
 private _p = [_r, _fire, _geom, _v04, _v10, _v16, _fire >= 0.15];
 private _n = (lambs_danger_agacProfilH getOrDefault [_anahtar + "#n", 0]) + 1;
 lambs_danger_agacProfilH set [_anahtar + "#n", _n];
