@@ -69,7 +69,7 @@ private _talepler = ((_g getVariable [QEGVAR(main,coverClaims), []]) select {(ti
 private _dostPoz = ((_u nearEntities ["CAManBase", _yar + 14]) select {_x isNotEqualTo _u && {alive _x} && {(side group _x) isEqualTo (side group _u)}}) apply {getPosATL _x};
 private _doluMu = {
     params ["_pt", "_r"];
-    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min 3)}) >= 0}
+    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min (missionNamespace getVariable ["lambs_danger_siperDostAralik", 4.5]))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
 };
 // govde genisligi testi: istenen durus yuksekliginde hedef noktanin +-0.25 m yanindan da isin nesneye carpmali
 private _govdeKapali = {
@@ -309,6 +309,9 @@ private _nesneGit = {
     // v8.648 SIPERDE ALCAK DURUS (kullanici: 'asil ona bak'; RPT 949d7eff: dusman 106-190 m, secilen agac / nesne arkasi [ACIK-SIPER] 'durus UP' hep ayakta; CBA siperDusuk (kullanici 2) YALNIZ coverHug'da uygulaniyordu, acikSiper'in nesne dalinda yoktu):
     //   gizli en yuksek durus (_objDurus) CBA siperDusuk kademe (0-2) alcaltilir (UP -> MIDDLE -> DOWN), baski > 0.35 ise bir kademe daha; son durus setUnitPosWeak (ates gerekirse motor kalkar)
     private _dusukK = ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0) min 2;
+    // v8.656 DURUS CESITLILIGI (kullanici: 'dediklerini yap'; Altis goruntuleri: HEPSI yatik; egitimli tim karisik durur): baski yoksa (<= 0.35) ve MG degilse askerlerin CBA siperDurusCesit orani (varsayilan %50) bir kademe YUKSEK (yatma -> comelme) durur; kisiye bagli sabit secim (birimId)
+    private _cesit = (missionNamespace getVariable ["lambs_danger_siperDurusCesit", 0.5]) max 0 min 1;
+    if ((getSuppression _u) <= 0.35 && {_dusukK > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _cesit}) then { _dusukK = _dusukK - 1; };
     if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
     _u setUnitPos "UP";
