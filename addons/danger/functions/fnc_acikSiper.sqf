@@ -312,6 +312,7 @@ private _nesneGit = {
     _u setVariable [QGVAR(taktikKilit), time + 15];
     _u forceSpeed -1;
     _u setSpeedMode "FULL";
+    _u setVariable [QGVAR(siperDoMoveT), time];   // v8.707: ters donus kaynak atfi (durumLog)
     _u doMove _obj;
     // v8.641 SIPER NOKTASINA OTUR (kullanici: 'arada 2 metre var', RPT 47dde7ed: [SIPER-YAPIS] YAPISTI satiri HIC yok -> coverHug kayma kolu bu askerlerde calismiyor; asker doMove toleransinda (~1-2 m) duruyor):
     //   bu dalin KENDI tamamlayicisi: hareket 1.2 sn sonra baslar, asker durdugunda (< 0.8 m/sn, 8 m icinde) ya da 12 sn sonra, hedef hala ayni siper noktasiysa 0.15-6 m kalan mesafe yumusak kayarak (ayak hatti GEOM acik) kapatilir; hat kapaliysa (govde araya girer) doMove tekrar
@@ -341,6 +342,7 @@ private _nesneGit = {
                     diag_log format ["[SIPER-OTUR] %1 | %2 | siper noktasina %3 m kaldi -> oturtuldu", groupId (group _a), name _a, _d0 toFixed 2];
                 };
             } else {
+                _a setVariable [QGVAR(oturDoMoveT), time];   // v8.707: siper noktasina OTUR adiminin kendi doMove'u (hat kapali: govde araya girer); ters donus kaynak atfi (durumLog)
                 _a doMove _pt;
             };
         } else {
@@ -450,6 +452,7 @@ _u setVariable [QGVAR(taktikKilit), time + 15];
 _u forceSpeed -1;
 _u setSpeedMode "FULL";
 _u setUnitPos "AUTO";
+_u setVariable [QGVAR(siperDoMoveT), time];   // v8.707: ters donus kaynak atfi (durumLog)
 _u doMove _en_iyi;
 // v8.354: atis pozisyonuna varinca durus + dusmana bak (pasif beklemesin); 45 sn sonra serbest
 if (_atisVar) then {

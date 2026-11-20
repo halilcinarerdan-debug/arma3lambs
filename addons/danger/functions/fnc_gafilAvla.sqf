@@ -179,6 +179,8 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                         _g setCombatMode "RED";
                         _g setBehaviour "COMBAT";
                         _g reveal [_p, 2.5];
+                        // v8.707 TEMAS BAYRAGI (RPT 87f87da8: gafil avlama sonrasi grup COMBAT + RED kaldi ama QGVAR(contact) HIC yazilmadi -> [ANOMALI] TEMAS-YOK-COMBAT 4 satir; temasSonrasi / combatGevset contact > 0 sarti aradigi icin grubu hic gevsetmedi, patlayici modulu da 'temasta degil' saydi): LAMBS fnc_contact ile ayni deger (+600 sn)
+                        _g setVariable [QGVAR(contact), ((time + 600) max (_g getVariable [QGVAR(contact), 0]))];
                         { if (alive _x) then { _x doTarget _p; _x doFire _p; }; } forEach _us;
                     } else {
                         _g setCombatMode _eskiCM;

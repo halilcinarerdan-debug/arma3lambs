@@ -13,7 +13,8 @@
  *   GRUP-EZILMIS     : askerlerin >= %50'si baski >= 0.85, > 10 sn
  *   BOSTA-HAREKET    : temas > 30 sn yok, lider duruyor ama >= 2 asker yuruyor (> 10 sn)  -> formasyonda surekli hareket suphesi (gorev / buddy / rol istasyonu zamanlari ile)
  *   FORMASYON-FELC   : temas var + LINE / COLUMN / FILE / ECH formasyonunda >= %70 asker ayakta ve duruyor (> 20 sn) -> formasyon felci suphesi
- *   TEMAS-YOK-COMBAT : temas > 60 sn yok ama lider COMBAT ve taktik bayragi yok (uzun sure COMBAT'ta kalma)
+ *   TEMAS-YOK-COMBAT : temas bayragi kurulmus, > 60 sn once bitmis ama lider COMBAT ve taktik bayragi yok (uzun sure COMBAT'ta kalma)
+ *   COMBAT-HIC-TEMAS : (v8.707) temas bayragi HIC kurulmamis ama lider COMBAT (tasarimci COMBAT'i / bayraksiz cikis)
  * Her 60 sn: [SAGLIK] ozet satiri (grup / asker sayisi, anomali sayilari). Kapatma: lambs_danger_saglikOff = true.
  *
  * Arguments: None
@@ -190,8 +191,16 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             };
 
             // TEMAS-YOK-COMBAT
-            if (!_bayrakVar && {(_g getVariable [QGVAR(contact), 0]) < (time - 60)} && {(behaviour _l) isEqualTo "COMBAT"}) then {
-                ["TEMAS-YOK-COMBAT", _g, format ["temas %1 sn once bitti ama lider COMBAT | combatMode:%2 | formasyon:%3", round (time - (_g getVariable [QGVAR(contact), 0])), combatMode _g, formation _g]] call _isaretle;
+            // v8.707: contact == 0 = temas bayragi HIC kurulmadi (RPT 87f87da8: 'temas 549 / 990 / 1080 / 1185 sn once bitti' = gorev suresinin kendisiydi, yanlis mesaj). Tasarimcinin kurdugu COMBAT ya da bayraksiz cikis (gafil avlama v8.707'ye kadar) ayri anomali; temasSonrasi / combatGevset bunlara dokunmaz (tasarimci istegi)
+            if (!_bayrakVar && {(behaviour _l) isEqualTo "COMBAT"}) then {
+                private _ct = _g getVariable [QGVAR(contact), 0];
+                if (_ct <= 0) then {
+                    ["COMBAT-HIC-TEMAS", _g, format ["temas bayragi hic kurulmadi (tasarimci COMBAT'i ya da bayraksiz cikis) | combatMode:%1 | formasyon:%2", combatMode _g, formation _g]] call _isaretle;
+                } else {
+                    if (_ct < (time - 60)) then {
+                        ["TEMAS-YOK-COMBAT", _g, format ["temas %1 sn once bitti ama lider COMBAT | combatMode:%2 | formasyon:%3", round (time - _ct), combatMode _g, formation _g]] call _isaretle;
+                    };
+                };
             };
         } forEach allGroups;
 

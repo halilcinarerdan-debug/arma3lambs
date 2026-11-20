@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.706"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.707"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -315,15 +315,18 @@ def kabul(path):
     if eg:
         st = sum(int(m.group(1)) for l in eg for m in [re.search(r"MOVE -> STOP (\d+)", l)] if m)
         tr = sum(int(m.group(1)) for l in eg for m in [re.search(r"ters donus \(.*?\) (\d+)", l)] if m)
-        oran = 100.0 * tr / max(st, 1)
+        # v8.707: 'siperOtur' = acikSiper'in KENDI siper-noktasina-otur doMove'u (kasitli); orana katilmaz, ham sayi yine yazilir (eski RPT'lerde alan yok = 0)
+        kas = sum(int(m.group(1)) for l in eg for m in [re.search(r"siperOtur (\d+) \(kasitli\)", l)] if m)
+        oran_ham = 100.0 * tr / max(st, 1)
+        oran = 100.0 * max(tr - kas, 0) / max(st, 1)
         son = re.sub(r"^.*\[EMIR-GIDIP-GELME\] ", "", max(eg, key=lambda x: len(x)))[:230]
-        ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (%.0f%%) | %s" % (st, tr, oran, son))
+        ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (ham %.0f%%) - kasitli siper-oturma %d = %d (%.0f%%) | %s" % (st, tr, oran_ham, kas, max(tr - kas, 0), oran, son))
         td = [l for l in L if "[EMIR-TERS-DONUS]" in l]
         gv = collections.Counter(re.search(r"g:([^,\]]+)", l).group(1) for l in td if re.search(r"g:([^,\]]+)", l))
         if td:
             # kaynak siniflamasi (imza belirtecleri): acikSiper = siper arama mikro-hareketi, RET = geri cekilme sirasinda, digeri
-            sinif = collections.Counter(("RET" if "RET" in im.split(",") else ("acikSiper" if "acikSiper" in im else "diger")) for im in [re.search(r"imza \(STOP aninda\): ([^|]+)", l).group(1) for l in td if re.search(r"imza \(STOP aninda\): ([^|]+)", l)])
-            ekle("  ters donus kaynaklari", "BILGI", "%d satir | RET (geri cekilme sirasinda): %d | acikSiper (siper arama mikro-hareketi): %d | diger: %d | gorev dagilimi %s | ornek: %s" % (len(td), sinif["RET"], sinif["acikSiper"], sinif["diger"], dict(gv.most_common(4)), re.sub(r"^.*\[EMIR-TERS-DONUS\] ", "", td[0])[:150]))
+            sinif = collections.Counter(("RET" if "RET" in im.split(",") else ("siperOtur" if "kaynak:siperOtur" in im else ("acikSiper" if "acikSiper" in im else "diger"))) for im in [re.search(r"imza \(STOP aninda\): ([^|]+)", l).group(1) for l in td if re.search(r"imza \(STOP aninda\): ([^|]+)", l)])
+            ekle("  ters donus kaynaklari", "BILGI", "%d satir | RET (geri cekilme sirasinda): %d | siperOtur (kasitli, v8.707+): %d | acikSiper (diger siper arama): %d | diger: %d | gorev dagilimi %s | ornek: %s" % (len(td), sinif["RET"], sinif["siperOtur"], sinif["acikSiper"], sinif["diger"], dict(gv.most_common(4)), re.sub(r"^.*\[EMIR-TERS-DONUS\] ", "", td[0])[:150]))
     else:
         ekle("EMIR GIDIP-GELME", "VERI YOK", "[EMIR-GIDIP-GELME] yok (v8.684+ ve temasli grup gerekir)")
 
@@ -351,7 +354,8 @@ def kabul(path):
     else:
         ekle("DURUS DISIPLINI", "VERI YOK", "hareketsiz ayakta asker olusmadi (temas + durma gerekir)")
     tyc = len([1 for l in L if "[ANOMALI] TEMAS-YOK-COMBAT" in l])
-    ekle("COMBAT'TA KALMA", "GECTI" if tyc == 0 else "KALDI", "TEMAS-YOK-COMBAT anomali:%d | temas-sonrasi gevseme:%d" % (tyc, len([1 for l in L if "[TEMAS-SONRASI]" in l and "sessizlik" in l and "baslatildi" not in l])))
+    hic = len([1 for l in L if "[ANOMALI] COMBAT-HIC-TEMAS" in l])
+    ekle("COMBAT'TA KALMA", "GECTI" if tyc == 0 else "KALDI", "TEMAS-YOK-COMBAT anomali:%d | temas-sonrasi gevseme:%d | COMBAT-HIC-TEMAS (bayrak hic kurulmadi, v8.707+): %d" % (tyc, len([1 for l in L if "[TEMAS-SONRASI]" in l and "sessizlik" in l and "baslatildi" not in l]), hic))
     yy = len([1 for l in L if "[ANOMALI] YURUMUYOR" in l])
     ekle("YURUMUYOR ANOMALISI", "GECTI" if yy <= 3 else "KONTROL", "%d satir (kisa acik-siper / bomba kacisi anlari normal; kalici takilma degil)" % yy)
 
