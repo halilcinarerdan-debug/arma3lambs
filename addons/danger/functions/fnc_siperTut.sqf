@@ -6,7 +6,7 @@
  * 'lider duruyor, askerler FORMATION PLANNED ile liderin yanina yuruyor') geri doner -> siperden cikip acikta yuruyor, tekrar temas / acikta tespiti -> yeniden siper = GIT-GEL.
  * Bu fonksiyon siper noktasina varinca (cagiran, varis callback'inde) askeri DURDURUR (doStop: ates etmeye devam eder), taktik kilidini uzatir (diger ELITE katmanlari tasimaz) ve
  *   temas bitince (8 sn) / 45 sn sonra / kosucu (forceMove) olunca ya da emir verilince serbest birakir (doFollow). Bounding yeni sicrama verirse (moveTo / doMove) bu bekleme dogal olarak ezilir.
- * v8.715: bekleme suresi CBA lambs_danger_siperTutSn (15-300 sn, varsayilan 45).
+ * v8.715: bekleme suresi CBA lambs_danger_siperTutSn (15-300 sn, varsayilan 45). v8.716: 'temas bitince' payi CBA lambs_danger_siperTutTemasS (0-120 sn, varsayilan 8).
  * Kapatma: lambs_danger_siperTutOff = true.
  *
  * Arguments:
@@ -31,7 +31,7 @@ doStop _u;
 [{
     params ["_uu", "_b"];
     !alive _uu || {(_uu getVariable [QGVAR(siperTutBit), 0]) isNotEqualTo _b} || {time >= _b}
-        || {((group _uu) getVariable [QGVAR(contact), 0]) < (time - 8)} || {(_uu getVariable [QGVAR(forceMove), false]) isEqualTo true}
+        || {((group _uu) getVariable [QGVAR(contact), 0]) < (time - (((missionNamespace getVariable ["lambs_danger_siperTutTemasS", 8]) max 0) min 120))} || {(_uu getVariable [QGVAR(forceMove), false]) isEqualTo true}   // v8.716: temas bitis payi CBA siperTutTemasS (eskiden sabit 8 sn)
 }, {
     params ["_uu", "_b"];
     if (alive _uu && {(_uu getVariable [QGVAR(siperTutBit), 0]) isEqualTo _b}) then {
@@ -45,6 +45,6 @@ doStop _u;
 }] call CBA_fnc_waitUntilAndExecute;
 if ((missionNamespace getVariable ["lambs_danger_siperTutLogN", 0]) < 30) then {
     missionNamespace setVariable ["lambs_danger_siperTutLogN", (missionNamespace getVariable ["lambs_danger_siperTutLogN", 0]) + 1];
-    diag_log format ["[SIPER-TUT] %1 | %2 | siperde bekliyor (doStop; temas bitince / 45 sn serbest) | xy %3", groupId (group _u), name _u, (getPosATL _u) select [0, 2] apply { round _x }];
+    diag_log format ["[SIPER-TUT] %1 | %2 | siperde bekliyor (doStop; temas bitince (CBA siperTutTemasS) / siperTutSn sonra serbest) | xy %3", groupId (group _u), name _u, (getPosATL _u) select [0, 2] apply { round _x }];
 };
 true
