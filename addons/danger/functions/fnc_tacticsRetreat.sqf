@@ -383,6 +383,7 @@ if (EGVAR(main,debug_functions)) then {
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
                     _varis pushBack [_x, _p, getPosATL _x, time, 0];
+                    _x setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                     _x doMove _p;
                 };
             } forEach _cift;
@@ -479,6 +480,7 @@ if (EGVAR(main,debug_functions)) then {
                     _b setBehaviour "COMBAT";
                     _b setVariable [QGVAR(forceMove), true];
                     _b setUnitPos "UP";
+                    _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                     _b doMove (_x select 1);
                     _x set [2, getPosATL _b];
                     _x set [3, time];
@@ -526,6 +528,7 @@ if (EGVAR(main,debug_functions)) then {
                         _b setUnitPos "UP";
                         _b forceSpeed -1;
                         doStop _b;
+                        _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _b doMove (_x select 1);
                     };
                 };
@@ -543,6 +546,7 @@ if (EGVAR(main,debug_functions)) then {
                         _bR enableAI "PATH";
                         _bR enableAI "MOVE";
                         _bR forceSpeed -1;
+                        _bR setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _bR doMove (_x select 1);
                         if ((missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) < 20) then {
                             missionNamespace setVariable ["lambs_danger_retKorumaN", (missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) + 1];
@@ -611,6 +615,7 @@ if (EGVAR(main,debug_functions)) then {
                                 doStop _b;
                                 sleep 0.3;
                             };
+                            _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                             _b doMove (_x select 1);
                             _x set [3, time];
                         };
@@ -716,6 +721,7 @@ if (EGVAR(main,debug_functions)) then {
                     private _cp = (_cv select 0) select 0;
                     if ((getSuppression _x) < 0.85 && {(_x distance2D _cp) > 3}) then {
                         _x setVariable [QGVAR(forceMove), true];
+                        _x setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _x doMove _cp;
                     };
                 };
