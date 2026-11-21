@@ -8,6 +8,7 @@
  *   BEKLEME BITIS (gafil avla = ates serbest, COMBAT + RED + oyuncu reveal 2.5 + hep birden doTarget / doFire): (a) TETIK: oyuncu gruba <= gafilTetikM (70 m) (olum alani); (b) oyuncu BAKISI ESLESTI >= 1 sn; (c) oyuncu ates etti / ates sesi duyuldu / baski / kayip;
  *   sessiz bitis (eski combatMode / behaviour geri, ates YOK): sure doldu (gafilSure 150 sn) ya da oyuncu 45 sn bilinmiyor. Grup basina gafilBekle (240 sn) bekleme.
  * ATLANIR: geri cekilme / temas kes / kacis / bounding / taktik / supurme / pusu / sniper / sahte cekilme, LAMBS gorevi / TUTAN waypoint, binada, oyuncu liderli grup, bilinen AI dusman (oyuncu disi) 350 m icinde.
+ * v8.710 KOMSU SINYALI: bir manga gafil avlama ates acinca (tetik / bakis / ates) komsu mangalar (ayni taraf, gafilKomsuM, varsayilan 400 m) bekleme icindeyse HEMEN acar (neden 'komsu'); zincirleme yok. CBA gafilKomsu / gafilKomsuM.
  * CBA: lambs_danger_gafilAvla (varsayilan KAPALI), gafilAci, gafilMenzil, gafilTetikM, gafilSure, gafilBekle, gafilMinAsker. Log: [GAFIL] (ilk 25) + [GAFIL-OZET] 60 sn.
  *
  * Arguments: None
@@ -21,7 +22,7 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["basladi", 0], ["tetik", 0], ["bakis", 0], ["ates", 0], ["sure", 0], ["kayboldu", 0], ["iptal", 0]];
+    private _say = createHashMapFromArray [["basladi", 0], ["tetik", 0], ["bakis", 0], ["ates", 0], ["sure", 0], ["kayboldu", 0], ["iptal", 0], ["komsu", 0]];
     private _ozetT = time + 60;
     private _red = createHashMap;   // v8.704: aday grubun NEDEN gafil beklemeye girmedigi sayaclari
     private _durumT = time + 20;
@@ -33,7 +34,7 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
             private _t = 0;
             { _t = _t + (_say get _x); } forEach (keys _say);
             if ((count _red) > 0) then { diag_log format ["[GAFIL-OZET] 60 sn: aday grup-tur ret nedenleri: %1", (keys _red) apply { format ["%1=%2", _x, _red get _x] }]; _red = createHashMap; };
-            if (_t > 0) then { diag_log format ["[GAFIL-OZET] 60 sn: bekleme basladi %1 | bitis: tetik (olum alani) %2, bakis eslesti %3, ates / baski / kayip %4, sure doldu %5, oyuncu kayboldu %6, iptal %7", _say get "basladi", _say get "tetik", _say get "bakis", _say get "ates", _say get "sure", _say get "kayboldu", _say get "iptal"]; };
+            if (_t > 0) then { diag_log format ["[GAFIL-OZET] 60 sn: bekleme basladi %1 | bitis: tetik (olum alani) %2, bakis eslesti %3, ates / baski / kayip %4, sure doldu %5, oyuncu kayboldu %6, iptal %7, KOMSU SINYALI %8", _say get "basladi", _say get "tetik", _say get "bakis", _say get "ates", _say get "sure", _say get "kayboldu", _say get "iptal", _say get "komsu"]; };
             { _say set [_x, 0]; } forEach (keys _say);
         };
         if !(missionNamespace getVariable ["lambs_danger_gafilAvla", false]) then { continue };
@@ -137,6 +138,10 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                     if ((count ((units (group _p)) select {alive _x})) > ((missionNamespace getVariable ["lambs_danger_gafilSquadMax", 4]) max 1)) exitWith { _sebep = "iptal"; };   // oyuncu squadi buyudu (AI dostlar katildi): bekleme biter
                     private _canli = _us select {alive _x};
                     if (_canli isEqualTo [] || {!alive _p}) exitWith { _sebep = "iptal"; };
+                    // v8.710 KOMSU MANGA SINYALI (mangalar arasi koordinasyon; RPT 87f87da8 / 1e81987e: 3 manga ayni sn'de acti ama yalniz oyuncu ates ettigi icin): ayni taraftan BASKA bir manga gafil avlama ates acmaya basladiysa (tetik / bakis / ates; zincirleme degil) ve bu manga komsu menzildeyse
+                    //   (gafilKomsuM, 400 m) bekleme hemen biter ve hep birden acar ('komsu'); sinyal 10 sn gecerli, yalniz bu mangaya bekleme basladiktan SONRA gelen sinyaller sayilir. CBA gafilKomsu.
+                    private _sig = missionNamespace getVariable ["lambs_danger_gafilSinyal", []];
+                    if (_sig isNotEqualTo [] && {missionNamespace getVariable ["lambs_danger_gafilKomsu", true]} && {(_sig select 0) > _bas} && {(time - (_sig select 0)) < 10} && {(_sig select 2) isEqualTo (side _g)} && {(_sig select 3) isNotEqualTo (groupId _g)} && {((getPosATL (leader _g)) distance2D (_sig select 1)) <= ((missionNamespace getVariable ["lambs_danger_gafilKomsuM", 400]) max 100)}) exitWith { _sebep = "komsu"; };
                     // ates / baski / kayip / ates sesi
                     private _bsk = 0;
                     { _bsk = _bsk max (getSuppression _x); } forEach _canli;
@@ -165,7 +170,9 @@ diag_log "[GAFIL] gafil avlama (oyuncu farkinda degilse sis yok, botlar hazirda 
                     if ((time - _sonGor) > 45) exitWith { _sebep = "kayboldu"; };
                 };
                 // ---- BITIS
-                private _ates = _sebep in ["tetik", "bakis", "ates"];
+                private _ates = _sebep in ["tetik", "bakis", "ates", "komsu"];
+                // v8.710: birincil nedenle (komsu degil) acan manga komsulara sinyal verir (zincirleme yayilma yok)
+                if (_sebep in ["tetik", "bakis", "ates"] && {!isNull _g} && {!isNull (leader _g)}) then { missionNamespace setVariable ["lambs_danger_gafilSinyal", [time, getPosATL (leader _g), side _g, groupId _g]]; };
                 {
                     if (alive _x) then {
                         _x setVariable [QGVAR(taktikKilit), nil];

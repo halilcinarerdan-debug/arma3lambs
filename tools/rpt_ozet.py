@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.709"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.710"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -429,6 +429,16 @@ def kabul(path):
         ekle("UGL SIKLIGI", "GECTI" if dk <= 6 else "KONTROL", "%d karar, %d atici, en sik atici %.1f karar/dk, en yakin hedef %d m (uglGrupAralik / uglCooldown CBA ile ayarlanir)" % (sum(len(v) for v in ugl.values()), len(ugl), dk, mn))
     else:
         ekle("UGL SIKLIGI", "VERI YOK", "UGL karari yok")
+
+    # --- 8b) MANGALAR ARASI KOORDINASYON (v8.710; yalniz olcum: kac modul gercekten calisti)
+    ist = len([1 for l in L if "[HQ-ISTIHBARAT] " in l and "muhbir " in l])
+    kan = len([1 for l in L if "[HQ-KANAT]" in l and "EMIR:" in l])
+    des = len([1 for l in L if "[HQ-DESTEK]" in l and "EMIR" in l])
+    fei = len([1 for l in L if "[HQ-FEINT]" in l and "EMIR" in l])
+    tak = len([1 for l in L if "[HQ-TAKVIYE]" in l and "EMIR" in l])
+    kom = len([1 for l in L if "[GAFIL]" in l and "BEKLEME BITTI" in l and "neden: komsu" in l])
+    nd = [m.group(1) for l in L for m in [re.search(r"\[HQ-DESTEK-OZET\].*?(musait destek grubu yok:\d+)", l)] if m]
+    ekle("MANGALAR ARASI KOORD.", "BILGI", "istihbarat raporu %d | kanat emri %d | destek atesi emri %d | feint %d | takviye %d | gafil KOMSU sinyali %d | destek 'musait' yok sayaci (son): %s" % (ist, kan, des, fei, tak, kom, nd[-1] if nd else "-"))
 
     # --- 9) senaryo kapsami (tetiklenmeyen ozellikler)
     for ad, tag, ipucu in [
