@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.711"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.712"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -440,6 +440,14 @@ def kabul(path):
     kom = len([1 for l in L if "[GAFIL]" in l and "BEKLEME BITTI" in l and "neden: komsu" in l])
     nd = [m.group(1) for l in L for m in [re.search(r"\[HQ-DESTEK-OZET\].*?(musait destek grubu yok:\d+)", l)] if m]
     ekle("MANGALAR ARASI KOORD.", "BILGI", "istihbarat raporu %d | kanat emri %d | destek atesi emri %d (temasli B: %d) | feint %d | takviye %d | gafil KOMSU sinyali %d | destek 'musait' yok sayaci (son): %s" % (ist, kan, des, des_t, fei, tak, kom, nd[-1] if nd else "-"))
+
+    # --- 8c) ACRE2 / OYUNCU KONUSMASI (v8.712; yalniz olcum)
+    acre = any("[KONUSMA] ACRE2 algilandi" in l for l in L)
+    k_olay = len([1 for l in L if "(OYUNCU) konustu" in l])
+    k_duy = [l for l in L if "[KONUSMA]" in l and "konusma duyuldu" in l and "konusan OYUNCU" in l]
+    k_mes = [int(m.group(1)) for l in k_duy for m in [re.search(r"\| (\d+) m \(etkin", l)] if m]
+    k_ozet = sum(int(m.group(1)) for l in L for m in [re.search(r"OYUNCU konusmasi: (\d+)", l)] if m)
+    ekle("OYUNCU KONUSMASI (ACRE2)", "BILGI", "ACRE2 algilandi: %s | oyuncu konusma olayi (log): %d | duyuldu (log satiri): %d%s | 60 sn ozetlerinde oyuncu konusmasi duyulma: %d" % ("evet" if acre else "hayir", k_olay, len(k_duy), (" (mesafe %d-%d m)" % (min(k_mes), max(k_mes))) if k_mes else "", k_ozet))
 
     # --- 9) senaryo kapsami (tetiklenmeyen ozellikler)
     for ad, tag, ipucu in [

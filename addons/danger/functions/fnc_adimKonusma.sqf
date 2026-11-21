@@ -14,6 +14,7 @@
  *    (>= 0 = bir kanalda KONUSUYOR; surume bagli, test edilmeli) kullanilir. ACRE2'de konusma SES SEVIYESI menzili olcekler: ses egrisi katsayisi linearConversion [0,1,seviye,0.1,1.3] / 0.7 (fisilti kisa, bagirma uzun; telsizde seviye -0.25);
  *    sonuc lambs_danger_konusmaBit (serverTime bitis) olarak HERKESE yayilir. Baska bir mod / betik ayni degiskeni setVariable ile verebilir: unit setVariable ["lambs_danger_konusmaBit", serverTime + 2, true].
  *    Acilista [KONUSMA] komut denemesi satiri hangi yolun kullanildigini yazar.
+ * v8.712: INSAN oyuncunun konusmasi STEALTH davranisindan etkilenmez (yalniz bot callout'u STEALTH'te susar); 60 sn ozetinde 'OYUNCU konusmasi' duyulma sayisi.
  * Kapatma: CBA botAdim / konusmaAlgi.  Log: [ADIM-BOT] / [KONUSMA] (ilk 30 + 60 sn ozeti [ADIM-KONUSMA-OZET]).
  *
  * Arguments: None
@@ -75,7 +76,7 @@ if (hasInterface) then {
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["adim", 0], ["konusma", 0], ["olay", 0], ["enYakin", 1e9]];
+    private _say = createHashMapFromArray [["adim", 0], ["konusma", 0], ["olay", 0], ["oyuncu", 0], ["enYakin", 1e9]];
     private _ozetT = time + 60;
     private _hizTablo = [["road", 1.3], ["conc", 1.3], ["asph", 1.3], ["rock", 1.3], ["stone", 1.3]];
     private _davK = createHashMapFromArray [["CARELESS", 0.5], ["SAFE", 0.8], ["AWARE", 1], ["COMBAT", 1.1], ["STEALTH", 1.2]];
@@ -93,7 +94,8 @@ if (hasInterface) then {
         if (_konAcik) then {
             {
                 private _s = _x;
-                if ((behaviour _s) isEqualTo "STEALTH" || {!alive _s} || {(lifeState _s) in ["INCAPACITATED", "UNCONSCIOUS"]} || {[_s] call FUNC(teslimMi)}) then { continue };   // v8.581: teslim olan konusma kaynagi degil
+                // v8.712: INSAN oyuncunun gercek sesi (ACRE2 / TFAR / vanilla) STEALTH davranisindan etkilenmez (STEALTH yalniz bot callout'unu susturur)
+                if (((behaviour _s) isEqualTo "STEALTH" && {!isPlayer _s}) || {!alive _s} || {(lifeState _s) in ["INCAPACITATED", "UNCONSCIOUS"]} || {[_s] call FUNC(teslimMi)}) then { continue };   // v8.581: teslim olan konusma kaynagi degil
                 private _sSide = side group _s;
                 if (_sSide isEqualTo civilian) then { continue };
                 private _sPos = getPosATL _s;
@@ -135,6 +137,7 @@ if (hasInterface) then {
                     };
                     _tepki = _tepki + 1;
                     _say set ["konusma", (_say get "konusma") + 1];
+                    if (isPlayer _s) then { _say set ["oyuncu", (_say get "oyuncu") + 1]; };
                     if (_logN < 30) then {
                         _logN = _logN + 1;
                         diag_log format ["[KONUSMA] %1 -> %2 | %3 m (etkin %4) | konusma duyuldu | bilgi %5 | konusan %6", name _s, groupId _g, round _d, round _dEtkin, _lvl toFixed 2, ["bot", "OYUNCU"] select (isPlayer _s)];
@@ -198,9 +201,9 @@ if (hasInterface) then {
         if (time > _ozetT) then {
             _ozetT = time + 60;
             if (((_say get "adim") + (_say get "konusma") + (_say get "olay")) > 0) then {
-                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: CQB sessiz (el isareti) %5 / %6 m | bot ayak sesi duyulma %1 | konusma olayi %2 (en yakin dusman %3 m) | konusma duyulma %4", _say get "adim", _say get "olay", if ((_say get "enYakin") > 399) then {">400"} else {str (round (_say get "enYakin"))}, _say get "konusma", missionNamespace getVariable ["lambs_danger_cqbSessiz", true], missionNamespace getVariable ["lambs_danger_cqbSessizM", 50]];
+                diag_log format ["[ADIM-KONUSMA-OZET] 60 sn: CQB sessiz (el isareti) %5 / %6 m | bot ayak sesi duyulma %1 | konusma olayi %2 (en yakin dusman %3 m) | konusma duyulma %4 (OYUNCU konusmasi: %7)", _say get "adim", _say get "olay", if ((_say get "enYakin") > 399) then {">400"} else {str (round (_say get "enYakin"))}, _say get "konusma", missionNamespace getVariable ["lambs_danger_cqbSessiz", true], missionNamespace getVariable ["lambs_danger_cqbSessizM", 50], _say get "oyuncu"];
             };
-            { _say set [_x, 0]; } forEach ["adim", "konusma", "olay"];
+            { _say set [_x, 0]; } forEach ["adim", "konusma", "olay", "oyuncu"];
             _say set ["enYakin", 1e9];
         };
     };
