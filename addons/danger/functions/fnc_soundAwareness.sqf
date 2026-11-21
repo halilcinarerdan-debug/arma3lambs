@@ -188,6 +188,35 @@ private _say = 0;
                     };
                 };
 
+                // v8.717 SESE GORE TAVIR (kullanici: 'silah sesine gore tavir takinsinlar'; eskiden yalniz reveal + doWatch + SAFE / CARELESS -> AWARE): CBA sesTavir (varsayilan KAPALI). Grup TEMASTA DEGIL ve ses / parlama seviyesi >= 0.7 ise:
+                //   0.7 - 1.0 (uzak / hafif ses): en yakin 4 asker 8 sn COMEL (setUnitPosWeak MIDDLE, korumali geri alma);  >= 1.0 (yakin ses ya da GORULEN parlama): en yakin 3 asker fnc_acikSiper ile siper arar (atici = dusman nesnesi; ses yonu zaten yaklasik biliniyor).
+                //   Grup basina 12 sn'de bir. ATLANIR: binada, geri cekilme / kacis / temas kes / bounding / taktik / pusu / sniper, LAMBS gorevi / kal-bekle waypoint (senaryoKapi sabit), kosucu (forceMove), taktikKilit.
+                if (missionNamespace getVariable ["lambs_danger_sesTavir", false]) then {
+                    if (
+                        (_lvl >= 0.7) && {(_g getVariable [QGVAR(contact), 0]) < time} && {isNull (assignedTarget _k)} && {(time - (_g getVariable [QGVAR(sesTavirT), -999])) > 12} && {(insideBuilding _k) <= 0.5}
+                        && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
+                        && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])} && {!(_g getVariable [QGVAR(isAmbushing), false])} && {!(_g getVariable [QGVAR(sniperTeam), false])}
+                        && {!([_g, "sesTavir", true] call FUNC(senaryoKapi))}
+                    ) then {
+                        _g setVariable [QGVAR(sesTavirT), time];
+                        private _tU = (([(units _g) select {alive _x && {isNull objectParent _x} && {(insideBuilding _x) <= 0.5} && {!((_x getVariable [QGVAR(forceMove), false]) isEqualTo true)} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}}, [], {_x distance2D _unit}, "ASCEND"] call BIS_fnc_sortBy));
+                        private _tTur = "comel";
+                        if (_lvl >= 1.0) then {
+                            _tTur = "siper";
+                            { [_x, _unit] call FUNC(acikSiper); } forEach (_tU select [0, 3]);
+                        } else {
+                            {
+                                _x setUnitPosWeak "MIDDLE";
+                                [{ params ["_uu"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) isEqualTo true)} && {!((group _uu) getVariable [QGVAR(isRetreating), false])}) then { _uu setUnitPosWeak "AUTO"; }; }, [_x], 8] call CBA_fnc_waitAndExecute;
+                            } forEach (_tU select [0, 4]);
+                        };
+                        if ((missionNamespace getVariable ["lambs_danger_sesTavirLogN", 0]) < 25) then {
+                            missionNamespace setVariable ["lambs_danger_sesTavirLogN", (missionNamespace getVariable ["lambs_danger_sesTavirLogN", 0]) + 1];
+                            diag_log format ["[SES-TAVIR] %1 | tavir: %2 | ses seviyesi %3 | %4 m | %5 | %6 asker", groupId _g, _tTur, _lvl toFixed 2, round _d, ["ses", "parlama / duman"] select _gorulur, count (_tU select [0, [4, 3] select (_lvl >= 1.0)])];
+                        };
+                    };
+                };
+
                 _g setVariable [QGVAR(sesSonZaman), time];
                 _g setVariable [QGVAR(sesSonPos), _tahmin];
 
