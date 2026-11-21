@@ -4387,3 +4387,6 @@ v8.717 (dal sade-waypoint) kullanici: 'silah sesine daha agresif spot etsinler, 
  - YENI: CBA sesTavir (varsayilan KAPALI). Temasta olmayan grup + seviye >= 0.7: 0.7-1.0 en yakin 4 asker 8 sn comel (setUnitPosWeak MIDDLE, korumali geri alma); >= 1.0 (yakin ses ya da gorulen parlama) en yakin 3 asker fnc_acikSiper ile siper arar. Grup basina 12 sn. ATLANIR: binada, retreat / evade / breakContact / bounding / taktik / pusu / sniper, LAMBS gorevi / kal-bekle waypoint (senaryoKapi sabit), forceMove, taktikKilit. Log [SES-TAVIR] (ilk 25); karne 'SESE GORE TAVIR' satiri.
  - NOT (hile siniri): acikSiper'a ates eden birim nesnesi veriliyor (siper secimi icin atici yonu); ses yonu zaten yaklasik biliniyor. Tavir yalniz seviye >= 0.7'de.
  - SINIR: v8.717 oyunda DENENMEDI.
+v8.718 (dal sade-waypoint) kullanici: 'dusunme hizlarini oyuncu seviyesine cikarabilmek icin limiti 2 yerine 3'.
+ - dusunHizi / dusunHiziOnemli / dusunHiziCqb CBA kaydirici ust siniri 2 -> 3 (XEH_PREP) VE fnc_dusunSure kod ici kenetleme 'min 2' -> 'min 3' (ikisi birlikte degismeli; yalniz kaydirici degisse deger 2'de kenetlenirdi). Varsayilanlar (1.25 / 1.3 / 1.1) ayni. Sure = bekleme / carpan -> 3 = sicak temasta izleyici dongusu 1/3 surede; CPU yuku artar, [PERF-DUSUN] orani >= 2 olursa izleyici istenen hizda donemiyor demektir (perfOlcum).
+ - SINIR: v8.718 oyunda DENENMEDI.
