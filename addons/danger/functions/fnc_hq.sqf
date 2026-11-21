@@ -100,11 +100,19 @@ private _tahtaKur = {
             && {(time - (_g getVariable ["lambs_danger_hqGorevT", -999])) > 180}
             && {_g getVariable ["lambs_danger_hqTakviyeKatilim", true]};
 
+        // v8.711 DESTEK UYGUN (RPT 87f87da8 / 1e81987e / 80874d73: yogun coklu manga carpismasinda butun mangalar ayni anda temasta ve meskul -> 'musait destek grubu yok' 12 / 12 / 23, HQ-DESTEK 3 RPT'de 0 emir):
+        //   TEMASTA ama taktik bayragi / karari OLMAYAN (mesgul degil), dusman >= 120 m, kayip < %30, baski altinda degil, LAMBS gorevi / kal-bekle waypoint'li degil grup destek-ateşi unsuru (B) olabilir. Normal 'musait' (kanat / takviye) tanimi DEGISMEDI. CBA hqDestekTemasli.
+        private _destekUygun = _musait || {
+            (missionNamespace getVariable ["lambs_danger_hqDestekTemasli", true]) && {!_mesgul} && {_temasta} && {_n >= 3} && {isNull objectParent _l}
+            && {_enYakin >= 120} && {_kayip < 0.3} && {(({(getSuppression _x) > 0.3} count (units _g)) < 2)}
+            && {(time - (_g getVariable ["lambs_danger_hqGorevT", -999])) > 180} && {_g getVariable ["lambs_danger_hqTakviyeKatilim", true]}
+            && {!(([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"])}
+        };
         _tahta pushBack (createHashMapFromArray [
             ["g", _g], ["poz", getPosATL _l], ["n", _n], ["kayip", _kayip],
             ["temasta", _temasta], ["temasSure", time - _contact],
             ["sit", _g getVariable ["lambs_danger_cmdSit", []]],
-            ["mesgul", _mesgul], ["musait", _musait]
+            ["mesgul", _mesgul], ["musait", _musait], ["destekUygun", _destekUygun]
         ]);
     } forEach allGroups;
     _tahta

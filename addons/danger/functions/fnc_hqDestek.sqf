@@ -12,6 +12,7 @@
  *   + A'ya gore yukseklik x 0.3 + dusman noktasina arazi gorusu (terrainIntersectASL) + 40 - B'nin yurume mesafesi x 0.05; gorus yoksa aday elenir.
  * B YAPAR: noktaya (dagilik 7 m) hareket (forceMove), varista combatMode RED + herkes doSuppressiveFire dusman noktasina (8 sn'de bir tazelenir; +-6 m dagilim; tasarruf ederken MG / ikinci sirada olmayanlar susar).
  *   A dusman noktasina < 45 m girince ates 40 m ilerisine KAYDIRILIR (hucum eden dosta ates gitmesin). BITIS: A saldirisi bitti / dusman 25 sn bilinmiyor / 150 sn / B temasa girdi / retreat.
+ * v8.711: B artik TEMASTA ama taktik bayragi / karari olmayan (hq tahtasi 'destekUygun'), dusman >= 120 m, kayip < %30 olan grup da olabilir (CBA hqDestekTemasli; bosta olan once secilir).
  * Log: [HQ-DESTEK] EMIR / VARIS / KAYDIR / BITTI. Kapatma: lambs_danger_hqDestekV1 = false; doktrin anahtari hqDestek (varsayilan true), hqDestekM (1200).
  *
  * Arguments:
@@ -132,7 +133,7 @@ private _kaldir = [];
 private _calisanTaraf = {(side (_x select 0)) isEqualTo _taraf} count (values lambs_danger_hqDestekler);
 if (_calisanTaraf >= 2) exitWith { "es zamanli limit (2)" call _neden; false };
 
-private _musaitlar = _tahta select {(_x get "musait") && {(_x get "n") >= 3}};
+private _musaitlar = _tahta select {(_x getOrDefault ["destekUygun", _x get "musait"]) && {(_x get "n") >= 3}};
 if (_musaitlar isEqualTo []) exitWith { "musait destek grubu yok" call _neden; false };
 
 private _istekler = _tahta select {
@@ -170,7 +171,8 @@ private _adaylar = _musaitlar select {
     && {(time - (_bG getVariable [QGVAR(destekT), -999])) > 60}
 };
 if (_adaylar isEqualTo []) exitWith { "telsiz mesafesinde uygun destek yok" call _neden; false };
-private _sirali = [_adaylar, [], { -((_x get "poz") distance2D _aPoz) + (10 * (_x get "n")) }, "DESCEND"] call BIS_fnc_sortBy;
+// v8.711: bosta (musait) olan temasli gruptan once secilir (temasli B icin -60 puan)
+private _sirali = [_adaylar, [], { -((_x get "poz") distance2D _aPoz) + (10 * (_x get "n")) - (60 * ([0, 1] select (_x get "temasta"))) }, "DESCEND"] call BIS_fnc_sortBy;
 private _b = _sirali select 0;
 private _bG = _b get "g";
 private _bPoz = _b get "poz";
@@ -204,8 +206,8 @@ if (_en isEqualTo []) exitWith { "yan tepe noktasi (gorus) bulunamadi" call _ned
 if ([_bG, "DESTEK", [_en, _enP, groupId _aG]] call FUNC(hqEmir)) then {
     lambs_danger_hqDestekler set [groupId _bG, [_bG, _aG, _en, _enP, time, "YOLDA", 0, false]];
     _aG setVariable [QGVAR(destekIstekT), time];
-    (format ["[HQ-DESTEK] %1 | EMIR: taarruz %2 (%3 kisi, dusman %4 m, karar %5) | destek %6 (%7 kisi, %8 m) -> nokta %9 (yukseklik farki %10 m) | ates hedefi %11",
+    (format ["[HQ-DESTEK] %1 | EMIR: taarruz %2 (%3 kisi, dusman %4 m, karar %5) | destek %6 (%7 kisi, %8 m) -> nokta %9 (yukseklik farki %10 m) | ates hedefi %11 | destek temasta:%12",
         _taraf, groupId _aG, _istek get "n", round (_sit select 1), _aG getVariable [QGVAR(cmdSonKarar), "?"], groupId _bG, _b get "n", round (_bPoz distance2D _aPoz),
-        mapGridPosition _en, round ((getTerrainHeightASL _en) - _hE), mapGridPosition _enP]) call _log;
+        mapGridPosition _en, round ((getTerrainHeightASL _en) - _hE), mapGridPosition _enP, _b get "temasta"]) call _log;
     true
 } else { "hqEmir reddetti" call _neden; false }
