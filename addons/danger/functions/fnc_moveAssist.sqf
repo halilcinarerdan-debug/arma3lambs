@@ -100,7 +100,10 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                 _hizU = _hizU * (1 + ((missionNamespace getVariable ["lambs_danger_cqbAnimEk", 30]) max 0) / 100);
             };
             private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
-            private _istenen = if (_donuyor) then {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} else {
+            // v8.719 DONUS HIZI CBA (kullanici: 'sadece saga sola donme hizlarini ayarlayabilelim, nisan degil, arkaya falan'): CBA donusHizi > 0 ise donus animasyonu ("turn": saga / sola / arkaya) MUTLAK bu katsayida oynar (agirlik yavaslamasi turnAgirlik acikse uygulanir);
+            //   0 (varsayilan) = eski davranis: max(turnCoef 1.2 x agirlik, genel animasyon hizi). NOT: eski formul genel animHiz'in (ornek 60 = 1.6) altina inemiyordu, bu yuzden donus hizi tek basina yavaslatilamiyordu.
+            private _dK = missionNamespace getVariable ["lambs_danger_donusHizi", 0];
+            private _istenen = if (_donuyor) then { if (_dK > 0) then {_dK * ([_u] call _agirCarpan)} else {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} } else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
             };
             // SENKRON: retreat / evade / baska kod setAnimSpeedCoef'i dogrudan yazinca onbellek bayat kaliyor, donus hizi bir daha

@@ -4390,3 +4390,7 @@ v8.717 (dal sade-waypoint) kullanici: 'silah sesine daha agresif spot etsinler, 
 v8.718 (dal sade-waypoint) kullanici: 'dusunme hizlarini oyuncu seviyesine cikarabilmek icin limiti 2 yerine 3'.
  - dusunHizi / dusunHiziOnemli / dusunHiziCqb CBA kaydirici ust siniri 2 -> 3 (XEH_PREP) VE fnc_dusunSure kod ici kenetleme 'min 2' -> 'min 3' (ikisi birlikte degismeli; yalniz kaydirici degisse deger 2'de kenetlenirdi). Varsayilanlar (1.25 / 1.3 / 1.1) ayni. Sure = bekleme / carpan -> 3 = sicak temasta izleyici dongusu 1/3 surede; CPU yuku artar, [PERF-DUSUN] orani >= 2 olursa izleyici istenen hizda donemiyor demektir (perfOlcum).
  - SINIR: v8.718 oyunda DENENMEDI.
+v8.719 (dal sade-waypoint) kullanici: 'sadece saga sola donme hizlarini ayarlayabilelim, nisan degil, arkaya falan'.
+ - BULGU: fnc_moveAssist donus animasyonu ('turn' iceren animationState) katsayisi = max(turnCoef 1.2 x turnAgirlik, genel animasyon hizi _hizU); turnCoef CBA'da YOKTU (yalniz degisken) ve animHiz 60 (1.6) iken max(1.2 x w, 1.6) = 1.6: turnCoef'in HICBIR etkisi yoktu, donus hizi tek basina ne artirilabiliyor ne azaltilabiliyordu.
+ - YENI CBA donusHizi (0-3, varsayilan 0): > 0 ise donus animasyonu MUTLAK bu katsayida (x turnAgirlik); 0 = eski davranis (degismez). Nisan hizi (aimingSpeed / skillCarpan) ETKILENMEZ; yalniz bot (!isPlayer). Hedef: sadece 'turn' animasyonu; yurume / kosu / durus gecisi aynen animHiz / postureCoef.
+ - SINIR: v8.719 oyunda DENENMEDI. setAnimSpeedCoef etkisi yerel (mevcut senkron: degisimde + 6 sn nabiz).
