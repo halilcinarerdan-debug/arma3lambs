@@ -30,6 +30,9 @@ if ((getPosATL _a) distance2D _p1 > 0.9) then {
     waitUntil { sleep 0.2; !(call _saglam) || {time > _bit} || {((getPosATL _a) distance2D _p1) < 0.9} };
 };
 if (!(call _saglam)) exitWith {};
+// v8.709 SIPER BEKLEMESINI GERI KOY (RPT 1e81987e, Alpha 1-1 Nikolayev: 7:31:12 [SIPER-TUT] doStop -> 7:31:13 [SIPER-OTUR 1.93 m kaldi] ve AYNI SANIYE MOVE): bu fonksiyonun doMove'u siperTut'un doStop beklemesini eziyordu; oturma bitince asker formasyon slotuna donebiliyordu (siperTut'un yazilma nedeni 'git-gel').
+//   siperTut beklemesi hala gecerliyse (siperTutBit > time) ve asker kosucu / geri cekilmede degilse doStop yeniden verilir; bitis ve cikis kosullari siperTut'ta (temas bitince / 45 sn) aynen kalir.
+if ((_a getVariable [QGVAR(siperTutBit), 0]) > time && {!((_a getVariable [QGVAR(forceMove), false]) isEqualTo true)} && {!((group _a) getVariable [QGVAR(isRetreating), false])}) then { doStop _a; };
 _p1 set [2, (getPosATL _a) select 2];
 private _p0 = getPosATL _a;
 private _d = _p0 distance2D _p1;

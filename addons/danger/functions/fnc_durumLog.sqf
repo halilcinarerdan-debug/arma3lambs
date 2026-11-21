@@ -94,8 +94,10 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                             private _im = +(_prev select 3);
                             // v8.707 KAYNAK ATFI (RPT 87f87da8: ters donuslerin 16 / 29'u 'acikSiper' imzali, sureler 1-2 sn = acikSiper'in 'siper noktasina otur' adimi sleep 2 + doMove _pt ile ortusuyor ama KANITSIZDI): ikinci MOVE, MOVE -> STOP gecisinden SONRA verilmis bir acikSiper doMove'u ise kaynak damgalanir:
                             //   siperOtur = siper noktasina OTUR adiminin kendi doMove'u (kasitli); siperYeni = acikSiper yeni siper secimi (gercek gidip-gelme adayi); damga yoksa belirsiz (motor / formasyon / baska modul)
+                            // v8.709 KESIN ATIF: zaman toleransi yerine DAMGA DEGISTI MI (RPT 1e81987e: +-1 sn tolerans ayni sicramanin damgasini 'siperYeni' sayabiliyordu); MOVE -> STOP gecisinde damgalar kaydedilir, ters donuste simdiki damgayla karsilastirilir
+                            private _dm0 = if ((count _prev) > 4) then { _prev select 4 } else { [-1, -1] };
                             private _kay = "belirsiz";
-                            if ((_u getVariable [QGVAR(oturDoMoveT), -999]) > ((_prev select 0) - 1)) then { _kay = "siperOtur"; } else { if ((_u getVariable [QGVAR(siperDoMoveT), -999]) > ((_prev select 0) - 1)) then { _kay = "siperYeni"; }; };
+                            if ((_u getVariable [QGVAR(oturDoMoveT), -999]) isNotEqualTo (_dm0 select 1)) then { _kay = "siperOtur"; } else { if ((_u getVariable [QGVAR(siperDoMoveT), -999]) isNotEqualTo (_dm0 select 0)) then { _kay = "siperYeni"; }; };
                             _tersKay set [_kay, (_tersKay getOrDefault [_kay, 0]) + 1];
                             _im pushBack ("kaynak:" + _kay);
                             { _bTers set [_x, (_bTers getOrDefault [_x, 0]) + 1]; } forEach _im;
@@ -112,7 +114,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                             _imN = [_u, _g] call _imza;
                             { _bAll set [_x, (_bAll getOrDefault [_x, 0]) + 1]; } forEach _imN;
                         };
-                        _u setVariable [QGVAR(durumGecis), [time, _o, _c, _imN]];
+                        _u setVariable [QGVAR(durumGecis), [time, _o, _c, _imN, [_u getVariable [QGVAR(siperDoMoveT), -999], _u getVariable [QGVAR(oturDoMoveT), -999]]]];
                     };
                     if (_o isNotEqualTo "" && {_n < 400} && {time > (_u getVariable [QGVAR(durumKomutT), 0])}) then {
                         _u setVariable [QGVAR(durumKomutT), time + 3];
