@@ -4374,3 +4374,7 @@ v8.714 (dal sade-waypoint) RPT 4c87bab5 (v8.713, 9:27 - 9:38, ~11 dk). Karne 14 
  - SECENEK (kullanici karari, kodlanmadi): uzun carpismada yaralilar 3 dk bekliyor; tcccKatiGuvenlik = false eski davranisa doner (ates altinda baygin yaraliya cekme).
  - KOORDINASYON: istihbarat 30, kanat 0, destek atesi 0 (temasli B 0), takviye 0, komsu 0, 'musait destek grubu yok' 12. YURUMUYOR 7 (ELITE yonetimindeki 7, lider 0) KONTROL.
  - SINIR: v8.714 oyunda DENENMEDI (karne / log degisikligi; davranis ayni).
+v8.715 (dal sade-waypoint) kullanici: 'botlar acikta durmasin, daha uzun siperde kalsinlar, acikTan ates etmesinler' + 'cba ayar ver'.
+ - MEVCUT CBA ile yapilabilenler (preset): atesHareketOran 1 -> 0.1 (kosarken ates etme olasiligi; zor durumda baski > 0.5 ya da kayip >= %40 her zaman atar), atesHareketMaxM 500 -> 300, siperYaricap 18 -> 25 (acikta kalan siper arama yaricapi), siperYakinlik 4.97 -> 3 (siper sayilma mesafesi daha siki), bndAgresif 2 -> 1, bndAtilimCarpan 3 -> 2.2 (bounding sicrama boyu).
+ - YENI CBA: siperTutSn (15-300, varsayilan 45): fnc_siperTut bekleme suresi (eskiden kodda SABIT 45 sn); CBA waitUntilAndExecute zaman asimi _sn + 1. Varsayilan davranis ayni. Preset 90.
+ - SINIR: v8.715 oyunda DENENMEDI. Uzun bekleme hucum / manevrayi geciktirebilir; bekleme siperTut'un mevcut cikis kosullarini (temas bitince 8 sn, kosucu, emir) korur.

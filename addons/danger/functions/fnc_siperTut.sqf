@@ -6,6 +6,7 @@
  * 'lider duruyor, askerler FORMATION PLANNED ile liderin yanina yuruyor') geri doner -> siperden cikip acikta yuruyor, tekrar temas / acikta tespiti -> yeniden siper = GIT-GEL.
  * Bu fonksiyon siper noktasina varinca (cagiran, varis callback'inde) askeri DURDURUR (doStop: ates etmeye devam eder), taktik kilidini uzatir (diger ELITE katmanlari tasimaz) ve
  *   temas bitince (8 sn) / 45 sn sonra / kosucu (forceMove) olunca ya da emir verilince serbest birakir (doFollow). Bounding yeni sicrama verirse (moveTo / doMove) bu bekleme dogal olarak ezilir.
+ * v8.715: bekleme suresi CBA lambs_danger_siperTutSn (15-300 sn, varsayilan 45).
  * Kapatma: lambs_danger_siperTutOff = true.
  *
  * Arguments:
@@ -21,7 +22,9 @@ if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {captive _u} ||
 if ([group _u, "siperTut", true] call FUNC(senaryoKapi)) exitWith {false};   // LAMBS gorevi / kal-bekle waypoint'li grupta dokunma
 if ((group _u) getVariable [QGVAR(isRetreating), false]) exitWith {false};
 
-private _bit = time + 45;
+// v8.715 (kullanici: 'daha uzun siperde kalsinlar'): bekleme suresi CBA siperTutSn (eskiden sabit 45 sn; varsayilan ayni)
+private _sn = ((missionNamespace getVariable ["lambs_danger_siperTutSn", 45]) max 15) min 300;
+private _bit = time + _sn;
 _u setVariable [QGVAR(siperTutBit), _bit];
 _u setVariable [QGVAR(taktikKilit), _bit];
 doStop _u;
@@ -36,7 +39,7 @@ doStop _u;
         _uu setVariable [QGVAR(taktikKilit), 0];
         if (!(_uu getVariable [QGVAR(forceMove), false]) && {_uu isNotEqualTo (leader _uu)}) then { _uu doFollow (leader _uu); };
     };
-}, [_u, _bit], 46, {
+}, [_u, _bit], _sn + 1, {
     params ["_uu", "_b"];
     if (alive _uu && {(_uu getVariable [QGVAR(siperTutBit), 0]) isEqualTo _b}) then { _uu setVariable [QGVAR(siperTutBit), 0]; _uu setVariable [QGVAR(taktikKilit), 0]; };
 }] call CBA_fnc_waitUntilAndExecute;
