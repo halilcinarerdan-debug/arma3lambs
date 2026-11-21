@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.713"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.714"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -345,11 +345,15 @@ def kabul(path):
         ekle("RETREAT VARIS", "VERI YOK", "retreat olmadi (senaryo B: zayif grup)")
 
     # --- 5) TCCC BEKLEME (baygin dusman artik tehdit degil)
+    # v8.714: bekleme ATES ALTINDA ise (son ates <= 10 sn) tasarim geregi (tcccKatiGuvenlik: catismada ilk yardim yok; RPT 4c87bab5: 4 uzun bekleme 96-183 sn, hepsinde 'son ates 1-2 sn once' = sureklli carpisma, ACE Medical YOK -> vanilla HealSoldier yolu); puan yalniz SESSIZKEN (son ates > 10 sn) bekleyenlere gore verilir
+    bk_t = [(int(m.group(2)), int(m.group(1))) for l in L for m in [re.search(r"\[TCCC-BEKLE\].*son ates (\d+) sn once.*bekliyor (\d+) sn", l)] if m]
     bk = [int(m.group(1)) for l in L for m in [re.search(r"\[TCCC-BEKLE\].*bekliyor (\d+) sn", l)] if m]
     tc = len([1 for l in L if "[TCCC]" in l and "hekim" in l and "IPTAL" not in l])
     if bk or tc:
         mb = max(bk) if bk else 0
-        ekle("TCCC BEKLEME", "GECTI" if mb <= 90 else ("KONTROL" if mb <= 180 else "KALDI"), "en uzun bekleme %d sn (%d satir) | tedaviye giden hekim: %d (grup ya da dusman hala ayaktaysa bekleme normal)" % (mb, len(bk), tc))
+        sess = [b for b, a in bk_t if a > 10]
+        ms = max(sess) if sess else 0
+        ekle("TCCC BEKLEME", "GECTI" if ms <= 90 else ("KONTROL" if ms <= 180 else "KALDI"), "en uzun bekleme %d sn (%d satir) | SESSIZKEN (son ates > 10 sn) en uzun %d sn | ates altinda bekleme tasarim geregi (tcccKatiGuvenlik) | tedaviye giden hekim: %d" % (mb, len(bk), ms, tc))
     else:
         ekle("TCCC BEKLEME", "VERI YOK", "yarali / hekim olayi yok")
 
