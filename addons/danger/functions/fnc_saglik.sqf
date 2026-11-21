@@ -118,7 +118,7 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                     private _durS = time - (_u getVariable [QGVAR(saglikMoveT), time]);
                     if (_durS > 15 && {_durS < 120 || {(time - (_u getVariable [QGVAR(saglikYurLogT), -999])) > 300}}) then {
                         _u setVariable [QGVAR(saglikYurLogT), time];
-                        ["YURUMUYOR", _g, format ["%1 | MOVE komutu ama %2 sn duruyor | gorev:%3 | stance:%4 | bayrak:%5 | fm:%6", name _u, round (time - (_u getVariable [QGVAR(saglikMoveT), time])), _u getVariable [QEGVAR(main,currentTask), "-"], stance _u, _bStr, _u getVariable [QGVAR(forceMove), false]]] call _isaretle;
+                        ["YURUMUYOR", _g, format ["%1 | MOVE komutu ama %2 sn duruyor | gorev:%3 | stance:%4 | bayrak:%5 | fm:%6 | sahip:%7 | lider:%8", name _u, round (time - (_u getVariable [QGVAR(saglikMoveT), time])), _u getVariable [QEGVAR(main,currentTask), "-"], stance _u, _bStr, _u getVariable [QGVAR(forceMove), false], (([_g] call FUNC(wpSahip)) call { if (_this isEqualTo "") then {"-"} else {_this} }), _u isEqualTo (leader _g)]] call _isaretle;
                     };
                 } else {
                     _u setVariable [QGVAR(saglikMoveT), -1];
@@ -197,7 +197,8 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
                 if (_ct <= 0) then {
                     ["COMBAT-HIC-TEMAS", _g, format ["temas bayragi hic kurulmadi (tasarimci COMBAT'i ya da bayraksiz cikis) | combatMode:%1 | formasyon:%2", combatMode _g, formation _g]] call _isaretle;
                 } else {
-                    if (_ct < (time - 60)) then {
+                    // v8.708: esik artik CBA temasSonrasiAwareS'e bagli (RPT 1e81987e: kullanici 300 sn secmisti, anomali 166 / 197 sn'de yaniyordu = beklenen pencere): max(60, S + 45)
+                    if (_ct < (time - ((((missionNamespace getVariable ["lambs_danger_temasSonrasiAwareS", 75]) max 30) + 45) max 60))) then {
                         ["TEMAS-YOK-COMBAT", _g, format ["temas %1 sn once bitti ama lider COMBAT | combatMode:%2 | formasyon:%3", round (time - _ct), combatMode _g, formation _g]] call _isaretle;
                     };
                 };

@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.707"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.708"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -266,10 +266,16 @@ def kabul(path):
     b = re.search(r"build (v[0-9.]+[A-Z-]*)", t)
     ekle("SURUM", "GECTI" if b and b.group(1).startswith(BEKLENEN_SURUM) else "KALDI", ("%s (beklenen %s)" % (b.group(1), BEKLENEN_SURUM)) if b else "boot satiri yok")
     hata = 0
+    yabanci = 0
     for i, l in enumerate(L):
         if ("Error in expression" in l or "Error position" in l or "Error Undefined" in l or "Error Type" in l or "Error Zero" in l) and not any(n in " ".join(L[i:i + 3]) for n in NOISE):
-            hata += 1
-    ekle("SCRIPT HATASI", "GECTI" if hata == 0 else "KALDI", "%d satir" % hata)
+            # v8.708: bagiminda lambs / ELITE / fnc_ gecen hata bizim; digerleri yabanci mod (RPT 1e81987e: 166 satirin hepsi 4 sn'de partikul efekti ifadeleri: directionX / humidity interpolate / distToSurface)
+            blok = " ".join(L[max(i - 2, 0):i + 8]).lower()
+            if "lambs" in blok or "elite" in blok or "fnc_" in blok:
+                hata += 1
+            else:
+                yabanci += 1
+    ekle("SCRIPT HATASI", "GECTI" if hata == 0 else "KALDI", "%d satir (LAMBS / ELITE baglamli)%s" % (hata, (" | yabanci mod (partikul / efekt ifadeleri vb.): %d satir, bizim kod degil" % yabanci) if yabanci else ""))
 
     # --- 1) DUSUNME HIZI (izleyici dongu hizi; n >= 20 olanlar; ~1-1.5 saglikli, >= 2 yavas)
     oranlar = []
@@ -356,8 +362,17 @@ def kabul(path):
     tyc = len([1 for l in L if "[ANOMALI] TEMAS-YOK-COMBAT" in l])
     hic = len([1 for l in L if "[ANOMALI] COMBAT-HIC-TEMAS" in l])
     ekle("COMBAT'TA KALMA", "GECTI" if tyc == 0 else "KALDI", "TEMAS-YOK-COMBAT anomali:%d | temas-sonrasi gevseme:%d | COMBAT-HIC-TEMAS (bayrak hic kurulmadi, v8.707+): %d" % (tyc, len([1 for l in L if "[TEMAS-SONRASI]" in l and "sessizlik" in l and "baslatildi" not in l]), hic))
-    yy = len([1 for l in L if "[ANOMALI] YURUMUYOR" in l])
-    ekle("YURUMUYOR ANOMALISI", "GECTI" if yy <= 3 else "KONTROL", "%d satir (kisa acik-siper / bomba kacisi anlari normal; kalici takilma degil)" % yy)
+    ya = [l for l in L if "[ANOMALI] YURUMUYOR" in l]
+    yy = len(ya)
+    # v8.708: sahip / lider alanlari (yoksa eski RPT)
+    yh = [l for l in ya if "| sahip:" in l]
+    if yh:
+        yl = len([1 for l in yh if re.search(r"sahip:(LAMBS|TUTAN)", l)])
+        yld = len([1 for l in yh if "lider:true" in l])
+        yel = len([1 for l in yh if not re.search(r"sahip:(LAMBS|TUTAN)", l)])
+        ekle("YURUMUYOR ANOMALISI", "GECTI" if yel <= 3 else "KONTROL", "%d satir | LAMBS / TUTAN sahipli (ELITE yonetmiyor): %d | ELITE yonetimindeki: %d | lider olan: %d (kisa acik-siper / bomba kacisi anlari normal)" % (yy, yl, yel, yld))
+    else:
+        ekle("YURUMUYOR ANOMALISI", "GECTI" if yy <= 3 else "KONTROL", "%d satir (kisa acik-siper / bomba kacisi anlari normal; kalici takilma degil; sahip alani yok = v8.708 oncesi RPT)" % yy)
 
     # --- 7) FOV / ALGI KAYNAGI (mesafe x aci)
     fv = [l for l in L if "[FOV-OLCUM] 60 sn" in l]

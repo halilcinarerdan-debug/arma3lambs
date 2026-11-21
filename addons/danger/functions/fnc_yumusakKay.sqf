@@ -24,6 +24,7 @@ private _p1 = +_hedef;
 _p1 set [2, (getPosATL _a) select 2];
 if ((getPosATL _a) distance2D _p1 > 0.9) then {
     _a forceSpeed -1;
+    _a setVariable [QGVAR(oturDoMoveT), time];   // v8.708: ters donus kaynak atfi (durumLog): siper noktasina OTUR adiminin kendi doMove'u (RPT 1e81987e: 62 ters donusun 49'u 'belirsiz', ornek SIPER-OTUR 1.93 m ile ayni saniyede MOVE)
     _a doMove _p1;
     private _bit = time + ((((getPosATL _a) distance2D _p1) / 3) max 5) min 9;   // v8.649: uzak siperde sure mesafeye gore (5-9 sn)
     waitUntil { sleep 0.2; !(call _saglam) || {time > _bit} || {((getPosATL _a) distance2D _p1) < 0.9} };
