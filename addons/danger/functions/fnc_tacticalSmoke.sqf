@@ -83,21 +83,40 @@ _aticilar = [_aticilar, [], {_x distance2D _targetPos}, "ASCEND"] call BIS_fnc_s
 // v8.330 SIS BUTCESI: ortak taraf / grup butcesi + gercek tehdit kapisi (fnc_sisButce); olay basina tek kayit
 if !([_group, _mode] call (missionNamespace getVariable ["lambs_danger_fnc_sisButce", {true}])) exitWith {false};
 _group setVariable [QGVAR(smokeLast), time];
+// v8.755 OKKALI PERDE: atici en az 2 duman tasisin (envanterde yer varsa 1 standart SmokeShell eklenir; CBA sisPerdeTasi)
+private _sisSay = missionNamespace getVariable ["lambs_danger_sisPerdeSay", createHashMap];
+missionNamespace setVariable ["lambs_danger_sisPerdeSay", _sisSay];
+if (missionNamespace getVariable ["lambs_danger_sisPerdeTasi", true]) then {
+    {
+        private _u = _x;
+        private _n = {(getText (configFile >> "CfgMagazines" >> _x >> "ammo")) isKindOf ["SmokeShell", configFile >> "CfgAmmo"]} count (magazines _u);
+        if (_n < 2 && {_u canAdd "SmokeShell"}) then { _u addMagazine "SmokeShell"; _sisSay set ["ek_duman_verildi", (_sisSay getOrDefault ["ek_duman_verildi", 0]) + 1]; };
+    } forEach (_aticilar select [0, 3]);
+};
 
 private _mod = _mode;
-[_aticilar, _targetPos, _mod] spawn {
-    params ["_aticilar", "_targetPos", "_mod"];
+[_aticilar, _targetPos, _mod, _sisliMi] spawn {
+    params ["_aticilar", "_targetPos", "_mod", "_sisliMi"];
+    // v8.755 OKKALI PERDE (kullanici: 'smoke daha okkali atilsin'): CBA sisPerde ACIKKEN olay basina sisPerdeAdet (3; hareket onunde 2) duman, hareket eksenine DIK hatta sisPerdeAralik (9 m) arayla, 1.5 sn aralikla;
+    //   ruzgar telafisi 4 sn; ayni olayin dumanlari ekonomi kapilarina takilmaz (tek butce olayi). Eski: temas kesmede 2, hareket onunde 1 duman.
+    private _perde = missionNamespace getVariable ["lambs_danger_sisPerde", true];
+    private _perdeN = ((missionNamespace getVariable ["lambs_danger_sisPerdeAdet", 3]) max 1) min 4;
+    private _aralik = ((missionNamespace getVariable ["lambs_danger_sisPerdeAralik", 9]) max 3) min 20;
+    private _atilan = 0;
+    private _pozlar = [];
 
     // v8.10: temas kesmede 3 atici (derin + GENIS perde: yanlara +-14 derece), 2.5 sn arayla (eskiden 2 atici, 5 sn: sis yetmiyordu)
-    private _atisSayisi = if (_mod isEqualTo "BREAK_CONTACT") then { 2 min (count _aticilar) } else { 1 };   // v8.330: derin perde 3 -> 2 atis (tek butce olayi)
+    private _atisSayisi = if (_perde) then { if (_mod isEqualTo "BREAK_CONTACT") then {_perdeN} else {(_perdeN - 1) max 1} } else { if (_mod isEqualTo "BREAK_CONTACT") then { 2 min (count _aticilar) } else { 1 } };   // v8.330: derin perde 3 -> 2 atis (tek butce olayi); v8.755: perde modunda sisPerdeAdet
 
     for "_i" from 0 to (_atisSayisi - 1) do {
-        private _atici = _aticilar select _i;
+        private _atici = _aticilar select (_i mod (count _aticilar));   // v8.755: az atici varsa ayni atici art arda (>= 2 duman tasir)
         if (!alive _atici || {!isNull objectParent _atici}) then { continue };
+        if (_perde && {!([_atici] call _sisliMi)}) then { continue };
+        private _ekoAtla = _perde && {_i > 0};   // ayni olayin 2. / 3. dumani ekonomi kapilarina takilmaz
 
         private _aticiPos = getPosATL _atici;
         private _hedefMesafe = _atici distance2D _targetPos;
-        private _yon = (_aticiPos getDir _targetPos) + ([0, -14, 14] select (_i min 2));
+        private _yon = (_aticiPos getDir _targetPos) + ([[0, -14, 14] select (_i min 2), 0] select _perde);
 
         // El bombasi menzili ~38m
         private _atisMesafe = if (_mod isEqualTo "BREAK_CONTACT") then {
@@ -106,7 +125,7 @@ private _mod = _mode;
             ((_hedefMesafe * 0.65) max 22) min 38
         };
         // 2. sis biraz daha yakin = derin perde
-        if (_i > 0) then { _atisMesafe = (_atisMesafe - (6 * _i)) max 15; };
+        if (_i > 0 && {!_perde}) then { _atisMesafe = (_atisMesafe - (6 * _i)) max 15; };
 
         // v8.110 SIS EKONOMISI (kullanici: 'ayni acida 1 sis varsa 3 tane atilmasina gerek yok'): bu acida (<= 10 derece) 12 sn onceden planlanmis / atilmis (75 sn) sis veya yasayan sis nesnesi
         //   (8-60 m, standart sis) varsa bu atis yapilmaz. Temas kesmedeki +-14 derecelik genis perde ayri aci sayilir.
@@ -124,7 +143,7 @@ private _mod = _mode;
                     && {([_aticiPos getDir _x, _yon] call _acikFn) <= 10} && {(_aticiPos distance2D _x) >= 8}) then { _canliNesne = _x; };
             } forEach (nearestObjects [_aticiPos, ["SmokeShell"], 60]);
         };
-        if (_kayit >= 0 || {!isNull _canliNesne}) then {
+        if (!_ekoAtla && {_kayit >= 0 || {!isNull _canliNesne}}) then {
             if (isNil "lambs_danger_sisEkoN") then { lambs_danger_sisEkoN = 0; };
             lambs_danger_sisEkoSay = (missionNamespace getVariable ["lambs_danger_sisEkoSay", 0]) + 1;
             if (lambs_danger_sisEkoN < 40) then {
@@ -134,11 +153,16 @@ private _mod = _mode;
             continue
         };
         private _sisPos = _aticiPos getPos [_atisMesafe, _yon];
+        if (_perde) then {   // hareket eksenine DIK hat: ortada 0, yanlara +-aralik
+            private _lat = (_i - ((_atisSayisi - 1) / 2)) * _aralik;
+            _sisPos = _sisPos getPos [abs _lat, _yon + ([90, -90] select (_lat < 0))];
+        };
 
         // ruzgar telafisi: sis ruzgar yonune kayar -> ruzgar ustune nisan al
         private _ruzgar = wind;
-        private _ofs = [-(_ruzgar select 0) * 3, -(_ruzgar select 1) * 3, 0];
-        if ((vectorMagnitude _ofs) > 8) then { _ofs = (vectorNormalized _ofs) vectorMultiply 8; };
+        private _rk = [3, 4] select (_perde && {missionNamespace getVariable ["lambs_danger_sisPerdeRuzgar", true]});   // v8.755: perde modunda 4 sn'lik ruzgar kaymasi
+        private _ofs = [-(_ruzgar select 0) * _rk, -(_ruzgar select 1) * _rk, 0];
+        if ((vectorMagnitude _ofs) > (2 * _rk + 2)) then { _ofs = (vectorNormalized _ofs) vectorMultiply (2 * _rk + 2); };
         _sisPos = _sisPos vectorAdd _ofs;
         // sis atici ile hedef arasinda kalsin (ruzgar dostun ustune de, menzil disina da tasimasin)
         _sisPos = _aticiPos getPos [(((_aticiPos distance2D _sisPos) max 12) min 38), _aticiPos getDir _sisPos];
@@ -151,7 +175,7 @@ private _mod = _mode;
             private _tn = toLower (typeOf _x);
             ((_tn find "red") < 0) && {(_tn find "green") < 0} && {(_tn find "blue") < 0} && {(_tn find "yellow") < 0} && {(_tn find "purple") < 0} && {(_tn find "orange") < 0}
         };
-        if (_noktaKayit >= 0 || {_noktaNesne >= 0}) then {
+        if (!_ekoAtla && {_noktaKayit >= 0 || {_noktaNesne >= 0}}) then {
             lambs_danger_sisEkoSay = (missionNamespace getVariable ["lambs_danger_sisEkoSay", 0]) + 1;
             if ((missionNamespace getVariable ["lambs_danger_sisEkoN", 0]) < 40) then {
                 lambs_danger_sisEkoN = (missionNamespace getVariable ["lambs_danger_sisEkoN", 0]) + 1;
@@ -163,6 +187,8 @@ private _mod = _mode;
             lambs_danger_sisListe pushBack [_sisPos, time];
             _atici setVariable [QGVAR(sisIzin), time + 15];   // v8.383: firedHub motor sisi kapisi bu atisi tanir
             [_atici, _sisPos] call EFUNC(main,doSmoke);
+            _atilan = _atilan + 1;
+            _pozlar pushBack _sisPos;
 
             if (EGVAR(main,debug_functions)) then {
                 diag_log format [
@@ -172,7 +198,31 @@ private _mod = _mode;
             };
         };
 
-        if (_i < (_atisSayisi - 1)) then { sleep 2.5; };
+        if (_i < (_atisSayisi - 1)) then { sleep ([2.5, 1.5] select _perde); };
+    };
+    // v8.755 OLCUM: olay logu + 7 sn sonra liderin gozunden tehdit noktasina hatti kesen duman bulutu sayisi (fnc_dumanPerde)
+    if (_perde && {_atilan > 0}) then {
+        private _sy = missionNamespace getVariable ["lambs_danger_sisPerdeSay", createHashMap];
+        _sy set ["olay", (_sy getOrDefault ["olay", 0]) + 1];
+        _sy set ["atis", (_sy getOrDefault ["atis", 0]) + _atilan];
+        private _ln = missionNamespace getVariable ["lambs_danger_sisPerdeLogN", 0];
+        if (_ln < 40) then {
+            missionNamespace setVariable ["lambs_danger_sisPerdeLogN", _ln + 1];
+            diag_log format ["[SIS-PERDE] %1 | mod:%2 | %3 duman (plan %4) | aralik %5 m | tehdit %6 m | ruzgar %7 m/sn | atici %8", groupId group (_aticilar select 0), _mod, _atilan, _atisSayisi, _aralik, round ((_aticilar select 0) distance2D _targetPos), (vectorMagnitude wind) toFixed 1, count _aticilar];
+        };
+        [{
+            params ["_l", "_tp", "_mod2"];
+            if (!alive _l) exitWith {};
+            private _k = [eyePos _l, (AGLToASL _tp) vectorAdd [0, 0, 1.5], 14] call FUNC(dumanPerde);
+            private _s2 = missionNamespace getVariable ["lambs_danger_sisPerdeSay", createHashMap];
+            _s2 set ["olcum", (_s2 getOrDefault ["olcum", 0]) + 1];
+            if (_k > 0) then { _s2 set ["olcum_kesen", (_s2 getOrDefault ["olcum_kesen", 0]) + 1]; };
+            private _n2 = missionNamespace getVariable ["lambs_danger_sisPerdeOlcLogN", 0];
+            if (_n2 < 30) then {
+                missionNamespace setVariable ["lambs_danger_sisPerdeOlcLogN", _n2 + 1];
+                diag_log format ["[SIS-PERDE-OLCUM] %1 | mod:%2 | 7 sn sonra lider -> tehdit hattini kesen duman bulutu: %3 (0 = perde ise yaramadi)", groupId group _l, _mod2, _k];
+            };
+        }, [leader group (_aticilar select 0), _targetPos, _mod], 7] call CBA_fnc_waitAndExecute;
     };
 };
 

@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * SIS (DUMAN) BUTCESI (v8.330) — kullanici: 'askerler cok fazla smoke atiyorlar, gomuyorlar, bunun onune gec'. Bir saldirida sis uc ayri yerden atiliyordu: fnc_tacticalSmoke (COVER_MOVE / BREAK_CONTACT) + fnc_tacticsAssault (lider sis + 40mm sis)
  * + fnc_tacticsFlank (lider sis) + bounding basi + geri cekilme / AT / zirhtan kacis; hepsinin kendi cooldown'u vardi, birbirini bilmiyordu. Bu kapi TUM askeri sis atislarinin ortak butcesidir:
- *   TARAF butcesi : 120 sn'de en cok N sis OLAYI (CBA lambs_danger_sisButceMax, varsayilan 2; 0 = hic sis atilmaz) ve iki olay arasi en az 25 sn
+ *   TARAF butcesi : 120 sn'de en cok N sis OLAYI (CBA lambs_danger_sisButceMax, varsayilan 3 (v8.755; perde tek olay); 0 = hic sis atilmaz) ve iki olay arasi en az 25 sn
  *   GRUP aralik   : ayni grup en az 90 sn (CBA lambs_danger_sisGrupAralik; temas kesmede 60 sn)
  *   GERCEK TEHDIT : grup temasta (contact) ya da lider baski altinda olmali (temassiz bounding / manevra sis atmaz)
  *   OLAY          : olay basina 1 kayit; temas kesmedeki 2-3 atislik derin perde TEK olay sayilir
@@ -21,7 +21,7 @@ params [["_g", grpNull, [grpNull, objNull]], ["_mod", "COVER_MOVE", [""]]];
 if (_g isEqualType objNull) then { _g = group _g; };
 if (isNull _g) exitWith {false};
 
-private _maks = round (missionNamespace getVariable ["lambs_danger_sisButceMax", 2]);
+private _maks = round (missionNamespace getVariable ["lambs_danger_sisButceMax", 3]);
 private _ret = {
     params ["_neden"];
     lambs_danger_sisButceRetN = (missionNamespace getVariable ["lambs_danger_sisButceRetN", 0]) + 1;
