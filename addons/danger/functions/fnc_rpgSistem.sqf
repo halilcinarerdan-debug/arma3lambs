@@ -201,6 +201,12 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                     if (_tSec < 0 && {(currentWeapon _uu) isEqualTo _ll}) then { _tSec = time - _t0; };
                     if (_tAtis < 0 && {(_uu getVariable [QGVAR(rpgAtisT), -999]) >= _t0}) then { _tAtis = time - _t0; };
                     if (_tAtis >= 0) exitWith {};
+                    // v8.765 SILAHI BIRAKMASIN (kullanici: 'bazen silah degistiriyor roketi birakiyor'): ates oncesi baska katman / motor tufege gecerse roketatar yeniden secilir (CBA rpgSilahKoru)
+                    if (_tSec >= 0 && {(currentWeapon _uu) isNotEqualTo _ll} && {(_uu ammo _ll) > 0} && {missionNamespace getVariable ["lambs_danger_rpgSilahKoru", true]}) then {
+                        _uu selectWeapon _ll;
+                        private _sy = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
+                        _sy set ["silah_geri_secildi", (_sy getOrDefault ["silah_geri_secildi", 0]) + 1];
+                    };
                     sleep 0.25;
                 };
                 private _n = missionNamespace getVariable ["lambs_danger_rpgZamanLogN", 0];

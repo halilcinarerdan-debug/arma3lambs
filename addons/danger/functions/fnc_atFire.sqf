@@ -51,6 +51,7 @@ if ((currentWeapon _unit) isNotEqualTo _launcher) then {
         [{
             params ["_u", "_t"];
             if (alive _u && {alive _t} && {[_u, _t, "RPG"] call (missionNamespace getVariable ["lambs_danger_fnc_atisGuvenli", {true}])}) then {
+                if ((currentWeapon _u) isNotEqualTo (secondaryWeapon _u) && {missionNamespace getVariable ["lambs_danger_rpgSilahKoru", true]}) then { _u selectWeapon (secondaryWeapon _u); };   // v8.765: silah birakildiysa roketatari geri sec
                 _u doFire _t;
             };
         }, [_unit, _target], ((missionNamespace getVariable ["lambs_danger_atAtisGecikme", 4]) max 0.3) min 8] call CBA_fnc_waitAndExecute;   // v8.759: CBA atAtisGecikme (silah secimi -> ates; eski sabit 4 sn)

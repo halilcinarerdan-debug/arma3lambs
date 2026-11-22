@@ -86,8 +86,9 @@ if (_neden isNotEqualTo "") then {
         if (!isNull _t && {alive _t} && {(_taraf getFriend (side group _t)) < 0.6} && {((getPosASL _proj) distance (aimPos _t)) < 700}) then {
             private _pp = getPosASL _proj;
             private _hp = aimPos _t;
-            private _tf = (((_pp distance _hp) / (_vm max 80)) min 6);
-            private _gp = (_hp vectorAdd ((velocity _t) vectorMultiply (_tf * _acc))) vectorAdd [0, 0, 0.5 * 9.81 * _tf * _tf * 0.35 * _acc];   // ongoru + dusme payi becerisiyle olceklenir
+            private _tf = (((_pp distance _hp) / (_vm max 150)) min 6);   // v8.764: roket hizlanir -> ortalama ucus hizi tabani 150 m/sn (eski 80)
+            private _ld = [_acc, 1] select (_t isKindOf "LandVehicle");   // v8.764: ARAC hedefte ongoru (hiz x ucus suresi) TAM (hesap); beceri yalniz rastgele sapma konisini belirler
+            private _gp = (_hp vectorAdd ((velocity _t) vectorMultiply (_tf * _ld))) vectorAdd [0, 0, 0.5 * 9.81 * _tf * _tf * 0.35 * _acc];   // ongoru + dusme payi becerisiyle olceklenir
             private _dirT = vectorNormalized (_gp vectorDiff _pp);
             private _dirN = vectorNormalized (velocity _proj);
             private _dirY = vectorNormalized ((_dirN vectorMultiply (1 - _dz)) vectorAdd (_dirT vectorMultiply _dz));

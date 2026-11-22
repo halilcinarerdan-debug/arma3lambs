@@ -184,7 +184,9 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     {
         private _at = _x;
         private _hedef = getPosATL _at;
-        private _cover = [_at, _zirh, 60, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
+        // v8.764 DIREKT ATIS (kullanici: 'arac karsisindayken eleman mal gibi bekliyo'; CBA atDirekt): AT zirhi ZATEN goruyorsa (gorunurluk >= 0.3, 40-450 m) pozisyon degistirmez, oldugu yerden atar
+        private _direkt = (missionNamespace getVariable ["lambs_danger_atDirekt", false]) && {(_at distance2D _zirhPos) >= 40} && {(_at distance2D _zirhPos) <= 450} && {([_at, "VIEW", _zirh] checkVisibility [eyePos _at, aimPos _zirh]) >= 0.3};
+        private _cover = if (_direkt) then {[]} else { [_at, _zirh, 60, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover) };
         if (_cover isNotEqualTo []) then {
             private _cp = (_cover select 0) select 0;
             if ((_cp distance2D _zirhPos) >= 60 && {(_cp distance2D _zirhPos) <= 420}) then {
@@ -250,7 +252,7 @@ _group setVariable [QGVAR(atEngageStart), _baslangic];
     } forEach (_eskortlar - _atanan);
 
     // Varisa kadar bekle (en fazla 14 sn); gelmeyenlere emri 3 sn'de bir tazele
-    private _bitis = time + 14;
+    private _bitis = time + ([14, 4] select (missionNamespace getVariable ["lambs_danger_atDirekt", false]));   // v8.764: direkt modda en cok 4 sn
     while {time < _bitis && {!isNull _group}} do {
         private _gelmeyen = _varis select {
             alive (_x select 0) && {((_x select 0) distance2D (_x select 1)) > 6}
