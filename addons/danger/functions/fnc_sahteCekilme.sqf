@@ -22,7 +22,7 @@ diag_log "[SAHTE-CEKILME] sahte geri cekilme + alan hakimiyeti (oyuncuyu kotu ar
 
 [] spawn {
     private _logN = 0;
-    private _say = createHashMapFromArray [["basladi", 0], ["bitti", 0], ["yerYok", 0], ["geriDegil", 0], ["kotuAraziYok", 0], ["gozcuYok", 0], ["sans", 0]];
+    private _say = createHashMapFromArray [["basladi", 0], ["bitti", 0], ["yerYok", 0], ["geriDegil", 0], ["kotuAraziYok", 0], ["gozcuYok", 0], ["sans", 0], ["hBayrak", 0], ["hSahip", 0], ["hBina", 0], ["hAskerAz", 0], ["hBaski", 0], ["hHedefYok", 0], ["hYakin", 0]];
     private _ozetT = time + 60;
     private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     while {true} do {
@@ -31,7 +31,7 @@ diag_log "[SAHTE-CEKILME] sahte geri cekilme + alan hakimiyeti (oyuncuyu kotu ar
             _ozetT = time + 60;
             private _top = 0;
             { _top = _top + (_say get _x); } forEach (keys _say);
-            if (_top > 0) then { diag_log format ["[SAHTE-CEKILME-OZET] 60 sn: basladi %1 | bitti %2 | ret nedenleri: arka yer yok %3, geri degil %4, kotu arazi yetersiz %5, gozetleyici yok %6, sans tutmadi %7", _say get "basladi", _say get "bitti", _say get "yerYok", _say get "geriDegil", _say get "kotuAraziYok", _say get "gozcuYok", _say get "sans"]; };
+            if (_top > 0) then { diag_log format ["[SAHTE-CEKILME-OZET] 60 sn: basladi %1 | bitti %2 | ret nedenleri: arka yer yok %3, geri degil %4, kotu arazi yetersiz %5, gozetleyici yok %6, sans tutmadi %7 | HUNI (temasli grup-tur, v8.722): baska taktik / geri cekilme bayragi %8, LAMBS-TUTAN sahipli %9, binada %10, asker az (< %15) %11, baski >= 0.4 %12, oyuncu hedef yok (<= %16 m) %13, oyuncu < %17 m %14", _say get "basladi", _say get "bitti", _say get "yerYok", _say get "geriDegil", _say get "kotuAraziYok", _say get "gozcuYok", _say get "sans", _say get "hBayrak", _say get "hSahip", _say get "hBina", _say get "hAskerAz", _say get "hBaski", _say get "hHedefYok", _say get "hYakin", ((missionNamespace getVariable ["lambs_danger_sahteMinAsker", 6]) max 4) min 16, ((missionNamespace getVariable ["lambs_danger_sahteMenzilMax", 400]) max 170) min 700, ((missionNamespace getVariable ["lambs_danger_sahteMenzilMin", 120]) max 80) min 300]; };
             { _say set [_x, 0]; } forEach (keys _say);
         };
         if !(missionNamespace getVariable ["lambs_danger_sahteCekilme", false]) then { continue };
@@ -51,24 +51,26 @@ diag_log "[SAHTE-CEKILME] sahte geri cekilme + alan hakimiyeti (oyuncuyu kotu ar
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if (time < (_g getVariable [QGVAR(sahteT), 0])) then { continue };
             if ((_g getVariable [QGVAR(contact), 0]) < (time - 90)) then { continue };
+            // v8.722 HUNI: kapilar ayri ayri sayilir (sahte cekilme 111 RPT'de hic baslamadi; hangi kapida elendigi bilinmiyordu)
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isSweeping), false]}
                 || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]}
-                || {([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]} || {(insideBuilding _l) > 0.5}
-            ) then { continue };
+            ) then { _say set ["hBayrak", (_say get "hBayrak") + 1]; continue };
+            if (([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]) then { _say set ["hSahip", (_say get "hSahip") + 1]; continue };
+            if ((insideBuilding _l) > 0.5) then { _say set ["hBina", (_say get "hBina") + 1]; continue };
             private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
-            if ((count _us) < _minA) then { continue };
+            if ((count _us) < _minA) then { _say set ["hAskerAz", (_say get "hAskerAz") + 1]; continue };
             private _bsk = 0;
             { _bsk = _bsk + (getSuppression _x); } forEach _us;
-            if ((_bsk / (count _us)) >= 0.4) then { continue };
+            if ((_bsk / (count _us)) >= 0.4) then { _say set ["hBaski", (_say get "hBaski") + 1]; continue };
             private _hedef = (_l targets [true, _mMax, [], 60]) select {alive _x && {(isPlayer _x) || {((crew _x) findIf {isPlayer _x}) >= 0}}};
-            if (_hedef isEqualTo []) then { continue };
+            if (_hedef isEqualTo []) then { _say set ["hHedefYok", (_say get "hHedefYok") + 1]; continue };
             _n = _n + 1;
             _hedef = [_hedef, [], {_l distance2D _x}, "ASCEND"] call BIS_fnc_sortBy;
             private _p = _hedef select 0;
             private _d = _l distance2D _p;
-            if (_d < _mMin) then { continue };
+            if (_d < _mMin) then { _say set ["hYakin", (_say get "hYakin") + 1]; continue };
             _g setVariable [QGVAR(sahteT), time + 45];   // bir sonraki bakis (sans / ret sonrasi)
             if ((random 1) > _sans) then { _say set ["sans", (_say get "sans") + 1]; continue };
 

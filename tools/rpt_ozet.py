@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.721"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.722"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -464,6 +464,28 @@ def kabul(path):
     k_mes = [int(m.group(1)) for l in k_duy for m in [re.search(r"\| (\d+) m \(etkin", l)] if m]
     k_ozet = sum(int(m.group(1)) for l in L for m in [re.search(r"OYUNCU konusmasi: (\d+)", l)] if m)
     ekle("OYUNCU KONUSMASI (ACRE2)", "BILGI", "ACRE2 algilandi: %s | oyuncu konusma olayi (log): %d | duyuldu (log satiri): %d%s | 60 sn ozetlerinde oyuncu konusmasi duyulma: %d" % ("evet" if acre else "hayir", k_olay, len(k_duy), (" (mesafe %d-%d m)" % (min(k_mes), max(k_mes))) if k_mes else "", k_ozet))
+
+    # --- v8.722: sahte geri cekilme HUNISI (hangi kapida eleniyor) + el bombasi izi (bina girisi)
+    hn = [0] * 7
+    hn_n = 0
+    for l in L:
+        m = re.search(r"\[SAHTE-CEKILME-OZET\].*?HUNI.*?bayragi (\d+), LAMBS-TUTAN sahipli (\d+), binada (\d+), asker az \(< \d+\) (\d+), baski >= 0.4 (\d+), oyuncu hedef yok \(<= \d+ m\) (\d+), oyuncu < \d+ m (\d+)", l)
+        if m:
+            hn_n += 1
+            for i in range(7): hn[i] += int(m.group(i + 1))
+    if hn_n:
+        ekle("SAHTE CEKILME HUNISI", "BILGI", "%d ozet | temasli grup-tur elenme: taktik/bayrak %d, LAMBS-TUTAN %d, binada %d, asker az %d, baski %d, oyuncu hedef yok %d, oyuncu cok yakin %d (en buyuk kalem = ana engel)" % ((hn_n,) + tuple(hn)))
+    else:
+        ekle("SAHTE CEKILME HUNISI", "BILGI", "ozet yok (v8.722 oncesi RPT ya da sahteCekilme kapali / temasli grup olmadi)")
+    biz = [l for l in L if "[BOMBA-IZI]" in l]
+    if biz:
+        def _hd(l):
+            m = re.search(r"hedefe (\d+) m", l)
+            return int(m.group(1)) if m else 999
+        ic = len([1 for l in biz if "bina altinda true" in l])
+        yk = len([1 for l in biz if _hd(l) <= 6])
+        dv = len([1 for l in biz if re.search(r"nesne Land_\w*(House|Shed|Cargo|Hotel|Barracks|Church|Office|Bunker|Hut)\w*, yukseklik \+?[1-4]\.", l)])
+        ekle("EL BOMBASI IZI (bina girisi)", "BILGI", "%d bomba | hedefe <= 6 m: %d | bina altinda (iceri girdi): %d | duvara +1..+4 m'de carpan (pencere denizligi): %d (v8.722 tup denetimi sonrasi azalmali)" % (len(biz), yk, ic, dv))
 
     # --- 9) senaryo kapsami (tetiklenmeyen ozellikler)
     for ad, tag, ipucu in [
