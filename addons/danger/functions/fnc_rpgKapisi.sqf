@@ -76,6 +76,41 @@ if (_neden isNotEqualTo "") then {
         diag_log format ["[RPG-IPTAL] %1 | %2 | %3 (%4) | neden: %5 | dusus %6 m | dusus hedefi: %7 | kaynak: %8 | mermi 12 sn sonra geri verilir", groupId group _unit, name _unit, _weapon, _ammo, _neden, round _dI, _tur, _kaynak];
     };
 } else {
+    // v8.761 ISABET DUZELTMESI (kullanici: 'eleman tutturamiyor acil duzelt'): gudumsuz roketin cikis yonu hedefin ONGORULEN konumuna (hiz x ucus suresi + yercekimi payi) CBA rpgIsabetDuzeltme (0.85) orani kadar cevrilir (botIsabet mermi duzeltmesi gibi); hedef: karar katmani hedefi (son 12 sn) ya da atanmis / saldiri hedefi
+    // HILESIZ (kullanici: 'hilesiz olsun accuracy ayarina baksin'): duzeltme orani ve ongoru TIRADOR BECERISINE (aimingAccuracy; CBA 'ELITE bot becerisi' isabet ayarlari) bagli; dusuk beceri = az duzeltme + rastgele sapma konisi
+    private _acc = (_unit skill "aimingAccuracy") max 0 min 1;
+    private _dz = (((missionNamespace getVariable ["lambs_danger_rpgIsabetDuzeltme", 0.85]) max 0) min 1) * _acc;
+    if (_dz > 0 && {_vm > 1}) then {
+        private _t = _unit getVariable [QGVAR(rpgHedef), objNull];
+        if (isNull _t || {(time - (_unit getVariable [QGVAR(rpgKararT), -999])) > 12} || {!alive _t}) then { _t = assignedTarget _unit; if (isNull _t) then { _t = getAttackTarget _unit; }; };
+        if (!isNull _t && {alive _t} && {(_taraf getFriend (side group _t)) < 0.6} && {((getPosASL _proj) distance (aimPos _t)) < 700}) then {
+            private _pp = getPosASL _proj;
+            private _hp = aimPos _t;
+            private _tf = (((_pp distance _hp) / (_vm max 80)) min 6);
+            private _gp = (_hp vectorAdd ((velocity _t) vectorMultiply (_tf * _acc))) vectorAdd [0, 0, 0.5 * 9.81 * _tf * _tf * 0.35 * _acc];   // ongoru + dusme payi becerisiyle olceklenir
+            private _dirT = vectorNormalized (_gp vectorDiff _pp);
+            private _dirN = vectorNormalized (velocity _proj);
+            private _dirY = vectorNormalized ((_dirN vectorMultiply (1 - _dz)) vectorAdd (_dirT vectorMultiply _dz));
+            private _sap = acos ((((_dirN vectorDotProduct _dirT) min 1) max -1));
+            private _yan = _dirY vectorCrossProduct [0, 0, 1];
+            // rastgele sapma konisi: (1 - beceri) x 2.5 derece (yaw / pitch)
+            if ((vectorMagnitude _yan) > 0.01) then {
+                private _hata = (1 - _acc) * 2.5;
+                private _yn = vectorNormalized _yan;
+                private _yu = _yn vectorCrossProduct _dirY;
+                _dirY = vectorNormalized (_dirY vectorAdd (_yn vectorMultiply ((((random 2) - 1) * (sin _hata)))) vectorAdd (_yu vectorMultiply ((((random 2) - 1) * (sin _hata)))));
+                _yan = _dirY vectorCrossProduct [0, 0, 1];
+            };
+            if ((vectorMagnitude _yan) > 0.01) then {
+                _proj setVelocity (_dirY vectorMultiply _vm);
+                _proj setVectorDirAndUp [_dirY, _yan vectorCrossProduct _dirY];
+                private _sy = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
+                _sy set ["isabet_duzeltme", (_sy getOrDefault ["isabet_duzeltme", 0]) + 1];
+                private _ln = missionNamespace getVariable ["lambs_danger_rpgDuzLogN", 0];
+                if (_ln < 30) then { missionNamespace setVariable ["lambs_danger_rpgDuzLogN", _ln + 1]; diag_log format ["[RPG-DUZELTME] %1 | %2 | hedef %3 %4 m | sapma %5 derece -> orani %6 (beceri %9) | ucus %7 sn | hedef hizi %8 m/sn", groupId group _unit, name _unit, typeOf _t, round (_pp distance _hp), _sap toFixed 1, _dz toFixed 2, _tf toFixed 1, (vectorMagnitude (velocity _t)) toFixed 1, _acc toFixed 2]; };
+            };
+        };
+    };
     private _k = format ["atis_%1", _kaynak];
     _say set [_k, (_say getOrDefault [_k, 0]) + 1];
     private _kt = format ["hedef_%1", _tur];

@@ -167,6 +167,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             _verilen = _verilen + 1;
             _u setVariable [QGVAR(rpgBekleT), time + _bekle];
             _u setVariable [QGVAR(rpgKararT), time];
+            _u setVariable [QGVAR(rpgHedef), _en];   // v8.761: isabet duzeltmesi (fnc_rpgKapisi) icin hedef
             _g setVariable [QGVAR(rpgGrupT), time];
             _g reveal [_en, 2.5];
             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_u, _ls] call CBA_fnc_selectWeapon; };
