@@ -21,6 +21,7 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
 
 [] spawn {
     private _sayac = createHashMapFromArray [["n", 0], ["siper", 0], ["uzak", 0], ["acik", 0], ["kume", 0], ["dostMes", 0], ["sSTAND", 0], ["sCROUCH", 0], ["sPRONE", 0], ["sN", 0], ["hN", 0], ["lider", 0], ["fmRIFLE", 0], ["fmMG", 0], ["fmAT", 0], ["fmMEDIC", 0], ["fmMARKSMAN", 0], ["rolMG", 0], ["rolAT", 0], ["rolMEDIC", 0], ["rolRIFLE", 0], ["rolMARKSMAN", 0]];
+    private _bsay = createHashMap;   // v8.757 BINA / EV OLCUMU (kullanici: 'evler var onlarda siper sayilmiyor, afganistan burasi')
     private _ozetT = time + 60;
     private _rf = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}];
     while {true} do {
@@ -33,10 +34,16 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             if (_k >= 30) exitWith {};
             if (
                 !local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
-                || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 30)} || {(insideBuilding _u) > 0.5}
+                || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 30)}
             ) then { continue };
             private _e = _u findNearestEnemy _u;
             if (isNull _e || {!alive _e} || {(_u distance _e) > 400} || {(_u knowsAbout _e) < _esik}) then { continue };
+            // v8.757: bina ICINDEKI asker eski siper olcumune girmez (ayri sayilir; eskiden hic sayilmiyordu -> Afgan koyunde 'gercek siper %0' yaniltici)
+            if ((insideBuilding _u) > 0.5) then {
+                _bsay set ["ic_n", (_bsay getOrDefault ["ic_n", 0]) + 1];
+                if (([_u, "VIEW", _e] checkVisibility [eyePos _u, eyePos _e]) >= 0.3) then { _bsay set ["ic_gorur", (_bsay getOrDefault ["ic_gorur", 0]) + 1]; };
+                continue
+            };
             _k = _k + 1;
             _sayac set ["n", (_sayac get "n") + 1];
             private _lider = _u isEqualTo (leader group _u);
@@ -51,6 +58,14 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             private _ht = lineIntersectsSurfaces [eyePos _e, _pa, _e, _u, true, 1, "VIEW", "NONE"];
             private _sinif = if (_ht isNotEqualTo []) then { ["uzak", "siper"] select ((((_ht select 0) select 0) distance _pa) < 4) } else { ["acik", "uzak"] select (terrainIntersectASL [eyePos _e, _pa]) };
             _sayac set [_sinif, (_sayac get _sinif) + 1];
+            // v8.757: bina disi: hattin ilk vurusu BINA / EV ise (<= 8 m) 'bina arkasi'; herhangi nesne <= 6 m ise 'yakin nesne' (eski kural 4 m)
+            _bsay set ["dis_n", (_bsay getOrDefault ["dis_n", 0]) + 1];
+            if (_ht isNotEqualTo []) then {
+                private _hd = ((_ht select 0) select 0) distance _pa;
+                private _ho = (_ht select 0) select 2;
+                if (_hd < 6) then { _bsay set ["yakin6", (_bsay getOrDefault ["yakin6", 0]) + 1]; };
+                if (_hd < 8 && {!isNull _ho} && {(_ho isKindOf "House") || {_ho isKindOf "Building"}}) then { _bsay set ["bina_arka", (_bsay getOrDefault ["bina_arka", 0]) + 1]; };
+            };
             // v8.737: HAREKETSIZ asker icin ayri siniflar (kullanici: 'botlari sipere yapistir'; hareketli askerler siper % 'yi sulandiriyordu) + ates edebiliyor mu (dusmani su an goruyor)
             if ((speed _u) < 1.5) then {
                 _sayac set ["hs_n", (_sayac getOrDefault ["hs_n", 0]) + 1];
@@ -83,6 +98,12 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             if (_hsn > 0) then {
                 diag_log format ["[COVER-OLCUM-HAREKETSIZ] 60 sn: hareketsiz ornek %1 | GERCEK SIPER (<= 4 m nesne) %%%2 | uzak engel %%%3 | acik %%%4 | dusmani su an goruyor (ates edebilir) %%%5", _hsn, round (100 * (_sayac getOrDefault ["hs_siper", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_uzak", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_acik", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_gorur", 0]) / _hsn)];
             };
+            private _bi = _bsay getOrDefault ["ic_n", 0];
+            private _bd = _bsay getOrDefault ["dis_n", 0];
+            if ((_bi + _bd) > 0) then {
+                diag_log format ["[COVER-OLCUM-BINA] 60 sn: bina ICI %1 (dusmani goren %2) | bina DISI %3: bina / ev ARKASI (<= 8 m) %4 | herhangi nesne <= 6 m %5 | TOPLAM siper benzeri (bina ici + bina arkasi) %6 / %7", _bi, _bsay getOrDefault ["ic_gorur", 0], _bd, _bsay getOrDefault ["bina_arka", 0], _bsay getOrDefault ["yakin6", 0], _bi + (_bsay getOrDefault ["bina_arka", 0]), _bi + _bd];
+            };
+            { _bsay set [_x, 0]; } forEach (keys _bsay);
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };
     };

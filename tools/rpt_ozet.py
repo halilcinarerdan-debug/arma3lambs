@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.756"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.757"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -593,6 +593,13 @@ def kabul(path):
     ekle("DUMAN PERDESI (okkali perde)", "BILGI", ("perde olayi %d (ilk 40 loglanir) | 7 sn sonra lider -> tehdit hattini KESEN perde %d / %d olcum (hedef: cogu kesmeli)" % (sp, sok, len(so))) if sp else "perde kaydi yok (v8.755 oncesi RPT ya da duman olayi yok; [SIS-BUTCE] ret nedenleri butce / aralik mi bak)")
     snp = [l for l in L if "[SIPER-SNAP]" in l]
     ekle("VARIS NOKTASI SIPERE OTUR", "BILGI", ("[SIPER-SNAP] kaydirilan nokta %d (ilk 40 loglanir; bacak %d / geri cekilme %d) | hedef: gercek siper %% ve 'hareketsiz gercek siper %%' artmali" % (len(snp), len([1 for l in snp if "] bacak" in l]), len([1 for l in snp if "geri cekilme" in l]))) if snp else "[SIPER-SNAP] yok (v8.756 oncesi RPT ya da yakinda sert nesne bulunmadi)")
+    cb = [l for l in L if "[COVER-OLCUM-BINA]" in l]
+    cbi = cbd = cba = cbt = cby = 0
+    for l in cb:
+        m = re.search(r"bina ICI (\d+) .*? bina DISI (\d+): bina / ev ARKASI \(<= 8 m\) (\d+) \| herhangi nesne <= 6 m (\d+)", l)
+        if m: cbi += int(m.group(1)); cbd += int(m.group(2)); cba += int(m.group(3)); cby += int(m.group(4))
+    cbt = cbi + cbd
+    ekle("COVER: BINA / EV DAHIL (Afgan koyu)", "BILGI", ("ornek %d | bina ICI %%%.0f | bina / ev ARKASI (<= 8 m) %%%.0f | nesne <= 6 m %%%.0f | SIPER BENZERI (bina ici + bina arkasi) %%%.0f" % (cbt, 100.0*cbi/max(cbt,1), 100.0*cba/max(cbt,1), 100.0*cby/max(cbt,1), 100.0*(cbi+cba)/max(cbt,1))) if cbt else "[COVER-OLCUM-BINA] yok (v8.757 oncesi RPT)")
     se = [l for l in L if "[SKILL-ESIT]" in l]
     ekle("OYUNCU GRUBU ESITLIGI (beceri + hiz)", "BILGI", re.sub(r"^.*?\"\[SKILL-ESIT\] ", "", se[-1]).strip().rstrip('"')[:420] if se else "[SKILL-ESIT] yok (v8.745 oncesi RPT ya da oyuncu grubunda bot / dusman bot yok)")
     ca_n = ca_g = 0
