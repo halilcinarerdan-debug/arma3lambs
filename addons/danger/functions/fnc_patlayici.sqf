@@ -441,6 +441,10 @@ lambs_danger_patlayiciDon = {
                             private _ihr = getNumber (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _mag >> "ammo")) >> "indirectHitRange");
                             private _icerde = (insideBuilding _u) > 0.5;
                             if (_bTM < _bombaMin) then { _sayac set ["g_yakin", (_sayac getOrDefault ["g_yakin", 0]) + 1]; continue };
+                            // v8.728 YUZ YUZE YASAGI (kullanici: 'face to face'de el bombasi atilmasin'): hedef bombaYuzYuzeM (20 m) icinde VE gorus hatti ACIK (duvar / siper arkasinda degil, gorunurluk >= 0.4) ise bomba atilmaz; asker ates eder (bomba 2-3 sn, olum yaricapi ~5-8 m, kendi canina da tehlike).
+                            //   Duvar arkasi / kapali hat / ust kat hedefe ve bina girisi bombasina (girisBombasi) dokunulmaz.
+                            private _yuzM = ((missionNamespace getVariable ["lambs_danger_bombaYuzYuzeM", 20]) max 0) min 60;
+                            if (_yuzM > 0 && {_bTM < _yuzM} && {!(lineIntersects [eyePos _u, eyePos _bT, _u, _bT])} && {([_u, "VIEW", _bT] checkVisibility [eyePos _u, eyePos _bT]) >= 0.4}) then { _sayac set ["g_yuzyuze", (_sayac getOrDefault ["g_yuzyuze", 0]) + 1]; continue };
                             private _dostYakin = (_bT nearEntities ["CAManBase", ((missionNamespace getVariable ["lambs_danger_bombaDostM", 8]) max 8) min 30]) findIf {alive _x && {(_taraf getFriend (side (group _x))) >= 0.6}} >= 0;
                             if (_dostYakin) then { _sayac set ["g_dost", (_sayac getOrDefault ["g_dost", 0]) + 1]; };
                             if (!_dostYakin && {(speed _u) < 6}) then {
@@ -463,8 +467,8 @@ lambs_danger_patlayiciDon = {
         if (time > _sonOzet) then {
             _sonOzet = time + 60;
             private _ys = missionNamespace getVariable ["lambs_danger_patlayiciSayac", createHashMap];
-            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 | UGL ek mermi verilen %2 | bomba firlatma sonucu (toplam): atildi %3 | atilmadi %4 | bomba neden atilmadi: mesafe %5 frag_yok %6 yedek %7 yakin %8 dost %9 deger_yok %10", _sayac get "bomba", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0], _sayac getOrDefault ["g_mesafe", 0], _sayac getOrDefault ["g_frag_yok", 0], _sayac getOrDefault ["g_yedek", 0], _sayac getOrDefault ["g_yakin", 0], _sayac getOrDefault ["g_dost", 0], _sayac getOrDefault ["g_deger", 0]];
-            { _sayac set [_x, 0]; } forEach ["bomba", "g_mesafe", "g_frag_yok", "g_yedek", "g_yakin", "g_dost", "g_deger"];
+            diag_log format ["[PATLAYICI-OZET] 60 sn: emir bomba %1 | UGL ek mermi verilen %2 | bomba firlatma sonucu (toplam): atildi %3 | atilmadi %4 | bomba neden atilmadi: mesafe %5 frag_yok %6 yedek %7 yakin %8 dost %9 deger_yok %10 yuz_yuze %11", _sayac get "bomba", _sayac get "ugl_ek", _ys getOrDefault ["FAT", 0], _ys getOrDefault ["yok", 0], _sayac getOrDefault ["g_mesafe", 0], _sayac getOrDefault ["g_frag_yok", 0], _sayac getOrDefault ["g_yedek", 0], _sayac getOrDefault ["g_yakin", 0], _sayac getOrDefault ["g_dost", 0], _sayac getOrDefault ["g_deger", 0], _sayac getOrDefault ["g_yuzyuze", 0]];
+            { _sayac set [_x, 0]; } forEach ["bomba", "g_mesafe", "g_frag_yok", "g_yedek", "g_yakin", "g_dost", "g_deger", "g_yuzyuze"];
         };
     };
 };
