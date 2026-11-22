@@ -51,6 +51,12 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             private _ht = lineIntersectsSurfaces [eyePos _e, _pa, _e, _u, true, 1, "VIEW", "NONE"];
             private _sinif = if (_ht isNotEqualTo []) then { ["uzak", "siper"] select ((((_ht select 0) select 0) distance _pa) < 4) } else { ["acik", "uzak"] select (terrainIntersectASL [eyePos _e, _pa]) };
             _sayac set [_sinif, (_sayac get _sinif) + 1];
+            // v8.737: HAREKETSIZ asker icin ayri siniflar (kullanici: 'botlari sipere yapistir'; hareketli askerler siper % 'yi sulandiriyordu) + ates edebiliyor mu (dusmani su an goruyor)
+            if ((speed _u) < 1.5) then {
+                _sayac set ["hs_n", (_sayac getOrDefault ["hs_n", 0]) + 1];
+                _sayac set ["hs_" + _sinif, (_sayac getOrDefault ["hs_" + _sinif, 0]) + 1];
+                if (([_u, "VIEW", _e] checkVisibility [eyePos _u, eyePos _e]) >= 0.3) then { _sayac set ["hs_gorur", (_sayac getOrDefault ["hs_gorur", 0]) + 1]; };
+            };
             // v8.662: DURUS: hareketsiz (< 1.5 m/sn) askerin duruşu = siper duruşu (STAND, CROUCH, PRONE); eskiden 'UP' sayiliyordu, stance 'STAND' doner
             if ((speed _u) < 1.5) then {
                 _sayac set ["sN", (_sayac get "sN") + 1];
@@ -72,6 +78,10 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
                     _sayac get "sN", round (100 * (_sayac get "sSTAND") / _sN), round (100 * (_sayac get "sCROUCH") / _sN), round (100 * (_sayac get "sPRONE") / _sN), _sayac get "hN",
                     _sayac get "rolMG", _sayac get "rolAT", _sayac get "rolMEDIC", _sayac get "rolMARKSMAN", _sayac get "rolRIFLE", _sayac get "lider",
                     _sayac get "fmRIFLE", _sayac get "fmMG", _sayac get "fmAT", _sayac get "fmMEDIC", _sayac get "fmMARKSMAN"];
+            };
+            private _hsn = _sayac getOrDefault ["hs_n", 0];
+            if (_hsn > 0) then {
+                diag_log format ["[COVER-OLCUM-HAREKETSIZ] 60 sn: hareketsiz ornek %1 | GERCEK SIPER (<= 4 m nesne) %%%2 | uzak engel %%%3 | acik %%%4 | dusmani su an goruyor (ates edebilir) %%%5", _hsn, round (100 * (_sayac getOrDefault ["hs_siper", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_uzak", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_acik", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_gorur", 0]) / _hsn)];
             };
             { _sayac set [_x, 0]; } forEach (keys _sayac);
         };

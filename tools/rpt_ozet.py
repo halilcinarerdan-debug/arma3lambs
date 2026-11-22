@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.736"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.737"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -545,6 +545,29 @@ def kabul(path):
             k = "baygin" if m.group(1) == "true" else ("elkelepce" if m.group(2) == "true" else ("teslim" if m.group(3) == "true" else "ACE disi / bilinmiyor (ornek yasam: %s)" % m.group(4)))
             cp_neden[k] = cp_neden.get(k, 0) + 1
     ekle("OYUNCU CAPTIVE (botlar seni dusman SAYMAZ)", "KONTROL" if cp else "GECTI", ("%d ROE-IHLAL satiri (ilk 60 loglanir): nedenler %s -> bu anlarda test gecersiz: botlar oyuncuyu hedef almaz / ROE hedefi unutturur" % (len(cp), cp_neden)) if cp else "oyuncu captive degil")
+    gc = {"sahte_siper_elendi": 0, "siper_karsilik": 0, "siper_saf_saklanma": 0}
+    for l in L:
+        if "[ACIK-SIPER-OZET]" in l:
+            for k in gc:
+                m = re.search(k + r"=(\d+)", l)
+                if m: gc[k] += int(m.group(1))
+    sahteHug = 0
+    for l in L:
+        m = re.search(r"sahte_siper=(\d+)", l)
+        if m and "SIPER-YAPIS-OZET" in l: sahteHug += int(m.group(1))
+    ekle("GERCEK SIPER KURALI", "BILGI", "sahte (gorunur + mermi geciren) aday elenen %d | karsilik verebilen aday %d | saf saklanma cezasi %d (ates edemeyen siper) | coverHug sahte siper (SIPER-YAPIS-OZET) %d" % (gc["sahte_siper_elendi"], gc["siper_karsilik"], gc["siper_saf_saklanma"], sahteHug))
+    vt = [0, 0]
+    for l in L:
+        m = re.search(r"\[VURULDU-TEPKI-OZET\] 60 sn: hareketsizken vurulan (\d+) \| yeni siper bulunup gonderilen (\d+)", l)
+        if m: vt[0] += int(m.group(1)); vt[1] += int(m.group(2))
+    ekle("VURULUNCA YENIDEN DEGERLENDIRME", "BILGI", "hareketsizken vurulan %d | yeni siper bulunup gonderilen %d (korunakliyken vurulma = siper 'sus' / yan yon acik; azalmali)" % tuple(vt))
+    hs = [l for l in L if "[COVER-OLCUM-HAREKETSIZ]" in l]
+    hn = hsip = huz = hac = hgo = 0.0
+    for l in hs:
+        m = re.search(r"hareketsiz ornek (\d+) \| GERCEK SIPER \(<= 4 m nesne\) %(\d+) \| uzak engel %(\d+) \| acik %(\d+) \| dusmani su an goruyor \(ates edebilir\) %(\d+)", l)
+        if m:
+            k = int(m.group(1)); hn += k; hsip += k * int(m.group(2)); huz += k * int(m.group(3)); hac += k * int(m.group(4)); hgo += k * int(m.group(5))
+    ekle("HAREKETSIZ ASKER SIPER KALITESI", "BILGI", ("hareketsiz ornek %d | GERCEK SIPER %%%.0f | uzak engel %%%.0f | acik %%%.0f | dusmani goruyor (ates edebilir) %%%.0f (hedef: gercek siper artar, acik azalir)" % (hn, hsip / hn, huz / hn, hac / hn, hgo / hn)) if hn else "hareketsiz ornek yok (v8.737 oncesi RPT)")
     og = [l for l in L if "[ONGORU-OLCUM] TAHMIN:" in l]
     if og:
         son = og[-1]

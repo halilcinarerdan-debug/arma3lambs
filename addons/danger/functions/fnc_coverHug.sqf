@@ -48,6 +48,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
             _sonOzet = time;
             private _a = _sayac get "ayarlandi";
             diag_log format ["[SIPER-YAPIS-OZET] 60 sn: ayarlandi:%1 (ort kayma %2 m) | acikta:%3 reddedildi:%4 | arazi siperi:%8 | durus UP:%5 MIDDLE:%6 DOWN:%7", _a, ((_sayac get "kaymaTop") / (_a max 1)) toFixed 2, _sayac get "acikta", _sayac get "reddedildi", _sayac get "UP", _sayac get "MIDDLE", _sayac get "DOWN", _sayac getOrDefault ["arazi", 0]];
+            if ((_sayac getOrDefault ["sahte_siper", 0]) > 0) then { diag_log format ["[SIPER-YAPIS-OZET] sahte_siper=%1 (v8.737: yakinda sert yuzey var ama gorunur + mermi geciren -> acikta sayildi)", _sayac getOrDefault ["sahte_siper", 0]]; };
             private _snO = missionNamespace getVariable ["lambs_danger_acikSinif", createHashMap];
             if (count _snO > 0) then {
                 private _top = ((_snO getOrDefault ["sert<=20m", 0]) + (_snO getOrDefault ["yalniz agac", 0]) + (_snO getOrDefault ["yalniz cali", 0]) + (_snO getOrDefault ["hic yok", 0])) max 1;
@@ -133,7 +134,18 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                     _sayac set ["arazi", (_sayac getOrDefault ["arazi", 0]) + 1];
                     continue
                 };
-                if (_hP isEqualTo [] || {_d > _esik}) then {
+                // v8.737 SAHTE SIPER (kullanici: 'gercekten ya goremeyelim ya da islemesin', 'sus niyetine gizlenmesin'): yakinda sert yuzey VAR ama dusmanin mermisi onu AŞIYOR (yumusak) VE VIEW LOD hatti ACIK (gorunuyor) -> siper degil, acikta say (acikSiper gercek siperi arar); asker basina 20 sn'de bir
+                private _sahteS = false;
+                if (_hP isNotEqualTo [] && {_d <= _esik} && {missionNamespace getVariable ["lambs_danger_siperGercekCover", true]} && {time >= (_u getVariable [QGVAR(sahteT), 0])} && {(getSuppression _u) < 0.5}) then {
+                    private _gPh = [_en] call FUNC(munisyonGucu);
+                    private _prh = [_eASL, _pASL vectorAdd [0, 0, 1.0], _en, _u, _gPh] call FUNC(penetreGuc);
+                    if ((_prh select 0) && {(_prh select 1) > 0} && {(lineIntersectsSurfaces [_eASL, _pASL vectorAdd [0, 0, 1.0], _en, _u, true, 1, "VIEW", "NONE"]) isEqualTo []} && {!(terrainIntersectASL [_eASL, _pASL vectorAdd [0, 0, 1.0]])}) then {
+                        _sahteS = true;
+                        _u setVariable [QGVAR(sahteT), time + 20];
+                        _sayac set ["sahte_siper", (_sayac getOrDefault ["sahte_siper", 0]) + 1];
+                    };
+                };
+                if (_hP isEqualTo [] || {_d > _esik} || {_sahteS}) then {
                     _sayac set ["acikta", (_sayac get "acikta") + 1];
                     // v8.519 ACIKTA SINIFLAMA (teshis; kullanici: 'Altis'te acikta sayisi hala yuksekse yakinda kaya / duvar / bina olup olmadigina bak'): acikta kalan askerin 16-20 m cevresinde ne var?
                     //   sert (kaya / duvar / bina / HIDE) | yalniz agac | yalniz cali | hic yok  +  grup durumu (bounding / kosucu / diger).  [ACIKTA-SINIF] 60 sn ozeti + ilk 15 ornek.

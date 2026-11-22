@@ -27,20 +27,20 @@ diag_log "[SIPER-ON-TARAMA] siper on tarama (gizli ama sert siperi olmayan asker
     while {true} do {
         sleep ([2, true, false, "siperOnTarama"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_siperOnTarama", true]) then { continue };
-        private _M = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaM", 8]) max 3) min 20;
-        private _cd = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaS", 45]) max 15) min 300;
+        private _M = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaM", 14]) max 3) min 20;
+        private _cd = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaS", 30]) max 15) min 300;
         private _esik = ["SUPHE"] call FUNC(bilgiEsik);
         private _n = 0;
         {
             private _u = _x;
-            if (_n >= 3) exitWith {};
+            if (_n >= 5) exitWith {};   // v8.737: tarama basina 3 -> 5
             if (!local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u}) then { continue };
             private _g = group _u;
             if ((_g getVariable [QGVAR(contact), 0]) <= time || {time < (_u getVariable [QGVAR(onTaramaT), 0])}) then { continue };
             if ((speed _u) >= 1.5 || {(insideBuilding _u) > 0.5}) then { continue };
             if (
-                (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]} || {_g getVariable [QGVAR(isBounding), false]}
-                || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]}
+                (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
+                || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(sniperTeam), false]}   // v8.737 (kullanici: 'botlari sipere yapistir'): bounding / taktik yurutenlerin bosta (kapsama) askerleri de taranir (kosucu = forceMove asagida elenir)
                 || {([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]} || {[_u] call FUNC(oyuncuKomutaMi)}
                 || {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {(_u getVariable [QGVAR(siperTutBit), 0]) > time}
                 || {time < (_u getVariable [QGVAR(tcccBusy), 0])} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}
