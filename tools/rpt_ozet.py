@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.765"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.766"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -602,6 +602,8 @@ def kabul(path):
     ekle("COVER: BINA / EV DAHIL (Afgan koyu)", "BILGI", ("ornek %d | bina ICI %%%.0f | bina / ev ARKASI (<= 8 m) %%%.0f | nesne <= 6 m %%%.0f | SIPER BENZERI (bina ici + bina arkasi) %%%.0f" % (cbt, 100.0*cbi/max(cbt,1), 100.0*cba/max(cbt,1), 100.0*cby/max(cbt,1), 100.0*(cbi+cba)/max(cbt,1))) if cbt else "[COVER-OLCUM-BINA] yok (v8.757 oncesi RPT)")
     rdz = [l for l in L if "[RPG-DUZELTME]" in l]
     ekle("RPG ISABET DUZELTMESI", "BILGI", ("duzeltilen roket %d (ilk 30 loglanir); isabeti [RPG-ATIS] sonrasi hasar / olum ile karsilastir" % len(rdz)) if rdz else "[RPG-DUZELTME] yok (v8.761 oncesi RPT ya da gudumsuz roket atisi / hedef yok)")
+    ri = [l for l in L if "[RPG-IZI]" in l]; rih = len([1 for l in ri if "ISABET (<= 10 m)" in l])
+    ekle("RPG ISABET IZI", "BILGI", ("izlenen roket %d | ISABET (<= 10 m) %d | kacan %d | isabet orani %%%.0f" % (len(ri), rih, len(ri) - rih, 100.0 * rih / max(len(ri), 1))) if ri else "[RPG-IZI] yok (v8.766 oncesi RPT ya da hedefi bilinen roket atisi yok)")
     rz = [l for l in L if "[RPG-ZAMAN]" in l]
     rza = [l for l in rz if "ATILMADI" not in l]
     ekle("RPG ZAMANLAMA (emir -> atis)", "BILGI", ("emir %d | atilan %d | atilmayan %d (silah elde / atis suresi icin [RPG-ZAMAN] satirlarina bak)" % (len(rz), len(rza), len(rz) - len(rza))) if rz else "[RPG-ZAMAN] yok (v8.763 oncesi RPT ya da karar yok)")

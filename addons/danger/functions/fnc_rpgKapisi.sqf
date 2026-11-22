@@ -105,11 +105,44 @@ if (_neden isNotEqualTo "") then {
             if ((vectorMagnitude _yan) > 0.01) then {
                 _proj setVelocity (_dirY vectorMultiply _vm);
                 _proj setVectorDirAndUp [_dirY, _yan vectorCrossProduct _dirY];
+                // v8.766 (kullanici: 'kodumu oturtsun'; RPT d68f69bc: motor atislari 0.9 / 8.6 / 9.3 derece sapmali, roket motoru kendi yonune hizlanir): ilk 0.6 sn her karede ayni yone tekrar cevrilir (motor yanarken yon kaymasin)
+                [_proj, _dirY, _vm] spawn {
+                    params ["_p", "_d", "_v"];
+                    private _t0 = time;
+                    while {!isNull _p && {time < (_t0 + 0.6)}} do {
+                        private _yy = _d vectorCrossProduct [0, 0, 1];
+                        _p setVectorDirAndUp [_d, _yy vectorCrossProduct _d];
+                        _p setVelocity (_d vectorMultiply ((vectorMagnitude (velocity _p)) max _v));
+                        sleep 0.02;
+                    };
+                };
                 private _sy = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
                 _sy set ["isabet_duzeltme", (_sy getOrDefault ["isabet_duzeltme", 0]) + 1];
                 private _ln = missionNamespace getVariable ["lambs_danger_rpgDuzLogN", 0];
                 if (_ln < 30) then { missionNamespace setVariable ["lambs_danger_rpgDuzLogN", _ln + 1]; diag_log format ["[RPG-DUZELTME] %1 | %2 | hedef %3 %4 m | sapma %5 derece -> orani %6 (beceri %9) | ucus %7 sn | hedef hizi %8 m/sn", groupId group _unit, name _unit, typeOf _t, round (_pp distance _hp), _sap toFixed 1, _dz toFixed 2, _tf toFixed 1, (vectorMagnitude (velocity _t)) toFixed 1, _acc toFixed 2]; };
             };
+        };
+    };
+    // v8.766 ISABET IZI ([RPG-IZI]): roket <= 8 sn izlenir; hedefe en yakin gecis (hedefin o anki konumu) + son nokta; <= 10 m = isabet; sayac izi_n / izi_isabet
+    private _izT = _unit getVariable [QGVAR(rpgHedef), objNull];
+    if (isNull _izT || {(time - (_unit getVariable [QGVAR(rpgKararT), -999])) > 12} || {!alive _izT}) then { _izT = assignedTarget _unit; if (isNull _izT) then { _izT = getAttackTarget _unit; }; };
+    if (!isNull _izT && {alive _izT}) then {
+        [_proj, _izT, _unit, _ammo] spawn {
+            params ["_p", "_t", "_u", "_a"];
+            private _min = 1e9;
+            private _son = getPosASL _p;
+            private _t0 = time;
+            while {!isNull _p && {time < (_t0 + 8)}} do {
+                _son = getPosASL _p;
+                if (!isNull _t) then { _min = _min min (_son distance (aimPos _t)); };
+                sleep 0.05;
+            };
+            private _sy = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
+            private _hit = _min <= 10;
+            _sy set ["izi_n", (_sy getOrDefault ["izi_n", 0]) + 1];
+            if (_hit) then { _sy set ["izi_isabet", (_sy getOrDefault ["izi_isabet", 0]) + 1]; };
+            private _ln = missionNamespace getVariable ["lambs_danger_rpgIziLogN", 0];
+            if (_ln < 40) then { missionNamespace setVariable ["lambs_danger_rpgIziLogN", _ln + 1]; diag_log format ["[RPG-IZI] %1 | %2 | hedef %3 | hedefe en yakin gecis %4 m | ucus %5 sn | hedef simdi %6 m (atici) | sonuc: %7", groupId group _u, name _u, typeOf _t, round _min, (time - _t0) toFixed 1, if (isNull _t) then {"?"} else {round (_u distance _t)}, ["KACTI / UZAK (> 10 m)", "ISABET (<= 10 m)"] select _hit]; };
         };
     };
     private _k = format ["atis_%1", _kaynak];
