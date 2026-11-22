@@ -59,6 +59,8 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
             private _ni = _st select 3;
             if (_ni < 5 && {_age >= (2 + (2 * _ni))}) then {
                 _st set [3, _ni + 1];
+                // STABILITE (v8.733): yol uzunlugu (ornekler arasi yer degistirme toplami)
+                if (alive _u) then { _st set [4, (_st select 4) + (((getPosASL _u) distance2D (_st select 5)))]; _st set [5, getPosASL _u]; };
                 if (alive _u && {!isNull _en} && {alive _en} && {((getPosATL _u) distance2D _cp) < 3}) then {
                     private _pa = (AGLToASL [_cp select 0, _cp select 1, 0]) vectorAdd [0, 0, 1.0];
                     private _ge = eyePos _en;
@@ -75,6 +77,9 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
                 [_g + "_n", 1] call _ekle;
                 [_g + "_acik", _st select 1] call _ekle;
                 [_g + "_ornek", _st select 2] call _ekle;
+                [_g + "_yol", _st select 4] call _ekle;
+                private _ah = _u getVariable [QGVAR(acikSiperHedef), []];
+                if (_ah isNotEqualTo [] && {(_ah select 1) > (_t0 + 0.5)}) then { [_g + "_tekrar", 1] call _ekle; };
                 if (_hasar) then { [_g + "_hasar", 1] call _ekle; };
                 if (!alive _u) then { [_g + "_olum", 1] call _ekle; };
             } else {
@@ -115,6 +120,18 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
                         }
                     }
                 };
+                // STABILITE: yeniden siper secimi % ve ort. yol (kontrol vs tedavi) -> 'ongoru stabilite / smoothluk / zaman kazandiriyor mu'
+                private _kYol = (_acc getOrDefault ["K0_yol", 0]) + (_acc getOrDefault ["K1_yol", 0]);
+                private _tYol = (_acc getOrDefault ["T0_yol", 0]) + (_acc getOrDefault ["T1_yol", 0]);
+                private _kTk = (_acc getOrDefault ["K0_tekrar", 0]) + (_acc getOrDefault ["K1_tekrar", 0]);
+                private _tTk = (_acc getOrDefault ["T0_tekrar", 0]) + (_acc getOrDefault ["T1_tekrar", 0]);
+                private _kTkR = if (_kN > 0) then {100 * _kTk / _kN} else {-1};
+                private _tTkR = if (_tN > 0) then {100 * _tTk / _tN} else {-1};
+                private _kYolO = if (_kN > 0) then {_kYol / _kN} else {-1};
+                private _tYolO = if (_tN > 0) then {_tYol / _tN} else {-1};
+                diag_log format ["[ONGORU-STABILITE] kontrol n=%1: 12 sn'de yeniden siper secimi %%%2, ort. yol %3 m | tedavi n=%4: yeniden secim %%%5, ort. yol %6 m | FARK (tedavi - kontrol; negatif = ongoru daha stabil / az hareket): yeniden secim %7 puan, yol %8 m%9",
+                    _kN, if (_kTkR >= 0) then {_kTkR toFixed 0} else {"-"}, if (_kYolO >= 0) then {_kYolO toFixed 1} else {"-"}, _tN, if (_tTkR >= 0) then {_tTkR toFixed 0} else {"-"}, if (_tYolO >= 0) then {_tYolO toFixed 1} else {"-"},
+                    if (_kTkR >= 0 && {_tTkR >= 0}) then {(_tTkR - _kTkR) toFixed 0} else {"-"}, if (_kYolO >= 0 && {_tYolO >= 0}) then {(_tYolO - _kYolO) toFixed 1} else {"-"}, if (_yeter) then {""} else {" | VERI AZ"}];
                 diag_log format ["[ONGORU-OLCUM] TAHMIN: olcum %1 | ileri senaryolu %2: ort hata %3 m vs 'yerinde kalir' tabani %4 m (ileri daha iyi %%%5) | dusman ort. hareket %6 m | yanal kayma >=12 derece %%%7, >=25 derece %%%8 || SONUC: %9 | %10 | %11 | %12 || TAHMIN GUCU (kontrolde ham>0 acik - ham=0 acik) %13 puan | TEDAVI ETKISI (tedavi - kontrol acik) %14 puan || HUKUM: %15",
                     _n, _s1N, ((_acc getOrDefault ["pr_errS1", 0]) / (_s1N max 1)) toFixed 1, ((_acc getOrDefault ["pr_errTaban", 0]) / (_s1N max 1)) toFixed 1, [_acc getOrDefault ["pr_s1Iyi", 0], _s1N] call _oran, ((_acc getOrDefault ["pr_hareket", 0]) / (_n max 1)) toFixed 1,
                     [_acc getOrDefault ["pr_kay12", 0], _n] call _oran, [_acc getOrDefault ["pr_kay25", 0], _n] call _oran,

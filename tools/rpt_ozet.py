@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.732"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.733"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -507,6 +507,10 @@ def kabul(path):
     ekle("SIPER KALITESI (gercek siper %)", "BILGI", ("ornek %d | GERCEK SIPER (<= 4 m nesne) %%%.0f | uzak engel %%%.0f | acikta %%%.0f (referans: v8.731 oncesi tum RPT ~%%1 siper / %%95 uzak / %%4 acik; on tarama sonrasi siper %% artmali)" % (cn, cs / max(cn, 1), cu / max(cn, 1), ca / max(cn, 1))) if cn else "COVER-OLCUM ornegi yok")
     mgd = len([1 for l in L if "[MG-DESTEK]" in l]); mgo = len([1 for l in L if "[MG-ONDE]" in l and "baslatildi" not in l])
     ekle("MG DESTEK / ONDE", "BILGI", "MG destek (bastirma) logu %d (ilk 15) | MG one alinan %d (ilk 20)" % (mgd, mgo))
+    uh = len([1 for l in L if "[UZAK-HUCUM]" in l])
+    ekle("UZAK HUCUM YOK", "BILGI", "%d olay (SUPPRESS_ASSAULT / ASSAULT -> BOUNDING, dusman > uzakHucumM); karne: acikta orani (ACIKTA-SINIF-OZET) ve 'hucum ailesi' gruplarin acik arazide formasyonla yurumesi azalmali" % uh)
+    ost = [l for l in L if "[ONGORU-STABILITE]" in l]
+    ekle("ONGORU STABILITE", "BILGI", (re.sub(r"^.*?\"\[ONGORU-STABILITE\] ", "", ost[-1]).strip().rstrip('"')[:330]) if ost else "stabilite satiri yok (v8.733 oncesi RPT ya da olcum kaydi yok)")
     og = [l for l in L if "[ONGORU-OLCUM] TAHMIN:" in l]
     if og:
         son = og[-1]

@@ -532,6 +532,17 @@ private _reason   = _result select 1;
 
 // PUSH kararlari hafiza / koordinasyon ile alternatife CEVRILMEZ (israrla bastir + hucum)
 private _push = (_reason select [0, 5]) isEqualTo "PUSH:";
+// v8.733 UZAK HUCUM YOK (kullanici: 'botlarin hepsi aciga cikti, makro duzeyde'; RPT 871b54c9: 5 grup x 7 asker SUPPRESS_ASSAULT ile 80-260 m'de acik arazide COLUMN / WEDGE / LINE yurudu, bounding bayragi yok): doktrin 'duz hucum yalniz son 60 m' ama
+//   'MG ustunlugu' ve 'dusman binada' kurallari bunu deliyordu. Dusman CBA uzakHucumM (100 m) ustundeyse (PUSH haric) SUPPRESS_ASSAULT / ASSAULT -> BOUNDING (siperden siper ates-manevra; kapsama ekibi atesle). 0 = kapali (eski). Log [UZAK-HUCUM].
+private _uzakH = missionNamespace getVariable ["lambs_danger_uzakHucumM", 100];
+if (_uzakH > 0 && {!_push} && {_decision in ["SUPPRESS_ASSAULT", "ASSAULT"]} && {_enemyCount > 0} && {_closest > _uzakH}) then {
+    if ((missionNamespace getVariable ["lambs_danger_uzakHucumLogN", 0]) < 15) then {
+        missionNamespace setVariable ["lambs_danger_uzakHucumLogN", (missionNamespace getVariable ["lambs_danger_uzakHucumLogN", 0]) + 1];
+        diag_log format ["[UZAK-HUCUM] %1 | %2 (%3) -> BOUNDING | dusman %4 m > %5 m: acik arazide duz hucum yok, siperden siper ates-manevra", groupId _group, _decision, _reason, round _closest, _uzakH];
+    };
+    _reason = format ["%1 -> BOUNDING (dusman %2 m > %3 m: duz hucum yok, ates-manevra)", _decision, round _closest, _uzakH];
+    _decision = "BOUNDING";
+};
 // Mesafe / zirh kaynakli kararlar da hafiza-koordinasyon ile degistirilmez (sebebi bu kararin kendisi)
 // KARAR ISTIKRARI: "alternatif / farkli grup" degisimi KAPALI (ayni durumda taktik surekli degisiyordu) -> _noSwap hep true
 private _noSwap = true;
