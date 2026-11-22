@@ -4598,3 +4598,6 @@ v8.759 (dal sade-waypoint) kullanici: 'direk cekip atsin, cba ayari ile aractan 
  - ZIRHTAN KACIS: yalniz AT'siz grup (_ownAT <= 0) tank / APC'den sert siperle kacar (commanderAssess EVADE_ARMOR). YENI CBA zirhKacis (varsayilan ACIK = eski; KAPALI: kacmaz, normal piyade karari). Preset: KAPALI. AT'li grup zaten AT_ENGAGE (kacmaz).
  - AT ATIS: fnc_atFire roketatara gecince (CBA_fnc_selectWeapon) doFire 4 sn sonra veriliyordu. YENI CBA atAtisGecikme (0.3-8 sn, varsayilan 4 = eski); preset 1.5. ELITE RPG karar katmaninin ates gecikmesi ayri (rpgAtisGecikme 0, v8.758).
  - SINIR / T: DENENMEDI; silah gecis animasyonu 1-3 sn: cok dusuk gecikmede doFire animasyon bitmeden yutulabilir; AT'siz grubun zirhtan kacmamasi tanka karsi kayip verdirebilir.
+v8.760 (dal sade-waypoint) kullanici: 'elemanin kullanim hizi ve reaksiyonu hizli olsun' (RPG).
+ - fnc_rpgSistem karar dongusu sabit 2 sn, grup ici emir araligi sabit 8 sn idi: CBA rpgTaramaS (0.3-5, varsayilan 2) ve rpgGrupBekleS (0-30, varsayilan 8). Preset: 0.5 / 0 (hizli tepki, grup ici sinir yok) + reaksiyonArtis 0.4 -> 0.8 (tum botlarin karar / tepki hizi, fnc_dusunSure).
+ - SINIR / T: DENENMEDI; 0.5 sn tarama CPU'yu artirir (yalniz roketatarli aday + yakin bilinen hedef taramasi); grup ici sinir 0 iken tum roketatarlilar ayni hedefe ayni anda atabilir.

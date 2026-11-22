@@ -41,7 +41,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
     private _ozT = time + 60;
     private _ar = { params ["_k"]; _oz set [_k, (_oz getOrDefault [_k, 0]) + 1]; };
     while {true} do {
-        sleep 2;
+        sleep (((missionNamespace getVariable ["lambs_danger_rpgTaramaS", 2]) max 0.3) min 5);   // v8.760: CBA rpgTaramaS (karar dongusu; eski sabit 2 sn)
         if !(missionNamespace getVariable ["lambs_danger_rpgSistem", true]) then { continue };
         if !(missionNamespace getVariable ["lambs_danger_rpgKarar", true]) then { continue };
         private _say = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
@@ -78,7 +78,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             private _ls = secondaryWeapon _u;
             ["aday"] call _ar;
             if (
-                time < (_u getVariable [QGVAR(rpgBekleT), 0]) || {(time - (_g getVariable [QGVAR(rpgGrupT), -999])) < 8}
+                time < (_u getVariable [QGVAR(rpgBekleT), 0]) || {(time - (_g getVariable [QGVAR(rpgGrupT), -999])) < (((missionNamespace getVariable ["lambs_danger_rpgGrupBekleS", 8]) max 0) min 30)}
                 || {(_u ammo _ls) <= 0} || {(insideBuilding _u) >= 0.5} || {_u getVariable [QGVAR(forceMove), false]} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                 || {(_g getVariable [QGVAR(isRetreating), false]) isEqualTo true} || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true}
                 || {(time - (_u getVariable [QGVAR(hvAAT), -999])) < 12} || {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 6}
