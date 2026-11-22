@@ -591,8 +591,8 @@ def kabul(path):
     sp = len([1 for l in L if "[SIS-PERDE] " in l]); so = [l for l in L if "[SIS-PERDE-OLCUM]" in l]
     sok = len([1 for l in so if "bulutu: 0 " not in l])
     ekle("DUMAN PERDESI (okkali perde)", "BILGI", ("perde olayi %d (ilk 40 loglanir) | 7 sn sonra lider -> tehdit hattini KESEN perde %d / %d olcum (hedef: cogu kesmeli)" % (sp, sok, len(so))) if sp else "perde kaydi yok (v8.755 oncesi RPT ya da duman olayi yok; [SIS-BUTCE] ret nedenleri butce / aralik mi bak)")
-    sn = [l for l in L if "[SIPER-SNAP]" in l]
-    ekle("VARIS NOKTASI SIPERE OTUR", "BILGI", ("[SIPER-SNAP] kaydirilan nokta %d (ilk 40 loglanir; bacak %d / geri cekilme %d) | hedef: gercek siper % ve 'hareketsiz gercek siper %' artmali" % (len(sn), len([1 for l in sn if "] bacak" in l]), len([1 for l in sn if "geri cekilme" in l]))) if sn else "[SIPER-SNAP] yok (v8.756 oncesi RPT ya da yakinda sert nesne bulunmadi)")
+    snp = [l for l in L if "[SIPER-SNAP]" in l]
+    ekle("VARIS NOKTASI SIPERE OTUR", "BILGI", ("[SIPER-SNAP] kaydirilan nokta %d (ilk 40 loglanir; bacak %d / geri cekilme %d) | hedef: gercek siper %% ve 'hareketsiz gercek siper %%' artmali" % (len(snp), len([1 for l in snp if "] bacak" in l]), len([1 for l in snp if "geri cekilme" in l]))) if snp else "[SIPER-SNAP] yok (v8.756 oncesi RPT ya da yakinda sert nesne bulunmadi)")
     se = [l for l in L if "[SKILL-ESIT]" in l]
     ekle("OYUNCU GRUBU ESITLIGI (beceri + hiz)", "BILGI", re.sub(r"^.*?\"\[SKILL-ESIT\] ", "", se[-1]).strip().rstrip('"')[:420] if se else "[SKILL-ESIT] yok (v8.745 oncesi RPT ya da oyuncu grubunda bot / dusman bot yok)")
     ca_n = ca_g = 0
