@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.726"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.727"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -477,6 +477,17 @@ def kabul(path):
         ekle("SAHTE CEKILME HUNISI", "BILGI", "%d ozet | temasli grup-tur elenme: taktik/bayrak %d, LAMBS-TUTAN %d, binada %d, asker az %d, baski %d, oyuncu hedef yok %d, oyuncu cok yakin %d (en buyuk kalem = ana engel)" % ((hn_n,) + tuple(hn)))
     else:
         ekle("SAHTE CEKILME HUNISI", "BILGI", "ozet yok (v8.722 oncesi RPT ya da sahteCekilme kapali / temasli grup olmadi)")
+    hf_t = 0; hf_ts = 0.0; hf_m = 0; hf_ms = 0.0; hfn = 0
+    for l in L:
+        m = re.search(r"\[HIZLI-FARK-OZET\] 60 sn: tetiklenen (\d+) \(ort\. gorunur->fark ([\d.]+) sn\) \| motorun kendi fark ettigi (\d+) \(ort\. gorunur->fark ([\d.]+) sn", l)
+        if m:
+            hfn += 1
+            a, asn, b, bsn = int(m.group(1)), float(m.group(2)), int(m.group(3)), float(m.group(4))
+            hf_t += a; hf_ts += a * asn; hf_m += b; hf_ms += b * bsn
+    if hfn:
+        ekle("HIZLI FARK (reaksiyon)", "BILGI", "%d ozet | bizim tetik %d (ort. gorunur->fark %.2f sn) | motor kendi fark etti %d (ort. %.2f sn, referans) | tetik / (tetik + motor) = %.0f%%" % (hfn, hf_t, hf_ts / max(hf_t, 1), hf_m, hf_ms / max(hf_m, 1), 100.0 * hf_t / max(hf_t + hf_m, 1)))
+    else:
+        ekle("HIZLI FARK (reaksiyon)", "BILGI", "ozet yok (v8.727 oncesi RPT ya da gorunen insan oyuncu olmadi)")
     hd = [0] * 5; hdn = 0
     for l in L:
         m = re.search(r"\[HAREKET-DESTEK-OZET\] 60 sn: tespit (\d+) \| adim1 \(yeniden emir\) (\d+) \| adim2 \(yan adim\) (\d+) \| adim3 \(gruba don\) (\d+) \| kurtarilan (\d+)", l)
