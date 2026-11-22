@@ -434,6 +434,7 @@ force lambs_danger_yigilmaYaricap = 4;
 force lambs_danger_zirhKacisSinir = true;
 force lambs_danger_zirhKacis = false;
 force lambs_danger_atDirekt = true;
+force lambs_danger_temasCombat = true;
 force lambs_danger_rpgSilahKoru = true;
 force lambs_danger_atAtisGecikme = 0.3;
 force lambs_danger_zirhUyariAktif = true;
