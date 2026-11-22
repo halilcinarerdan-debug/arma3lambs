@@ -4609,3 +4609,4 @@ v8.761 (dal sade-waypoint) kullanici: 'eleman tutturamiyor acil duzelt, eleman k
 v8.762 (dal sade-waypoint) kullanici: 'eleman kosmasin gordugu gibi caksin' (RPG).
  - fnc_rpgSistem: emir verilen roketatarli hareket halindeyse (hiz > 0.8 km/sa, komutan degil; forceMove kosucular zaten aday disi) doStop ile DURDURULUR, ates sonrasi 5 sn'de doFollowGuvenli ile gruba doner. CBA rpgDurAt (ACIK).
  - SINIR / T: DENENMEDI; doStop yeni yol hesabini sifirlar; 5 sn sonra gruba donus formasyon ritmini bozabilir (kisa). Kapali: roketatarli kosarken atmaya calisir.
+v8.763 (dal sade-waypoint) kullanici: 'yani tuttursun, ve eleman mal gibi bekliyo' (RPG). Bekleme kaynagi bilinmiyor (RPT yok): [RPG-ZAMAN] her RPG emrinden sonra 12 sn izler: emirden roketatar ELDE olana ve ATISA kadar sure + hiz / komut / durus / baski. Beklenen kaynaklar: silah gecis animasyonu (1-3 sn), doStop sonrasi yol / komut, motor hedef reddi (atis HIC).

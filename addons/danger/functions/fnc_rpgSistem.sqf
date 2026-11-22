@@ -191,6 +191,24 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                     if (alive _uu && {alive _tt} && {isNull objectParent _uu} && {(_uu ammo _ll) >= _aa0} && {(currentWeapon _uu) isEqualTo _ll}) then { _uu fireAtTarget [_tt, currentMuzzle _uu]; };
                 }, [_u, _en, _ls, _a0], _gec + 1.5] call CBA_fnc_waitAndExecute;
             };
+            // v8.763 ZAMAN TESHISI (kullanici: 'eleman mal gibi bekliyo'): emirden silah secimine / atisa kadar gecen sure; 0.25 sn'de bir 12 sn izlenir -> [RPG-ZAMAN]
+            [_u, _ls, time] spawn {
+                params ["_uu", "_ll", "_t0"];
+                private _tSec = -1;
+                private _tAtis = -1;
+                private _ts = time;
+                while {time < (_t0 + 12) && {alive _uu}} do {
+                    if (_tSec < 0 && {(currentWeapon _uu) isEqualTo _ll}) then { _tSec = time - _t0; };
+                    if (_tAtis < 0 && {(_uu getVariable [QGVAR(rpgAtisT), -999]) >= _t0}) then { _tAtis = time - _t0; };
+                    if (_tAtis >= 0) exitWith {};
+                    sleep 0.25;
+                };
+                private _n = missionNamespace getVariable ["lambs_danger_rpgZamanLogN", 0];
+                if (_n < 40) then {
+                    missionNamespace setVariable ["lambs_danger_rpgZamanLogN", _n + 1];
+                    diag_log format ["[RPG-ZAMAN] %1 | %2 | emirden roketatar elde: %3 sn | atisa: %4 sn | hiz %5 km/sa | komut %6 | durus %7 | baski %8", groupId group _uu, name _uu, if (_tSec < 0) then {"HIC (12 sn)"} else {_tSec toFixed 1}, if (_tAtis < 0) then {"ATILMADI (12 sn)"} else {_tAtis toFixed 1}, round (speed _uu), currentCommand _uu, stance _uu, (getSuppression _uu) toFixed 2];
+                };
+            };
             private _k2 = format ["karar_%1", _enTur];
             _say set [_k2, (_say getOrDefault [_k2, 0]) + 1];
             if (_logN < 60) then {
