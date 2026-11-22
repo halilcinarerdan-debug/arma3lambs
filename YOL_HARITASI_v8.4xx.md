@@ -160,7 +160,7 @@ Fikir (kullanıcı): ses / limiter dünyasındaki "look-ahead" gibi botlar yapac
 
 | # | Madde | Durum | Kabul ölçütü (RPT) |
 |---|---|---|---|
-| 1 | **Öngörü 1. aşama:** siper (nesne arkası) seçimi düşmanın TAHMİNİ konumlarına (ileri: hız > 1 m/sn → 4–5 sn sonrası; kanat ±55°) açıklığa göre cezalı | v8.724 YAPILDI (T) | `[ACIK-SIPER-OZET]` `ongoru_cezali_aday` > 0; siperden açığa çıkma oranı düşer |
+| 1 | **Öngörü 1. aşama:** siper (nesne arkası) seçimi düşmanın TAHMİNİ konumlarına (ileri: hız > 1 m/sn → 4–5 sn sonrası; kanat ±55°) açıklığa göre cezalı | v8.724 YAPILDI (T); **v8.734 VARSAYILAN KAPALI** (v8.732 verisi: ileri senaryo hatası 14,1 m vs 'yerinde kalır' 3,4 m; kanıt yok) | `[ACIK-SIPER-OZET]` `ongoru_cezali_aday` > 0; siperden açığa çıkma oranı düşer |
 | 2 | "Kendi siperimde kal" hafızası (`acikSiper` üst, 60 sn) tahmini konuma açıklığa da baksın; düşman yönü ≥ 35° değişince siper yeniden değerlendirilsin | YAPILACAK | siper değişimi düşman yön değişimiyle ilişkili; ters dönüş artmaz |
 | 3 | Bounding / `rotaPlan` bacak riski tahmini konumlara göre (madde 6 ateş hattı / ölü alan tahmini ile birleşir) | YAPILACAK | planlı bacakta düşman gözünden açık oran düşer |
 | 4 | **Komutan karar öngörüsü:** `commanderAssess` 10–20 sn ileri basit projeksiyon (kayıp hızı, yaklaşma hızı, bilgi) + ZİNCİR PLAN (tut → kanat → baskı); plan kararlılığı (madde 9) ile birleşir | YAPILACAK | karar gidip-gelme (savunma ↔ hücum) azalır; `KOMUTAN KARARLILIGI` satırı |

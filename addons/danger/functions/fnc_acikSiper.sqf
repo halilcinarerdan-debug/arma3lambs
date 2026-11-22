@@ -99,7 +99,7 @@ private _coklu = {
 //   Aday siper noktasinin (1.0 m) FIRE LOD hatti bu varsayimsal goz noktalarindan ACIKSA ilgili agirlik cezaya eklenir (mesafe / durus puani ile ayni birim: m). Bilinen konum + diger bilinen dusmanlar (v8.657) mantigi aynen korunur; yalniz NESNE ARKASI adaylarinda uygulanir.
 private _senE = [];
 private _ogSureG = 4;
-if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {
+if (missionNamespace getVariable ["lambs_danger_ongoru", false]) then {   // v8.734: varsayilan KAPALI (kanit yok: ileri senaryo hatasi 14.1 m vs yerinde kalir 3.4 m)
     private _ogS = ((missionNamespace getVariable ["lambs_danger_ongoruSure", 4]) max 1) min 10;
     _ogSureG = _ogS;
     private _ogA = ((missionNamespace getVariable ["lambs_danger_ongoruAgirlik", 3]) max 0) min 12;
