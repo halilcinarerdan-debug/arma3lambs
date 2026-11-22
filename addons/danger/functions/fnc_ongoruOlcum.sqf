@@ -31,7 +31,7 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
         private _list = missionNamespace getVariable ["lambs_danger_ogKayit", []];
         private _kalan = [];
         {
-            _x params ["_t0", "_u", "_en", "_ep0", "_s1", "_cp", "_ham", "_kon", "_d0", "_sure", "_st", "_up0"];
+            _x params ["_t0", "_u", "_en", "_ep0", "_s1", "_cp", "_ham", "_kon", "_d0", "_sure", "_st", "_up0", ["_sk", []]];
             private _age = time - _t0;
             private _bitti = false;
             if (isNull _u) then { continue };   // silindi: sayilmaz
@@ -49,6 +49,15 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
                         ["pr_errS1", _eS1] call _ekle;
                         ["pr_errTaban", _hrk] call _ekle;
                         if (_eS1 < _hrk) then { ["pr_s1Iyi", 1] call _ekle; };
+                    };
+                    // olasi siper kumesi isabeti: dusman ongoruSure sn sonra tahmin edilen siper noktalarindan birine <= 8 m mi? (taban: oldugu yerde <= 8 m)
+                    if (_sk isNotEqualTo []) then {
+                        private _mnD = 1e9;
+                        { _mnD = _mnD min (_ac distance2D _x); } forEach _sk;
+                        ["pr_kumeN", 1] call _ekle;
+                        _acc set ["pr_ongoruSure", _sure];
+                        if (_mnD <= 8) then { ["pr_kumeIsabet", 1] call _ekle; };
+                        if (_hrk <= 8) then { ["pr_kumeKaldi", 1] call _ekle; };
                     };
                     private _dB = abs ((((_up0 getDir _ac) - (_up0 getDir _ep0)) + 540) mod 360 - 180);
                     if (_dB >= 12) then { ["pr_kay12", 1] call _ekle; };
@@ -129,6 +138,10 @@ diag_log "[ONGORU-OLCUM] ongoru olcum sistemi (tahmin hatasi + kontrollu karsila
                 private _tTkR = if (_tN > 0) then {100 * _tTk / _tN} else {-1};
                 private _kYolO = if (_kN > 0) then {_kYol / _kN} else {-1};
                 private _tYolO = if (_tN > 0) then {_tYol / _tN} else {-1};
+                private _kuN = _acc getOrDefault ["pr_kumeN", 0];
+                if (_kuN > 0) then {
+                    diag_log format ["[ONGORU-KUME] olasi siper kumesi (3 nokta, dusmanin 15 m'si): olcum %1 | dusman %2 sn sonra tahmin noktalarindan birine <= 8 m: %%%3 | 'oldugu yerde kalir' tabani (<= 8 m): %%%4 | not: kume noktalari dusmanin 15 m'sinde, bu yuzden durgun dusmanda iki oran birbirine yakin cikar; fark = siper degistiren dusmanin kume tarafindan yakalanmasi", _kuN, _acc getOrDefault ["pr_ongoruSure", 0], [_acc getOrDefault ["pr_kumeIsabet", 0], _kuN] call _oran, [_acc getOrDefault ["pr_kumeKaldi", 0], _kuN] call _oran];
+                };
                 diag_log format ["[ONGORU-STABILITE] kontrol n=%1: 12 sn'de yeniden siper secimi %%%2, ort. yol %3 m | tedavi n=%4: yeniden secim %%%5, ort. yol %6 m | FARK (tedavi - kontrol; negatif = ongoru daha stabil / az hareket): yeniden secim %7 puan, yol %8 m%9",
                     _kN, if (_kTkR >= 0) then {_kTkR toFixed 0} else {"-"}, if (_kYolO >= 0) then {_kYolO toFixed 1} else {"-"}, _tN, if (_tTkR >= 0) then {_tTkR toFixed 0} else {"-"}, if (_tYolO >= 0) then {_tYolO toFixed 1} else {"-"},
                     if (_kTkR >= 0 && {_tTkR >= 0}) then {(_tTkR - _kTkR) toFixed 0} else {"-"}, if (_kYolO >= 0 && {_tYolO >= 0}) then {(_tYolO - _kYolO) toFixed 1} else {"-"}, if (_yeter) then {""} else {" | VERI AZ"}];

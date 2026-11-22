@@ -29,7 +29,8 @@ private _ham = 0;
 } forEach _sen;
 private _s1 = _sen select {(_x param [2, ""]) isEqualTo "ileri"};
 private _s1p = if (_s1 isEqualTo []) then {[]} else {(_s1 select 0) select 0};
+private _sk = (_sen select {(_x param [2, ""]) isEqualTo "siper"}) apply {_x select 0};
 // kayit: [t0, asker, dusman, dusman konumu t0 (ASL), ileri senaryo konumu, siper (AGL), ham ceza, kontrol, hasar0, sure, durum [tahminYapildi, acikSay, ornekSay, sonrakiOrnek], asker konumu t0 (ASL)]
-_list pushBack [time, _u, _en, getPosASL _en, _s1p, +_cp, _ham, _kon, damage _u, _sure, [false, 0, 0, 0, 0, getPosASL _u], getPosASL _u];
+_list pushBack [time, _u, _en, getPosASL _en, _s1p, +_cp, _ham, _kon, damage _u, _sure, [false, 0, 0, 0, 0, getPosASL _u], getPosASL _u, _sk];
 missionNamespace setVariable ["lambs_danger_ogKayit", _list];
 true

@@ -35,7 +35,7 @@ if (_ah0 isNotEqualTo [] && {(time - (_ah0 select 1)) < 60} && {((getPosATL _u) 
 // v8.312: tekrar 25 -> 10 sn (CBA lambs_danger_siperHizli), nesne arama yaricapi CBA lambs_danger_siperYaricap (varsayilan 22 m; eskiden 14), bina _yar + 10 m (eskiden 28)
 private _hizli = missionNamespace getVariable ["lambs_danger_siperHizli", true];
 private _yar = missionNamespace getVariable ["lambs_danger_siperYaricap", 16];
-_u setVariable [QGVAR(acikSiperT), time + ([25, 10] select _hizli)];
+_u setVariable [QGVAR(acikSiperT), time + (([25, 10] select _hizli) / (1 + (((missionNamespace getVariable ["lambs_danger_reaksiyonArtis", 0.3]) max 0) min 1)))];   // v8.735: karar tekrar araligi / (1 + reaksiyonArtis) (tepki / karar hizi; nisan becerisi DEGIL)
 private _g = group _u;
 // v8.515: eskiden bounding / taktik yurutenlerin TUM grubu atlaniyordu -> RPT 13:14 (Alpha 1-1 BOUNDING iken uyeler 140-160 m'de acikta: [SIPER-YAPIS-OZET] acikta 24 / dk, [ACIK-SIPER] 1) hic kurtarilmiyordu.
 //   Simdi yalniz geri cekilen grup, KOSUCU (forceMove) ve baska emirle kilitli (taktikKilit) asker atlanir; bounding'in kapsama / bekleyen uyeleri siperden yararlanir.
@@ -99,8 +99,8 @@ private _coklu = {
 //   Aday siper noktasinin (1.0 m) FIRE LOD hatti bu varsayimsal goz noktalarindan ACIKSA ilgili agirlik cezaya eklenir (mesafe / durus puani ile ayni birim: m). Bilinen konum + diger bilinen dusmanlar (v8.657) mantigi aynen korunur; yalniz NESNE ARKASI adaylarinda uygulanir.
 private _senE = [];
 private _ogSureG = 4;
-if (missionNamespace getVariable ["lambs_danger_ongoru", false]) then {   // v8.734: varsayilan KAPALI (kanit yok: ileri senaryo hatasi 14.1 m vs yerinde kalir 3.4 m)
-    private _ogS = ((missionNamespace getVariable ["lambs_danger_ongoruSure", 4]) max 1) min 10;
+if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {   // v8.735: yeniden tasarim (olasi siper kumesi; hiz tahmini kisa ufuk + sonumlu); v8.734'te kapatilmisti (ileri senaryo hatasi 14.1 m vs yerinde kalir 3.4 m)
+    private _ogS = ((missionNamespace getVariable ["lambs_danger_ongoruSure", 2]) max 1) min 10;
     _ogSureG = _ogS;
     private _ogA = ((missionNamespace getVariable ["lambs_danger_ongoruAgirlik", 3]) max 0) min 12;
     if (_ogA > 0) then {
@@ -108,12 +108,18 @@ if (missionNamespace getVariable ["lambs_danger_ongoru", false]) then {   // v8.
         private _ev = velocity _en;
         private _hizE = sqrt (((_ev select 0) ^ 2) + ((_ev select 1) ^ 2));
         private _yuk = ((_ep select 2) - (getTerrainHeightASL _ep)) max 0;
-        if (_hizE > 1) then {
-            private _pp = [(_ep select 0) + ((_ev select 0) * _ogS), (_ep select 1) + ((_ev select 1) * _ogS), 0];
+        // v8.735 1) OLASI SIPER KUMESI: dusmanin 15 m icinde bizden gizli 3 nesne arkasi (insan dusman durur / siper degistirir; hiz tahmininden daha dogru varsayim)
+        {
+            _senE pushBack [AGLToASL [_x select 0, _x select 1, 1.1], _ogA, "siper"];
+        } forEach ([_en, getPosATL _u, 3, 15] call FUNC(dusmanSiperKumesi));
+        if (_hizE > 1.5) then {
+            // hiz tahmini yalniz kisa ufuk (<= 2.5 sn) ve %70 sonumlu
+            private _ogK = (_ogS min 2.5) * 0.7;
+            private _pp = [(_ep select 0) + ((_ev select 0) * _ogK), (_ep select 1) + ((_ev select 1) * _ogK), 0];
             _pp set [2, (getTerrainHeightASL _pp) + _yuk + 1.6];
             _senE pushBack [_pp, _ogA, "ileri"];
         };
-        if (missionNamespace getVariable ["lambs_danger_ongoruKanat", true]) then {
+        if (missionNamespace getVariable ["lambs_danger_ongoruKanat", false]) then {
             private _br = _u getDir _en;
             private _dm = (_ed max 20) min 150;
             {
@@ -128,6 +134,10 @@ if (missionNamespace getVariable ["lambs_danger_ongoru", false]) then {   // v8.
 // v8.730 OLCUM (kullanici: 'on gorunun gercekten ise yarayip yaramayacagini olcecek sistem ekle'): secimlerin CBA ongoruKontrolOran'i (varsayilan %25) KONTROL grubudur: senaryolar hesaplanir ama ceza UYGULANMAZ (secim eski gibi);
 //   sonuc fnc_ongoruKayit + fnc_ongoruOlcum ile 12 sn izlenir (gercek dusmanin goz hatti acikligi, hasar / olum) ve TEDAVI (ceza uygulandi) ile KONTROL karsilastirilir; ayrica senaryo tahmin hatasi olculur.
 private _ogKontrol = (_senE isNotEqualTo []) && {(random 1) < (((missionNamespace getVariable ["lambs_danger_ongoruKontrolOran", 0.25]) max 0) min 0.9)};
+// v8.735 rota riski goz noktalari: gercek dusman (agirlik 1) + olasi siper noktalari (0.5); kontrol grubunda uygulanmaz (olcum)
+private _yolOn = (missionNamespace getVariable ["lambs_danger_rotaRiski", true]) && {!_ogKontrol};
+private _yolAg = ((missionNamespace getVariable ["lambs_danger_rotaRiskAgirlik", 2]) max 0) min 8;
+private _yolEyes = [[_eASL, 1]] + ((_senE select {(_x param [2, ""]) isEqualTo "siper"}) apply {[_x select 0, 0.5]});
 private _ongoruCeza = {
     params ["_pt"];
     if (_senE isEqualTo [] || {_ogKontrol}) exitWith {0};
@@ -210,6 +220,8 @@ private _objAd = "";
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));   // v8.529 mevzi hafizasi (puan yuksek = iyi -> maliyet duser)
                 _sk = _sk + ([_pos] call _coklu);   // v8.657: diger bilinen dusmanlara acik nokta +5 / dusman
                 _sk = _sk + ([_pos] call _ongoruCeza);   // v8.724: tahmini (ileri / kanat) senaryolara acik nokta + agirlik
+                // v8.735 2) ROTA RISKI (bireysel): oraya KOSARKEN (hat 3 ornek) dusmanin gozunden / olasi siper noktalarindan acikta kalir miyim? risk x rotaRiskAgirlik (m)
+                if (_yolOn) then { _sk = _sk + (([getPosATL _u, _pos, _yolEyes, _u] call FUNC(rotaRiski)) * _yolAg); };
                 // v8.666 PENETRASYON FARKINDALIGI (siper secimi): dusmanin SU ANKI mermisi bu siperi (malzeme x kalinlik) AŞIYORSA yumusak siper: +6 m ceza (CBA siperPenetrasyon)
                 if (missionNamespace getVariable ["lambs_danger_siperPenetrasyon", true]) then {
                     private _gP = [_en] call FUNC(munisyonGucu);
@@ -365,6 +377,10 @@ private _nesneGit = {
     _dolu pushBack [_obj, time];
     missionNamespace setVariable ["lambs_danger_acikSiperDolu", _dolu];
     [_obj, _objAd] call _talepYaz;
+    if (missionNamespace getVariable ["lambs_danger_yedekSiper", true]) then {
+        private _yb = [_u, _en, _obj] call FUNC(yedekSiper);
+        if (_yb isNotEqualTo []) then { _u setVariable [QGVAR(acikSiperYedek), [_yb, time]]; _sayAS set ["yedek_kuruldu", (_sayAS getOrDefault ["yedek_kuruldu", 0]) + 1]; };
+    };
     _u setVariable [QGVAR(taktikKilit), time + 15];
     _u forceSpeed -1;
     _u setSpeedMode "FULL";
@@ -428,6 +444,23 @@ private _nesneGit = {
         diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> NESNE ARKASI %4 (%5 m, durus %6, dusmandan gizli)", groupId _g, name _u, round _ed, _objAd, round (_u distance2D _obj), _objDurus];
     };
     true
+};
+// v8.735 3) YEDEK SIPER (iki sicramali bireysel on plan): daha once secilen yedek B (<= 60 sn) hala gizli / dolu degil / yakinsa ve secilen siperden en fazla 4 m uzaksa B'ye git (yeniden secim azalir)
+if (missionNamespace getVariable ["lambs_danger_yedekSiper", true]) then {
+    private _yd = _u getVariable [QGVAR(acikSiperYedek), []];
+    if (_yd isNotEqualTo [] && {(time - (_yd select 1)) < 60}) then {
+        private _bp = _yd select 0;
+        if ((_u distance2D _bp) <= _yar && {!([_bp, _aralik] call _doluMu)} && {(_bp distance2D _en) >= (_ed - 8)} && {(!_limAcik) || {(_u distance2D _bp) <= _lim}}) then {
+            private _bG = AGLToASL [_bp select 0, _bp select 1, 0];
+            if (((lineIntersectsSurfaces [_eASL, _bG vectorAdd [0, 0, 1.0], _en, _u, true, 1, "FIRE", "NONE"]) isNotEqualTo []) && {_obj isEqualTo [] || {(_u distance2D _bp) <= ((_u distance2D _obj) + 4)}}) then {
+                _obj = +_bp;
+                _objAd = "YEDEK SIPER (on plan)";
+                _objDurus = "MIDDLE";
+                _sayAS set ["yedek_kullanildi", (_sayAS getOrDefault ["yedek_kullanildi", 0]) + 1];
+            };
+        };
+        _u setVariable [QGVAR(acikSiperYedek), []];
+    };
 };
 if (_limAcik && {_obj isNotEqualTo []} && {(_u distance2D _obj) > _lim}) then { _obj = []; _sayAS set ["yakin_dovus_uzak_red", (_sayAS getOrDefault ["yakin_dovus_uzak_red", 0]) + 1]; };
 private _binalarK = (nearestObjects [_p, ["House"], _yar + 10]) select {(count (_x buildingPos -1)) >= 2};

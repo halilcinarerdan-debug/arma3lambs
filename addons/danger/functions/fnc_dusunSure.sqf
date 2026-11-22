@@ -26,7 +26,8 @@ if (_h isNotEqualTo 1) then {
         missionNamespace setVariable ["lambs_danger_sicakT", time + 1];
         missionNamespace setVariable ["lambs_danger_sicakTemas", (allGroups findIf { local _x && {(_x getVariable [QGVAR(contact), 0]) > time} && {((units _x) findIf {isPlayer _x}) < 0} }) >= 0];
     };
-    if (missionNamespace getVariable ["lambs_danger_sicakTemas", false]) then { _sonuc = _s / _h; };
+    // v8.735 REAKSIYON ARTISI (kullanici: 'reaksiyon sureleri 3x dusunme hizinin hakkini versin, %30 arttir'): sicak temasta bekleme / (dusunHizi x (1 + reaksiyonArtis)); dusunHizi 3 sinirinin USTUNE cikar (CBA reaksiyonArtis, 0.3)
+    if (missionNamespace getVariable ["lambs_danger_sicakTemas", false]) then { _sonuc = _s / (_h * (1 + (((missionNamespace getVariable ["lambs_danger_reaksiyonArtis", 0.3]) max 0) min 1))); };
 };
 
 // v8.681 DUSUNME HIZI OLCUMU (kullanici: '6 dusunme hizini etkiler mi'; YALNIZ OLCUM, bekleme suresi DEGISMEZ): izleyici adi (4. parametre) verilen her cagri icin ardisik iki cagri arasi GERCEKLESEN sure (bekleme + govde + zamanlayici gecikmesi)

@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.734"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.735"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -511,6 +511,22 @@ def kabul(path):
     ekle("UZAK HUCUM YOK", "BILGI", "%d olay (SUPPRESS_ASSAULT / ASSAULT -> BOUNDING, dusman > uzakHucumM); karne: acikta orani (ACIKTA-SINIF-OZET) ve 'hucum ailesi' gruplarin acik arazide formasyonla yurumesi azalmali" % uh)
     ost = [l for l in L if "[ONGORU-STABILITE]" in l]
     ekle("ONGORU STABILITE", "BILGI", (re.sub(r"^.*?\"\[ONGORU-STABILITE\] ", "", ost[-1]).strip().rstrip('"')[:330]) if ost else "stabilite satiri yok (v8.733 oncesi RPT ya da olcum kaydi yok)")
+    yk_k = 0; yk_u = 0
+    for l in L:
+        m = re.search(r"\[ACIK-SIPER-OZET\].*", l)
+        if m:
+            a = re.search(r"yedek_kuruldu=(\d+)", l); b = re.search(r"yedek_kullanildi=(\d+)", l)
+            if a: yk_k += int(a.group(1))
+            if b: yk_u += int(b.group(1))
+    ekle("YEDEK SIPER (iki sicramali on plan)", "BILGI", "kurulan %d | kullanilan %d (kullanilan / kurulan = %.0f%%; yeniden secim / hesap gidip-gelmesi azalmali)" % (yk_k, yk_u, 100.0 * yk_u / max(yk_k, 1)))
+    rr_e = 0.0; rr_y = 0.0; rr_n = 0
+    for l in L:
+        m = re.search(r"\[BND-PLAN\].*rota riski \(siper bacaklari, m-esdeger\): ilk aday ([\d.]+) -> secilen ([\d.]+)", l)
+        if m:
+            rr_n += 1; rr_e += float(m.group(1)); rr_y += float(m.group(2))
+    ekle("ROTA RISKI (bounding bacaklari)", "BILGI", ("%d plan | toplam risk: ilk aday %.1f -> secilen %.1f (azalma %.0f%%)" % (rr_n, rr_e, rr_y, 100.0 * (rr_e - rr_y) / max(rr_e, 0.1))) if rr_n else "plan satiri yok (v8.735 oncesi RPT ya da bounding olmadi)")
+    kume = [l for l in L if "[ONGORU-KUME]" in l]
+    ekle("ONGORU KUME (olasi siper)", "BILGI", (re.sub(r"^.*?\"\[ONGORU-KUME\] ", "", kume[-1]).strip().rstrip('"')[:300]) if kume else "kume olcumu yok (ongoru kapali ya da v8.735 oncesi)")
     og = [l for l in L if "[ONGORU-OLCUM] TAHMIN:" in l]
     if og:
         son = og[-1]

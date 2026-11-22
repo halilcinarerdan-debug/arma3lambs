@@ -24,7 +24,7 @@ diag_log "[BILGI-ARTIS] genel bilgi artisi (bilinen dusmanin bilgisi / konum net
     private _grupSay = 0;
     private _ozetT = time + 60;
     while {true} do {
-        sleep 2;
+        sleep ([2, true, false, "bilgiArtis"] call FUNC(dusunSure));   // v8.735: sabit 2 sn yerine dusunme hizi (ilk temasta bilgi artisi gecikmesi)
         private _k = ((missionNamespace getVariable ["lambs_danger_bilgiArtis", 0]) max 0) min 1;
         private _tb = ((missionNamespace getVariable ["lambs_danger_bilgiTaban", 0]) max 0) min 4;
         if (time > _ozetT) then {

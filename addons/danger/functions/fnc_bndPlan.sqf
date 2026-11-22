@@ -30,6 +30,13 @@ private _son = _g getVariable [QGVAR(bndPlanSon), []];
 if (_son isNotEqualTo [] && {(_son distance2D _hedef) < ((_cur distance2D _hedef) - 15)} && {(_son distance2D _cur) < 250}) then { _cur = +_son; };
 private _plan = [];
 private _sipN = 0;
+// v8.735 2) ROTA RISKI (bounding bacaklari): findCover'in 4 adayi arasindan, bir onceki noktadan o adaya giden hattin dusman goz noktalarindan (hedef + olasi siper noktalari) EN GIZLI olani secilir (CBA rotaRiski); eskiden ilk aday
+private _rotaOn = missionNamespace getVariable ["lambs_danger_rotaRiski", true];
+private _rAg = ((missionNamespace getVariable ["lambs_danger_rotaRiskAgirlik", 2]) max 0) min 8;
+private _eyes = [[AGLToASL [_hedef select 0, _hedef select 1, ((_hedef param [2, 0]) max 0) + 1.6], 1]];
+if (_rotaOn) then { { _eyes pushBack [AGLToASL [_x select 0, _x select 1, 1.1], 0.5]; } forEach ([_hedef, _cur, 3, 15] call FUNC(dusmanSiperKumesi)); };
+private _riskEski = 0;
+private _riskYeni = 0;
 for "_i" from 1 to 8 do {
     private _kal = _cur distance2D _hedef;
     if (_kal <= (_bitis + 12)) exitWith {};
@@ -42,8 +49,22 @@ for "_i" from 1 to 8 do {
     private _ad = "ARAZI";
     private _cvr = [_l, _hedef, 22, "ASCEND", 4, "ADVANCE", _merkez] call EFUNC(main,findCover);
     if (_cvr isNotEqualTo []) then {
-        private _cp = (_cvr select 0) select 0;
-        if (!surfaceIsWater _cp && {(_cp distance2D _hedef) < ((_cur distance2D _hedef) - 6)}) then { _pt = _cp; _ad = "SIPER"; _sipN = _sipN + 1; };
+        private _bestP = [];
+        private _bestR = 1e9;
+        private _ilkR = -1;
+        {
+            private _cp = _x select 0;
+            if (!surfaceIsWater _cp && {(_cp distance2D _hedef) < ((_cur distance2D _hedef) - 6)}) then {
+                private _risk = if (_rotaOn) then { [_cur, _cp, _eyes, objNull] call FUNC(rotaRiski) } else { 0 };
+                if (_ilkR < 0) then { _ilkR = _risk; };
+                if (_risk < _bestR) then { _bestR = _risk; _bestP = _cp; };
+            };
+        } forEach _cvr;
+        if (_bestP isNotEqualTo []) then {
+            _pt = _bestP; _ad = "SIPER"; _sipN = _sipN + 1;
+            _riskEski = _riskEski + (_ilkR max 0) * _rAg;
+            _riskYeni = _riskYeni + _bestR * _rAg;
+        };
     };
     if (surfaceIsWater _pt) exitWith {};
     _plan pushBack [_pt, _ad];
@@ -55,6 +76,6 @@ _g setVariable [QGVAR(bndPlanHedef), +_hedef];
 _g setVariable [QGVAR(bndPlanT), time];
 if ((missionNamespace getVariable ["lambs_danger_bndPlanLogN", 0]) < 25) then {
     missionNamespace setVariable ["lambs_danger_bndPlanLogN", (missionNamespace getVariable ["lambs_danger_bndPlanLogN", 0]) + 1];
-    diag_log format ["[BND-PLAN] %1 | hedef %2 m | %3 bacak (siper %4 / arazi %5) | bitis %6 m | zincir xy %7", groupId _g, round ((getPosATL _l) distance2D _hedef), count _plan, _sipN, (count _plan) - _sipN, round _bitis, _plan apply { (_x select 0) select [0, 2] apply { round _x } }];
+    diag_log format ["[BND-PLAN] %1 | hedef %2 m | %3 bacak (siper %4 / arazi %5) | bitis %6 m | zincir xy %7 | rota riski (siper bacaklari, m-esdeger): ilk aday %8 -> secilen %9", groupId _g, round ((getPosATL _l) distance2D _hedef), count _plan, _sipN, (count _plan) - _sipN, round _bitis, _plan apply { (_x select 0) select [0, 2] apply { round _x } }, _riskEski toFixed 1, _riskYeni toFixed 1];
 };
 _plan

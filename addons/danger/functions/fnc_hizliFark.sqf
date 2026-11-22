@@ -27,8 +27,11 @@ diag_log "[HIZLI-FARK] gorunur insan oyuncuyu hizli fark etme (reveal) katmani b
     private _say = createHashMapFromArray [["tetik", 0], ["tetikSn", 0], ["motor", 0], ["motorSn", 0]];
     private _ozetT = time + 60;
     private _dt = 0.25;
+    private _son = time;
     while {true} do {
-        sleep _dt;
+        sleep ([0.25, true, true, "hizliFark"] call FUNC(dusunSure));   // v8.735: dusunme hizi + reaksiyonArtis; birikim GERCEK gecen sureyle (asagida)
+        _dt = ((time - _son) max 0.05) min 1;
+        _son = time;
         if !(missionNamespace getVariable ["lambs_danger_hizliFark", true]) then { continue };
         private _R = ((missionNamespace getVariable ["lambs_danger_hizliFarkM", 120]) max 30) min 300;
         private _S = ((missionNamespace getVariable ["lambs_danger_hizliFarkS", 0.5]) max 0.2) min 3;
@@ -77,7 +80,7 @@ diag_log "[HIZLI-FARK] gorunur insan oyuncuyu hizli fark etme (reveal) katmani b
                 if (_vis >= 0.3) then {
                     if (_ilk < 0) then { _ilk = time; };
                     _acc = _acc + _dt;
-                    private _T = _S * (0.5 + (_d / _R)) / (_vis max 0.3);
+                    private _T = _S * (0.5 + (_d / _R)) / (_vis max 0.3) / (1 + (((missionNamespace getVariable ["lambs_danger_reaksiyonArtis", 0.3]) max 0) min 1));   // v8.735: reaksiyonArtis
                     if (_pYatik) then { _T = _T * 2; };
                     if (_acc >= _T) then {
                         _b reveal [_p, _sev];
