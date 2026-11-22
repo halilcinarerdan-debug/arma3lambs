@@ -37,7 +37,9 @@ diag_log "[VURULDU-TEPKI] vurulunca siperi yeniden degerlendirme (hareketsiz ask
             _u setVariable [QGVAR(onTaramaT), 0];
             _u setVariable [QGVAR(acikSiperHedef), nil];   // v8.742: [] DEGIL nil (okuyucular [] ise 'select' hatasi veriyordu: RPT 5289ea85 acikSiper:451 / mevziHafiza:52)
             _say set ["vurulan", (_say get "vurulan") + 1];
-            private _en = _u findNearestEnemy _u;
+            // v8.751 GERCEK VURUS YONU (kullanici: '2 yap'): son 4 sn icinde bizi vuran dusman (Hit EH kaynagi) varsa siper o yone gore aranir (eskiden en yakin dusman); CBA vurulmaGercekYon
+            private _vk = _u getVariable [QGVAR(vuranKaynak), []];
+            private _en = if ((missionNamespace getVariable ["lambs_danger_vurulmaGercekYon", true]) && {_vk isNotEqualTo []} && {(time - (_vk select 1)) < 4} && {alive (_vk select 0)}) then { _vk select 0 } else { _u findNearestEnemy _u };
             if (isNull _en || {!alive _en}) then { continue };
             // v8.750 TESHIS: acikSiper'in hangi sayaclarinin degistigi (neden yeni siper yok) - kayit oncesi / sonrasi fark
             private _s0 = +(missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap]);

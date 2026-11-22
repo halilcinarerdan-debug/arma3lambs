@@ -45,6 +45,7 @@ diag_log "[MEVZI-HAFIZA] siper / ufuk / dusman atis noktasi hafizasi baslatildi 
     _u setVariable [QGVAR(mevziHitT), time + 3];
     private _k = [_src, _ins] select (!isNull _ins);
     if (isNull _k || {(side group _k) isEqualTo _s} || {(_s getFriend (side group _k)) >= 0.6}) exitWith {};
+    _u setVariable [QGVAR(vuranKaynak), [_k, time]];   // v8.751: gercek vurus kaynagi (fnc_vurulmaTepki yeniden siper icin)
     private _sek = -1;
     if ((_u knowsAbout _k) >= (["SEZILDI"] call FUNC(bilgiEsik))) then { _sek = floor ((((_u getDir _k) + 22.5) mod 360) / 45); };
     private _poz = getPosATL _u;

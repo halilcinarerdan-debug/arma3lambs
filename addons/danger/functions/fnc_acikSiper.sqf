@@ -277,10 +277,10 @@ private _objAd = "";
                     private _prC = (vectorNormalized (_gASL vectorDiff _eASL)) vectorCrossProduct [0, 0, 1];
                     private _acYan = ([0.9, -0.9] findIf { (lineIntersectsSurfaces [_eASL, (_gASL vectorAdd [0, 0, _hh max 0.8]) vectorAdd (_prC vectorMultiply _x), _en, _u, true, 1, "FIRE", "NONE"]) isEqualTo [] }) >= 0;
                     if (_acUst || {_acYan}) then {
-                        _sk = _sk - 3;
+                        _sk = _sk - ((missionNamespace getVariable ["lambs_danger_siperKarsilikBonus", 6]) max 0 min 20);   // v8.751: CBA (eski sabit 3)
                         _sayAS set ["siper_karsilik", (_sayAS getOrDefault ["siper_karsilik", 0]) + 1];
                     } else {
-                        if ((getSuppression _u) < 0.5) then { _sk = _sk + 6; _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
+                        if ((getSuppression _u) < 0.5) then { _sk = _sk + ((missionNamespace getVariable ["lambs_danger_siperSafCeza", 14]) max 0 min 40); _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
                     };
                 };
                 // v8.737 COK YONLU KAPALILIK (kullanici: 'bir yerden yemesin'): adaydan dusmana bakan eksene +-45 / +-90 derece 4 yonden (40 m, goz 1.6 m) FIRE LOD hatti ACIK mi; her acik yon x siperYanAgirlik (2 m; son 20 sn'de vurulduysa x3)
