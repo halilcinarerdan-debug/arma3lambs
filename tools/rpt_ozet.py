@@ -602,7 +602,7 @@ def kabul(path):
     ekle("SIPER COK ACILI GUVENCE", "BILGI", ("sinanan kazanan aday %d | ortalama gorunen atici konumu %.2f / 4 (dusuk iyi: 0 = her yandan kapali) | vurulunca yeni siper yok (teshis logu) %d" % (ca_n, ca_g / float(ca_n), vy)) if ca_n else "cok acili guvence kaydi yok (v8.750 oncesi RPT ya da siper secimi olmadi)")
     bk = [l for l in L if "[BASKI-KAPI-OZET]" in l]
     bkr = len([1 for l in L if "[BASKI-KAPI] RED" in l])
-    ekle("BASTIRMA KAPISI (bos yere bastirma yok)", "BILGI", (("RED ornek %d (ilk 30 loglanir) | " % bkr) + re.sub(r"^.*?\"\[BASKI-KAPI-OZET\] ", "", bk[-1]).strip().rstrip('"')[:260]) if (bk or bkr) else "bastirma kapisi kaydi yok (v8.743 oncesi RPT ya da baskiKapisi kapali / uzak + gozlemcisiz bastirma denemesi olmadi)")
+    ekle("BASTIRMA KAPISI (bos yere bastirma yok)", "BILGI", (("RED ornek %d (ilk 30 loglanir) | " % bkr) + (re.sub(r"^.*?\"\[BASKI-KAPI-OZET\] ", "", bk[-1]).strip().rstrip('"')[:260] if bk else "OZET yok")) if (bk or bkr) else "bastirma kapisi kaydi yok (v8.743 oncesi RPT ya da baskiKapisi kapali / uzak + gozlemcisiz bastirma denemesi olmadi)")
     bm = [l for l in L if "[EL-BOMBASI-MESAFE]" in l]
     bmy = len([1 for l in bm if "yuz yuze:true" in l])
     ekle("EL BOMBASI YUZ YUZE (motor atisi)", "BILGI", "motor atisi iptal %d (yuz yuze %d, uzak / baygin %d); iptal yoksa motor yuz yuze bomba atmadi ya da v8.743 oncesi" % (len(bm), bmy, len(bm) - bmy))
