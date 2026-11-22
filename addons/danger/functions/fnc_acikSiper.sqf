@@ -297,6 +297,7 @@ private _objAd = "";
                 // v8.517: haritada agaclar mermi durdurmuyorsa (kalibrasyon LOD = VIEW) agac yalniz GIZLER -> kaya / duvar / konteyner gibi gercek siperler +10 puanla (m) one gecer
                 private _mdl = toLower ((getModelInfo _o) select 0);
                 if ((missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"]) isEqualTo "VIEW" && {((_mdl find "t_") isEqualTo 0) || {(_mdl find "tree") >= 0} || {(_mdl find "picea") >= 0}}) then { _sk = _sk + 10; };
+                if (_sk < _objS) then { _sk = _sk + ([_pos, _en, _ds select 0, _u] call FUNC(siperGuvence)); };   // v8.750: kazanan aday cok acili (+-35 / +-70 derece) gorus sinavindan gecer
                 if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds select 0; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
             };
         };
@@ -357,6 +358,7 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
                 if (_ds isNotEqualTo "") then {
                     private _sk = (_u distance2D _pos) + _dc + ([6, missionNamespace getVariable ["lambs_danger_siperMermiOncelik", 8]] select _esitG);   // v8.667: gizlenme-only (mermi durdurmaz) adayi: mermi oncelikli ceza (varsayilan 8; eski 2)
                     _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
+                    if (_sk < _objS) then { _sk = _sk + ([_pos, _en, _ds, _u] call FUNC(siperGuvence)); };   // v8.750
                     if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
                 };
             };
@@ -417,6 +419,7 @@ if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
                 if (_dn isNotEqualTo "") then {
                     private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 4]) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
+                    if (_sk < _objS) then { _sk = _sk + ([_pt, _en, _dn, _u] call FUNC(siperGuvence)); };   // v8.750
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
                 };
             };

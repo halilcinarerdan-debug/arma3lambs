@@ -15,6 +15,7 @@ lambs_danger_vurulmaTepkiStarted = true;
 diag_log "[VURULDU-TEPKI] vurulunca siperi yeniden degerlendirme (hareketsiz asker hasar alirsa) baslatildi (v8.737)";
 
 [] spawn {
+    private _logR = 0;   // v8.750: basarisiz yeniden degerlendirme logu
     private _logN = 0;
     private _say = createHashMapFromArray [["vurulan", 0], ["siperBulundu", 0]];
     private _ozetT = time + 60;
@@ -38,7 +39,16 @@ diag_log "[VURULDU-TEPKI] vurulunca siperi yeniden degerlendirme (hareketsiz ask
             _say set ["vurulan", (_say get "vurulan") + 1];
             private _en = _u findNearestEnemy _u;
             if (isNull _en || {!alive _en}) then { continue };
-            if ([_u, _en] call FUNC(acikSiper)) then {
+            // v8.750 TESHIS: acikSiper'in hangi sayaclarinin degistigi (neden yeni siper yok) - kayit oncesi / sonrasi fark
+            private _s0 = +(missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap]);
+            private _bulundu = [_u, _en] call FUNC(acikSiper);
+            if (!_bulundu && {_logR < 25}) then {
+                _logR = _logR + 1;
+                private _s1 = missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap];
+                private _fark = ((keys _s1) select {(_s1 get _x) isNotEqualTo (_s0 getOrDefault [_x, 0])}) apply {format ["%1:+%2", _x, (_s1 get _x) - (_s0 getOrDefault [_x, 0])]};
+                diag_log format ["[VURULDU-TEPKI] YENI SIPER YOK | %1 | %2 | dusman %3 m | durus %4 | baski %5 | acikSiperT +%6 sn | taktikKilit %7 | forceMove %8 | sayac degisimi: %9", groupId group _u, name _u, round (_u distance2D _en), stance _u, (getSuppression _u) toFixed 2, ((_u getVariable [QGVAR(acikSiperT), 0]) - time) toFixed 1, (_u getVariable [QGVAR(taktikKilit), 0]) > time, _u getVariable [QGVAR(forceMove), false], _fark];
+            };
+            if (_bulundu) then {
                 _say set ["siperBulundu", (_say get "siperBulundu") + 1];
                 if (_logN < 20) then {
                     _logN = _logN + 1;
