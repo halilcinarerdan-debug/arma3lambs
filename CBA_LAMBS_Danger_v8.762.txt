@@ -310,6 +310,7 @@ force lambs_danger_rpgDostM = 4;
 force lambs_danger_rpgYedek = 0;
 force lambs_danger_rpgBekleS = 5;
 force lambs_danger_rpgIsabetDuzeltme = 0.85;
+force lambs_danger_rpgDurAt = true;
 force lambs_danger_rpgTaramaS = 0.3;
 force lambs_danger_rpgGrupBekleS = 0;
 force lambs_danger_rpgAtisGecikme = 0;

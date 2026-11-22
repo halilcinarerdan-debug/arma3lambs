@@ -172,6 +172,14 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             _g reveal [_en, 2.5];
             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_u, _ls] call CBA_fnc_selectWeapon; };
             _u doTarget _en;
+            // v8.762 KOSMASIN, GORDUGU GIBI CAKSIN (kullanici): hareket eden roketatarli ates emrinde DURDURULUR (doStop); 5 sn sonra gruba doner (CBA rpgDurAt)
+            if ((missionNamespace getVariable ["lambs_danger_rpgDurAt", true]) && {(speed _u) > 0.8} && {_u isNotEqualTo (leader _g)}) then {
+                doStop _u;
+                [{
+                    params ["_uu"];
+                    if (alive _uu && {(_uu getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {_uu isNotEqualTo (leader group _uu)}) then { [_uu, leader group _uu] call FUNC(doFollowGuvenli); };
+                }, [_u], 5] call CBA_fnc_waitAndExecute;
+            };
             private _a0 = _u ammo _ls;
             // v8.758 DIREK ATIS (kullanici: 'eleman direk atsin hic beklemesin, nisan aldigi gibi'): CBA rpgAtisGecikme (sn, 0 = hemen doFire; eski 1.5-2.5) + rpgZorlaAtis: 1.5 sn sonra hala atmadiysa fireAtTarget
             private _gec = ((missionNamespace getVariable ["lambs_danger_rpgAtisGecikme", 0]) max 0) min 3;
