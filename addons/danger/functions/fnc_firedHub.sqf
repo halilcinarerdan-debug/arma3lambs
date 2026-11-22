@@ -80,6 +80,9 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 0b3) v8.746 RPG KAPISI + OLCUMU (kullanici: 'lambs rpg arastir' + 'rpg sistemi yapalim'): AI omuz roketatari (gudumsuz) atisi izlenir ([RPG-ATIS]); min mesafe / bina ici / hedefte dost / geri duvar / arkada dost / zirh yedegi ihlalinde mermi iptal + 12 sn sonra iade (fnc_rpgKapisi)
+        if (!isNull _proj && {_simTani in ["shotrocket", "shotmissile"]}) then { [_unit, _weapon, _ammo, _mag, _proj] call FUNC(rpgKapisi); };
+
         // 0c) v8.115 PLAN ROE: 'binalara agir silah / bomba yasak' (Zeus Objektif kisiti): grup bayragi lambs_danger_agirYasak; hedef (ya da bomba iniş noktasi) bir binanin 15 m'sindeyse patlayici iptal
         if (!isNull _proj && {(group _unit) getVariable ["lambs_danger_agirYasak", false]} && {_simTani in ["shotgrenade", "shotrocket", "shotmissile", "shotshell"]}) then {
             private _hedefP = [];
