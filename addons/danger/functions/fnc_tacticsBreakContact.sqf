@@ -93,7 +93,9 @@ private _tehditPos = _target call CBA_fnc_getPos;
 if ((_tehditPos select 2) > 6) then { _tehditPos set [2, 0.5]; };
 private _mesafe = 99999;
 { _mesafe = _mesafe min (_x distance2D _tehditPos); } forEach _birimler;
-if (_mesafe < ([25, 10] select (_alive isEqualTo 1)) || {_mesafe > 400}) exitWith {false};
+// v8.723 KACIS YASAGI (kullanici: 'arkalarini donup kacmasin'; 1v1 RPT 25647f54: tek kalan bot dusman 11-24 m'de kacmaya basladi, 4 / 6 duello kacisin ilk 40 sn'sinde bitti): dusman CBA kacisYakinM (60 m) icindeyse kacis YOK, asker dovusur (siper / kose)
+private _yakinM = ((missionNamespace getVariable ["lambs_danger_kacisYakinM", 60]) max 10) min 250;
+if (_mesafe < ([(25 max _yakinM), _yakinM] select (_alive isEqualTo 1)) || {_mesafe > 400}) exitWith {false};
 
 // v8.30 SON DIRENIS: <= 3 asker, kacis imkansiz (kayip >= %50 + dusman <= 150 m ya da kayip >= %60) ve yakinda bina varsa KALE SAVUNMASI (fnc_sonDirenis)
 if ([_group, _tehditPos] call FUNC(sonDirenis)) exitWith {true};

@@ -49,7 +49,7 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
             private _en = _u findNearestEnemy _u;
             if (isNull _en || {!alive _en} || {!(_en isKindOf "CAManBase")} || {captive _en} || {(lifeState _en) in ["INCAPACITATED", "UNCONSCIOUS"]}) then { continue };
             private _d = _u distance2D _en;
-            if (_d < 20 || {_d > 250}) then { continue };
+            if (_d < (20 max ((missionNamespace getVariable ["lambs_danger_kacisYakinM", 60]) min 250)) || {_d > 250}) then { continue };   // v8.723: CBA kacisYakinM (60 m) icinde arkasini donup kacmaz
             if ((_u knowsAbout _en) < (["SEZILDI"] call FUNC(bilgiEsik))) then { continue };
 
             // (a) tek kalan
@@ -106,6 +106,20 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
                 diag_log format ["[KACIS] %1 %2 | %3 | neden:%4 (dost %5, mermi %6/%7 yedek %8) | dusman %9 m | xy %10 -> %11 | puan %12", str (side _g), groupId _g, name _u, ["MERMI KRITIK", "TEK KALAN"] select _tek, count _dostlar, _simdi, _kap, count _yedek, round _d,
                     (getPosATL _u) select [0, 2] apply { round _x }, _en2 select [0, 2] apply { round _x }, round _en2P];
             };
+            // v8.723 DONMA DENETIMI (1v1 RPT 25647f54: kacis MOVE emri verildi ama asker 15 sn yerinde durdu, atessiz, dusman 13 m): 5 sn sonra < 2 m yer degistirdiyse kacis IPTAL, ates / hedef geri acilir, asker dovusur
+            [{
+                params ["_uu", "_tk", "_p0"];
+                if (alive _uu && {(_uu getVariable [QGVAR(kacisTok), -1]) isEqualTo _tk} && {(_uu distance2D _p0) < 2}) then {
+                    _uu setVariable [QGVAR(kacisTok), nil];
+                    _uu enableAI "AUTOTARGET";
+                    _uu enableAI "TARGET";
+                    _uu setVariable [QGVAR(forceMove), nil];
+                    _uu setVariable [QGVAR(taktikKilit), 0];
+                    _uu setBehaviour "COMBAT";
+                    _uu setUnitPosWeak "MIDDLE";
+                    diag_log format ["[KACIS-IPTAL] %1 | kacis emri 5 sn'de yer degistirmedi (donma) -> iptal, dovusuyor", name _uu];
+                };
+            }, [_u, _kTok, getPosATL _u], 5] call CBA_fnc_waitAndExecute;
             [{
                 params ["_uu", "_pp"];
                 !alive _uu || {(_uu distance2D _pp) < 4}

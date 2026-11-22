@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.722"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.723"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -477,6 +477,15 @@ def kabul(path):
         ekle("SAHTE CEKILME HUNISI", "BILGI", "%d ozet | temasli grup-tur elenme: taktik/bayrak %d, LAMBS-TUTAN %d, binada %d, asker az %d, baski %d, oyuncu hedef yok %d, oyuncu cok yakin %d (en buyuk kalem = ana engel)" % ((hn_n,) + tuple(hn)))
     else:
         ekle("SAHTE CEKILME HUNISI", "BILGI", "ozet yok (v8.722 oncesi RPT ya da sahteCekilme kapali / temasli grup olmadi)")
+    yk = []
+    for l in L:
+        m = re.search(r"\[TEMAS-KES-BASLA\].*?tehdit:(\d+)m \| kacis:true", l)
+        if m: yk.append(int(m.group(1)))
+        m = re.search(r"\[KACIS\] (?:EAST|WEST|GUER|CIV)\b.*?\| dusman (\d+) m \|", l)
+        if m: yk.append(int(m.group(1)))
+    ykn = len([1 for x in yk if x < 60])
+    iptal = len([1 for l in L if "[KACIS-IPTAL]" in l])
+    ekle("YAKIN KACIS (arkasini donup kacma)", "GECTI" if ykn == 0 else "KALDI", "kacis baslangici %d | dusman < 60 m iken baslayan: %d (0 olmali; v8.723 kacisYakinM) | donma iptali: %d" % (len(yk), ykn, iptal))
     biz = [l for l in L if "[BOMBA-IZI]" in l]
     if biz:
         def _hd(l):
