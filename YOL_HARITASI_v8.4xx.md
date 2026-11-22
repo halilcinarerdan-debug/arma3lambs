@@ -155,6 +155,30 @@ Hedef: cover ve piyade manevrasında gözlemlenen davranışı eğitimli bir piy
 - Doktrin sayıları (bounding hızı, siper aralığı) yalnız kaynağı doğrulanırsa eklenir (TC 3-21.8 / MCWP 3-11.1 gibi kaynakların sayfa / bölümü okunmadan yazılmaz; şu an doğrulanmadı = T).
 - Motor sınırları (lean yok, gecikmeli emir, ince navmesh yok) nedeniyle 10/10 hedef değildir; tavan öz değerlendirme ile 8–8,5.
 
+## Aşama 13 — ÖNGÖRÜ (look-ahead), ÇOKLU SENARYO VE AKICI HAREKET (dal: `claude/sade-waypoint`, v8.723 sonrası; kullanıcı kararı: "yapılacaklara bu fikirleri ekle"; hiçbiri oyunda doğrulanmadı = "T")
+Fikir (kullanıcı): ses / limiter dünyasındaki "look-ahead" gibi botlar yapacakları taktikleri olaydan ÖNCE düşünsün; siper yerleri düşmanın bilinen yönüne (ve tahmini yönlerine) göre seçilsin; ÇOKLU SENARYO / çoklu durum desteklensin; hareket daha SMOOTH olsun (yat-kalk azalsın), botlar covera DİREK girsin, bireysel harekette zaman kaybetmesin. Sistem kaldırıyor (kullanıcı: fps 100–240) → öngörü bütçesi varsayılan yüksek olabilir.
+
+| # | Madde | Durum | Kabul ölçütü (RPT) |
+|---|---|---|---|
+| 1 | **Öngörü 1. aşama:** siper (nesne arkası) seçimi düşmanın TAHMİNİ konumlarına (ileri: hız > 1 m/sn → 4–5 sn sonrası; kanat ±55°) açıklığa göre cezalı | v8.724 YAPILDI (T) | `[ACIK-SIPER-OZET]` `ongoru_cezali_aday` > 0; siperden açığa çıkma oranı düşer |
+| 2 | "Kendi siperimde kal" hafızası (`acikSiper` üst, 60 sn) tahmini konuma açıklığa da baksın; düşman yönü ≥ 35° değişince siper yeniden değerlendirilsin | YAPILACAK | siper değişimi düşman yön değişimiyle ilişkili; ters dönüş artmaz |
+| 3 | Bounding / `rotaPlan` bacak riski tahmini konumlara göre (madde 6 ateş hattı / ölü alan tahmini ile birleşir) | YAPILACAK | planlı bacakta düşman gözünden açık oran düşer |
+| 4 | **Komutan karar öngörüsü:** `commanderAssess` 10–20 sn ileri basit projeksiyon (kayıp hızı, yaklaşma hızı, bilgi) + ZİNCİR PLAN (tut → kanat → baskı); plan kararlılığı (madde 9) ile birleşir | YAPILACAK | karar gidip-gelme (savunma ↔ hücum) azalır; `KOMUTAN KARARLILIGI` satırı |
+| 5 | **Çoklu senaryo (ağırlıklı varsayım listesi):** düşman ileri / kanat / geri çekilme / tut / arkadan dolanma varsayımları ağırlıkla; siper, rota ve komutan kararı hepsini tartar | 1. aşama (siper: ileri + 2 kanat) v8.724; GENELLEŞTİRME YAPILACAK | `[ONGORU]` log: varsayım sayısı, seçilen |
+| 6 | Bina adayları (`acikSiper` bina dalı) ve `siperZorla` öngörü cezası | YAPILACAK | — |
+| 7 | **Öngörü bütçesi:** FPS'e bağlı sıklık / derinlik (`PERF-DUSUN`), CBA; yüksek varsayılan | YAPILACAK | fps min düşmez; `PERF-DUSUN` x değerleri ≤ 1.5 |
+| 8 | **Öngörü isabet ölçümü:** varsayımsal konum ile 4–6 sn sonraki gerçek düşman konumu arası mesafe (kalibrasyon: ileri süresi / kanat açısı) | YAPILACAK | karne satırı "ÖNGÖRÜ İSABETİ" |
+| 9 | **Akıcı hareket — yat-kalk sönümleyici:** kaynaktan bağımsız duruş değişimi sınırlayıcı (`fnc_durusAkici`) | v8.725 YAPILDI (T) | karne `YAT-KALK` (birim başına dakikada duruş değişimi) düşük; kaynak bazlı atıf (hangi modül yazdı) sonraki adım |
+| 10 | **Hareket tıkanma kurtarıcı:** MOVE komutu + hız < 0.8 km/s + hedef > 6 m + 6 sn → aynı hedefe yeniden emir, 12 sn'de yan adım, 24 sn'de gruba dön (`fnc_hareketDestek`; LAMBS / TUTAN / bina içi / baskı / tedavi muaf) | v8.726 YAPILDI (T) | karne `MOVE TIKANMA`: kurtarılan / tespit; `YURUMUYOR` (hedef uzak) azalır |
+| 11 | **Siper noktasına tek adımda yaklaşma:** `doMove` toleransında durup `SIPER-OTUR` ile ikinci adım (duraksama / ters dönüş) → tek emir, varışta duruş | YAPILACAK | `EMIR GIDIP-GELME` siperOtur payı düşer |
+| 12 | **Yerinde dönüş animasyonu kaybı** (`HIZ-TANI` 1613 MOVE-0 km/s kaydının 218'i `turn`): hareket emrinden önce yön hazırlığı (`moveAssist`) | YAPILACAK | `HIZ-TANI` turn payı düşer |
+| 13 | **1v1 hayatta kalma:** yakın mesafe kaçış yasağı (`kacisYakinM`) v8.723 YAPILDI (T); köşe tut → kısa açıl → yer değiştir döngüsü; ters bakış (`IC-BAKIS`, duvar arkası düşmandan 84–104° ters) incelemesi; bot ateş verimi (1v1 RPT 259 atış / 8 isabet) | KISMEN | `YAKIN KACIS` = 0; düello süresi / bot ölüm mesafesi |
+| 14 | **El bombası profesyonelliği:** pencere TÜP denetimi v8.722 YAPILDI (T); ölçüm (`BOMBA-IZI` plan alanı); koordineli bomba + itiş (bomba sonrası grup girişi), flashbang | KISMEN | karne `EL BOMBASI IZI` duvara çarpma payı düşer |
+| 15 | **Sahte geri çekilme:** HUNI verisi (v8.722 tanı) ile kapı kararı; 111+ RPT'de hiç başlamadı | TANI | `SAHTE CEKILME HUNISI` ana engel |
+| 16 | **Algı:** CBA ile yükseltildi (v8.723: bilgi artışı / taban / eşikler / ses / yakın algı); algı karnesi (oyuncuyu ilk fark etme süresi / mesafesi) | CBA YAPILDI; ÖLÇÜM YAPILACAK | ilk temas fark etme süresi |
+
+Not: öngörü katmanı yeni hareket emri üretmeden, mevcut SEÇİM noktalarını (siper, rota, karar) cezalandıran / ağırlıklandıran biçimde ilerler (titreme / ters dönüş riski düşük); komutan karar öngörüsü (madde 4) en riskli adımdır: bayrakla kapatılabilir, tek adım + RPT.
+
 ## Sürüm disiplini
 - Her aşama: değişiklik → RPT ile kabul ölçütü → `DEVIR_LOGU` ve `OZELLIKLER_LISTESI` güncelleme.
 - Doğrulanmayan davranış belgede "T" (doğrulanmadı) işaretlenir.
