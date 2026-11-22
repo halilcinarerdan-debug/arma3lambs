@@ -172,7 +172,16 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_u, _ls] call CBA_fnc_selectWeapon; };
             _u doTarget _en;
             private _a0 = _u ammo _ls;
-            [{ params ["_uu", "_tt"]; if (alive _uu && {alive _tt} && {isNull objectParent _uu}) then { _uu doFire _tt; }; }, [_u, _en], 1.5 + (random 1)] call CBA_fnc_waitAndExecute;
+            // v8.758 DIREK ATIS (kullanici: 'eleman direk atsin hic beklemesin, nisan aldigi gibi'): CBA rpgAtisGecikme (sn, 0 = hemen doFire; eski 1.5-2.5) + rpgZorlaAtis: 1.5 sn sonra hala atmadiysa fireAtTarget
+            private _gec = ((missionNamespace getVariable ["lambs_danger_rpgAtisGecikme", 0]) max 0) min 3;
+            private _atFn = { params ["_uu", "_tt"]; if (alive _uu && {alive _tt} && {isNull objectParent _uu}) then { _uu doFire _tt; }; };
+            if (_gec <= 0) then { [_u, _en] call _atFn; } else { [_atFn, [_u, _en], _gec] call CBA_fnc_waitAndExecute; };
+            if (missionNamespace getVariable ["lambs_danger_rpgZorlaAtis", true]) then {
+                [{
+                    params ["_uu", "_tt", "_ll", "_aa0"];
+                    if (alive _uu && {alive _tt} && {isNull objectParent _uu} && {(_uu ammo _ll) >= _aa0} && {(currentWeapon _uu) isEqualTo _ll}) then { _uu fireAtTarget [_tt, currentMuzzle _uu]; };
+                }, [_u, _en, _ls, _a0], _gec + 1.5] call CBA_fnc_waitAndExecute;
+            };
             private _k2 = format ["karar_%1", _enTur];
             _say set [_k2, (_say getOrDefault [_k2, 0]) + 1];
             if (_logN < 60) then {
