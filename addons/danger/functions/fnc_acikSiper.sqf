@@ -96,8 +96,10 @@ private _coklu = {
 //   S1 ILERI: dusman hizi > 1 m/sn ise hareket yonunde ongoruSure (4 sn) sonraki konum (agirlik = ongoruAgirlik, 3 m);  S2 / S3 KANAT: dusman ayni mesafeyi koruyup gruba gore +-55 derece yana kayarsa (kanat; agirlik yarisi, CBA ongoruKanat).
 //   Aday siper noktasinin (1.0 m) FIRE LOD hatti bu varsayimsal goz noktalarindan ACIKSA ilgili agirlik cezaya eklenir (mesafe / durus puani ile ayni birim: m). Bilinen konum + diger bilinen dusmanlar (v8.657) mantigi aynen korunur; yalniz NESNE ARKASI adaylarinda uygulanir.
 private _senE = [];
+private _ogSureG = 4;
 if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {
     private _ogS = ((missionNamespace getVariable ["lambs_danger_ongoruSure", 4]) max 1) min 10;
+    _ogSureG = _ogS;
     private _ogA = ((missionNamespace getVariable ["lambs_danger_ongoruAgirlik", 3]) max 0) min 12;
     if (_ogA > 0) then {
         private _ep = getPosASL _en;
@@ -107,7 +109,7 @@ if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {
         if (_hizE > 1) then {
             private _pp = [(_ep select 0) + ((_ev select 0) * _ogS), (_ep select 1) + ((_ev select 1) * _ogS), 0];
             _pp set [2, (getTerrainHeightASL _pp) + _yuk + 1.6];
-            _senE pushBack [_pp, _ogA];
+            _senE pushBack [_pp, _ogA, "ileri"];
         };
         if (missionNamespace getVariable ["lambs_danger_ongoruKanat", true]) then {
             private _br = _u getDir _en;
@@ -115,15 +117,18 @@ if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {
             {
                 private _kp = (getPosATL _u) getPos [_dm, _br + _x];
                 if (!surfaceIsWater _kp) then {
-                    _senE pushBack [AGLToASL [_kp select 0, _kp select 1, 1.6], _ogA * 0.5];
+                    _senE pushBack [AGLToASL [_kp select 0, _kp select 1, 1.6], _ogA * 0.5, "kanat"];
                 };
             } forEach [55, -55];
         };
     };
 };
+// v8.730 OLCUM (kullanici: 'on gorunun gercekten ise yarayip yaramayacagini olcecek sistem ekle'): secimlerin CBA ongoruKontrolOran'i (varsayilan %25) KONTROL grubudur: senaryolar hesaplanir ama ceza UYGULANMAZ (secim eski gibi);
+//   sonuc fnc_ongoruKayit + fnc_ongoruOlcum ile 12 sn izlenir (gercek dusmanin goz hatti acikligi, hasar / olum) ve TEDAVI (ceza uygulandi) ile KONTROL karsilastirilir; ayrica senaryo tahmin hatasi olculur.
+private _ogKontrol = (_senE isNotEqualTo []) && {(random 1) < (((missionNamespace getVariable ["lambs_danger_ongoruKontrolOran", 0.25]) max 0) min 0.9)};
 private _ongoruCeza = {
     params ["_pt"];
-    if (_senE isEqualTo []) exitWith {0};
+    if (_senE isEqualTo [] || {_ogKontrol}) exitWith {0};
     private _pa = (AGLToASL [_pt select 0, _pt select 1, 0]) vectorAdd [0, 0, 1.0];
     private _c = 0;
     {
@@ -352,6 +357,7 @@ if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
 // v8.520 KENTSEL ONCELIK (kullanici: 'ev ici ve meskun mahalde oncelik'; RPT 14:10 Altis 'cover': 55 kurtarmanin 0'i bina, 34'u cam agaci - cevrede dukkan / ev varken): girilebilir >= 2 bina varsa (_yar + 10 m)
 //   NESNE (agac / kaya / duvar) sonucu ERTELENIR, once BINA (atis pozisyonu / gizli nokta) aranir; bina bulunamazsa ertelenen nesne uygulanir. CBA lambs_danger_kentselOncelik (varsayilan acik).
 private _nesneGit = {
+    if (_senE isNotEqualTo [] && {missionNamespace getVariable ["lambs_danger_ongoruOlcum", true]}) then { [_u, _en, _obj, _senE, _ogKontrol, _ogSureG] call FUNC(ongoruKayit); };
     _sayAS set ["nesne", (_sayAS getOrDefault ["nesne", 0]) + 1];
     if (_objAd isEqualTo "ARAZI KIVRIMI") then { _sayAS set ["arazi_kivrimi", (_sayAS getOrDefault ["arazi_kivrimi", 0]) + 1]; };   // v8.673: arazi (cukur / yamac) secimi sayaci
     _dolu pushBack [_obj, time];
