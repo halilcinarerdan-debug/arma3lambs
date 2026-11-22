@@ -5,7 +5,7 @@
  * NEDEN: LAMBS RPG yalniz CONFIG modudur (aiAmmoUsageFlags: roketatar secimi motorun kararidir) ve atisin guvenligini DENETLEMEZ; RPT'lerde (120 dosya) AI roketatar atisi HIC loglanmiyordu (kim, neye, ne kadar, kime zarar) -> olcum yoktu.
  * KURAL: fnc_rpgGuvenli (min mesafe, bina ici, hedefte dost, geri duvar, arkada dost, zirh yedegi) ihlalinde mermi silinir (deleteVehicle), 12 sn sonra mermi geri verilir
  *   (silah bossa setAmmo 1, motor yedekten doldurduysa addMagazine); atici 12 sn karar verilmez (rpgBekleT). Gudumlu fuzeye (AA / Javelin / Titan / NLAW: weaponLockSystem / maxControlRange > 0) DOKUNULMAZ.
- *   Dusus noktasi: mermi hiz yonunde 800 m FIRE LOD hatti + arazi (ilk vurus); hedef zirh: dususun 15 m'sinde dusman kara araci / zirh.
+ *   Dusus noktasi: mermi hiz yonunde 800 m FIRE LOD hatti + arazi (ilk vurus); hedef zirh: dususun 15 m'sinde dusman kara araci / zirh. REZERV (v8.747): piyadeye / binaya atis kalan roket <= rpgYedek ise iptal (arac / hava / sabit silah hedefi muaf).
  * OLCUM: [RPG-ATIS] (ilk 60: atici, silah, mermi, aiAmmoUsageFlags, dusus mesafesi, hedef turu, kaynak 'karar' = fnc_rpgSistem emri / 'motor' = LAMBS RPG / motor) + [RPG-IPTAL] (ilk 40) + 60 sn [RPG-OZET]. Karne: RPG SISTEMI.
  * CBA: lambs_danger_rpgSistem (varsayilan ACIK; kapali = hicbir sey yapmaz), rpgMinM, rpgDostM, rpgYedek.
  *
@@ -50,7 +50,11 @@ private _zirh = (_yakin findIf {(_x isKindOf "Tank") || {_x isKindOf "APC"} || {
 private _arac = (_yakin findIf {_x isKindOf "LandVehicle"}) >= 0;
 private _tur = if (_zirh) then {"zirh"} else { if (_arac) then {"arac"} else { if ((_yakin findIf {_x isKindOf "CAManBase" && {(insideBuilding _x) > 0.5}}) >= 0) then {"bina ici dusman"} else { if (_yakin isNotEqualTo []) then {"piyade"} else {"hedef yok / nokta"} } } };
 
-private _neden = [_unit, _weapon, _yon, _imp, _zirh, true] call FUNC(rpgGuvenli);
+// v8.747 REZERV MUAFIYETI: atici hedefi (atanmis / saldiri) arac / hava ise ya da dususun 15 m'sinde dusman arac / sabit silah varsa roket piyadeye harcanmis sayilmaz
+private _ah = assignedTarget _unit;
+if (isNull _ah) then { _ah = getAttackTarget _unit; };
+private _ahMuaf = !isNull _ah && {alive _ah} && {(_taraf getFriend (side group _ah)) < 0.6} && {(_ah isKindOf "Air") || {_ah isKindOf "LandVehicle"}};
+private _neden = [_unit, _weapon, _yon, _imp, _arac || _ahMuaf, true] call FUNC(rpgGuvenli);
 private _kaynak = ["motor", "karar"] select ((time - (_unit getVariable [QGVAR(rpgKararT), -999])) < 10);
 private _dI = _unit distance _imp;
 

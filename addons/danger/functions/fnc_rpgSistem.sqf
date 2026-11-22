@@ -7,10 +7,14 @@
  *   MG_YUVASI : bilinen dusman SABIT SILAH (StaticWeapon, mürettebatli)
  *   BINA      : bilinen dusman BINA ICINDE (insideBuilding > 0.5) ve atici hattinin ilk vurusu hedefe <= 30 m bir yapi (duvara roket: ic bolgeyi temizler)
  *   KUME      : acikta bilinen >= 3 dusman piyade 8 m cap icinde (gorunurluk >= 0.3, hat acik)
+ * REZERV (v8.747, kullanici: 'hepsini piyadeye harcamasinlar yedekte tutsunlar'): BINA / KUME emri yalniz kalan roket > rpgYedek (2) ise (fnc_rpgGuvenli 'yedek'); MG yuvasi muaf.
  * KOSULLAR: yerel AI, grup 25 sn icinde temasli, yuklu GUDUMSUZ roketatar (weaponLockSystem / maxControlRange = 0), bina disinda, kosucu / tedavi / geri cekilme degil, atis 6 sn'den eski, hedef rpgMinM + 10 .. rpgMaxM (250 m),
  *   bilgi >= SUPHE ve grup son 20 sn icinde gormus, fnc_rpgGuvenli (min / dost / geri duvar / arkada dost / zirh yedegi) temiz. Birim basina rpgBekleS (20 sn) bekleme, grup basina 8 sn, tur basina en cok 2 emir.
  * OLCUM: [RPG-KARAR] (ilk 60: tur, mesafe, hedef) + [RPG-KARAR-SONUC] (7 sn sonra: mermi a -> b, atildi mi) + [RPG-OZET] (rpgKapisi ile ortak). Karne: RPG SISTEMI.
  * CBA: lambs_danger_rpgSistem, rpgKarar (varsayilan ACIK; kapali = yalniz kapi / olcum), rpgMinM, rpgMaxM, rpgDostM, rpgYedek, rpgBekleS.
+ * LAMBS RPG BILGISI (v8.747; KULLANICI EKRAN GORUNTUSU, 3. taraf ozet, dogrulanmadi): mod CONFIG duzeyinde mermi tanimini degistirir: allowAgainstInfantry = 1 (roket piyadeye karsi kullanilabilir; varsayilan 0 = yalniz arac), aiAmmoUsageFlags'e piyade eklenir,
+ *   airLock = 1 (havaya kilitlenir); RPG-7 (vanilla + RHS), RPG-32, MAAWS, SPG-9. v8.705'te motorun piyadeye roketatar secmemesinin nedeni buydu. Bu katman piyade hedefli (BINA / KUME) emri YALNIZ mermide allowAgainstInfantry > 0 ise verir
+ *   (yamasiz mermiye emir motorda reddedilir); [RPG-TANI] boot'ta yamali roket siniflarini, [RPG-MERMI-TANI] her roketatar mermisinin degerlerini yazar.
  * SINIR: oyunda DENENMEDI; motor roketatari secmezse [RPG-KARAR-SONUC] 'atilmadi' sayar (v8.705 bulgusu: motor aiAmmoUsageFlags'e bagli; LAMBS RPG bunu degistirir, kanitlanmadi).
  *
  * Arguments: None
@@ -25,6 +29,11 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
 
 [] spawn {
     private _logN = 0;
+    // v8.747 TANI: gudumsuz roket mermilerinden allowAgainstInfantry > 0 olanlar (LAMBS RPG yamasi ya da baska mod) - hangi roketatarlarin piyadeye atabilecegi
+    private _tum = "(toLower (getText (_x >> 'simulation'))) isEqualTo 'shotrocket'" configClasses (configFile >> "CfgAmmo");
+    private _yam = (_tum select {(getNumber (_x >> "allowAgainstInfantry")) > 0}) apply {configName _x};
+    diag_log format ["[RPG-TANI] gudumsuz roket mermisi (shotRocket) %1 sinif, bunlardan allowAgainstInfantry > 0: %2 (LAMBS RPG yamasi ya da baska mod) | ilk 40: %3", count _tum, count _yam, _yam select [0, 40]];
+    private _mermiTani = [];
     while {true} do {
         sleep 2;
         if !(missionNamespace getVariable ["lambs_danger_rpgSistem", true]) then { continue };
@@ -57,6 +66,13 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             private _mag = (secondaryWeaponMagazine _u) param [0, ""];
             private _ammo = if (_mag isEqualTo "") then {""} else { getText (configFile >> "CfgMagazines" >> _mag >> "ammo") };
             if (_ammo isEqualTo "" || {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "weaponLockSystem")) > 0} || {(getNumber (configFile >> "CfgAmmo" >> _ammo >> "maxControlRange")) > 0}) then { continue };
+            private _ac = configFile >> "CfgAmmo" >> _ammo;
+            private _bayrak = getNumber (_ac >> "aiAmmoUsageFlags");
+            private _pizin = ((getNumber (_ac >> "allowAgainstInfantry")) > 0) || {((floor (_bayrak / 64)) mod 2) isEqualTo 1};   // v8.747: piyade izni = allowAgainstInfantry > 0 YA DA aiAmmoUsageFlags'te 64 (piyade) biti (BI forum: 64 = piyade, 128 = arac, 512 = zirh)
+            if (!(_ammo in _mermiTani) && {(count _mermiTani) < 20}) then {
+                _mermiTani pushBack _ammo;
+                diag_log format ["[RPG-MERMI-TANI] %1 | sarjor %2 | mermi %3 | allowAgainstInfantry %4 | aiAmmoUsageFlags %5 | airLock %6 | hit %7 | indirectHit %8 (yaricap %9 m) | piyadeye emir: %10", _ls, _mag, _ammo, getNumber (_ac >> "allowAgainstInfantry"), _bayrak, getNumber (_ac >> "airLock"), getNumber (_ac >> "hit"), getNumber (_ac >> "indirectHit"), getNumber (_ac >> "indirectHitRange"), ["HAYIR (yamasiz: motor reddeder)", "evet"] select _pizin];
+            };
 
             private _taraf = side _g;
             private _eye = eyePos _u;
@@ -66,6 +82,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 && {(_u knowsAbout _o) >= _esit} && {((_u targetKnowledge _o) select 2) > (time - 20)}
             } apply {_x select 4};
             if (_gor isEqualTo []) then { continue };
+            if (!_pizin && {(_gor findIf {_x isKindOf "StaticWeapon"}) < 0}) then { _say set ["karar_ret_izin_yok", (_say getOrDefault ["karar_ret_izin_yok", 0]) + 1]; continue };   // yamasiz mermi + sabit silah yok: piyade emri motorda reddedilir
             private _piyade = _gor select {_x isKindOf "CAManBase" && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])} && {!([_x] call FUNC(teslimMi))}};
             private _en = objNull;
             private _enTur = "";
@@ -79,7 +96,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 if (_o isKindOf "StaticWeapon") then {
                     if ((crew _o) isNotEqualTo []) then { _tur = "MG_YUVASI"; _deger = 3; };
                 } else {
-                    if (_o isKindOf "CAManBase") then {
+                    if (_o isKindOf "CAManBase" && {_pizin}) then {
                         if ((insideBuilding _o) > 0.5) then {
                             if (_d >= 40) then { _tur = "BINA"; _deger = 2; };
                         } else {
@@ -100,7 +117,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                     _hatOk = !(terrainIntersectASL [_eye, _aim]) && {!(lineIntersects [_eye, _aim, _u, _o])} && {([_u, "VIEW", _o] checkVisibility [_eye, eyePos _o]) >= 0.3};
                 };
                 if (!_hatOk) then { continue };
-                private _guv = [_u, _ls, _u getDir _o, _aim, false, false] call FUNC(rpgGuvenli);
+                private _guv = [_u, _ls, _u getDir _o, _aim, _tur isEqualTo "MG_YUVASI", false] call FUNC(rpgGuvenli);
                 if (_guv isNotEqualTo "") then {
                     private _k = format ["karar_ret_%1", _guv];
                     _say set [_k, (_say getOrDefault [_k, 0]) + 1];
