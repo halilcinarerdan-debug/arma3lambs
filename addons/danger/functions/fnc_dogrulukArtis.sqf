@@ -18,7 +18,7 @@ diag_log "[DOGRULUK] sabit hedefe ardisik atista dogruluk artisi baslatildi (v8.
 
 ["CAManBase", "Fired", {
     params ["_u", "_wep"];
-    if (!local _u || {isPlayer _u} || {((units group _u) findIf {isPlayer _x}) > -1} || {[_u] call lambs_danger_fnc_aliveSahip} || {_u getVariable ["lambs_danger_disableAI", false]} || {!(missionNamespace getVariable ["lambs_danger_dogrulukArtis", true])}) exitWith {};
+    if (!local _u || {isPlayer _u} || {(((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}} || {[_u] call lambs_danger_fnc_aliveSahip} || {_u getVariable ["lambs_danger_disableAI", false]} || {!(missionNamespace getVariable ["lambs_danger_dogrulukArtis", true])}) exitWith {};
     if (_wep isEqualTo (secondaryWeapon _u) || {_wep isEqualTo (handgunWeapon _u)}) exitWith {};
     private _t = assignedTarget _u;
     if (isNull _t || {!alive _t}) then { _t = _u findNearestEnemy _u; };

@@ -60,7 +60,7 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
     private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
     private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
     if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
-    if (_yrd <= 0 || {!_gecerli} || {isNull _proj} || {((units group _u) findIf {isPlayer _x}) > -1}) exitWith {};
+    if (_yrd <= 0 || {!_gecerli} || {isNull _proj} || {(((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}}) exitWith {};   // v8.721: CBA oyuncuGrubuBot acikken oyuncu grubundaki botlar da isabet yardimi alir
     private _v = velocity _proj;
     private _sp = vectorMagnitude _v;
     private _vh = sqrt (((_v select 0) ^ 2) + ((_v select 1) ^ 2));
@@ -136,7 +136,7 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
             private _u = _x;
             private _bay = _u getVariable ["lambs_danger_isabetSevBay", false];
             if (_sev > 1) then {
-                if (isPlayer _u || {((units group _u) findIf {isPlayer _x}) > -1} || {_u getVariable [QGVAR(disableAI), false]} || {[_u] call FUNC(aliveSahip)}) then { continue };
+                if (isPlayer _u || {(((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}} || {_u getVariable [QGVAR(disableAI), false]} || {[_u] call FUNC(aliveSahip)}) then { continue };
                 if (!_bay) then {
                     _u setVariable ["lambs_danger_isabetSevEski", [_u skill "aimingAccuracy", _u skill "aimingShake"]];
                     _u setVariable ["lambs_danger_isabetSevBay", true];
