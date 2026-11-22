@@ -19,7 +19,7 @@
 */
 
 params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]], ["_maxM", -1, [0]]];   // v8.732: 3. arguman = en uzak siper (m) (on tarama: yakin siper yukseltmesi); -1 = sinir yok
-if (isNull _u || {isNull _en} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};
+if (isNull _u || {isNull _en} || {isPlayer _u} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};   // v8.749: INSAN OYUNCUNUN kendi birimi siper secimine / oturtmaya girmez (RPT 64b4517e: [ACIK-SIPER] / [SIPER-OTUR] Alpha 1-1 | hcinar33 (oyuncu) satirlari)
 if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   // v8.352: teslim olan / esir asker nesne arkasina gonderilmez (STOP -> MOVE salinimi)
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
 // v8.650 KENDI SIPERINDE KAL (kullanici: 'altisteki gibi almiyorlar'; RPT d6ee1c87: [SIPER-OTUR] oturtuldu 2.8-8.7 m, ayni asker 10-15 sn arayla yeniden secip yeniden kosuyor: coverHug CUP / A2 agacinda (FIRE LOD yok / dar) 'siperde' saymiyor -> acikta -> acikSiper 10 sn'de bir yeniden sec -> git-gel):
@@ -398,6 +398,12 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
 // v8.516 ARAZI KIVRIMI ARKASI (RPT 13:27 chernarus_summer: agaclarin %75'inde FIRE LOD yok, gövde genisligi medyan 0.00 m; nesne siperi gorus keser ama mermi durdurmaz): nesne siperi de bulunamazsa
 //   cevrede (4 / 8 / 12 m halkalarda 8 yon) dusman gozunden arazi kivrimiyle (terrainIntersectASL) gizlenen en yakin nokta: 0.4 m kapali = yat, 1.0 m kapali = comel. Kapatma: lambs_danger_siperArazi = false.
 // v8.672: artik nesne bulunsa da ARAZI adaylari nesneyle YARISIR (kullanici: 'mermi engellemiyor'; Lythium'da tek nesne siper ince agac = yalniz gizlenme, mermi gecer): arazi kivrimi hem gizler hem mermiyi durdurur; sabit 8 -> 6.
+// v8.749 KENTSEL ARAZI CEZASI (kullanici: 'lythium gibi alanlarda siperi nasil guclendirebiliriz' + 'her arada mukemmel siper'; RPT 64b4517e Lythium: cevre %83 KENTSEL, sert nesne 31 (<= 25 m) varken [ACIK-SIPER] secimlerinin ~%60'i ARAZI KIVRIMI (38 / 65), bina 3, duvar 3): sehirde arazi cukuru / yamaci
+//   duvar / bina / arac siperinin onune geciyordu (arazi adayi siperArazOncelik bonusu + nesne cezalari yuzunden). Askerin cevre profili KENTSEL ise ve cevrede sert nesne varsa arazi adaylarina CBA siperKentselArazi (varsayilan 6) puan CEZA eklenir (0 = eski).
+private _araziKentselCeza = 0;
+if (((missionNamespace getVariable ["lambs_danger_siperKentselArazi", 6]) > 0) && {([_u] call FUNC(cevreProfil)) isEqualTo "KENTSEL"}) then {
+    _araziKentselCeza = (missionNamespace getVariable ["lambs_danger_siperKentselArazi", 6]) min 20;
+};
 if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
     {
         private _r = _x;
@@ -409,7 +415,7 @@ if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
                 private _dc = 0;
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
-                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 4]) max 0 min 12);   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar')
+                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 4]) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
                 };

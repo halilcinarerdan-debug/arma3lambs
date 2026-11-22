@@ -17,6 +17,7 @@
 */
 
 params [["_a", objNull, [objNull]], ["_hedef", [], [[]]]];
+if (isNull _a || {isPlayer _a}) exitWith {};   // v8.749: oyuncu birimi setPos ile kaydirilmaz (siper oturtma / yapistirma yalniz AI)
 // v8.653: baygin / yarali dusen (vanilla revive INCAPACITATED / ACE) asker kaydirilmaz (RPT 27f2781f: 'oturtuldu 12-22 m' satirlari 'unconsciousfacedown' / 'ousrevivedefault' animasyonlu askerlerdi)
 private _saglam = { alive _a && {(lifeState _a) in ["HEALTHY", "INJURED"]} && {!(_a getVariable ["ACE_isUnconscious", false])} };
 if (isNull _a || {!alive _a} || {_hedef isEqualTo []} || {!(call _saglam)}) exitWith {};

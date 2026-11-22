@@ -26,6 +26,7 @@
 params ["_u", ["_e", objNull], ["_kaynak", ""]];
 if !(missionNamespace getVariable ["lambs_danger_baskiKapisi", true]) exitWith {true};
 if (isNull _e || {!alive _e}) exitWith {true};
+if (isPlayer _u) exitWith {false};   // v8.749: oyuncu birimine bastirma emri anlamsiz
 
 private _say = missionNamespace getVariable ["lambs_danger_baskiKapiSay", createHashMap];
 missionNamespace setVariable ["lambs_danger_baskiKapiSay", _say];
