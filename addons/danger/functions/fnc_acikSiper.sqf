@@ -63,6 +63,18 @@ private _yakinM = ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25
 private _yakinKosu = ((missionNamespace getVariable ["lambs_danger_siperYakinKosuM", 6]) max 2) min 20;
 private _yakinDovus = _yakinM > 0 && {_ed < _yakinM} && {!(lineIntersects [eyePos _u, _eASL, _u, _en])} && {([_u, "VIEW", _en] checkVisibility [eyePos _u, _eASL]) >= 0.4};
 if (_yakinDovus) then { _sayAS set ["yakin_dovus", (_sayAS getOrDefault ["yakin_dovus", 0]) + 1]; };
+// v8.736 AYNI ANDA HAREKET SINIRI (kullanici: 'cover to cover daha profesyonel'): grupta son 6 sn'de siper atilisina cikmis ve hala kosan asker sayisi siperAyniAnda'ya (2) ulastiysa bu asker (baski < 0.35, yakin dovus degil) 1.5 sn bekler: biri kosar, digerleri kapsar; 6 = kapali
+private _ayniA = ((missionNamespace getVariable ["lambs_danger_siperAyniAnda", 2]) max 1) min 6;
+private _ertele = false;
+if (_ayniA < 6 && {!_yakinDovus} && {(getSuppression _u) < 0.35}) then {
+    private _kosan = ({ alive _x && {_x isNotEqualTo _u} && {(time - (_x getVariable [QGVAR(siperDoMoveT), -999])) < 6} && {(speed _x) > 2} } count (units _g));
+    if (_kosan >= _ayniA) then { _ertele = true; };
+};
+if (_ertele) exitWith {
+    _sayAS set ["ertelendi", (_sayAS getOrDefault ["ertelendi", 0]) + 1];
+    _u setVariable [QGVAR(acikSiperT), time + 1.5];
+    false
+};
 private _limAcik = _yakinDovus || {_maxM > 0};
 private _lim = if (_maxM > 0) then { _maxM } else { _yakinKosu };
 private _dolu = missionNamespace getVariable ["lambs_danger_acikSiperDolu", []];

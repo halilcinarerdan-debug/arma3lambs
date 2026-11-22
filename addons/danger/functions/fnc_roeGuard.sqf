@@ -93,7 +93,8 @@ diag_log "[ROE] sivil / dost / esir koruma izleyicisi baslatildi (getAttackTarge
                 _u doWatch objNull;
                 if (_gercekIhlal && {_logN < 60}) then {
                     _logN = _logN + 1;
-                    diag_log format ["[ROE-IHLAL] %1 (%2) -> %3 (%4) | iliski:%5 | captive:%6 | mesafe:%7 m | silahli:%8 | gorev:%9 | beh:%10 -> hedef UNUTTURULDU", name _u, side group _u, name _t, _tSide, _fr toFixed 1, captive _t, round (_u distance2D _t), (weapons _t) isNotEqualTo [], _u getVariable [QEGVAR(main,currentTask), "-"], behaviour _u];
+                    diag_log format ["[ROE-IHLAL] %1 (%2) -> %3 (%4) | iliski:%5 | captive:%6 | mesafe:%7 m | silahli:%8 | gorev:%9 | beh:%10 | CAPTIVE NEDENI (v8.736): ACE baygin %11, ACE elkelepce %12, ACE teslim %13, yasam %14, aracta %15, oyuncu %16 -> hedef UNUTTURULDU", name _u, side group _u, name _t, _tSide, _fr toFixed 1, captive _t, round (_u distance2D _t), (weapons _t) isNotEqualTo [], _u getVariable [QEGVAR(main,currentTask), "-"], behaviour _u,
+                        _t getVariable ["ACE_isUnconscious", false], _t getVariable ["ace_captives_isHandcuffed", false], _t getVariable ["ace_captives_isSurrendering", false], lifeState _t, !isNull objectParent _t, isPlayer _t];
                 };
             };
             _indeks = _indeks + _kesit;

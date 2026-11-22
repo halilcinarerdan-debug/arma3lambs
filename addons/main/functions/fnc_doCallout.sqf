@@ -55,7 +55,7 @@ if (missionNamespace getVariable ["lambs_danger_cqbSessiz", true]) then {
     if (!_sessiz) then {
         private _sd = side group _unit;
         _sessiz = ((_unit nearEntities ["CAManBase", _cM]) findIf {
-            alive _x && {!captive _x} && {(side group _x) isNotEqualTo civilian} && {(_sd getFriend (side group _x)) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            alive _x && {!captive _x || {isPlayer _x}} && {(side group _x) isNotEqualTo civilian} && {(_sd getFriend (side group _x)) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
         }) >= 0;
     };
 };
