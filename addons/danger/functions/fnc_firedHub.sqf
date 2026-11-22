@@ -152,15 +152,25 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             private _gTaraf = side (group _unit);
             private _gBay = (_gland nearEntities ["CAManBase", 12]) select {alive _x && {(_gTaraf getFriend (side (group _x))) < 0.6} && {((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"]) || {_x getVariable ["ACE_isUnconscious", false]}}};
             private _gBaygin = _gBay isNotEqualTo [] && {((_gland nearEntities ["CAManBase", 35]) findIf {alive _x && {(_gTaraf getFriend (side (group _x))) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]}}) isEqualTo -1};
-            if (_gUzak > (_bMax + 8) || {_gHM > 55} || {_gBaygin}) then {
+            // v8.743 YUZ YUZE (kullanici: 'abi elemanla yuz yuzeyken el bombasi atmasinlar'; v8.728 kapisi yalniz MOD atislarinda (fnc_patlayici) vardi, MOTOR atisi burada kontrolsuzdu): hedef (saldiri / atanmis hedef, yoksa en yakin dusman)
+            //   bombaYuzYuzeM (20 m) icinde VE gorus hatti acik (duvar / siper arkasinda degil, gorunurluk >= 0.4) ise motor atisi da silinir + bomba geri verilir. Duvar arkasi / ust kat / kapali hat hedefe dokunulmaz.
+            private _gYuzM = ((missionNamespace getVariable ["lambs_danger_bombaYuzYuzeM", 20]) max 0) min 60;
+            private _gYuz = false;
+            private _gYuzH = _gHedef;
+            if (isNull _gYuzH || {!alive _gYuzH}) then { _gYuzH = _unit findNearestEnemy _unit; };
+            if (_gYuzM > 0 && {!isNull _gYuzH} && {alive _gYuzH} && {(_unit distance2D _gYuzH) < _gYuzM}) then {
+                _gYuz = !(lineIntersects [eyePos _unit, eyePos _gYuzH, _unit, _gYuzH]) && {([_unit, "VIEW", _gYuzH] checkVisibility [eyePos _unit, eyePos _gYuzH]) >= 0.4};
+            };
+            if (_gUzak > (_bMax + 8) || {_gHM > 55} || {_gBaygin} || {_gYuz}) then {
                 deleteVehicle _proj;
                 _unit addMagazine _mag;
                 private _gN = {_x isEqualTo _mag} count (magazines _unit);
                 _unit removeMagazines _mag;
                 [{ params ["_uu", "_mm", "_nn"]; if (alive _uu) then { _uu addMagazines [_mm, _nn]; }; }, [_unit, _mag, _gN], 20] call CBA_fnc_waitAndExecute;
                 lambs_danger_bombaMesafeN = (missionNamespace getVariable ["lambs_danger_bombaMesafeN", 0]) + 1;
+                if (_gYuz) then { lambs_danger_bombaYuzN = (missionNamespace getVariable ["lambs_danger_bombaYuzN", 0]) + 1; };
                 if (lambs_danger_bombaMesafeN <= 40) then {
-                    diag_log format ["[EL-BOMBASI-MESAFE] %1 | %2 | motor atisi IPTAL: dusus %3 m (limit %4+8) | bilinen hedef %5 m (limit 55) | baygin hedef:%7 | bomba 20 sn elde tutulmaz | toplam %6", groupId (group _unit), name _unit, round _gUzak, _bMax, if (_gHM < 0) then {"yok"} else {round _gHM}, lambs_danger_bombaMesafeN, _gBaygin];
+                    diag_log format ["[EL-BOMBASI-MESAFE] %1 | %2 | motor atisi IPTAL: dusus %3 m (limit %4+8) | bilinen hedef %5 m (limit 55) | baygin hedef:%7 | yuz yuze:%8 | bomba 20 sn elde tutulmaz | toplam %6", groupId (group _unit), name _unit, round _gUzak, _bMax, if (_gHM < 0) then {"yok"} else {round _gHM}, lambs_danger_bombaMesafeN, _gBaygin, _gYuz];
                 };
             };
         };

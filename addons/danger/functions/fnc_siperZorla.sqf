@@ -95,7 +95,7 @@ _u setVariable [QGVAR(taktikKilit), time + _sure];
 //   hedef secimi kapatilmaz, hedefe BASTIRMA ATESI (doSuppressiveFire) verilerek kosulur (dusmanin nisanini bozar); aksi halde saf kosu (hedef secimi kapali).
 //   Gercek atis sayisi atilisin basinda / sonunda mermi farkindan olculur ([KOSU-ATES] log + [ATES-HAREKET-OZET] 'b' sayaci).
 private _ateseKos = false;
-if ([_u, _e] call FUNC(atesHatiAcik)) then {
+if ([_u, _e] call FUNC(atesHatiAcik) && {[_u, _e, "siperZorla"] call FUNC(baskiKapisi)}) then {
     _ateseKos = (_risk >= 0.6) || {_bask > 0.5} || {(["zorlaKosuAtes", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (missionNamespace getVariable ["lambs_danger_atesHareketOran", 0.25])};
 };
 private _atVar = _u checkAIFeature "AUTOTARGET";

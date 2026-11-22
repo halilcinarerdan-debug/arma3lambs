@@ -37,6 +37,7 @@ if (_mgs isEqualTo []) exitWith {false};
 _mgs = [_mgs, [], {_x distance2D _en}, "ASCEND"] call BIS_fnc_sortBy;
 private _mg = _mgs select 0;
 if !([_mg, _en] call FUNC(atesHatiAcik)) exitWith {false};
+if !([_mg, _en, "mgDestek"] call FUNC(baskiKapisi)) exitWith {false};   // v8.743: uzak + gozlemci yok = bastirma yok
 _g setVariable [QGVAR(mgDestekT), time + 5];
 _mg doWatch _en;
 _mg doSuppressiveFire _en;

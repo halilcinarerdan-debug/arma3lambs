@@ -58,6 +58,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
             // ---- hedef (2 sn'de bir) ----
             private _hd = _g getVariable [QGVAR(atisHedef), [0, []]];
             if ((time - (_hd select 0)) > 2) then {
+                private _hObj = objNull;
                 private _taraf = side _g;
                 private _adaylar = (_l nearTargets 400) select {
                     private _o = _x select 4;
@@ -69,8 +70,9 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                 if (_adaylar isNotEqualTo []) then {
                     _adaylar = [_adaylar, [], {(_x select 4) distance2D _l}, "ASCEND"] call BIS_fnc_sortBy;
                     _poz = getPosATL ((_adaylar select 0) select 4);
+                    _hObj = (_adaylar select 0) select 4;
                 };
-                _hd = [time, _poz];
+                _hd = [time, _poz, _hObj];
                 _g setVariable [QGVAR(atisHedef), _hd];
             };
             private _hedef = _hd select 1;
@@ -122,6 +124,8 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                     && {((_x distance2D _aim) < 12) || {((abs ((((_u getDir _x) - _yon) + 540) mod 360 - 180)) < 8) && {(_u distance2D _x) < _mesafe}}}
                 });
                 if (_dost isNotEqualTo []) then { _sayac set ["hatDost", (_sayac get "hatDost") + 1]; _u setVariable [QGVAR(atisT), time]; continue };
+                // v8.743 BASTIRMA KAPISI (kullanici: 'dusman yakinda degilse bos yere supress atmasinlar'): uzak + gorus hatti olan gozlemci yok = atilmaz
+                if !([_u, _hd param [2, objNull], "atisUstunlugu"] call FUNC(baskiKapisi)) then { _sayac set ["baskiKapi", (_sayac getOrDefault ["baskiKapi", 0]) + 1]; _u setVariable [QGVAR(atisT), time]; continue };
                 if (!([_u, _aASL vectorAdd [0, 0, 4]] call _supFn) || {!([_u, _aim] call FUNC(atesHatiAcik))}) then {
                     // v8.604 PENCERE ATESI (kullanici: 'bilinen duvar arkasi atesi icin pencere yonune ates acsinlar, gorusunun oldugu ic bolgeye'): hedef duvar arkasindaysa pencere / kapidan GORULEN ic noktayi bastir (fnc_pencereNoktasi)
                     private _pw = if (missionNamespace getVariable ["lambs_danger_pencereAtesi", true]) then { [_u, _aim] call FUNC(pencereNoktasi) } else { [] };

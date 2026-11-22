@@ -67,7 +67,7 @@ if (_hazirYap) exitWith {
         private _u = _x;
         if (_u isNotEqualTo _unit && {alive _u} && {isNull objectParent _u} && {(primaryWeapon _u) isNotEqualTo ""}) then {
             _u doWatch _target;
-            if ([_u, _target] call FUNC(atesHatiAcik)) then {
+            if ([_u, _target] call FUNC(atesHatiAcik) && {[_u, _eObj, "hucum"] call FUNC(baskiKapisi)}) then {
                 _u doSuppressiveFire _target;
                 _nAtes = _nAtes + 1;
             };

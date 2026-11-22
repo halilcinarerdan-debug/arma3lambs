@@ -102,7 +102,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 if (_binaPen && {_vis < 0.15} && {_d <= _penetreM} && {time >= (_u getVariable [QGVAR(penetreT), 0])} && {(_u ammo (primaryWeapon _u)) > 6}) then {
                     private _pw = [_u, getPosATL _e] call FUNC(pencereNoktasi);
                     _u setVariable [QGVAR(penetreT), time + 4];
-                    if (_pw isNotEqualTo []) then {
+                    if (_pw isNotEqualTo [] && {[_u, _e, "pencere"] call FUNC(baskiKapisi)}) then {   // v8.743: uzak + gozlemci yok = atma
                         _u doSuppressiveFire (AGLToASL _pw);
                         _atesVerdi = true;
                     };
@@ -135,7 +135,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                             if ((time - (_u getVariable [QGVAR(penDenT), -999])) > 40) then { _u setVariable [QGVAR(penDenN), 0]; _u setVariable [QGVAR(penDenT), time]; };
                             if ((_u getVariable [QGVAR(penDenN), 0]) >= 4) then { _dostEngel = true; } else { _u setVariable [QGVAR(penDenN), (_u getVariable [QGVAR(penDenN), 0]) + 1]; };
                         };
-                        if (!_dostEngel && {_pm select 1 > 0}) then {
+                        if (!_dostEngel && {_pm select 1 > 0} && {[_u, _e, "penetre"] call FUNC(baskiKapisi)}) then {   // v8.743: uzak + gozlemci yok = atma
                             _u doSuppressiveFire _hedefASL;
                             _u setVariable [QGVAR(penetreT), time + ([4, 8] select _denemeMi)];
                             _atesVerdi = true;
@@ -183,7 +183,8 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                             if (_mes <= 14 && {_mes >= 2} && {_yon <= 70} && {_mes < _hedefMes}) then { _hedefMes = _mes; _hedefCp = _cp; };
                         };
                     } forEach _kv;
-                    if (_hedefCp isNotEqualTo []) then {
+                    // v8.743 (kullanici: 'bos duvari tariyorlar'): tahmin noktasi cogu zaman duvarin / nesnenin KENDISI; hat kontrolu yoktu -> hat acik + (dusman yakin ya da ileri gozlemci goruyor) sart
+                    if (_hedefCp isNotEqualTo [] && {[_u, _hedefCp] call FUNC(atesHatiAcik)} && {[_u, _e, "tahmin"] call FUNC(baskiKapisi)}) then {
                         _u doSuppressiveFire (_hedefCp vectorAdd [0, 0, 0.9]);
                         _u setVariable [QGVAR(siperTahminU), time + 5];
                         _say set ["tahmin", (_say get "tahmin") + 1];
