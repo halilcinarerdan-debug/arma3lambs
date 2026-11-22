@@ -47,6 +47,23 @@ if (isNull _u) exitWith {
         while {true} do {
             sleep 60;
             diag_log format ["[SKILL-OZET] %1", (keys lambs_danger_skillSay) apply {format ["%1=%2", _x, lambs_danger_skillSay get _x]}];
+            // v8.745 ESITLIK OLCUMU (kullanici: 'oyuncu grubu dusman grubu ile ayni skillere ve hiza sahip olsun'): oyuncu grubundaki botlar ile dusman botlarin ortalama becerisi + animasyon katsayisi (mvAnim) yan yana
+            if (allPlayers isNotEqualTo []) then {
+                private _oyG = allPlayers apply {group _x};
+                private _oyS = side group (allPlayers select 0);
+                private _bot = allUnits select {alive _x && {!isPlayer _x} && {local _x} && {isNull objectParent _x} && {_x isKindOf "CAManBase"}};
+                private _dost = _bot select {(group _x) in _oyG};
+                private _dus = _bot select {!((group _x) in _oyG) && {(_oyS getFriend (side group _x)) < 0.6} && {(side group _x) isNotEqualTo civilian}};
+                if (_dost isNotEqualTo [] && {_dus isNotEqualTo []}) then {
+                    private _ort = {
+                        params ["_l"];
+                        private _n = count _l;
+                        (["aimingAccuracy", "aimingSpeed", "aimingShake", "spotDistance", "spotTime", "reloadSpeed", "courage"] apply { private _s = _x; format ["%1 %2", _s select [0, 5], (((_l apply {_x skill _s}) call BIS_fnc_arithmeticMean)) toFixed 2] }) joinString " | "
+                    };
+                    private _anim = { params ["_l"]; (((_l apply {_x getVariable [QGVAR(mvAnim), 1]}) call BIS_fnc_arithmeticMean)) toFixed 2 };
+                    diag_log format ["[SKILL-ESIT] oyuncu grubu botlari (%1): %2 | anim katsayisi %3 || dusman botlar (%4): %5 | anim katsayisi %6 | oyuncuGrubuBot %7", count _dost, [_dost] call _ort, [_dost] call _anim, count _dus, [_dus] call _ort, [_dus] call _anim, missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false]];
+                };
+            };
         };
     };
     true

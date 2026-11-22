@@ -67,8 +67,9 @@ diag_log format ["[ORTAM-SKILL] ortam beceri dususu baslatildi | CF_BAI algiland
         {
             private _g = _x;
             if (isNull _g || {!local _g} || {(side _g) isEqualTo civilian}) then { continue };
-            if ((units _g) findIf {isPlayer _x} > -1) then { continue };
-            { if (alive _x && {local _x}) then { _askerler pushBack _x; }; } forEach (units _g);
+            // v8.745 (kullanici: 'oyuncu grubu dusman grubu ile ayni skillere sahip olsun'): oyuncuGrubuBot ACIKKEN oyuncu grubundaki botlar da ortam beceri dususune girer (oyuncunun kendisi HAYIR)
+            if ((units _g) findIf {isPlayer _x} > -1 && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}) then { continue };
+            { if (alive _x && {local _x} && {!isPlayer _x}) then { _askerler pushBack _x; }; } forEach (units _g);
         } forEach allGroups;
         private _n = count _askerler;
         if (_n isEqualTo 0) then { continue };

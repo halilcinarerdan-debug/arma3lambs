@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.744"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.745"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -579,6 +579,8 @@ def kabul(path):
     ekle("CEVRE PROFILI (dinamik cover)", "BILGI", ("tarama %d | %s | profil gecisi (ilk 30 loglanir) %d" % (tp, " ".join("%s %%%.0f" % (k, 100.0 * v / tp) for k, v in sorted(cs.items(), key=lambda x: -x[1])), cg)) if tp else "profil taramasi yok (v8.738 oncesi RPT ya da cevreProfil kapali / siper secimi olmadi)")
     ui = [l for l in L if "[UGL-IZI-OZET]" in l]
     ekle("UGL ISABET (40 mm dusus izi)", "BILGI", (re.sub(r"^.*?\"\[UGL-IZI-OZET\] ", "", ui[-1]).strip().rstrip('"')[:260]) if ui else ("[UGL-IZI] ornek %d (OZET henuz yok)" % len([1 for l in L if "[UGL-IZI]" in l and "OZET" not in l]) if any("[UGL-IZI]" in l for l in L) else "UGL izi yok (v8.741 oncesi RPT ya da UGL atisi olmadi)"))
+    se = [l for l in L if "[SKILL-ESIT]" in l]
+    ekle("OYUNCU GRUBU ESITLIGI (beceri + hiz)", "BILGI", re.sub(r"^.*?\"\[SKILL-ESIT\] ", "", se[-1]).strip().rstrip('"')[:420] if se else "[SKILL-ESIT] yok (v8.745 oncesi RPT ya da oyuncu grubunda bot / dusman bot yok)")
     bk = [l for l in L if "[BASKI-KAPI-OZET]" in l]
     bkr = len([1 for l in L if "[BASKI-KAPI] RED" in l])
     ekle("BASTIRMA KAPISI (bos yere bastirma yok)", "BILGI", (("RED ornek %d (ilk 30 loglanir) | " % bkr) + re.sub(r"^.*?\"\[BASKI-KAPI-OZET\] ", "", bk[-1]).strip().rstrip('"')[:260]) if (bk or bkr) else "bastirma kapisi kaydi yok (v8.743 oncesi RPT ya da baskiKapisi kapali / uzak + gozlemcisiz bastirma denemesi olmadi)")
