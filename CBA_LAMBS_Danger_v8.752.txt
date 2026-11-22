@@ -313,6 +313,7 @@ force lambs_danger_rpgMuhimmat = true;
 force lambs_danger_rpgMuhimmatAdet = 1;
 force lambs_danger_rpgMuhimmatDegis = true;
 force lambs_danger_rpgOyuncuOncelik = true;
+force lambs_danger_rpgTekHedef = true;
 force lambs_danger_siperKentselArazi = 6;
 force lambs_danger_siperCokAcili = true;
 force lambs_danger_siperCokAciliAg = 6;

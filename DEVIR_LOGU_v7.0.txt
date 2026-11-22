@@ -4563,3 +4563,7 @@ v8.751 (dal sade-waypoint) kullanici: '2 ve 3 yap' (v8.750 onerileri).
  - (2) GERCEK VURUS YONU: mevziHafiza Hit EH kaynagi birimin vuranKaynak degiskenine [kaynak, zaman] yazar; fnc_vurulmaTepki son 4 sn icinde canli kaynak varsa siperi ona gore arar (eski: findNearestEnemy). CBA vurulmaGercekYon (ACIK).
  - (3) KARSILIK VEREN SIPER: saf saklanma cezasi +6 -> CBA siperSafCeza 14; karsilik verebilen siper bonusu -3 -> CBA siperKarsilikBonus 6. Pop-up atisin kendisi mevcut siperPeek katmaninda (degismedi).
  - SINIR / T: DENENMEDI. Yuksek degerler siper secimini uzatir / kosuyu arttirir; beklenen: siper_saf_saklanma dusmeli, siper_karsilik artmali, [VURULDU-TEPKI-OZET] yeni siper bulunan > 0.
+v8.752 (dal sade-waypoint) RPT 635b383c (v8.751) + kullanici: 'roket kullanimi yok'.
+ - BULGU: yukleme CALISIYOR ([RPG-MUHIMMAT] 5 roketatarli birim: rhs_rpg7 + rhs_rpg7_TBG7V_mag, AT -> AP yer degisimi 1 = envanter doluydu); AMA [RPG-KARAR] / [RPG-ATIS] YOK (karar 0). Kume (>= 3 kisi 8 m) / binadaki dusman / MG yuvasi sartlari bu RPT'de olusmamis olabilir ya da baska bir filtre eliyor - bilinmiyordu.
+ - DEGISIKLIK: (1) TEK hedef: kume / bina / MG yoksa acikta gorunen tek piyade >= 60 m (CBA rpgTekHedef ACIK); KUME esigi 3 -> 2 kisi. (2) [RPG-KARAR-OZET] 60 sn: aday / filtre / hedef_bilinmiyor / izin_yok / sinif_* / hat_ret_* / emir_yok / emir + karar_ret_* (guvenlik) -> karar neden yok kesin gorulur.
+ - SINIR / T: DENENMEDI; tek hedefe emir roket israfi sayilabilir (birim basina AP 1 adet ile sinirli; yedek kurali AT roketleri korur).
