@@ -34,7 +34,7 @@ diag_log "[VURULDU-TEPKI] vurulunca siperi yeniden degerlendirme (hareketsiz ask
             _u setVariable [QGVAR(vurulduT), time];
             _u setVariable [QGVAR(acikSiperT), 0];
             _u setVariable [QGVAR(onTaramaT), 0];
-            _u setVariable [QGVAR(acikSiperHedef), []];
+            _u setVariable [QGVAR(acikSiperHedef), nil];   // v8.742: [] DEGIL nil (okuyucular [] ise 'select' hatasi veriyordu: RPT 5289ea85 acikSiper:451 / mevziHafiza:52)
             _say set ["vurulan", (_say get "vurulan") + 1];
             private _en = _u findNearestEnemy _u;
             if (isNull _en || {!alive _en}) then { continue };

@@ -49,7 +49,7 @@ diag_log "[MEVZI-HAFIZA] siper / ufuk / dusman atis noktasi hafizasi baslatildi 
     if ((_u knowsAbout _k) >= (["SEZILDI"] call FUNC(bilgiEsik))) then { _sek = floor ((((_u getDir _k) + 22.5) mod 360) / 45); };
     private _poz = getPosATL _u;
     private _hedef = _u getVariable [QGVAR(acikSiperHedef), [[], -999, ""]];
-    private _sipDe = ((_u getVariable [QGVAR(siperTutBit), 0]) > time) || {(time - (_hedef select 1)) < 40};
+    private _sipDe = ((_u getVariable [QGVAR(siperTutBit), 0]) > time) || {(time - (_hedef param [1, -999])) < 40};
     if (_sipDe) then {
         ["lambs_danger_mevziKayit", [_s, "kotu", _poz, _sek, 1]] call CBA_fnc_globalEvent;
     } else {
