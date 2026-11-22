@@ -31,7 +31,7 @@ diag_log "[HAREKET-DESTEK] hareket tikanma kurtarici (MOVE + hiz 0 + hedef uzak 
     while {true} do {
         sleep ([1, true, false, "hareketDestek"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_hareketDestek", true]) then { continue };
-        private _S = ((missionNamespace getVariable ["lambs_danger_hareketDestekS", 6]) max 3) min 30;
+        private _S = ((missionNamespace getVariable ["lambs_danger_hareketDestekS", 3]) max 3) min 30;
         {
             private _u = _x;
             if (!local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u}) then { continue };

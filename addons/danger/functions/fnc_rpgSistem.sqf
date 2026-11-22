@@ -158,7 +158,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             ["emir"] call _ar;
 
             // v8.748 yuklu AT mermisi AP degilse ve piyade / bina / kume hedefi + AP tasiyorsa yuklu mermiyi AP ile degistir (CBA rpgMuhimmatDegis)
-            if (!_pizin && {_apVar} && {_enTur in ["BINA", "KUME"]} && {missionNamespace getVariable ["lambs_danger_rpgMuhimmatDegis", true]}) then {
+            if (!_pizin && {_apVar} && {_enTur in ["BINA", "KUME", "TEK"]} && {missionNamespace getVariable ["lambs_danger_rpgMuhimmatDegis", true]}) then {
                 if ([_u, "degis"] call FUNC(rpgMuhimmat)) then {
                     _mag = (secondaryWeaponMagazine _u) param [0, ""];
                     _ammo = getText (configFile >> "CfgMagazines" >> _mag >> "ammo");
@@ -184,7 +184,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 params ["_uu", "_ll", "_aa0", "_tr"];
                 if (!alive _uu) exitWith {};
                 private _s = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
-                private _atildi = ((_uu ammo _ll) < _aa0) || {(time - (_uu getVariable [QGVAR(sonAtisT), -999])) < 9};
+                private _atildi = ((_uu ammo _ll) < _aa0) || {(time - (_uu getVariable [QGVAR(rpgAtisT), -999])) < 9};   // v8.754: yalniz ROKET atisi (eskiden sonAtisT = tufek atisi de sayiliyordu)
                 private _kk = ["sonuc_atilmadi", "sonuc_atildi"] select _atildi;
                 _s set [_kk, (_s getOrDefault [_kk, 0]) + 1];
                 private _n = missionNamespace getVariable ["lambs_danger_rpgSonucLogN", 0];

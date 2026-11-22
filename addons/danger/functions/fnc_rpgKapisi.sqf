@@ -28,6 +28,7 @@ if ((getNumber (configFile >> "CfgWeapons" >> _weapon >> "type")) isNotEqualTo 4
 private _ac = configFile >> "CfgAmmo" >> _ammo;
 if ((getNumber (_ac >> "weaponLockSystem")) > 0 || {(getNumber (_ac >> "maxControlRange")) > 0}) exitWith {false};
 
+_unit setVariable [QGVAR(rpgAtisT), time];   // v8.754: roket atis zamani (karar sonucu icin)
 private _say = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
 missionNamespace setVariable ["lambs_danger_rpgSay", _say];
 

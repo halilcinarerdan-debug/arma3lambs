@@ -32,7 +32,7 @@
  *   pusu true, pusuAtesM 70, pusuMaxS 150, pusuMinKisi 4   pusu: kill-box mesafesi, azami bekleme, en az kisi
  *   DUZENSIZ (Taliban-tipi): vur-kac, erken temas kesme, pusu agirlikli (haritada taliban / lop_am / lop_ists / insurgent ...)
  *   sonDirenis true   <= 3 asker son care: yakin binaya yerlesip kale savunmasi;  konsolidasyonS 90   retreat sonrasi LAMBS grup taktigi kapali toparlanma suresi (sn)
- *   cekilTopluM 180   retreat: dusman bu mesafeden uzaksa kapsama takimi yok, herkes birlikte kosar (yakinda ates-manevra)
+ *   cekilTopluM 350   retreat: dusman bu mesafeden uzaksa kapsama takimi yok, herkes birlikte kosar (yakinda ates-manevra)
  *   yorgunlukEtki 1 (bound uzunlugunu yorgunluga gore kisaltma carpani; 0 = kapali)
  *   teslim true, teslimEsik 0.15   moral endeksi bu esigin altina duserse (+ umutsuz kosullar) teslim; DUZENSIZ: teslim yok
  *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
@@ -82,7 +82,7 @@ private _p = createHashMapFromArray [
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
     ["tasimaInisM", 500], ["tasimaOrpEk", true], ["aracDestekKal", false], ["ifvDestek", true], ["kesifCarpan", 1], ["topcuMermiCarpan", 1], ["kesifAtesHizli", false],
-    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 180], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 350], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---
