@@ -86,6 +86,47 @@ private _coklu = {
     private _pa = (AGLToASL [_pt select 0, _pt select 1, 0]) vectorAdd [0, 0, 1.0];
     5 * ({ ((lineIntersectsSurfaces [_x, _pa, objNull, _u, true, 1, "FIRE", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_x, _pa])} } count _digerE)
 };
+// v8.724 ONGORU / COKLU SENARYO (kullanici: 'botlar yapacaklari taktikleri onceden dusunsun', 'cover yerleri dusman bilinen yonune gore', 'coklu senaryo / coklu durum'): siper secimi yalniz dusmanin SU ANKI konumuna degil, tahmini konumlarina da bakar:
+//   S1 ILERI: dusman hizi > 1 m/sn ise hareket yonunde ongoruSure (4 sn) sonraki konum (agirlik = ongoruAgirlik, 3 m);  S2 / S3 KANAT: dusman ayni mesafeyi koruyup gruba gore +-55 derece yana kayarsa (kanat; agirlik yarisi, CBA ongoruKanat).
+//   Aday siper noktasinin (1.0 m) FIRE LOD hatti bu varsayimsal goz noktalarindan ACIKSA ilgili agirlik cezaya eklenir (mesafe / durus puani ile ayni birim: m). Bilinen konum + diger bilinen dusmanlar (v8.657) mantigi aynen korunur; yalniz NESNE ARKASI adaylarinda uygulanir.
+private _senE = [];
+if (missionNamespace getVariable ["lambs_danger_ongoru", true]) then {
+    private _ogS = ((missionNamespace getVariable ["lambs_danger_ongoruSure", 4]) max 1) min 10;
+    private _ogA = ((missionNamespace getVariable ["lambs_danger_ongoruAgirlik", 3]) max 0) min 12;
+    if (_ogA > 0) then {
+        private _ep = getPosASL _en;
+        private _ev = velocity _en;
+        private _hizE = sqrt (((_ev select 0) ^ 2) + ((_ev select 1) ^ 2));
+        private _yuk = ((_ep select 2) - (getTerrainHeightASL _ep)) max 0;
+        if (_hizE > 1) then {
+            private _pp = [(_ep select 0) + ((_ev select 0) * _ogS), (_ep select 1) + ((_ev select 1) * _ogS), 0];
+            _pp set [2, (getTerrainHeightASL _pp) + _yuk + 1.6];
+            _senE pushBack [_pp, _ogA];
+        };
+        if (missionNamespace getVariable ["lambs_danger_ongoruKanat", true]) then {
+            private _br = _u getDir _en;
+            private _dm = (_ed max 20) min 150;
+            {
+                private _kp = (getPosATL _u) getPos [_dm, _br + _x];
+                if (!surfaceIsWater _kp) then {
+                    _senE pushBack [AGLToASL [_kp select 0, _kp select 1, 1.6], _ogA * 0.5];
+                };
+            } forEach [55, -55];
+        };
+    };
+};
+private _ongoruCeza = {
+    params ["_pt"];
+    if (_senE isEqualTo []) exitWith {0};
+    private _pa = (AGLToASL [_pt select 0, _pt select 1, 0]) vectorAdd [0, 0, 1.0];
+    private _c = 0;
+    {
+        _x params ["_ge", "_w"];
+        if (((lineIntersectsSurfaces [_ge, _pa, objNull, _u, true, 1, "FIRE", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_ge, _pa])}) then { _c = _c + _w; };
+    } forEach _senE;
+    if (_c > 0) then { _sayAS set ["ongoru_cezali_aday", (_sayAS getOrDefault ["ongoru_cezali_aday", 0]) + 1]; };
+    _c
+};
 // govde genisligi testi: istenen durus yuksekliginde hedef noktanin +-0.25 m yanindan da isin nesneye carpmali
 private _govdeKapali = {
     params ["_eA", "_gA", "_hh", "_enm", "_unt"];
@@ -155,6 +196,7 @@ private _objAd = "";
                 private _sk = (_u distance2D _pos) + (_ds select 1);
                 _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));   // v8.529 mevzi hafizasi (puan yuksek = iyi -> maliyet duser)
                 _sk = _sk + ([_pos] call _coklu);   // v8.657: diger bilinen dusmanlara acik nokta +5 / dusman
+                _sk = _sk + ([_pos] call _ongoruCeza);   // v8.724: tahmini (ileri / kanat) senaryolara acik nokta + agirlik
                 // v8.666 PENETRASYON FARKINDALIGI (siper secimi): dusmanin SU ANKI mermisi bu siperi (malzeme x kalinlik) AŞIYORSA yumusak siper: +6 m ceza (CBA siperPenetrasyon)
                 if (missionNamespace getVariable ["lambs_danger_siperPenetrasyon", true]) then {
                     private _gP = [_en] call FUNC(munisyonGucu);
