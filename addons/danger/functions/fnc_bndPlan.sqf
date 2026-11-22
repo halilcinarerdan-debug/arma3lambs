@@ -32,7 +32,7 @@ private _plan = [];
 private _sipN = 0;
 // v8.735 2) ROTA RISKI (bounding bacaklari): findCover'in 4 adayi arasindan, bir onceki noktadan o adaya giden hattin dusman goz noktalarindan (hedef + olasi siper noktalari) EN GIZLI olani secilir (CBA rotaRiski); eskiden ilk aday
 private _rotaOn = missionNamespace getVariable ["lambs_danger_rotaRiski", true];
-private _rAg = ((missionNamespace getVariable ["lambs_danger_rotaRiskAgirlik", 2]) max 0) min 8;
+private _rAg = (([_l, "rotaRiskAgirlik", 2] call FUNC(profilDeger)) max 0) min 8;   // v8.738: lider cevre profiline gore
 private _eyes = [[AGLToASL [_hedef select 0, _hedef select 1, ((_hedef param [2, 0]) max 0) + 1.6], 1]];
 if (_rotaOn) then { { _eyes pushBack [AGLToASL [_x select 0, _x select 1, 1.1], 0.5]; } forEach ([_hedef, _cur, 3, 15] call FUNC(dusmanSiperKumesi)); };
 private _riskEski = 0;

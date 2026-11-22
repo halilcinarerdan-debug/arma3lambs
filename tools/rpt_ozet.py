@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.737"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.738"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -568,6 +568,15 @@ def kabul(path):
         if m:
             k = int(m.group(1)); hn += k; hsip += k * int(m.group(2)); huz += k * int(m.group(3)); hac += k * int(m.group(4)); hgo += k * int(m.group(5))
     ekle("HAREKETSIZ ASKER SIPER KALITESI", "BILGI", ("hareketsiz ornek %d | GERCEK SIPER %%%.0f | uzak engel %%%.0f | acik %%%.0f | dusmani goruyor (ates edebilir) %%%.0f (hedef: gercek siper artar, acik azalir)" % (hn, hsip / hn, huz / hn, hac / hn, hgo / hn)) if hn else "hareketsiz ornek yok (v8.737 oncesi RPT)")
+    cs = {}
+    for l in L:
+        m = re.search(r"\[CEVRE-PROFIL-OZET\] 60 sn \(asker taramasi\): (.*)$", l)
+        if m:
+            for k, v in re.findall(r"(ORMAN|KENTSEL|ACIK|KARISIK)=(\d+)", m.group(1)):
+                cs[k] = cs.get(k, 0) + int(v)
+    cg = len([1 for l in L if "[CEVRE-PROFIL] " in l and " -> " in l])
+    tp = sum(cs.values())
+    ekle("CEVRE PROFILI (dinamik cover)", "BILGI", ("tarama %d | %s | profil gecisi (ilk 30 loglanir) %d" % (tp, " ".join("%s %%%.0f" % (k, 100.0 * v / tp) for k, v in sorted(cs.items(), key=lambda x: -x[1])), cg)) if tp else "profil taramasi yok (v8.738 oncesi RPT ya da cevreProfil kapali / siper secimi olmadi)")
     og = [l for l in L if "[ONGORU-OLCUM] TAHMIN:" in l]
     if og:
         son = og[-1]

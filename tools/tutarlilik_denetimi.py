@@ -175,7 +175,9 @@ for ad, (tur, spec, tip, satir) in sets.items():
 _dinOn = [d for d in re.findall(r'"(lambs_danger_\w*?)%\d', "".join(SQF.values())) if len(d) > 14]   # format ile kurulan degisken adlari (ornek lambs_danger_esik_%1)
 for ad in sets:
     if any(ad.startswith(d) for d in _dinOn): continue
-    if sum(len(re.findall(r"\b" + ad + r"\b", t)) for t in list(SQF.values()) + list(HPP.values())) <= 1: UYARI.append("[AYAR] kayitli ama kullanilmayan ayar: %s" % ad)
+    _kisa = ad[len("lambs_danger_"):]   # v8.738: fnc_profilDeger ile profile gore okunan ayarlar ('[_u, "siperYaricap", 16] call FUNC(profilDeger)') kisa adla anilir
+    _pd = sum(len(re.findall(r'"' + re.escape(_kisa) + r'"\s*,', t)) for t in SQF.values() if "profilDeger" in t)
+    if (sum(len(re.findall(r"\b" + ad + r"\b", t)) for t in list(SQF.values()) + list(HPP.values())) + _pd) <= 1: UYARI.append("[AYAR] kayitli ama kullanilmayan ayar: %s" % ad)
 # v8.572: addSetting blogunda kullanilan _katS o blokta tanimli mi? (RPT 89d68bc7: tanimsiz -> 'Empty menu category', ayar menude gorunmez)
 _bloklar = [m.start() for m in re.finditer(r'if \(!isNil "CBA_fnc_addSetting"', prep)]
 for m in re.finditer(r'\],\s*(_kat[A-Za-z0-9]*)\s*,', prep):   # v8.731: yalniz _katS degil TUM _kat* degiskenleri (RPT 21d9cf1f: hizliFark* ayarlari _katB ile _katB'nin tanimindan ONCE yazildi -> 'Setting ... does not exist', CBA dosyasi uygulanmadi)

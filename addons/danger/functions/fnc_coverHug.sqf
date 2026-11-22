@@ -296,7 +296,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
 
                 // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)
                 // v8.662 DURUS CESITLILIGI coverHug'da da (RPT 4a0e73e9: hareketsiz askerlerin 34 / 41'i PRONE, 4 CROUCH, 3 STAND; acikSiper'deki siperDurusCesit yalniz nesne dalinda uyguluyordu): baski <= 0.35 ve MG degilse CBA siperDurusCesit orani bir kademe az alcalir
-private _dusukKH = ((missionNamespace getVariable ["lambs_danger_siperDusuk", 1]) max 0) min 2;
+private _dusukKH = (round ([_u, "siperDusuk", 1] call FUNC(profilDeger)) max 0) min 2;   // v8.738: cevre profiline gore
 if ((getSuppression _u) <= 0.35 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < ((missionNamespace getVariable ["lambs_danger_siperDurusCesit", 0.5]) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
 for "_k" from 1 to _dusukKH do {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; default {"DOWN"} };
@@ -306,7 +306,7 @@ for "_k" from 1 to _dusukKH do {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; case "MIDDLE": {"DOWN"}; default {"DOWN"} };
                 };
                 // v8.729 YAKIN DOVUS (kullanici: 'face to face'de yere yatiyorlar'): dusman CBA siperYakinM (25 m) icinde ve gorunurse (arada engel yok) yatma yok, en cok comel
-                private _ycM = ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25]) max 0) min 60;
+                private _ycM = (([_u, "siperYakinM", 25] call FUNC(profilDeger)) max 0) min 60;
                 if (_ycM > 0 && {_durus isEqualTo "DOWN"} && {!isNull _en} && {_ed < _ycM} && {!(lineIntersects [eyePos _u, eyePos _en, _u, _en])}) then { _durus = "MIDDLE"; };
                 _u setUnitPosWeak _durus;
                 _u doWatch _en;

@@ -534,7 +534,7 @@ private _reason   = _result select 1;
 private _push = (_reason select [0, 5]) isEqualTo "PUSH:";
 // v8.733 UZAK HUCUM YOK (kullanici: 'botlarin hepsi aciga cikti, makro duzeyde'; RPT 871b54c9: 5 grup x 7 asker SUPPRESS_ASSAULT ile 80-260 m'de acik arazide COLUMN / WEDGE / LINE yurudu, bounding bayragi yok): doktrin 'duz hucum yalniz son 60 m' ama
 //   'MG ustunlugu' ve 'dusman binada' kurallari bunu deliyordu. Dusman CBA uzakHucumM (100 m) ustundeyse (PUSH haric) SUPPRESS_ASSAULT / ASSAULT -> BOUNDING (siperden siper ates-manevra; kapsama ekibi atesle). 0 = kapali (eski). Log [UZAK-HUCUM].
-private _uzakH = missionNamespace getVariable ["lambs_danger_uzakHucumM", 100];
+private _uzakH = [leader _group, "uzakHucumM", 100] call FUNC(profilDeger);   // v8.738: lider cevre profiline gore
 if (_uzakH > 0 && {!_push} && {_decision in ["SUPPRESS_ASSAULT", "ASSAULT"]} && {_enemyCount > 0} && {_closest > _uzakH}) then {
     if ((missionNamespace getVariable ["lambs_danger_uzakHucumLogN", 0]) < 15) then {
         missionNamespace setVariable ["lambs_danger_uzakHucumLogN", (missionNamespace getVariable ["lambs_danger_uzakHucumLogN", 0]) + 1];

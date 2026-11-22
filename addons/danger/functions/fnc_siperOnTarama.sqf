@@ -27,7 +27,7 @@ diag_log "[SIPER-ON-TARAMA] siper on tarama (gizli ama sert siperi olmayan asker
     while {true} do {
         sleep ([2, true, false, "siperOnTarama"] call FUNC(dusunSure));
         if !(missionNamespace getVariable ["lambs_danger_siperOnTarama", true]) then { continue };
-        private _M = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaM", 14]) max 3) min 20;
+        private _Mb = (missionNamespace getVariable ["lambs_danger_siperOnTaramaM", 14]) max 3;   // taban; asker basina profile gore (asagida)
         private _cd = ((missionNamespace getVariable ["lambs_danger_siperOnTaramaS", 30]) max 15) min 300;
         private _esik = ["SUPHE"] call FUNC(bilgiEsik);
         private _n = 0;
@@ -48,6 +48,7 @@ diag_log "[SIPER-ON-TARAMA] siper on tarama (gizli ama sert siperi olmayan asker
             ) then { continue };
             private _en = _u findNearestEnemy _u;
             if (isNull _en || {!alive _en} || {!(_en isKindOf "CAManBase")} || {captive _en} || {(_u knowsAbout _en) < _esik}) then { continue };
+            private _M = (([_u, "siperOnTaramaM", _Mb] call FUNC(profilDeger)) max 3) min 40;   // v8.738: ACIK arazide 2x, ORMAN / KENTSEL'de 0.6x
             private _d = _u distance2D _en;
             if (_d < 25 || {_d > 300}) then { continue };
             // sinif (COVER-OLCUM ile ayni): siper (<= 4 m) / acik / uzak engel
