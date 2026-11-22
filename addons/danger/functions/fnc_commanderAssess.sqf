@@ -330,7 +330,7 @@ private _enemyInBuilding = false;
 //   ile piyadeye de ates etmedi (grup 1-2: 12 -> 4). Iki duzeltme:
 //   (1) KAPALI ARAZI (orman / sehir) + dusman PIYADE ic ice (>= 2 bilinen, en yakin <= 130 m) + zirh >= 60 m: zirhtan kacmak yerine normal karar akisi (piyadeyle dovus; zirh < 60 m = ezilme riski: kacis).
 //   (2) ZAMAN SINIRI: ayni zirh icin kesintisiz kacis 90 sn'den uzun surerse 60 sn MOLA (normal karar), sonra yeniden. CBA zirhKacisSinir (kapali: eski sinirsiz kacis).
-private _evadeIzin = _armorCount > 0 && {_ownAT <= 0};
+private _evadeIzin = _armorCount > 0 && {_ownAT <= 0} && {missionNamespace getVariable ["lambs_danger_zirhKacis", true]};   // v8.759: CBA zirhKacis (kapali: AT'siz grup da zirhtan kacmaz, normal piyade akisi)
 private _evadeOrmanIcIce = !_isOpen && {_enemyCount >= 2} && {_closest <= 160} && {_armorDist >= 60};   // v8.551: 130 -> 160 m (RPT 04:58: piyade 99-185 m, EVADE_ARMOR 7 dk)
 private _evadeMola = false;
 if (_evadeIzin && {missionNamespace getVariable ["lambs_danger_zirhKacisSinir", true]}) then {
