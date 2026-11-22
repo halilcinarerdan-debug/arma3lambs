@@ -48,7 +48,16 @@ if (!_acil && {((_grp getVariable ["lambs_main_calloutGrupZaman", 0]) > time) ||
 private _sessiz = false;
 if (missionNamespace getVariable ["lambs_danger_cqbSessiz", true]) then {
     private _enS = _unit findNearestEnemy _unit;
-    _sessiz = !isNull _enS && {alive _enS} && {(_unit distance _enS) <= (missionNamespace getVariable ["lambs_danger_cqbSessizM", 50])};
+    private _cM = missionNamespace getVariable ["lambs_danger_cqbSessizM", 50];
+    _sessiz = !isNull _enS && {alive _enS} && {(_unit distance _enS) <= _cM};
+    // v8.720 (kullanici: 'adamlarin sesini cqbde duyuyoruz'; RPT 25f1fef7: bot konusmalarinin 11 / 17'si en yakin GERCEK dusman 1-85 m'deyken yapildi, cqbSessizM 100): findNearestEnemy yalniz birimin BILDIGI dusmani dondurur (BI wiki: grup hic dusman bilmiyorsa null; en yakin gercek dusman olmayabilir) -> CQB'de seni henuz bilmeyen bot konusuyordu.
+    //   Artik bilinen dusman yoksa / uzaktaysa bile, cqbSessizM icinde GERCEK konumda canli dusman piyade (sivil / esir / baygin haric) varsa sessiz kalinir.
+    if (!_sessiz) then {
+        private _sd = side group _unit;
+        _sessiz = ((_unit nearEntities ["CAManBase", _cM]) findIf {
+            alive _x && {!captive _x} && {(side group _x) isNotEqualTo civilian} && {(_sd getFriend (side group _x)) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+        }) >= 0;
+    };
 };
 if (_sessiz) exitWith {
     private _jest = switch (toLowerANSI _callout) do {

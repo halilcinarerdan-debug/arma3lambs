@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.719"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.720"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -323,10 +323,11 @@ def kabul(path):
         tr = sum(int(m.group(1)) for l in eg for m in [re.search(r"ters donus \(.*?\) (\d+)", l)] if m)
         # v8.707: 'siperOtur' = acikSiper'in KENDI siper-noktasina-otur doMove'u (kasitli); orana katilmaz, ham sayi yine yazilir (eski RPT'lerde alan yok = 0)
         kas = sum(int(m.group(1)) for l in eg for m in [re.search(r"siperOtur (\d+) \(kasitli\)", l)] if m) + sum(int(m.group(1)) for l in eg for m in [re.search(r"retreatEmir (\d+) \(kasitli\)", l)] if m)
+        lg_ = sum(int(m.group(1)) for l in eg for m in [re.search(r"lambsGorev (\d+) \(LAMBS taban kodu", l)] if m)
         oran_ham = 100.0 * tr / max(st, 1)
         oran = 100.0 * max(tr - kas, 0) / max(st, 1)
         son = re.sub(r"^.*\[EMIR-GIDIP-GELME\] ", "", max(eg, key=lambda x: len(x)))[:230]
-        ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (ham %.0f%%) - kasitli (siper-oturma + retreat emri) %d = %d (%.0f%%) | %s" % (st, tr, oran_ham, kas, max(tr - kas, 0), oran, son))
+        ekle("EMIR GIDIP-GELME", "GECTI" if oran <= 10 else ("KONTROL" if oran <= 20 else "KALDI"), "STOP %d, ters donus %d (ham %.0f%%) - kasitli (siper-oturma + retreat emri) %d = %d (%.0f%%) | bunlardan LAMBS gorev etiketli (taban kod, dolayli) %d | %s" % (st, tr, oran_ham, kas, max(tr - kas, 0), oran, lg_, son))
         td = [l for l in L if "[EMIR-TERS-DONUS]" in l]
         gv = collections.Counter(re.search(r"g:([^,\]]+)", l).group(1) for l in td if re.search(r"g:([^,\]]+)", l))
         if td:
@@ -444,6 +445,17 @@ def kabul(path):
     kom = len([1 for l in L if "[GAFIL]" in l and "BEKLEME BITTI" in l and "neden: komsu" in l])
     nd = [m.group(1) for l in L for m in [re.search(r"\[HQ-DESTEK-OZET\].*?(musait destek grubu yok:\d+)", l)] if m]
     ekle("MANGALAR ARASI KOORD.", "BILGI", "istihbarat raporu %d | kanat emri %d | destek atesi emri %d (temasli B: %d) | feint %d | takviye %d | gafil KOMSU sinyali %d | destek 'musait' yok sayaci (son): %s" % (ist, kan, des, des_t, fei, tak, kom, nd[-1] if nd else "-"))
+
+    # --- 8d) CQB SESSIZLIK (v8.720): bot konusmasi, en yakin GERCEK dusman cqbSessizM icindeyken olmamali
+    mM = [int(m.group(1)) for l in L for m in [re.search(r"CQB sessiz \(el isareti\) true / (\d+) m", l)] if m]
+    if mM:
+        eM = max(mM)
+        bk = [l for l in L if "[KONUSMA-OLAY]" in l and "(bot)" in l]
+        ic = 0
+        for l in bk:
+            m = re.search(r"en yakin dusman (\S+) m", l)
+            if m and m.group(1) != ">400" and int(m.group(1)) <= eM: ic += 1
+        ekle("CQB SESSIZLIK", "GECTI" if ic == 0 else "KALDI", "bot konusma olayi (log): %d | en yakin dusman <= %d m iken konusan: %d (0 olmali; v8.720 oncesi RPT'de bilinen-dusman kosulu yuzunden konusuyorlardi)" % (len(bk), eM, ic))
 
     # --- 8c) ACRE2 / OYUNCU KONUSMASI (v8.712; yalniz olcum)
     acre = any("[KONUSMA] ACRE2 algilandi" in l for l in L)

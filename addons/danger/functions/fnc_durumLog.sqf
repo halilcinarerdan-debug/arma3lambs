@@ -100,7 +100,10 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                             // v8.713: retreat'in KENDI doMove'lari (sicrama emri / ezme tespiti yeniden emri / koruma yeniden emri; RPT 52337533: ters donuslerin 17 / 42'si RET imzali, 'koruma yeniden-emir 20' ile ortusuyor) retEmirT damgasi yazar
                             if ((_u getVariable [QGVAR(oturDoMoveT), -999]) isNotEqualTo (_dm0 select 1)) then { _kay = "siperOtur"; } else {
                                 if ((_u getVariable [QGVAR(siperDoMoveT), -999]) isNotEqualTo (_dm0 select 0)) then { _kay = "siperYeni"; } else {
-                                    if ((count _dm0) > 2 && {(_u getVariable [QGVAR(retEmirT), -999]) isNotEqualTo (_dm0 select 2)}) then { _kay = "retEmir"; };
+                                    if ((count _dm0) > 2 && {(_u getVariable [QGVAR(retEmirT), -999]) isNotEqualTo (_dm0 select 2)}) then { _kay = "retEmir"; } else {
+                                        // v8.720: damga yok ama STOP aninda LAMBS gorev etiketi (g:Assault / Dodge! / Hide! ...) varsa kaynak buyuk olasilikla LAMBS taban kodu (RPT 25f1fef7: 'belirsiz' 22'nin 17'sinde gorev etiketi var; dolayli kanit)
+                                        if ((_im findIf { _x isEqualType "" && {(_x select [0, 2]) isEqualTo "g:"} }) >= 0) then { _kay = "lambsGorev"; };
+                                    };
                                 };
                             };
                             _tersKay set [_kay, (_tersKay getOrDefault [_kay, 0]) + 1];
@@ -137,8 +140,8 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 private _belS = (_bel select [0, 10]) apply { format ["%1 %2/%3", _x select 1, _bTers getOrDefault [_x select 1, 0], _x select 0] };
                 private _iz = (keys _imzaH) apply { [_imzaH get _x, _x] };
                 _iz sort false;
-                diag_log format ["[EMIR-GIDIP-GELME] 60 sn: komut gecisi %1 | MOVE -> STOP %2 | ters donus (MOVE -> STOP -> MOVE <= 4 sn) %3 (%4 %% of STOP) | belirtec (ters donuslerde / tum STOP'larda): %5 | en sik imza: %6 | ters donus kaynagi: siperOtur %7 (kasitli) / siperYeni %8 / retreatEmir %10 (kasitli) / belirsiz %9",
-                    _top, _stopS, _ters, (if (_stopS > 0) then { round (100 * _ters / _stopS) } else { 0 }), _belS joinString ", ", ((_iz select [0, 3]) apply { format ["%1x [%2]", _x select 0, _x select 1] }) joinString " ; ", _tersKay getOrDefault ["siperOtur", 0], _tersKay getOrDefault ["siperYeni", 0], _tersKay getOrDefault ["belirsiz", 0], _tersKay getOrDefault ["retEmir", 0]];
+                diag_log format ["[EMIR-GIDIP-GELME] 60 sn: komut gecisi %1 | MOVE -> STOP %2 | ters donus (MOVE -> STOP -> MOVE <= 4 sn) %3 (%4 %% of STOP) | belirtec (ters donuslerde / tum STOP'larda): %5 | en sik imza: %6 | ters donus kaynagi: siperOtur %7 (kasitli) / siperYeni %8 / retreatEmir %10 (kasitli) / lambsGorev %11 (LAMBS taban kodu, dolayli) / belirsiz %9",
+                    _top, _stopS, _ters, (if (_stopS > 0) then { round (100 * _ters / _stopS) } else { 0 }), _belS joinString ", ", ((_iz select [0, 3]) apply { format ["%1x [%2]", _x select 0, _x select 1] }) joinString " ; ", _tersKay getOrDefault ["siperOtur", 0], _tersKay getOrDefault ["siperYeni", 0], _tersKay getOrDefault ["belirsiz", 0], _tersKay getOrDefault ["retEmir", 0], _tersKay getOrDefault ["lambsGorev", 0]];
             };
             _top = 0; _stopS = 0; _ters = 0; _bAll = createHashMap; _bTers = createHashMap; _imzaH = createHashMap; _tersKay = createHashMap;
         };
