@@ -18,7 +18,7 @@
  * Public: No
 */
 
-params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]]];
+params [["_u", objNull, [objNull]], ["_en", objNull, [objNull]], ["_maxM", -1, [0]]];   // v8.732: 3. arguman = en uzak siper (m) (on tarama: yakin siper yukseltmesi); -1 = sinir yok
 if (isNull _u || {isNull _en} || {missionNamespace getVariable ["lambs_danger_acikSiperOff", false]}) exitWith {false};
 if (captive _u || {_u getVariable [QGVAR(teslim), false]}) exitWith {false};   // v8.352: teslim olan / esir asker nesne arkasina gonderilmez (STOP -> MOVE salinimi)
 if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
@@ -63,6 +63,8 @@ private _yakinM = ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25
 private _yakinKosu = ((missionNamespace getVariable ["lambs_danger_siperYakinKosuM", 6]) max 2) min 20;
 private _yakinDovus = _yakinM > 0 && {_ed < _yakinM} && {!(lineIntersects [eyePos _u, _eASL, _u, _en])} && {([_u, "VIEW", _en] checkVisibility [eyePos _u, _eASL]) >= 0.4};
 if (_yakinDovus) then { _sayAS set ["yakin_dovus", (_sayAS getOrDefault ["yakin_dovus", 0]) + 1]; };
+private _limAcik = _yakinDovus || {_maxM > 0};
+private _lim = if (_maxM > 0) then { _maxM } else { _yakinKosu };
 private _dolu = missionNamespace getVariable ["lambs_danger_acikSiperDolu", []];
 _dolu = _dolu select {(time - (_x select 1)) < 30};
 
@@ -368,6 +370,8 @@ private _nesneGit = {
     _u setSpeedMode "FULL";
     _u setVariable [QGVAR(siperDoMoveT), time];   // v8.707: ters donus kaynak atfi (durumLog)
     _u doMove _obj;
+    if ((_u distance2D _obj) <= 8 || {_yakinDovus}) then { _u doWatch _en; };   // v8.732: kisa siper atilisinda arkani donme (bakis dusmanda: yan / geri adim animasyonu)
+    [_u, _en] call FUNC(mgDestek);   // v8.732: acikta kalanin siper atilisina MG bastirma destegi
     // v8.641 SIPER NOKTASINA OTUR (kullanici: 'arada 2 metre var', RPT 47dde7ed: [SIPER-YAPIS] YAPISTI satiri HIC yok -> coverHug kayma kolu bu askerlerde calismiyor; asker doMove toleransinda (~1-2 m) duruyor):
     //   bu dalin KENDI tamamlayicisi: hareket 1.2 sn sonra baslar, asker durdugunda (< 0.8 m/sn, 8 m icinde) ya da 12 sn sonra, hedef hala ayni siper noktasiysa 0.15-6 m kalan mesafe yumusak kayarak (ayak hatti GEOM acik) kapatilir; hat kapaliysa (govde araya girer) doMove tekrar
     [_u, _obj] spawn {
@@ -425,7 +429,7 @@ private _nesneGit = {
     };
     true
 };
-if (_yakinDovus && {_obj isNotEqualTo []} && {(_u distance2D _obj) > _yakinKosu}) then { _obj = []; _sayAS set ["yakin_dovus_uzak_red", (_sayAS getOrDefault ["yakin_dovus_uzak_red", 0]) + 1]; };
+if (_limAcik && {_obj isNotEqualTo []} && {(_u distance2D _obj) > _lim}) then { _obj = []; _sayAS set ["yakin_dovus_uzak_red", (_sayAS getOrDefault ["yakin_dovus_uzak_red", 0]) + 1]; };
 private _binalarK = (nearestObjects [_p, ["House"], _yar + 10]) select {(count (_x buildingPos -1)) >= 2};
 private _kentsel = (missionNamespace getVariable ["lambs_danger_kentselOncelik", true]) && {(count _binalarK) >= 2};
 if (_obj isNotEqualTo [] && {!_kentsel}) exitWith { call _nesneGit };
@@ -448,7 +452,7 @@ private _edir = _p getDir _en;
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= (_yar + 10) && {!_yakinDovus || {_d <= _yakinKosu}} && {(_bp distance2D _en) >= (_ed - 8)} && {(_bp distance2D _en) <= (_ed + _geriMax)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
+        if (_d <= (_yar + 10) && {!_limAcik || {_d <= _lim}} && {(_bp distance2D _en) >= (_ed - 8)} && {(_bp distance2D _en) <= (_ed + _geriMax)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
             private _bA = AGLToASL _bp;
             if (!_cqbV2) then {
                 if (_d < _enS && {lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.3], _en, _u]}) then { _enS = _d; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = false; };
@@ -510,6 +514,8 @@ _u setSpeedMode "FULL";
 _u setUnitPos "AUTO";
 _u setVariable [QGVAR(siperDoMoveT), time];   // v8.707: ters donus kaynak atfi (durumLog)
 _u doMove _en_iyi;
+if ((_u distance2D _en_iyi) <= 8 || {_yakinDovus}) then { _u doWatch _en; };   // v8.732
+[_u, _en] call FUNC(mgDestek);   // v8.732
 // v8.354: atis pozisyonuna varinca durus + dusmana bak (pasif beklemesin); 45 sn sonra serbest
 if (_atisVar) then {
     [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds", "_e"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos _ds; if (!isNull _e && {alive _e}) then { _uu doWatch _e; }; [_uu] call FUNC(siperTut); }; }, [_u, _en_iyi, _durusB, _en], 14, {}] call CBA_fnc_waitUntilAndExecute;

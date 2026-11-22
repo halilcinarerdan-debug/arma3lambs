@@ -80,7 +80,10 @@ diag_log "[BAKIS-FARK] bakis farkindaligi (oyuncu bota bakinca bot siper mikro /
                 if ((time < (_u getVariable [QGVAR(taktikKilit), 0])) && {!_bndUye}) then { _atl = "atlKilit"; } else {
                 if ((insideBuilding _u) > 0.5) then { _atl = "atlBina"; } else {
                 if ((_u getVariable [QGVAR(teslim), false]) || {(_u getVariable [QGVAR(yemBirim), false]) isEqualTo true} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}) then { _atl = "atlDiger"; }; }; }; }; };
-                if (_atl isNotEqualTo "") then { _say set ["atlandi", (_say get "atlandi") + 1]; _say set [_atl, (_say get _atl) + 1]; _u setVariable [QGVAR(bakisTepkiT), time + 3]; continue };
+                // v8.732 (kullanici: 'siperden cikip girdigim gibi elemanlar hareket ediyor, o sirada aciga cikiyor veya ates edemiyor'): ates eden (son 6 sn) ve yakin dovustaki (siperYakinM) bot oyuncunun bakisina hareketle tepki vermez
+                if (_atl isEqualTo "" && {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 6}) then { _atl = "atlAtes"; };
+                if (_atl isEqualTo "" && {_d < ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25]) max 0)}) then { _atl = "atlYakin"; };
+                if (_atl isNotEqualTo "") then { _say set ["atlandi", (_say get "atlandi") + 1]; _say set [_atl, (_say getOrDefault [_atl, 0]) + 1]; _u setVariable [QGVAR(bakisTepkiT), time + 3]; continue };
                 if (_bndUye) then { _u setVariable [QGVAR(taktikKilit), nil]; };
                 _u setVariable [QGVAR(bakisTepkiT), time + _cool];
                 _u setVariable [QGVAR(bakilmaT), nil];

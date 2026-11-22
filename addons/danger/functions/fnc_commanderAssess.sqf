@@ -490,7 +490,7 @@ private _result = call {
     // v8.552 100 m ICI SAVUNMA TERCIHI (kullanici: '100 m ici savunma tercihi yap'): kapali arazide (orman / sehir), dusman <= CBA savunmaMesafe (100 m) ama >= 25 m, binada degil, guc orani < 2.2 (umutsuz degil) ve
     //   KENDI ortalama silah gucumuz dusmaninkinin >= CBA savunmaSilahOran (1.15) kati ise: ilerlemek / yaklasmak yerine MEVZIDE KAL (HOLD: siperde ates, yaklasani vur). Silah ustunlugu yakindan dovuste (dusmanin 'sarilma' taktigini) onler.
     //   Silah ustunlugu yoksa (zayif silahli taraf) normal akis (bounding / kanat / hucum: yaklasarak ustunlugu kapatir). Dusman < 25 m = CQB / hucum. CBA savunmaTercihi.
-    if ((missionNamespace getVariable ["lambs_danger_savunmaTercihi", true]) && {!_isOpen} && {!_enemyInBuilding} && {_enemyCount > 0} && {_closest <= (missionNamespace getVariable ["lambs_danger_savunmaMesafe", 100])} && {_closest >= 25}
+    if ((missionNamespace getVariable ["lambs_danger_savunmaTercihi", true]) && {(time - (_group getVariable [QGVAR(cikmazSon), -999])) > 60} && {!_isOpen} && {!_enemyInBuilding} && {_enemyCount > 0} && {_closest <= (missionNamespace getVariable ["lambs_danger_savunmaMesafe", 100])} && {_closest >= 25}
         && {_pwrRatio < 2.2} && {(_ownQT / (_ownCount max 1)) >= (((_enemyQT / ((count _enemySample) max 1)) max 0.3) * (missionNamespace getVariable ["lambs_danger_savunmaSilahOran", 1.15]))}) exitWith {
         ["HOLD", format ["savunma tercihi: dusman %1 m (<= 100), silah ustunlugu (biz %2 / dusman %3): mevzide kal, yaklasma", round _closest, (_ownQT / (_ownCount max 1)) toFixed 2, (_enemyQT / ((count _enemySample) max 1)) toFixed 2]]
     };
@@ -575,6 +575,28 @@ if ((_tekrarMi || _digerAyni) && {!_noSwap} && {_decision in ["BOUNDING", "FLANK
     _reason = ["koord: farkli grup", "hafiza: alternatif"] select (_tekrarMi);
 };
 
+// v8.732 CIKMAZ KIRICI (kullanici: 'eger uzun sure cikmadiysak hareket etsin'): 'savunma tercihi' HOLD'u (dusman <= 100 m + silah ustunlugu: mevzide kal) baski yok + kimse ates etmiyorken (25 sn) cikmazKirS (60 sn) surerse
+//   BOUNDING (kisa sicramalarla ates-manevra); sonraki 60 sn bu HOLD kurali atlanir (BOUNDING hemen HOLD'a donmesin). Baski / ates / baska karar gelirse sayac sifirlanir. CBA cikmazKir, cikmazKirS. Log: [CIKMAZ-KIR].
+if (_decision isEqualTo "HOLD" && {(_reason select [0, 15]) isEqualTo "savunma tercihi"} && {missionNamespace getVariable ["lambs_danger_cikmazKir", true]}) then {
+    private _sessiz = (_suppAvg < 0.2) && {((units _group) findIf {alive _x && {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 25}}) < 0};
+    if (_sessiz) then {
+        private _ck0 = _group getVariable [QGVAR(cikmazT0), -1];
+        if (_ck0 < 0) then { _group setVariable [QGVAR(cikmazT0), time]; } else {
+            if ((time - _ck0) >= (((missionNamespace getVariable ["lambs_danger_cikmazKirS", 60]) max 20) min 300)) then {
+                _group setVariable [QGVAR(cikmazT0), -1];
+                _group setVariable [QGVAR(cikmazSon), time];
+                _reason = format ["cikmaz: %1 sn ates yok, dusman %2 m cikmiyor -> kisa sicramalarla ates-manevra (BOUNDING)", round (time - _ck0), round _closest];
+                _decision = "BOUNDING";
+                if ((missionNamespace getVariable ["lambs_danger_cikmazLogN", 0]) < 15) then {
+                    missionNamespace setVariable ["lambs_danger_cikmazLogN", (missionNamespace getVariable ["lambs_danger_cikmazLogN", 0]) + 1];
+                    diag_log format ["[CIKMAZ-KIR] %1 | %2 sn sessiz HOLD (dusman %3 m, %4 asker) -> BOUNDING", groupId _group, round (time - _ck0), round _closest, _ownCount];
+                };
+            };
+        };
+    } else { _group setVariable [QGVAR(cikmazT0), -1]; };
+} else {
+    if (_decision isNotEqualTo "HOLD") then { _group setVariable [QGVAR(cikmazT0), -1]; };
+};
 // v8.544 KACIS KILIDI (kullanici: 'zaiyat fazlaysa daha da geri cekil, dusmanin sayisi azaldi diye riske atmak olgun degil'): kayip >= CBA kacisKayip iken WITHDRAW / PEEL / DELAY -> kilit (CBA kacisKilitS sn);
 //   kilit boyunca: hucum ailesi YOK (dusman sayisi azalsa da), DELAY -> WITHDRAW (daha da geri), ve 'kucuk ekip / yakin: kosarak kacilmaz' kurali dusman >= 25 m iken uygulanmaz. Dusman < 25 m = kacilmaz (dovus).
 private _kacisOn = missionNamespace getVariable ["lambs_danger_kacisAktif", true];
