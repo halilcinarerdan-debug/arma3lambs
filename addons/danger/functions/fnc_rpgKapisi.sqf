@@ -54,7 +54,7 @@ private _tur = if (_zirh) then {"zirh"} else { if (_arac) then {"arac"} else { i
 private _ah = assignedTarget _unit;
 if (isNull _ah) then { _ah = getAttackTarget _unit; };
 private _ahMuaf = !isNull _ah && {alive _ah} && {(_taraf getFriend (side group _ah)) < 0.6} && {(_ah isKindOf "Air") || {_ah isKindOf "LandVehicle"}};
-private _neden = [_unit, _weapon, _yon, _imp, _arac || _ahMuaf, true] call FUNC(rpgGuvenli);
+private _neden = [_unit, _weapon, _yon, _imp, _arac || _ahMuaf || {[_unit, "apMi", _ammo] call FUNC(rpgMuhimmat)}, true] call FUNC(rpgGuvenli);   // AP (piyadeye uygun) roket rezervden muaf
 private _kaynak = ["motor", "karar"] select ((time - (_unit getVariable [QGVAR(rpgKararT), -999])) < 10);
 private _dI = _unit distance _imp;
 

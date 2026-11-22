@@ -7,6 +7,8 @@
  *   MG_YUVASI : bilinen dusman SABIT SILAH (StaticWeapon, mürettebatli)
  *   BINA      : bilinen dusman BINA ICINDE (insideBuilding > 0.5) ve atici hattinin ilk vurusu hedefe <= 30 m bir yapi (duvara roket: ic bolgeyi temizler)
  *   KUME      : acikta bilinen >= 3 dusman piyade 8 m cap icinde (gorunurluk >= 0.3, hat acik)
+ * MUHIMMAT (v8.748): fnc_rpgMuhimmat roketatarliya piyadeye uygun (AP) roket tasitir (envanterde yer yoksa 1 AT sarjoru AP ile degisir); piyade / bina / kume emrinden once yuklu AT mermisi AP ile degistirilir (CBA rpgMuhimmatDegis);
+ *   insan oyuncu hedefi (ozellikle binada pusuya yatan) once secilir (CBA rpgOyuncuOncelik).
  * REZERV (v8.747, kullanici: 'hepsini piyadeye harcamasinlar yedekte tutsunlar'): BINA / KUME emri yalniz kalan roket > rpgYedek (2) ise (fnc_rpgGuvenli 'yedek'); MG yuvasi muaf.
  * KOSULLAR: yerel AI, grup 25 sn icinde temasli, yuklu GUDUMSUZ roketatar (weaponLockSystem / maxControlRange = 0), bina disinda, kosucu / tedavi / geri cekilme degil, atis 6 sn'den eski, hedef rpgMinM + 10 .. rpgMaxM (250 m),
  *   bilgi >= SUPHE ve grup son 20 sn icinde gormus, fnc_rpgGuvenli (min / dost / geri duvar / arkada dost / zirh yedegi) temiz. Birim basina rpgBekleS (20 sn) bekleme, grup basina 8 sn, tur basina en cok 2 emir.
@@ -46,6 +48,19 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
         private _oyEsit = missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false];
         private _esit = ["SUPHE"] call FUNC(bilgiEsik);
         private _verilen = 0;
+        private _oyOnc = missionNamespace getVariable ["lambs_danger_rpgOyuncuOncelik", true];
+        // v8.748 MUHIMMAT (kullanici: 'b yap'): roketatarli AI piyadeye uygun (AP) roket tasisin (envanterde yer yoksa 1 AT sarjoru AP ile yer degistirir); tick basina <= 6 birim, birim basina bir kez
+        if (missionNamespace getVariable ["lambs_danger_rpgMuhimmat", true]) then {
+            private _yk = 0;
+            {
+                if (_yk >= 6) exitWith {};
+                _yk = _yk + 1;
+                [_x, "yukle"] call FUNC(rpgMuhimmat);
+            } forEach (allUnits select {
+                local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {_x isKindOf "CAManBase"} && {(secondaryWeapon _x) isNotEqualTo ""} && {!(_x getVariable [QGVAR(rpgMuhOk), false])}
+                && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
+            });
+        };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(secondaryWeapon _x) isNotEqualTo ""}
             && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 25)} && {_x isKindOf "CAManBase"}
@@ -69,6 +84,9 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             private _ac = configFile >> "CfgAmmo" >> _ammo;
             private _bayrak = getNumber (_ac >> "aiAmmoUsageFlags");
             private _pizin = ((getNumber (_ac >> "allowAgainstInfantry")) > 0) || {((floor (_bayrak / 64)) mod 2) isEqualTo 1};   // v8.747: piyade izni = allowAgainstInfantry > 0 YA DA aiAmmoUsageFlags'te 64 (piyade) biti (BI forum: 64 = piyade, 128 = arac, 512 = zirh)
+            private _apVar = false;
+            if (!_pizin && {missionNamespace getVariable ["lambs_danger_rpgMuhimmat", true]}) then { _apVar = ([_u, "var"] call FUNC(rpgMuhimmat)) isNotEqualTo ""; };
+            private _pEl = _pizin || {_apVar};   // v8.748: piyade emri uygun = yuklu mermi AP YA DA envanterde AP var (degistirme / LAMBS munisyon degisimi)
             if (!(_ammo in _mermiTani) && {(count _mermiTani) < 20}) then {
                 _mermiTani pushBack _ammo;
                 diag_log format ["[RPG-MERMI-TANI] %1 | sarjor %2 | mermi %3 | allowAgainstInfantry %4 | aiAmmoUsageFlags %5 | airLock %6 | hit %7 | indirectHit %8 (yaricap %9 m) | piyadeye emir: %10", _ls, _mag, _ammo, getNumber (_ac >> "allowAgainstInfantry"), _bayrak, getNumber (_ac >> "airLock"), getNumber (_ac >> "hit"), getNumber (_ac >> "indirectHit"), getNumber (_ac >> "indirectHitRange"), ["HAYIR (yamasiz: motor reddeder)", "evet"] select _pizin];
@@ -82,7 +100,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 && {(_u knowsAbout _o) >= _esit} && {((_u targetKnowledge _o) select 2) > (time - 20)}
             } apply {_x select 4};
             if (_gor isEqualTo []) then { continue };
-            if (!_pizin && {(_gor findIf {_x isKindOf "StaticWeapon"}) < 0}) then { _say set ["karar_ret_izin_yok", (_say getOrDefault ["karar_ret_izin_yok", 0]) + 1]; continue };   // yamasiz mermi + sabit silah yok: piyade emri motorda reddedilir
+            if (!_pEl && {(_gor findIf {_x isKindOf "StaticWeapon"}) < 0}) then { _say set ["karar_ret_izin_yok", (_say getOrDefault ["karar_ret_izin_yok", 0]) + 1]; continue };   // yamasiz mermi + sabit silah yok: piyade emri motorda reddedilir
             private _piyade = _gor select {_x isKindOf "CAManBase" && {!((lifeState _x) in ["INCAPACITATED", "UNCONSCIOUS"])} && {!(_x getVariable ["ACE_isUnconscious", false])} && {!([_x] call FUNC(teslimMi))}};
             private _en = objNull;
             private _enTur = "";
@@ -96,9 +114,9 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 if (_o isKindOf "StaticWeapon") then {
                     if ((crew _o) isNotEqualTo []) then { _tur = "MG_YUVASI"; _deger = 3; };
                 } else {
-                    if (_o isKindOf "CAManBase" && {_pizin}) then {
+                    if (_o isKindOf "CAManBase" && {_pEl}) then {
                         if ((insideBuilding _o) > 0.5) then {
-                            if (_d >= 40) then { _tur = "BINA"; _deger = 2; };
+                            if (_d >= 40 || {isPlayer _o}) then { _tur = "BINA"; _deger = 2; };
                         } else {
                             private _kn = {_x isNotEqualTo _o && {(_x distance2D _o) <= 8} && {(insideBuilding _x) < 0.2}} count _piyade;
                             if (_kn >= 2) then { _tur = "KUME"; _deger = 2 + (_kn / 10); };
@@ -106,6 +124,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                     };
                 };
                 if (_tur isEqualTo "") then { continue };
+                if (_oyOnc && {isPlayer _o}) then { _deger = _deger + 5; };   // v8.748 (kullanici: 'ilk oyunculara odaklansin, evde pusan oyunculara'): insan oyuncu hedefi once
                 if (_deger < _enDeger || {_deger isEqualTo _enDeger && {!isNull _en} && {_d >= (_u distance _en)}}) then { continue };
                 private _aim = aimPos _o;
                 // hat: MG / kume = acik hat; bina = ilk vurus hedefe yakin bir yapi
@@ -117,7 +136,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                     _hatOk = !(terrainIntersectASL [_eye, _aim]) && {!(lineIntersects [_eye, _aim, _u, _o])} && {([_u, "VIEW", _o] checkVisibility [_eye, eyePos _o]) >= 0.3};
                 };
                 if (!_hatOk) then { continue };
-                private _guv = [_u, _ls, _u getDir _o, _aim, _tur isEqualTo "MG_YUVASI", false] call FUNC(rpgGuvenli);
+                private _guv = [_u, _ls, _u getDir _o, _aim, (_tur isEqualTo "MG_YUVASI") || _pEl, false] call FUNC(rpgGuvenli);   // AP (piyadeye uygun) roket rezervden muaf
                 if (_guv isNotEqualTo "") then {
                     private _k = format ["karar_ret_%1", _guv];
                     _say set [_k, (_say getOrDefault [_k, 0]) + 1];
@@ -127,6 +146,13 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             } forEach _gor;
             if (isNull _en) then { continue };
 
+            // v8.748 yuklu AT mermisi AP degilse ve piyade / bina / kume hedefi + AP tasiyorsa yuklu mermiyi AP ile degistir (CBA rpgMuhimmatDegis)
+            if (!_pizin && {_apVar} && {_enTur in ["BINA", "KUME"]} && {missionNamespace getVariable ["lambs_danger_rpgMuhimmatDegis", true]}) then {
+                if ([_u, "degis"] call FUNC(rpgMuhimmat)) then {
+                    _mag = (secondaryWeaponMagazine _u) param [0, ""];
+                    _ammo = getText (configFile >> "CfgMagazines" >> _mag >> "ammo");
+                };
+            };
             _verilen = _verilen + 1;
             _u setVariable [QGVAR(rpgBekleT), time + _bekle];
             _u setVariable [QGVAR(rpgKararT), time];
@@ -140,7 +166,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             _say set [_k2, (_say getOrDefault [_k2, 0]) + 1];
             if (_logN < 60) then {
                 _logN = _logN + 1;
-                diag_log format ["[RPG-KARAR] %1 | %2 | %3 -> %4 %5 m | %6 | mermi %7 (%8) | aiAmmoUsageFlags %9", groupId _g, name _u, _enTur, typeOf _en, round (_u distance _en), _ls, _mag, _a0, getNumber (configFile >> "CfgAmmo" >> _ammo >> "aiAmmoUsageFlags")];
+                diag_log format ["[RPG-KARAR] %1 | %2 | %3 -> %4 %5 m | %6 | mermi %7 (%8) | aiAmmoUsageFlags %9 | oyuncu hedef: %10", groupId _g, name _u, _enTur, typeOf _en, round (_u distance _en), _ls, _mag, _a0, getNumber (configFile >> "CfgAmmo" >> _ammo >> "aiAmmoUsageFlags"), isPlayer _en];
             };
             // sonuc (7 sn sonra): atildi mi
             [{
