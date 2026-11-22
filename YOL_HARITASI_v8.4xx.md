@@ -177,6 +177,7 @@ Fikir (kullanıcı): ses / limiter dünyasındaki "look-ahead" gibi botlar yapac
 | 15 | **Sahte geri çekilme:** HUNI verisi (v8.722 tanı) ile kapı kararı; 111+ RPT'de hiç başlamadı | TANI | `SAHTE CEKILME HUNISI` ana engel |
 | 16 | **Algı:** CBA ile yükseltildi (v8.723: bilgi artışı / taban / eşikler / ses / yakın algı); algı karnesi (oyuncuyu ilk fark etme süresi / mesafesi) | CBA YAPILDI; ÖLÇÜM YAPILACAK | ilk temas fark etme süresi |
 | 17 | **Reaksiyon süresi (fark etme + ateş):** görünür insan oyuncuyu hızlı fark etme (`fnc_hizliFark`, reveal; v8.727 YAPILDI (T)); ateş tarafı: fark sonrası `doTarget`, cqbReflex (≤ 28 m); ölçüm: görünürden farka süre (motor referansı ile) | v8.727 (T); ATEŞ GECİKMESİ ÖLÇÜMÜ YAPILACAK | karne `HIZLI FARK`: tetik süresi < motor süresi; ilk görünürden ilk atışa süre (yeni log) |
+| 18 | **Yakın dövüş (face to face): yatma / uzak siper koşusu yok** (`siperYakinM`, `siperYakinKosuM`): görünür düşman < 25 m ise bot ≤ 6 m'deki siper / binayı kullanır, uzağa ateşsiz koşmaz, varışta yatmaz (çömelir) | v8.729 YAPILDI (T) | karne `YAKIN DOVUS KOSUSU` = 0 (v8.728 RPT: 18 koşunun 2'si düşman < 25 m iken > 6 m) |
 
 Not: öngörü katmanı yeni hareket emri üretmeden, mevcut SEÇİM noktalarını (siper, rota, karar) cezalandıran / ağırlıklandıran biçimde ilerler (titreme / ters dönüş riski düşük); komutan karar öngörüsü (madde 4) en riskli adımdır: bayrakla kapatılabilir, tek adım + RPT.
 

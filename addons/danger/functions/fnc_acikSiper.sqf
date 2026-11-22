@@ -57,6 +57,12 @@ private _p = getPosATL _u;
 private _eASL = eyePos _en;
 private _mevziFn = missionNamespace getVariable ["lambs_danger_fnc_mevziPuan", {0}];   // v8.529
 private _ed = _u distance2D _en;
+// v8.729 YAKIN DOVUS (kullanici: 'adamlar animasyona cok giriyor, face to face'de yere yatiyorlar'; RPT 6ac64f59: dusman 14 m acikta -> 19 m'deki siper icin 4.2 sn ATESSIZ 'saf kosu' + varista DOWN; dusman 17 m -> 24 m kosu): dusman CBA siperYakinM (25 m) icinde ve GORUNUR (arada engel yok,
+//   gorunurluk >= 0.4) ise asker uzak siper icin kosmaz (yalniz siperYakinKosuM = 6 m icindeki siper / bina), dovusur; varis duruşu yatik (DOWN) olmaz (comel). 0 = kapali (eski).
+private _yakinM = ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25]) max 0) min 60;
+private _yakinKosu = ((missionNamespace getVariable ["lambs_danger_siperYakinKosuM", 6]) max 2) min 20;
+private _yakinDovus = _yakinM > 0 && {_ed < _yakinM} && {!(lineIntersects [eyePos _u, _eASL, _u, _en])} && {([_u, "VIEW", _en] checkVisibility [eyePos _u, _eASL]) >= 0.4};
+if (_yakinDovus) then { _sayAS set ["yakin_dovus", (_sayAS getOrDefault ["yakin_dovus", 0]) + 1]; };
 private _dolu = missionNamespace getVariable ["lambs_danger_acikSiperDolu", []];
 _dolu = _dolu select {(time - (_x select 1)) < 30};
 
@@ -402,6 +408,7 @@ private _nesneGit = {
     if ((getSuppression _u) <= 0.35 && {_dusukK > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _cesit}) then { _dusukK = _dusukK - 1; };
     if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
+    if (_yakinDovus && {_objDurus isEqualTo "DOWN"}) then { _objDurus = "MIDDLE"; };   // v8.729: yakin dovusta yatma yok
     _u setUnitPos "UP";
     [_u, _obj, _en, _objDurus, true, true] call FUNC(siperZorla);   // v8.510; v8.649: riskAtla + uzakIzin (acikta kalan asker risk esigi aranmadan, 40 m'ye kadar atilisla): ates ederken doMove ertelenmesin (raycast dogrulamali atilis)
     [{ params ["_uu", "_hp"]; !alive _uu || {(_uu distance2D _hp) < 1.5} }, { params ["_uu", "_hp", "_ds"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPosWeak _ds; [_uu] call FUNC(siperTut); }; }, [_u, _obj, _objDurus], 12, { params ["_uu", "_hp", "_ds"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { _uu setUnitPos _ds; }; }] call CBA_fnc_waitUntilAndExecute;
@@ -412,6 +419,7 @@ private _nesneGit = {
     };
     true
 };
+if (_yakinDovus && {_obj isNotEqualTo []} && {(_u distance2D _obj) > _yakinKosu}) then { _obj = []; _sayAS set ["yakin_dovus_uzak_red", (_sayAS getOrDefault ["yakin_dovus_uzak_red", 0]) + 1]; };
 private _binalarK = (nearestObjects [_p, ["House"], _yar + 10]) select {(count (_x buildingPos -1)) >= 2};
 private _kentsel = (missionNamespace getVariable ["lambs_danger_kentselOncelik", true]) && {(count _binalarK) >= 2};
 if (_obj isNotEqualTo [] && {!_kentsel}) exitWith { call _nesneGit };
@@ -434,7 +442,7 @@ private _edir = _p getDir _en;
     {
         private _bp = _x;
         private _d = _u distance2D _bp;
-        if (_d <= (_yar + 10) && {(_bp distance2D _en) >= (_ed - 8)} && {(_bp distance2D _en) <= (_ed + _geriMax)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
+        if (_d <= (_yar + 10) && {!_yakinDovus || {_d <= _yakinKosu}} && {(_bp distance2D _en) >= (_ed - 8)} && {(_bp distance2D _en) <= (_ed + _geriMax)} && {!([_bp, (_aralik * 0.5) max 2] call _doluMu)}) then {
             private _bA = AGLToASL _bp;
             if (!_cqbV2) then {
                 if (_d < _enS && {lineIntersects [_eASL, _bA vectorAdd [0, 0, 1.3], _en, _u]}) then { _enS = _d; _en_iyi = _bp; _binaAd = typeOf _b; _atisVar = false; };

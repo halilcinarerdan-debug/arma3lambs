@@ -293,6 +293,9 @@ for "_k" from 1 to _dusukKH do {
                 if ((getSuppression _u) > 0.35) then {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; case "MIDDLE": {"DOWN"}; default {"DOWN"} };
                 };
+                // v8.729 YAKIN DOVUS (kullanici: 'face to face'de yere yatiyorlar'): dusman CBA siperYakinM (25 m) icinde ve gorunurse (arada engel yok) yatma yok, en cok comel
+                private _ycM = ((missionNamespace getVariable ["lambs_danger_siperYakinM", 25]) max 0) min 60;
+                if (_ycM > 0 && {_durus isEqualTo "DOWN"} && {!isNull _en} && {_ed < _ycM} && {!(lineIntersects [eyePos _u, eyePos _en, _u, _en])}) then { _durus = "MIDDLE"; };
                 _u setUnitPosWeak _durus;
                 _u doWatch _en;
 
