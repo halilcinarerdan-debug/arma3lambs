@@ -97,6 +97,43 @@ diag_log "[SES] ates merkezi baslatildi (el bombasi listesi + ses/parlama farkin
             };
         };
 
+        // 0b2) v8.741 UGL IZI (kullanici: 'ugl kullanimini arastir'; 2483 [UGL-KARAR] / ~100 RPT: KARAR loglaniyor, ISABET hic olculmuyordu): AI 40 mm (silah muzzle'i UGL, el bombasi 'Throw' degil) atisinin dusus noktasi ile
+        //   hedefin ATIS ANINDAKI konumu arasindaki sapma (m), kisa / uzun, ucus suresi. Ilk 40 satir [UGL-IZI] + 60 sn [UGL-IZI-OZET] (medyan sapma, <= 10 m orani). Yalniz izleme (mermiye dokunmaz).
+        if (!isNull _proj && {_simTani isEqualTo "shotgrenade"} && {!(_weapon in ["Throw", "Put"])} && {_muzzle isNotEqualTo _weapon} && {!isPlayer _unit}) then {
+            private _ugT = assignedTarget _unit;
+            if (isNull _ugT) then { _ugT = getAttackTarget _unit; };
+            if (!isNull _ugT) then {
+                [_unit, _proj, _ugT, getPosASL _unit, getPosASL _ugT, _ammo] spawn {
+                    params ["_u", "_p", "_t", "_op", "_tp0", "_am"];
+                    private _son = getPosASL _p;
+                    private _t0 = time;
+                    waitUntil { sleep 0.1; if (!isNull _p) then { _son = getPosASL _p; }; isNull _p || {time > (_t0 + 8)} };
+                    private _sap = _son distance2D _tp0;
+                    private _atisM = _op distance2D _tp0;
+                    private _ucM = _op distance2D _son;
+                    private _s = missionNamespace getVariable ["lambs_danger_uglIziSay", []];   // [n, toplamSapma, <=10 m, kisa, uzun, [sapmalar]]
+                    if (_s isEqualTo []) then { _s = [0, 0, 0, 0, 0, []]; };
+                    _s set [0, (_s select 0) + 1];
+                    _s set [1, (_s select 1) + _sap];
+                    if (_sap <= 10) then { _s set [2, (_s select 2) + 1]; };
+                    if (_ucM < _atisM) then { _s set [3, (_s select 3) + 1]; } else { _s set [4, (_s select 4) + 1]; };
+                    (_s select 5) pushBack _sap;
+                    missionNamespace setVariable ["lambs_danger_uglIziSay", _s];
+                    if ((missionNamespace getVariable ["lambs_danger_uglIziLogN", 0]) < 40) then {
+                        missionNamespace setVariable ["lambs_danger_uglIziLogN", (missionNamespace getVariable ["lambs_danger_uglIziLogN", 0]) + 1];
+                        diag_log format ["[UGL-IZI] %1 | %2 | hedef (atis ani) %3 m | dustu: atici %4 m | hedefe sapma %5 m (%6 %7 m) | ucus %8 sn | hedef simdi %9 m uzakta", name _u, _am, round _atisM, round _ucM, round _sap, ["UZUN", "KISA"] select (_ucM < _atisM), round (abs (_ucM - _atisM)), (time - _t0) toFixed 1, if (isNull _t) then {"-"} else {str (round ((getPosASL _t) distance2D _son))}];
+                    };
+                    if (isNil "lambs_danger_uglIziOzetT") then { lambs_danger_uglIziOzetT = time + 60; };
+                    if (time > lambs_danger_uglIziOzetT) then {
+                        lambs_danger_uglIziOzetT = time + 60;
+                        private _l = +(_s select 5);
+                        _l sort true;
+                        diag_log format ["[UGL-IZI-OZET] kumulatif: atis %1 | medyan sapma %2 m | ort %3 m | <= 10 m (ise yarar) %%%4 | kisa dusen %5 / uzun %6", _s select 0, (_l select (floor ((count _l) / 2))) toFixed 1, ((_s select 1) / ((_s select 0) max 1)) toFixed 1, round (100 * (_s select 2) / ((_s select 0) max 1)), _s select 3, _s select 4];
+                    };
+                };
+            };
+        };
+
         // 0c) v8.383 EL BOMBASI MESAFE KAPISI (kullanici: 'mesafe kontrolu olsun, cok uzaga el bombasi atmaya calisti'; RPT 12:08:29: Faulkner'in bombasi MOTOR atisiydi - [PATLAYICI] kapisindan gecmedi, hedefi bilinmiyordu).
         //   Script atislari (fnc_patlayici) createVehicle ile gelir ve 'Fired' olayi UretMEZ; Fired ile gelen 'Throw' el bombasi motorun kendi kararidir. Dusus noktasi azami mesafeyi (varsayilan 40 m +8) ya da bilinen hedef 55 m'yi asarsa
         //   mermi silinir + bomba envantere geri verilir; atici 20 sn bu tur bombayi elinde tutmaz (motor ayni uzak hedefe tekrar tekrar atmaya calismasin). Kapatma: lambs_danger_elBombasiMesafeOff = true.
