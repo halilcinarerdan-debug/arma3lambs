@@ -79,8 +79,6 @@ if (_neden isNotEqualTo "") then {
     // v8.761 ISABET DUZELTMESI (kullanici: 'eleman tutturamiyor acil duzelt'): gudumsuz roketin cikis yonu hedefin ONGORULEN konumuna (hiz x ucus suresi + yercekimi payi) CBA rpgIsabetDuzeltme (0.85) orani kadar cevrilir (botIsabet mermi duzeltmesi gibi); hedef: karar katmani hedefi (son 12 sn) ya da atanmis / saldiri hedefi
     // HILESIZ (kullanici: 'hilesiz olsun accuracy ayarina baksin'): duzeltme orani ve ongoru TIRADOR BECERISINE (aimingAccuracy; CBA 'ELITE bot becerisi' isabet ayarlari) bagli; dusuk beceri = az duzeltme + rastgele sapma konisi
     private _acc = (_unit skill "aimingAccuracy") max 0 min 1;
-    private _hz = ((missionNamespace getVariable ["lambs_danger_rpgHizCarpan", 1]) max 1) min 3;   // v8.769: roket hiz carpani (hileli boost)
-    private _hile = missionNamespace getVariable ["lambs_danger_rpgHile", false];
     private _dz = (((missionNamespace getVariable ["lambs_danger_rpgIsabetDuzeltme", 0.85]) max 0) min 1) * _acc;
     if (_dz > 0 && {_vm > 1}) then {
         private _t = _unit getVariable [QGVAR(rpgHedef), objNull];
@@ -105,10 +103,10 @@ if (_neden isNotEqualTo "") then {
                 _yan = _dirY vectorCrossProduct [0, 0, 1];
             };
             if ((vectorMagnitude _yan) > 0.01) then {
-                _proj setVelocity (_dirY vectorMultiply (_vm * _hz));
+                _proj setVelocity (_dirY vectorMultiply _vm);
                 _proj setVectorDirAndUp [_dirY, _yan vectorCrossProduct _dirY];
                 // v8.766 (kullanici: 'kodumu oturtsun'; RPT d68f69bc: motor atislari 0.9 / 8.6 / 9.3 derece sapmali, roket motoru kendi yonune hizlanir): ilk 0.6 sn her karede ayni yone tekrar cevrilir (motor yanarken yon kaymasin)
-                if (!_hile) then { [_proj, _dirY, (_vm * _hz)] spawn {
+                [_proj, _dirY, _vm] spawn {
                     params ["_p", "_d", "_v"];
                     private _t0 = time;
                     while {!isNull _p && {time < (_t0 + 0.6)}} do {
@@ -116,23 +114,6 @@ if (_neden isNotEqualTo "") then {
                         _p setVectorDirAndUp [_d, _yy vectorCrossProduct _d];
                         _p setVelocity (_d vectorMultiply ((vectorMagnitude (velocity _p)) max _v));
                         sleep 0.02;
-                    };
-                }; };
-                // v8.769 AIMBOT (kullanici: 'rpgyi boostla eleman aimbot olsun rpgde'; CBA rpgHile): roket rpgHileS sn boyunca her karede hedefin ANLIK konumuna (aimPos) yonelir (saf takip), hiz = cikis hizi x rpgHizCarpan; hedef olurse / sure dolunca biter
-                if (_hile) then {
-                    [_proj, _t, (_vm * _hz)] spawn {
-                        params ["_p", "_tt", "_v"];
-                        private _t0 = time;
-                        private _sn = ((missionNamespace getVariable ["lambs_danger_rpgHileS", 3]) max 0.5) min 8;
-                        while {!isNull _p && {time < (_t0 + _sn)} && {!isNull _tt} && {alive _tt}} do {
-                            private _d = vectorNormalized ((aimPos _tt) vectorDiff (getPosASL _p));
-                            private _y = _d vectorCrossProduct [0, 0, 1];
-                            if ((vectorMagnitude _y) > 0.01) then {
-                                _p setVectorDirAndUp [_d, _y vectorCrossProduct _d];
-                                _p setVelocity (_d vectorMultiply ((vectorMagnitude (velocity _p)) max _v));
-                            };
-                            sleep 0.02;
-                        };
                     };
                 };
                 private _sy = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
