@@ -31,7 +31,7 @@ diag_log "[DURUS-AKICI] yat-kalk sonumleyici (durus degisimi sinirlayici) baslat
         if !(missionNamespace getVariable ["lambs_danger_durusAkici", true]) then { continue };
         private _pen = ((missionNamespace getVariable ["lambs_danger_durusAkiciPencere", 12]) max 5) min 40;
         private _fN = ((missionNamespace getVariable ["lambs_danger_durusAkiciFlip", 3]) max 2) min 8;
-        private _kS = ((missionNamespace getVariable ["lambs_danger_durusAkiciKilitS", 6]) max 2) min 20;
+        private _kS = ((missionNamespace getVariable ["lambs_danger_durusAkiciKilitS", 10]) max 2) min 20;
         {
             private _u = _x;
             if (!local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u}) then { continue };
@@ -68,13 +68,14 @@ diag_log "[DURUS-AKICI] yat-kalk sonumleyici (durus degisimi sinirlayici) baslat
             private _tk = time;
             _u setVariable [QGVAR(akiciTok), _tk];
             _u setVariable [QGVAR(akiciKB), time + _kS];
-            _u setUnitPos "MIDDLE";
+            // v8.753 (kullanici: 'bir de dur kalk yapiyor karakterler'): kilit YATIKSA yatik, COMELSE comel KALIR (eskiden PRONE -> MIDDLE = kilidin kendisi ek durus degisimiydi); yalniz AYAKTA ise comele iner
+            _u setUnitPos (switch (_st) do { case "PRONE": {"DOWN"}; default {"MIDDLE"} });
             _d set [1, []];
             _d set [2, time + _kS + 10];
             _say set ["kilit", (_say get "kilit") + 1];
             if (_logN < 15) then {
                 _logN = _logN + 1;
-                diag_log format ["[DURUS-AKICI] %1 | %2 | %3 sn'de %4 durus degisimi (%5 -> MIDDLE kilidi %6 sn) | hiz %7 km/s | baski %8 | bina %9 | komut %10", groupId _g, name _u, _pen, _fN, _st, _kS, round (speed _u), (getSuppression _u) toFixed 2, (insideBuilding _u) toFixed 1, currentCommand _u];
+                diag_log format ["[DURUS-AKICI] %1 | %2 | %3 sn'de %4 durus degisimi (%5 -> kilit %6 sn) | hiz %7 km/s | baski %8 | bina %9 | komut %10", groupId _g, name _u, _pen, _fN, _st, _kS, round (speed _u), (getSuppression _u) toFixed 2, (insideBuilding _u) toFixed 1, currentCommand _u];
             };
             [{
                 params ["_a", "_t"];

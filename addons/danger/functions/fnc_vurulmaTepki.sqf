@@ -43,7 +43,11 @@ diag_log "[VURULDU-TEPKI] vurulunca siperi yeniden degerlendirme (hareketsiz ask
             if (isNull _en || {!alive _en}) then { continue };
             // v8.750 TESHIS: acikSiper'in hangi sayaclarinin degistigi (neden yeni siper yok) - kayit oncesi / sonrasi fark
             private _s0 = +(missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap]);
+            // v8.753: hareketsiz (forceMove degil) asker taktik kilidindeyken vurulduysa kilit bu arama icin asilir (RPT 635b383c: 'YENI SIPER YOK' 35 / 35'te sayac 'kilitli' / 'kosucu'); siper bulunamazsa kilit geri
+            private _kil0 = _u getVariable [QGVAR(taktikKilit), 0];
+            if (_kil0 > time && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {missionNamespace getVariable ["lambs_danger_vurulmaKilitAs", true]}) then { _u setVariable [QGVAR(taktikKilit), 0]; };
             private _bulundu = [_u, _en] call FUNC(acikSiper);
+            if (!_bulundu && {_kil0 > time}) then { _u setVariable [QGVAR(taktikKilit), _kil0]; };
             if (!_bulundu && {_logR < 25}) then {
                 _logR = _logR + 1;
                 private _s1 = missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap];
