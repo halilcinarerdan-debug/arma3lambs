@@ -26,18 +26,19 @@ diag_log "[COMBAT-GEVSE] temassiz uzun COMBAT -> AWARE izleyicisi baslatildi (v8
         {
             private _g = _x;
             if (isNull _g || {!local _g} || {isNull (leader _g)} || {isPlayer (leader _g)} || {(side _g) isEqualTo civilian}) then { continue };
-            // v8.767 TEMASTA AWARE KALMASIN (kullanici: 'botlar awarede kaldi'; RPT 23929743: 10 / 39 grup ornegi AWARE + temas var, cogu 1 kisilik EAST gruplar, bayrak BRK+TAK ya da bayraksiz, bilinen dusman 164-370 m / bilinmiyor): temas TAZE (son 8 sn) + bilinen dusman (SEZILDI, <= 600 m) + grup
-            //   geri cekilme / kacis / temas kes / pusu / sniper / gafil bayragi YOK + lider AWARE ise COMBAT'a alinir (CBA temasCombat). Ilk 20 olay [TEMAS-COMBAT].
-            if ((missionNamespace getVariable ["lambs_danger_temasCombat", true]) && {(behaviour (leader _g)) isEqualTo "AWARE"} && {(_g getVariable [QGVAR(contact), 0]) > (time - 8)}
+            // v8.767 / v8.768 ADAM GORUNCE COMBAT (kullanici: 'botlar awarede kalmasin, combata gecsin adam gorunce'): lider AWARE + bilinen dusman (SEZILDI, <= 800 m) + (temas taze (8 sn) YA DA dusman SU AN gorunuyor (gorunurluk >= 0.3)) + grup geri cekilme / kacis / temas kes / pusu / sniper / gafil bayragi YOK -> COMBAT.
+            //   CBA temasCombat; ilk 20 olay [TEMAS-COMBAT]; gevsetme 20 sn beklemeye alinir.
+            if ((missionNamespace getVariable ["lambs_danger_temasCombat", true]) && {(behaviour (leader _g)) isEqualTo "AWARE"}
                 && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])} && {!(_g getVariable [QGVAR(isAmbushing), false])}
                 && {!(_g getVariable [QGVAR(sniperTeam), false])} && {!(_g getVariable [QGVAR(gafilAktif), false])} && {isNil {(leader _g) getVariable QGVAR(koseAktif)}}) then {
                 private _le = leader _g;
                 private _ee = _le findNearestEnemy _le;
-                if (!isNull _ee && {alive _ee} && {(_le distance2D _ee) <= 600} && {(_le knowsAbout _ee) >= (["SEZILDI"] call FUNC(bilgiEsik))}) then {
+                if (!isNull _ee && {alive _ee} && {(_le distance2D _ee) <= 800} && {(_le knowsAbout _ee) >= (["SEZILDI"] call FUNC(bilgiEsik))}
+                    && {((_g getVariable [QGVAR(contact), 0]) > (time - 8)) || {([_le, "VIEW", _ee] checkVisibility [eyePos _le, eyePos _ee]) >= 0.3}}) then {
                     _g setBehaviour "COMBAT";
                     _g setVariable [QGVAR(gevsetT), time + 20];
                     lambs_danger_temasCombatN = (missionNamespace getVariable ["lambs_danger_temasCombatN", 0]) + 1;
-                    if (lambs_danger_temasCombatN <= 20) then { diag_log format ["[TEMAS-COMBAT] %1 | temas taze, bilinen dusman %2 m, lider AWARE -> COMBAT | toplam %3", groupId _g, round (_le distance2D _ee), lambs_danger_temasCombatN]; };
+                    if (lambs_danger_temasCombatN <= 20) then { diag_log format ["[TEMAS-COMBAT] %1 | bilinen dusman %2 m (gorunur / temas taze), lider AWARE -> COMBAT | toplam %3", groupId _g, round (_le distance2D _ee), lambs_danger_temasCombatN]; };
                 };
             };
             if ((behaviour (leader _g)) isNotEqualTo "COMBAT") then { continue };
