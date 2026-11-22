@@ -527,7 +527,9 @@ if (EGVAR(main,debug_functions)) then {
                         _b setBehaviour "COMBAT";
                         _b setUnitPos "UP";
                         _b forceSpeed -1;
-                        doStop _b;
+                        // v8.743 GITGEL (kullanici RPT b7ca8e16 14:26:57: 'eleman gitgel yapti'; [GERI-CEKILME-EZME-TANI] Blackburn / Jones 'emir 1.5 sn sonra bozuldu: komut ATTACK, hiz 16 / 7' = KOSARKEN motor ATTACK koydu; eskiden burada KOSULSUZ doStop -> kosan asker durup yeniden basliyor (MOVE -> STOP -> MOVE 1 sn, [EMIR-TERS-DONUS] kaynak:retEmir 18 / 90 dk)):
+                        //   doStop yalniz asker gercekten DURUYORSA (< 3 km/sa); hareket halindeyse dogrudan doMove (komutu degistirir, yol hesabi + ayak ritmi kesilmez).
+                        if ((speed _b) < 3) then { doStop _b; };
                         _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _b doMove (_x select 1);
                     };
