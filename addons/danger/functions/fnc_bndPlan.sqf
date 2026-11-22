@@ -66,6 +66,21 @@ for "_i" from 1 to 8 do {
             _riskYeni = _riskYeni + _bestR * _rAg;
         };
     };
+    // v8.756 VARIS NOKTASINI SIPERE OTURT (kullanici: '1 yap'): bacak noktasi acikta kalmasin; R (12 m) icinde sert nesnenin dusmana gore ARKASI gizli + mermi durdurucu ise oraya kaydirilir (ilerleme >= 6 m korunur)
+    if (missionNamespace getVariable ["lambs_danger_bndSiperSnap", true]) then {
+        private _from = _cur;
+        private _snR = ((missionNamespace getVariable ["lambs_danger_bndSiperSnapM", 12]) max 4) min 25;
+        private _sn = [_pt, _hedef, _snR, { params ["_c"]; (_c distance2D _hedef) < ((_from distance2D _hedef) - 6) }] call FUNC(siperSnap);
+        private _sy = missionNamespace getVariable ["lambs_danger_snapSay", createHashMap];
+        missionNamespace setVariable ["lambs_danger_snapSay", _sy];
+        _sy set ["bacak_aranan", (_sy getOrDefault ["bacak_aranan", 0]) + 1];
+        if (_sn isNotEqualTo []) then {
+            _sy set ["bacak_bulunan", (_sy getOrDefault ["bacak_bulunan", 0]) + 1];
+            private _ln = missionNamespace getVariable ["lambs_danger_snapLogN", 0];
+            if (_ln < 40) then { missionNamespace setVariable ["lambs_danger_snapLogN", _ln + 1]; diag_log format ["[SIPER-SNAP] bacak | %1 | %2 -> %3 | %4 m kaydirildi (%5)", groupId _g, _ad, "SIPER", round (_pt distance2D _sn), ["arazi", "siper"] select (_ad isEqualTo "SIPER")]; };
+            if (_ad isNotEqualTo "SIPER") then { _sipN = _sipN + 1; }; _pt = _sn; _ad = "SIPER";
+        };
+    };
     if (surfaceIsWater _pt) exitWith {};
     _plan pushBack [_pt, _ad];
     _cur = _pt;

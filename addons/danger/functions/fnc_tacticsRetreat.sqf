@@ -147,6 +147,24 @@ private _wp1 = [_leaderPos, [_leaderPos] call _yonK] call _wpSec;
 private _wp2 = [_wp1, [_wp1] call _yonK] call _wpSec;
 private _wp3 = [_wp2, [_wp2] call _yonK] call _wpSec;
 if (_yer isNotEqualTo [] && {(_wp2 distance2D (_yer select 0)) <= (_adimBoy * 1.6)}) then { _wp3 = _yer select 0; };   // son bacak dogrudan avantajli yer
+// v8.756 GERI CEKILME WP'LERINI SIPERE OTURT (kullanici: '1 yap'): R (12 m) icinde sert nesnenin tehdide gore ARKASI gizli + mermi durdurucu ise WP oraya kayar (tehdide yaklasma <= 3 m); avantajli yer korunur
+private _snapGeri = {
+    params ["_w"];
+    if (_yer isNotEqualTo [] && {_w isEqualTo (_yer select 0)}) exitWith { _w };
+    private _snR = ((missionNamespace getVariable ["lambs_danger_bndSiperSnapM", 12]) max 4) min 25;
+    private _sn = [_w, _targetPos, _snR, { params ["_c"]; (_c distance2D _targetPos) >= ((_w) distance2D _targetPos) - 3 }] call FUNC(siperSnap);
+    private _sy = missionNamespace getVariable ["lambs_danger_snapSay", createHashMap];
+    missionNamespace setVariable ["lambs_danger_snapSay", _sy];
+    _sy set ["geri_aranan", (_sy getOrDefault ["geri_aranan", 0]) + 1];
+    if (_sn isEqualTo []) exitWith { _w };
+    _sy set ["geri_bulunan", (_sy getOrDefault ["geri_bulunan", 0]) + 1];
+    private _ln = missionNamespace getVariable ["lambs_danger_snapLogN", 0];
+    if (_ln < 40) then { missionNamespace setVariable ["lambs_danger_snapLogN", _ln + 1]; diag_log format ["[SIPER-SNAP] geri cekilme | %1 | WP %2 m kaydirildi", groupId _group, round (_w distance2D _sn)]; };
+    _sn
+};
+_wp1 = [_wp1] call _snapGeri;
+_wp2 = [_wp2] call _snapGeri;
+_wp3 = [_wp3] call _snapGeri;
 _wp1 = [_wp1, _leaderPos] call _suKontrol;
 _wp2 = [_wp2, _wp1] call _suKontrol;
 _wp3 = [_wp3, _wp2] call _suKontrol;

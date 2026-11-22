@@ -28,7 +28,7 @@ private _tab = missionNamespace getVariable ["lambs_danger_profilTablo", createH
 if ((count _tab) isEqualTo 0) then {
     _tab = createHashMapFromArray [
         ["ORMAN|siperYaricap", [0.7, 0]], ["ORMAN|siperGercekCezaM", [0.4, 0]], ["ORMAN|siperYanAgirlik", [1.5, 0]], ["ORMAN|rotaRiskAgirlik", [0.5, 0]], ["ORMAN|ongoruAgirlik", [0.5, 0]], ["ORMAN|siperOnTaramaM", [0.6, 0]], ["ORMAN|siperYakinM", [0.8, 0]], ["ORMAN|siperDusuk", [1, -1]],
-        ["KENTSEL|siperYaricap", [0.6, 0]], ["KENTSEL|siperGercekCezaM", [1.3, 0]], ["KENTSEL|siperYanAgirlik", [1.5, 0]], ["KENTSEL|rotaRiskAgirlik", [1.2, 0]], ["KENTSEL|siperYakinM", [1.2, 0]], ["KENTSEL|siperYakinKosuM", [0.8, 0]], ["KENTSEL|siperOnTaramaM", [0.6, 0]], ["KENTSEL|siperDusuk", [1, -1]], ["KENTSEL|uzakHucumM", [0.6, 0]],
+        ["KENTSEL|siperYaricap", [0.6, 0]], ["KENTSEL|siperGercekCezaM", [1.3, 0]], ["KENTSEL|siperYanAgirlik", [1.5, 0]], ["KENTSEL|rotaRiskAgirlik", [1.2, 0]], ["KENTSEL|siperYakinM", [1.2, 0]], ["KENTSEL|siperYakinKosuM", [0.8, 0]], ["KENTSEL|siperOnTaramaM", [1.3, 0]], ["KENTSEL|siperDusuk", [1, -1]], ["KENTSEL|uzakHucumM", [0.6, 0]],
         ["ACIK|siperYaricap", [1.8, 0]], ["ACIK|siperGercekCezaM", [0.3, 0]], ["ACIK|siperYanAgirlik", [0.7, 0]], ["ACIK|rotaRiskAgirlik", [2.0, 0]], ["ACIK|ongoruAgirlik", [1.5, 0]], ["ACIK|siperOnTaramaM", [2.0, 0]], ["ACIK|siperYakinKosuM", [1.6, 0]], ["ACIK|uzakHucumM", [0.8, 0]]
     ];
     missionNamespace setVariable ["lambs_danger_profilTablo", _tab];

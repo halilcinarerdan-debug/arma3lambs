@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.755"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.756"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -591,6 +591,8 @@ def kabul(path):
     sp = len([1 for l in L if "[SIS-PERDE] " in l]); so = [l for l in L if "[SIS-PERDE-OLCUM]" in l]
     sok = len([1 for l in so if "bulutu: 0 " not in l])
     ekle("DUMAN PERDESI (okkali perde)", "BILGI", ("perde olayi %d (ilk 40 loglanir) | 7 sn sonra lider -> tehdit hattini KESEN perde %d / %d olcum (hedef: cogu kesmeli)" % (sp, sok, len(so))) if sp else "perde kaydi yok (v8.755 oncesi RPT ya da duman olayi yok; [SIS-BUTCE] ret nedenleri butce / aralik mi bak)")
+    sn = [l for l in L if "[SIPER-SNAP]" in l]
+    ekle("VARIS NOKTASI SIPERE OTUR", "BILGI", ("[SIPER-SNAP] kaydirilan nokta %d (ilk 40 loglanir; bacak %d / geri cekilme %d) | hedef: gercek siper % ve 'hareketsiz gercek siper %' artmali" % (len(sn), len([1 for l in sn if "] bacak" in l]), len([1 for l in sn if "geri cekilme" in l]))) if sn else "[SIPER-SNAP] yok (v8.756 oncesi RPT ya da yakinda sert nesne bulunmadi)")
     se = [l for l in L if "[SKILL-ESIT]" in l]
     ekle("OYUNCU GRUBU ESITLIGI (beceri + hiz)", "BILGI", re.sub(r"^.*?\"\[SKILL-ESIT\] ", "", se[-1]).strip().rstrip('"')[:420] if se else "[SKILL-ESIT] yok (v8.745 oncesi RPT ya da oyuncu grubunda bot / dusman bot yok)")
     ca_n = ca_g = 0
