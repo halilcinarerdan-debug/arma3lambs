@@ -51,7 +51,7 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
             private _hedefler = (_l nearTargets _bMenzil) select {
                 private _o = _x select 4;
                 !isNull _o && {alive _o} && {_o isKindOf "CAManBase"} && {!([_o] call FUNC(teslimMi))} && {(_taraf getFriend (side (group _o))) < 0.6}
-                && {(side (group _o)) isNotEqualTo civilian} && {(insideBuilding _o) > 0.15} && {(_l distance2D _o) >= _bMin}
+                && {(side (group _o)) isNotEqualTo civilian} && {((insideBuilding _o) > 0.15) || {(missionNamespace getVariable ["lambs_danger_binaDisHedefi", false]) && {(nearestTerrainObjects [getPosATL _o, ["BUILDING", "HOUSE"], 5, false, true]) isNotEqualTo []}}} && {(_l distance2D _o) >= _bMin}
                 && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
                 && {_temas || {((_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))) && {((_l targetKnowledge _o) select 2) > (time - 240)}}}
             };
@@ -68,6 +68,8 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
                 diag_log format ["[BINA-SALDIRI] %1 | bina %2 | en yakin icerideki dusman %3 m | asker %4 | binada dusman %5", groupId _g, typeOf _b, round (_l distance2D _o), count _uyeler, _icDus];
             };
             ["GIRIS_BASLATILDI"] call _ar;
+            // v8.772 (kullanici: 'kodla duzelt, disarida bekliyorlar'): siperde bekleme (siperTut doStop + taktik kilidi) giris baslarken SERBEST birakilir; yoksa kapida doStop'ta kalirlar
+            { _x setVariable [QGVAR(siperTutBit), 0]; _x setVariable [QGVAR(taktikKilit), 0]; } forEach _uyeler;
             [_g, true, _b] spawn (missionNamespace getVariable ["lambs_danger_fnc_buildingClearRun", {false}]);
         } forEach allGroups;
         if (time > _ozT) then {

@@ -21,6 +21,7 @@ if (isNull _u || {!alive _u} || {isPlayer _u} || {!local _u} || {missionNamespac
 if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {!isNull objectParent _u}) exitWith {false};
 if ([group _u, "siperTut", true] call FUNC(senaryoKapi)) exitWith {false};   // LAMBS gorevi / kal-bekle waypoint'li grupta dokunma
 if ((group _u) getVariable [QGVAR(isRetreating), false]) exitWith {false};
+if ((group _u) getVariable [QGVAR(isSweeping), false]) exitWith {false};   // v8.772: bina temizleme / saldirisi suruyorsa siperde bekletme (kapida doStop)
 
 // v8.715 (kullanici: 'daha uzun siperde kalsinlar'): bekleme suresi CBA siperTutSn (eskiden sabit 45 sn; varsayilan ayni)
 private _sn = ((missionNamespace getVariable ["lambs_danger_siperTutSn", 45]) max 15) min 300;

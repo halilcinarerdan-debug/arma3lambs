@@ -38,6 +38,7 @@ force lambs_danger_binaBekleS = 20;
 force lambs_danger_binaMenzilM = 250;
 force lambs_danger_binaMinM = 4;
 force lambs_danger_binaBoundingDahil = true;
+force lambs_danger_binaDisHedefi = true;
 force lambs_danger_savunmaTercihi = false;
 force lambs_danger_binaOdaMaks = 60;
 force lambs_danger_binaSure = 600;
