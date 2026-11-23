@@ -20,26 +20,31 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
 
 [] spawn {
     private _logN = 0;
+    private _oz = createHashMap;   // v8.771 TESHIS: hangi kapi grubu eliyor (60 sn ozet)
+    private _ozT = time + 60;
+    private _ar = { params ["_k"]; _oz set [_k, (_oz getOrDefault [_k, 0]) + 1]; };
     while {true} do {
         sleep ([3, false, true, "binaSaldiri"] call FUNC(dusunSure));
         if (!(missionNamespace getVariable ["lambs_danger_binaSaldiri", true]) || {missionNamespace getVariable ["lambs_danger_buildingClearOff", false]}) then { continue };
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };
-            if (((units _g) findIf {isPlayer _x}) > -1) then { continue };
-            if (_g getVariable [QGVAR(isSweeping), false] || {time < (_g getVariable [QGVAR(saldiriT), 0])} || {time < (_g getVariable [QGVAR(sweepCooldown), 0])}) then { continue };
+            if ((side _g) isEqualTo civilian || {(count (units _g)) < 2}) then { continue };
+            ["grup"] call _ar;
+            if (((units _g) findIf {isPlayer _x}) > -1) then { ["oyunculu"] call _ar; continue };
+            if (_g getVariable [QGVAR(isSweeping), false] || {time < (_g getVariable [QGVAR(saldiriT), 0])} || {time < (_g getVariable [QGVAR(sweepCooldown), 0])}) then { ["bekleme_supurme"] call _ar; continue };
             private _temas = (_g getVariable [QGVAR(contact), 0]) > time;   // v8.604: temas YOKSA da bilinen binadaki dusmana gider (asagida bilgi / son gorulme sarti)
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]} || {(_g getVariable [QGVAR(isBounding), false]) && {!(missionNamespace getVariable ["lambs_danger_binaBoundingDahil", false])}} || {_g getVariable [QGVAR(sniperTeam), false]}   // v8.770: CBA binaBoundingDahil
                 || {_g getVariable [QGVAR(teslimOldu), false]} || {(combatMode _g) in ["GREEN", "BLUE"]}
-            ) then { continue };
-            if ([_g, "binaSaldiri", true] call FUNC(senaryoKapi)) then { continue };
+            ) then { ["bayrak"] call _ar; continue };
+            if ([_g, "binaSaldiri", true] call FUNC(senaryoKapi)) then { ["senaryo"] call _ar; continue };
             private _l = leader _g;
             if (isNull _l || {!alive _l} || {isPlayer _l} || {!isNull objectParent _l}) then { continue };
             private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
-            if ((count _uyeler) < (((missionNamespace getVariable ["lambs_danger_binaMinAsker", 4]) max 2) min 8) || {((count _uyeler) / ((count (units _g)) max 1)) < 0.6}) then { continue };   // v8.770: CBA binaMinAsker
-            if (({(getSuppression _x) > 0.8} count _uyeler) > 0) then { continue };
+            if ((count _uyeler) < (((missionNamespace getVariable ["lambs_danger_binaMinAsker", 4]) max 2) min 8) || {((count _uyeler) / ((count (units _g)) max 1)) < 0.6}) then { ["asker_az"] call _ar; continue };   // v8.770: CBA binaMinAsker
+            if (({(getSuppression _x) > 0.8} count _uyeler) > 0) then { ["baski"] call _ar; continue };
             private _taraf = side _g;
             private _bMenzil = ((missionNamespace getVariable ["lambs_danger_binaMenzilM", 120]) max 60) min 250;   // v8.770: CBA binaMenzilM
             private _bMin = ((missionNamespace getVariable ["lambs_danger_binaMinM", 12]) max 4) min 30;   // v8.770: CBA binaMinM
@@ -50,20 +55,26 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
                 && {(_l knowsAbout _o) >= (["SEZILDI"] call FUNC(bilgiEsik))}
                 && {_temas || {((_l knowsAbout _o) >= (["SUPHE"] call FUNC(bilgiEsik))) && {((_l targetKnowledge _o) select 2) > (time - 240)}}}
             };
-            if (_hedefler isEqualTo []) then { continue };
+            if (_hedefler isEqualTo []) then { ["binada_bilinen_dusman_yok"] call _ar; continue };
             _hedefler = [_hedefler, [], {(_x select 4) distance2D _l}, "ASCEND"] call BIS_fnc_sortBy;
             private _o = (_hedefler select 0) select 4;
             private _b = nearestBuilding _o;
-            if (isNull _b || {(count (_b buildingPos -1)) < 2}) then { continue };
+            if (isNull _b || {(count (_b buildingPos -1)) < 2}) then { ["bina_pozisyonu_yok"] call _ar; continue };
             private _icDus = {alive _x && {(_taraf getFriend (side (group _x))) < 0.6} && {(insideBuilding _x) > 0.2}} count (_b nearEntities ["CAManBase", 30]);
-            if (_icDus > ((count _uyeler) * 1.5)) then { continue };
+            if (_icDus > ((count _uyeler) * 1.5)) then { ["binada_dusman_fazla"] call _ar; continue };
             _g setVariable [QGVAR(saldiriT), time + (((missionNamespace getVariable ["lambs_danger_binaBekleS", 150]) max 10) min 300)];   // v8.770: CBA binaBekleS
             if (_logN < 15) then {
                 _logN = _logN + 1;
                 diag_log format ["[BINA-SALDIRI] %1 | bina %2 | en yakin icerideki dusman %3 m | asker %4 | binada dusman %5", groupId _g, typeOf _b, round (_l distance2D _o), count _uyeler, _icDus];
             };
+            ["GIRIS_BASLATILDI"] call _ar;
             [_g, true, _b] spawn (missionNamespace getVariable ["lambs_danger_fnc_buildingClearRun", {false}]);
         } forEach allGroups;
+        if (time > _ozT) then {
+            _ozT = time + 60;
+            if (_oz isNotEqualTo createHashMap) then { diag_log format ["[BINA-SALDIRI-OZET] 60 sn: %1", (([keys _oz, [], {_x}, "ASCEND"] call BIS_fnc_sortBy) apply { format ["%1=%2", _x, _oz get _x] }) joinString " "]; };
+            { _oz set [_x, 0]; } forEach (keys _oz);
+        };
     };
 };
 
