@@ -2,7 +2,7 @@
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;
-        units[] = {QGVAR(SetRadio), QGVAR(DisableAI), QGVAR(ConfigureGroupAI), QGVAR(Kumanda), QGVAR(GorevAta), QGVAR(IhaGorev), QGVAR(TopcuTest), QGVAR(EdenKumanda), QGVAR(EdenGorevAta), QGVAR(EdenIha), QGVAR(EdenPozisyon)};   // ELITE fork: Zeus modulu listede olmazsa Zeus gostermez
+        units[] = {QGVAR(SetRadio), QGVAR(DisableAI), QGVAR(ConfigureGroupAI), QGVAR(Kumanda), QGVAR(GorevAta), QGVAR(IhaGorev), QGVAR(TopcuTest), QGVAR(EdenKumanda), QGVAR(EdenGorevAta), QGVAR(EdenIha), QGVAR(EdenPozisyon), QGVAR(EypBomba), QGVAR(EypKomut), QGVAR(EdenEypBomba), QGVAR(EdenEypKomut)};   // ELITE fork: Zeus modulu listede olmazsa Zeus gostermez
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {"lambs_main"};

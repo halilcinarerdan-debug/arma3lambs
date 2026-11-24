@@ -161,6 +161,43 @@ class CfgVehicles {
         };
     };
 
+    // ELITE fork (v8.777): Zeus - canli bomba (PBIED / VBIED) ve komutla patlayan EYP pususu
+    class GVAR(EypBomba) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(EypBomba);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE Canli Bomba (PBIED / VBIED)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\destroy_ca.paa";
+        function = QFUNC(moduleEypBomba);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
+    class GVAR(EypKomut) : Module_F {
+        author = "ELITE fork";
+        _generalMacro = QGVAR(EypKomut);
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "ELITE EYP Kur (komutla patlayan pusu)";
+        isGlobal = 0;
+        category = "Lambs_Danger_Cat";
+        icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\mine_ca.paa";
+        function = QFUNC(moduleEypKomut);
+        class EventHandlers {
+            class CBA_Extended_EventHandlers: CBA_Extended_EventHandlers_base {};
+            class ADDON {
+                init = QUOTE(call EFUNC(main,initModules));
+            };
+        };
+    };
+
     // ELITE fork (v8.362): 3DEN (Eden) modulleri
     #include "CfgVehiclesEden.hpp"
 };

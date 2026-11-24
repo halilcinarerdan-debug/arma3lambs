@@ -131,3 +131,58 @@ class GVAR(EdenPozisyon): Module_F {
         description = "Modul konumu bir catisma pozisyonudur; modul yonu ates veya ilerleme yonudur. Baglanti GEREKMEZ. Tip ve onem puani botlara pozisyonun ne ise yaradigini soyler: cover secimi - bounding - geri cekilme - karakol nobeti - SAVUN mevzisi bu pozisyonlari puana gore kullanir. Gecis tipini kotu arazide 40-60 m arayla zincir olarak dizin.";
     };
 };
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+// 10) CANLI BOMBA (v8.777; kullanici: zeus destegi ve editor destegi olsun) - SYNC ile baglanan asker / arac canli bomba olur (PBIED / VBIED)
+// ---------------------------------------------------------------------------------------------------------------------------------------------------
+class GVAR(EdenEypBomba): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenEypBomba);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE Canli Bomba PBIED VBIED (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\destroy_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenEypBomba);
+    functionPriority = 1;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        E_COMBO(edBmbTarz,"Yaklasma tarzi","Catisarak: zikzak ve ates ederek gelir. Gizli: yuruyerek yaklasir ates etmez son anda sprint.","0",E_V(0,"Catisarak zikzak ve ates") E_V(1,"Gizli yaklasim referans"))
+        E_COMBO(edBmbTaraf,"Hedef taraf","Otomatik: dost olmayan herkes.","0",E_V(0,"Otomatik dost olmayan") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
+        E_NUM(edBmbMenzil,"Tespit menzili m","Bu mesafede dusman gorunce hedefe gider.","400")
+        E_NUM(edBmbAtilma,"Son an mesafesi m","Bu mesafede sprint veya tam gaz. 0 = CBA ayari: piyade 45 arac 120.","0")
+        E_COMBO(edBmbGuc,"Patlama gucu","CBA ayari: eypPatlamaGucu. 2 referans: arac GBU-12 ve olum yaricapi cok buyuk.","0",E_V(0,"CBA ayari") E_V(1,"0 hafif") E_V(2,"1 orta") E_V(3,"2 referans"))
+        E_COMBO(edBmbOlum,"Vurulunca patlama sansi","Hedefe varamadan vurulursa cihazin olunce patlama olasiligi.","0",E_V(0,"CBA ayari") E_V(1,"Hic") E_V(2,"25 yuzde") E_V(3,"50 yuzde") E_V(4,"75 yuzde") E_V(5,"100 yuzde"))
+        E_COMBO(edBmbVaril,"Arac ustu gorsel varil","Yalniz arac: kasaya patlayici varil nesnesi baglar.","0",E_V(0,"Evet") E_V(1,"Hayir"))
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "SYNC ile bir veya daha cok asker ya da araca baglayin. Asker PBIED arac VBIED olur (arac: surucu kosucu). Birimin ya da aracin init satirina [this] call lambs_danger_fnc_eypBombaYap yazmak da ayni isi yapar.";
+    };
+};
+
+class GVAR(EdenEypKomut): Module_F {
+    author = "ELITE fork";
+    _generalMacro = QGVAR(EdenEypKomut);
+    scope = 2;
+    scopeCurator = 0;
+    displayName = "ELITE EYP Kur komutla patlayan pusu (3DEN)";
+    icon = "\A3\ui_f\data\igui\cfg\simpleTasks\types\mine_ca.paa";
+    category = "lambs_danger_elite_cat";
+    function = QFUNC(edenEypKomut);
+    functionPriority = 1;
+    isGlobal = 0;
+    isTriggerActivated = 0;
+    isDisposable = 0;
+    class Attributes: AttributesBase {
+        E_NUM(edEypHideM,"Gozetleme mesafesi m","Kurucu EYP den bu kadar uzaga cekilir. 0 = otomatik: patlama gucune gore 20 28 45 m.","0")
+        E_NUM(edEypTetikM,"Tetik mesafesi m","Dusman EYP ye bu kadar yaklasinca patlatir. 8 m icinde dost varsa patlatmaz.","12")
+        E_COMBO(edEypGuc,"Patlama gucu","CBA ayari: eypPatlamaGucu. 2 referans: GBU-12 ve kurucu 45 m uzaga cekilir.","0",E_V(0,"CBA ayari") E_V(1,"0 hafif") E_V(2,"1 orta") E_V(3,"2 referans"))
+        class ModuleDescription: ModuleDescription {};
+    };
+    class ModuleDescription: ModuleDescription {
+        description = "Modul KONUMU EYP noktasidir. Modul YONU (rotasyon oku) dusmanin EYP ye GELDIGI yondur; gozetleme noktasi bunun tersinde secilir. SYNC ile BIR asker baglayin: kurucu odur. Kurucu kurar cekilir gozetler dusman tetik mesafesine girince patlatir. Alternatif init satiri: [this getMarkerPos eyp_noktasi getMarkerPos pusu_noktasi] spawn lambs_danger_fnc_eypKomut.";
+    };
+};
