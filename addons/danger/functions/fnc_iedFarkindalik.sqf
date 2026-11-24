@@ -133,7 +133,7 @@ private _calis = {
                 // tehlike yaricapi: oyunun kendi verisinden (CfgAmmo indirectHitRange; mod IED'leri dahil) x 6 guvenlik / parca payi (v8.52: x3 / 20 m cok kucuk kaldi), 30-80 m arasi;
                 // veri yoksa sinif adina gore yedek (buyuk 55 m, digerleri 30 m)
                 private _irange = getNumber (configFile >> "CfgAmmo" >> (typeOf _m) >> "indirectHitRange");
-                private _yaricap = if (_irange > 0) then { ((_irange * 6) max 30) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) };
+                private _yaricap = (if (_irange > 0) then { ((_irange * 6) max 30) min 80 } else { [30, 55] select ((_sinif find "big") >= 0) }) * (((missionNamespace getVariable ["lambs_danger_eypStandoffCarpan", 1]) max 0.5) min 3);   // v8.775: CBA eypStandoffCarpan (ATP 3-34.20: olay kategorisine gore emniyet cemberi)
                 // ikincil cihaz suphesi: hedefin 40 m cevresinde baska IED adayi var mi (IED'ler kumelenir); yakinlik tetikli (range / pressure) tiplere EOD yurumez
                 // v8.50e: yalniz hedefe / EOD yaklasma hattina YAKIN (12-20 m / 8-14 m) cihaz engeller; 40 m'de kumeleme artik imhayi engellemez (sirayla imha)
                 private _digerleri = _adaylar select {_x isNotEqualTo _m};
