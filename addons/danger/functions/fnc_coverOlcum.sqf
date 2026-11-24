@@ -72,6 +72,26 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
                 _sayac set ["hs_" + _sinif, (_sayac getOrDefault ["hs_" + _sinif, 0]) + 1];
                 if (([_u, "VIEW", _e] checkVisibility [eyePos _u, eyePos _e]) >= 0.3) then { _sayac set ["hs_gorur", (_sayac getOrDefault ["hs_gorur", 0]) + 1]; };
             };
+            // v8.788 (kullanici: 'bu oyunda sert siper yok hicbir terrainde, ona gore kalibre et'): 'sert siper <= 4 m' olcusu yaniltici; asil olcu = askerin KENDI DURUSUNDA (bas yuksekligi) dusman gozunden gizli mi? gorunuyorsa yatsa / comelse gizlenir miydi? (arazi + nesne, mesafe sinirsiz)
+            if ((speed _u) < 1.5) then {
+                private _stn = stance _u;
+                private _ed = eyePos _e;
+                private _gor = {
+                    params ["_h"];
+                    private _pp = (getPosASL _u) vectorAdd [0, 0, _h];
+                    ((lineIntersectsSurfaces [_ed, _pp, _e, _u, true, 1, "VIEW", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_ed, _pp])}
+                };
+                private _hh = switch (_stn) do { case "PRONE": {0.45}; case "CROUCH": {1.1}; default {1.7} };
+                _sayac set ["dn", (_sayac getOrDefault ["dn", 0]) + 1];
+                if ([_hh] call _gor) then {
+                    _sayac set ["dg", (_sayac getOrDefault ["dg", 0]) + 1];
+                    private _kz = "dh";
+                    if (_stn isNotEqualTo "PRONE" && {!([0.45] call _gor)}) then { _kz = "dy"; } else {
+                        if (_stn isEqualTo "STAND" && {!([1.1] call _gor)}) then { _kz = "dc"; };
+                    };
+                    _sayac set [_kz, (_sayac getOrDefault [_kz, 0]) + 1];
+                };
+            };
             // v8.662: DURUS: hareketsiz (< 1.5 m/sn) askerin duruşu = siper duruşu (STAND, CROUCH, PRONE); eskiden 'UP' sayiliyordu, stance 'STAND' doner
             if ((speed _u) < 1.5) then {
                 _sayac set ["sN", (_sayac get "sN") + 1];
@@ -97,6 +117,11 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             private _hsn = _sayac getOrDefault ["hs_n", 0];
             if (_hsn > 0) then {
                 diag_log format ["[COVER-OLCUM-HAREKETSIZ] 60 sn: hareketsiz ornek %1 | GERCEK SIPER (<= 4 m nesne) %%%2 | uzak engel %%%3 | acik %%%4 | dusmani su an goruyor (ates edebilir) %%%5", _hsn, round (100 * (_sayac getOrDefault ["hs_siper", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_uzak", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_acik", 0]) / _hsn), round (100 * (_sayac getOrDefault ["hs_gorur", 0]) / _hsn)];
+            };
+            private _dn = _sayac getOrDefault ["dn", 0];
+            if (_dn > 0) then {
+                private _dg = _sayac getOrDefault ["dg", 0];
+                diag_log format ["[COVER-OLCUM-DURUS] 60 sn: hareketsiz ornek %1 | KENDI DURUSUNDA GIZLI %%%2 | GORUNUR %%%3 | gorunurlerin icinde: YATSA gizli %4 / COMELSE gizli %5 / hicbir durusta gizli degil %6 (sert siper beklenmez: arazi + nesne)", _dn, round (100 * (_dn - _dg) / _dn), round (100 * _dg / _dn), _sayac getOrDefault ["dy", 0], _sayac getOrDefault ["dc", 0], _sayac getOrDefault ["dh", 0]];
             };
             private _bi = _bsay getOrDefault ["ic_n", 0];
             private _bd = _bsay getOrDefault ["dis_n", 0];

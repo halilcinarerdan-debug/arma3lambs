@@ -403,8 +403,8 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
 // v8.749 KENTSEL ARAZI CEZASI (kullanici: 'lythium gibi alanlarda siperi nasil guclendirebiliriz' + 'her arada mukemmel siper'; RPT 64b4517e Lythium: cevre %83 KENTSEL, sert nesne 31 (<= 25 m) varken [ACIK-SIPER] secimlerinin ~%60'i ARAZI KIVRIMI (38 / 65), bina 3, duvar 3): sehirde arazi cukuru / yamaci
 //   duvar / bina / arac siperinin onune geciyordu (arazi adayi siperArazOncelik bonusu + nesne cezalari yuzunden). Askerin cevre profili KENTSEL ise ve cevrede sert nesne varsa arazi adaylarina CBA siperKentselArazi (varsayilan 6) puan CEZA eklenir (0 = eski).
 private _araziKentselCeza = 0;
-if (((missionNamespace getVariable ["lambs_danger_siperKentselArazi", 6]) > 0) && {([_u] call FUNC(cevreProfil)) isEqualTo "KENTSEL"}) then {
-    _araziKentselCeza = (missionNamespace getVariable ["lambs_danger_siperKentselArazi", 6]) min 20;
+if (((missionNamespace getVariable ["lambs_danger_siperKentselArazi", 2]) > 0) && {([_u] call FUNC(cevreProfil)) isEqualTo "KENTSEL"}) then {
+    _araziKentselCeza = (missionNamespace getVariable ["lambs_danger_siperKentselArazi", 2]) min 20;
 };
 if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
     {
@@ -417,7 +417,7 @@ if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
                 private _dc = 0;
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
-                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 4]) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
+                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 8]) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _sk = _sk + ([_pt, _en, _dn, _u] call FUNC(siperGuvence)); };   // v8.750
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };

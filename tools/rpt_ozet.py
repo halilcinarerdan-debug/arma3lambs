@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.787"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.788"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -504,7 +504,15 @@ def kabul(path):
         m = re.search(r"\[COVER-OLCUM\] 60 sn: ornek (\d+) \| SIPER \(<= 4 m nesne\) (\d+) % / UZAK ENGEL \(arazi / uzak nesne\) (\d+) % / ACIKTA (\d+) %", l)
         if m:
             k = int(m.group(1)); cn += k; cs += k * int(m.group(2)); cu += k * int(m.group(3)); ca += k * int(m.group(4))
-    ekle("SIPER KALITESI (gercek siper %)", "BILGI", ("ornek %d | GERCEK SIPER (<= 4 m nesne) %%%.0f | uzak engel %%%.0f | acikta %%%.0f (referans: v8.731 oncesi tum RPT ~%%1 siper / %%95 uzak / %%4 acik; on tarama sonrasi siper %% artmali)" % (cn, cs / max(cn, 1), cu / max(cn, 1), ca / max(cn, 1))) if cn else "COVER-OLCUM ornegi yok")
+    _kor = (cs + cu) / max(cn, 1)
+    _acik = ca / max(cn, 1)
+    ekle("KORUNAKLILIK (arazi + nesne; sert siper beklenmez)", ("VERI YOK" if not cn else ("GECTI" if _acik <= 15 else ("KONTROL" if _acik <= 25 else "KALDI"))), ("ornek %d | KORUNAKLI %%%.0f (nesne <= 4 m %%%.0f + arazi / uzak engel %%%.0f) | ACIKTA %%%.0f (kullanici: bu oyunda sert siper yok; 'gercek siper %%' olcusu emekli, ACIKTA <= %%15 beklenir)" % (cn, _kor, cs / max(cn, 1), cu / max(cn, 1), _acik)) if cn else "COVER-OLCUM ornegi yok")
+    dn = dg = dy = dc = dh = 0
+    for l in L:
+        m = re.search(r"\[COVER-OLCUM-DURUS\] 60 sn: hareketsiz ornek (\d+) \| KENDI DURUSUNDA GIZLI %(\d+) \| GORUNUR %(\d+) \| gorunurlerin icinde: YATSA gizli (\d+) / COMELSE gizli (\d+) / hicbir durusta gizli degil (\d+)", l)
+        if m:
+            k = int(m.group(1)); dn += k; dg += round(k * int(m.group(3)) / 100.0); dy += int(m.group(4)); dc += int(m.group(5)); dh += int(m.group(6))
+    ekle("DURUS / ARAZI GIZLENME (hareketsiz)", "BILGI", ("hareketsiz ornek %d | KENDI DURUSUNDA GORUNUR %%%.0f | gorunenlerden: yatsa gizli %d, comelse gizli %d, hicbir durusta gizli degil %d (yatsa / comelse gizli yuksekse durus disiplini eksik; hicbiri yuksekse yer degistirme gerekir)" % (dn, 100.0 * dg / max(dn, 1), dy, dc, dh)) if dn else "[COVER-OLCUM-DURUS] yok (v8.788 oncesi RPT)")
     mgd = len([1 for l in L if "[MG-DESTEK]" in l]); mgo = len([1 for l in L if "[MG-ONDE]" in l and "baslatildi" not in l])
     ekle("MG DESTEK / ONDE", "BILGI", "MG destek (bastirma) logu %d (ilk 15) | MG one alinan %d (ilk 20)" % (mgd, mgo))
     uh = len([1 for l in L if "[UZAK-HUCUM]" in l])
@@ -567,7 +575,7 @@ def kabul(path):
         m = re.search(r"hareketsiz ornek (\d+) \| GERCEK SIPER \(<= 4 m nesne\) %(\d+) \| uzak engel %(\d+) \| acik %(\d+) \| dusmani su an goruyor \(ates edebilir\) %(\d+)", l)
         if m:
             k = int(m.group(1)); hn += k; hsip += k * int(m.group(2)); huz += k * int(m.group(3)); hac += k * int(m.group(4)); hgo += k * int(m.group(5))
-    ekle("HAREKETSIZ ASKER SIPER KALITESI", "BILGI", ("hareketsiz ornek %d | GERCEK SIPER %%%.0f | uzak engel %%%.0f | acik %%%.0f | dusmani goruyor (ates edebilir) %%%.0f (hedef: gercek siper artar, acik azalir)" % (hn, hsip / hn, huz / hn, hac / hn, hgo / hn)) if hn else "hareketsiz ornek yok (v8.737 oncesi RPT)")
+    ekle("HAREKETSIZ ASKER KORUNAKLILIK", "BILGI", ("hareketsiz ornek %d | GERCEK SIPER %%%.0f | uzak engel %%%.0f | acik %%%.0f | dusmani goruyor (ates edebilir) %%%.0f (hedef: gercek siper artar, acik azalir)" % (hn, hsip / hn, huz / hn, hac / hn, hgo / hn)) if hn else "hareketsiz ornek yok (v8.737 oncesi RPT)")
     cs = {}
     for l in L:
         m = re.search(r"\[CEVRE-PROFIL-OZET\] 60 sn \(asker taramasi\): (.*)$", l)
