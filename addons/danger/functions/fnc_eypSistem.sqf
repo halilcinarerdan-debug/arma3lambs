@@ -112,7 +112,8 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                             { private _vv = vehicle _x; if (_vv isNotEqualTo _x && {_vv isKindOf "Car"} && {!(_vv in _araclar)} && {canMove _vv} && {((crew _vv) findIf {isPlayer _x}) < 0}) then { _araclar pushBack _vv; }; } forEach _hepsi;
                             private _surucu = objNull;
                             { private _dd = driver _x; if (!isNull _dd && {alive _dd} && {_dd in _hepsi} && {!isPlayer _dd}) exitWith { _surucu = _dd; }; } forEach _araclar;
-                            private _b = if (!isNull _surucu) then {_surucu} else {if (_uyeler isEqualTo []) then {objNull} else {_uyeler select ((count _uyeler) - 1)}};
+                            // v8.786 (RPT 1f3a00f8: secilen 'en son' asker hedeften 235 m uzaktaydi (lider-dusman 98 m), 40 sn'de 54 m gidebildi -> zaman asimi x2): bomba = HEDEFE EN YAKIN asker (arac yoksa)
+                            private _b = if (!isNull _surucu) then {_surucu} else {if (_uyeler isEqualTo []) then {objNull} else {([_uyeler, [], {_x distance _en}, "ASCEND"] call BIS_fnc_sortBy) select 0}};
                             if (!isNull _b && {isNil {_b getVariable QGVAR(canliBomba)}}) then {
                                 _olaylar pushBack time;
                                 _bombaOlaylar set [str _taraf, _olaylar];
@@ -121,11 +122,13 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                                 _say set ["bomba_secildi", (_say get "bomba_secildi") + 1];
                                 private _aracMi = !isNull objectParent _b;
                                 if (_aracMi) then { _say set ["bomba_arac", (_say getOrDefault ["bomba_arac", 0]) + 1]; };
-                                if (_bombaN < 30) then { _bombaN = _bombaN + 1; diag_log format ["[CANLI-BOMBA] SECILDI | %1 | %2 | %3 | grup %4 / %5 canli | hedef %6 %7 m", groupId _g, name _b, ["piyade", "ARAC (" + typeOf vehicle _b + ")"] select _aracMi, count _hepsi, _toplam, typeOf _en, round _d]; };
+                                if (_bombaN < 30) then { _bombaN = _bombaN + 1; diag_log format ["[CANLI-BOMBA] SECILDI | %1 | %2 | %3 | grup %4 / %5 canli | hedef %6 %7 m (lider-dusman) | bomba-hedef %8 m", groupId _g, name _b, ["piyade", "ARAC (" + typeOf vehicle _b + ")"] select _aracMi, count _hepsi, _toplam, typeOf _en, round _d, round (_b distance _en)]; };
                                 [_b, _en, _say, _bombaN] spawn {
                                     params ["_u", "_hedef", "_sy", "_ln"];
                                     private _t0 = time;
-                                    private _sonuc = [_u, _hedef, 40] call FUNC(eypKos);
+                                    // sure: mesafeye gore (4 m/s varsayim; en az 40, en cok 120 sn)
+                                    private _sure = ((20 + ((_u distance _hedef) / 4)) max 40) min 120;
+                                    private _sonuc = [_u, _hedef, _sure] call FUNC(eypKos);
                                     private _k = switch (_sonuc) do { case "PATLADI": {"bomba_patladi"}; case "vuruldu / oldu": {"bomba_oldu"}; default {"bomba_zamanasimi"} };
                                     _sy set [_k, (_sy getOrDefault [_k, 0]) + 1];
                                     if (alive _u) then { _u setVariable [QGVAR(canliBomba), nil]; };

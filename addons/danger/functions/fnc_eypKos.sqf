@@ -109,6 +109,7 @@ if (_arac) then {
 //   (5) arac takilma: 15 sn'den uzun hiz < 3 km/s -> 'arac durdu' (sonuc dongusu serbest kalir). Ilerleme logu: [EYP-KOS] (ilk 25 satir, 5 sn'de bir).
 private _sonEmir = [];
 private _dmT = 0;
+private _tazeT = 0;
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
@@ -195,14 +196,21 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                     _izlenen = _h;
                 };
                 // v8.780 (kullanici: 'zikzakta cok bekliyor, zikzaki kaldir'): ZIKZAK YOK, hedefe dogrudan. doMove yalniz hedef 6 m'den fazla kaydiysa ya da araliktan sonra yenilenir (her tikte yenilemek yol hesabini sifirlar)
+                // her ~2 sn: agresif piyadede hiz / davranis baska betik tarafindan bozulduysa yeniden kur (RPT 1f3a00f8: beh CARELESS -> AWARE)
+                if (_agresif && {!_arac} && {time >= _tazeT}) then {
+                    _tazeT = time + 2;
+                    if ((behaviour _b) isNotEqualTo "CARELESS") then { _b setBehaviour "CARELESS"; };
+                    _b forceSpeed (_b getSpeed "FAST");
+                };
                 // ARAC: doMove NADIREN (hedef 60 m / yakinda 25 m kaydiysa, en az 3 sn arayla; hedef sabitse 8 sn'de bir): her yeni emir yol hesabini sifirlar, arac durup yeniden planliyordu (RPT 0689d2a0: hiz 47 -> 0)
                 private _hp = getPosATL _h;
-                private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {6};
-                private _zorS = [1, 8] select _arac;
+                // v8.786 (RPT b5f24b66 / 1f3a00f8: piyade 'hiz 0 / MOVE' dur-kalk: her 0.6-1.6 sn'de yeni doMove yol planini sifirliyordu): piyade de SEYREK emir (uzakta hedef 15 m kaydiysa, en az 2.5 sn; yakinda 4 m / 0.6 sn)
+                private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {[15, 4] select (_m < 30)};
+                private _zorS = if (_arac) then {8} else {[5, 1] select (_m < 30)};
                 if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {time >= (_dmT + _zorS)}}) then {
                     _b doMove _hp;
                     _sonEmir = _hp;
-                    _dmT = time + ([0.6, 3] select _arac);
+                    _dmT = time + (if (_arac) then {3} else {[2.5, 0.6] select (_m < 30)});
                 };
             };
         };
