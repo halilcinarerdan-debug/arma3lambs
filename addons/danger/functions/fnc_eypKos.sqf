@@ -66,6 +66,8 @@ _grp setVariable [QGVAR(isExecutingTactic), true];
 _b setVariable [QGVAR(taktikKilit), time + 8];
 _b setVariable [QGVAR(disableAI), true];
 _b allowFleeing 0;
+// v8.790 (RPT f2a62ebb: piyade bomba 79 sn'de varamadi, [EYP-KOS] komut 'GET IN' / bos): atanmis arac (cargo) varsa AI binmeye calisiyordu -> atama kaldirilir
+if (!_arac && {!isNull (assignedVehicle _b)}) then { unassignVehicle _b; };
 { _b disableAI _x; } forEach ["AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
 { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
 if (_catis && {!_arac}) then {
@@ -205,12 +207,12 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 // ARAC: doMove NADIREN (hedef 60 m / yakinda 25 m kaydiysa, en az 3 sn arayla; hedef sabitse 8 sn'de bir): her yeni emir yol hesabini sifirlar, arac durup yeniden planliyordu (RPT 0689d2a0: hiz 47 -> 0)
                 private _hp = getPosATL _h;
                 // v8.786 (RPT b5f24b66 / 1f3a00f8: piyade 'hiz 0 / MOVE' dur-kalk: her 0.6-1.6 sn'de yeni doMove yol planini sifirliyordu): piyade de SEYREK emir (uzakta hedef 15 m kaydiysa, en az 2.5 sn; yakinda 4 m / 0.6 sn)
-                private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {[15, 4] select (_m < 30)};
-                private _zorS = if (_arac) then {8} else {[5, 1] select (_m < 30)};
+                private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {[15, 8] select (_m < 30)};   // v8.790: yakinda da seyrek (RPT f2a62ebb: 24-29 m'de hiz 0 / MOVE; 0.6 sn emir yol planini sifirliyordu)
+                private _zorS = if (_arac) then {8} else {[5, 2.5] select (_m < 30)};
                 if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {time >= (_dmT + _zorS)}}) then {
                     _b doMove _hp;
                     _sonEmir = _hp;
-                    _dmT = time + (if (_arac) then {3} else {[2.5, 0.6] select (_m < 30)});
+                    _dmT = time + (if (_arac) then {3} else {[2.5, 1.5] select (_m < 30)});
                 };
             };
         };

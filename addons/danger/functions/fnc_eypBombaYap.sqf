@@ -49,7 +49,7 @@ if (_arac && {_varil > 0}) then {
 };
 // surucu / asker panik edip kacmasin, arac inmesin (referans)
 private _kos = if (_arac) then {driver _obj} else {_obj};
-if (!isNull _kos) then { _kos allowFleeing 0; };
+if (!isNull _kos) then { _kos allowFleeing 0; if (!_arac && {!isNull (assignedVehicle _kos)}) then { unassignVehicle _kos; }; };
 if (_arac) then { _obj allowCrewInImmobile true; };
 diag_log format ["[EYP-ISARET] %1 | %2 | tespit %3 m | %4 | son an %5 | guc %6 | olum sansi %7 | hedef taraf %8", typeOf _obj, ["piyade (PBIED)", "arac (VBIED)"] select _arac, _menzil, ["catisarak", "gizli yaklasim", "AGRESIF (durmadan sprint)"] select _tarz, [str _atilmaM + " m", "CBA"] select (_atilmaM < 0), [str _guc, "CBA"] select (_guc < 0), [str _olumSans, "CBA"] select (_olumSans < 0), ["otomatik (dost olmayan)", "BLUFOR", "OPFOR", "INDEP"] select _hedefTaraf];
 

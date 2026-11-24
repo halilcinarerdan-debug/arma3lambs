@@ -86,7 +86,8 @@ private _calis = {
             if !(_cls in ["IFV", "APC", "KAMYON"]) then { continue };
             private _cargo = ((fullCrew [_v, "cargo", false]) apply {_x select 0}) select {alive _x && {!isPlayer _x} && {local _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(teslim), false])}};
             if ((count _cargo) < 2) then { continue };
-            if ([_g, "mekanizeInis", true] call FUNC(senaryoKapi)) then { continue };
+            // v8.790: senaryo kapisi (TUTAN = kal-bekle waypoint dahil) kaldirildi (savasta inis tasarimci waypoint'inden bagimsiz); yalniz LAMBS gorevi ya da inis / binis waypoint'i (GETOUT / UNLOAD / GETIN) ELITE'i geri ceker
+            if (([_g] call FUNC(wpSahip)) isEqualTo "LAMBS" || {(waypointType [_g, currentWaypoint _g]) in ["GETOUT", "TR UNLOAD", "UNLOAD", "GETIN"]}) then { continue };
             private _baz = [_g, "mekInisM", 300] call FUNC(dk);
             private _esik = ((_baz * ([0.85, 1, 1.3] select (["IFV", "APC", "KAMYON"] find _cls)) * _carpan) max 100) min 800;
             private _en = _d findNearestEnemy _d;
