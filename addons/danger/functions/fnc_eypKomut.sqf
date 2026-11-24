@@ -24,6 +24,7 @@
 
 params [["_u", objNull, [objNull]], ["_ip", [], [[]]], ["_hide0", [], [[]]], ["_ep", [], [[]]], ["_tetikM", 12, [0]], ["_gucOv", -1, [0]]];
 if (isNull _u || {!alive _u} || {_ip isEqualTo []}) exitWith {"olu"};
+if (!isNil {_u getVariable QGVAR(eypBomba)}) exitWith {"mesgul (canli bomba)"};
 // dusman gelis yonu verilmediyse: kurucunun bulundugu yonun TERSI (dusman EYP'ye karsi taraftan gelir)
 if (_ep isEqualTo []) then { _ep = _ip getPos [100, (_ip getDir _u) + 180]; };
 _tetikM = (_tetikM max 5) min 40;
@@ -46,16 +47,16 @@ _u setSpeedMode "NORMAL";
 // (1) EYP noktasina sizma
 _u doMove _ip;
 private _tB = time + 15;
-waitUntil { sleep 0.5; !alive _u || {(_u distance2D _ip) < 3} || {time > _tB} };
-private _devam = alive _u && {(_u distance2D _ip) < 6};
+waitUntil { sleep 0.5; !alive _u || {(_u distance2D _ip) < 3} || {time > _tB} || {!isNil {_u getVariable QGVAR(eypBomba)}} };
+private _devam = alive _u && {(_u distance2D _ip) < 6} && {isNil {_u getVariable QGVAR(eypBomba)}};
 
 // (2) kurma animasyonu
 if (_devam) then {
     doStop _u;
     _u playMove "AinvPknlMstpSnonWnonDnon_medic_1";
     private _tK = time + 5;
-    waitUntil { sleep 0.5; !alive _u || {time > _tK} };
-    _devam = alive _u;
+    waitUntil { sleep 0.5; !alive _u || {time > _tK} || {!isNil {_u getVariable QGVAR(eypBomba)}} };
+    _devam = alive _u && {isNil {_u getVariable QGVAR(eypBomba)}};
 };
 
 // (3) EYP + kamuflaj
@@ -86,15 +87,15 @@ if (_devam) then {
     };
     _u doMove _hide;
     _tB = time + 25;
-    waitUntil { sleep 1; !alive _u || {(_u distance2D _hide) < 4} || {time > _tB} };
-    if (alive _u) then {
+    waitUntil { sleep 1; !alive _u || {(_u distance2D _hide) < 4} || {time > _tB} || {!isNil {_u getVariable QGVAR(eypBomba)}} };
+    if (alive _u && {isNil {_u getVariable QGVAR(eypBomba)}}) then {
         doStop _u;
         _u setUnitPos "MIDDLE";
         _u doWatch _ip;
         // (5) tetik disiplini
         private _tEnd = time + 600;
         private _patla = false;
-        while {alive _u && {!isNull _ied} && {time < _tEnd} && {!_patla}} do {
+        while {alive _u && {!isNull _ied} && {time < _tEnd} && {!_patla} && {isNil {_u getVariable QGVAR(eypBomba)}}} do {
             private _yak = (_ied nearEntities [["CAManBase", "LandVehicle"], _tetikM]) select {alive _x && {!captive _x} && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}};
             private _dost = ((_ied nearEntities [["CAManBase", "LandVehicle"], 8]) findIf {alive _x && {(_taraf getFriend (side _x)) >= 0.6}}) >= 0;
             if (_yak isNotEqualTo [] && {!_dost}) then {
@@ -109,17 +110,17 @@ if (_devam) then {
             deleteVehicle _cover;
             _sonuc = "PATLADI";
         } else {
-            _sonuc = ["zaman asimi", "olu"] select (!alive _u);
+            _sonuc = if (!alive _u) then {"olu"} else { if (!isNil {_u getVariable QGVAR(eypBomba)}) then {"iptal (canli bomba oldu)"} else {"zaman asimi"} };
         };
     } else {
-        _sonuc = "olu";
+        _sonuc = if (alive _u) then {"iptal (canli bomba oldu)"} else {"olu"};
     };
     // etkisiz kalan EYP: olu kurucu -> 120 sn sonra, zaman asimi -> hemen
     if (!isNull _ied) then {
-        if (_sonuc isEqualTo "olu") then { [_ied, _cover] spawn { params ["_i", "_c"]; sleep 120; deleteVehicle _i; deleteVehicle _c; }; } else { deleteVehicle _ied; deleteVehicle _cover; };
+        if (_sonuc isEqualTo "olu" || {(_sonuc find "iptal") == 0}) then { [_ied, _cover] spawn { params ["_i", "_c"]; sleep 120; deleteVehicle _i; deleteVehicle _c; }; } else { deleteVehicle _ied; deleteVehicle _cover; };
     };
 };
-if (alive _u) then {
+if (alive _u && {isNil {_u getVariable QGVAR(eypBomba)}}) then {
     _u setVariable [QGVAR(disableAI), false];
     _u setUnitPos "AUTO";
     _u doWatch objNull;

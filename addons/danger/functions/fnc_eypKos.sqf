@@ -94,8 +94,10 @@ private _taraf = side group _b;
 private _izlenen = objNull;
 private _tetikT = _tetik + ([0, 3] select _arac);
 private _logT = 0;
+private _sonPoz = getPosATL _v;
 while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
     private _dt = 0.4;
+    if (!isNull _v) then { _sonPoz = getPosATL _v; };
     if (isNull _h || {!alive _h}) then {
         _h = _b findNearestEnemy _b;
         // v8.781: isaretli (Zeus / 3DEN / init) bomba bilgi aramaz, tespit menzilindeki en yakin dusmani yeniden bulur
@@ -176,8 +178,13 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
     if (!_bitti) then { sleep _dt; };
 };
 if (alive _b && {!_arac}) then { _b doWatch objNull; };
-if (!alive _b && {_sonuc isNotEqualTo "PATLADI"}) then { _sonuc = "vuruldu / oldu"; };
-if (_sonuc isEqualTo "PATLADI" || {!alive _v}) then { deleteVehicle (_v getVariable [QGVAR(eypVaril), objNull]); };
+// v8.782 (RPT 53423fd4: birim silinince 'Error: No vehicle' + patlama xy [0,0]): silinen (null) birim patlamaz; olum patlamasi son bilinen konumda
+if (isNull _b) then {
+    _sonuc = "silindi";
+} else {
+    if (!alive _b && {_sonuc isNotEqualTo "PATLADI"}) then { _sonuc = "vuruldu / oldu"; };
+};
+if (_sonuc isEqualTo "PATLADI" || {isNull _v} || {!alive _v}) then { deleteVehicle (_v getVariable [QGVAR(eypVaril), objNull]); };
 
 // referans (canl_bomba / aral_canl_bomba): hedefe varamadan vurulursa cihaz olunce patlayabilir
 if (_sonuc isEqualTo "vuruldu / oldu") then {
@@ -185,7 +192,7 @@ if (_sonuc isEqualTo "vuruldu / oldu") then {
     private _ol = (((if (_ovO >= 0) then {_ovO} else {missionNamespace getVariable ["lambs_danger_canliBombaOlumSans", 0.5]})) max 0) min 1;
     if ((random 1) < _ol) then {
         sleep 0.3;
-        [getPosATL _v, ["piyade", "arac"] select _arac, _gucOv] call FUNC(eypPatlat);
+        [_sonPoz, ["piyade", "arac"] select _arac, _gucOv] call FUNC(eypPatlat);
         private _sy = missionNamespace getVariable ["lambs_danger_eypKosSay", createHashMap];
         missionNamespace setVariable ["lambs_danger_eypKosSay", _sy];
         _sy set ["olum_patlama", (_sy getOrDefault ["olum_patlama", 0]) + 1];

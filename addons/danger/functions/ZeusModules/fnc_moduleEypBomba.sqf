@@ -23,7 +23,7 @@ if (_activated && local _logic) then {
             ["Hedef taraf", "LIST", "Otomatik: bu birimin dost saymadigi herkes. Elle secersen yalniz o taraf hedeflenir.", ["Otomatik (dost olmayan)", "BLUFOR", "OPFOR", "INDEP"], 0],
             ["Tespit menzili (m)", "SLIDER", "Bu mesafede dusman gorunce hedefe gider.", [50, 1000], [50, 100], 400, 0],
             ["Son an mesafesi (m, 0 = CBA ayari)", "SLIDER", "Bu mesafede sprint / tam gaz. 0: CBA ayari (piyade 45 / arac 120).", [0, 300], [10, 50], 0, 0],
-            ["Patlama mesafesi (m, 0 = CBA ayari)", "SLIDER", "Hedef ya da herhangi bir dusman bu mesafeye girdigi anda patlar. 0: CBA ayari canliBombaTetikM (5 m).", [0, 25], [1, 5], 0, 0],
+            ["Patlama mesafesi (m, 0 = CBA ayari)", "SLIDER", "Hedef ya da herhangi bir dusman bu mesafeye girdigi anda patlar. 0: CBA ayari canliBombaTetikM (5 m). Varsayilan 8 m (olum yaricapi ~5-10 m; daha yakinda patlarsa hedef zarar gormeyebilir).", [0, 25], [1, 5], 8, 0],
             ["Patlama gucu", "LIST", "CBA ayari: eypPatlamaGucu. 0 hafif (DemoCharge). 1 orta. 2 referans (arac: GBU-12; olum yaricapi cok buyuk).", ["CBA ayari", "0 hafif", "1 orta", "2 referans"], 0],
             ["Vurulunca patlama sansi", "LIST", "Hedefe varamadan vurulursa cihazin olunce patlama olasiligi.", ["CBA ayari", "Hic", "25 yuzde", "50 yuzde", "75 yuzde", "100 yuzde"], 0],
             ["Arac ustu gorsel varil", "LIST", "Yalniz arac: kasaya patlayici varil nesnesi baglar (gorsel).", ["Evet", "Hayir"], 0]

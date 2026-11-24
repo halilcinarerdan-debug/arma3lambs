@@ -22,7 +22,7 @@ if (!_activated || {!isServer}) exitWith {};
     private _taraf = ((round (["SAYI", [_logic, "lambs_danger_edBmbTaraf", 0]] call FUNC(edenOrtak))) max 0) min 3;
     private _menzil = round (["SAYI", [_logic, "lambs_danger_edBmbMenzil", 400]] call FUNC(edenOrtak));
     private _atilma = round (["SAYI", [_logic, "lambs_danger_edBmbAtilma", 0]] call FUNC(edenOrtak));
-    private _tetik = round (["SAYI", [_logic, "lambs_danger_edBmbTetik", 0]] call FUNC(edenOrtak));
+    private _tetik = round (["SAYI", [_logic, "lambs_danger_edBmbTetik", 8]] call FUNC(edenOrtak));
     private _guc = ((round (["SAYI", [_logic, "lambs_danger_edBmbGuc", 0]] call FUNC(edenOrtak))) max 0) min 3;
     private _olum = ((round (["SAYI", [_logic, "lambs_danger_edBmbOlum", 0]] call FUNC(edenOrtak))) max 0) min 5;
     private _varil = ((round (["SAYI", [_logic, "lambs_danger_edBmbVaril", 0]] call FUNC(edenOrtak))) max 0) min 1;
