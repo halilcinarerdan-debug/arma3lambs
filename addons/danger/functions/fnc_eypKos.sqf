@@ -1,17 +1,17 @@
 #include "script_component.hpp"
 /*
  * Author: Cinar (ELITE fork)
- * EYP KOSU: CATISARAK (zikzak + ates ederek) hedefe yaklas, canliBombaTetikM'de patla (v8.777; kullanici: 'araclardada olsun' + 've direk kosmasinlar catisarak girsinler' + 'adam uzerimize kossun catisarak').
+ * EYP KOSU: CATISARAK (ates ederek) hedefe yaklas, canliBombaTetikM'de patla (v8.777; kullanici: 'araclardada olsun' + 've direk kosmasinlar catisarak girsinler' + 'adam uzerimize kossun catisarak').
  * fnc_eypSistem (canli bomba) ve teslim-bomba dongusu cagirir; BLOKLAR (spawn icinden cagrilmali), sonuc metni doner.
  * PIYADE: hedef alma / nisan AI'si ACIK (TARGET, AUTOTARGET, WEAPONAIM) -> kosarken ates eder (doWatch + reveal; doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
- *   (sprintte AI ates edemez); hedefe DIREK degil: zikzak BACAKLARI (5 sn / 3 m kala yeni nokta, 3-6 m yan sapma); 14 m icinde dogrudan hedefe.
- * ARAC (araba / kamyon / MRAP; Tank sinifi degil): surucu hedefin ANLIK konumuna tam hizla surer, zikzak aynen; surucu disi murettebatin ates AI'si ACIK kalir (catisarak); arac hedefe tetik + 3 m kalinca patlar (arac + murettebat olur).
+ *   (sprintte AI ates edemez); hedefe DOGRUDAN (zikzak v8.780'de kullanici istegiyle KALDIRILDI).
+ * ARAC (araba / kamyon / MRAP; Tank sinifi degil): surucu hedefin ANLIK konumuna tam hizla surer (dogrudan); surucu disi murettebatin ates AI'si ACIK kalir (catisarak); arac hedefe tetik + 3 m kalinca patlar (arac + murettebat olur).
  * Patlama: fnc_eypPatlat (CBA eypPatlamaGucu; piyade / arac). Referans kodlardan (aral_canl_bomba / canl_bomba): SON AN HIZ ARTISI (piyade canliBombaAtilmaM 45 m, arac canliBombaAracAtilmaM 120 m ya da hasar > 0.1 -> sprint / tam hiz + bagirma sesi; oncesi kosu / sivil trafik hizi), allowFleeing 0, aracta allowCrewInImmobile (tekerlek patlasa inmez),
  *   hedefe varamadan VURULURSA canliBombaOlumSans (0.5) ihtimaliyle cihaz olunce patlar (arac: surucu olur / arac yok olursa).
  * Sonuc metni: "PATLADI" / "vuruldu / oldu" / "hedef yok" / "zaman asimi" / "arac durdu".
  * GRUP: piyade kosucu mangayla birlikteyse gecici ayri gruba alinir (grup duzeyi davranis / muharebe modu / hiz mangayi etkilemesin), bitince (hayattaysa) geri katilir.
  * ZEUS / 3DEN: birim ayarlari (eypTetikM, eypGizli: referans PBIED / VBIED 'gizli yaklasim' = CARELESS + BLUE + yuruyus / 45 km/s, son anda sprint; eypAtilmaM, eypOlumSans, eypGuc, eypVaril) fnc_eypBombaYap ile yazilir.
- * SINIR: oyunda DENENMEDI; zikzak AI'nin yol bulmasina bagli (dar sokakta sapma kisalir); aracta surucu olmadan once durursa 'arac durdu' sayilir.
+ * SINIR: oyunda DENENMEDI; aracta 15 sn'den uzun hiz < 3 km/s olursa 'arac durdu' sayilir.
  *
  * Arguments:
  * 0: Kosucu (piyade ya da arac surucusu) <OBJECT>
@@ -71,13 +71,11 @@ if (_arac) then {
 
 // v8.779 (RPT a4e1d6c8 / f82218cf; kullanici: 'zikzaki check et', 'araciada coz', 'menzile girdigi gibi patlasin'):
 //   (1) ESKI HATA: her 0.4 sn'de doMove + doTarget + doFire. doFire komutu doMove'u iptal eder (asker durur / yavaslar); doMove'u her tikte degisen noktaya yenilemek yol hesabini surekli sifirlar (ARAC 0 km/s'de kaldi: [MEKANIZE-YAVAS] hiz 0).
-//   (2) YENI: zikzak = BACAKLAR (her ~5 sn / 3 m kala yeni nokta: hedefe 10-16 m ilerleme + 3-6 m yan sapma, yon dongusu); arac ve gizli yaklasimda zikzak YOK (dogrudan, doMove 2 sn'de bir); 14 m icinde dogrudan hedefe (0.6 sn).
+//   (2) [v8.780: zikzak bacaklari kullanici istegiyle KALDIRILDI] hedefe dogrudan; doMove araliklarla yenilenir (arac 2 sn, piyade 0.6-1 sn).
 //   (3) ates: doFire / doTarget YOK; doWatch + reveal ile hedef gosterilir, TARGET / AUTOTARGET acik oldugu icin AI kosarken kendisi ates eder.
 //   (4) PATLAMA: hedef YA DA tetik menzilindeki HERHANGI dusman (menzile girdigi gibi); yakinda (<30 m) 0.15 sn'de bir kontrol.
 //   (5) arac takilma: 15 sn'den uzun hiz < 3 km/s -> 'arac durdu' (sonuc dongusu serbest kalir). Ilerleme logu: [EYP-KOS] (ilk 25 satir, 5 sn'de bir).
-private _bacak = [];
-private _bacakT = 0;
-private _isaret = selectRandom [-1, 1];
+private _sonEmir = [];
 private _dmT = 0;
 private _durT = -1;
 private _bitti = false;
@@ -126,28 +124,17 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         if (_gizli) then { _b setBehaviour "AWARE"; };
                     };
                 };
-                private _hy = _v getDir _h;
                 if (_catis && {!_arac} && {!(_h isEqualTo _izlenen)}) then {
                     _b doWatch _h;
                     _b reveal [_h, 4];
                     _izlenen = _h;
                 };
-                if (_catis && {!_arac} && {_m > 14}) then {
-                    // zikzak bacaklari
-                    if (_bacak isEqualTo [] || {time > _bacakT} || {(_b distance2D _bacak) < 3}) then {
-                        _isaret = -_isaret;
-                        private _ileri = (_m - 8) min (10 + (random 6));
-                        _bacak = ((getPosATL _v) getPos [_ileri, _hy]) getPos [(3 + (random 3)) * _isaret, _hy + 90];
-                        _bacakT = time + 5;
-                        _b doMove _bacak;
-                    };
-                } else {
-                    _bacak = [];
-                    // dogrudan: doMove yalniz araliklarla yenilenir (her tikte yenilemek yol hesabini sifirlar)
-                    if (time >= _dmT) then {
-                        _b doMove (getPosATL _h);
-                        _dmT = time + ([0.6, 2] select _arac);
-                    };
+                // v8.780 (kullanici: 'zikzakta cok bekliyor, zikzaki kaldir'): ZIKZAK YOK, hedefe dogrudan. doMove yalniz hedef 6 m'den fazla kaydiysa ya da araliktan sonra yenilenir (her tikte yenilemek yol hesabini sifirlar)
+                private _hp = getPosATL _h;
+                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > 6} || {time >= (_dmT + 1)}}) then {
+                    _b doMove _hp;
+                    _sonEmir = _hp;
+                    _dmT = time + ([0.6, 2] select _arac);
                 };
             };
         };
@@ -156,7 +143,7 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
             private _kl = missionNamespace getVariable ["lambs_danger_eypKosLogN", 0];
             if (_kl < 25) then {
                 missionNamespace setVariable ["lambs_danger_eypKosLogN", _kl + 1];
-                diag_log format ["[EYP-KOS] %1 | %2 | hedef %3 %4 m | hiz %5 km/s | %6 | surge %7 | gecen %8 sn", name _b, typeOf _v, typeOf _h, round _m, round (speed _v), ["piyade zikzak", "piyade dogrudan", "arac dogrudan"] select (if (_arac) then {2} else {[1, 0] select (_catis && {_m > 14})}), _surge, round (time - _t0)];
+                diag_log format ["[EYP-KOS] %1 | %2 | hedef %3 %4 m | hiz %5 km/s | %6 | surge %7 | gecen %8 sn", name _b, typeOf _v, typeOf _h, round _m, round (speed _v), ["piyade dogrudan", "arac dogrudan"] select _arac, _surge, round (time - _t0)];
             };
         };
     };
