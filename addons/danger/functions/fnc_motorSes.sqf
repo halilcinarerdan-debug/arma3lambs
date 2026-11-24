@@ -12,6 +12,7 @@
  * Dinleyici: dusman (getFriend < 0.6), YEREL, oyuncusuz, lideri yaya ve canli AI grubu; grup bu araci zaten biliyorsa (knowsAbout >= 0.5) dokunulmaz. Tepki: grup 'AWARE' (temasta degilse), lider + 2 asker hata payli yone bakar (doWatch ~15 sn);
  *   zirh sesi + grupta AT varsa AT askerleri hazir bakar; grup degiskenleri lambs_danger_motorSesT / Yon / Tip / Mesafe yazilir (diger sistemler okuyabilir). Hile yok: reveal verilmez (konum bilgisi yok).
  *   Yon hatasi: +-(8 + mesafe/60) derece. Grup basina 20 sn'de bir; tur basina en cok 8 dinleyici.
+ * v8.792 CBA (kategori 'ELITE zirh / mekanize'): motorSes (ac / kapa), motorSesCarpan (genel), motorSesZirhCarpan / HafifCarpan / HavaCarpan (sinif), motorSesRolanti (duran motor), motorSesTemasCarpan (temasta bastirma), motorSesArazi (arazi engeli); varsayilanlar eski davranisla AYNI.
  * Kapatma: lambs_danger_motorSesOff = true. Log: [MOTOR-SES] (ilk 60 olay), 90 sn ozet [MOTOR-SES-OZET].
  *
  * Arguments: None
@@ -30,7 +31,15 @@ private _calis = {
     private _ozetT = time + 90;
     while {true} do {
         sleep 3;
-        if (missionNamespace getVariable ["lambs_danger_motorSesOff", false]) then { continue };
+        if (missionNamespace getVariable ["lambs_danger_motorSesOff", false] || {!(missionNamespace getVariable ["lambs_danger_motorSes", true])}) then { continue };
+        // v8.792 (kullanici: 'arac motor duyma sesini ayarlayabilelim'): CBA carpanlari (ELITE zirh / mekanize)
+        private _mkG = ((missionNamespace getVariable ["lambs_danger_motorSesCarpan", 1]) max 0.2) min 3;
+        private _mkZ = ((missionNamespace getVariable ["lambs_danger_motorSesZirhCarpan", 1]) max 0.2) min 3;
+        private _mkH = ((missionNamespace getVariable ["lambs_danger_motorSesHafifCarpan", 1]) max 0.2) min 3;
+        private _mkA = ((missionNamespace getVariable ["lambs_danger_motorSesHavaCarpan", 1]) max 0.2) min 3;
+        private _mkR = ((missionNamespace getVariable ["lambs_danger_motorSesRolanti", 1]) max 0.2) min 2;
+        private _mkT = ((missionNamespace getVariable ["lambs_danger_motorSesTemasCarpan", 0.4]) max 0.1) min 1;
+        private _mkE = ((missionNamespace getVariable ["lambs_danger_motorSesArazi", 0.6]) max 0.2) min 1;
         // ortam carpani (tum kaynaklar icin ortak)
         private _gece = sunOrMoon < 0.1;
         private _env = (if (_gece) then {1.3} else {1}) * (if (rain > 0.3) then {0.7} else {1}) * (if ((vectorMagnitude wind) > 6) then {0.75} else {1}) * (if (fog > 0.4) then {0.9} else {1});
@@ -67,6 +76,9 @@ private _calis = {
             else { if (_v isKindOf "Wheeled_APC_F" || {_v isKindOf "APC"} || {getNumber (configOf _v >> "armor") >= 120}) then { _tip = "ZIRHLI"; _taban = if (_hiz >= 3) then {700} else {300}; }
             else { _tip = "ARAC"; _taban = if (_hiz >= 3) then {500} else {200}; }; }; }; }; }; };
             if (_taban <= 0) then { continue };
+            // CBA carpanlari: genel x sinif; rolantide (duran arac / yerdeki heli) rolanti carpani
+            private _bosta = (_tip in ["TANK", "ZIRHLI", "ARAC"] && {_hiz < 3}) || {_tip isEqualTo "HELI" && {((getPosATL _v) select 2) <= 3}};
+            _taban = _taban * _mkG * (switch (_tip) do { case "TANK": {_mkZ}; case "ZIRHLI": {_mkZ}; case "ARAC": {_mkH}; default {_mkA} }) * ([1, _mkR] select _bosta);
             private _vp = getPosASL _v;
             {
                 private _g = _x;
@@ -91,8 +103,8 @@ private _calis = {
                 if ((_l distance _v) > _m) then { continue };
                 // engel / gurultu carpanlari
                 private _carp = [1, 0.45] select (!isNull _vOz);
-                if (terrainIntersectASL [eyePos _l, _vp]) then { _carp = _carp * ([0.6, 0.8] select (_tip isEqualTo "IHA")); };
-                if ((time - (_g getVariable ["lambs_danger_contact", -999])) < 15) then { _carp = _carp * 0.4; };
+                if (terrainIntersectASL [eyePos _l, _vp]) then { _carp = _carp * ([_mkE, 0.8] select (_tip isEqualTo "IHA")); };
+                if ((time - (_g getVariable ["lambs_danger_contact", -999])) < 15) then { _carp = _carp * _mkT; };
                 if !(isNull (nearestBuilding _l)) then { if ((_l distance (nearestBuilding _l)) < 6) then { _carp = _carp * 0.8; }; };
                 if (_d > (_m * _carp)) then { continue };
                 // duyuldu: hata payli yon
