@@ -39,7 +39,7 @@ diag_log "[TURRET-EKIP] LAMBS Turrets algilandi: tank/hava disi silahli arac + s
                 if (!isPlayer _u && {local _u} && {alive _u} && {!(_u getVariable [QGVAR(turretEkipU), false])}) then {
                     _u setVariable [QGVAR(turretEkipU), true];
                     private _once = _u skill "aimingShake";
-                    { if ((_u skill _x) < _sk) then { _u setSkill [_x, _sk]; }; } forEach ["aimingAccuracy", "aimingShake", "aimingSpeed"];
+                    { if ((_u skill _x) < _sk) then { _u setSkill [_x, _sk]; }; } forEach (["aimingAccuracy", "aimingShake", "aimingSpeed"] select {!(missionNamespace getVariable ["lambs_danger_skillSabit", false]) || {_x isEqualTo "aimingSpeed"}});   // v8.774: skillSabit acikken isabet / titreme yukseltilmez
                     if (_logN < 20) then {
                         _logN = _logN + 1;
                         diag_log format ["[TURRET-EKIP] %1 | %2 (%3) | aimingShake %4 -> %5 (taban %6)", getText (configOf _v >> "displayName"), name _u, groupId (group _u), _once toFixed 2, (_u skill "aimingShake") toFixed 2, _sk];

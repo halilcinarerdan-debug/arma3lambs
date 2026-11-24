@@ -488,7 +488,7 @@ private _govde = {
                 {
                     private _uu = _x;
                     _eskiBec pushBack [_uu, _uu skill "aimingAccuracy", _uu skill "aimingSpeed", _uu skill "spotDistance", _uu skill "spotTime"];
-                    _uu setSkill ["aimingAccuracy", ((_uu skill "aimingAccuracy") max 0.8)];
+                    if !(missionNamespace getVariable ["lambs_danger_skillSabit", false]) then { _uu setSkill ["aimingAccuracy", ((_uu skill "aimingAccuracy") max 0.8)]; };   // v8.774 (kullanici: 'accuracy 0 olmasina ragmen vuruyorlar'): CBA skillSabit acikken CQB temizlemede isabet 0.8'e YUKSELTILMEZ
                     _uu setSkill ["aimingSpeed", ((_uu skill "aimingSpeed") max 0.9)];
                     _uu setSkill ["spotDistance", ((_uu skill "spotDistance") max 0.9)];
                     _uu setSkill ["spotTime", ((_uu skill "spotTime") max 0.9)];

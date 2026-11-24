@@ -358,6 +358,7 @@ force lambs_danger_skillHizMin = 1;
 force lambs_danger_skillIsabetCarpan = 2;
 force lambs_danger_skillIsabetMax = 1;
 force lambs_danger_skillIsabetMin = 1;
+force lambs_danger_skillSabit = true;
 force lambs_danger_skillOptiksizCarpan = 1;
 force lambs_danger_skillTavanHiz = 1;
 force lambs_danger_skillTavanIsabet = 1;

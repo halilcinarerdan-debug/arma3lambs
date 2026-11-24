@@ -23,7 +23,7 @@ if (_sk > 0) then {
     {
         private _u = _x;
         if (!isPlayer _u && {local _u}) then {
-            { if ((_u skill _x) < _sk) then { _u setSkill [_x, _sk]; }; } forEach ["aimingAccuracy", "aimingSpeed", "aimingShake", "spotDistance", "spotTime", "reloadSpeed"];
+            { if ((_u skill _x) < _sk) then { _u setSkill [_x, _sk]; }; } forEach (["aimingAccuracy", "aimingSpeed", "aimingShake", "spotDistance", "spotTime", "reloadSpeed"] select {!(missionNamespace getVariable ["lambs_danger_skillSabit", false]) || {!(_x in ["aimingAccuracy", "aimingShake"])}});   // v8.774: skillSabit acikken isabet / titreme yukseltilmez
         };
     } forEach (crew _v);
     diag_log format ["[TANK-ATIS] %1 | ekip becerisi >= %2 yapildi (%3 kisi)", getText (configOf _v >> "displayName"), _sk, count (crew _v)];
