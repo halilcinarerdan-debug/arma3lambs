@@ -4,7 +4,7 @@
  * BIRIMI / ARACI CANLI BOMBA YAP (editor init satiri + 3DEN / Zeus modulleri ortak) (v8.777; kullanici: 'zeus destegi ve editor destegi olsun'; referans: aral_canl_bomba.txt VBIED + canl_bomba.txt PBIED).
  * Isaretlenen asker (PBIED) ya da arac (VBIED; surucu kosucudur) ayarlanan menzilde dusman bulunca fnc_eypKos ile hedefe gider (CBA canliBomba KAPALI olsa bile calisir; CBA yalniz OLAY-tabanli otomatik secimi yonetir).
  * Dongu 1 sn'de bir dusman arar (tespit menzili); hedefe varamazsa (zaman asimi / hedef yok) 5 sn bekler, 3 basarisiz denemeden sonra birakir; patlayinca / olunce biter.
- * AYAR dizisi (hepsi istege bagli): [menzil m (400), gizli 0/1 (0), son an mesafesi m (-1 = CBA), patlama gucu 0-2 (-1 = CBA), olunce patlama sansi 0-1 (-1 = CBA), hedef taraf 0 otomatik / 1 BLUFOR / 2 OPFOR / 3 INDEP (0), arac ustu gorsel varil 0/1 (1)]
+ * AYAR dizisi (hepsi istege bagli): [menzil m (400), gizli 0/1 (0), son an mesafesi m (-1 = CBA), patlama gucu 0-2 (-1 = CBA), olunce patlama sansi 0-1 (-1 = CBA), hedef taraf 0 otomatik / 1 BLUFOR / 2 OPFOR / 3 INDEP (0), arac ustu gorsel varil 0/1 (1), patlama (tetik) mesafesi m (-1 = CBA canliBombaTetikM)]
  *   gizli = 1 -> referans PBIED / VBIED: CARELESS + BLUE (ates etmez), yuruyus (arac 45 km/s), son an mesafesinde sprint / tam gaz. gizli = 0 -> catisarak (zikzak + ates; bkz. fnc_eypKos).
  * Uzak yerellik: birim bu makinede yerel degilse olay (lambs_danger_eypBombaYerel) ile sahibine gonderilir.
  *
@@ -26,7 +26,7 @@ if (isNull _obj || {!alive _obj}) exitWith {false};
 if (_obj isKindOf "CAManBase" && {!isNull objectParent _obj}) then { _obj = vehicle _obj; };
 if (!local _obj) exitWith { ["lambs_danger_eypBombaYerel", [_obj, _a], _obj] call CBA_fnc_targetEvent; false };
 if (!isNil {_obj getVariable QGVAR(eypBomba)}) exitWith {false};
-_a params [["_menzil", 400, [0]], ["_gizli", 0, [0]], ["_atilmaM", -1, [0]], ["_guc", -1, [0]], ["_olumSans", -1, [0]], ["_hedefTaraf", 0, [0]], ["_varil", 1, [0]]];
+_a params [["_menzil", 400, [0]], ["_gizli", 0, [0]], ["_atilmaM", -1, [0]], ["_guc", -1, [0]], ["_olumSans", -1, [0]], ["_hedefTaraf", 0, [0]], ["_varil", 1, [0]], ["_tetikM", -1, [0]]];
 _menzil = (_menzil max 30) min 2000;
 _hedefTaraf = round (_hedefTaraf max 0 min 3);
 
@@ -34,6 +34,7 @@ _obj setVariable [QGVAR(eypBomba), true, true];
 _obj setVariable [QGVAR(eypGizli), _gizli > 0];
 _obj setVariable [QGVAR(eypAtilmaM), _atilmaM];
 _obj setVariable [QGVAR(eypGuc), _guc];
+_obj setVariable [QGVAR(eypTetikM), _tetikM];
 _obj setVariable [QGVAR(eypOlumSans), _olumSans];
 private _arac = !(_obj isKindOf "CAManBase");
 if (_arac && {_varil > 0}) then {
