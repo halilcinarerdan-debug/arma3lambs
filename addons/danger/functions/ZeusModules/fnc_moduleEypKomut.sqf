@@ -35,6 +35,6 @@ if (_activated && local _logic) then {
             };
             ["lambs_danger_eypKomutIstegi", [netId _u, _poz, _hide, _ep, round _tetik, (round _guc) - 1]] call CBA_fnc_serverEvent;
             systemChat format ["[ELITE] EYP kurma emri gonderildi: %1 -> %2", name _u, mapGridPosition _poz];
-        }, {}, [_poz]
+        }, {}, {}, [_poz]
     ] call EFUNC(main,showDialog);
 };

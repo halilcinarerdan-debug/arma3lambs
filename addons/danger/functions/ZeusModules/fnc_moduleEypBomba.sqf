@@ -34,6 +34,6 @@ if (_activated && local _logic) then {
             private _a = [round _menzil, round _tarz, [-1, round _atilma] select (_atilma > 0), (round _guc) - 1, [-1, 0, 0.25, 0.5, 0.75, 1] select (round _olum), round _taraf, [1, 0] select (round _varil)];
             ["lambs_danger_eypBombaIstegi", [netId _hedef, _a]] call CBA_fnc_serverEvent;
             systemChat format ["[ELITE] Canli bomba gorevi gonderildi: %1 (%2)", getText (configOf _hedef >> "displayName"), ["catisarak", "gizli yaklasim"] select (round _tarz)];
-        }, {}, [_hedef]
+        }, {}, {}, [_hedef]
     ] call EFUNC(main,showDialog);
 };
