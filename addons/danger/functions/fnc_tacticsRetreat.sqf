@@ -421,7 +421,7 @@ if (EGVAR(main,debug_functions)) then {
                         private _cmd = currentCommand _b;
                         private _rd = unitReady _b;
                         private _dm = (expectedDestination _b) select 1;
-                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0} || {((_dm find "LEADER") >= 0) && {_b isNotEqualTo (leader _g)}}) then {   // v8.680: lider icin 'LEADER PLANNED' NORMAL (kendi doMove emri bile boyle gorunur) -> yalniz lider olmayanda; v8.679: 'LEADER PLANNED' (doFollow / formasyon) de ezme sayilir (kendi doMove emri 'DoNotPlan' gosterir)
+                        if (_cmd isNotEqualTo "MOVE" || {_rd} || {(_dm find "Formation") >= 0}) then {   // v8.787: 'LEADER PLANNED' artik 'ezilmis' SAYILMAZ (asagida aciklama)   // v8.680: lider icin 'LEADER PLANNED' NORMAL (kendi doMove emri bile boyle gorunur) -> yalniz lider olmayanda; v8.679: 'LEADER PLANNED' (doFollow / formasyon) de ezme sayilir (kendi doMove emri 'DoNotPlan' gosterir)
                             _gor pushBack _b;
                             if ((missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) < 40) then {
                                 missionNamespace setVariable ["lambs_danger_retEzmeTaniN", (missionNamespace getVariable ["lambs_danger_retEzmeTaniN", 0]) + 1];
@@ -559,9 +559,12 @@ if (EGVAR(main,debug_functions)) then {
             {
                 private _bR = _x select 0;
                 if (alive _bR && {(lifeState _bR) in ["HEALTHY", "INJURED"]} && {!(_bR in _pinned)} && {_bR isNotEqualTo (leader _grup)} && {(time - _t0) > 1} && {(_bR distance2D (_x select 1)) > 12}
-                    && {(time - (_bR getVariable [QGVAR(retReasT), -999])) > 1.5} && {(speed _bR) < 3}) then {
+                    && {(time - (_bR getVariable [QGVAR(retReasT), -999])) > 4} && {(speed _bR) < 3}) then {
                     private _dmR = (expectedDestination _bR) select 1;
-                    if ((_dmR find "LEADER") >= 0 || {(_dmR find "Formation") >= 0}) then {
+                    // v8.787 (RPT 1f3a00f8: Alpha 1-2 ilk sicramada 24 sn 'vardi 0/4', 4 kosucu da 'komut MOVE / hedef modu LEADER PLANNED / hiz 0 / ready false', baski 0; koruma 20 kez yeniden emir verdi):
+                    //   doMove'dan 1 sn sonra mod 'DoNotPlan' -> 'LEADER PLANNED' olur = yol planlandi (emrin NORMAL gorunumu; v8.680 notu lider icin de ayni). 'LEADER' kosulu HER yavas kosucuyu 'ezilmis' sayip 1.5 sn'de bir doMove tekrarliyor,
+                    //   her doMove yol hesabini SIFIRLIYOR (v8.674 notu) -> kosucu hic yola cikamiyor (geri cekilme varisi 14 RPT'de %0-50). Simdi yalniz GERCEK formasyon modu ('Formation') + en az 4 sn arayla.
+                    if ((_dmR find "Formation") >= 0) then {
                         _bR setVariable [QGVAR(retReasT), time];
                         _bR enableAI "PATH";
                         _bR enableAI "MOVE";
@@ -570,7 +573,7 @@ if (EGVAR(main,debug_functions)) then {
                         _bR doMove (_x select 1);
                         if ((missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) < 20) then {
                             missionNamespace setVariable ["lambs_danger_retKorumaN", (missionNamespace getVariable ["lambs_danger_retKorumaN", 0]) + 1];
-                            diag_log format ["[GERI-CEKILME-KORUMA] %1 | %2 | hedef modu %3 (formasyon planina donmus) -> koşu emri yeniden | hedefe %4 m | hiz %5 km/sa", groupId _grup, name _bR, _dmR, round (_bR distance2D (_x select 1)), round (speed _bR)];
+                            diag_log format ["[GERI-CEKILME-KORUMA] %1 | %2 | hedef modu %3 (GERCEK formasyon modu) -> koşu emri yeniden | hedefe %4 m | hiz %5 km/sa", groupId _grup, name _bR, _dmR, round (_bR distance2D (_x select 1)), round (speed _bR)];
                         };
                     };
                 };
@@ -585,7 +588,7 @@ if (EGVAR(main,debug_functions)) then {
                         _x set [3, time];
                     } else {
                         // v8.679: hedef modu 'LEADER PLANNED' / 'Formation' = asker kendi doMove emrini degil lider / formasyon planini izliyor (emir ezilmis; yol hesabi gecikmesi DEGIL) -> 2.5 sn'de yeniden emir (yol hesabi sifirlama riski yok); diger durumlarda 7 sn
-                        private _ezMod = ((((expectedDestination _b) select 1) find "LEADER") >= 0) || {(((expectedDestination _b) select 1) find "Formation") >= 0};
+                        private _ezMod = (((expectedDestination _b) select 1) find "Formation") >= 0;   // v8.787: 'LEADER PLANNED' = normal planli doMove (ezilme DEGIL)
                         if ((time - (_x select 3)) > ([7, 2.5] select _ezMod)) then {   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
                             _x set [4, (_x select 4) + 1];
                             // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
