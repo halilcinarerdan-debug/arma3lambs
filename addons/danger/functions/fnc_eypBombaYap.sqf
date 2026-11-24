@@ -35,6 +35,8 @@ _obj setVariable [QGVAR(eypGizli), _gizli > 0];
 _obj setVariable [QGVAR(eypAtilmaM), _atilmaM];
 _obj setVariable [QGVAR(eypGuc), _guc];
 _obj setVariable [QGVAR(eypTetikM), _tetikM];
+_obj setVariable [QGVAR(eypMenzil), _menzil];
+_obj setVariable [QGVAR(eypHedefTaraf), _hedefTaraf];
 _obj setVariable [QGVAR(eypOlumSans), _olumSans];
 private _arac = !(_obj isKindOf "CAManBase");
 if (_arac && {_varil > 0}) then {
@@ -57,14 +59,8 @@ diag_log format ["[EYP-ISARET] %1 | %2 | tespit %3 m | %4 | son an %5 | guc %6 |
         sleep 1;
         private _r = if (_o isKindOf "CAManBase") then {_o} else {driver _o};
         if (isNull _r || {!alive _r} || {!local _o} || {isPlayer _r}) then { continue };
-        private _taraf = side group _r;
-        private _yal = _o;
-        private _adaylar = ((getPosATL _o) nearEntities [["CAManBase", "LandVehicle"], _men]) select {
-            alive _x && {_x isNotEqualTo _yal} && {!(_x in (crew _yal))} && {!captive _x} && {!isObjectHidden _x} && {(side _x) isNotEqualTo civilian}
-            && {if (_ht > 0) then {(side _x) isEqualTo ([west, east, independent] select (_ht - 1))} else {(_taraf getFriend (side _x)) < 0.6}}
-        };
-        if (_adaylar isEqualTo []) then { continue };
-        private _h = ([_adaylar, [], {_x distance _yal}, "ASCEND"] call BIS_fnc_sortBy) select 0;
+        private _h = [_o, _men, _ht] call FUNC(eypHedefBul);
+        if (isNull _h) then { continue };
         _sonuc = [_r, _h, 120] call FUNC(eypKos);
         diag_log format ["[EYP-ISARET] SONUC | %1 | %2", typeOf _o, _sonuc];
         if (_sonuc isEqualTo "PATLADI" || {!alive _r}) exitWith {};

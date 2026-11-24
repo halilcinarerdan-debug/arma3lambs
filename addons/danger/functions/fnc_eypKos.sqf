@@ -10,7 +10,7 @@
  *   hedefe varamadan VURULURSA canliBombaOlumSans (0.5) ihtimaliyle cihaz olunce patlar (arac: surucu olur / arac yok olursa).
  * Sonuc metni: "PATLADI" / "vuruldu / oldu" / "hedef yok" / "zaman asimi" / "arac durdu".
  * GRUP: piyade kosucu mangayla birlikteyse gecici ayri gruba alinir (grup duzeyi davranis / muharebe modu / hiz mangayi etkilemesin), bitince (hayattaysa) geri katilir.
- * ZEUS / 3DEN: birim ayarlari (eypTetikM, eypGizli: referans PBIED / VBIED 'gizli yaklasim' = CARELESS + BLUE + yuruyus / 45 km/s, son anda sprint; eypAtilmaM, eypOlumSans, eypGuc, eypVaril) fnc_eypBombaYap ile yazilir.
+ * ZEUS / 3DEN: birim ayarlari (eypTetikM, eypMenzil, eypHedefTaraf, eypGizli: referans PBIED / VBIED 'gizli yaklasim' = CARELESS + BLUE + yuruyus / 45 km/s, son anda sprint; eypAtilmaM, eypOlumSans, eypGuc, eypVaril) fnc_eypBombaYap ile yazilir.
  * SINIR: oyunda DENENMEDI; aracta 15 sn'den uzun hiz < 3 km/s olursa 'arac durdu' sayilir.
  *
  * Arguments:
@@ -62,8 +62,17 @@ _b setBehaviour (["AWARE", "CARELESS"] select _gizli);
 if (_arac) then {
     _v allowCrewInImmobile true;
     _v engineOn true;
-    _v limitSpeed ([60, 45] select _gizli);
-    _b setSpeedMode "NORMAL";
+    if (_gizli) then {
+        _v limitSpeed 45;
+        _b setSpeedMode "NORMAL";
+    } else {
+        // v8.781 (kullanici: 'arac hic durmasin direk gitsin'): arac en bastan TAM HIZ (kademeli yaklasma yalniz gizli modda)
+        _v limitSpeed 300;
+        _b setSpeedMode "FULL";
+        (group _b) setSpeedMode "FULL";
+        _v forceSpeed -1;
+        _surge = true;
+    };
 } else {
     _b setUnitPos "UP";
     _b forceSpeed (_b getSpeed (if (_gizli) then {"SLOW"} else {["FAST", "NORMAL"] select _catis}));
@@ -77,6 +86,8 @@ if (_arac) then {
 //   (5) arac takilma: 15 sn'den uzun hiz < 3 km/s -> 'arac durdu' (sonuc dongusu serbest kalir). Ilerleme logu: [EYP-KOS] (ilk 25 satir, 5 sn'de bir).
 private _sonEmir = [];
 private _dmT = 0;
+private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
+private _yokT = -1;
 private _durT = -1;
 private _bitti = false;
 private _taraf = side group _b;
@@ -85,11 +96,20 @@ private _tetikT = _tetik + ([0, 3] select _arac);
 private _logT = 0;
 while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
     private _dt = 0.4;
-    if (isNull _h || {!alive _h}) then { _h = _b findNearestEnemy _b; };
+    if (isNull _h || {!alive _h}) then {
+        _h = _b findNearestEnemy _b;
+        // v8.781: isaretli (Zeus / 3DEN / init) bomba bilgi aramaz, tespit menzilindeki en yakin dusmani yeniden bulur
+        if (isNull _h && {_isaretli}) then { _h = [_v, _v getVariable [QGVAR(eypMenzil), 400], _v getVariable [QGVAR(eypHedefTaraf), 0]] call FUNC(eypHedefBul); };
+    };
     if (isNull _h) then {
-        _sonuc = "hedef yok";
-        _bitti = true;
+        // isaretli bomba 8 sn boyunca hedef bekler (cikmaz: AI geri acilip arac durmasin); digerleri hemen cikar
+        if (_isaretli && {_yokT < 0}) then { _yokT = time; };
+        if (!_isaretli || {(time - _yokT) > 8}) then {
+            _sonuc = "hedef yok";
+            _bitti = true;
+        };
     } else {
+        _yokT = -1;
         private _m = _v distance _h;
         _dt = [0.4, 0.15] select (_m < 30);
         // PATLAMA: hedef ya da tetik menzilindeki HERHANGI dusman
@@ -106,7 +126,10 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 if (!_bitti) then {
                     if ((speed _v) < 3) then {
                         if (_durT < 0) then { _durT = time; };
-                        if ((time - _durT) > 15) then { _sonuc = "arac durdu"; _bitti = true; };
+                        if ((time - _durT) > 15) then { _sonuc = "arac durdu"; _bitti = true; } else {
+                            // 4 sn'den uzun duruyorsa emri hemen yenile (takilmis / plan bitmis olabilir)
+                            if ((time - _durT) > 4 && {time >= _dmT}) then { _b doMove (getPosATL _h); _sonEmir = getPosATL _h; _dmT = time + 3; };
+                        };
                     } else { _durT = -1; };
                 };
             };
@@ -130,11 +153,14 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                     _izlenen = _h;
                 };
                 // v8.780 (kullanici: 'zikzakta cok bekliyor, zikzaki kaldir'): ZIKZAK YOK, hedefe dogrudan. doMove yalniz hedef 6 m'den fazla kaydiysa ya da araliktan sonra yenilenir (her tikte yenilemek yol hesabini sifirlar)
+                // ARAC: doMove NADIREN (hedef 60 m / yakinda 25 m kaydiysa, en az 3 sn arayla; hedef sabitse 8 sn'de bir): her yeni emir yol hesabini sifirlar, arac durup yeniden planliyordu (RPT 0689d2a0: hiz 47 -> 0)
                 private _hp = getPosATL _h;
-                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > 6} || {time >= (_dmT + 1)}}) then {
+                private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {6};
+                private _zorS = [1, 8] select _arac;
+                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {time >= (_dmT + _zorS)}}) then {
                     _b doMove _hp;
                     _sonEmir = _hp;
-                    _dmT = time + ([0.6, 2] select _arac);
+                    _dmT = time + ([0.6, 3] select _arac);
                 };
             };
         };
