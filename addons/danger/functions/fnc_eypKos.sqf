@@ -48,6 +48,14 @@ private _g0 = group _b;
 private _izole = !_arac && {(count (units _g0)) > 1};
 if (_izole) then { private _gn = createGroup [side _g0, true]; [_b] joinSilent _gn; };
 
+// v8.783 (RPT 19bff8dc: piyade 40-81 m'de duruyor / yan adim atiyor): fnc_yakinHareket (oyuncu icin 45 x 1.8 = 81 m) ve fnc_acikBekleme emri eziyordu.
+//   birim TAKTIK KILIDI (74 ELITE fonksiyonu saygi duyar) + grup HARIC / disableGroupAI (LAMBS cekirdegi + ELITE grup katmani) kosu boyunca; bitince eski deger geri
+private _grp = group _b;
+private _gDAI0 = _grp getVariable [QGVAR(disableGroupAI), false];
+private _gGorev0 = _grp getVariable [QGVAR(gorev), ""];
+_grp setVariable [QGVAR(disableGroupAI), true];
+_grp setVariable [QGVAR(gorev), "HARIC"];
+_b setVariable [QGVAR(taktikKilit), time + _sure + 5];
 _b setVariable [QGVAR(disableAI), true];
 _b allowFleeing 0;
 { _b disableAI _x; } forEach ["AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
@@ -200,6 +208,11 @@ if (_sonuc isEqualTo "vuruldu / oldu") then {
     };
 };
 
+if (!isNull _grp) then {
+    _grp setVariable [QGVAR(disableGroupAI), [nil, true] select _gDAI0];
+    _grp setVariable [QGVAR(gorev), [nil, _gGorev0] select (_gGorev0 isNotEqualTo "")];
+};
+if (!isNull _b) then { _b setVariable [QGVAR(taktikKilit), time]; };
 if (alive _b) then {
     { _b enableAI _x; } forEach ["TARGET", "AUTOTARGET", "AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
     _b forceSpeed -1;

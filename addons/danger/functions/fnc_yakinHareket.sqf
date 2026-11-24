@@ -46,6 +46,7 @@ diag_log "[YAKIN-HAREKET] yakin mesafe hareketlilik (peek-strafe) baslatildi (v8
                 if (((units _g) findIf {isPlayer _x}) > -1) then { continue };   // v8.589: oyuncu gruplari muaf (yan adim oyuncu emrini eziyordu)
                 if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(_u getVariable [QGVAR(zorlaBitis), 0]) > time} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                     || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []}
+                    || {_u getVariable [QGVAR(disableAI), false]}
                     || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}) then { continue };
                 // taktik kilidi yalniz siperTut'tan kaynakliysa asilir (baska emir / kosu kilidi korunur)
                 if ((_u getVariable [QGVAR(taktikKilit), 0]) > time && {(_u getVariable [QGVAR(siperTutBit), 0]) <= time}) then { continue };
