@@ -54,6 +54,8 @@ private _calis = {
                 };
             };
 
+            // v8.789: fnc_mekanizeHareket inis / ates destegi / rezerv durumunda hizi KENDISI yonetir
+            if ((_veh getVariable [QGVAR(mekDurum), ""]) isNotEqualTo "") then { continue };
             // v8.784 (RPT 51d09846: VBIED surucusu 'BEKLE:7' -> forceSpeed 0, eskort piyadeyi bekleyip 15 sn yerinde kaldi, 'arac durdu' x6): bomba araci / disableAI surucu eskortu BEKLEMEZ
             if (!isNil {_veh getVariable QGVAR(eypBomba)} || {_d getVariable [QGVAR(disableAI), false]}) then { ["canli bomba / disableAI"] call _serbest; continue };
             if (_g getVariable ["lambs_danger_planZirh", false]) then { ["plan zirh destek"] call _serbest; continue };

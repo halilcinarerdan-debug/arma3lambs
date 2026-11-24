@@ -35,6 +35,8 @@
  *   cekilTopluM 350   retreat: dusman bu mesafeden uzaksa kapsama takimi yok, herkes birlikte kosar (yakinda ates-manevra)
  *   yorgunlukEtki 1 (bound uzunlugunu yorgunluga gore kisaltma carpani; 0 = kapali)
  *   teslim true, teslimEsik 0.15   moral endeksi bu esigin altina duserse (+ umutsuz kosullar) teslim; DUZENSIZ: teslim yok
+ *   mekInisM 300       (v8.789) mekanize: tasiyici arac (IFV x0.85 / APC x1 / KAMYON x1.3) bu mesafede temas + bilinen dusmanda yolcularini indirir (fnc_mekanizeHareket); ABD / USMC 350, RUS 200, CHN 220, PESHMERGA 250, DUZENSIZ 280
+ *   yereAtes 0, yereAtesMermi 30   (v8.789) HOSTILE ACT: taze olu / baygin dusmana yere ates olasiligi (0-1) ve mermi sayisi (fnc_yereAtes); RUS 0.15, PESHMERGA 0.35 / 25, DUZENSIZ 0.7 / 30, digerleri 0
  *   kamuflaj true, kamuflajMin 0.6   kamuflaj bilinci (ufuk / hareket / isik; camouflageCoef alt siniri)
  *
  * YENI ORDU EKLEME (kod degistirmeden, misyon init'te):
@@ -82,13 +84,14 @@ private _p = createHashMapFromArray [
     ["pusu", true], ["pusuAtesM", 70], ["pusuMaxS", 150], ["pusuMinKisi", 4],
     ["kamuflaj", true], ["kamuflajMin", 0.6],
     ["tasimaInisM", 500], ["tasimaOrpEk", true], ["aracDestekKal", false], ["ifvDestek", true], ["kesifCarpan", 1], ["topcuMermiCarpan", 1], ["kesifAtesHizli", false],
-    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 350], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true]
+    ["yorgunlukEtki", 1], ["teslim", true], ["teslimEsik", 0.15], ["cekilTopluM", 350], ["sonDirenis", true], ["konsolidasyonS", 90], ["toparlan", true],
+    ["mekInisM", 300], ["yereAtes", 0], ["yereAtesMermi", 30]
 ];
 
 // --- ORDU TANIMLARI: [ad, ust, [[anahtar, deger], ...]] ---
 private _tanim = [
     // USMC: ates takimi liderleri inisiyatif alir (merkezsiz), agresif ates-manevra, uzun bound, ates ustunlugu + sis
-    ["USMC", "GENEL", [["assaultM", 40], ["bndBitisM", 35], ["bantlar", [[200, 80, 15], [100, 45, 12], [0, 25, 8]]], ["retreatAdim", [25, 35, 55]], ["cekilKayip", 0.45]]],
+    ["USMC", "GENEL", [["assaultM", 40], ["bndBitisM", 35], ["bantlar", [[200, 80, 15], [100, 45, 12], [0, 25, 8]]], ["retreatAdim", [25, 35, 55]], ["cekilKayip", 0.45], ["mekInisM", 350]]],
     // ABD ordusu / NATO tipi: USMC'ye yakin, biraz daha temkinli
     ["ABD", "USMC", [["assaultM", 42], ["bndBitisM", 38], ["bantlar", [[200, 75, 15], [100, 42, 12], [0, 25, 8]]], ["cekilKayip", 0.4]]],
     // Rus (motorlu piyade): merkezi kontrol, kisa ve kati bound, daha uzak hucum baslangici, daha direncli (yuksek cekilme esigi)
@@ -100,14 +103,14 @@ private _tanim = [
     //   - kesifAtesHizli: kesif-ates kompleksi: kesif raporu gelince hedef hemen vurulur (sensor-atici < 4 dk, 5056)
     //   - ast inisiyatifi kitapta VURGULANIR (5554-5557): merkezilestirilmis degil, o yuzden inisiyatif kisilmadi
     ["RUS", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 60, 15], [100, 35, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 30, 45]], ["arkaGuvenlik", false],
-        ["tasimaInisM", 300], ["tasimaOrpEk", false], ["aracDestekKal", true], ["kesifCarpan", 0.6], ["topcuMermiCarpan", 2], ["kesifAtesHizli", true]]],
+        ["tasimaInisM", 300], ["tasimaOrpEk", false], ["aracDestekKal", true], ["kesifCarpan", 0.6], ["topcuMermiCarpan", 2], ["kesifAtesHizli", true], ["mekInisM", 200], ["yereAtes", 0.15]]],
     // Cin (PLA): merkezi, siki duzen, uclu hucum hucreleri; kisa kontrollu atilimlar
-    ["CHN", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 55, 15], [100, 32, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 28, 45]], ["arkaGuvenlik", false]]],
+    ["CHN", "GENEL", [["assaultM", 50], ["bndBitisM", 45], ["bantlar", [[200, 55, 15], [100, 32, 12], [0, 20, 8]]], ["cekilKayip", 0.5], ["retreatAdim", [20, 28, 45]], ["arkaGuvenlik", false], ["mekInisM", 220]]],
     // Peshmerge: hafif / yari duzensiz, mevzi savunmasi + atik yerel hucum; gevsek bound, daha yakindan hucum
-    ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2]]],
+    ["PESHMERGA", "GENEL", [["assaultM", 55], ["bndBitisM", 50], ["bantlar", [[200, 60, 12], [100, 40, 10], [0, 30, 8]]], ["retreatAdim", [25, 35, 45]], ["cekilKayip", 0.35], ["uglRezerv", 2], ["mekInisM", 250], ["yereAtes", 0.35], ["yereAtesMermi", 25]]],
     // DUZENSIZ / TALIBAN-tipi isyanci (TAHMIN, kaynak dogrulanmadi): vur-kac, pusu agirlikli, kucuk dagitik takimlar, ates ustunlugu yoksa ERKEN temas keser,
     //   yakin mesafeden hucum, daha iyi gizlenme (camouflageCoef alt siniri 0.55), uzun dagilarak cekilme
-    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 40], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false]]],
+    ["DUZENSIZ", "GENEL", [["assaultM", 30], ["bndBitisM", 30], ["bantlar", [[200, 60, 12], [100, 35, 10], [0, 20, 8]]], ["retreatAdim", [25, 40, 60]], ["cekilKayip", 0.30], ["peelOran", 1.3], ["peelKayip", 0.08], ["konsolidasyonS", 40], ["kucukEkip", 2], ["pusu", true], ["pusuAtesM", 55], ["pusuMaxS", 180], ["pusuMinKisi", 3], ["uglRezerv", 2], ["arkaGuvenlik", false], ["kamuflajMin", 0.55], ["teslim", false], ["mekInisM", 280], ["yereAtes", 0.7], ["yereAtesMermi", 30]]],
     // v8.555 IKINCI DUNYA SAVASI PROFILLERI (kullanici: '2. dunya savasina tutarli hale getir'; Spearhead 1944 / IFA3). TAHMIN, kaynak dogrulanmadi (genel tarih bilgisi + tasarim): tufek takimi 'ates ve hareket', MG agirlikli;
     //   modern ASTE / koruyucu dagilma yok (arkaGuvenlik kapali), tufek bombasi (UGL) rezervi yok, daha uzun direnis (cekilKayip 0.5-0.6), kisa atilimlar, yakina daha cok yaklasarak hucum (assaultM 35).
     ["WW2_ABD", "GENEL", [["assaultM", 35], ["bndBitisM", 32], ["bantlar", [[200, 45, 15], [100, 30, 12], [0, 18, 8]]], ["retreatAdim", [20, 28, 40]], ["cekilKayip", 0.5], ["peelOran", 1.8], ["arkaGuvenlik", false], ["uglRezerv", 0], ["kamuflajMin", 0.7]]],
