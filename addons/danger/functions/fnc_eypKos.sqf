@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * EYP KOSU: CATISARAK (ates ederek) hedefe yaklas, canliBombaTetikM'de patla (v8.777; kullanici: 'araclardada olsun' + 've direk kosmasinlar catisarak girsinler' + 'adam uzerimize kossun catisarak').
  * fnc_eypSistem (canli bomba) ve teslim-bomba dongusu cagirir; BLOKLAR (spawn icinden cagrilmali), sonuc metni doner.
- * PIYADE: hedef alma / nisan AI'si ACIK (TARGET, AUTOTARGET, WEAPONAIM) -> kosarken ates eder (doWatch + reveal; doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
+ * PIYADE (v8.785 varsayilan = AGRESIF): durmadan sprint, hedef alma KAPALI, CARELESS (AI ates etmek icin durmaz; 'catisarak' modunda RPT'de ornekleri %50 'hiz 0 / komut ATTACK' idi). Asagidaki 'catisarak' modu (eypTarz 0 / CBA canliBombaCatis ACIK): hedef alma / nisan AI'si ACIK (TARGET, AUTOTARGET, WEAPONAIM) -> kosarken ates eder (doWatch + reveal; doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
  *   (sprintte AI ates edemez); hedefe DOGRUDAN (zikzak v8.780'de kullanici istegiyle KALDIRILDI).
  * ARAC (araba / kamyon / MRAP; Tank sinifi degil): surucu hedefin ANLIK konumuna tam hizla surer (dogrudan); surucu disi murettebatin ates AI'si ACIK kalir (catisarak); arac hedefe tetik + 3 m kalinca patlar (arac + murettebat olur).
  * Patlama: fnc_eypPatlat (CBA eypPatlamaGucu; piyade / arac). Referans kodlardan (aral_canl_bomba / canl_bomba): SON AN HIZ ARTISI (piyade canliBombaAtilmaM 45 m, arac canliBombaAracAtilmaM 120 m ya da hasar > 0.1 -> sprint / tam hiz + bagirma sesi; oncesi kosu / sivil trafik hizi), allowFleeing 0, aracta allowCrewInImmobile (tekerlek patlasa inmez),
@@ -24,7 +24,7 @@
  * Public: No
 */
 
-params [["_b", objNull, [objNull]], ["_h", objNull, [objNull]], ["_sure", 40, [0]], ["_catis", missionNamespace getVariable ["lambs_danger_canliBombaCatis", true], [true]]];
+params [["_b", objNull, [objNull]], ["_h", objNull, [objNull]], ["_sure", 40, [0]], ["_catis", missionNamespace getVariable ["lambs_danger_canliBombaCatis", false], [true]]];
 if (isNull _b || {!alive _b}) exitWith {"vuruldu / oldu"};
 private _tetik = ((missionNamespace getVariable ["lambs_danger_canliBombaTetikM", 5]) max 3) min 12;
 private _arac = !isNull objectParent _b;
@@ -40,6 +40,11 @@ private _ovT = _v getVariable [QGVAR(eypTetikM), -1];
 if (_ovT > 0) then { _tetik = (_ovT max 2) min 25; };
 private _gizli = (_v getVariable [QGVAR(eypGizli), false]) isEqualTo true;
 if (_gizli) then { _catis = false; };
+// v8.785 (RPT b5f24b66; kullanici: 'CANLI BOMBA daha agresif kossun'): tarz 0 catisarak (AI hedef alir) / 1 gizli / 2 AGRESIF (durmadan sprint, ates yok); tarz verilmediyse CBA canliBombaCatis (varsayilan KAPALI = agresif)
+private _tarz = _v getVariable [QGVAR(eypTarz), -1];
+if (_tarz == 0) then { _catis = true; };
+if (_tarz == 2) then { _catis = false; };
+private _agresif = !_catis && {!_gizli};
 private _gucOv = _v getVariable [QGVAR(eypGuc), -1];
 private _bh0 = behaviour _b;
 private _cm0 = combatMode _b;
@@ -69,7 +74,7 @@ if (_catis && {!_arac}) then {
 } else {
     if (!_arac) then { { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET"]; };
 };
-_b setBehaviour (["AWARE", "CARELESS"] select _gizli);
+_b setBehaviour (["AWARE", "CARELESS"] select (_gizli || {_agresif && {!_arac}}));
 if (_arac) then {
     _v allowCrewInImmobile true;
     _v engineOn true;
@@ -86,7 +91,14 @@ if (_arac) then {
     };
 } else {
     _b setUnitPos "UP";
-    _b forceSpeed (_b getSpeed (if (_gizli) then {"SLOW"} else {["FAST", "NORMAL"] select _catis}));
+    if (_agresif) then {
+        // AGRESIF: en bastan sprint (setSpeedMode FULL + forceSpeed FAST), hedef alma kapali (AI ates etmek icin DURMAZ: RPT b5f24b66'da ornekleri %50 'hiz 0 / komut ATTACK')
+        _b setSpeedMode "FULL";
+        _b forceSpeed (_b getSpeed "FAST");
+        _surge = true;
+    } else {
+        _b forceSpeed (_b getSpeed (if (_gizli) then {"SLOW"} else {"NORMAL"}));
+    };
 };
 
 // v8.779 (RPT a4e1d6c8 / f82218cf; kullanici: 'zikzaki check et', 'araciada coz', 'menzile girdigi gibi patlasin'):

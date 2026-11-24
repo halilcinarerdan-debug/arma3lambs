@@ -19,7 +19,7 @@ if (_activated && local _logic) then {
     [
         "ELITE Canli Bomba (PBIED / VBIED)",
         [
-            ["Yaklasma tarzi", "LIST", "Catisarak: zikzak yaparak ve ates ederek gelir. Gizli (referans): CARELESS + ates etmez, yuruyerek yaklasir, son an mesafesinde sprint (arac: 45 km/s sonra tam gaz).", ["Catisarak (zikzak + ates)", "Gizli yaklasim (referans)"], 0],
+            ["Yaklasma tarzi", "LIST", "Agresif (varsayilan): en bastan sprint, hedef almaz (AI ates etmek icin durmaz). Catisarak: kosarken hedef alir ama AI durup ates eder = yavas. Gizli (referans): CARELESS + yuruyerek yaklasir, son an mesafesinde sprint (arac: 45 km/s sonra tam gaz).", ["Agresif kosu (durmadan sprint)", "Catisarak (hedef alir; yavas)", "Gizli yaklasim (referans)"], 0],
             ["Hedef taraf", "LIST", "Otomatik: bu birimin dost saymadigi herkes. Elle secersen yalniz o taraf hedeflenir.", ["Otomatik (dost olmayan)", "BLUFOR", "OPFOR", "INDEP"], 0],
             ["Tespit menzili (m)", "SLIDER", "Bu mesafede dusman gorunce hedefe gider.", [50, 1000], [50, 100], 400, 0],
             ["Son an mesafesi (m, 0 = CBA ayari)", "SLIDER", "Bu mesafede sprint / tam gaz. 0: CBA ayari (piyade 45 / arac 120).", [0, 300], [10, 50], 0, 0],
@@ -32,9 +32,9 @@ if (_activated && local _logic) then {
             params ["_data", "_args"];
             _args params ["_hedef"];
             _data params ["_tarz", "_taraf", "_menzil", "_atilma", "_tetik", "_guc", "_olum", "_varil"];
-            private _a = [round _menzil, round _tarz, [-1, round _atilma] select (_atilma > 0), (round _guc) - 1, [-1, 0, 0.25, 0.5, 0.75, 1] select (round _olum), round _taraf, [1, 0] select (round _varil), [-1, round _tetik] select (_tetik > 0)];
+            private _a = [round _menzil, [2, 0, 1] select (round _tarz), [-1, round _atilma] select (_atilma > 0), (round _guc) - 1, [-1, 0, 0.25, 0.5, 0.75, 1] select (round _olum), round _taraf, [1, 0] select (round _varil), [-1, round _tetik] select (_tetik > 0)];
             ["lambs_danger_eypBombaIstegi", [netId _hedef, _a]] call CBA_fnc_serverEvent;
-            systemChat format ["[ELITE] Canli bomba gorevi gonderildi: %1 (%2)", getText (configOf _hedef >> "displayName"), ["catisarak", "gizli yaklasim"] select (round _tarz)];
+            systemChat format ["[ELITE] Canli bomba gorevi gonderildi: %1 (%2)", getText (configOf _hedef >> "displayName"), ["agresif kosu", "catisarak", "gizli yaklasim"] select (round _tarz)];
         }, {}, {}, [_hedef]
     ] call EFUNC(main,showDialog);
 };

@@ -149,7 +149,7 @@ class GVAR(EdenEypBomba): Module_F {
     isTriggerActivated = 0;
     isDisposable = 0;
     class Attributes: AttributesBase {
-        E_COMBO(edBmbTarz,"Yaklasma tarzi","Catisarak: zikzak ve ates ederek gelir. Gizli: yuruyerek yaklasir ates etmez son anda sprint.","0",E_V(0,"Catisarak zikzak ve ates") E_V(1,"Gizli yaklasim referans"))
+        E_COMBO(edBmbTarz,"Yaklasma tarzi","Agresif: en bastan sprint hedef almaz AI ates icin durmaz. Catisarak: kosarken hedef alir ama AI durup ates eder yavas. Gizli: yuruyerek yaklasir ates etmez son anda sprint.","0",E_V(0,"Agresif kosu durmadan sprint") E_V(1,"Catisarak hedef alir yavas") E_V(2,"Gizli yaklasim referans"))
         E_COMBO(edBmbTaraf,"Hedef taraf","Otomatik: dost olmayan herkes.","0",E_V(0,"Otomatik dost olmayan") E_V(1,"BLUFOR") E_V(2,"OPFOR") E_V(3,"INDEP"))
         E_NUM(edBmbMenzil,"Tespit menzili m","Bu mesafede dusman gorunce hedefe gider.","400")
         E_NUM(edBmbAtilma,"Son an mesafesi m","Bu mesafede sprint veya tam gaz. 0 = CBA ayari: piyade 45 arac 120.","0")

@@ -18,7 +18,7 @@ if (!_activated || {!isServer}) exitWith {};
     sleep 2;
     private _bagli = ["BAGLI", [_logic]] call FUNC(edenOrtak);
     if (_bagli isEqualTo []) exitWith { diag_log format ["[EDEN] Canli bomba (3DEN) %1: module bagli birim yok", mapGridPosition _logic] };
-    private _tarz = ((round (["SAYI", [_logic, "lambs_danger_edBmbTarz", 0]] call FUNC(edenOrtak))) max 0) min 1;
+    private _tarz = [2, 0, 1] select (((round (["SAYI", [_logic, "lambs_danger_edBmbTarz", 0]] call FUNC(edenOrtak))) max 0) min 2);   // v8.785: 0 agresif (varsayilan) / 1 catisarak / 2 gizli -> eypTarz 2 / 0 / 1
     private _taraf = ((round (["SAYI", [_logic, "lambs_danger_edBmbTaraf", 0]] call FUNC(edenOrtak))) max 0) min 3;
     private _menzil = round (["SAYI", [_logic, "lambs_danger_edBmbMenzil", 400]] call FUNC(edenOrtak));
     private _atilma = round (["SAYI", [_logic, "lambs_danger_edBmbAtilma", 0]] call FUNC(edenOrtak));
