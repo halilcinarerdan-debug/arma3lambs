@@ -373,6 +373,7 @@ force lambs_danger_canliBombaCatis = false;
 force lambs_danger_canliBombaAtilmaM = 45;
 force lambs_danger_canliBombaAracAtilmaM = 120;
 force lambs_danger_canliBombaOlumSans = 0.5;
+force lambs_danger_canliBombaTereddutS = 3;
 force lambs_danger_teslimBomba = true;
 force lambs_danger_teslimBombaSans = 0;
 force lambs_danger_teslimBombaTabanca = true;

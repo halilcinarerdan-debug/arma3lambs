@@ -24,6 +24,7 @@ if (_activated && local _logic) then {
             ["Tespit menzili (m)", "SLIDER", "Bu mesafede dusman gorunce hedefe gider.", [50, 1000], [50, 100], 400, 0],
             ["Son an mesafesi (m, 0 = CBA ayari)", "SLIDER", "Bu mesafede sprint / tam gaz. 0: CBA ayari (piyade 45 / arac 120).", [0, 300], [10, 50], 0, 0],
             ["Patlama mesafesi (m, 0 = CBA ayari)", "SLIDER", "Hedef ya da herhangi bir dusman bu mesafeye girdigi anda patlar. 0: CBA ayari canliBombaTetikM (5 m). Varsayilan 8 m (olum yaricapi ~5-10 m; daha yakinda patlarsa hedef zarar gormeyebilir).", [0, 25], [1, 5], 8, 0],
+            ["Tereddut azami suresi (sn)", "SLIDER", "Piyade bomba menzile girince rastgele 0.5 - bu kadar sn duraksar, sonra patlar (arac etkilenmez). 0 = tereddut yok. Vurulursa olum patlamasi korunur.", [0, 6], [0.5, 1], 3, 1],
             ["Patlama gucu", "LIST", "CBA ayari: eypPatlamaGucu. 0 hafif (DemoCharge). 1 orta. 2 referans (arac: GBU-12; olum yaricapi cok buyuk).", ["CBA ayari", "0 hafif", "1 orta", "2 referans"], 0],
             ["Vurulunca patlama sansi", "LIST", "Hedefe varamadan vurulursa cihazin olunce patlama olasiligi.", ["CBA ayari", "Hic", "25 yuzde", "50 yuzde", "75 yuzde", "100 yuzde"], 0],
             ["Arac ustu gorsel varil", "LIST", "Yalniz arac: kasaya patlayici varil nesnesi baglar (gorsel).", ["Evet", "Hayir"], 0]
@@ -31,8 +32,8 @@ if (_activated && local _logic) then {
         {
             params ["_data", "_args"];
             _args params ["_hedef"];
-            _data params ["_tarz", "_taraf", "_menzil", "_atilma", "_tetik", "_guc", "_olum", "_varil"];
-            private _a = [round _menzil, [2, 0, 1] select (round _tarz), [-1, round _atilma] select (_atilma > 0), (round _guc) - 1, [-1, 0, 0.25, 0.5, 0.75, 1] select (round _olum), round _taraf, [1, 0] select (round _varil), [-1, round _tetik] select (_tetik > 0)];
+            _data params ["_tarz", "_taraf", "_menzil", "_atilma", "_tetik", "_tereddut", "_guc", "_olum", "_varil"];
+            private _a = [round _menzil, [2, 0, 1] select (round _tarz), [-1, round _atilma] select (_atilma > 0), (round _guc) - 1, [-1, 0, 0.25, 0.5, 0.75, 1] select (round _olum), round _taraf, [1, 0] select (round _varil), [-1, round _tetik] select (_tetik > 0), _tereddut max 0];
             ["lambs_danger_eypBombaIstegi", [netId _hedef, _a]] call CBA_fnc_serverEvent;
             systemChat format ["[ELITE] Canli bomba gorevi gonderildi: %1 (%2)", getText (configOf _hedef >> "displayName"), ["agresif kosu", "catisarak", "gizli yaklasim"] select (round _tarz)];
         }, {}, {}, [_hedef]

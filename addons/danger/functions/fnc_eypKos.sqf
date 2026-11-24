@@ -36,6 +36,10 @@ private _atilmaM = if (_arac) then { ((missionNamespace getVariable ["lambs_dang
 // v8.777 ZEUS / 3DEN: birim (arac) basina ayar ezmeleri (fnc_eypBombaYap yazar): eypAtilmaM, eypOlumSans, eypGuc, eypGizli (referans PBIED: yurur, ates etmez, son anda sprint), eypVaril (arac ustu gorsel varil)
 private _ovA = _v getVariable [QGVAR(eypAtilmaM), -1];
 if (_ovA >= 0) then { _atilmaM = _ovA; };
+// v8.791 (kullanici: 'bombacilar random tereddut etsin, birkac sn gecikme olsun, olunce patlamalarini koru'): PIYADE bomba tetik menzilinde RASTGELE 0.5 - azami sn TEREDDUT eder (durur), sonra yasiyorsa patlar; tereddutte vurulursa olum patlamasi (canliBombaOlumSans) aynen calisir
+private _ovTd = _v getVariable [QGVAR(eypTereddutS), -1];
+private _tereddutMax = ((if (_ovTd >= 0) then {_ovTd} else {missionNamespace getVariable ["lambs_danger_canliBombaTereddutS", 3]}) max 0) min 8;
+private _tereddutBit = -1;
 private _ovT = _v getVariable [QGVAR(eypTetikM), -1];
 if (_ovT > 0) then { _tetik = (_ovT max 2) min 25; };
 private _gizli = (_v getVariable [QGVAR(eypGizli), false]) isEqualTo true;
@@ -145,11 +149,30 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
         // PATLAMA: hedef ya da tetik menzilindeki HERHANGI dusman
         private _yakin = (_v nearEntities [["CAManBase", "LandVehicle"], _tetikT]) select {alive _x && {_x isNotEqualTo _v} && {!(_x in (crew _v))} && {!captive _x} && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}};
         if (_m <= _tetikT || {_yakin isNotEqualTo []}) then {
-            _sonuc = "PATLADI";
-            _bitti = true;
-            [getPosATL _v, ["piyade", "arac"] select _arac, _gucOv] call FUNC(eypPatlat);
-            if (_arac) then { { _x setDamage 1; } forEach (crew _v); _v setDamage 1; } else { _b setDamage 1; };
+            // TEREDDUT (yalniz piyade): menzile giren dusman -> 0.5 - azami sn rastgele duraksama, sonra patla
+            private _bekle = false;
+            if (!_arac && {_tereddutMax > 0}) then {
+                if (_tereddutBit < 0) then {
+                    _tereddutBit = time + (0.5 + (random ((_tereddutMax - 0.5) max 0)));
+                    doStop _b;
+                    private _tl = missionNamespace getVariable ["lambs_danger_eypTereddutLogN", 0];
+                    if (_tl < 25) then {
+                        missionNamespace setVariable ["lambs_danger_eypTereddutLogN", _tl + 1];
+                        diag_log format ["[EYP-KOS] TEREDDUT | %1 | %2 sn | hedef %3 m | azami %4 sn", name _b, (_tereddutBit - time) toFixed 1, round _m, _tereddutMax];
+                    };
+                };
+                _bekle = time < _tereddutBit;
+                if (_bekle) then { _dt = 0.1; };
+            };
+            if (!_bekle) then {
+                _sonuc = "PATLADI";
+                _bitti = true;
+                [getPosATL _v, ["piyade", "arac"] select _arac, _gucOv] call FUNC(eypPatlat);
+                if (_arac) then { { _x setDamage 1; } forEach (crew _v); _v setDamage 1; } else { _b setDamage 1; };
+            };
         } else {
+            // tetik menzili disina cikildi: tereddut sifirlanir, hareket emri yeniden
+            if (_tereddutBit >= 0) then { _tereddutBit = -1; _dmT = 0; _sonEmir = []; };
             if (_arac) then {
                 if (!alive _v) then { _sonuc = "vuruldu / oldu"; _bitti = true; };
                 if (!_bitti && {!canMove _v}) then { _sonuc = "arac durdu"; _bitti = true; };

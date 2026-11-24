@@ -154,6 +154,7 @@ class GVAR(EdenEypBomba): Module_F {
         E_NUM(edBmbMenzil,"Tespit menzili m","Bu mesafede dusman gorunce hedefe gider.","400")
         E_NUM(edBmbAtilma,"Son an mesafesi m","Bu mesafede sprint veya tam gaz. 0 = CBA ayari: piyade 45 arac 120.","0")
         E_NUM(edBmbTetik,"Patlama mesafesi m","Hedef ya da herhangi bir dusman bu mesafeye girdigi anda patlar. 0 = CBA ayari canliBombaTetikM 5 m. Varsayilan 8 m.","8")
+        E_NUM(edBmbTered,"Tereddut azami suresi sn","Piyade bomba menzile girince rastgele 0.5 - bu kadar sn duraksar sonra patlar. 0 = tereddut yok. Vurulursa olum patlamasi korunur.","3")
         E_COMBO(edBmbGuc,"Patlama gucu","CBA ayari: eypPatlamaGucu. 2 referans: arac GBU-12 ve olum yaricapi cok buyuk.","0",E_V(0,"CBA ayari") E_V(1,"0 hafif") E_V(2,"1 orta") E_V(3,"2 referans"))
         E_COMBO(edBmbOlum,"Vurulunca patlama sansi","Hedefe varamadan vurulursa cihazin olunce patlama olasiligi.","0",E_V(0,"CBA ayari") E_V(1,"Hic") E_V(2,"25 yuzde") E_V(3,"50 yuzde") E_V(4,"75 yuzde") E_V(5,"100 yuzde"))
         E_COMBO(edBmbVaril,"Arac ustu gorsel varil","Yalniz arac: kasaya patlayici varil nesnesi baglar.","0",E_V(0,"Evet") E_V(1,"Hayir"))

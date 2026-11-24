@@ -99,7 +99,7 @@ if (_devam) then {
             private _yak = (_ied nearEntities [["CAManBase", "LandVehicle"], _tetikM]) select {alive _x && {!captive _x} && {(side _x) isNotEqualTo civilian} && {(_taraf getFriend (side _x)) < 0.6}};
             private _dost = ((_ied nearEntities [["CAManBase", "LandVehicle"], 8]) findIf {alive _x && {(_taraf getFriend (side _x)) >= 0.6}}) >= 0;
             if (_yak isNotEqualTo [] && {!_dost}) then {
-                sleep 0.4;
+                sleep (0.4 + (random (((missionNamespace getVariable ["lambs_danger_canliBombaTereddutS", 3]) max 0) / 2)));   // v8.791: insan tepki suresi rastgele (0.4 + 0 - T/2 sn)
                 if (alive _u && {!isNull _ied}) then { _patla = true; };
             };
             if (!_patla) then { sleep 0.5; };
