@@ -54,6 +54,8 @@ private _calis = {
                 };
             };
 
+            // v8.784 (RPT 51d09846: VBIED surucusu 'BEKLE:7' -> forceSpeed 0, eskort piyadeyi bekleyip 15 sn yerinde kaldi, 'arac durdu' x6): bomba araci / disableAI surucu eskortu BEKLEMEZ
+            if (!isNil {_veh getVariable QGVAR(eypBomba)} || {_d getVariable [QGVAR(disableAI), false]}) then { ["canli bomba / disableAI"] call _serbest; continue };
             if (_g getVariable ["lambs_danger_planZirh", false]) then { ["plan zirh destek"] call _serbest; continue };
             // v8.275 TANK MUAF (kullanici, RPT 04dfc9d7: 'west tankı cok yavas, dur kalkli'): plan baslamadan once tank yakindaki piyade grubuna eskort sayilip BEKLE (0) / YAVASLA (1.4 m/s) ile
             //   surunuyordu; plan zirhi olunca (SERBEST) duzeldi. Tank artik varsayilan olarak eskort kuralina girmez (CBA: lambs_danger_tankSenkron = true ile eski davranis)

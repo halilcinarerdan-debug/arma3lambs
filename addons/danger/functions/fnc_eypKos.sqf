@@ -55,7 +55,10 @@ private _gDAI0 = _grp getVariable [QGVAR(disableGroupAI), false];
 private _gGorev0 = _grp getVariable [QGVAR(gorev), ""];
 _grp setVariable [QGVAR(disableGroupAI), true];
 _grp setVariable [QGVAR(gorev), "HARIC"];
-_b setVariable [QGVAR(taktikKilit), time + _sure + 5];
+// v8.784 (RPT 51d09846: [ANOMALI] KILIT-UZUN x11 / AI-KAPALI-SIZINTI / BIRIM-AI-KAPALI yanlis alarmlari): taktik kilidi KISA (her tikte yenilenir), grup 'TAK' (isExecutingTactic) bayragi ile bilincli gorev oldugu belli
+private _tak0 = _grp getVariable [QGVAR(isExecutingTactic), false];
+_grp setVariable [QGVAR(isExecutingTactic), true];
+_b setVariable [QGVAR(taktikKilit), time + 8];
 _b setVariable [QGVAR(disableAI), true];
 _b allowFleeing 0;
 { _b disableAI _x; } forEach ["AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
@@ -97,6 +100,7 @@ private _dmT = 0;
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
+private _yardim = 0;
 private _bitti = false;
 private _taraf = side group _b;
 private _izlenen = objNull;
@@ -106,6 +110,7 @@ private _sonPoz = getPosATL _v;
 while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
     private _dt = 0.4;
     if (!isNull _v) then { _sonPoz = getPosATL _v; };
+    _b setVariable [QGVAR(taktikKilit), time + 8];
     if (isNull _h || {!alive _h}) then {
         _h = _b findNearestEnemy _b;
         // v8.781: isaretli (Zeus / 3DEN / init) bomba bilgi aramaz, tespit menzilindeki en yakin dusmani yeniden bulur
@@ -135,11 +140,25 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 if (!_bitti && {!canMove _v}) then { _sonuc = "arac durdu"; _bitti = true; };
                 if (!_bitti) then {
                     if ((speed _v) < 3) then {
-                        if (_durT < 0) then { _durT = time; };
-                        if ((time - _durT) > 15) then { _sonuc = "arac durdu"; _bitti = true; } else {
-                            // 4 sn'den uzun duruyorsa emri hemen yenile (takilmis / plan bitmis olabilir)
-                            if ((time - _durT) > 4 && {time >= _dmT}) then { _b doMove (getPosATL _h); _sonEmir = getPosATL _h; _dmT = time + 3; };
+                        if (_durT < 0) then {
+                            _durT = time;
+                            // durma teshisi (ilk 12 olay): neden duruyor?
+                            private _dl = missionNamespace getVariable ["lambs_danger_eypDurLogN", 0];
+                            if (_dl < 12) then {
+                                missionNamespace setVariable ["lambs_danger_eypDurLogN", _dl + 1];
+                                diag_log format ["[EYP-KOS] ARAC DURDU TESHIS | %1 | canMove %2 | motor %3 | yakit %4 | komut %5 | hasar %6 | surucu %7 | murettebat %8 | hedef %9 m | senkDurum '%10' | forceSpeed? (surucu hizi %11)", typeOf _v, canMove _v, isEngineOn _v, fuel _v toFixed 2, currentCommand _b, damage _v toFixed 2, name _b, count crew _v, round _m, _b getVariable [QGVAR(senkDurum), ""], round (speed _b)];
+                            };
                         };
+                        // 4 sn'den uzun duruyorsa emri hemen yenile (takilmis / plan bitmis olabilir)
+                        if ((time - _durT) > 4 && {time >= _dmT}) then { _b doMove (getPosATL _h); _sonEmir = getPosATL _h; _dmT = time + 3; };
+                        // YARDIMLI SURUS (v8.784): isaretli (Zeus / 3DEN / init) arac 8 sn'den uzun duruyorsa AI yolu bulamiyor / baska betik tutuyor demektir -> hedefe dogru hiz verilir (carpisma motorda; yol bulma yok)
+                        if (_isaretli && {(time - _durT) > 8} && {_m > 15}) then {
+                            private _yn = _v getDir _h;
+                            _v setDir _yn;
+                            _v setVelocity [14 * (sin _yn), 14 * (cos _yn), 0.4];
+                            _yardim = _yardim + 1;
+                        };
+                        if ((time - _durT) > ([15, 40] select _isaretli)) then { _sonuc = "arac durdu"; _bitti = true; };
                     } else { _durT = -1; };
                 };
             };
@@ -154,6 +173,7 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         _v forceSpeed -1;
                     } else {
                         _b forceSpeed (_b getSpeed "FAST");
+                        _b setSpeedMode "FULL";
                         if (_gizli) then { _b setBehaviour "AWARE"; };
                     };
                 };
@@ -177,9 +197,9 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
         if (time >= _logT) then {
             _logT = time + 5;
             private _kl = missionNamespace getVariable ["lambs_danger_eypKosLogN", 0];
-            if (_kl < 25) then {
+            if (_kl < 200) then {
                 missionNamespace setVariable ["lambs_danger_eypKosLogN", _kl + 1];
-                diag_log format ["[EYP-KOS] %1 | %2 | hedef %3 %4 m | hiz %5 km/s | %6 | surge %7 | gecen %8 sn", name _b, typeOf _v, typeOf _h, round _m, round (speed _v), ["piyade dogrudan", "arac dogrudan"] select _arac, _surge, round (time - _t0)];
+                diag_log format ["[EYP-KOS] %1 | %2 | hedef %3 %4 m | hiz %5 km/s | %6 | surge %7 | gecen %8 sn | komut %9 | beh %10 | yardim %11", name _b, typeOf _v, typeOf _h, round _m, round (speed _v), ["piyade dogrudan", "arac dogrudan"] select _arac, _surge, round (time - _t0), currentCommand _b, behaviour _b, _yardim];
             };
         };
     };
@@ -211,6 +231,7 @@ if (_sonuc isEqualTo "vuruldu / oldu") then {
 if (!isNull _grp) then {
     _grp setVariable [QGVAR(disableGroupAI), [nil, true] select _gDAI0];
     _grp setVariable [QGVAR(gorev), [nil, _gGorev0] select (_gGorev0 isNotEqualTo "")];
+    _grp setVariable [QGVAR(isExecutingTactic), [nil, true] select _tak0];
 };
 if (!isNull _b) then { _b setVariable [QGVAR(taktikKilit), time]; };
 if (alive _b) then {
