@@ -4782,3 +4782,6 @@ v8.800 (dal sade-waypoint) kullanici: RPT d26f0712 ('check et'; OYUNDA HALA v8.7
  - DUZELTME (fnc_eypKos): kosarken ates yalniz hiz > 5 km/s iken (duran bombaci ates etmez, AI yeniden yuruyebilir; ates durmanin sebebi ise kendiliginden azalir).
  - TESHIS: [EYP-KOS] KOMUT-TESHIS (ilk 15; komut MOVE degilken duraklamada: komut, atanmis hedef, expectedDestination, ates denemesi, hiz, sipEskiCM, forceMove) -> ATTACK'i kimin verdigini ayirir.
  - SINIR / T: DENENMEDI.
+ - PRESET SENKRONU (v8.800, kod degismedi): CBA_LAMBS_Danger_v8.800.txt kullanicinin yukledigi LAMBS_Danger.txt degerleriyle esitlendi (216 satir degisti: 206 deger + 10 force bayragi; 'force' / 'force degil' ayrimi kullanicinin dosyasindaki gibi korundu; depoda olmayan oyuncuGrubuBot eklendi). Onceki preset dosyalari kullanicinin degil depo varsayilanlariydi (skillIsabetMax 1, dogrulukMaks 1, bastirmaYogunluk 6, doktrin ABD ...): toptan ice aktarilirsa kullanici ayarlari sifirlanirdi.
+ - NOT: sohbette yapistirilan onceki liste ile yuklenen dosya 3 anahtarda ayrisiyor (senaryoModu, senaryoTemasSerbest, yereAtesM); preset DOSYANIN degerlerini aldi (senaryoModu true / senaryoTemasSerbest true / yereAtesM 40). RPT d26f0712'de senaryo modu ACIK gorundu (dosyayla uyumlu).
+

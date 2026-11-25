@@ -663,7 +663,7 @@ Doktrin / profil seçimleri gibi döngüyle kaydedilen ya da başka bir yerden g
 | `aktifEast` | true |
 | `aktifInd` | true |
 | `aktifWest` | true |
-| `cqbRange` | 60 |
+| `cqbRange` | 55 |
 | `disableAIAutonomousManoeuvres` | false |
 | `disableAIDeployStaticWeapons` | false |
 | `disableAIFindStaticWeapons` | false |
@@ -672,14 +672,14 @@ Doktrin / profil seçimleri gibi döngüyle kaydedilen ya da başka bir yerden g
 | `disableAIPlayerGroupReaction` | false |
 | `disableAutonomousFlares` | false |
 | `disableAutonomousSmokeGrenades` | false |
-| `doktrinEast` | "ABD" |
-| `doktrinInd` | "ABD" |
+| `doktrinEast` | "DUZENSIZ" |
+| `doktrinInd` | "DUZENSIZ" |
 | `doktrinWest` | "ABD" |
 | `dronAviAktif` | true |
 | `dronAviArac` | true |
 | `dronIstiksaf` | true |
 | `elBombasiAktif` | true |
-| `panicChance` | 0 |
+| `panicChance` | 0.1 |
 | `patlayiciAktif` | true |
 | `pusuCagriAktif` | true |
 | `pusuKanatAktif` | true |
