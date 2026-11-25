@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.813 · Preset: `CBA_LAMBS_Danger_v8.813.txt` · 654 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.814 · Preset: `CBA_LAMBS_Danger_v8.814.txt` · 656 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.813.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.814.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (348 ayar)
+### ELITE siper (350 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -313,6 +313,8 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `isabetYardim` | Bot isabet yardimi: mermi yonu duzeltme (aimingAccuracy 1 siniri disi) | 0–1 | 0 | v8.569 / v8.575. YALNIZ BOTLAR. Bot atisinda (hedefe <= 600 m, bilinen dusman piyade) mermi yonu, hedefe (onculu + dusme telafili) olan hatanin bu orani kadar duzeltilir (hata <= 4 derece; 0 = kapali, 1 = hata neredeyse sifir). aimingAccuracy en cok 1 oldugu icin beceriyle ulasilamayan isabet. HILE BENZERI (aimbot yardimi). Oyunculu gruptaki botlara uygulanmaz. |
 | `isinlanmaAktif` | Isinlanma korumasi (arac murettebati) | açık/kapalı | açık | v8.368 (fnc_isinlanmaKoruma). Aracta olan / yeni inen AI askerin tek tikte > 20 m sicramasi ya da inisten sonra 8 sn icinde > 60 m uzaklasmasi son guvenli konuma geri alinir ve [ISINLANMA] satiri yazilir (tank murettebati geriye isinlanma hatasi). |
 | `kacisAktif` | Kacis katmani: zaiyat agirsa daha da geri cekil (kilit) | açık/kapalı | açık | v8.544. Grubun kaybi Kacis kilidi kayip esigini asinca WITHDRAW / PEEL / DELAY karari 'kacis kilidi' kurar: kilit suresince dusman sayisi azalsa da hucum yok, gecikme geri cekilmeye cevrilir, 'kucuk ekip kosarak kacilmaz' kurali (dusman >= 25 m) uygulanmaz. Amac tek dusmani oldurmek degil, zaiyati sinirlamak. |
+| `kacisArkaCeza` | Kacis arka alan cezasi (puan) | 0–80 | 40 | v8.814. Arkasi tamamen kapali (su / ucurum) aday bu kadar puan kaybeder (varsayilan 40; gizli bonusu 35-43, bu yuzden 40 = tamamen kapali aday neredeyse hic secilmez, yarisi kapaliysa hala secilebilir). 0 = ceza yok. |
+| `kacisArkaTara` | Kacis / geri cekilme: noktanin ARKASINDA su / ucurum varsa puan dusur | açık/kapalı | açık | v8.814 (kullanici: 'kotu pozisyondaydi, arkada su vardi'; RPT 3b3bf4bd: temas kesme tek kalan askeri suyun kenarinda cikmaz bir noktaya gonderdi). Acik (varsayilan): kacis (temas kesme) ve geri cekilme WP adaylarinin kacis yonundeki 12 / 25 / 40 m ilerisi (9 ornek) su ya da dik yamacsa aday (1 - kara orani) x kacisArkaCeza puan kaybeder; orta hat kapaliysa ek -15. Kapali = eski (yalniz adayin kendisi su mu). |
 | `kacisBireysel` | Bireysel kacis: tek kalan / mermisi az asker kacar | açık/kapalı | açık | v8.544. Grubu temasta, bilinen dusman 20-250 m'de olan asker TEK KALDIYSA (40 m icinde saglikli dost yok ya da grup etkini <= 2) veya MERMISI KRITIKSE (yedek sarjor yok, sarjorda <= %30) dusmanin tersine 70-120 m'de gizli bir noktaya kosar, varinca yatar ve 45 sn saklanir. Tibbi / zorla kosucu / geri cekilen grup / dusman < 20 m dokunulmaz. |
 | `kacisKayip` | Kacis kilidi kayip esigi | 0.1–0.8 | 0.3 | v8.544. Grubun baslangica gore kayip orani bu degeri asinca (varsayilan 0.3 = %30) kacis kilidi kurulur. |
 | `kacisKilitMinM` | Kacis kilidi: kosarak cekilme alt siniri (m) | 25–100 | 50 | v8.676. Kayip kilidi (kacisKayip) acikken bile dusman bu mesafeden YAKINSA kucuk ekip / yakin temas kurali gecerli (kosarak kacilmaz, siper al + sis). Eskiden sabit 25 m; varsayilan 50. |

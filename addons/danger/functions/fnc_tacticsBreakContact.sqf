@@ -195,6 +195,7 @@ diag_log format [
         private _eb = [];
         private _ebS = -9999;
         private _ebG = false;
+        private _ebK = [1, 0, 0, 0, false];
         private _oMes = _o distance2D _tehditPos;
         {
             private _r = _x;
@@ -212,11 +213,14 @@ diag_log format [
                 };
                 if ((nearestTerrainObjects [_c, ["BUILDING", "HOUSE"], 6, false, true]) isNotEqualTo []) then { _s = _s - 25; };
                 if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "WALL", "HIDE"], 3, false, true]) isNotEqualTo []) then { _s = _s + 8; };
-                if (_s > _ebS) then { _ebS = _s; _eb = _c; _ebG = _gizli; };
+                // v8.814 ARKA ALAN (kullanici: 'arkada su vardi'): adayin kacis yonundeki ilerisi su / ucurum ise cikmaz = puan duser (CBA kacisArkaTara / kacisArkaCeza)
+                private _ka = [_c, _kacisYonu] call FUNC(kacisArka);
+                _s = _s - ((1 - (_ka select 0)) * (missionNamespace getVariable ["lambs_danger_kacisArkaCeza", 40])) - ([0, 15] select (_ka select 4));
+                if (_s > _ebS) then { _ebS = _s; _eb = _c; _ebG = _gizli; _ebK = _ka; };
             } forEach [0, 20, -20, 40, -40, 60, -60, 80, -80];
         } forEach [25, 40, 60];
         if (_eb isEqualTo []) exitWith {[]};
-        [_eb, _ebS, _ebG]
+        [_eb, _ebS, _ebG, _ebK]
     };
 
     private _varis = [];
@@ -255,6 +259,7 @@ diag_log format [
                     if (lambs_danger_bcLogN < 40) then {
                         lambs_danger_bcLogN = lambs_danger_bcLogN + 1;
                         diag_log format ["[TEMAS-KES-YON] %1 | %2 | kacis yonu:%3 | hedef %4 m, sapma %5 | gizli:%6 puan:%7 | dusman %8 m", groupId _group, name _oncu, round _kacisYonu, round (_oncu distance2D _hedef), round (abs ((((_oncu getDir _hedef) - _kacisYonu) + 540) % 360 - 180)), _ga select 2, round (_ga select 1), round (_oncu distance2D _tehditPos)];
+                        diag_log format ["[KACIS-ARKA] %1 | %2 | secilen kacis noktasinin arka alani: kara %%%3 (su %4, dik yamac %5 / %6 ornek), orta hat kapali %7", groupId _group, name _oncu, round (((_ga select 3) select 0) * 100), (_ga select 3) select 1, (_ga select 3) select 2, (_ga select 3) select 3, (_ga select 3) select 4];
                     };
                 } else {
                 // Sert siper yok: dusmandan 60m uzaklas (dik acilarla)
