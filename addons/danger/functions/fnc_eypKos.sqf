@@ -118,6 +118,9 @@ private _dmT = 0;
 private _tazeT = 0;
 private _stallT = -1;
 private _stallEmirT = 0;
+private _altList = [];
+private _altIdx = 0;
+private _altBitis = 0;
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
@@ -248,7 +251,7 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {[15, 8] select (_m < 30)};   // v8.790: yakinda da seyrek (RPT f2a62ebb: 24-29 m'de hiz 0 / MOVE; 0.6 sn emir yol planini sifirliyordu)
                 // v8.793 (RPT 99188002: piyade 'hiz 0' orneklerinin hepsi ~10 sn arayla = ZORUNLU periyodik yeniden emir yol planini sifirliyordu): yeniden emir yalniz hedef _esik'ten fazla kaydiysa YA DA komut kayboldu (komut MOVE degil) ise
                 private _komutKayip = (currentCommand _b) isNotEqualTo "MOVE";
-                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {_komutKayip && {time >= (_dmT + 1)}}}) then {
+                if (time >= _dmT && {time >= _altBitis} && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {_komutKayip && {time >= (_dmT + 1)}}}) then {
                     _b doMove _hp;
                     _sonEmir = _hp;
                     _dmT = time + (if (_arac) then {3} else {[2.5, 1.5] select (_m < 30)});
@@ -262,16 +265,44 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                             { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
                             { _b disableAI _x; } forEach ["SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
                             if !(_gizli) then { _b setUnitPos "UP"; _b forceSpeed (_b getSpeed "FAST"); };
-                            _b doMove _hp;
-                            _sonEmir = _hp;
-                            _dmT = time + 2.5;
+                            // v8.796 (RPT 45378173: piyade bomba hedefe 122 m'de 57 sn 'hiz 0 / komut MOVE' durdu, sonra oyuncu yaklasinca kosup 28 m'ye geldi = hedef noktaya YOL YOK gibi): yol bulunamadi (moveToFailed) ya da 6 sn'den uzun duruyorsa hedefin cevresindeki
+                            //   alternatif noktalara (10 / 25 / 45 m halka, 8 yon) sirayla doMove; hepsi denenince 'ulasilamaz' ile kosuyu bitirir (dis dongu en cok 3 deneme)
+                            private _mf = moveToFailed _b;
+                            if (_mf || {(time - _stallT) > 6}) then {
+                                if (_altList isEqualTo []) then {
+                                    { private _r = _x; for "_aci" from 0 to 7 do { private _pp = _hp getPos [_r, _aci * 45]; if (!surfaceIsWater _pp) then { _altList pushBack _pp; }; }; } forEach [10, 25, 45];
+                                };
+                                if (_altIdx < (count _altList)) then {
+                                    private _alt = _altList select _altIdx;
+                                    _altIdx = _altIdx + 1;
+                                    _b doMove _alt;
+                                    _sonEmir = _alt;
+                                    _altBitis = time + 6;
+                                    _dmT = time + 6;
+                                    private _al = missionNamespace getVariable ["lambs_danger_eypAltLogN", 0];
+                                    if (_al < 20) then {
+                                        missionNamespace setVariable ["lambs_danger_eypAltLogN", _al + 1];
+                                        diag_log format ["[EYP-KOS] ALT NOKTA | %1 | hedef %2 m | moveToFailed %3 | aday %4 / %5 | duruyor %6 sn", name _b, round _m, _mf, _altIdx, count _altList, (time - _stallT) toFixed 1];
+                                    };
+                                } else {
+                                    _sonuc = "ulasilamaz";
+                                    _bitti = true;
+                                };
+                            } else {
+                                _b doMove _hp;
+                                _sonEmir = _hp;
+                                _dmT = time + 2.5;
+                            };
                             private _dl = missionNamespace getVariable ["lambs_danger_eypDurLogN2", 0];
                             if (_dl < 20) then {
                                 missionNamespace setVariable ["lambs_danger_eypDurLogN2", _dl + 1];
-                                diag_log format ["[EYP-KOS] DURAKLAMA | %1 | hedef %2 m | duruyor %3 sn | baski %4 | hasar %5 (bacak %6) | komut '%7' | anim %8 | durus %9 | AI MOVE %10 PATH %11 ANIM %12 SUPPRESSION %13 | captive %14 | yasam %15 | beh %16", name _b, round _m, (time - _stallT) toFixed 1, (getSuppression _b) toFixed 2, (damage _b) toFixed 2, (_b getHitPointDamage "HitLegs") toFixed 2, currentCommand _b, animationState _b, stance _b, _b checkAIFeature "MOVE", _b checkAIFeature "PATH", _b checkAIFeature "ANIM", _b checkAIFeature "SUPPRESSION", captive _b, lifeState _b, behaviour _b];
+                                diag_log format ["[EYP-KOS] DURAKLAMA | %1 | hedef %2 m | duruyor %3 sn | baski %4 | hasar %5 (bacak %6) | komut '%7' | anim %8 | durus %9 | AI MOVE %10 PATH %11 ANIM %12 SUPPRESSION %13 | captive %14 | yasam %15 | beh %16", name _b, round _m, (time - _stallT) toFixed 1, (getSuppression _b) toFixed 2, (damage _b) toFixed 2, (_b getHitPointDamage "HitLegs") toFixed 2, ((["", "moveToFailed "] select _mf) + (currentCommand _b)), animationState _b, stance _b, _b checkAIFeature "MOVE", _b checkAIFeature "PATH", _b checkAIFeature "ANIM", _b checkAIFeature "SUPPRESSION", captive _b, lifeState _b, behaviour _b];
                             };
                         };
-                    } else { _stallT = -1; };
+                    } else {
+                        _stallT = -1;
+                        if ((speed _b) > 4 && {_altList isNotEqualTo []} && {time >= _altBitis}) then { _altList = []; _altIdx = 0; };
+                    };
                 };
             };
         };
