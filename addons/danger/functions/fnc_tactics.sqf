@@ -145,6 +145,39 @@ if (_mevziTut) exitWith {true};
 // Eski "random 1 < 0.85" zar atma KALDIRILDI.
 // Karar fnc_commanderAssess.sqf'te verilir, burada sadece dispatch.
 // ---------------------------------------------------------------------------
+// v8.813 AGIR KAYIP KESINTISI (kullanici: 'retreat coz'; RPT ff4b77fc v8.812: EAST Alpha 1-2 FLANK karari 15:44:33'ten sonra 89 sn YENIDEN DEGERLENDIRILMEDI (telemetri 'FLANK (8 -> 89 sn once)'), 7 kisi -> 3, lider hiz 0, dusman 134-149 m; sebep: fnc_tacticsFlank
+//   isExecutingTactic'i 120 sn'e kadar tutuyor ve komutan beyni (asagidaki dispatch) isExecutingTactic / isBounding iken HIC calismiyor -> kayip ne olursa olsun komutan WITHDRAW / PEEL / DELAY dusunemiyor):
+//   bounding / taktik yurutulurken son 60 sn'de >= 2 kayip ya da grup kaybi >= %25 (cmdInitialCount) ise komutan beyni (8 sn'de bir) YENIDEN calistirilir; karar WITHDRAW / PEEL / DELAY ise taktik kilidi temizlenir ve karar dispatch'e onbellek ile verilir.
+//   Ayni aile (FLANK / ASSAULT / BOUNDING / SUPPRESS_ASSAULT) kararlari yok sayilir (taktik tekrar kurulup titresmez). Geri cekilen / temas kesen / kacan gruba dokunmaz. CBA lambs_danger_agirKesinti (varsayilan acik). Log: [AGIR-KESINTI].
+if (
+    (missionNamespace getVariable ["lambs_danger_agirKesinti", true])
+    && {_tehditGecerli}
+    && {count (units _group) >= 4}
+    && {(_group getVariable [QGVAR(isBounding), false]) || {_group getVariable [QGVAR(isExecutingTactic), false]}}
+    && {time >= (_group getVariable [QGVAR(agirKesT), 0])}
+) then {
+    private _canK = {alive _x} count (units _group);
+    private _gecK = ((_group getVariable [QGVAR(kesGecmis), []]) select {(time - (_x select 0)) < 60}) + [[time, _canK]];
+    _group setVariable [QGVAR(kesGecmis), _gecK];
+    private _k60K = (selectMax (_gecK apply { _x select 1 })) - _canK;
+    private _ilkK = _group getVariable [QGVAR(cmdInitialCount), -1];
+    if !(_ilkK isEqualType 0) then { _ilkK = -1; };
+    private _oranK = if (_ilkK > 0) then { (_ilkK - _canK) / _ilkK } else { 0 };
+    if (_k60K >= 2 || {_oranK >= 0.25}) then {
+        _group setVariable [QGVAR(agirKesT), time + 8];
+        private _kK = [_group, _target] call FUNC(commanderAssess);
+        if (_kK in ["WITHDRAW", "PEEL", "DELAY"]) then {
+            private _hangiK = ["taktik", "bounding"] select (_group getVariable [QGVAR(isBounding), false]);
+            _group setVariable [QGVAR(isExecutingTactic), nil];
+            _group setVariable [QGVAR(isBounding), nil];
+            _group setVariable [QGVAR(cmdOnbellek), [time, _kK]];
+            if ((missionNamespace getVariable ["lambs_danger_agirKesN", 0]) < 20) then {
+                missionNamespace setVariable ["lambs_danger_agirKesN", (missionNamespace getVariable ["lambs_danger_agirKesN", 0]) + 1];
+                diag_log format ["[AGIR-KESINTI] %1 | yurutulen %2 kilidi kirildi | kayip60 %3 | grup kaybi %%%4 | etkin %5 | yeni karar %6", groupId _group, _hangiK, _k60K, round (_oranK * 100), _canK, _kK];
+            };
+        };
+    };
+};
 if (
     _tehditGecerli
     && {count (units _group) >= 4}

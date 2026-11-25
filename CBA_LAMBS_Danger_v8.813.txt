@@ -1,5 +1,6 @@
 // LAMBS Danger
 force lambs_danger_aciktaGizlen = true;
+force lambs_danger_agirKesinti = true;
 force lambs_danger_agacProfil = true;
 force lambs_danger_aktifCiv = true;
 force lambs_danger_aktifEast = true;

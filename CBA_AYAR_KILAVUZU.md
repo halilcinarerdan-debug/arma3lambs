@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.812 · Preset: `CBA_LAMBS_Danger_v8.812.txt` · 653 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.813 · Preset: `CBA_LAMBS_Danger_v8.813.txt` · 654 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.812.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.813.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,12 +166,13 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (347 ayar)
+### ELITE siper (348 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
 | `aciktaGizlen` | Acikta gizlen (bos harita) | açık/kapalı | açık | v8.595. 20 m icinde hicbir siper (sert / agac / cali / bina) olmayan, temasta duran asker: dusmandan arazi sirti / cukur (arazi ortusu) arar ve oraya gecer; bulamazsa dusman >= 70 m ise yatar. Bos haritada (ova / tarla) goruluruk azalir. |
 | `agacProfil` | Siper: CUP / A2 agac model profili (FIRE / GEOM / VIEW olcumu) | açık/kapalı | açık | v8.643. Acikken her agac MODELI icin bir kez FIRE / GEOM / VIEW LOD'larinda govde yaricapi ve gizleme genisligi olculur (CUP / A2 agaclarinda FIRE LOD yok); govde yaricapi, gizlenme testi ve durus buna gore verilir. Kapaliyken eski yontem: yalniz FIRE taramasi + +-0.2 m VIEW yan isin testi. |
+| `agirKesinti` | Komutan: agir kayip taktik kilidini kirsin (retreat kesintisi) | açık/kapalı | açık | v8.813 (kullanici: 'retreat coz'; RPT ff4b77fc: kanat (FLANK) taktigi 120 sn'e kadar komutanin yeniden karar vermesini kilitliyor, grup 89 sn yeniden degerlendirilmeden 7 -> 3'e dustu). Acik (varsayilan): bounding / taktik yurutulurken son 60 sn'de >= 2 kayip ya da grup kaybi >= %25 ise komutan 8 sn'de bir yeniden karar verir; WITHDRAW / PEEL / DELAY cikarsa taktik kilidi kirilir ve geri cekilme baslar (ayni aile kararlari yok sayilir). Kapali = eski. |
 | `aliveUyum` | ALiVE uyumu (OPCOM / profil / CQB / sivil populasyon) | liste (Kapali, Uyumlu (onerilen), Tam el cekme) | Uyumlu (onerilen) | v8.561. Yalniz ALiVE yukluyse etkili. Kaynak: ALiVE kaynak kodu (alivemod.com wiki'sine erisilemedi). ALiVE, Guard modunda yaptigi her gruba lambs_danger_disableGroupAI = true koyar; birimlere lambs_danger_disableAI yalniz Soldier Behaviour acikken. 0 Kapali: ELITE ALiVE gruplarina da calisir. 1 Uyumlu (onerilen): ALiVE grubu (profileID / CQB / destek) ELITE grup katmanlarindan cikarilir (ALiVE Guard WARN / OFF olsa bile; emirler / OPCOM bozulmaz), asker refleksleri KALIR (ALiVE Soldier Behaviour aciksa kapanir); varsayilan beceri / isabet artisi / CQB kumelenme / ates tutma / tank kesif atesi ALiVE birimlerinde calismaz (ALiVE AI Skill korunur). 2 Tam el cekme: ALiVE birimlerinin tumunde EL… |
 | `atAtisGecikme` | AT: roketatar secimi -> ates gecikmesi (sn) | 0.3–8 | 4 | v8.759 (kullanici: 'direk cekip atsin'). Zirha atan AT roketatara gecince ates emri bu kadar sn sonra verilir (silah gecis animasyonu ~1-3 sn). Eski sabit 4. Varsayilan 4; dusuk deger = hemen ates (animasyon bitmeden emir yutulabilir). |
 | `atDirekt` | AT taarruzu: zirhi goruyorsa yer degistirmeden direkt at | açık/kapalı | kapalı | v8.764 (kullanici: 'arac karsisindayken eleman mal gibi bekliyo'). ACIK: AT zirhi zaten goruyorsa (40-450 m, gorunurluk >= 0.3) korunakli atis pozisyonuna gitmez ve varisi beklemez (en cok 4 sn); oldugu yerden roketi ceker. KAPALI (eski): once OVERWATCH sipere gider, varis en cok 14 sn beklenir. |
