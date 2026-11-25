@@ -565,6 +565,7 @@ if (EGVAR(main,debug_functions)) then {
                         if ((speed _b) < 3) then { doStop _b; };
                         _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _b doMove (_x select 1);
+                        [_b, _x select 1, _kmt] spawn FUNC(retDomoveTani);   // v8.809: motor doMove'u kabul etti mi? (0.7 sn sonra AI durumu + beklenen hedef)
                     };
                 };
             } forEach _varis;

@@ -4,7 +4,7 @@
  * KOSU PATLAMASI (v8.807; kullanici: 'retreati incele, cok aciktta durmasinlar, siperi guclendir'; RPT d03615e7 v8.806: retreat kosucu orneklerinin %67'si duruyor ve duranlarin 14 / 16'si komut ATTACK; tek retreat'te lider 25 sn boyunca
  *   ATTACK -> yeniden MOVE (3 sn'de bir, hedefe 68 m) dongusunde aciktta kaldi; siper varis gozcusunde 18 basarisizligin 8'i komut ATTACK / Suppress).
  * NEDEN: motorun hedefe nisan alma alt durumu (AUTOTARGET / TARGET acikken gorulen dusmana dur + ates et) MOVE emrini askıya alir; geri cekilme kosucusunun ezme isleyicisi hedef almayi hep yeniden aciyordu (v8.386: 'kosarken karsilik
- *   versin') -> dongu. Teknik (referans modun 'move inhibitor' fikrinden ilhamla, kod kopyalanmadi): kosucu kisa sureligine (sure sn) TARGET + AUTOTARGET kapatilir, mevcut hedef birakilir (doTarget / doWatch objNull); tufek INDIRILMEZ
+ *   versin') -> dongu. Teknik (referans modun 'move inhibitor' fikrinden ilhamla, kod kopyalanmadi): kosucu kisa sureligine (sure sn) TARGET + AUTOTARGET kapatilir, (v8.809: hedef birakma / doTarget objNull yok; yalniz bayrak); tufek INDIRILMEZ
  *   (davranis degismez: COMBAT / tufek yukarda), sure sonunda hedef alma geri verilir (baska katman koşu modunu kalici tuttuysa -retKosuModu- dokunulmaz).
  * Arguments:
  * 0: Asker <OBJECT>
@@ -25,8 +25,7 @@ private _tok = time + (random 0.001);
 _u setVariable [QGVAR(kosuPatlamaTok), _tok];
 _u disableAI "TARGET";
 _u disableAI "AUTOTARGET";
-_u doTarget objNull;
-_u doWatch objNull;
+// v8.809: doTarget / doWatch objNull KALDIRILDI (RPT 67cf9809: ATTACK komutlu duran kosucu orneklerinin %87'si burst almis birimlerden; null hedefli doTarget bos ATTACK emri birakiyor olabilir; yalniz AI bayragi (atesHareket rush'inin kanitlanmis yontemi))
 
 private _say = missionNamespace getVariable ["lambs_danger_kosuPatSay", createHashMap];
 missionNamespace setVariable ["lambs_danger_kosuPatSay", _say];

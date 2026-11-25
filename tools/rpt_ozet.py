@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.808"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.809"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -847,9 +847,14 @@ def kabul(path):
         if "[KOSU-PATLAMA-OZET]" in l:
             for k_, v_ in re.findall(r"(retreat|varis)=(\d+)", l): kp_say[k_] = kp_say.get(k_, 0) + int(v_)
     kp_n = len([1 for l in L if "[KOSU-PATLAMA] " in l])
+    dm_k = 0; dm_y = 0
+    for l in L:
+        if "[RET-DOMOVE-TEST]" in l:
+            if "KABUL" in l.split("[RET-DOMOVE-TEST]",1)[1][:12]: dm_k += 1
+            else: dm_y += 1
     if iz_n >= 10:
         o_ = 100.0 * iz_dur / iz_n
-        ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "GECTI" if o_ <= 40 and rb_ip == 0 else "KONTROL", "kosucu ornegi %d: duran (< 2 km/sa) %d (%%%.0f; hedef <= %%40), bunlardan ATTACK komutlu %d | retreat bitisi 'ilerleme yok': %d / %d | eski siper komutu engellendi (v8.806+): %s (log %d) | kosu patlamasi (v8.807+, ATTACK ile duran kosucuda hedef alma kisa sure kapali): %s (log %d)" % (iz_n, iz_dur, o_, iz_atk, rb_ip, len(rb_), (", ".join("%s %d" % (k, v) for k, v in sorted(rc_say.items())) or "yok"), rc_n, (", ".join("%s %d" % (k, v) for k, v in sorted(kp_say.items())) or "yok"), kp_n))
+        ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "GECTI" if o_ <= 40 and rb_ip == 0 else "KONTROL", "kosucu ornegi %d: duran (< 2 km/sa) %d (%%%.0f; hedef <= %%40), bunlardan ATTACK komutlu %d | retreat bitisi 'ilerleme yok': %d / %d | eski siper komutu engellendi (v8.806+): %s (log %d) | kosu patlamasi (v8.807+, ATTACK ile duran kosucuda hedef alma kisa sure kapali): %s (log %d) | retreat doMove testi (v8.809+; ilk 20): kabul %d / yok sayildi %d" % (iz_n, iz_dur, o_, iz_atk, rb_ip, len(rb_), (", ".join("%s %d" % (k, v) for k, v in sorted(rc_say.items())) or "yok"), rc_n, (", ".join("%s %d" % (k, v) for k, v in sorted(kp_say.items())) or "yok"), kp_n, dm_k, dm_y))
     else:
         ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "VERI YOK", "[GERI-CEKILME-IZ] ornegi az (retreat yok)")
     ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
