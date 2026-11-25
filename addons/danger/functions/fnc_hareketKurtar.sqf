@@ -8,6 +8,7 @@
  *   siper noktasina medyan ~15 m kala (18 kaydi 5-15 m). Yani engel / arazi / baski DEGIL: asker emri aliyor ama harekete gecmiyor. KOK NEDEN HALA BILINMIYOR (T: asagidaki adimlar tek tek denenir, hangisinin ise yaradigi log'dan okunur).
  * MERDIVEN (AYNI birimde 20 sn icinde art arda cagrilarda adim artar; 20 sn sessizlikte sifirlanir; adimlar BIRIKIMLI: ust adim alttakileri de uygular):
  *   1) bu birimin saldiri / atanan hedefini unutur (forgetTarget; yalniz bu birim) + AI bayraklari acilir (PATH / MOVE / ANIM) + hiz kilidi kalkar + doStop (yalniz duruyorsa) + doMove;
+ *   (v8.820: 2. adimda bakis gidilecek noktaya doWatch, 3. adimda SUPPRESSION + CHECKVISIBLE 8 sn kapali)
  *   2) + lider degilse formasyona don (doFollowGuvenli: komut kuyrugu sifirlanir; retreat / temas kesme / kacis grubunda atlanir) + duruş UP (zayif) + 8 sn CARELESS (motorun 'dusman var, dur ve nisan al' davranisini baypas; sure sonunda eski davranis geri) + kosu patlamasi (TARGET + AUTOTARGET kapali) + doMove;
  *   3) + setDestination [hedef, 'LEADER DIRECT', true] (yol planlamasini atlayan dogrudan yuruyus) + hiz modu FULL;
  *   4) + calculatePath (asenkron 'PathCalculated') ile yol dugumleri hesaplanir, askerden >= 12 m ilerideki ilk dugume doMove (yalniz azami adim >= 4 ise; referans modun yol dugumu tekniginden ilhamla, kod kopyalanmadi).
@@ -57,6 +58,10 @@ if (_n >= 2) then {
     [_u] call FUNC(doFollowGuvenli);   // korumali (retreat / temas kesme / kacis grubunda atlanir; o taktik emri zaten surekli yeniden verir)
     _u setUnitPosWeak "UP";
     [_u, 8, "kurtar"] call FUNC(kosuPatlamasi);
+    // v8.820 (kullanici: 'vanilla'da eleman mermi yiyince / hedef bilince kipirdayamiyor'; RPT a049faa1: duran askerlerde cok sayida _turnl / _turnr donus animasyonu, getAttackTarget dolu, dusman 230-285 m, baski 0): bakis gidilecek noktaya cevrilir (hedefe donme dongusu kirilsin);
+    //   8 sn sonra serbest birakilir (doWatch objNull; retreat zaten sicrama sonunda birakir)
+    _u doWatch (AGLToASL [_hedef select 0, _hedef select 1, 1.5]);
+    [{ params ["_uu"]; if (alive _uu && {!((group _uu) getVariable [QGVAR(isRetreating), false])} && {!(_uu getVariable [QGVAR(forceMove), false])}) then { _uu doWatch objNull; }; }, [_u], 8] call CBA_fnc_waitAndExecute;
     if (missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) then {
         private _tok = time + (random 0.001);
         _u setVariable [QGVAR(hkCareTok), _tok];
@@ -82,6 +87,9 @@ _u doMove _hedef;
 if (_n >= 3) then {
     _u setDestination [_h3, "LEADER DIRECT", true];
     _u setSpeedMode "FULL";
+    // v8.820: baski / gorunurluk kontrolu kisa sure kapali (motorun 'bastirildim / hedef gorunur: dur' alt durumu); 8 sn sonra geri
+    { _u disableAI _x; } forEach ["SUPPRESSION", "CHECKVISIBLE"];
+    [{ params ["_uu"]; if (alive _uu) then { { _uu enableAI _x; } forEach ["SUPPRESSION", "CHECKVISIBLE"]; }; }, [_u], 8] call CBA_fnc_waitAndExecute;
 };
 
 // 4) yol dugumu
