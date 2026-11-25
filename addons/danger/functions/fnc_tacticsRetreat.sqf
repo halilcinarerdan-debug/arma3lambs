@@ -416,6 +416,23 @@ if (EGVAR(main,debug_functions)) then {
                     _x setVariable [QGVAR(kacisTok), nil];   // v8.670: bireysel kacis (fnc_kacis) bu cekilmeyle ayni askere emir vermesin; kacis geri cagrilari belirtece bakar
                     private _p = _ciftNokta getPos [random 4, random 360];
                     if (surfaceIsWater _p) then { _p = _ciftNokta; };
+                    // v8.816 BACAK KISALTMA (kullanici: 'retreat coz'; RPT 7ba225b8 v8.815: [GERI-CEKILME-IZ] kosucularin sicrama basindaki hedef mesafesi 32-151 m (ortanca ~92 m), 'mesafe kazanci -15 / +8 / +24 m', 'vardi 0/3' (sicrama penceresi en cok 26 sn x ~3.5 m/s = 91 m'e yetmiyor);
+    //   WP lider konumundan hesaplaniyor ama manga uyeleri dagik: uzaktaki kosucu 100+ m kosup WP'ye yigiliyor (hatta dusmana dogru). Kural: kosucunun KENDI konumundan hedefe mesafe adim boyu x CBA retBacakCarpan'i (1.2; en az 30 m) asarsa hedef, kosucudan o yone o kadar uzakta bir ARA NOKTA olur (sonraki sicrama yeniden planlanir). CBA retBacakKap kapaliysa eski.
+                    if (missionNamespace getVariable ["lambs_danger_retBacakKap", true]) then {
+                        private _rp = getPosATL _x;
+                        private _kap = ((_adimBoy * (((missionNamespace getVariable ["lambs_danger_retBacakCarpan", 1.2]) max 0.8) min 2)) max 30);
+                        if ((_rp distance2D _p) > _kap) then {
+                            private _hp = _rp getPos [_kap, _rp getDir _p];
+                            if (!surfaceIsWater _hp) then {
+                                private _eskiM = round (_rp distance2D _p);
+                                _p = _hp;
+                                if ((missionNamespace getVariable ["lambs_danger_retBacakLogN", 0]) < 15) then {
+                                    missionNamespace setVariable ["lambs_danger_retBacakLogN", (missionNamespace getVariable ["lambs_danger_retBacakLogN", 0]) + 1];
+                                    diag_log format ["[RET-BACAK-KISALT] %1 | %2 | hedef %3 m -> %4 m (ara nokta; adim boyu %5 m)", groupId _grup, name _x, _eskiM, round _kap, round _adimBoy];
+                                };
+                            };
+                        };
+                    };
                     _varis pushBack [_x, _p, getPosATL _x, time, 0];
                     _x setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                     _x doMove _p;

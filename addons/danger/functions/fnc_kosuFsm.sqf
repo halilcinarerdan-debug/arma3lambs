@@ -5,7 +5,7 @@
  *   TARGET / AUTOTARGET kapatma (v8.807), doStop + doMove (v8.743), kalici KOSU-MODU (AWARE + hedef alma kapali, v8.671) bunu cozmedi; ayni ortamda canli bombaci (fnc_eypKos: FSM + SUPPRESSION + AUTOCOMBAT + COVER KAPALI,
  *   MOVE / PATH / ANIM ACIK, CARELESS) kesintisiz kosuyor).
  * HIPOTEZ: motorun davranis FSM'i (tehdit / hedef / siper alt durumlari) MOVE emrini askiya aliyor; FSM kapaliyken AI yalniz emri uygular (referans modun 'move inhibitor' fikriyle ayni yon; kod kopyalanmadi).
- * KURAL: geri cekilme kosucusunun (lider HARIC: grup FSM'i liderde calisir) FSM'i kosu suresince (sure sn, varsayilan 14) kapatilir; sicrama sonunda / varista / geri cekilme bitince / sure dolunca (token) yeniden acilir.
+ * KURAL: geri cekilme kosucusunun (v8.816: lider DAHIL; CBA retKosuFsmLider) FSM'i kosu suresince (sure sn, varsayilan 14) kapatilir; sicrama sonunda / varista / geri cekilme bitince / sure dolunca (token) yeniden acilir.
  *   Davranis COMBAT + tufek yukarda kalir (v8.386 istegi). CBA lambs_danger_retKosuFsm kapaliysa hicbir sey yapmaz.
  * Arguments:
  * 0: Asker <OBJECT>
@@ -19,7 +19,8 @@
 params [["_u", objNull, [objNull]], ["_sure", 14, [0]]];
 if (isNull _u || {!alive _u} || {isPlayer _u} || {!local _u} || {!isNull objectParent _u}) exitWith {false};
 if !(missionNamespace getVariable ["lambs_danger_retKosuFsm", true]) exitWith {false};
-if (_u isEqualTo (leader group _u)) exitWith {false};
+// v8.816: RPT 7ba225b8: kosucu ilk hareket gecikmesi LIDER (FSM hep acik) 12-17 sn, lider olmayan (FSM kapali) 0-5 sn -> lider de dahil (CBA retKosuFsmLider, varsayilan acik); kapaliysa eski (lider haric)
+if (_u isEqualTo (leader group _u) && {!(missionNamespace getVariable ["lambs_danger_retKosuFsmLider", true])}) exitWith {false};
 _sure = (_sure max 4) min 25;
 private _tok = time + (random 0.001);
 _u setVariable [QGVAR(kosuFsmTok), _tok];
