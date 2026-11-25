@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.800"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.801"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -721,6 +721,69 @@ def kabul(path):
     ]:
         n = len([1 for l in L if ("[%s]" % tag) in l and "baslatildi" not in l])
         ekle(ad, "GECTI" if n else "VERI YOK", ("%d satir" % n) if n else ipucu)
+
+    # --- 10) GERCEKCILIK KARNESI (v8.801; kullanici: 'gerceklik karnesi ekle'): kalibrasyon hedefine gore GECTI / KONTROL / VERI YOK
+    # HEDEF BANTLAR = oyun icin TAHMINI baslangic hedefleri (gercek hayat rakami DEGIL; ayarlamak icin buradaki sabitleri degistir). KONTROL = hedef bant disi (kalibrasyon ayari gerek), KALDI degil.
+    HB_ISABET = {"<50 m": (10, 20), "50-120 m": (5, 10), "<120 m": (5, 15), "120-250 m": (1, 4), ">250 m": (0, 1)}   # '<120 m' = v8.801 oncesi RPT'lerin tek bandi
+    HB_MERMI_ISABET = (30, 100)       # genel mermi / isabet (bastirma dahil)
+    HB_ACIKTA_MAX = 20                # hareketsiz askerin acikta orani % (en cok)
+    HB_STAND_MAX = 30                 # hareketsiz askerde ayakta (STAND) orani % (en cok)
+    HB_GORUNUR_MAX = 40               # hareketsiz askerin KENDI DURUSUNDA gorunur orani % (en cok)
+    HB_FARK = (0.8, 2.5)              # gorunur -> fark etme ort. sn
+    MIN_ATIS = 30                     # bant basina en az nisanli atis (altinda 'az veri')
+    bant = collections.OrderedDict()
+    for l in L:
+        if "[BOT-ISABET]" not in l: continue
+        for ad_, a_, i_ in re.findall(r"(<\d+ m|\d+-\d+ m|>\d+ m): nisanli (\d+) atis / (\d+) isabet", l):
+            v_ = bant.setdefault(ad_, [0, 0]); v_[0] += int(a_); v_[1] += int(i_)
+    sirali = [b_ for b_ in ["<50 m", "50-120 m", "<120 m", "120-250 m", ">250 m"] if b_ in bant]
+    ol_ = []; ihlal_ = []; olc_ = 0
+    for b_ in sirali:
+        a_, i_ = bant[b_]
+        if a_ < MIN_ATIS:
+            ol_.append("%s: az veri (%d atis)" % (b_, a_)); continue
+        olc_ += 1
+        o_ = 100.0 * i_ / a_; lo_, hi_ = HB_ISABET[b_]
+        dd_ = "ok" if lo_ <= o_ <= hi_ else ("DUSUK" if o_ < lo_ else "YUKSEK")
+        if dd_ != "ok": ihlal_.append("%s %s" % (b_, dd_))
+        ol_.append("%s: %d atis / %d isabet = %%%.1f (hedef %%%d-%d) %s" % (b_, a_, i_, o_, lo_, hi_, dd_))
+    ekle("GERCEKCILIK: BOT ISABET (mesafe bandi)", "VERI YOK" if not olc_ else ("GECTI" if not ihlal_ else "KONTROL"),
+         (" | ".join(ol_) + (" | SAPMA: " + ", ".join(ihlal_) if ihlal_ else "") + " (ayar: skillIsabetMax / Min, dogrulukMaks, isabetSeviye; her turda tek grup ayari degistir)") if sirali else "[BOT-ISABET] yok (v8.577 oncesi RPT ya da bot atisi olmadi; bant bazli olcum v8.801+)")
+    otr_ = re.findall(r"OTURUM: (\d+) atis / (\d+) isabet", "\n".join([l for l in L if "[BOT-ISABET]" in l]))
+    if otr_:
+        ta_, ti_ = int(otr_[-1][0]), int(otr_[-1][1])
+        mi_ = (float(ta_) / ti_) if ti_ else None
+        ekle("GERCEKCILIK: GENEL MERMI / ISABET", "VERI YOK" if ta_ < 200 else ("GECTI" if (mi_ is not None and HB_MERMI_ISABET[0] <= mi_ <= HB_MERMI_ISABET[1]) else "KONTROL"),
+             "oturum %d atis / %d isabet = %s mermi/isabet (hedef %d-%d; baski atesi dahil; cok yuksek deger = neredeyse hic isabet yok)" % (ta_, ti_, ("%.0f" % mi_) if mi_ else "-", HB_MERMI_ISABET[0], HB_MERMI_ISABET[1]) + (" | az veri (< 200 atis)" if ta_ < 200 else ""))
+    else:
+        ekle("GERCEKCILIK: GENEL MERMI / ISABET", "VERI YOK", "[BOT-ISABET] OTURUM satiri yok")
+    gn_ = 0; gs_ = 0.0; gc_ = 0.0; gp_ = 0.0; ga_ = 0.0; gk = 0; gk_g = 0.0
+    for l in L:
+        m = re.search(r"\[COVER-OLCUM\] 60 sn: ornek (\d+) \| SIPER \(<= 4 m nesne\) (\d+) % / UZAK ENGEL \(arazi / uzak nesne\) (\d+) % / ACIKTA (\d+) %", l)
+        if m: ga_ += int(m.group(1)) * int(m.group(4)); gk += int(m.group(1))
+        m = re.search(r"HAREKETSIZ (\d+) asker: STAND (\d+) % CROUCH (\d+) % PRONE (\d+) %", l)
+        if m:
+            n_ = int(m.group(1)); gn_ += n_; gs_ += n_ * int(m.group(2)); gc_ += n_ * int(m.group(3)); gp_ += n_ * int(m.group(4))
+        m = re.search(r"\[COVER-OLCUM-DURUS\] 60 sn: hareketsiz ornek (\d+) \| KENDI DURUSUNDA GIZLI %(\d+) \| GORUNUR %(\d+)", l)
+        if m: gk_g += int(m.group(1)) * int(m.group(3))
+    dkn_ = sum(int(m.group(1)) for m in [re.search(r"\[COVER-OLCUM-DURUS\] 60 sn: hareketsiz ornek (\d+)", l) for l in L] if m)
+    if gk or gn_ or dkn_:
+        acik_ = ga_ / max(gk, 1); stand_ = gs_ / max(gn_, 1); gor_ = gk_g / max(dkn_, 1)
+        ih_ = []
+        if gk and acik_ > HB_ACIKTA_MAX: ih_.append("acikta %%%.0f > %%%d" % (acik_, HB_ACIKTA_MAX))
+        if gn_ and stand_ > HB_STAND_MAX: ih_.append("ayakta %%%.0f > %%%d" % (stand_, HB_STAND_MAX))
+        if dkn_ and gor_ > HB_GORUNUR_MAX: ih_.append("kendi durusunda gorunur %%%.0f > %%%d" % (gor_, HB_GORUNUR_MAX))
+        ekle("GERCEKCILIK: GIZLENME / DURUS (hareketsiz)", "GECTI" if not ih_ else "KONTROL",
+             ("acikta %%%.0f (hedef <= %%%d, ornek %d) | hareketsiz ayakta %%%.0f / comel %%%.0f / yatan %%%.0f (ayakta hedef <= %%%d, ornek %d) | kendi durusunda GORUNUR %s" % (acik_, HB_ACIKTA_MAX, gk, stand_, gc_ / max(gn_, 1), gp_ / max(gn_, 1), HB_STAND_MAX, gn_, ("%%%.0f (hedef <= %%%d, ornek %d)" % (gor_, HB_GORUNUR_MAX, dkn_)) if dkn_ else "veri yok ([COVER-OLCUM-DURUS] yok)")) + ((" | SAPMA: " + ", ".join(ih_) + " (ayar: durusDisiplin / durusDisiplinSn / durusYatMesafe, siper*)") if ih_ else ""))
+    else:
+        ekle("GERCEKCILIK: GIZLENME / DURUS (hareketsiz)", "VERI YOK", "[COVER-OLCUM] yok: CBA 'coverOlcum' KAPALI olabilir (acik: coverOlcum = true; 60 sn ozetleri RPT'ye yazilir)")
+    fark_n = hf_t + hf_m
+    if fark_n >= 5:
+        fo_ = (hf_ts + hf_ms) / fark_n
+        ekle("GERCEKCILIK: REAKSIYON (gorunur -> fark)", "GECTI" if HB_FARK[0] <= fo_ <= HB_FARK[1] else "KONTROL", "ort. %.2f sn (hedef %.1f-%.1f sn; ornek %d: bizim tetik %d + motor %d; ayar: hizliFark*, reaksiyonArtis)" % (fo_, HB_FARK[0], HB_FARK[1], fark_n, hf_t, hf_m))
+    else:
+        ekle("GERCEKCILIK: REAKSIYON (gorunur -> fark)", "VERI YOK", "[HIZLI-FARK-OZET] ornegi yok / az (%d); gorunen insan oyuncu gerekir" % fark_n)
+    ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
 
     print("=" * 100); print("KABUL TESTI |", path)
     for ad, d, k in sat:

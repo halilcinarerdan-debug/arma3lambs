@@ -2,6 +2,7 @@
 /*
  * Author: Cinar (ELITE fork)
  * BOT ISABETI: OYUNIN aimingAccuracy = 1 SINIRININ OTESI (v8.575; kullanici: 'oyuncunun isabeti ile ilgili her seyi kaldir, ben sadece botlarin 1 limitinden cikmasini istemistim').
+ * v8.801: mesafe bandi 4'e bolundu (<50 / 50-120 / 120-250 / >250 m; eskiden <120 tek bant) -> tools/rpt_ozet.py GERCEKCILIK KARNESI bant bazli isabet oranini hedef bantla karsilastirir.
  * ATIS / ISABET SAYACI (v8.577, v8.585, v8.586): botlar icin 60 sn'de bir [BOT-ISABET] (genel + mesafe bandi, oturum toplami); OYUNCU icin OLAY TABANLI [OYUNCU-ISABET] (her isabette bir satir; 60 sn penceresi gorev yeniden baslatmalarinda bos kaliyordu). OLUM SAYILMAZ (baygin / yaralanma durumlari yaniltir; kullanici: 'olmeyi sayma hit say').
  * Oyuncu sayaci YALNIZ OLCUMDUR (kullanici: 'gozlemim uydurma degil, hadi kur sistemi, atis sayisini olcelim'): oyuncuya yardim / mudahale YOK; bot isabet yardimi yalniz botlara uygulanir. Oyuncu atisi = nisan noktasindaki (cursorObject) dusman piyadeye atilan BulletBase mermisi; hedef basina 'son isabetten beri atis' tutulur. Etiket: SAVAS = hedef birimin davranisi COMBAT ve grup combatMode BLUE / GREEN / WHITE degil; aksi UYANDIRMA (hold fire hedefi uyandirmak icin atilan mermiler; kullanici: 'onlari hesaba katma') ve toplama SAYILMAZ. Satirda hedefin oyuncu hakkindaki bilgisi (knowsAbout) da var (spot suresi etkisi icin). Oyuncu ve hedef ayni makinede yerelse (SP / host / editor) calisir.
  * aimingAccuracy / aimingShake en cok 1.0'dir (setSkill siniri). Bu sinirin otesi iki ayarla:
@@ -24,7 +25,7 @@ diag_log "[ISABET-SEVIYE] bot isabeti (aimingAccuracy 1 siniri otesi: CBA isabet
 
 // ---- BOT ISABET SAYACI (v8.577; kullanici: 'genele vurdugunda ortalama kaba tahmin 100 ustudur'): YALNIZ botlar (oyuncu sayilmaz / olculmez). Bu makinedeki yerel botlarin TUM mermileri (baski ateşi dahil) ve dusman piyadeye ISABETLERI ----
 // sayac: [toplam atis, nisanli atis (bant 0/1/2), isabet (bant 0/1/2), toplam isabet]; oyuncu icin nisanli atis kullanilmaz (hedef secimi yok)
-lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
+lambs_danger_botSay = [0, [0, 0, 0, 0], [0, 0, 0, 0], 0];
 lambs_danger_botSayTop = [0, 0, 0];   // oturum toplami: [atis, isabet, nisanli atis]
 lambs_danger_oyuSay = [0, 0, 0, 0];   // oyuncu oturum: [SAVAS atis, SAVAS isabet, UYANDIRMA atis, UYANDIRMA isabet]
 lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {!((combatMode group _h) in ["BLUE", "GREEN", "WHITE"])} };
@@ -52,7 +53,7 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
     private _gecerli = !isNull _t && {alive _t} && {_t isKindOf "CAManBase"} && {!([_t] call FUNC(teslimMi))} && {((side group _u) getFriend (side group _t)) < 0.6} && {(_u distance _t) <= 600};
     if (_gecerli) then {
         private _m = _u distance _t;
-        private _bn = if (_m >= 250) then {2} else { if (_m >= 120) then {1} else {0} };
+        private _bn = if (_m >= 250) then {3} else { if (_m >= 120) then {2} else { if (_m >= 50) then {1} else {0} } };
         private _na = _say select 1;
         _na set [_bn, (_na select _bn) + 1];
     };
@@ -101,7 +102,7 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
             ["SAVAS", "UYANDIRMA"] select !_sv, _m toFixed 0, _at, behaviour _unit, combatMode group _unit, (_unit knowsAbout _sh) toFixed 1,
             _oy select 0, _oy select 1, if ((_oy select 1) > 0) then { ((_oy select 0) / (_oy select 1)) toFixed 1 } else {"-"}, _oy select 2, _oy select 3];
     };
-    private _bn = if (_m >= 250) then {2} else { if (_m >= 120) then {1} else {0} };
+    private _bn = if (_m >= 250) then {3} else { if (_m >= 120) then {2} else { if (_m >= 50) then {1} else {0} } };
     private _say = lambs_danger_botSay;
     private _ia = _say select 2;
     _ia set [_bn, (_ia select _bn) + 1];
@@ -116,13 +117,13 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
         private _top = lambs_danger_botSayTop;
         _top set [0, (_top select 0) + _at];
         _top set [1, (_top select 1) + _ih];
-        _top set [2, (_top select 2) + (_na select 0) + (_na select 1) + (_na select 2)];
+        _top set [2, (_top select 2) + (_na select 0) + (_na select 1) + (_na select 2) + (_na select 3)];
         if (_at > 0) then {
-            private _bantS = [0, 1, 2] apply { format ["%1: nisanli %2 atis / %3 isabet (%4 atis/isabet)", ["<120 m", "120-250 m", ">250 m"] select _x, _na select _x, _ia select _x, if ((_ia select _x) > 0) then { ((_na select _x) / (_ia select _x)) toFixed 0 } else {"-"}] };
+            private _bantS = [0, 1, 2, 3] apply { format ["%1: nisanli %2 atis / %3 isabet (%4 atis/isabet)", ["<50 m", "50-120 m", "120-250 m", ">250 m"] select _x, _na select _x, _ia select _x, if ((_ia select _x) > 0) then { ((_na select _x) / (_ia select _x)) toFixed 0 } else {"-"}] };
             diag_log format ["[BOT-ISABET] son 60 sn (bu makinedeki botlar): TUM atis %1 (baski ateşi dahil) | isabet %2 | GENEL %3 mermi/isabet | %4 || OTURUM: %5 atis / %6 isabet = %7 mermi/isabet",
                 _at, _ih, if (_ih > 0) then { (_at / _ih) toFixed 0 } else {"-"}, _bantS joinString " | ", _top select 0, _top select 1, if ((_top select 1) > 0) then { ((_top select 0) / (_top select 1)) toFixed 0 } else {"-"}];
         };
-        lambs_danger_botSay = [0, [0, 0, 0], [0, 0, 0], 0];
+        lambs_danger_botSay = [0, [0, 0, 0, 0], [0, 0, 0, 0], 0];
     };
 };
 
