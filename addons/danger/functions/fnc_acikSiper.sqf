@@ -458,6 +458,7 @@ private _nesneGit = {
         // v8.804 VARIS GOZCUSU (kullanici: 'siper varisini duzelt, coverlar cok iyi olsun'; RPT b4f22e03: [SIPER-OTUR] 14 kaydin 6'si 'oturtulamadi' - siper noktasina 6.8 / 9.7 / 21.5 / 27.6 / 28.3 / 54.2 m kala; eski bekleme TEK 12 sn'di, kosan asker (hiz 6-15) ya da durmus asker (hiz 0) icin hicbir sey yapilmiyordu):
         //   en cok 30 sn izler: yaklasma ILERLIYORSA beklemeye devam; 3 sn ilerleme yok + durmus ise ayni noktaya yeniden doMove (en cok 2); hala ilerlemiyorsa nokta 60 sn KARA LISTEYE alinir ve (varsa) YEDEK SIPER'e gidilir (15 sn izlenir); yedek de yoksa siper hedefi sifirlanir, hemen YENIDEN SECIM (acikSiperT = 0).
         private _son = time + 30;
+        private _t00 = time;
         private _ilerT = time;
         private _enAz = 1e9;
         private _reemir = 0;
@@ -476,9 +477,11 @@ private _nesneGit = {
                     if (_hOnc isEqualTo [] || {(_h distance2D _hOnc) > 1}) then { _hOnc = +_h; _enAz = 1e9; _ilerT = time; _reemir = 0; };   // siper hedefi degisti (yeniden secim): ilerleme sayaci sifirlanir
                     private _d = (getPosATL _a) distance2D _h;
                     if (_d < 4 && {(speed _a) < 0.8}) then { _bitti = true; } else {
-                        if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; };
+                        if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; _son = (_son max (time + 8)) min (_t00 + 75); };   // v8.824: ilerleme suruyorsa bitis suresi uzar (en cok 75 sn; RPT 9eb0728d: oturtulamadi 10'un 7'si hala yuruyor, kalan 16-33 m, hiz 5-17 km/sa = 30 sn pencere yetmedi)
                         if ((time - _ilerT) > ([3, 3.5, 4.5] select ((["STAND", "CROUCH", "PRONE"] find (stance _a)) max 0)) && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
-                            if (_reemir < 4) then {   // v8.818: 2 -> 4 yeniden emir (hareket kurtarma merdiveni adim 1-4; pencere duruşa gore 3 / 3.5 / 4.5 sn)
+                            // v8.824: script kosu uygunsa (<= 30 m, duz hat acik) merdiven 2 adimdan sonra script kosuya gecer (RPT 9eb0728d: script kosu 5 / 6 vardi; merdiven adim 2 %55, adim 3 %43, adim 4 %44)
+                            private _kosuUygun = !_kosuDenendi && {_d <= 30} && {missionNamespace getVariable ["lambs_danger_hareketKurtarKos", true]} && {(([_a, _h] call FUNC(yolTara)) select 1) <= 1.05};
+                            if (_reemir < ([4, 2] select _kosuUygun)) then {   // v8.818: 2 -> 4 yeniden emir (hareket kurtarma merdiveni adim 1-4; pencere duruşa gore 3 / 3.5 / 4.5 sn)
                                 _reemir = _reemir + 1;
                                 _ilerT = time;
                                 _son = (time + 6) max _son;
@@ -491,7 +494,7 @@ private _nesneGit = {
                                 _sy set ["varis_yeniden_emir", (_sy getOrDefault ["varis_yeniden_emir", 0]) + 1];
                             } else {
                                 // v8.823 SCRIPT KOSU (son care; RPT 01a3fcd2: ULASILAMADI 10, yol acik, merdiven 4 adimi da tukendi, 6-20 m kala): hedef <= 30 m ve duz hat acikken asker kosu animasyonuyla surulur (fnc_kosuAdim); ilerleme penceresi 4 sn ileri alinir
-                                if (!_kosuDenendi && {_d <= 30} && {(([_a, _h] call FUNC(yolTara)) select 1) <= 1.05} && {[_a, _h, "varis"] call FUNC(kosuAdim)}) then {
+                                if (_kosuUygun && {[_a, _h, "varis"] call FUNC(kosuAdim)}) then {
                                     _kosuDenendi = true;
                                     _ilerT = time + 4;
                                     _enAz = 1e9;

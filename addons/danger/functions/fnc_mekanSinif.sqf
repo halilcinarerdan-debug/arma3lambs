@@ -96,7 +96,9 @@ missionNamespace setVariable ["lambs_danger_mekanSay", _s];
 if (isNil "lambs_danger_mekanOzetT") then { lambs_danger_mekanOzetT = time + 60; };
 if (time > lambs_danger_mekanOzetT) then {
     lambs_danger_mekanOzetT = time + 60;
-    diag_log format ["[MEKAN-DOKTRIN-OZET] 60 sn (grup taramasi): %1 | gecis toplam %2", (_s toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }, missionNamespace getVariable ["lambs_danger_mekanGecis", 0]];
+    private _ms = missionNamespace getVariable ["lambs_danger_mekanDkSay", createHashMap];
+    diag_log format ["[MEKAN-DOKTRIN-OZET] 60 sn (grup taramasi): %1 | gecis toplam %2 | uygulanan carpan (sinif|anahtar=adet): %3", (_s toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }, missionNamespace getVariable ["lambs_danger_mekanGecis", 0], (_ms toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }];
+    missionNamespace setVariable ["lambs_danger_mekanDkSay", createHashMap];
     missionNamespace setVariable ["lambs_danger_mekanSay", createHashMap];
 };
 _aktif
