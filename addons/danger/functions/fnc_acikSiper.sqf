@@ -501,10 +501,11 @@ private _nesneGit = {
                                     _ulasilamadi = true;
                                     _bitti = true;
                                     _sy set ["varis_ulasilamadi", (_sy getOrDefault ["varis_ulasilamadi", 0]) + 1];
+                                    private _yt = [_a, _h] call FUNC(yolTara);   // v8.805: neden ulasilamadi? (engel sinifi / dolasma / su / yamac)
                                     private _vl = missionNamespace getVariable ["lambs_danger_varisLogN", 0];
                                     if (_vl < 25) then {
                                         missionNamespace setVariable ["lambs_danger_varisLogN", _vl + 1];
-                                        diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala 3 sn ilerleme yok, 2 yeniden emir sonuc vermedi%4 -> kara liste 60 sn + yeniden secim", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK];
+                                        diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala 3 sn ilerleme yok, 2 yeniden emir sonuc vermedi%4 -> kara liste 60 sn + yeniden secim | YOL-TANI: yol %5 (%6, dolasma %7, engel %8) | durus %9 | komut '%10' | anim %11 | baski %12 | davranis %13 | yukseklik farki %14 m", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK, (_yt select 0), (_yt select 2), (_yt select 1) toFixed 2, (_yt select 3), stance _a, currentCommand _a, animationState _a, (getSuppression _a) toFixed 2, behaviour _a, (((getPosASL _a) select 2) - ((AGLToASL _h) select 2)) toFixed 1];
                                     };
                                 };
                             };
@@ -577,6 +578,26 @@ if (missionNamespace getVariable ["lambs_danger_yedekSiper", true]) then {
     };
 };
 if (_limAcik && {_obj isNotEqualTo []} && {(_u distance2D _obj) > _lim}) then { _obj = []; _sayAS set ["yakin_dovus_uzak_red", (_sayAS getOrDefault ["yakin_dovus_uzak_red", 0]) + 1]; };
+// v8.805 YOL TARAMA KAPISI (kullanici: 'raycast sisteminin hakkini son damlasina kadar ver'; RPT c69aff1e v8.804: [SIPER-VARIS] ULASILAMADI 25 kayit, siper noktasina 5-35 m kala 3 sn ilerleme yok): secilen nesne / arazi noktasi GIDILEBILIR mi?
+//   askerden noktaya GEOM hatti (3 yukseklik + govde genisligi) acik degilse iki yana dolasma kordu denenir (fnc_yolTara); kord yok / cok uzun ya da hat su / ucurumdan geciyorsa nokta 60 sn KARA LISTEYE alinir ve
+//   1.2 sn sonra yeniden secilir (kosarak oraya gidip takilmak yerine). Bina ici asker (insideBuilding) atlanir. CBA lambs_danger_yolTara.
+if (_obj isNotEqualTo [] && {missionNamespace getVariable ["lambs_danger_yolTara", true]} && {(_u distance2D _obj) > 3} && {(insideBuilding _u) < 0.5}) then {
+    private _yt = [_u, _obj, 0, format ["%1 | %2 | %3", groupId _g, name _u, _objAd]] call FUNC(yolTara);
+    if (!(_yt select 0)) then {
+        private _kr = (_u getVariable [QGVAR(acikSiperKara), []]) select {time < (_x select 1)};
+        _kr pushBack [+_obj, time + 60];
+        if ((count _kr) > 6) then { _kr deleteAt 0; };
+        _u setVariable [QGVAR(acikSiperKara), _kr];
+        private _yrn = (_u getVariable [QGVAR(yolRedN), 0]) + 1;   // art arda red: yeniden secim araligi 1.2 -> 2.7 -> 4.2 ... en cok 8 sn (tum arama pahali; kapali avluda 1.2 sn'de bir dongu olmasin)
+        _u setVariable [QGVAR(yolRedN), _yrn];
+        _u setVariable [QGVAR(acikSiperT), time + ((1.2 + (1.5 * (_yrn - 1))) min 8)];
+        _sayAS set ["yol_kapali", (_sayAS getOrDefault ["yol_kapali", 0]) + 1];
+        _obj = [];
+    } else {
+        _u setVariable [QGVAR(yolRedN), 0];
+        if ((_yt select 1) > 1.25) then { _sayAS set ["yol_dolasma", (_sayAS getOrDefault ["yol_dolasma", 0]) + 1]; };
+    };
+};
 private _binalarK = (nearestObjects [_p, ["House"], _yar + 10]) select {(count (_x buildingPos -1)) >= 2};
 private _kentsel = (missionNamespace getVariable ["lambs_danger_kentselOncelik", true]) && {(count _binalarK) >= 2};
 if (_obj isNotEqualTo [] && {!_kentsel}) exitWith { call _nesneGit };

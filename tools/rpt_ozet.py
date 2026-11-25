@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.804"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.805"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -808,6 +808,23 @@ def kabul(path):
         ekle("GERCEKCILIK: SIPER VARISI", "GECTI" if o_ <= 15 and sv_ul <= 2 else "KONTROL", "oturtuldu %d / oturtulamadi %d (%%%.0f; hedef <= %%15) | varis gozcusu: yeniden emir %d, yedek sipere gecis %d, ulasilamadi (kara liste + yeniden secim) %d (v8.804+)" % (sv_ok, sv_no, o_, sv_re, sv_ye, max(sv_ul, sv_ua)))
     else:
         ekle("GERCEKCILIK: SIPER VARISI", "VERI YOK", "[SIPER-OTUR] / varis gozcusu kaydi az (siper atilisi yok)")
+    # v8.805 (kullanici: 'raycast sisteminin hakkini son damlasina kadar ver'): YOL TARAMA (fnc_yolTara) - secilen siper / geri cekilme noktasina gidis yolu raycast'i
+    yt_ozet = [l for l in L if "[YOL-TARA-OZET]" in l]
+    yt_say = {"cagri": 0, "duz": 0, "dolasma": 0, "kapali": 0, "su": 0, "dik_yamac": 0, "dolasma_yok": 0, "dolasma_asildi": 0}
+    for l in yt_ozet:
+        for k_, v_ in re.findall(r"(cagri|duz|dolasma|kapali|su|dik_yamac|dolasma_yok|dolasma_asildi)=(\d+)", l):
+            yt_say[k_] += int(v_)
+    yk_as = 0; yd_as = 0
+    for l in L:
+        if "[ACIK-SIPER-OZET]" in l:
+            for k_, v_ in re.findall(r"(yol_kapali|yol_dolasma)=(\d+)", l):
+                if k_ == "yol_kapali": yk_as += int(v_)
+                else: yd_as += int(v_)
+    yt_log = [l for l in L if "[YOL-TARA] " in l]
+    if yt_say["cagri"] or yk_as or yt_log:
+        ekle("GERCEKCILIK: SIPER YOLU (yol tarama)", "BILGI", "tarama %d: duz acik %d | dolasma %d | ERISILEMEZ %d (su %d, dik yamac %d, dolasma kordu yok %d, dolasma > sinir %d) | acikSiper: yol_kapali %d (nokta elendi + yeniden secim), yol_dolasma %d | ilk olumsuz: %s (v8.805+; yol_kapali yuksek + [SIPER-VARIS] ULASILAMADI dusuk = ise yariyor)" % (yt_say["cagri"], yt_say["duz"], yt_say["dolasma"], yt_say["kapali"], yt_say["su"], yt_say["dik_yamac"], yt_say["dolasma_yok"], yt_say["dolasma_asildi"], yk_as, yd_as, (re.sub(r'^.*?"\[YOL-TARA\] ', "", yt_log[0]).strip().rstrip('"')[:160]) if yt_log else "-"))
+    else:
+        ekle("GERCEKCILIK: SIPER YOLU (yol tarama)", "VERI YOK", "[YOL-TARA] / [YOL-TARA-OZET] yok (v8.805 oncesi RPT ya da lambs_danger_yolTara kapali)")
     ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
 
     print("=" * 100); print("KABUL TESTI |", path)

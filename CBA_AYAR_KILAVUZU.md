@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.804 · Preset: `CBA_LAMBS_Danger_v8.804.txt` · 643 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.805 · Preset: `CBA_LAMBS_Danger_v8.805.txt` · 646 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.804.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.805.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (337 ayar)
+### ELITE siper (340 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -504,6 +504,9 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `yigilmaAktif` | Yigilma nedeni + cozucu | açık/kapalı | açık | v8.367 (fnc_yigilmaCoz). Ayni yerde (< yaricap) en az 3 AYAKTA asker temasta 6 sn / sakinde 12 sn yigili kalirsa her uyenin NEDENI RPT'ye yazilir ([YIGILMA-NEDEN]: HEKIM / BOMBA / ISTASYON / BOUND-VARIS / EMIR-FM / BINA / ACIK-SIPER-ORTAK / SIPER-YAPIS / BOUND-KAPSAMA / TEMAS-DURAN / FORMASYON-SIKISIK); muaf olmayan (hekim, bomba, istasyon, forceMove, binadaki degil; lider degil) en fazla 2 uye 4-8 m yana bos noktaya tasinir. Bounding kapsama ekibi dahil (fnc_dispersion'in atladigi bosluk). Kapaliyken yalniz mevcut sistemler calisir. |
 | `yigilmaAralik` | Siper noktalari arasi asgari aralik (m) | 2–10 | 6 | fnc_acikSiper: acikta kalan askerin nesne arkasi siper noktasi, daha once ayni gruptaki askere ayrilmis (30 sn) ya da o anda bir dostun durdugu (3 m) noktaya bu mesafeden daha yakin olamaz. Eskiden 1.5 m idi (ayni direge 3-4 asker gidiyordu). v8.390: 4 -> 6 (3-5 m gunduz dagilmasinin ustunde, es isleyen siperler arasi). TASARIM: 6. |
 | `yigilmaYaricap` | Yigilma yaricapi (m) | 1.5–8 | 4 | Bu mesafeden yakin duran 3+ ayakta asker 'yigilma' sayilir. v8.390: 2.5 -> 4 (doktrin: gunduz 3-5 m aralik; granat / RPG alan etkisi tek askerle sinirli kalsin). [DOKTRIN] yigilma olcusu (2.5 m) tani amacli aynen kalir. |
+| `yolDolasMaks` | Yol tarama: en cok dolasma orani | 1.2–4 | 1.8 | v8.805. Duz hat kapaliysa kabul edilen en uzun dolasma (kord boyu / duz mesafe). 1.8 = varsayilan (duz 20 m'lik yer icin en cok 36 m kosu); kucuk = yalniz acik yollu siperler, buyuk = uzun duvar arkasi da secilir. |
+| `yolMaruziyetCeza` | Geri cekilme yolu: acik ornek basina ceza | 0–20 | 5 | v8.805. Geri cekilme WP adayina giden hat 3 noktada (fnc_rotaRiski) dusman gozunden taranir; dusmana ACIK her ornek WP puanina bu kadar ceza ekler (varsayilan 5; 0 = kapali). Mevcut +35 / +15 gizlenme puanlarina EK. |
+| `yolTara` | Yol tarama: siper / geri cekilme noktasina GIDIS YOLU raycast'i | açık/kapalı | açık | v8.805 (kullanici: 'raycast sisteminin hakkini son damlasina kadar ver'; RPT c69aff1e: 25 [SIPER-VARIS] ULASILAMADI, siper noktasina 5-35 m kala takilma). Acik: secilen siper (acikSiper) ve geri cekilme WP adaylari icin askerden noktaya GEOM hatti 3 yukseklikte + govde genisligi isinlariyla taranir; hat nesneyle (duvar / cit / kaya / bina kosesi) kapaliysa iki yana dolasma kordu denenir; kord yoksa / cok uzunsa (yolDolasMaks) ya da hat su / ucurumdan geciyorsa nokta ELENIR (60 sn kara liste) ve 1-2 sn icinde baska siper secilir. Kapali = eski (yalniz varis gozcusu). |
 | `zirhKacis` | Zirhtan kacis (AT'siz grup) | açık/kapalı | açık | v8.759 (kullanici: 'araçtan kaçmasın'). ACIK (eski): kendi AT'si olmayan grup tank / APC'den sert sipere kacar. KAPALI: kacmaz, normal piyade karari (siper / bastirma / hucum). AT'li grup zaten kacmaz (AT taarruzu). |
 | `zirhKacisSinir` | Zirhtan kacis: zaman siniri (90 sn kacis, 60 sn mola) | açık/kapalı | açık | v8.550. AT'siz piyade grubunun ayni zirhtan kesintisiz kacisi 90 sn'yi gecerse 60 sn mola verilir (normal karar akisi: piyadeyle dovus / bounding / geri cekilme); ayrica kapali arazide (orman / sehir) dusman piyade ic ice ise (>= 2 bilinen, en yakin <= 130 m) ve zirh >= 60 m uzaktaysa zirhtan kacis uygulanmaz. Zirh < 60 m = kacis. Kapali: eski sinirsiz kacis (orman ic ice kural yine gecerli). |
 | `zorlaRisk` | Sipere zorla: risk esigi | 0–1 | 0.25 | v8.511. Risk = tehdit (bilinen dusman sayisi, agir silah / arac) x baski x mesafe (yakinda dusuk). Bu degerin altinda siper atilisi yapilmaz (tek hafif dusman = savas). Atilis suresi 1.2 + 2.3 x risk sn. 0 = her cover isteginde atilis. |

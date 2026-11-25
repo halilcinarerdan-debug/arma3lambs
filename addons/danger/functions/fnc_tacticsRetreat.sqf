@@ -123,7 +123,16 @@ private _wpSec = {
             private _cASL = AGLToASL (_c vectorAdd [0, 0, 1.2]);
             if (terrainIntersectASL [_eASL, _cASL] || {lineIntersects [_eASL, _cASL, objNull, objNull]}) then { _s = _s + 35; };
             if ((nearestTerrainObjects [_c, ["TREE", "ROCK", "HIDE", "BUSH", "WALL"], 3, false, true]) isNotEqualTo []) then { _s = _s + 10; };
-            if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
+            // v8.805 YOL TARAMA (kullanici: 'raycast sisteminin hakkini son damlasina kadar ver; retreatlar daha iyi olsun'): eski tek isin (1.4 m) yerine fnc_yolTara (3 yukseklik + govde isini, dolasma kordu, su / yamac) ve
+            //   fnc_rotaRiski (hat 3 ornek, dusman gozunden aciklik): erisilemez WP -60, dolasma orani > 1.15 ise -(oran - 1) x 20, dusmana ACIK her hat ornegi -yolMaruziyetCeza (5). CBA lambs_danger_yolTara kapaliysa eski -15.
+            if (missionNamespace getVariable ["lambs_danger_yolTara", true]) then {
+                private _yt = [_o, _c, 0] call FUNC(yolTara);
+                if (!(_yt select 0)) then { _s = _s - 60; } else { if ((_yt select 1) > 1.15) then { _s = _s - (((_yt select 1) - 1) * 20); }; };
+                private _yca = (missionNamespace getVariable ["lambs_danger_yolMaruziyetCeza", 5]) max 0;
+                if (_yca > 0) then { _s = _s - (([_o, _c, [[_eASL, 1]], objNull] call FUNC(rotaRiski)) * _yca); };
+            } else {
+                if (lineIntersects [AGLToASL (_o vectorAdd [0, 0, 1.4]), AGLToASL (_c vectorAdd [0, 0, 1.4])]) then { _s = _s - 15; };
+            };
             // v8.669 BACAK ORTASI GIZLI (yol haritasi madde 4 / 6): kosu yolunun orta noktasi da dusman gozunden arazi / nesneyle kesiliyorsa (olu arazi) +15; sicrama acikta gecen sure azalir
             if (missionNamespace getVariable ["lambs_danger_cekilBacakYenile", true]) then {
                 private _mASL = AGLToASL [((_o select 0) + (_c select 0)) / 2, ((_o select 1) + (_c select 1)) / 2, 1.0];
