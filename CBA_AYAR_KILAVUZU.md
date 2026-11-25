@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.806 · Preset: `CBA_LAMBS_Danger_v8.806.txt` · 646 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.807 · Preset: `CBA_LAMBS_Danger_v8.807.txt` · 648 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.806.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.807.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (340 ayar)
+### ELITE siper (342 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -324,6 +324,8 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `konusmaAlgi` | Konusma sesi dusmana bilgi verir (STEALTH degilse) | açık/kapalı | açık | v8.535. Bir bot callout yaptiginda (ya da oyuncu ses konusmasi yaparken: TFAR / vanilla getPlayerChannel) ve davranisi STEALTH degilse, kisitli mesafedeki (Konusma menzili) DUSMAN askerler konusma suresince konusanin konumunu duyar (bilgi + yaklasik yon). Duvar araya girerse menzil kisalir. DOST etkilenmez. |
 | `konusmaM` | Konusma duyulma menzili (m) | 10–400 | 60 | v8.535. Konusma sesinin dusmana bilgi verdigi azami mesafe (varsayilan 60). Bina / duvar araya girerse etkin mesafe x1.8. |
 | `koseIcHassas` | Bina ici: kose temkini ekstra hassas | açık/kapalı | açık | v8.605. Bina icinde kose tespiti daha hassas (isin farki 3 -> 2.2 m, yakin taraf 8 -> 10 m, kose 7 -> 9 m, aci 52 -> 60 derece) ve bina temizleme / LAMBS CQB sirasinda temas damgasi olmadan da calisir: koseden once durur, bilinmeyen sektoru dilimler (pie), namlu koseye doner. |
+| `kosuPatlama` | Kosu patlamasi: motor 'dur + nisan al' alt durumunu kisa sure kapat | açık/kapalı | açık | v8.807 (kullanici: 'retreati incele, cok aciktta durmasinlar'; RPT d03615e7: retreat kosucularinin %67'si duruyor, duranlarin 14 / 16'si komut ATTACK; lider 25 sn ATTACK -> MOVE dongusunde aciktta kaldi). Acik: geri cekilme kosucusu ATTACK komutuyla durursa (ve siper varis gozcusunde ATTACK / Suppress ile takilan asker icin) TARGET + AUTOTARGET kosuPatlamaS sn kapatilir, hedef birakilir, MOVE yeniden verilir; tufek indirilmez (COMBAT), sure sonunda hedef alma geri gelir. Kapali = eski (ezme isleyicisi hedef almayi hep acik tutar). |
+| `kosuPatlamaS` | Kosu patlamasi: sure (sn) | 2–15 | 6 | v8.807. Hedef alma kac sn kapali kalsin (varsayilan 6; art arda durmada retreat +2 sn / durma, en cok +6). Kisa = daha cok karsilik, uzun = daha az aciktta durma. |
 | `lambs_main_eliteCoverYedek` | ELITE Cover: raycast siper yedegi | açık/kapalı | açık | v8.365 (fnc_eliteCover canlandirildi). Normal siper aramasi (findCover) bos donerse askerin cevresi gercek mermi geometrisi (FIRE LOD) isinlariyla taranir: Zeus / Eden'de konan sandik, kum torbasi, bariyer, enkaz gibi harita disi nesneler siper olabilir. Aday halkasi AI sayisina gore kucultulur (performans). EVADE (zirhtan kacis) haric. Kapaliyken eski davranis (bos donunce yedek yok). |
 | `mekanizeDestekS` | Mekanize: IFV ates destegi suresi (sn) | 10–120 | 30 | v8.789. Yolcular indikten sonra IFV bu kadar sn yerinde durup kule atesiyle destek verir, sonra eskort takibine (aracSenkron) doner. Varsayilan 30. |
 | `mekanizeHareket` | Mekanize: tasiyici arac (BMP / BTR / kamyon) temasta yolcusunu indirsin | açık/kapalı | açık | v8.789 (kullanici: arac hareket mekanize ve araçla koordineli hareket, bmp btr truck). ACIK: >= 2 AI yolcu tasiyan IFV (BMP / Bradley) / APC (BTR / Stryker) / kamyon temas + bilinen dusman iniş esiginde (doktrin mekInisM) durur, yolcular iner; IFV yerinde ates destegi verir, APC / kamyon dusmandan uzaga rezerve cekilir. Varsayilan ACIK. |
@@ -868,7 +870,7 @@ Doktrin / profil seçimleri gibi döngüyle kaydedilen ya da başka bir yerden g
 | `aktifEast` | true |
 | `aktifInd` | true |
 | `aktifWest` | true |
-| `cqbRange` | 55 |
+| `cqbRange` | 58 |
 | `disableAIAutonomousManoeuvres` | false |
 | `disableAIDeployStaticWeapons` | false |
 | `disableAIFindStaticWeapons` | false |
@@ -884,10 +886,10 @@ Doktrin / profil seçimleri gibi döngüyle kaydedilen ya da başka bir yerden g
 | `dronAviArac` | true |
 | `dronIstiksaf` | true |
 | `elBombasiAktif` | true |
-| `panicChance` | 0.1 |
+| `panicChance` | 0.01 |
 | `patlayiciAktif` | true |
 | `pusuCagriAktif` | true |
 | `pusuKanatAktif` | true |
 | `pusuTepkiAktif` | true |
-| `teslimBirey` | true |
+| `teslimBirey` | false |
 

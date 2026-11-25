@@ -478,6 +478,7 @@ private _nesneGit = {
                                 _reemir = _reemir + 1;
                                 _ilerT = time;
                                 _a setVariable [QGVAR(oturDoMoveT), time];
+                                if ((currentCommand _a) in ["ATTACK", "Suppress"]) then { [_a, 6, "varis"] call FUNC(kosuPatlamasi); };   // v8.807: motor ATTACK ile durdurduysa (RPT d03615e7: 18 basarisizligin 8'i ATTACK / Suppress, baski 0) hedef alma 6 sn kapanir
                                 _a doMove _h;
                                 _sy set ["varis_yeniden_emir", (_sy getOrDefault ["varis_yeniden_emir", 0]) + 1];
                             } else {

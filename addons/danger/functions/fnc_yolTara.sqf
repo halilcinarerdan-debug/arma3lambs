@@ -9,7 +9,7 @@
  *   1) SU / DIK YAMAC: hat boyunca 4 m'de bir (en cok 10) yuzey suyu ve arazi egimi (adim basina > ~48 derece) ornegi. Su ya da ucurum varsa nokta erisilemez sayilir.
  *   2) DUZ HAT: askerden noktaya (son 0.7 m kisaltilarak: siper nesnesine siyirmasin) GEOM LOD hatti 3 yukseklikte (0.6 / 1.0 / 1.5 m: dizlik / bel / gogus) + govde genisligi icin +-0.3 m yan isinlar (1.0 m).
  *      Insan / hayvan engel sayilmaz. Arazi (nesnesiz) carpmasi engel sayilmaz. Duz hat acik ise [true, 1].
- *   3) DOLASMA: duz hat nesneyle kapaliysa orta noktadan hatta DIK iki yana (mesafenin %30 / %55 / %90'i, 3-25 m) iki bacakli kord denenir (her bacak 0.6 + 1.0 m GEOM); en kisa acik kord secilir.
+ *   3) DOLASMA: duz hat nesneyle kapaliysa orta noktadan hatta DIK iki yana (mesafenin %20 / %35 / %55 / %80 / %120'si, 3-30 m) iki bacakli kord denenir (her bacak 0.6 + 1.0 m GEOM); en kisa acik kord secilir.
  *      oran = (toplam kord boyu / duz mesafe). oran > yolDolasMaks (1.8) ya da kord yoksa nokta erisilemez sayilir (uzun duvarin arkasi, kapali avlu, iki cit arasi).
  * Arguments:
  * 0: Baslangic: Asker <OBJECT> ya da konum (AGL) <ARRAY>
@@ -107,7 +107,7 @@ if (_ad isEqualTo "") then { _ad = (getModelInfo _blk) select 0; };
 // 3) dolasma kordu (orta noktadan iki yana; en kisa acik kord)
 private _en = 1e9;
 {
-    private _yan = (((_d * _x) min 25) max 3);
+    private _yan = (((_d * _x) min 30) max 3);
     {
         if (_en < 1e9) then { continue };
         private _mx = (((_a select 0) + (_b select 0)) / 2) + (-_dy * _x * _yan);
@@ -119,7 +119,7 @@ private _en = 1e9;
             };
         };
     } forEach [1, -1];
-} forEach [0.3, 0.55, 0.9];
+} forEach [0.2, 0.35, 0.55, 0.8, 1.2];   // v8.807: 3 -> 5 kord yanal orani (RPT d03615e7: 32 reddin 31'i 'dolasma kordu yok', koy evleri / duvar; dar gecit / avlu icin daha fazla aday)
 if (_en >= 1e9) exitWith {
     _say set ["dolasma_yok", (_say getOrDefault ["dolasma_yok", 0]) + 1];
     [false, 99, "dolasma kordu yok", _ad] call _log

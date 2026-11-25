@@ -546,8 +546,14 @@ if (EGVAR(main,debug_functions)) then {
                             lambs_danger_retEzmeN = lambs_danger_retEzmeN + 1;
                             diag_log format ["[GERI-CEKILME-EZME] %1 | %2 | komut:%3 beh:%4 | hedefe %5 m | TARGET:%6 AUTOTARGET:%7 -> yeniden MOVE", groupId _grup, name _b, _kmt, behaviour _b, round (_b distance2D (_x select 1)), _b checkAIFeature "TARGET", _b checkAIFeature "AUTOTARGET"];
                         };
-                        _b enableAI "TARGET";
-                        _b enableAI "AUTOTARGET";
+                        // v8.807 KOSU PATLAMASI (RPT d03615e7: retreat kosucularinin %67'si duruyor, duranlarin 14 / 16'si ATTACK; lider 25 sn 'ATTACK -> yeniden MOVE' dongusunde aciktta kaldi: bu isleyici TARGET / AUTOTARGET'i her seferinde yeniden aciyordu):
+        //   motor ATTACK ile durdurduysa hedef alma kisa sure (6 sn, art arda durmada +2 sn) kapatilir + hedef birakilir, tufek yukarda kalir (COMBAT); sure sonunda geri gelir. CBA lambs_danger_kosuPatlama kapaliysa eski davranis.
+                        if ((_kmt isEqualTo "ATTACK") && {[_b, 6 + (2 * ((_b getVariable [QGVAR(retAtkN), 0]) min 3)), "retreat"] call FUNC(kosuPatlamasi)}) then {
+                            _b setVariable [QGVAR(retAtkN), (_b getVariable [QGVAR(retAtkN), 0]) + 1];
+                        } else {
+                            _b enableAI "TARGET";
+                            _b enableAI "AUTOTARGET";
+                        };
                         _b disableAI "AUTOCOMBAT";
                         _b enableAI "PATH";
                         _b enableAI "MOVE";
