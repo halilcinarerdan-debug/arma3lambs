@@ -21,6 +21,7 @@
  *   (3) ANA GOVDE iki yarida (A sonra B) KARSI KENARA ~7 m YANAL ARALIKLA yayilarak gecer (dagilma)
  *   (4) GOZETLEME ekibi (lider dahil) EN SON gecer; serbest: doFollow + waypoint yeniden
  *   Kapatma: CBA 'tehlikeAcikAktif' / lambs_danger_tehlikeAcikOff = true.   Log: [TEHLIKE-ACIK] (ilk 60).
+ * v8.822 ACIK ALAN DOLASMA (bypass): once yana kayip ortulu serit uzerinden dolasma aranir (TC 3-21.76 6-23 'Bypass danger areas whenever possible'; tasarim: yanal kayma 40-220 m, dolasma orani <= tehlikeAcikDolasOran, serit boyunca art arda <= 40 m ortusuz); bulunamazsa yukaridaki gecis. CBA tehlikeAcikDolas / tehlikeAcikDolasOran. Log: [TEHLIKE-ACIK] DOLASMA.
  * SINIR: karsi kenar > 250 m ise (cok genis alan) bu akis calismaz (uzun mesafe: bounding overwatch). Waypoint olmayan (expectedDestination bos) grup tetiklenmez.
  *
  * Arguments: None
@@ -212,6 +213,108 @@ private _acikGecis = {
 
 missionNamespace setVariable ["lambs_danger_tehlikeAcikGecisFn", _acikGecis];
 
+// ---- v8.822: ACIK ALAN DOLASMA (BYPASS; kullanici: 'acik tehlike alani gecisi yap'; TC 3-21.76 Tehlike Alanlari 6-23 'Bypass danger areas whenever possible' + 'Danger area (small or open)': PL liderlik eden manga ile alani DOLASMA teknigi ile
+//   asar: 90 derece yana sap, alan bitene kadar git, ayarlanan mesafe sonra orijinal yone don [K] satir 4461-4520). Mevcut v8.390 acik alan GECISI (gozetle + oncu eleman) 'buyuk alan, karsi kenar <= 250 m' dalidir [K: satir 4543-4546];
+//   dolasma icin 'kucuk / buyuk' esigi, yanal kayma mesafeleri ve dolasma orani TASARIM degerleridir (kitapta sayi YOK). Once dolasma aranir; makul bir ortulu serit yoksa eski gecis calisir. ----
+private _dolasPlan = {
+    params ["_l", "_yon", "_karsi", "_hedef"];
+    private _lp = getPosATL _l;
+    private _ortuVar = {
+        params ["_p"];
+        surfaceIsWater _p || {(count (nearestTerrainObjects [_p, ["TREE", "BUILDING", "HOUSE", "ROCK", "WALL", "HIDE", "FOREST"], 15, false, true])) > 0}
+    };
+    private _dTop = (_lp distance2D _hedef) max 1;
+    private _maxOran = ((missionNamespace getVariable ["lambs_danger_tehlikeAcikDolasOran", 1.5]) max 1.1) min 2.5;
+    private _ileri = (_lp distance2D _karsi) + 30;   // karsi kenarin 30 m otesi
+    private _best = [];
+    private _bestOran = 1e9;
+    {
+        private _o = _x;
+        {
+            private _p1 = _lp getPos [_o, _yon + _x];
+            if (!(surfaceIsWater _p1) && {([_l, _p1, 0] call FUNC(yolTara)) select 0}) then {
+                // paralel serit: art arda en cok 4 ortusuz ornek (40 m), su yok
+                private _art = 0;
+                private _enAcik = 0;
+                private _ok = true;
+                for "_d" from 10 to _ileri step 10 do {
+                    private _q = _p1 getPos [_d, _yon];
+                    if (surfaceIsWater _q) exitWith { _ok = false; };
+                    if ([_q] call _ortuVar) then { _art = 0; } else { _art = _art + 1; _enAcik = _enAcik max _art; };
+                };
+                if (_ok && {_enAcik <= 4}) then {
+                    private _p2 = _p1 getPos [_ileri, _yon];
+                    if (!(surfaceIsWater _p2)) then {
+                        private _oran = (_o + _ileri + (_p2 distance2D _hedef)) / _dTop;
+                        if (_oran < _bestOran) then { _bestOran = _oran; _best = [_p1, _p2, _o]; };
+                    };
+                };
+            };
+        } forEach [90, -90];
+        if (_best isNotEqualTo []) exitWith {};   // en kucuk yanal kayma
+    } forEach [40, 70, 110, 160, 220];
+    if (_best isEqualTo [] || {_bestOran > _maxOran}) exitWith {[]};
+    _best + [_bestOran]
+};
+missionNamespace setVariable ["lambs_danger_tehlikeAcikDolasPlanFn", _dolasPlan];
+
+private _acikDolas = {
+    params ["_g", "_p1", "_p2", "_ofs", "_oran", "_gen"];
+    private _t0 = time;
+    private _bitir = {
+        params ["_g", "_neden"];
+        if (isNull _g) exitWith {};
+        _g setVariable [QGVAR(isExecutingTactic), nil];
+        _g setVariable [QGVAR(tehlikeAlaniT), time];
+        {
+            if (alive _x) then {
+                _x setVariable [QGVAR(taktikKilit), nil];
+                _x setUnitPos "AUTO";
+                _x doWatch objNull;
+                [_x, leader _g] call FUNC(doFollowGuvenli);
+            };
+        } forEach (units _g);
+        if (!isNull (leader _g) && {currentWaypoint _g > 0 || {(count (waypoints _g)) > 0}}) then { _g setCurrentWaypoint [_g, currentWaypoint _g]; };
+        diag_log format ["[TEHLIKE-ACIK] %1 | DOLASMA SERBEST: %2", groupId _g, _neden];
+    };
+    private _iptalMi = { params ["_g"]; isNull _g || {(_g getVariable [QGVAR(contact), 0]) > time} || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} };
+    private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+    if ((count _us) < 5) exitWith {};
+    _g setVariable [QGVAR(isExecutingTactic), true];
+    diag_log format ["[TEHLIKE-ACIK] %1 | DOLASMA basladi | acik serit %2 m, yanal kayma %3 m, dolasma orani %4 (esik %5) | asker %6", groupId _g, round _gen, round _ofs, _oran toFixed 2, ((missionNamespace getVariable ["lambs_danger_tehlikeAcikDolasOran", 1.5]) max 1.1 min 2.5) toFixed 2, count _us];
+    // bacak: p1 sonra p2; her bacakta takilanlar hareket kurtarma merdiveniyle kurtarilir
+    private _bacak = {
+        params ["_g", "_nokta", "_sure"];
+        private _bas = time;
+        {
+            if (alive _x) then {
+                _x setVariable [QGVAR(taktikKilit), time + _sure + 20];
+                _x setUnitPos "AUTO";
+                _x forceSpeed -1;
+                _x doMove (_nokta getPos [random 8, random 360]);
+            };
+        } forEach ((units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x}});
+        private _bit = time + _sure;
+        private _ok = true;
+        waitUntil {
+            sleep 1.5;
+            private _canli = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
+            private _yakin = _canli select {(_x distance2D _nokta) <= 22};
+            { if ((speed _x) < 1 && {(time - _bas) > 6} && {(_x distance2D _nokta) > 22}) then { [_x, _nokta, "dolas", 3, 2] call FUNC(hareketKurtar); }; } forEach (_canli - _yakin);
+            if ([_g] call (missionNamespace getVariable "lambs_danger_tehlikeAcikIptalFn")) then { _ok = false; };
+            !_ok || {time > _bit} || {(count _canli) isEqualTo 0} || {(count _yakin) >= (ceil ((count _canli) * 0.7))}
+        };
+        _ok
+    };
+    missionNamespace setVariable ["lambs_danger_tehlikeAcikIptalFn", _iptalMi];
+    private _l1 = (leader _g) distance2D _p1;
+    private _ok1 = [_g, _p1, 20 + (_l1 / 1.8)] call _bacak;
+    if (!_ok1) exitWith { [_g, "temas / retreat (yana kayma)"] call _bitir; };
+    private _ok2 = [_g, _p2, 20 + ((_p1 distance2D _p2) / 1.8)] call _bacak;
+    [_g, if (_ok2) then { "TAMAM (" + str (round (time - _t0)) + " sn)" } else { "temas / retreat (dolasma)" }] call _bitir;
+};
+missionNamespace setVariable ["lambs_danger_tehlikeAcikDolasFn", _acikDolas];
+
 private _calis = {
     missionNamespace setVariable ["lambs_danger_tehlikeAdim", "basladi"];
     private _gecisFn = missionNamespace getVariable "lambs_danger_tehlikeAlaniGecisFn";
@@ -278,6 +381,16 @@ private _calis = {
                     continue
                 };
                 _g setVariable [QGVAR(tehlikeAlaniT), time];
+                // v8.822: once DOLASMA (TC 3-21.76 6-23: 'Bypass danger areas whenever possible'); makul ortulu serit yoksa eski gecis (gozetle + oncu eleman)
+                if (missionNamespace getVariable ["lambs_danger_tehlikeAcikDolas", true]) then {
+                    private _dp = [_l, _yon, _ac select 1, _hedef] call (missionNamespace getVariable "lambs_danger_tehlikeAcikDolasPlanFn");
+                    if (_dp isNotEqualTo []) then {
+                        _say set ["acik alan dolasma", (_say getOrDefault ["acik alan dolasma", 0]) + 1];
+                        [_g, _dp select 0, _dp select 1, _dp select 2, _dp select 3, _ac select 2] spawn (missionNamespace getVariable "lambs_danger_tehlikeAcikDolasFn");
+                        continue
+                    };
+                    _say set ["dolasma yok (gecis)", (_say getOrDefault ["dolasma yok (gecis)", 0]) + 1];
+                };
                 _say set ["acik alan gecisi", (_say getOrDefault ["acik alan gecisi", 0]) + 1];
                 [_g, _lp, _ac select 1, _yon, _ac select 2] spawn _acikFn;
                 continue

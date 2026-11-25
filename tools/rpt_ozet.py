@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.821"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.822"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -760,7 +760,7 @@ def kabul(path):
         if dd_ != "ok": ihlal_.append("%s %s" % (b_, dd_))
         ol_.append("%s: %d atis / %d isabet = %%%.1f (hedef %%%d-%d) %s" % (b_, a_, i_, o_, lo_, hi_, dd_))
     ekle("GERCEKCILIK: BOT ISABET (mesafe bandi)", "VERI YOK" if not olc_ else ("GECTI" if not ihlal_ else "KONTROL"),
-         (" | ".join(ol_) + (" | SAPMA: " + ", ".join(ihlal_) if ihlal_ else "") + " (ayar: skillIsabetMax / Min, dogrulukMaks, isabetSeviye; her turda tek grup ayari degistir)") if sirali else "[BOT-ISABET] yok (v8.577 oncesi RPT ya da bot atisi olmadi; bant bazli olcum v8.801+)")
+         (" | ".join(ol_) + (" | SAPMA: " + ", ".join(ihlal_) if ihlal_ else "") + " (ayar: >= 250 m YUKSEK -> isabetUzakSapma artir; < 120 m DUSUK -> isabetYakinYardim artir [v8.822]; ayrica skillIsabetMax / Min, dogrulukMaks, isabetSeviye; her turda tek grup ayari degistir)") if sirali else "[BOT-ISABET] yok (v8.577 oncesi RPT ya da bot atisi olmadi; bant bazli olcum v8.801+)")
     otr_ = re.findall(r"OTURUM: (\d+) atis / (\d+) isabet", "\n".join([l for l in L if "[BOT-ISABET]" in l]))
     if otr_:
         ta_, ti_ = int(otr_[-1][0]), int(otr_[-1][1])
@@ -888,6 +888,31 @@ def kabul(path):
         ekle("GERCEKCILIK: HAREKET KURTARMA (MOVE kabul + yurumuyor)", "BILGI", "olculen (ilk 25 + 30 sn'de bir): %s | ozet sayaclari (60 sn'de bir toplam): %s | KARAR: bir adimin yurudu orani yuksekse (ilk basarili adim = gereken en kucuk mudahale) o adim varsayilan yapilir; hicbiri tutmuyorsa motor MOVE'u bastiriyor -> ayri grup / join yolu" % (t_ or "-", ", ".join("%s=%d" % kv for kv in sorted(hk_oz.items())) or "-"))
     else:
         ekle("GERCEKCILIK: HAREKET KURTARMA (MOVE kabul + yurumuyor)", "VERI YOK", "[HAREKET-KURTAR] yok (v8.818 oncesi RPT, lambs_danger_hareketKurtar kapali ya da hic yurumeyen asker olmadi)")
+    # v8.822 CARELESS TEMASTA (kullanici: 'elemanlar catismada careless kaliyor?'): TELEMETRI-GRUP davranisi CARELESS olan satirlar; dusman < 150 m ya da son 20 sn'de temas varsa = HATA (hedef 0)
+    cr_t = 0; cr_k = []
+    for l in L:
+        m_ = re.search(r"\[TELEMETRI-GRUP\] ([^|]+?) \|.*?\| CARELESS/\w+/\w+/\w+ .*?temas:(-?\d+) sn once \|.*?en yakin dusman:(\d+) m", l)
+        if m_:
+            cr_t += 1
+            if int(m_.group(3)) < 150 or int(m_.group(2)) > -20: cr_k.append("%s %s m / temas %s sn" % (m_.group(1).strip(), m_.group(3), m_.group(2)))
+    tl_ = len([1 for l in L if "[TELEMETRI-GRUP]" in l])
+    if tl_ >= 5:
+        ekle("GERCEKCILIK: CARELESS TEMASTA", "GECTI" if not cr_k else "KALDI", "telemetri %d satir, CARELESS %d (%%%.0f) | dusman < 150 m ya da temas varken CARELESS: %d %s (0 olmali; v8.822: hareket kurtarma CARELESS'i yalniz dusman >= 150 m, baski < 0.3, 4 sn, grup duzeyinde geri alinir)" % (tl_, cr_t, 100.0 * cr_t / tl_, len(cr_k), cr_k[:3]))
+    # v8.822: IKILI SICRAMA (2-3 kisilik ekip buddy bounding) + ACIK ALAN DOLASMA (bypass)
+    ik_l = [l for l in L if "[IKILI-SICRAMA]" in l]
+    if ik_l:
+        ik_g = len(set(re.findall(r"\[IKILI-SICRAMA\] ([^|]+?) \|", "\n".join(ik_l))))
+        ekle("GERCEKCILIK: IKILI SICRAMA (2-3 kisilik ekip)", "BILGI", "sicrama satiri %d (ilk 20 + 30 sn'de bir) | grup %d | ilk: %s | KONTROL: sicramadan sonra ekip siperde mi, dusman mesafesi azaliyor mu, ekip kayip veriyor mu" % (len(ik_l), ik_g, ik_l[0].split("[IKILI-SICRAMA]",1)[1].strip()[:160]))
+    else:
+        ekle("GERCEKCILIK: IKILI SICRAMA (2-3 kisilik ekip)", "VERI YOK", "[IKILI-SICRAMA] yok (2-3 kisilik, temasli, dusman 60-350 m ekip gerekir; v8.822 oncesi RPT ya da ikiliSicrama kapali)")
+    dl_b = len([1 for l in L if "[TEHLIKE-ACIK]" in l and "DOLASMA basladi" in l])
+    dl_ok = len([1 for l in L if "[TEHLIKE-ACIK]" in l and "DOLASMA SERBEST: TAMAM" in l])
+    dl_iptal = len([1 for l in L if "[TEHLIKE-ACIK]" in l and "DOLASMA SERBEST: temas" in l])
+    gc_b = len([1 for l in L if "[TEHLIKE-ACIK]" in l and "ACIK ALAN GECISI basladi" in l])
+    if dl_b or gc_b:
+        ekle("GERCEKCILIK: ACIK ALAN DOLASMA (bypass)", "BILGI", "dolasma basladi %d (tamam %d, temas / retreat ile iptal %d) | dolasma bulunamadi -> eski gecis (gozetle + oncu) %d | KONTROL: dolasma grubu ortulu seritten gitti mi, toplam sure / yol makul mu (oran <= tehlikeAcikDolasOran)" % (dl_b, dl_ok, dl_iptal, gc_b))
+    else:
+        ekle("GERCEKCILIK: ACIK ALAN DOLASMA (bypass)", "VERI YOK", "[TEHLIKE-ACIK] yok (rota ortu kenarindan >= 60 m acik alana giren >= 5 kisilik, temassiz grup gerekir)")
     # v8.812 (kullanici: 'retreat coz'; RPT beabaf64: grup 80 sn'de yok oldu, WITHDRAW yok): erken cekilme tetigi / reddi
     ec_tet = len([1 for l in L if "erken cekilme:" in l])
     ec_red = [l for l in L if "[ERKEN-CEKILME-RED]" in l]

@@ -281,6 +281,12 @@ if (
     _temasKes = [_group, _target] call (missionNamespace getVariable ["lambs_danger_fnc_tacticsBreakContact", {false}]);
 };
 if (_temasKes) exitWith {true};
+// v8.817 IKILI SICRAMA (2-3 kisilik ates timi: temas kesme tetigi yoksa buddy bounding; yol haritasi Asama 15 / 4)
+private _ikili = false;
+if (_tehditGecerli && {!_senaryo} && {!isPlayer (leader _group)}) then {
+    _ikili = [_group, _target] call FUNC(tacticsIkili);
+};
+if (_ikili) exitWith {true};
 
 // Leader assessment
 // v8.256: mevzideki grup LAMBS tacticsAssess'e (Hide / Suppress / Flank / Assault secimi) hic dusmesin

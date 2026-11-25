@@ -57,10 +57,25 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
         private _na = _say select 1;
         _na set [_bn, (_na select _bn) + 1];
     };
+    // v8.817 MESAFE BANDI AYARI (yol haritasi Asama 15 / 8; karne GERCEKCILIK: BOT ISABET: 50-120 m dusuk %1-2.5 (hedef %5-10), > 250 m yuksek %2.5-3.6 (hedef %0-1)): (a) >= 250 m'de rastgele mermi sapmasi +-isabetUzakSapma derece (0 = kapali; 0.4 derece ~ 250 m'de 1.7 m),
+    //   (b) < 120 m'de ek mermi yonu duzeltme isabetYakinYardim (0-1; 0 = kapali). Yalniz botlar; oyunculu gruptaki botlar oyuncuGrubuBot kapaliysa dokunulmaz.
+    private _oyG = (((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])};
+    private _uS = missionNamespace getVariable ["lambs_danger_isabetUzakSapma", 0.65];
+    if (_gecerli && {_uS > 0} && {!_oyG} && {!isNull _proj} && {(_u distance _t) >= 250}) then {
+        private _v0 = velocity _proj;
+        private _sp0 = vectorMagnitude _v0;
+        private _vh0 = sqrt (((_v0 select 0) ^ 2) + ((_v0 select 1) ^ 2));
+        if (_sp0 > 50 && {_vh0 > 1}) then {
+            private _az0 = ((_v0 select 0) atan2 (_v0 select 1)) + ((random (2 * _uS)) - _uS);
+            private _el0 = (atan ((_v0 select 2) / _vh0)) + ((random (2 * _uS)) - _uS);
+            _proj setVelocity ([(sin _az0) * (cos _el0), (cos _az0) * (cos _el0), sin _el0] vectorMultiply _sp0);
+        };
+    };
     // mermi yonu duzeltme (isabetSeviye / isabetYardim)
     private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
     private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
     if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
+    if (_gecerli && {(_u distance _t) < 120}) then { _yrd = _yrd max (missionNamespace getVariable ["lambs_danger_isabetYakinYardim", 0.3]); };
     if (_yrd <= 0 || {!_gecerli} || {isNull _proj} || {(((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}}) exitWith {};   // v8.721: CBA oyuncuGrubuBot acikken oyuncu grubundaki botlar da isabet yardimi alir
     private _v = velocity _proj;
     private _sp = vectorMagnitude _v;

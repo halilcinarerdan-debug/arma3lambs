@@ -9,7 +9,7 @@
  * MERDIVEN (AYNI birimde 20 sn icinde art arda cagrilarda adim artar; 20 sn sessizlikte sifirlanir; adimlar BIRIKIMLI: ust adim alttakileri de uygular):
  *   1) bu birimin saldiri / atanan hedefini unutur (forgetTarget; yalniz bu birim) + AI bayraklari acilir (PATH / MOVE / ANIM) + hiz kilidi kalkar + doStop (yalniz duruyorsa) + doMove;
  *   (v8.820: 2. adimda bakis gidilecek noktaya doWatch, 3. adimda SUPPRESSION + CHECKVISIBLE 8 sn kapali)
- *   2) + lider degilse formasyona don (doFollowGuvenli: komut kuyrugu sifirlanir; retreat / temas kesme / kacis grubunda atlanir) + duruş UP (zayif) + 8 sn CARELESS (motorun 'dusman var, dur ve nisan al' davranisini baypas; sure sonunda eski davranis geri) + kosu patlamasi (TARGET + AUTOTARGET kapali) + doMove;
+ *   2) + lider degilse formasyona don (doFollowGuvenli: komut kuyrugu sifirlanir; retreat / temas kesme / kacis grubunda atlanir) + duruş UP (zayif) + 4 sn CARELESS (yalniz dusman >= 150 m ve baski < 0.3; motorun 'dusman var, dur ve nisan al' davranisini baypas; sure sonunda GRUP davranisi eski haline doner; v8.822) + kosu patlamasi (TARGET + AUTOTARGET kapali) + doMove;
  *   3) + setDestination [hedef, 'LEADER DIRECT', true] (yol planlamasini atlayan dogrudan yuruyus) + hiz modu FULL;
  *   4) + calculatePath (asenkron 'PathCalculated') ile yol dugumleri hesaplanir, askerden >= 12 m ilerideki ilk dugume doMove (yalniz azami adim >= 4 ise; referans modun yol dugumu tekniginden ilhamla, kod kopyalanmadi).
  *   2.5 sn sonra sonuc olculur (hiz > 2 km/sa): [HAREKET-KURTAR] satiri (ilk 25, sonra 30 sn'de bir; oncesi / sonrasi hiz, durus, animasyon, komut, saldiri / atanan hedef) + adim basina sayac ve 60 sn [HAREKET-KURTAR-OZET].
@@ -45,6 +45,7 @@ private _durus0 = stance _u;
 private _anim0 = animationState _u;
 private _hd = getAttackTarget _u;
 private _at = assignedTarget _u;
+private _care = false;
 
 // 1) hedef birakma + hareket bayraklari + emir
 { if (!isNull _x) then { _u forgetTarget _x; }; } forEach [_hd, _at];
@@ -62,18 +63,34 @@ if (_n >= 2) then {
     //   8 sn sonra serbest birakilir (doWatch objNull; retreat zaten sicrama sonunda birakir)
     _u doWatch (AGLToASL [_hedef select 0, _hedef select 1, 1.5]);
     [{ params ["_uu"]; if (alive _uu && {!((group _uu) getVariable [QGVAR(isRetreating), false])} && {!(_uu getVariable [QGVAR(forceMove), false])}) then { _uu doWatch objNull; }; }, [_u], 8] call CBA_fnc_waitAndExecute;
-    if (missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) then {
+    // v8.822 CARELESS GUVENLIGI (kullanici: 'elemanlar catismada careless kaliyor?'; RPT a049faa1: telemetride CARELESS 22 / 62 (dusman 200-400 m, temas yok), f4bf5df2: 5 / 64, bunlardan 2'si dusmana 122 m ve 39 m kala ASSAULT sirasinda):
+    //   KOK NEDEN (T): setBehaviour tek askere verilse de grubu etkiliyor olabilir; her askerin cagrisi 8 sn'lik pencereyi uzatiyordu (zincirleme), onceki davranis askerin KENDI degiskeninde tutuldugundan baska askerin CARELESS'i 'onceki' sanilip AWARE'e donuluyordu.
+    //   CARELESS ayrica algiyi dusurur (gizliAlgi isitme x0.5, hqIstihbarat CARELESS lideri alici saymaz). DUZELTME: (1) yalniz bilinen en yakin dusman >= 150 m VE baski < 0.3 iken; (2) 4 sn (eskiden 8); (3) onceki davranis GRUP duzeyinde saklanir, grup basina zincir yok
+    //   (en cok 10 sn kesintisiz, sonra 20 sn bekleme); (4) sure sonunda GRUP davranisi eskisine doner. CBA hareketKurtarCare kapaliysa hic uygulanmaz.
+    private _gc = group _u;
+    private _enC = (leader _gc) findNearestEnemy (leader _gc);
+    private _enUzak = isNull _enC || {((leader _gc) distance2D _enC) >= 150};
+    if ((missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) && {_enUzak} && {(getSuppression _u) < 0.3} && {time >= (_gc getVariable [QGVAR(hkGrpCareBekle), 0])}) then {
         private _tok = time + (random 0.001);
-        _u setVariable [QGVAR(hkCareTok), _tok];
-        if ((behaviour _u) isNotEqualTo "CARELESS") then { _u setVariable [QGVAR(hkOncekiBeh), behaviour _u]; };
-        _u setBehaviour "CARELESS";
-        [{
-            params ["_uu", "_tk"];
-            if (alive _uu && {(_uu getVariable [QGVAR(hkCareTok), 0]) isEqualTo _tk}) then {
-                _uu setVariable [QGVAR(hkCareTok), 0];
-                if ((behaviour _uu) isEqualTo "CARELESS") then { _uu setBehaviour (_uu getVariable [QGVAR(hkOncekiBeh), "AWARE"]); };
-            };
-        }, [_u, _tok], 8] call CBA_fnc_waitAndExecute;
+        if ((_gc getVariable [QGVAR(hkGrpCareTok), 0]) isEqualTo 0) then {
+            _gc setVariable [QGVAR(hkGrpOncekiBeh), behaviour _u];
+            _gc setVariable [QGVAR(hkGrpCareBas), time];
+        };
+        if ((time - (_gc getVariable [QGVAR(hkGrpCareBas), time])) > 10) then {
+            _gc setVariable [QGVAR(hkGrpCareBekle), time + 20];   // kesintisiz CARELESS tavani: 20 sn bekle (zincirleme yok)
+        } else {
+            _gc setVariable [QGVAR(hkGrpCareTok), _tok];
+            _u setBehaviour "CARELESS";
+            _care = true;
+            [{
+                params ["_g", "_tk"];
+                if (!isNull _g && {(_g getVariable [QGVAR(hkGrpCareTok), 0]) isEqualTo _tk}) then {
+                    _g setVariable [QGVAR(hkGrpCareTok), 0];
+                    _g setBehaviour (_g getVariable [QGVAR(hkGrpOncekiBeh), "AWARE"]);
+                    { if (alive _x && {(behaviour _x) isEqualTo "CARELESS"}) then { _x setBehaviour (_g getVariable [QGVAR(hkGrpOncekiBeh), "AWARE"]); }; } forEach (units _g);
+                };
+            }, [_gc, _tok], 4] call CBA_fnc_waitAndExecute;
+        };
     };
 };
 
@@ -124,8 +141,8 @@ if (time > lambs_danger_hkOzetT) then {
     _say = createHashMap;
     missionNamespace setVariable ["lambs_danger_hkSay", _say];
 };
-[_u, _n, _kaynak, _hiz0, _durus0, _anim0, _kOnce, !isNull _hd, !isNull _at, _hedef] spawn {
-    params ["_a", "_ad", "_ky", "_h0", "_d0", "_an0", "_ko", "_hv", "_av", "_hf"];
+[_u, _n, _kaynak, _hiz0, _durus0, _anim0, _kOnce, !isNull _hd, !isNull _at, _hedef, _care] spawn {
+    params ["_a", "_ad", "_ky", "_h0", "_d0", "_an0", "_ko", "_hv", "_av", "_hf", "_cr"];
     sleep 2.5;
     if (!alive _a) exitWith {};
     private _ok = (speed _a) > 2;
@@ -133,8 +150,8 @@ if (time > lambs_danger_hkOzetT) then {
     private _kk = format ["%1_adim%2_ok", _ky, _ad];
     if (_ok) then { _s set [_kk, (_s getOrDefault [_kk, 0]) + 1]; };
     if (["hareketKurtar", 25, 30] call FUNC(logIzin)) then {
-        diag_log format ["[HAREKET-KURTAR] %1 | %2 | %3 | adim %4 | hiz %5 -> %6 km/sa | durus %7 -> %8 | komut %9 -> %10 | anim %11 -> %12 | saldiri hedefi %13 atanan hedef %14 | hedefe %15 m | davranis %16 | sonuc %17",
-            _ky, groupId (group _a), name _a, _ad, _h0, round (speed _a), _d0, stance _a, _ko, currentCommand _a, _an0, animationState _a, _hv, _av, round ((getPosATL _a) distance2D _hf), behaviour _a, ["YURUMEDI", "YURUDU"] select _ok];
+        diag_log format ["[HAREKET-KURTAR] %1 | %2 | %3 | adim %4 | hiz %5 -> %6 km/sa | durus %7 -> %8 | komut %9 -> %10 | anim %11 -> %12 | saldiri hedefi %13 atanan hedef %14 | hedefe %15 m | davranis %16 | careless uygulandi %18 | sonuc %17",
+            _ky, groupId (group _a), name _a, _ad, _h0, round (speed _a), _d0, stance _a, _ko, currentCommand _a, _an0, animationState _a, _hv, _av, round ((getPosATL _a) distance2D _hf), behaviour _a, ["YURUMEDI", "YURUDU"] select _ok, _cr];
     };
 };
 _n
