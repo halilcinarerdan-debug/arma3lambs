@@ -71,7 +71,7 @@ private _red = {
     false
 };
 // v8.284 UGL SIKLIGI BOOST (kullanici: 'ugl kullanim sikiligini piyadeye karsi boostla'): birim cooldown 6 -> 4 sn (lambs_danger_uglCooldown)
-if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < ((missionNamespace getVariable ["lambs_danger_uglCooldown", 2]) * ([1, 1, 3] select (["cag"] call FUNC(cag))))) exitWith {"cooldown" call _red};
+if ((time - (_unit getVariable [QGVAR(uglLast), -999])) < (([_unit, "uglCooldown", 2] call FUNC(ayarTaraf)) * ([1, 1, 3] select (["cag"] call FUNC(cag))))) exitWith {"cooldown" call _red};
 // v8.676 GRUP UGL ARALIGI (RPT aa324317 Altis: 8-10 bombaatar, ilk 30 sn'de 47, 2.5 dk'da 118 atis = ~1.5 atis / sn; ses 'dongusu' + motor ses hatasi (ugl_distshot_02.wss multi-stream)): ayni grubun iki 40 mm atisi arasi en az lambs_danger_uglGrupAralik sn
 //   (varsayilan 3; zorla / hucum hazirligi yarisi; 0 = kapali). Birim cooldown'a EK sinirdir.
 private _gAr = ((missionNamespace getVariable ["lambs_danger_uglGrupAralik", 3]) max 0) * ([1, 0.5] select _force);
@@ -118,7 +118,7 @@ if ((_unit ammo _gl) <= 0) exitWith {"mermi_yok" call _red};
 // MENZIL
 // ---------------------------------------------------------------------------
 private _d = _unit distance2D _target;
-if (_d < (missionNamespace getVariable ["lambs_danger_uglMinM", 20]) || {_d > (missionNamespace getVariable ["lambs_danger_uglMaxM", 400])}) exitWith {"menzil" call _red};   // v8.675: 340 -> CBA uglMaxM (400; GP-25 / M203 alan atesi ~350-400 m)   // v8.284: 35-320 -> 30-340 m; v8.522: alt sinir CBA uglMinM (20; eskiden 30)
+if (_d < ([_unit, "uglMinM", 20] call FUNC(ayarTaraf)) || {_d > ([_unit, "uglMaxM", 400] call FUNC(ayarTaraf))}) exitWith {"menzil" call _red};   // v8.675: 340 -> CBA uglMaxM (400; GP-25 / M203 alan atesi ~350-400 m)   // v8.284: 35-320 -> 30-340 m; v8.522: alt sinir CBA uglMinM (20; eskiden 30)
 // UZAK MESAFE: > 200 m'de atis 25 sn'de bir (RPT: tek bombaatar 300 m'ye 9 sn'de bir 2'li salvo = 30 mermi / 90 sn; M203 pratik menzil ~150-200 m)
 if (_d > ([group _unit, "uglUzakM", 300] call FUNC(dk)) && {(time - (_unit getVariable [QGVAR(uglLast), -999])) < ([group _unit, "uglUzakAralik", 6] call FUNC(dk))}) exitWith {"uzak_aralik" call _red};
 

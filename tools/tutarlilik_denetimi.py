@@ -176,10 +176,10 @@ _dinOn = [d for d in re.findall(r'"(lambs_danger_\w*?)%\d', "".join(SQF.values()
 for ad in sets:
     if any(ad.startswith(d) for d in _dinOn): continue
     _kisa = ad[len("lambs_danger_"):]   # v8.738: fnc_profilDeger ile profile gore okunan ayarlar ('[_u, "siperYaricap", 16] call FUNC(profilDeger)') kisa adla anilir
-    _pd = sum(len(re.findall(r'"' + re.escape(_kisa) + r'"\s*,', t)) for t in SQF.values() if "profilDeger" in t)
+    _pd = sum(len(re.findall(r'"' + re.escape(_kisa) + r'"\s*,', t)) for t in SQF.values() if ("profilDeger" in t or "ayarTaraf" in t))   # v8.803: genel ayarlar da fnc_ayarTaraf ile (kisa adla) okunur
     # v8.802: fnc_rpgTarafDeger ile taraf eki (West / East / Ind) calisma aninda eklenerek okunan ayarlar ('[side group _x, "rpgAktif", true] call FUNC(rpgTarafDeger)') taban adla anilir
     _tb = re.sub(r"(West|East|Ind)$", "", _kisa)
-    if _tb != _kisa: _pd += sum(len(re.findall(r'"' + re.escape(_tb) + r'"\s*,', t)) for t in SQF.values() if "rpgTarafDeger" in t)
+    if _tb != _kisa: _pd += sum(len(re.findall(r'"' + re.escape(_tb) + r'"\s*,', t)) for t in SQF.values() if ("rpgTarafDeger" in t or "ayarTaraf" in t or "profilDeger" in t))   # v8.803: fnc_ayarTaraf / profilDeger ile okunan taraf ayarlari
     if (sum(len(re.findall(r"\b" + ad + r"\b", t)) for t in list(SQF.values()) + list(HPP.values())) + _pd) <= 1: UYARI.append("[AYAR] kayitli ama kullanilmayan ayar: %s" % ad)
 # v8.572: addSetting blogunda kullanilan _katS o blokta tanimli mi? (RPT 89d68bc7: tanimsiz -> 'Empty menu category', ayar menude gorunmez)
 _bloklar = [m.start() for m in re.finditer(r'if \(!isNil "CBA_fnc_addSetting"', prep)]

@@ -19,7 +19,7 @@
 */
 
 params [["_u", objNull, [objNull]], ["_ad", "", [""]], ["_def", 0, [0]]];
-private _baz = missionNamespace getVariable ["lambs_danger_" + _ad, _def];
+private _baz = [_u, _ad, _def] call FUNC(ayarTaraf);   // v8.803: taraf bazli (BLUFOR / OPFOR / INDEPENDENT) ayar varsa taban o
 if !(_baz isEqualType 0) exitWith {_baz};
 if (isNull _u || {(missionNamespace getVariable ["lambs_danger_cevreProfil", 1]) isEqualTo 0}) exitWith {_baz};
 private _pr = [_u] call FUNC(cevreProfil);

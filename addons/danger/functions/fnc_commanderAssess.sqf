@@ -350,8 +350,8 @@ private _erkenKayip60 = (selectMax ([_ownCount] + ((_kayipGecmis select {(time -
 private _erkenOn = (missionNamespace getVariable ["lambs_danger_erkenCekilme", true]) && {_enemyCount > 0} && {_ownCount >= 2};
 // v8.555 DONEM: Ikinci Dunya Savasi'nda birlikler kayba daha dayanikli (modern kayip-kacinimi yok): kayip hizi esigi +1, kayip orani esigi x1.4
 private _erkenWW2 = (["cag"] call FUNC(cag)) >= 2;
-private _erkenA = _erkenOn && {_erkenKayip60 >= ((missionNamespace getVariable ["lambs_danger_erkenKayipHiz", 3]) + ([0, 1] select _erkenWW2))} && {_closest >= 120} && {_pwrRatio >= 0.7};
-private _erkenB = _erkenOn && {_lossRatio >= ((missionNamespace getVariable ["lambs_danger_erkenKayipOran", 0.25]) * ([1, 1.4] select _erkenWW2))} && {_closest >= 150} && {_pwrRatio >= 0.8};
+private _erkenA = _erkenOn && {_erkenKayip60 >= (([_group, "erkenKayipHiz", 3] call FUNC(ayarTaraf)) + ([0, 1] select _erkenWW2))} && {_closest >= 120} && {_pwrRatio >= 0.7};
+private _erkenB = _erkenOn && {_lossRatio >= (([_group, "erkenKayipOran", 0.25] call FUNC(ayarTaraf)) * ([1, 1.4] select _erkenWW2))} && {_closest >= 150} && {_pwrRatio >= 0.8};
 private _result = call {
 
     // =======================================================================

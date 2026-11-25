@@ -52,6 +52,10 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
         private _son = (_indeks + 40) min _n;
         for "_i" from _indeks to (_son - 1) do {
             private _u = _adaylar select _i;
+            // v8.803: taraf bazli ozguven / baski etkisi (CBA 'ELITE BLUFOR / OPFOR / INDEPENDENT'; -1 = genel)
+            private _ozgU = (([_u, "ozguven", _ozg] call FUNC(ayarTaraf)) max 0) min 1;
+            private _etkiU = (([_u, "baskiEtki", missionNamespace getVariable ["lambs_danger_baskiEtki", 0.5]] call FUNC(ayarTaraf)) max 0) min 1;
+            if (_lSup) then { _etkiU = _etkiU * ((([_u, "baskiLambsCarpan", 0.4] call FUNC(ayarTaraf)) max 0) min 1); };
 
             // ---- 1) courage ----
             private _cYaz = _u getVariable [QGVAR(ozgCYaz), -1];
@@ -60,14 +64,14 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
                 _u setVariable [QGVAR(ozgCTaban), _cNow];       // ilk dokunus ya da baska sistem degistirdi: taban yeniden
             };
             private _cTaban = _u getVariable [QGVAR(ozgCTaban), _cNow];
-            private _cHedef = _cTaban + ((1 - _cTaban) * _ozg * 0.6);
+            private _cHedef = _cTaban + ((1 - _cTaban) * _ozgU * 0.6);
             if (abs (_cHedef - _cNow) > 0.02) then {
                 _u setSkill ["courage", _cHedef];
                 _u setVariable [QGVAR(ozgCYaz), _u skill "courage"];
                 _say set ["courage", (_say get "courage") + 1];
                 if (_logN < 30) then {
                     _logN = _logN + 1;
-                    diag_log format ["[OZGUVEN] %1 (%2) | courage %3 -> %4 (taban %5, ozguven %6)", name _u, groupId (group _u), _cNow toFixed 2, (_u skill "courage") toFixed 2, _cTaban toFixed 2, _ozg toFixed 2];
+                    diag_log format ["[OZGUVEN] %1 (%2) | courage %3 -> %4 (taban %5, ozguven %6)", name _u, groupId (group _u), _cNow toFixed 2, (_u skill "courage") toFixed 2, _cTaban toFixed 2, _ozgU toFixed 2];
                 };
             } else {
                 _u setVariable [QGVAR(ozgCYaz), _cNow];
@@ -76,7 +80,7 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
             // ---- 2) baski -> nisan ----
             private _baski = ((getSuppression _u) max 0) min 1;
             private _cour = _u skill "courage";
-            private _ceza = _etki * _baski * (1 - (0.6 * _cour));
+            private _ceza = _etkiU * _baski * (1 - (0.6 * _cour));
             private _eskiCeza = _u getVariable [QGVAR(ozgCeza), 0];
             if (abs (_ceza - _eskiCeza) >= 0.03 || {_ceza < 0.01 && {_eskiCeza > 0}}) then {
                 {

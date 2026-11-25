@@ -107,7 +107,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 // v8.514 SIPER TANIMI SIKILASTI (kullanici: 'sipere yakinligini 2 kat arttir, su anda siper olarak saydigi yer aciklik'): eskiden TEK isin + 6 m: ince direk / agac govdesi / cit teli de
                 //   'siper' sayiliyor, asker 6 m uzakta acikta duruyordu. Simdi: (a) govde genisligi (+-0.25 m yan isinlar) ucu de kapali olmali, (b) engel askere <= lambs_danger_siperYakinlik (3 m; eskiden 6),
                 //   (c) elektrik teli / direk / lamba / kablo nesneleri sayilmaz.
-                private _esik = missionNamespace getVariable ["lambs_danger_siperYakinlik", 3];
+                private _esik = [_u, "siperYakinlik", 3] call FUNC(ayarTaraf);
                 private _gvK = missionNamespace getVariable ["lambs_danger_siperGovde", 0.25];   // v8.515: haritaya gore olculen govde toleransi (fnc_siperKalibre)
                 private _lodK = missionNamespace getVariable ["lambs_danger_siperLod", "FIRE"];
                 private _perpE = (vectorNormalized ((_pASL vectorAdd [0, 0, 1]) vectorDiff _eASL)) vectorCrossProduct [0, 0, 1];
@@ -222,7 +222,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 // v8.588 HASSAS SIPER NOKTASI (kullanici: 'sipere yapisma yakinligini arttir, daha profesyonel raycast hesaplasin, daha dogru ve daha yakin'): eskiden hedef nokta = dusman tarafindaki ILK yuzey + hug mesafesi (isin yonunde);
                 //   kalin engelde (duvar / kaya / bina kosesi) bu nokta engelin ICINE dusebiliyor, egik isinda gercek mesafe de hug x cos(aci) kaliyordu. Simdi: askerden dusmana TERS isin -> askere BAKAN ilk sert yuz;
                 //   hedef = o yuz + yuzey NORMALI (yatay izdusum, askere bakacak sekilde yonlendirilmis) x hug. Yuz yok / cok uzak (> 2.5 m kalinlik) / yatay yuzey ise eski formul (yedek).
-                private _hugM = ((missionNamespace getVariable ["lambs_danger_coverHugMesafe", 0.06]) max 0.03) min 0.7;   // v8.637: 0.17 -> 0.06 (3 kat yakin), alt sinir 0.10 -> 0.03
+                private _hugM = (([_u, "coverHugMesafe", 0.06] call FUNC(ayarTaraf)) max 0.03) min 0.7;   // v8.637: 0.17 -> 0.06 (3 kat yakin), alt sinir 0.10 -> 0.03
                 private _tASL = _hP vectorAdd (_dir vectorMultiply _hugM);
                 private _nokta = "yedek";
                 private _ters = lineIntersectsSurfaces [_uASL, _eASL, _u, _en, true, 1, _lodK, "NONE"];
@@ -297,7 +297,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)
                 // v8.662 DURUS CESITLILIGI coverHug'da da (RPT 4a0e73e9: hareketsiz askerlerin 34 / 41'i PRONE, 4 CROUCH, 3 STAND; acikSiper'deki siperDurusCesit yalniz nesne dalinda uyguluyordu): baski <= 0.35 ve MG degilse CBA siperDurusCesit orani bir kademe az alcalir
 private _dusukKH = (round ([_u, "siperDusuk", 1] call FUNC(profilDeger)) max 0) min 2;   // v8.738: cevre profiline gore
-if ((getSuppression _u) <= 0.35 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < ((missionNamespace getVariable ["lambs_danger_siperDurusCesit", 0.5]) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
+if ((getSuppression _u) <= 0.35 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (([_u, "siperDurusCesit", 0.5] call FUNC(ayarTaraf)) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
 for "_k" from 1 to _dusukKH do {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; default {"DOWN"} };
                 };

@@ -94,16 +94,16 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
             private _durusGecis = !_donuyor && {(count _parca) >= 2} && {((_parca select 0) find "amov") isEqualTo 0} && {((_parca select 1) find "amov") isEqualTo 0};
             private _g = group _u;
             private _oyGrup = _g in _oyG;
-            private _hizU = if ((_oyGrup && {!_oyEsit}) || {time < (_u getVariable [QGVAR(mvSlowUntil), 0])}) then {1} else {_hizT};   // duvar korumasi: 3 sn artissiz
+            private _hizU = if ((_oyGrup && {!_oyEsit}) || {time < (_u getVariable [QGVAR(mvSlowUntil), 0])}) then {1} else { if (missionNamespace getVariable ["lambs_danger_animHizAktif", true]) then { 1 + ((([_u, "animHiz", 20] call FUNC(ayarTaraf)) max 0) min 60) / 100 } else {1} };   // v8.803: taraf bazli animHiz   // duvar korumasi: 3 sn artissiz
             // v8.628 EV ICI EK HIZ + AYAKTA YURUME (kullanici: 'animasyonlari cok yavas'; RPT 035e0def [HIZ-TANI]: supurme sirasinda bina icinde durus CROUCH / unitPos Middle, anim amovpknlmtacs / wlks = 4-6 km/sa, ort. 1-8 km/sa, sik donme duraklari):
             //   (a) bina supurmesinde (isSweeping) bina ICINDE CBA cqbAnimEk (%) carpan; (b) v8.629: comelme (unitPos Middle) LAMBS taskCQB'nin isi; ELITE onu UP'a ZORLAMAZ (LAMBS her turda geri yazarsa ayakta / comelme gecisi titreme yapar)
             if ((!_oyGrup || {_oyEsit}) && {_hizU > 1} && {(insideBuilding _u) > 0.5}) then {   // v8.631: yalniz bina ICINDE (supurme sarti kaldirildi: kullanici 'sadece ev icinde de animasyon ayari, ekstra hizlandirabilelim')
-                _hizU = _hizU * (1 + ((missionNamespace getVariable ["lambs_danger_cqbAnimEk", 30]) max 0) / 100);
+                _hizU = _hizU * (1 + (([_u, "cqbAnimEk", 30] call FUNC(ayarTaraf)) max 0) / 100);
             };
             private _tabanAnim = [_hizU, _hizU max 1.15] select ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]});
             // v8.719 DONUS HIZI CBA (kullanici: 'sadece saga sola donme hizlarini ayarlayabilelim, nisan degil, arkaya falan'): CBA donusHizi > 0 ise donus animasyonu ("turn": saga / sola / arkaya) MUTLAK bu katsayida oynar (agirlik yavaslamasi turnAgirlik acikse uygulanir);
             //   0 (varsayilan) = eski davranis: max(turnCoef 1.2 x agirlik, genel animasyon hizi). NOT: eski formul genel animHiz'in (ornek 60 = 1.6) altina inemiyordu, bu yuzden donus hizi tek basina yavaslatilamiyordu.
-            private _dK = missionNamespace getVariable ["lambs_danger_donusHizi", 0];
+            private _dK = [_u, "donusHizi", 0] call FUNC(ayarTaraf);
             private _istenen = if (_donuyor) then { if (_dK > 0) then {_dK * ([_u] call _agirCarpan)} else {((missionNamespace getVariable ["lambs_danger_turnCoef", 1.2]) * ([_u] call _agirCarpan)) max _hizU} } else {
                 if (_durusGecis) then {_tabanAnim max (missionNamespace getVariable ["lambs_danger_postureCoef", 1.25])} else {_tabanAnim}
             };

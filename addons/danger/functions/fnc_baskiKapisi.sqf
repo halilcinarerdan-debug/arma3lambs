@@ -45,13 +45,13 @@ if (isPlayer _u) exitWith {false};   // v8.749: oyuncu birimine bastirma emri an
 
 private _say = missionNamespace getVariable ["lambs_danger_baskiKapiSay", createHashMap];
 missionNamespace setVariable ["lambs_danger_baskiKapiSay", _say];
-private _yakinM = ((missionNamespace getVariable ["lambs_danger_baskiYakinM", 80]) max 10) min 300;
+private _yakinM = (([_u, "baskiYakinM", 80] call FUNC(ayarTaraf)) max 10) min 300;
 private _d = _u distance2D _e;
 private _izin = true;
 private _gorenN = 0;
 private _kisi = 0;
 if (_d > _yakinM) then {
-    private _gM = ((missionNamespace getVariable ["lambs_danger_baskiGozlemciM", 250]) max _yakinM) min 600;
+    private _gM = (([_u, "baskiGozlemciM", 250] call FUNC(ayarTaraf)) max _yakinM) min 600;
     private _esik = ["SEZILDI"] call FUNC(bilgiEsik);
     private _eEye = eyePos _e;
     private _taraf = side group _u;
@@ -72,7 +72,7 @@ if (!_izin) then {
     private _n = missionNamespace getVariable ["lambs_danger_baskiKapiLogN", 0];
     if (_n < 30) then {
         missionNamespace setVariable ["lambs_danger_baskiKapiLogN", _n + 1];
-        diag_log format ["[BASKI-KAPI] RED | %1 | %2 (%3) | dusman %4 m > %5 m ve gorus hatti olan gozlemci yok (kisi %6, goren %7, gozlemci menzili %8 m) -> bastirma atilmadi", _kaynak, name _u, groupId group _u, round _d, round _yakinM, _kisi, _gorenN, round ((missionNamespace getVariable ["lambs_danger_baskiGozlemciM", 250]) max _yakinM)];
+        diag_log format ["[BASKI-KAPI] RED | %1 | %2 (%3) | dusman %4 m > %5 m ve gorus hatti olan gozlemci yok (kisi %6, goren %7, gozlemci menzili %8 m) -> bastirma atilmadi", _kaynak, name _u, groupId group _u, round _d, round _yakinM, _kisi, _gorenN, round (([_u, "baskiGozlemciM", 250] call FUNC(ayarTaraf)) max _yakinM)];
     };
 };
 private _ot = missionNamespace getVariable ["lambs_danger_baskiKapiOzetT", time + 60];

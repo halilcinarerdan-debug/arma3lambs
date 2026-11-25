@@ -66,7 +66,7 @@ if (_yakinDovus) then { _sayAS set ["yakin_dovus", (_sayAS getOrDefault ["yakin_
 // v8.737 ZOR DURUM (kullanici: 'zor durumda gizlensinler, onu sakin cok geriye atma oncelikte'): baski >= 0.5, yarali ya da komutan WITHDRAW / PEEL / DELAY kararinda ise GIZLENME onceligi DUSMEZ: sahte siper cezasi x0.2, karsilik verme sarti yok, yan yon cezasi x0.5 (cali / yatis dahil gizlenme serbest)
 private _zor = ((getSuppression _u) >= 0.5) || {(lifeState _u) isEqualTo "INJURED"} || {((group _u) getVariable [QGVAR(cmdSonKarar), ""]) in ["WITHDRAW", "PEEL", "DELAY"]};
 // v8.736 AYNI ANDA HAREKET SINIRI (kullanici: 'cover to cover daha profesyonel'): grupta son 6 sn'de siper atilisina cikmis ve hala kosan asker sayisi siperAyniAnda'ya (2) ulastiysa bu asker (baski < 0.35, yakin dovus degil) 1.5 sn bekler: biri kosar, digerleri kapsar; 6 = kapali
-private _ayniA = ((missionNamespace getVariable ["lambs_danger_siperAyniAnda", 2]) max 1) min 6;
+private _ayniA = (([_u, "siperAyniAnda", 2] call FUNC(ayarTaraf)) max 1) min 6;
 private _ertele = false;
 if (_ayniA < 6 && {!_yakinDovus} && {(getSuppression _u) < 0.35}) then {
     private _kosan = ({ alive _x && {_x isNotEqualTo _u} && {(time - (_x getVariable [QGVAR(siperDoMoveT), -999])) < 6} && {(speed _x) > 2} } count (units _g));
@@ -91,7 +91,7 @@ private _talepler = ((_g getVariable [QEGVAR(main,coverClaims), []]) select {(ti
 private _dostPoz = ((_u nearEntities ["CAManBase", _yar + 14]) select {_x isNotEqualTo _u && {alive _x} && {(side group _x) isEqualTo (side group _u)}}) apply {getPosATL _x};
 private _doluMu = {
     params ["_pt", "_r"];
-    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min (missionNamespace getVariable ["lambs_danger_siperDostAralik", 4.5]))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
+    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min ([_u, "siperDostAralik", 4.5] call FUNC(ayarTaraf)))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
 };
 // v8.657 COKLU TEHDIT (kullanici: 'dediklerini yap / zayif olanlari yap'; egitimli asker yan ve arka acidan da korunur): en yakin dusman (_en) disinda BILINEN (>= SEZILDI) en cok 3 baska dusman (<= 250 m) icin aday siper noktasinin (1.0 m) FIRE LOD hatti ACIKSA +5 ceza / dusman (CBA siperCokluTehdit)
 private _digerE = [];
@@ -106,7 +106,7 @@ if (missionNamespace getVariable ["lambs_danger_siperCokluTehdit", true]) then {
 private _coklu = {
     params ["_pt"];
     private _pa = (AGLToASL [_pt select 0, _pt select 1, 0]) vectorAdd [0, 0, 1.0];
-    ((missionNamespace getVariable ["lambs_danger_siperCokluAgirlik", 10]) max 0) * ({ ((lineIntersectsSurfaces [_x, _pa, objNull, _u, true, 1, "FIRE", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_x, _pa])} } count _digerE)   // v8.737: 5 -> CBA siperCokluAgirlik (10 m / acik dusman)
+    (([_u, "siperCokluAgirlik", 10] call FUNC(ayarTaraf)) max 0) * ({ ((lineIntersectsSurfaces [_x, _pa, objNull, _u, true, 1, "FIRE", "NONE"]) isEqualTo []) && {!(terrainIntersectASL [_x, _pa])} } count _digerE)   // v8.737: 5 -> CBA siperCokluAgirlik (10 m / acik dusman)
 };
 // v8.724 ONGORU / COKLU SENARYO (kullanici: 'botlar yapacaklari taktikleri onceden dusunsun', 'cover yerleri dusman bilinen yonune gore', 'coklu senaryo / coklu durum'): siper secimi yalniz dusmanin SU ANKI konumuna degil, tahmini konumlarina da bakar:
 //   S1 ILERI: dusman hizi > 1 m/sn ise hareket yonunde ongoruSure (4 sn) sonraki konum (agirlik = ongoruAgirlik, 3 m);  S2 / S3 KANAT: dusman ayni mesafeyi koruyup gruba gore +-55 derece yana kayarsa (kanat; agirlik yarisi, CBA ongoruKanat).
@@ -246,7 +246,7 @@ private _objAd = "";
                     private _pP = (AGLToASL [_pos select 0, _pos select 1, 0]) vectorAdd [0, 0, 1.0];
                     private _pr = [eyePos _en, _pP, _en, _u, _gP] call FUNC(penetreGuc);
                     if ((_pr select 0) && {(_pr select 1) > 0}) then {
-                        _sk = _sk + (missionNamespace getVariable ["lambs_danger_siperMermiOncelik", 8]);   // v8.667: CBA siperMermiOncelik (mermi geciren siper cezasi, m)
+                        _sk = _sk + ([_u, "siperMermiOncelik", 8] call FUNC(ayarTaraf));   // v8.667: CBA siperMermiOncelik (mermi geciren siper cezasi, m)
                         _yumusakB = true;
                         _sayAS set ["siper_yumusak", (_sayAS getOrDefault ["siper_yumusak", 0]) + 1];
                     };
@@ -260,7 +260,7 @@ private _objAd = "";
                 // v8.667 GIZLENME GEREKSINIMI (kullanici: 'cover seciminde mermi gecirmeyene oncelik versinler ama gizlenme gereksinimini de unutma'): sert siper mermiyi durdursa bile dusman gozunden (VIEW LOD) GORUNUYORSA (CUP / A2 modellerinde VIEW LOD yok / dar: t_picea2s VIEW 0.0) +siperGorunurCeza (CBA, 8 m)
                 private _hh = [1.5, 1.0, 0.4] select (["UP", "MIDDLE", "DOWN"] find (_ds select 0));
                 if ((lineIntersectsSurfaces [_eASL, _gASL vectorAdd [0, 0, _hh max 0.4], _en, _u, true, 1, "VIEW", "NONE"]) isEqualTo [] && {!(terrainIntersectASL [_eASL, _gASL vectorAdd [0, 0, _hh max 0.4]])}) then {
-                    _sk = _sk + (missionNamespace getVariable ["lambs_danger_siperGorunurCeza", 8]);
+                    _sk = _sk + ([_u, "siperGorunurCeza", 8] call FUNC(ayarTaraf));
                     _sayAS set ["siper_gorunur", (_sayAS getOrDefault ["siper_gorunur", 0]) + 1];
                     _gorunurB = true;
                 };
@@ -277,10 +277,10 @@ private _objAd = "";
                     private _prC = (vectorNormalized (_gASL vectorDiff _eASL)) vectorCrossProduct [0, 0, 1];
                     private _acYan = ([0.9, -0.9] findIf { (lineIntersectsSurfaces [_eASL, (_gASL vectorAdd [0, 0, _hh max 0.8]) vectorAdd (_prC vectorMultiply _x), _en, _u, true, 1, "FIRE", "NONE"]) isEqualTo [] }) >= 0;
                     if (_acUst || {_acYan}) then {
-                        _sk = _sk - ((missionNamespace getVariable ["lambs_danger_siperKarsilikBonus", 6]) max 0 min 20);   // v8.751: CBA (eski sabit 3)
+                        _sk = _sk - (([_u, "siperKarsilikBonus", 6] call FUNC(ayarTaraf)) max 0 min 20);   // v8.751: CBA (eski sabit 3)
                         _sayAS set ["siper_karsilik", (_sayAS getOrDefault ["siper_karsilik", 0]) + 1];
                     } else {
-                        if ((getSuppression _u) < 0.5) then { _sk = _sk + ((missionNamespace getVariable ["lambs_danger_siperSafCeza", 14]) max 0 min 40); _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
+                        if ((getSuppression _u) < 0.5) then { _sk = _sk + (([_u, "siperSafCeza", 14] call FUNC(ayarTaraf)) max 0 min 40); _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
                     };
                 };
                 // v8.737 COK YONLU KAPALILIK (kullanici: 'bir yerden yemesin'): adaydan dusmana bakan eksene +-45 / +-90 derece 4 yonden (40 m, goz 1.6 m) FIRE LOD hatti ACIK mi; her acik yon x siperYanAgirlik (2 m; son 20 sn'de vurulduysa x3)
@@ -356,7 +356,7 @@ if ((_obj isEqualTo [] || {_esitG}) && {missionNamespace getVariable ["lambs_dan
                 private _dc = 0;
                 if ([1.0] call _gizli) then { _ds = "MIDDLE"; _dc = 2; } else { if ([0.4] call _gizli) then { _ds = "DOWN"; _dc = 5; }; };
                 if (_ds isNotEqualTo "") then {
-                    private _sk = (_u distance2D _pos) + _dc + ([6, missionNamespace getVariable ["lambs_danger_siperMermiOncelik", 8]] select _esitG);   // v8.667: gizlenme-only (mermi durdurmaz) adayi: mermi oncelikli ceza (varsayilan 8; eski 2)
+                    private _sk = (_u distance2D _pos) + _dc + ([6, [_u, "siperMermiOncelik", 8] call FUNC(ayarTaraf)] select _esitG);   // v8.667: gizlenme-only (mermi durdurmaz) adayi: mermi oncelikli ceza (varsayilan 8; eski 2)
                     _sk = _sk - (0.6 * ([side group _u, _pos, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _sk = _sk + ([_pos, _en, _ds, _u] call FUNC(siperGuvence)); };   // v8.750
                     if (_sk < _objS) then { _objS = _sk; _obj = _pos; _objDurus = _ds; _objAd = typeOf _o; if (_objAd isEqualTo "") then { _objAd = (getModelInfo _o) select 0; }; };
@@ -403,8 +403,8 @@ if (_obj isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperAgacG
 // v8.749 KENTSEL ARAZI CEZASI (kullanici: 'lythium gibi alanlarda siperi nasil guclendirebiliriz' + 'her arada mukemmel siper'; RPT 64b4517e Lythium: cevre %83 KENTSEL, sert nesne 31 (<= 25 m) varken [ACIK-SIPER] secimlerinin ~%60'i ARAZI KIVRIMI (38 / 65), bina 3, duvar 3): sehirde arazi cukuru / yamaci
 //   duvar / bina / arac siperinin onune geciyordu (arazi adayi siperArazOncelik bonusu + nesne cezalari yuzunden). Askerin cevre profili KENTSEL ise ve cevrede sert nesne varsa arazi adaylarina CBA siperKentselArazi (varsayilan 6) puan CEZA eklenir (0 = eski).
 private _araziKentselCeza = 0;
-if (((missionNamespace getVariable ["lambs_danger_siperKentselArazi", 2]) > 0) && {([_u] call FUNC(cevreProfil)) isEqualTo "KENTSEL"}) then {
-    _araziKentselCeza = (missionNamespace getVariable ["lambs_danger_siperKentselArazi", 2]) min 20;
+if ((([_u, "siperKentselArazi", 2] call FUNC(ayarTaraf)) > 0) && {([_u] call FUNC(cevreProfil)) isEqualTo "KENTSEL"}) then {
+    _araziKentselCeza = ([_u, "siperKentselArazi", 2] call FUNC(ayarTaraf)) min 20;
 };
 if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
     {
@@ -417,7 +417,7 @@ if (missionNamespace getVariable ["lambs_danger_siperArazi", true]) then {
                 private _dc = 0;
                 if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 1.0]]) then { _dn = "MIDDLE"; _dc = 2; } else { if (terrainIntersectASL [_eASL, _ptASL vectorAdd [0, 0, 0.4]]) then { _dn = "DOWN"; _dc = 5; }; };
                 if (_dn isNotEqualTo "") then {
-                    private _sk = _r + _dc + 6 - ((missionNamespace getVariable ["lambs_danger_siperArazOncelik", 8]) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
+                    private _sk = _r + _dc + 6 - (([_u, "siperArazOncelik", 8] call FUNC(ayarTaraf)) max 0 min 12) + _araziKentselCeza;   // v8.673: CBA siperArazOncelik (kullanici: 'cukurlara yamaclara siper alsinlar'); v8.749 + kentselde arazi cezasi
                     _sk = _sk - (0.6 * ([side group _u, _pt, getPosATL _en] call _mevziFn));
                     if (_sk < _objS) then { _sk = _sk + ([_pt, _en, _dn, _u] call FUNC(siperGuvence)); };   // v8.750
                     if (_sk < _objS) then { _objS = _sk; _obj = _pt; _objDurus = _dn; _objAd = "ARAZI KIVRIMI"; };
@@ -489,7 +489,7 @@ private _nesneGit = {
     //   gizli en yuksek durus (_objDurus) CBA siperDusuk kademe (0-2) alcaltilir (UP -> MIDDLE -> DOWN), baski > 0.35 ise bir kademe daha; son durus setUnitPosWeak (ates gerekirse motor kalkar)
     private _dusukK = (round ([_u, "siperDusuk", 1] call FUNC(profilDeger)) max 0) min 2;   // v8.738: ORMAN / KENTSEL'de -1
     // v8.656 DURUS CESITLILIGI (kullanici: 'dediklerini yap'; Altis goruntuleri: HEPSI yatik; egitimli tim karisik durur): baski yoksa (<= 0.35) ve MG degilse askerlerin CBA siperDurusCesit orani (varsayilan %50) bir kademe YUKSEK (yatma -> comelme) durur; kisiye bagli sabit secim (birimId)
-    private _cesit = (missionNamespace getVariable ["lambs_danger_siperDurusCesit", 0.5]) max 0 min 1;
+    private _cesit = ([_u, "siperDurusCesit", 0.5] call FUNC(ayarTaraf)) max 0 min 1;
     if ((getSuppression _u) <= 0.35 && {_dusukK > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _cesit}) then { _dusukK = _dusukK - 1; };
     if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };

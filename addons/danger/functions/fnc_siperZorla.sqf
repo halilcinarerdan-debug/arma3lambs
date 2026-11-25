@@ -36,7 +36,7 @@ if (isNull _e || {!alive _e}) exitWith {false};
 private _uPos = getPosATL _u;
 private _mes = _uPos distance2D _pos;
 // v8.649 UZAK SIPER ATILISI (kullanici: 'altisteki gibi almiyorlar'; RPT aff9b168: [SIPER-OTUR] 'oturtulamadi: kalan 7.5-13.9 m, hiz 0' - siperUzaklik 3-4 iken atilis siniri 20 / siperUzaklik = 5-6.7 m: daha uzak siper secilince siperZorla HIC calismiyor, asker duz doMove'da dusmani gorup duruyordu): acikSiper'in sectigi siper (_uzakIzin) 40 m'ye kadar atilisla gidilir
-private _lim = 20 / (((missionNamespace getVariable ["lambs_danger_siperUzaklik", 3]) max 1) min 4);
+private _lim = 20 / ((([_u, "siperUzaklik", 3] call FUNC(ayarTaraf)) max 1) min 4);
 if (_uzakIzin) then { _lim = _lim max 40; };
 if (_mes < 1.2 || {_mes > _lim}) exitWith {false};   // v8.513: 20 m / siperUzaklik (2) = 10 m
 private _ed = _u distance2D _e;

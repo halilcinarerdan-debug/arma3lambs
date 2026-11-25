@@ -55,6 +55,10 @@ diag_log "[HIZLI-FARK] gorunur insan oyuncuyu hizli fark etme (reveal) katmani b
             {
                 private _b = _x;
                 if (_n >= 14) exitWith {};
+                // v8.803: taraf bazli fark etme (hizliFarkS / hizliFarkAci / hizliFarkSeviye; bot = fark eden taraf; -1 = genel)
+                private _Sb = (([_b, "hizliFarkS", _S] call FUNC(ayarTaraf)) max 0.2) min 3;
+                private _aciB = (([_b, "hizliFarkAci", _aci] call FUNC(ayarTaraf)) max 30) min 90;
+                private _sevB = (([_b, "hizliFarkSeviye", _sev] call FUNC(ayarTaraf)) max 0.5) min 4;
                 _n = _n + 1;
                 private _d = _b distance2D _p;
                 private _kn = _b knowsAbout _p;
@@ -76,15 +80,15 @@ diag_log "[HIZLI-FARK] gorunur insan oyuncuyu hizli fark etme (reveal) katmani b
                 if (_vd < 1) then { continue };
                 private _acA = acos ((((_bakis vectorDotProduct _vp) / (_vd max 0.1)) min 1) max -1);
                 private _vis = 0;
-                if (_acA <= _aci && {!(_gece && {_d > 25})}) then { _vis = [_b, "VIEW", _p] checkVisibility [eyePos _b, _pEye]; };
+                if (_acA <= _aciB && {!(_gece && {_d > 25})}) then { _vis = [_b, "VIEW", _p] checkVisibility [eyePos _b, _pEye]; };
                 if (_vis >= 0.3) then {
                     if (_ilk < 0) then { _ilk = time; };
                     _acc = _acc + _dt;
-                    private _T = _S * (0.5 + (_d / _R)) / (_vis max 0.3) / (1 + (((missionNamespace getVariable ["lambs_danger_reaksiyonArtis", 0.3]) max 0) min 1));   // v8.735: reaksiyonArtis
+                    private _T = _Sb * (0.5 + (_d / _R)) / (_vis max 0.3) / (1 + (((missionNamespace getVariable ["lambs_danger_reaksiyonArtis", 0.3]) max 0) min 1));   // v8.735: reaksiyonArtis
                     if (_pYatik) then { _T = _T * 2; };
                     if (_acc >= _T) then {
-                        _b reveal [_p, _sev];
-                        if (_grup) then { { if (_x isNotEqualTo _b && {alive _x} && {(_x distance2D _b) <= 60}) then { _x reveal [_p, _sev * 0.7]; }; } forEach (units group _b); };
+                        _b reveal [_p, _sevB];
+                        if (_grup) then { { if (_x isNotEqualTo _b && {alive _x} && {(_x distance2D _b) <= 60}) then { _x reveal [_p, _sevB * 0.7]; }; } forEach (units group _b); };
                         if (!((_b getVariable [QGVAR(forceMove), false]) isEqualTo true) && {!((group _b) getVariable [QGVAR(isRetreating), false])}) then { _b doTarget _p; };   // hedef al (ates karari motor / cqbReflex'te)
                         _tet = true;
                         _say set ["tetik", (_say get "tetik") + 1];

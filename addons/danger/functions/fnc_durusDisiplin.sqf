@@ -65,7 +65,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
             // ne kadar suredir durgun
             private _dt = _u getVariable [QGVAR(durgunT), -1];
             if (_dt < 0) then { _u setVariable [QGVAR(durgunT), time]; continue };
-            if ((time - _dt) < _sn) then { continue };
+            if ((time - _dt) < ((([_u, "durusDisiplinSn", _sn] call FUNC(ayarTaraf)) max 1) min 10)) then { continue };   // v8.803: taraf bazli
             if ((stance _u) isNotEqualTo "STAND") then { continue };
             if (time < (_u getVariable [QGVAR(durusBekT), 0])) then { continue };
 
@@ -126,7 +126,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
                     _say set ["gizliComel", (_say get "gizliComel") + 1];
                 } else {
                     // ~%25 askerde yat yerine comel (cesitlilik; ayni noktada herkes ayni duruşta olmasin)
-                    private _yatIzin = _ed >= _yatM && {(["durusDisiplin", [_u] call FUNC(birimId), false] call FUNC(rastgele)) >= 0.25};
+                    private _yatIzin = _ed >= ((([_u, "durusYatMesafe", _yatM] call FUNC(ayarTaraf)) max 40) min 400) && {(["durusDisiplin", [_u] call FUNC(birimId), false] call FUNC(rastgele)) >= 0.25};
                     if (_yatIzin && {[0.4] call _gorur}) then {
                         _hedef = "DOWN";
                         _neden = format ["dusman %1 m, hat 0.4 m'den acik -> yat", round _ed];

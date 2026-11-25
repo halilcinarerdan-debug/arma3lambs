@@ -138,3 +138,6 @@ Tepki: grup AWARE olur ve hata paylı yöne bakar (konum bilgisi verilmez).
 - **Baygın / ölüye magdump çalışmıyor:** `yereAtes` 1, `yereAtesBaygin` ve `yereAtesOyuncu` açık; RPT `[YERE-ATES-OZET]` sayaçları (`tehdit_var`: yakında canlı düşman var, `atici_yok`, `sans_hayir`).
 - **BMP / BTR / kamyon yolcusunu indirmiyor:** `mekanizeHareket` açık, en az 2 AI yolcu olmalı, iniş eşiği için `mekanizeInisCarpan`; MEDEVAC / TASIMA / HARIC görevli araçlar muaf; RPT `[MEKANIZE-INIS]`.
 - **Motoru çok uzaktan / hiç duymuyorlar:** `motorSesCarpan` ve sınıf çarpanları; rölanti için `motorSesRolanti`.
+
+### Taraf bazlı ayarlar (BLUFOR / OPFOR / INDEPENDENT — v8.803)
+CBA menüsünde üç ayrı kategori: **ELITE BLUFOR**, **ELITE OPFOR**, **ELITE INDEPENDENT**. Her kategoride beceri, bastırma, reaksiyon/tempo, cover, duruş, UGL, çekilme ve RPG ayarlarının o tarafa özel kopyası var. Sayısal ayarlar `-1` = **genel ayar geçerli** (davranış öncekiyle aynı); başka bir değer yalnız o taraf için geçerli (genel ayarla aynı aralık). Anahtar adı = genel ad + `West` (BLUFOR) / `East` (OPFOR) / `Ind` (INDEPENDENT), örnek `skillIsabetMaxEast`. Doktrin, komutan kişiliği, teslim ve aktif ayarları zaten taraf bazlıydı.

@@ -121,21 +121,21 @@ private _yeni = [];
     _x params ["_ad", "_min", "_max"];
     // v8.289 CBA (kullanici: 'cba ayarlarindan botlarin dogruluklarini ayarlayabilelim'): isabet / nisan hizi araligi CBA 'ELITE bot becerisi' ayarindan gelir
     if (_ad isEqualTo "aimingAccuracy") then {
-        _min = missionNamespace getVariable ["lambs_danger_skillIsabetMin", _min];
-        _max = (missionNamespace getVariable ["lambs_danger_skillIsabetMax", _max]) max _min;
+        _min = [_u, "skillIsabetMin", _min] call FUNC(ayarTaraf);
+        _max = ([_u, "skillIsabetMax", _max] call FUNC(ayarTaraf)) max _min;
     };
     if (_ad isEqualTo "aimingShake") then {
-        _min = missionNamespace getVariable ["lambs_danger_skillTitremeMin", _min];
-        _max = (missionNamespace getVariable ["lambs_danger_skillTitremeMax", _max]) max _min;
+        _min = [_u, "skillTitremeMin", _min] call FUNC(ayarTaraf);
+        _max = ([_u, "skillTitremeMax", _max] call FUNC(ayarTaraf)) max _min;
     };
     if (_ad isEqualTo "aimingSpeed") then {
-        _min = missionNamespace getVariable ["lambs_danger_skillHizMin", _min];
-        _max = (missionNamespace getVariable ["lambs_danger_skillHizMax", _max]) max _min;
+        _min = [_u, "skillHizMin", _min] call FUNC(ayarTaraf);
+        _max = ([_u, "skillHizMax", _max] call FUNC(ayarTaraf)) max _min;
     };
     // v8.308 REAKSIYON / FARKINDALIK (kullanici: 'cevre farkindaliklari reaksiyon sureleri guclenebilir'): spotDistance (fark etme mesafesi) ve spotTime (fark etme HIZI) araligi CBA 'ELITE bot becerisi' ayarindan
     if (_ad in ["spotDistance", "spotTime"]) then {
-        _min = missionNamespace getVariable ["lambs_danger_skillFarkMin", _min];
-        _max = (missionNamespace getVariable ["lambs_danger_skillFarkMax", _max]) max _min;
+        _min = [_u, "skillFarkMin", _min] call FUNC(ayarTaraf);
+        _max = ([_u, "skillFarkMax", _max] call FUNC(ayarTaraf)) max _min;
     };
     private _v = _min + ((_max - _min) * (["skill", format ["%1|%2", [_u] call FUNC(birimId), _ad], false] call FUNC(rastgele)));   // v8.501 V: ayni birim + ayni beceri = ayni deger (tohumlu)
     _onceki pushBack format ["%1=%2", _ad, (_u skill _ad) toFixed 2];
@@ -148,7 +148,7 @@ private _yeni = [];
 if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_tablo findIf {(_x select 0) isEqualTo "aimingAccuracy"}) >= 0}) then {
     private _optik = ((primaryWeaponItems _u) param [2, ""]) isNotEqualTo "";
     if (!_optik && {(primaryWeapon _u) isNotEqualTo ""}) then {
-        private _oc = missionNamespace getVariable ["lambs_danger_skillOptiksizCarpan", 0.75];
+        private _oc = [_u, "skillOptiksizCarpan", 0.75] call FUNC(ayarTaraf);
         private _aa = (_u skill "aimingAccuracy") * _oc;
         _u setSkill ["aimingAccuracy", _aa];
         _yeni pushBack format ["optiksiz x%1 -> %2", _oc, _aa toFixed 2];
@@ -156,23 +156,23 @@ if (!(missionNamespace getVariable ["lambs_danger_optikSkillOff", false]) && {(_
 };
 // v8.280 BOT BECERISI +%20 (kullanici: 'botlarin dogrulugunu ve sağa sola donme animasyon hizini yuzde 20 arttir'): aimingAccuracy (isabet) ve aimingSpeed (nisan alma / donus hizi) x lambs_danger_skillCarpan (1.2), en cok 1.0.
 //   Optik carpanindan SONRA uygulanir. Kapatma: lambs_danger_skillCarpan = 1.
-private _cpn = missionNamespace getVariable ["lambs_danger_skillCarpan", 1];
+private _cpn = [_u, "skillCarpan", 1] call FUNC(ayarTaraf);
 // v8.282 INSANI BOYUT (kullanici: 'ama insani boyutu hala olsun dogrulugun'): (1) tavan: isabet en cok lambs_danger_skillTavanIsabet (0.92), nisan hizi 0.95 - kimse kusursuz degil;
 //   (2) bireysel fark: aimingAccuracy araligi genis (0.70-0.88) ve her 7 askerden ~1'i TECRUBESIZ (isabet / titreme x0.85); (3) dinamik insani faktorler zaten var: baski (Arma dagilimi), yorgunluk, ortam (gece / sis / yagmur: fnc_ortamSkill), hareket / durus.
-private _tavanI = missionNamespace getVariable ["lambs_danger_skillTavanIsabet", 0.45];
-private _acemiOran = missionNamespace getVariable ["lambs_danger_skillAcemiOran", 0.15];
-private _acemiK = missionNamespace getVariable ["lambs_danger_skillAcemiCarpan", 0.75];
+private _tavanI = [_u, "skillTavanIsabet", 0.45] call FUNC(ayarTaraf);
+private _acemiOran = [_u, "skillAcemiOran", 0.15] call FUNC(ayarTaraf);
+private _acemiK = [_u, "skillAcemiCarpan", 0.75] call FUNC(ayarTaraf);
 private _acemi = (["skillAcemi", [_u] call FUNC(birimId), false] call FUNC(rastgele)) < _acemiOran;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];
     _yeni pushBack format ["TECRUBESIZ x%1 (isabet / titreme)", _acemiK];
 };
 // v8.289: isabet carpani (varsayilan 1.26 = eski 1.2 x 1.05) ve nisan hizi carpani (1.2) CBA'dan ayri ayarlanir
-private _katI = missionNamespace getVariable ["lambs_danger_skillIsabetCarpan", 1.0];
+private _katI = [_u, "skillIsabetCarpan", 1.0] call FUNC(ayarTaraf);
 {
     private _o = _u skill _x;
     private _kat = if (_x isEqualTo "aimingAccuracy") then {_katI} else {_cpn};
-    private _n = (_o * _kat) min ([missionNamespace getVariable ["lambs_danger_skillTavanHiz", 0.9], _tavanI] select (_x isEqualTo "aimingAccuracy"));
+    private _n = (_o * _kat) min ([[_u, "skillTavanHiz", 0.9] call FUNC(ayarTaraf), _tavanI] select (_x isEqualTo "aimingAccuracy"));
     _u setSkill [_x, _n];
     _yeni pushBack format ["%1 x%2 -> %3", _x, _kat, _n toFixed 2];
 } forEach ["aimingAccuracy", "aimingSpeed"];
