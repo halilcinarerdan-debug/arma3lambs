@@ -462,6 +462,7 @@ private _nesneGit = {
         private _enAz = 1e9;
         private _reemir = 0;
         private _yedekK = false;
+        private _kosuDenendi = false;   // v8.823: script kosu (son care) bir kez
         private _bitti = false;
         private _ulasilamadi = false;
         private _hOnc = [];
@@ -489,6 +490,14 @@ private _nesneGit = {
                                 };
                                 _sy set ["varis_yeniden_emir", (_sy getOrDefault ["varis_yeniden_emir", 0]) + 1];
                             } else {
+                                // v8.823 SCRIPT KOSU (son care; RPT 01a3fcd2: ULASILAMADI 10, yol acik, merdiven 4 adimi da tukendi, 6-20 m kala): hedef <= 30 m ve duz hat acikken asker kosu animasyonuyla surulur (fnc_kosuAdim); ilerleme penceresi 4 sn ileri alinir
+                                if (!_kosuDenendi && {_d <= 30} && {(([_a, _h] call FUNC(yolTara)) select 1) <= 1.05} && {[_a, _h, "varis"] call FUNC(kosuAdim)}) then {
+                                    _kosuDenendi = true;
+                                    _ilerT = time + 4;
+                                    _enAz = 1e9;
+                                    _son = (time + 12) max _son;
+                                    _sy set ["varis_kosu_adim", (_sy getOrDefault ["varis_kosu_adim", 0]) + 1];
+                                } else {
                                 private _kr = (_a getVariable [QGVAR(acikSiperKara), []]) select {time < (_x select 1)};
                                 _kr pushBack [_h, time + 60];
                                 if ((count _kr) > 6) then { _kr deleteAt 0; };
@@ -511,11 +520,10 @@ private _nesneGit = {
                                     _sy set ["varis_ulasilamadi", (_sy getOrDefault ["varis_ulasilamadi", 0]) + 1];
                                     private _yt = [_a, _h] call FUNC(yolTara);   // v8.805: neden ulasilamadi? (engel sinifi / dolasma / su / yamac)
                                     [_a, _h, "VARIS-" + (currentCommand _a)] spawn FUNC(retDomoveTani);   // v8.815: siper doMove'u motor tarafindan KABUL EDILDI mi (beklenen hedef siper noktasina < 8 m mi) + AI durumu: [RET-DOMOVE-TEST] (RPT ea78a960: 15 basarisizligin 14'unde yol acik, 13'u bosta animasyon, komut MOVE 8 / ATTACK 6, baski 0)
-                                    private _vl = missionNamespace getVariable ["lambs_danger_varisLogN", 0];
-                                    if (_vl < 25) then {
-                                        missionNamespace setVariable ["lambs_danger_varisLogN", _vl + 1];
+                                    if (["siperVaris", 25, 30] call FUNC(logIzin)) then {   // v8.823: ilk 25 + sonra 30 sn'de bir
                                         diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala ilerleme yok, %15 yeniden emir (hareket kurtarma) sonuc vermedi%4 -> kara liste 60 sn + yeniden secim | YOL-TANI: yol %5 (%6, dolasma %7, engel %8) | durus %9 | komut '%10' | anim %11 | baski %12 | davranis %13 | yukseklik farki %14 m", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK, (_yt select 0), (_yt select 2), (_yt select 1) toFixed 2, (_yt select 3), stance _a, currentCommand _a, animationState _a, (getSuppression _a) toFixed 2, behaviour _a, (((getPosASL _a) select 2) - ((AGLToASL _h) select 2)) toFixed 1, _reemir];
                                     };
+                                };
                                 };
                             };
                         };

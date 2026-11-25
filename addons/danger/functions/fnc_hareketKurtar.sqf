@@ -70,7 +70,7 @@ if (_n >= 2) then {
     private _gc = group _u;
     private _enC = (leader _gc) findNearestEnemy (leader _gc);
     private _enUzak = isNull _enC || {((leader _gc) distance2D _enC) >= 150};
-    if ((missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) && {_enUzak} && {(getSuppression _u) < 0.3} && {time >= (_gc getVariable [QGVAR(hkGrpCareBekle), 0])}) then {
+    if ((missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) && {_enUzak} && {(getSuppression _u) < 0.3} && {time >= (_gc getVariable [QGVAR(hkGrpCareBekle), 0])} && {(_gc getVariable [QGVAR(contact), 0]) < (time - 20)}) then {   // v8.823: son 20 sn'de temas varsa CARELESS YOK (RPT 01a3fcd2: 5 kayit dusman 164-353 m ama temas 9-29 sn)
         private _tok = time + (random 0.001);
         if ((_gc getVariable [QGVAR(hkGrpCareTok), 0]) isEqualTo 0) then {
             _gc setVariable [QGVAR(hkGrpOncekiBeh), behaviour _u];

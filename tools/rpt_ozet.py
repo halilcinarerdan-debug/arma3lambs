@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.822"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.823"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -898,6 +898,27 @@ def kabul(path):
     tl_ = len([1 for l in L if "[TELEMETRI-GRUP]" in l])
     if tl_ >= 5:
         ekle("GERCEKCILIK: CARELESS TEMASTA", "GECTI" if not cr_k else "KALDI", "telemetri %d satir, CARELESS %d (%%%.0f) | dusman < 150 m ya da temas varken CARELESS: %d %s (0 olmali; v8.822: hareket kurtarma CARELESS'i yalniz dusman >= 150 m, baski < 0.3, 4 sn, grup duzeyinde geri alinir)" % (tl_, cr_t, 100.0 * cr_t / tl_, len(cr_k), cr_k[:3]))
+    # v8.823: MEKAN DOKTRINI (grup sinifi, titrememe) + SCRIPT KOSU (son care)
+    mk_l = [l for l in L if "[MEKAN-DOKTRIN] " in l]
+    mk_oz = [l for l in L if "[MEKAN-DOKTRIN-OZET]" in l]
+    if mk_l or mk_oz:
+        gec_ = {}
+        for l in mk_l:
+            m_ = re.search(r"^(\d+):(\d+):(\d+).*?\[MEKAN-DOKTRIN\] ([^|]+?) \| (\w+) -> (\w+)", l)
+            if m_:
+                t_ = int(m_.group(1)) * 3600 + int(m_.group(2)) * 60 + int(m_.group(3))
+                gec_.setdefault(m_.group(4).strip(), []).append(t_)
+        hizli_ = sum(1 for v in gec_.values() for a_, b_ in zip(v, v[1:]) if b_ - a_ < 60)
+        sin_ = collections.Counter()
+        for l in mk_oz:
+            for m_ in re.finditer(r"(KENTSEL|ORMAN|TEPELIK|KORIDOR|ACIK|KARISIK)=(\d+)", l): sin_[m_.group(1)] += int(m_.group(2))
+        ekle("GERCEKCILIK: MEKAN DOKTRINI (grup sinifi)", "GECTI" if hizli_ == 0 else "KALDI", "gecis %d (60 sn'den kisa aralikli %d; 0 olmali: histerezis) | sinif taramasi: %s | ilk: %s | KONTROL: acik arazide bound / hucum mesafesi uzadi mi, ormanda / kentte kisaldi mi (karne: acikta kalma, bound ilerlemesi)" % (sum(len(v) for v in gec_.values()), hizli_, dict(sin_) or "-", mk_l[0].split("[MEKAN-DOKTRIN]",1)[1].strip()[:150] if mk_l else "-"))
+    else:
+        ekle("GERCEKCILIK: MEKAN DOKTRINI (grup sinifi)", "VERI YOK", "[MEKAN-DOKTRIN] yok (v8.823 oncesi RPT, mekanDoktrin kapali ya da hucum / bound / overwatch / pusu kararina giren grup olmadi)")
+    ka_b = len([1 for l in L if "[KOSU-ADIM] BASLA" in l])
+    ka_s = len([1 for l in L if "[KOSU-ADIM] BITTI" in l and "hedefe vardi" in l])
+    if ka_b:
+        ekle("GERCEKCILIK: SCRIPT KOSU (son care)", "BILGI", "basladi %d | hedefe vardi %d (log ilk 20 + 30 sn'de bir) | KONTROL: kosu dogal gorundu mu (animasyon / yon), askerler duvara / nesneye takildi mi" % (ka_b, ka_s))
     # v8.822: IKILI SICRAMA (2-3 kisilik ekip buddy bounding) + ACIK ALAN DOLASMA (bypass)
     ik_l = [l for l in L if "[IKILI-SICRAMA]" in l]
     if ik_l:
