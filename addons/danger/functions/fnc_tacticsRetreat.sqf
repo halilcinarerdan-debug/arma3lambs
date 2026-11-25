@@ -655,7 +655,9 @@ if (EGVAR(main,debug_functions)) then {
                                 sleep 0.3;
                             };
                             _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
+                            private _kmtT = currentCommand _b;
                             _b doMove (_x select 1);
+                            [_b, _x select 1, "TAKILI-" + _kmtT] spawn FUNC(retDomoveTani);   // v8.810: MOVE + hiz 0 durgunlugu (RPT 1366df8e: duranlarin %84'u MOVE / idle) icin de motor doMove'u kabul etti mi?
                             _x set [3, time];
                         };
                     };

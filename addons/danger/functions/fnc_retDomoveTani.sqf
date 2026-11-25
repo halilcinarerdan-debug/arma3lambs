@@ -6,7 +6,7 @@
  * Bu fonksiyon retreat ezme isleyicisi bir askere doStop + doMove verdikten 0.7 sn sonra motorun emri KABUL edip etmedigini olcer ve nedenini arama icin AI durumunu yazar:
  *   komut (once -> sonra), expectedDestination (nokta + mod; WP'ye / eski konuma uzaklik), unitReady, hiz, birim ve grup combatMode, davranis, assignedTarget / getAttackTarget, AI bayraklari (TARGET / AUTOTARGET / FSM / PATH / MOVE / AUTOCOMBAT / COVER),
  *   silah elde mi, kosuPatlama / kosu modu / forceMove / taktikKilit / siperTut / zorla belirteçleri.
- * Log: [RET-DOMOVE-TEST] KABUL / YOK SAYILDI (ilk 20) + 60 sn [RET-DOMOVE-OZET] (kabul / yok sayildi). Karne: 'RETREAT KOSUSU' satirinda 'doMove kabul'.
+ * Log: [RET-DOMOVE-TEST] KABUL / YOK SAYILDI (ilk 30) + 60 sn [RET-DOMOVE-OZET] (kabul / yok sayildi). Karne: 'RETREAT KOSUSU' satirinda 'doMove kabul'.
  *
  * Arguments:
  * 0: Asker <OBJECT>
@@ -29,7 +29,7 @@ missionNamespace setVariable ["lambs_danger_retDomoveSay", _say];
 private _k = ["yok_sayildi", "kabul"] select _kabul;
 _say set [_k, (_say getOrDefault [_k, 0]) + 1];
 private _n = missionNamespace getVariable ["lambs_danger_retDomoveLogN", 0];
-if (_n < 20) then {
+if (_n < 30) then {
     missionNamespace setVariable ["lambs_danger_retDomoveLogN", _n + 1];
     private _g = group _b;
     private _hd = getAttackTarget _b;

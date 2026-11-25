@@ -87,6 +87,7 @@ force lambs_danger_canliBombaAracAtilmaM = 150;
 force lambs_danger_canliBombaAtilmaM = 60;
 force lambs_danger_canliBombaCatis = false;
 force lambs_danger_canliBombaEast = true;
+force lambs_danger_canliBombaGizliKos = true;
 force lambs_danger_canliBombaInd = true;
 force lambs_danger_canliBombaMax = 3;
 force lambs_danger_canliBombaMenzilM = 200;

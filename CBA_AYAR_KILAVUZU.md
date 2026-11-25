@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.809 · Preset: `CBA_LAMBS_Danger_v8.809.txt` · 651 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.810 · Preset: `CBA_LAMBS_Danger_v8.810.txt` · 652 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.809.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.810.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (345 ayar)
+### ELITE siper (346 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -220,6 +220,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `canliBombaAtilmaM` | EYP: piyade canli bomba son an sprint mesafesi (m) | 10–150 | 45 | v8.777 (referans: terminal surge). Bomba tasiyan piyade bu mesafeye kadar kosu hizinda ates ederek gelir, sonra sprint (hasar > %10 ise hemen). Varsayilan 45. |
 | `canliBombaCatis` | EYP: canli bomba / teslim bomba CATISARAK (hedef alir, yavas) | açık/kapalı | kapalı | v8.785 (kullanici: canli bomba daha agresif kossun). KAPALI (varsayilan): AGRESIF - en bastan sprint, hedef almaz, AI ates etmek icin durmaz. ACIK: catisarak - kosarken hedef alir ama AI durup ates eder (RPT b5f24b66: orneklerin %50si hiz 0, komut ATTACK). ARAC bombasi her iki durumda tam gazla gider. Varsayilan KAPALI. |
 | `canliBombaEast` | EYP: canli bomba - OPFOR (EAST) kullanabilsin | açık/kapalı | açık | v8.808. Acik (varsayilan): OPFOR grubu agir kayipta canli bomba (piyade / arac bombasi) ve teslim bombasi secebilir. Kapali: OPFOR hic bomber kullanmaz. Genel 'canli bomba' ayari ana salterdir. Zeus 'EYP Bomba' modulu etkilenmez. |
+| `canliBombaGizliKos` | EYP: gizli (stealth) yaklasimli bombaci da kossun | açık/kapalı | açık | v8.810 (kullanici: 'bomba kossun stealth'ta da'). Acik (varsayilan): Zeus / 3DEN 'gizli yaklasim' isaretli piyade bombaci YURUMEZ, kosar (son anda sprint); davranis CARELESS + hedef alma kapali (ates etmez), her 2 sn baska katmanin bozdugu davranis / hiz yeniden kurulur. Kapali = eski (yuruyus, yalniz son anda sprint). Arac bombasi etkilenmez. |
 | `canliBombaInd` | EYP: canli bomba - INDEPENDENT (GUER) kullanabilsin | açık/kapalı | açık | v8.808. Acik (varsayilan): INDEPENDENT grubu agir kayipta canli bomba (piyade / arac bombasi) ve teslim bombasi secebilir. Kapali: INDEPENDENT hic bomber kullanmaz. Genel 'canli bomba' ayari ana salterdir. Zeus 'EYP Bomba' modulu etkilenmez. |
 | `canliBombaMax` | EYP: canli bomba olay siniri (600 sn / taraf) | 1–5 | 1 | v8.775. Taraf basina 600 sn icinde en cok bu kadar canli bomba olayi. Varsayilan 1. |
 | `canliBombaMenzilM` | EYP: canli bomba baslama menzili (m) | 50–300 | 150 | v8.775. Bilinen dusman bu mesafedeyse canli bomba secilir. Varsayilan 150. |

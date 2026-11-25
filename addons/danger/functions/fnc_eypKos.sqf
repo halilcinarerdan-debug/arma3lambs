@@ -49,6 +49,7 @@ private _tarz = _v getVariable [QGVAR(eypTarz), -1];
 if (_tarz == 0) then { _catis = true; };
 if (_tarz == 2) then { _catis = false; };
 private _agresif = !_catis && {!_gizli};
+private _gizliKos = _gizli && {missionNamespace getVariable ["lambs_danger_canliBombaGizliKos", true]};   // v8.810: stealth bombaci da kossun
 private _gucOv = _v getVariable [QGVAR(eypGuc), -1];
 private _bh0 = behaviour _b;
 private _cm0 = combatMode _b;
@@ -105,7 +106,9 @@ if (_arac) then {
         _b forceSpeed (_b getSpeed "FAST");
         _surge = true;
     } else {
-        _b forceSpeed (_b getSpeed (if (_gizli) then {"SLOW"} else {"NORMAL"}));
+        // v8.810 (kullanici: 'bomba kossun stealth'ta da'): gizli (STEALTH) yaklasimda piyade bombaci artik YURUMEZ, KOSAR (NORMAL = kosu; son anda yine sprint); davranis CARELESS + hedef alma kapali kalir (ates etmez). CBA canliBombaGizliKos kapaliysa eski yuruyus (SLOW).
+        _b forceSpeed (_b getSpeed (if (_gizli && {!_gizliKos}) then {"SLOW"} else {"NORMAL"}));
+        if (_gizli && {_gizliKos}) then { _b setSpeedMode "FULL"; };
     };
 };
 
@@ -259,10 +262,10 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 };
                 // v8.780 (kullanici: 'zikzakta cok bekliyor, zikzaki kaldir'): ZIKZAK YOK, hedefe dogrudan. doMove yalniz hedef 6 m'den fazla kaydiysa ya da araliktan sonra yenilenir (her tikte yenilemek yol hesabini sifirlar)
                 // her ~2 sn: agresif piyadede hiz / davranis baska betik tarafindan bozulduysa yeniden kur (RPT 1f3a00f8: beh CARELESS -> AWARE)
-                if (_agresif && {!_arac} && {time >= _tazeT}) then {
+                if ((_agresif || {_gizliKos && {!_surge}}) && {!_arac} && {time >= _tazeT}) then {   // v8.810: gizli kosan bombaci da (kamuflaj / baska katman STEALTH'e ceviremesin)
                     _tazeT = time + 2;
                     if ((behaviour _b) isNotEqualTo "CARELESS") then { _b setBehaviour "CARELESS"; };
-                    _b forceSpeed (_b getSpeed "FAST");
+                    _b forceSpeed (_b getSpeed (["FAST", "NORMAL"] select (!_agresif)));
                     // v8.794: baski / ates altinda bayraklarin baska betikle geri acilmasina karsi her 2 sn'de yeniden kapat / ac
                     { _b disableAI _x; } forEach ["SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
                     { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
