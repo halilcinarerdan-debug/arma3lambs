@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * EYP KOSU: CATISARAK (ates ederek) hedefe yaklas, canliBombaTetikM'de patla (v8.777; kullanici: 'araclardada olsun' + 've direk kosmasinlar catisarak girsinler' + 'adam uzerimize kossun catisarak').
  * fnc_eypSistem (canli bomba) ve teslim-bomba dongusu cagirir; BLOKLAR (spawn icinden cagrilmali), sonuc metni doner.
- * PIYADE (v8.785 varsayilan = AGRESIF): durmadan sprint, hedef alma KAPALI, CARELESS (AI ates etmek icin durmaz; 'catisarak' modunda RPT'de ornekleri %50 'hiz 0 / komut ATTACK' idi). Asagidaki 'catisarak' modu (eypTarz 0 / CBA canliBombaCatis ACIK): hedef alma / nisan AI'si ACIK (TARGET, AUTOTARGET, WEAPONAIM) -> kosarken ates eder (doWatch + reveal; doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
+ * PIYADE (v8.785 varsayilan = AGRESIF): durmadan sprint, hedef alma KAPALI, CARELESS (AI ates etmek icin durmaz; 'catisarak' modunda RPT'de ornekleri %50 'hiz 0 / komut ATTACK' idi). Asagidaki 'catisarak' modu (eypTarz 0 / CBA canliBombaCatis ACIK): v8.797: hedef alma (TARGET, AUTOTARGET) KAPALI (acikken AI 'ATTACK' ile duruyordu), WEAPONAIM acik; kosarken forceWeaponFire ile 0.15-0.5 sn'de bir atis + doWatch (doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
  *   (sprintte AI ates edemez); hedefe DOGRUDAN (zikzak v8.780'de kullanici istegiyle KALDIRILDI).
  * ARAC (araba / kamyon / MRAP; Tank sinifi degil): surucu hedefin ANLIK konumuna tam hizla surer (dogrudan); surucu disi murettebatin ates AI'si ACIK kalir (catisarak); arac hedefe tetik + 3 m kalinca patlar (arac + murettebat olur).
  * Patlama: fnc_eypPatlat (CBA eypPatlamaGucu; piyade / arac). Referans kodlardan (aral_canl_bomba / canl_bomba): SON AN HIZ ARTISI (piyade canliBombaAtilmaM 45 m, arac canliBombaAracAtilmaM 120 m ya da hasar > 0.1 -> sprint / tam hiz + bagirma sesi; oncesi kosu / sivil trafik hizi), allowFleeing 0, aracta allowCrewInImmobile (tekerlek patlasa inmez),
@@ -74,11 +74,10 @@ _b allowFleeing 0;
 if (!_arac && {!isNull (assignedVehicle _b)}) then { unassignVehicle _b; };
 { _b disableAI _x; } forEach ["AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
 { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
-if (_catis && {!_arac}) then {
-    { _b enableAI _x; } forEach ["TARGET", "AUTOTARGET", "WEAPONAIM"];
-    _b setCombatMode "RED";
-} else {
-    if (!_arac) then { { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET"]; };
+// v8.797 (RPT 9d04962c: 'catisarak' modunda TARGET / AUTOTARGET acikken AI 76-117 m'de komut 'ATTACK' ile durup ates etti): hedef alma HER modda KAPALI; 'catisarak' ates etmeyi asagida forceWeaponFire ile kosarken yapar
+if (!_arac) then {
+    { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET"];
+    if (_catis) then { _b enableAI "WEAPONAIM"; _b setCombatMode "RED"; };
 };
 _b setBehaviour (["AWARE", "CARELESS"] select (_gizli || {_agresif && {!_arac}}));
 if (_arac) then {
@@ -121,6 +120,7 @@ private _stallEmirT = 0;
 private _altList = [];
 private _altIdx = 0;
 private _altBitis = 0;
+private _atesT = 0;
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
@@ -230,10 +230,26 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         if (_gizli) then { _b setBehaviour "AWARE"; };
                     };
                 };
-                if (_catis && {!_arac} && {!(_h isEqualTo _izlenen)}) then {
-                    _b doWatch _h;
-                    _b reveal [_h, 4];
-                    _izlenen = _h;
+                if (_catis && {!_arac}) then {
+                    if !(_h isEqualTo _izlenen) then {
+                        _b doWatch _h;
+                        _b reveal [_h, 4];
+                        _izlenen = _h;
+                    };
+                    // v8.797: kosarken ates (doFire / doTarget YOK: doMove'u iptal eder). 8 - 300 m arasi, mermi varsa, 0.15 - 0.5 sn aralikla tek atis; hedef alma kapali oldugu icin AI durmaz
+                    if (time >= _atesT && {_m > 8} && {_m < 300}) then {
+                        _atesT = time + 0.15 + (random 0.35);
+                        private _kw = currentWeapon _b;
+                        if (_kw isNotEqualTo "" && {(_b ammo _kw) > 0} && {(behaviour _b) isNotEqualTo "STEALTH"}) then {
+                            _b doWatch _h;
+                            _b forceWeaponFire [currentMuzzle _b, currentWeaponMode _b];
+                        };
+                    };
+                    if (time >= _tazeT) then {
+                        _tazeT = time + 2;
+                        { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET", "SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
+                        { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
+                    };
                 };
                 // v8.780 (kullanici: 'zikzakta cok bekliyor, zikzaki kaldir'): ZIKZAK YOK, hedefe dogrudan. doMove yalniz hedef 6 m'den fazla kaydiysa ya da araliktan sonra yenilenir (her tikte yenilemek yol hesabini sifirlar)
                 // her ~2 sn: agresif piyadede hiz / davranis baska betik tarafindan bozulduysa yeniden kur (RPT 1f3a00f8: beh CARELESS -> AWARE)
@@ -268,7 +284,8 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                             // v8.796 (RPT 45378173: piyade bomba hedefe 122 m'de 57 sn 'hiz 0 / komut MOVE' durdu, sonra oyuncu yaklasinca kosup 28 m'ye geldi = hedef noktaya YOL YOK gibi): yol bulunamadi (moveToFailed) ya da 6 sn'den uzun duruyorsa hedefin cevresindeki
                             //   alternatif noktalara (10 / 25 / 45 m halka, 8 yon) sirayla doMove; hepsi denenince 'ulasilamaz' ile kosuyu bitirir (dis dongu en cok 3 deneme)
                             private _mf = moveToFailed _b;
-                            if (_mf || {(time - _stallT) > 6}) then {
+                            // v8.797 (RPT 9d04962c: moveToFailed false iken 6 sn'den uzun durma 24 alternatif noktayi bosuna denedi ve kosuyu 'ulasilamaz' bitirdi; asil neden 'ATTACK' idi): alternatif nokta YALNIZ yol gercekten bulunamadiysa (moveToFailed); aksi halde ayni hedefe emir yenilenir
+                            if (_mf) then {
                                 if (_altList isEqualTo []) then {
                                     { private _r = _x; for "_aci" from 0 to 7 do { private _pp = _hp getPos [_r, _aci * 45]; if (!surfaceIsWater _pp) then { _altList pushBack _pp; }; }; } forEach [10, 25, 45];
                                 };
@@ -289,6 +306,7 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                                     _bitti = true;
                                 };
                             } else {
+                                if ((currentCommand _b) isEqualTo "ATTACK") then { doStop _b; _b doWatch objNull; };
                                 _b doMove _hp;
                                 _sonEmir = _hp;
                                 _dmT = time + 2.5;

@@ -56,13 +56,22 @@ private _calis = {
             private _ol = if (_mod isEqualTo 1) then {1} else {[_g, "yereAtes", 0] call FUNC(dk)};
             if (_ol <= 0) then { continue };
             if ((_g getVariable [QGVAR(isRetreating), false]) isEqualTo true || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true} || {(_g getVariable [QGVAR(isEvading), false]) isEqualTo true}) then { continue };
-            // once savas: yakinda canli bilinen dusman varsa yere atilmaz
-            // v8.793 (RPT 6f679694: tehdit_var 20 + atici_yok 10): tehdit = lider 100 m icinde BILINEN, savasabilir (saglikli / yarali, captive / baygin DEGIL) dusman; yerdeki baygin / captive oyuncu tehdit sayilmaz
-            private _tehdit = (_l targets [true, 100]) select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x} && {!(_x getVariable ["ACE_isUnconscious", false])}};
-            if (_tehdit isNotEqualTo []) then { _say set ["tehdit_var", (_say getOrDefault ["tehdit_var", 0]) + 1]; continue };
+            // v8.797 (RPT 9d04962c: [YERE-ATES-OZET] yalniz tehdit_var 22-34 / 90 sn, govde sayilmiyordu): once yakinda gecerli govde var mi bak (ucuz); yoksa grup atlanir, 'tehdit_var' sayaci YALNIZ govde varken engel olursa sayilir
             private _gSide = side _g;
             private _govdeler = (nearestObjects [getPosATL _l, ["CAManBase"], _menzil + 60]) select {[_x, _gSide, _oyuncuDahil, _oluAcik, _bayginAcik] call _kurbanMi};
             if (_govdeler isEqualTo []) then { continue };
+            // once savas: lider 100 m icinde SON 30 SN'de gorulmus / bilinen, savasabilir (saglikli / yarali, captive / baygin DEGIL) dusman varsa yere atilmaz (eskiden yas siniri yoktu: eski bilgi de tehdit sayiliyordu)
+            private _tehdit = (_l targets [true, 100, [], 30]) select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x} && {!(_x getVariable ["ACE_isUnconscious", false])}};
+            if (_tehdit isNotEqualTo []) then {
+                _say set ["tehdit_var", (_say getOrDefault ["tehdit_var", 0]) + 1];
+                private _tl = missionNamespace getVariable ["lambs_danger_yereTehditLogN", 0];
+                if (_tl < 12) then {
+                    missionNamespace setVariable ["lambs_danger_yereTehditLogN", _tl + 1];
+                    private _te = _tehdit select 0;
+                    diag_log format ["[YERE-ATES] TEHDIT ENGELI | %1 (%2) | govde %3 | tehdit %4 (%5) %6 m | yasam %7 | bilgi %8 | taraf %9 | oyuncu %10", name _l, groupId _g, count _govdeler, name _te, typeOf _te, round (_l distance _te), lifeState _te, (_l knowsAbout _te) toFixed 2, side group _te, isPlayer _te];
+                };
+                continue
+            };
             _say set ["govde_aday", (_say getOrDefault ["govde_aday", 0]) + (count _govdeler)];
             {
                 private _b = _x;

@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.796"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.797"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -618,7 +618,7 @@ def kabul(path):
     ekle("TESLIM + EYP (son anda kosu)", "BILGI", ("isaretli %d | son an kosusu %d | patladi %d" % (tb, tbk, tbp)) if tb else "[TESLIM-BOMBA] yok (v8.776 oncesi RPT ya da teslimBomba kapali (varsayilan) / teslim olan + patlayicili asker yok)")
     mb = [l for l in L if "[MEKANIZE-INIS] BASLA" in l]; mi_ = len([1 for l in L if "[MEKANIZE-INIS] INDI" in l]); ms_ = len([1 for l in L if "[MEKANIZE-INIS] SERBEST" in l])
     ekle("MEKANIZE INIS (BMP / BTR / KAMYON)", "BILGI", ("inis basladi %d | indi %d | serbest %d | siniflar: IFV %d APC %d KAMYON %d | nedenler: temas+dusman %d, hasar %d, baski %d, hareketsiz %d" % (len(mb), mi_, ms_, len([1 for l in mb if "(IFV)" in l]), len([1 for l in mb if "(APC)" in l]), len([1 for l in mb if "(KAMYON)" in l]), len([1 for l in mb if "temas + dusman" in l]), len([1 for l in mb if "hasar aldi" in l]), len([1 for l in mb if "surucu baskida" in l]), len([1 for l in mb if "arac hareketsiz" in l]))) if mb else "[MEKANIZE-INIS] BASLA yok (v8.789 oncesi RPT ya da yolcu tasiyan IFV / APC / kamyon temasa girmedi)")
-    ya_ = [l for l in L if "[YERE-ATES] " in l and "hedef" in l and "baslatildi" not in l]
+    ya_ = [l for l in L if "[YERE-ATES] " in l and "hedef" in l and "baslatildi" not in l and "TEHDIT ENGELI" not in l]
     yo_ = {}
     for l in L:
         if "[YERE-ATES-OZET]" in l:
