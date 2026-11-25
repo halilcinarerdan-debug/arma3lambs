@@ -123,7 +123,9 @@ private _yardim = 0;
 private _bitti = false;
 private _taraf = side group _b;
 private _izlenen = objNull;
-private _tetikT = _tetik + ([0, 3] select _arac);
+// v8.793 (RPT 6f679694 / 99188002): VBIED hedefe 20-36 m'de 30 sn takildi (hiz 0) ve patlamadi. Arac patlama yaricapi guce gore: 0 DemoCharge +0, 1 Mk82 +5, 2 GBU-12 +12 m (olum yaricapi bundan cok buyuk) -> tetik = tetik + 3 + guce bagli ek
+private _gucEfektif = round (((if (_gucOv >= 0) then {_gucOv} else {missionNamespace getVariable ["lambs_danger_eypPatlamaGucu", 1]}) max 0) min 2);
+private _tetikT = _tetik + (if (_arac) then {3 + ([0, 5, 12] select _gucEfektif)} else {0});
 private _logT = 0;
 private _sonPoz = getPosATL _v;
 while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
@@ -190,7 +192,15 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         // 4 sn'den uzun duruyorsa emri hemen yenile (takilmis / plan bitmis olabilir)
                         if ((time - _durT) > 4 && {time >= _dmT}) then { _b doMove (getPosATL _h); _sonEmir = getPosATL _h; _dmT = time + 3; };
                         // YARDIMLI SURUS (v8.784): isaretli (Zeus / 3DEN / init) arac 8 sn'den uzun duruyorsa AI yolu bulamiyor / baska betik tutuyor demektir -> hedefe dogru hiz verilir (carpisma motorda; yol bulma yok)
-                        if (_isaretli && {(time - _durT) > 8} && {_m > 15}) then {
+                        // takildi ama hedef yakin (<= 45 m, 3 sn'den uzun duruyor): VBIED yerinde patlar (RPT 6f679694: 20-36 m'de 30 sn durdu)
+                        if (_isaretli && {(time - _durT) > 3} && {_m <= 45}) then {
+                            _sonuc = "PATLADI";
+                            _bitti = true;
+                            [getPosATL _v, "arac", _gucOv] call FUNC(eypPatlat);
+                            { _x setDamage 1; } forEach (crew _v);
+                            _v setDamage 1;
+                        };
+                        if (!_bitti && {_isaretli} && {(time - _durT) > 3} && {_m > 15}) then {
                             private _yn = _v getDir _h;
                             _v setDir _yn;
                             _v setVelocity [14 * (sin _yn), 14 * (cos _yn), 0.4];
@@ -231,8 +241,9 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 private _hp = getPosATL _h;
                 // v8.786 (RPT b5f24b66 / 1f3a00f8: piyade 'hiz 0 / MOVE' dur-kalk: her 0.6-1.6 sn'de yeni doMove yol planini sifirliyordu): piyade de SEYREK emir (uzakta hedef 15 m kaydiysa, en az 2.5 sn; yakinda 4 m / 0.6 sn)
                 private _esik = if (_arac) then {[60, 25] select (_m < 80)} else {[15, 8] select (_m < 30)};   // v8.790: yakinda da seyrek (RPT f2a62ebb: 24-29 m'de hiz 0 / MOVE; 0.6 sn emir yol planini sifirliyordu)
-                private _zorS = if (_arac) then {8} else {[5, 2.5] select (_m < 30)};
-                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {time >= (_dmT + _zorS)}}) then {
+                // v8.793 (RPT 99188002: piyade 'hiz 0' orneklerinin hepsi ~10 sn arayla = ZORUNLU periyodik yeniden emir yol planini sifirliyordu): yeniden emir yalniz hedef _esik'ten fazla kaydiysa YA DA komut kayboldu (komut MOVE degil) ise
+                private _komutKayip = (currentCommand _b) isNotEqualTo "MOVE";
+                if (time >= _dmT && {_sonEmir isEqualTo [] || {(_hp distance2D _sonEmir) > _esik} || {_komutKayip && {time >= (_dmT + 1)}}}) then {
                     _b doMove _hp;
                     _sonEmir = _hp;
                     _dmT = time + (if (_arac) then {3} else {[2.5, 1.5] select (_m < 30)});

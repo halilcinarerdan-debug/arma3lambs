@@ -43,7 +43,7 @@ private _calis = {
         sleep 2.5;
         private _mod = missionNamespace getVariable ["lambs_danger_yereAtes", 0];
         if (_mod isEqualTo 2) then { continue };
-        private _menzil = ((missionNamespace getVariable ["lambs_danger_yereAtesM", 40]) max 10) min 100;
+        private _menzil = ((missionNamespace getVariable ["lambs_danger_yereAtesM", 60]) max 10) min 100;
         private _mermiCba = ((missionNamespace getVariable ["lambs_danger_yereAtesMermi", 30]) max 5) min 60;
         private _oyuncuDahil = missionNamespace getVariable ["lambs_danger_yereAtesOyuncu", true];
         private _oluAcik = missionNamespace getVariable ["lambs_danger_yereAtesOlu", true];
@@ -57,8 +57,9 @@ private _calis = {
             if (_ol <= 0) then { continue };
             if ((_g getVariable [QGVAR(isRetreating), false]) isEqualTo true || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true} || {(_g getVariable [QGVAR(isEvading), false]) isEqualTo true}) then { continue };
             // once savas: yakinda canli bilinen dusman varsa yere atilmaz
-            private _e = _l findNearestEnemy _l;
-            if (!isNull _e && {alive _e} && {(_l distance2D _e) < 100}) then { _say set ["tehdit_var", (_say getOrDefault ["tehdit_var", 0]) + 1]; continue };
+            // v8.793 (RPT 6f679694: tehdit_var 20 + atici_yok 10): tehdit = lider 100 m icinde BILINEN, savasabilir (saglikli / yarali, captive / baygin DEGIL) dusman; yerdeki baygin / captive oyuncu tehdit sayilmaz
+            private _tehdit = (_l targets [true, 100]) select {alive _x && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x} && {!(_x getVariable ["ACE_isUnconscious", false])}};
+            if (_tehdit isNotEqualTo []) then { _say set ["tehdit_var", (_say getOrDefault ["tehdit_var", 0]) + 1]; continue };
             private _gSide = side _g;
             private _govdeler = (nearestObjects [getPosATL _l, ["CAManBase"], _menzil + 60]) select {[_x, _gSide, _oyuncuDahil, _oluAcik, _bayginAcik] call _kurbanMi};
             if (_govdeler isEqualTo []) then { continue };
