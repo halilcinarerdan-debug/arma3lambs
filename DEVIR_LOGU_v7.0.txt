@@ -4838,3 +4838,10 @@ v8.807 (dal sade-waypoint) kullanici: 'retreati incele, cok aciktta durmasinlar,
  - PRESET: CBA_LAMBS_Danger_v8.807.txt = kullanicinin 18984fdf-LAMBS_Danger.txt dosyasi BIREBIR + iki yeni anahtar (kosuPatlama, kosuPatlamaS); kullanicinin hicbir degeri degistirilmedi.
  - SINIR / T: DENENMEDI. Siper varisinda MOVE + idle animasyonla takilan 10 askerin nedeni bilinmiyor (yol acik, baski 0): olasi: doMove yeniden emri yol hesabini sifirliyor (v8.787 notu) ya da motor FSM'i bekletiyor. Sonraki adim adaylari: (a) yeniden emri 3 sn yerine 4.5 sn sonra, (b) referans modun calculatePath + ara dugum (10-15 m) doMove tekniği (PathCalculated olayi; asenkron). Dolasma kordu 'yok' sonucu koy / duvar bolgesinde fazla temkinli olabilir (31 / 32 red): yolDolasMaks / kord sayisi ayari ya da ucuncu ara nokta eklenebilir.
  - fnc_yolTara: dolasma kordu yanal orani 3 -> 5 aday (%20 / %35 / %55 / %80 / %120, en cok 30 m): koy / duvar bolgesinde 'kord yok' reddi (32'nin 31'i) azalsin; 'cok acikta durmasinlar' icin gereksiz elenen siper azalir.
+
+v8.808 (dal sade-waypoint) kullanici: 'ayrica hangi taraflarin bomber olup olmayacagini ayarlayabilelim'.
+ - YORUM: 'bomber' = CANLI BOMBA (fnc_eypSistem: piyade PBIED + arac VBIED, agir kayipta dusman grubun secimi) ve teslim bombasi (teslim olan asker son anda kosar). El bombasi atanlar (bombaci / UGL) 'bomber' sayilmadi.
+ - YENI CBA (taraf bazli, varsayilan hepsi ACIK = onceki davranis): canliBombaWest (BLUFOR), canliBombaEast (OPFOR), canliBombaInd (INDEPENDENT). Genel canliBomba ana salter (VE). Okuma: fnc_rpgTarafDeger [taraf, "canliBomba", true]. fnc_eypSistem: ana dongu (_bTaraf; kapali tarafin grubu bomba secmez, taraf basina BIR kez '[CANLI-BOMBA] TARAF KAPALI' logu) + teslim bombasi isaretleme (_tasiyor).
+ - DOKUNULMADI: Zeus 'EYP Bomba' modulu (fnc_eypBombaYap) ile elle isaretlenen bombaci (acik kullanici niyeti) taraf ayarindan etkilenmez.
+ - PRESET: CBA_LAMBS_Danger_v8.808.txt = kullanicinin 18984fdf dosyasi + kosuPatlama / kosuPatlamaS (v8.807) + canliBombaWest / East / Ind (hepsi true). SINIR / T: DENENMEDI.
+

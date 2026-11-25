@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.807 · Preset: `CBA_LAMBS_Danger_v8.807.txt` · 648 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.808 · Preset: `CBA_LAMBS_Danger_v8.808.txt` · 651 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.807.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.808.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (342 ayar)
+### ELITE siper (345 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -219,11 +219,14 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `canliBombaAracAtilmaM` | EYP: arac bombasi son an tam gaz mesafesi (m) | 30–300 | 120 | v8.777 (referans: ramDist). Arac bombasi bu mesafeye kadar 60 km/s ile yaklasir, sonra tam gaz (hasar > %10 ise hemen). Varsayilan 120. |
 | `canliBombaAtilmaM` | EYP: piyade canli bomba son an sprint mesafesi (m) | 10–150 | 45 | v8.777 (referans: terminal surge). Bomba tasiyan piyade bu mesafeye kadar kosu hizinda ates ederek gelir, sonra sprint (hasar > %10 ise hemen). Varsayilan 45. |
 | `canliBombaCatis` | EYP: canli bomba / teslim bomba CATISARAK (hedef alir, yavas) | açık/kapalı | kapalı | v8.785 (kullanici: canli bomba daha agresif kossun). KAPALI (varsayilan): AGRESIF - en bastan sprint, hedef almaz, AI ates etmek icin durmaz. ACIK: catisarak - kosarken hedef alir ama AI durup ates eder (RPT b5f24b66: orneklerin %50si hiz 0, komut ATTACK). ARAC bombasi her iki durumda tam gazla gider. Varsayilan KAPALI. |
+| `canliBombaEast` | EYP: canli bomba - OPFOR (EAST) kullanabilsin | açık/kapalı | açık | v8.808. Acik (varsayilan): OPFOR grubu agir kayipta canli bomba (piyade / arac bombasi) ve teslim bombasi secebilir. Kapali: OPFOR hic bomber kullanmaz. Genel 'canli bomba' ayari ana salterdir. Zeus 'EYP Bomba' modulu etkilenmez. |
+| `canliBombaInd` | EYP: canli bomba - INDEPENDENT (GUER) kullanabilsin | açık/kapalı | açık | v8.808. Acik (varsayilan): INDEPENDENT grubu agir kayipta canli bomba (piyade / arac bombasi) ve teslim bombasi secebilir. Kapali: INDEPENDENT hic bomber kullanmaz. Genel 'canli bomba' ayari ana salterdir. Zeus 'EYP Bomba' modulu etkilenmez. |
 | `canliBombaMax` | EYP: canli bomba olay siniri (600 sn / taraf) | 1–5 | 1 | v8.775. Taraf basina 600 sn icinde en cok bu kadar canli bomba olayi. Varsayilan 1. |
 | `canliBombaMenzilM` | EYP: canli bomba baslama menzili (m) | 50–300 | 150 | v8.775. Bilinen dusman bu mesafedeyse canli bomba secilir. Varsayilan 150. |
 | `canliBombaOlumSans` | EYP: bomba tasiyan vurulunca patlama sansi (0-1) | 0–1 | 0.5 | v8.777 (referans: 0.5). Hedefe varamadan vurulan canli bomba / arac bombasinin cihazi bu olasilikla olunce patlar (yakindan vurmak riskli). 0 = hic patlamaz. Varsayilan 0.5. |
 | `canliBombaTereddutS` | EYP: bombaci tereddut suresi azami (sn) | 0–8 | 3 | v8.791 (kullanici: bombacilar random tereddut etsin, birkac sn gecikme). Piyade bomba (canli bomba / teslim bomba / Zeus-3DEN-init) patlama menzilinde 0.5 - bu kadar sn rastgele duraksar, sonra yasiyorsa patlar; tereddutte vurulursa olum patlamasi (canliBombaOlumSans) aynen calisir. Arac bombasi etkilenmez. EYP kurucu tepkisi 0.4 + 0 - bunun yarisi. 0 = tereddut yok. Varsayilan 3. |
 | `canliBombaTetikM` | EYP: canli bomba patlama mesafesi (m) | 3–12 | 5 | v8.775. Hedefe bu kadar yaklasinca patlar. Varsayilan 5. |
+| `canliBombaWest` | EYP: canli bomba - BLUFOR (WEST) kullanabilsin | açık/kapalı | açık | v8.808 (kullanici: 'hangi taraflarin bomber olup olmayacagini ayarlayabilelim'). Acik (varsayilan): BLUFOR grubu agir kayipta canli bomba (piyade / arac bombasi) ve teslim bombasi secebilir. Kapali: BLUFOR hic bomber kullanmaz. Genel 'canli bomba' ayari ana salterdir (ikisi de acik olmali). Zeus 'EYP Bomba' modulu ile isaretlenen bombaci bu ayardan etkilenmez. |
 | `cekilBacakYenile` | Geri cekilme: bacaklari yeniden planla + olu arazi puani | açık/kapalı | açık | v8.669 (yol haritasi madde 4 / 6). Geri cekilmede ilk bacak disindakiler her sicramadan once o anki durumdan yeniden secilir (grubun dusmandan en uzak askeri baslangic = leapfrog, guncel dusman yonu) ve bacak ortasi dusman gozunden gizliyse +15 puan alir. Kapali = baslangicta bir kez planlanan noktalar. Log: [GERI-CEKILME-BACAK]. |
 | `cekilKosuModu` | Geri cekilme: kosu modu (takilan asker hedef almayi birakir) | açık/kapalı | kapalı | v8.671 / v8.692. Acik: geri cekilmede ilk takilmada (3.5-7 sn hareketsiz, baski < 0.3) o asker AWARE + hedef alma kapali kosar; sicrama sonunda COMBAT + hedef alma geri verilir. Neden: RPT 29ac2821 geri cekilme sicramalarinin ilk saniyelerinde asker-saniyelerin %86'si hareketsiz (saldiri hedefi var, MOVE komutu, hiz 0). Dezavantaj: kosarken karsilik atesi verilmez. Varsayilan kapali. |
 | `cevreProfil` | Cevre profili: cover ayarlari bulunulan yere gore degissin (bukalemun) | liste (Kapali (statik, eski), Otomatik (konuma gore), Sabit: ORMAN, Sabit: KENTSEL / CQB, Sabit: ACIK ARAZI) | Otomatik (konuma gore) | v8.738 (kullanici: 'ormanlik, cqb, acik alan, lythium loglarina gore profil olustur, bulunduklari konuma gore dinamik degissin, CBA'dan opsiyonel'). OTOMATIK: her askerin cevresi (agac / sert nesne / bina sayisi) taranir; ORMAN, KENTSEL (CQB / Lythium), ACIK (nesnesiz arazi) ya da KARISIK profili secilir (histerezisli); siper yaricapi, sahte siper cezasi, yan yon / rota riski agirligi, ust kat on tarama yaricapi, yatma kademesi, uzak hucum siniri profile gore olceklenir (sizin CBA degeriniz TABAN). Kapali = tamamen statik (eski). Sabit secenekler tek profili zorlar. |
