@@ -503,6 +503,7 @@ private _nesneGit = {
                                     _bitti = true;
                                     _sy set ["varis_ulasilamadi", (_sy getOrDefault ["varis_ulasilamadi", 0]) + 1];
                                     private _yt = [_a, _h] call FUNC(yolTara);   // v8.805: neden ulasilamadi? (engel sinifi / dolasma / su / yamac)
+                                    [_a, _h, "VARIS-" + (currentCommand _a)] spawn FUNC(retDomoveTani);   // v8.815: siper doMove'u motor tarafindan KABUL EDILDI mi (beklenen hedef siper noktasina < 8 m mi) + AI durumu: [RET-DOMOVE-TEST] (RPT ea78a960: 15 basarisizligin 14'unde yol acik, 13'u bosta animasyon, komut MOVE 8 / ATTACK 6, baski 0)
                                     private _vl = missionNamespace getVariable ["lambs_danger_varisLogN", 0];
                                     if (_vl < 25) then {
                                         missionNamespace setVariable ["lambs_danger_varisLogN", _vl + 1];
