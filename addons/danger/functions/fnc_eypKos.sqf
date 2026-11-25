@@ -3,7 +3,7 @@
  * Author: Cinar (ELITE fork)
  * EYP KOSU: CATISARAK (ates ederek) hedefe yaklas, canliBombaTetikM'de patla (v8.777; kullanici: 'araclardada olsun' + 've direk kosmasinlar catisarak girsinler' + 'adam uzerimize kossun catisarak').
  * fnc_eypSistem (canli bomba) ve teslim-bomba dongusu cagirir; BLOKLAR (spawn icinden cagrilmali), sonuc metni doner.
- * PIYADE (v8.785 varsayilan = AGRESIF): durmadan sprint, hedef alma KAPALI, CARELESS (AI ates etmek icin durmaz; 'catisarak' modunda RPT'de ornekleri %50 'hiz 0 / komut ATTACK' idi). Asagidaki 'catisarak' modu (eypTarz 0 / CBA canliBombaCatis ACIK): v8.797: hedef alma (TARGET, AUTOTARGET) KAPALI (acikken AI 'ATTACK' ile duruyordu), WEAPONAIM acik; kosarken forceWeaponFire ile 0.15-0.5 sn'de bir atis + doWatch (doFire / doTarget YOK, onlar doMove'u iptal eder); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
+ * PIYADE (v8.785 varsayilan = AGRESIF): durmadan sprint, hedef alma KAPALI, CARELESS (AI ates etmek icin durmaz; 'catisarak' modunda RPT'de ornekleri %50 'hiz 0 / komut ATTACK' idi). Asagidaki 'catisarak' modu (eypTarz 0 / CBA canliBombaCatis ACIK): v8.797: hedef alma (TARGET, AUTOTARGET) KAPALI (acikken AI 'ATTACK' ile duruyordu); v8.799: davranis CARELESS (AWARE -> COMBAT'ta nisan durusunda duruyordu), doWatch YOK; kosarken forceWeaponFire ile 0.15-0.5 sn'de bir atis (doFire / doTarget / doWatch YOK, onlar kosuyu keser); siper / bastirma / FSM / otomatik muharebe KAPALI (siper aramaz, durmaz); davranis AWARE, tam hiz DEGIL kosu hizi
  *   (sprintte AI ates edemez); hedefe DOGRUDAN (zikzak v8.780'de kullanici istegiyle KALDIRILDI).
  * ARAC (araba / kamyon / MRAP; Tank sinifi degil): surucu hedefin ANLIK konumuna tam hizla surer (dogrudan); surucu disi murettebatin ates AI'si ACIK kalir (catisarak); arac hedefe tetik + 3 m kalinca patlar (arac + murettebat olur).
  * Patlama: fnc_eypPatlat (CBA eypPatlamaGucu; piyade / arac). Referans kodlardan (aral_canl_bomba / canl_bomba): SON AN HIZ ARTISI (piyade canliBombaAtilmaM 45 m, arac canliBombaAracAtilmaM 120 m ya da hasar > 0.1 -> sprint / tam hiz + bagirma sesi; oncesi kosu / sivil trafik hizi), allowFleeing 0, aracta allowCrewInImmobile (tekerlek patlasa inmez),
@@ -81,7 +81,8 @@ if (!_arac) then {
     { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET"];
     if (_catis) then { _b enableAI "WEAPONAIM"; _b setCombatMode "RED"; };
 };
-_b setBehaviour (["AWARE", "CARELESS"] select (_gizli || {_agresif && {!_arac}}));
+// v8.799 (RPT cc75a129 + 44282768: 'catisarak' bombaci her seferinde AWARE -> COMBAT'a gecince 20-50 sn 'hiz 0 / komut MOVE / amovpercmstpsraswrfldnon' (nisan durusunda ayakta) durdu; AGRESIF (CARELESS) ayni RPT'lerde 56 sn kesintisiz kostu): piyade HER modda CARELESS (motor COMBAT'a cevirip durduramaz); 'catisarak' atesi forceWeaponFire ile
+_b setBehaviour (["AWARE", "CARELESS"] select (_gizli || {!_arac}));
 if (_arac) then {
     _v allowCrewInImmobile true;
     _v engineOn true;
@@ -123,6 +124,8 @@ private _altList = [];
 private _altIdx = 0;
 private _altBitis = 0;
 private _atesT = 0;
+private _atesN = 0;
+private _mermi0 = if (!_arac && {(primaryWeapon _b) isNotEqualTo ""}) then {_b ammo (primaryWeapon _b)} else {0};
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
@@ -234,21 +237,21 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                 };
                 if (_catis && {!_arac}) then {
                     if !(_h isEqualTo _izlenen) then {
-                        _b doWatch _h;
                         _b reveal [_h, 4];
                         _izlenen = _h;
                     };
-                    // v8.797: kosarken ates (doFire / doTarget YOK: doMove'u iptal eder). 8 - 300 m arasi, mermi varsa, 0.15 - 0.5 sn aralikla tek atis; hedef alma kapali oldugu icin AI durmaz
+                    // v8.799: doWatch KALDIRILDI (hedefe bakan AI nisan durusunda durdu: RPT cc75a129); kosarken ates = govdenin baktigi yone forceWeaponFire (doFire / doTarget / doWatch YOK). 8 - 300 m, mermi varsa, 0.15 - 0.5 sn aralikla tek atis
                     if (time >= _atesT && {_m > 8} && {_m < 300}) then {
                         _atesT = time + 0.15 + (random 0.35);
                         private _kw = currentWeapon _b;
-                        if (_kw isNotEqualTo "" && {(_b ammo _kw) > 0} && {(behaviour _b) isNotEqualTo "STEALTH"}) then {
-                            _b doWatch _h;
+                        if (_kw isNotEqualTo "" && {(_b ammo _kw) > 0}) then {
                             _b forceWeaponFire [currentMuzzle _b, currentWeaponMode _b];
+                            _atesN = _atesN + 1;
                         };
                     };
                     if (time >= _tazeT) then {
                         _tazeT = time + 2;
+                        if ((behaviour _b) isNotEqualTo "CARELESS") then { _b setBehaviour "CARELESS"; };
                         { _b disableAI _x; } forEach ["TARGET", "AUTOTARGET", "SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
                         { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
                     };
@@ -360,6 +363,14 @@ if (_sonuc isEqualTo "vuruldu / oldu") then {
     };
 };
 
+if (_catis && {!_arac} && {!isNull _b}) then {
+    // v8.799: catisarak ozet (kosarken ates calisti mi: forceWeaponFire denemesi ve harcanan mermi)
+    private _cl = missionNamespace getVariable ["lambs_danger_eypCatisLogN", 0];
+    if (_cl < 20) then {
+        missionNamespace setVariable ["lambs_danger_eypCatisLogN", _cl + 1];
+        diag_log format ["[EYP-KOS] CATISARAK OZET | %1 | sonuc %2 | sure %3 sn | ates denemesi %4 | harcanan mermi %5 | davranis %6", name _b, _sonuc, round (time - _t0), _atesN, _mermi0 - (if ((primaryWeapon _b) isNotEqualTo "") then {_b ammo (primaryWeapon _b)} else {0}), behaviour _b];
+    };
+};
 if (!isNull _grp) then {
     _grp setVariable [QGVAR(disableGroupAI), [nil, true] select _gDAI0];
     _grp setVariable [QGVAR(gorev), [nil, _gGorev0] select (_gGorev0 isNotEqualTo "")];
