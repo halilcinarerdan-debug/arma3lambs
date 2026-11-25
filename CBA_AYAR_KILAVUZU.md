@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.810 · Preset: `CBA_LAMBS_Danger_v8.810.txt` · 652 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.811 · Preset: `CBA_LAMBS_Danger_v8.811.txt` · 653 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.810.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.811.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (346 ayar)
+### ELITE siper (347 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -369,6 +369,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `penetreOlcek` | Penetrasyon olcegi (mermi gucu carpani) | 0.5–2 | 1 | v8.666. Mermi gucunun genel carpani: 1 = varsayilan tahmin; < 1 = mermiler daha az nufuz eder (daha cok engel 'gecmez'), > 1 = daha cok nufuz eder. |
 | `perfOlcum` | Performans olcumu: izleyici dongu hizi | açık/kapalı | açık | v8.681. 42 izleyicinin ardisik iki dongusu arasi GERCEKLESEN sure ile ISTENEN bekleme karsilastirilir, 60 sn'de bir [PERF-DUSUN] satiri (oran ~1-1.5 saglikli, >= 2 yavas). YALNIZ OLCUM: dusunme hizi (dusunHizi carpanlari) ve bekleme sureleri DEGISMEZ. |
 | `reaksiyonArtis` | Reaksiyon artisi (dusunme hizina ek carpan) | 0–1 | 0.3 | v8.735 (kullanici: 'reaksiyon sureleri 3x dusunme hizinin hakkini versin, %30 arttir'). Sicak temasta TUM dusunme / reaksiyon izleyicilerinin bekleme suresi (dusunSure) CBA dusunHizi carpanina EK olarak (1 + bu deger) ile bolunur (0.3 = %30 daha hizli; dusunHizi 3 sinirinin USTUNE cikar); hizliFark esigi de ayni oranda kisalir. 0 = eski. |
+| `retKosuFsm` | Geri cekilme: kosucunun motor FSM'ini kosu suresince kapat | açık/kapalı | açık | v8.811 (kullanici: 'retreat coz'; RPT'lerde kosucularin %60-67'si MOVE komutu + hiz 0 ile duruyor; ayni ortamda FSM'i kapali bombaci kesintisiz kosuyor). Acik (varsayilan): geri cekilme sicramasinda kosucu askerin (lider haric) FSM'i en cok 14 sn kapanir, sicrama sonunda / varista / retreat bitince geri acilir; COMBAT + tufek yukarda kalir. Kapali = eski. |
 | `rolDisiplini` | Rol disiplini: MG / saglikci / nisanci manevrada KOSMAZ | açık/kapalı | açık | v8.661. Hucum, kanat ve bounding kosucusu secilirken MG (taban ates / bastirma), saglikci, nisanci ve (son tercih) AT manevraya katilmaz; RIFLE / UGL oncelikli. Baska kimse kalmazsa en az 1-2 kisi sirayla eklenir. |
 | `rotaRiskAgirlik` | Rota riski: ceza agirligi (m) | 0–8 | 2 | v8.735. Hattin her acik ornegi (dusmanin gozunden) siper puanina bu kadar m-esdeger ceza ekler (varsayilan 2; 0 = kapali). |
 | `rotaRiski` | Rota riski: siper / bounding bacagina giden hatti dusman gozunden test et | açık/kapalı | açık | v8.735 (kullanici: '1 2 3 yap'). Acik: acikSiper siper adayina KOSARKEN (hat 3 ornek) ve bndPlan bounding bacaklari (findCover'in 4 adayi arasindan) dusmanin gozunden / olasi siper noktalarindan en GIZLI hat secilir; risk x rotaRiskAgirlik siper puanina eklenir. Kapali = eski. |

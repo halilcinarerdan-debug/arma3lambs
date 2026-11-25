@@ -224,6 +224,8 @@ _group setVariable [QGVAR(retreatStartTime), _baslangic];
                     _x enableAI "AUTOTARGET";
                     _x enableAI "AUTOCOMBAT";
                     _x enableAI "COVER";
+                    [_x] call FUNC(kosuFsmBirak);   // v8.811: kosu FSM kapamasini geri ac
+                    _x enableAI "FSM";
                     _x setVariable [QGVAR(forceMove), nil];
                     _x setBehaviour (["AWARE", "COMBAT"] select ((_g getVariable [QGVAR(contact), 0]) > time));
                     _x allowFleeing 0;
@@ -262,6 +264,8 @@ if (EGVAR(main,debug_functions)) then {
         _x enableAI "AUTOTARGET";
         _x enableAI "AUTOCOMBAT";
         _x enableAI "COVER";
+        [_x] call FUNC(kosuFsmBirak);   // v8.811: kosu FSM kapamasini geri ac
+        _x enableAI "FSM";
     } forEach (units _group);
 
     [_group, "FILE", "retreat", 2] call FUNC(formSet);
@@ -412,6 +416,7 @@ if (EGVAR(main,debug_functions)) then {
                     _varis pushBack [_x, _p, getPosATL _x, time, 0];
                     _x setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                     _x doMove _p;
+                    [_x, 14] call FUNC(kosuFsm);   // v8.811: kosu suresince motor FSM'i kapali (MOVE + hiz 0 durgunlugu; lider haric; sicrama sonu / varista geri acilir)
                 };
             } forEach _cift;
         } forEach _ciftler;
@@ -713,6 +718,7 @@ if (EGVAR(main,debug_functions)) then {
             if (alive _b) then {
                 _b setVariable [QGVAR(forceMove), nil];
                 _b setVariable [QGVAR(retKosuModu), nil];   // v8.671: kosu modu sicrama sonunda biter
+                [_b] call FUNC(kosuFsmBirak);   // v8.811: sicrama bitti: FSM geri
                 _b enableAI "TARGET";
                 _b enableAI "AUTOTARGET";
                 _b enableAI "AUTOCOMBAT";
@@ -721,7 +727,7 @@ if (EGVAR(main,debug_functions)) then {
                 _b setUnitPos "AUTO"; _b setUnitPosWeak "MIDDLE";
                 // DOSTOP: varan asker kendi sicrama noktasinda KALIR (aksi halde formasyon slotuna, yani liderin eski konumuna,
                 // geri yuruyordu = "geri git ileri git, ayni yolu tekrar gidiyorlar")
-                if ((_b distance2D (_x select 1)) <= 12) then { doStop _b; };   // SADECE varanlar: varamayan durdurulursa hic ilerlemez (RPT: vardi 0/N, 40 sn'de lider kipirdamadi)
+                if ((_b distance2D (_x select 1)) <= 12) then { [_b] call FUNC(kosuFsmBirak); doStop _b; };   // SADECE varanlar: varamayan durdurulursa hic ilerlemez (RPT: vardi 0/N, 40 sn'de lider kipirdamadi)
                 [_b, _hedefASL] call _bastir;
             };
         } forEach _varis;
@@ -755,6 +761,8 @@ if (EGVAR(main,debug_functions)) then {
                 _x enableAI "AUTOTARGET";
                 _x enableAI "AUTOCOMBAT";
                 _x enableAI "COVER";
+                [_x] call FUNC(kosuFsmBirak);   // v8.811: kosu FSM kapamasini geri ac
+                _x enableAI "FSM";
                 _x setBehaviour "COMBAT";
                 _x setUnitPosWeak "DOWN";
                 private _cv = [_x, _targetPos, 25, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
@@ -950,6 +958,8 @@ if (EGVAR(main,debug_functions)) then {
                 _x enableAI "AUTOTARGET";
                 _x enableAI "AUTOCOMBAT";
                 _x enableAI "COVER";
+                [_x] call FUNC(kosuFsmBirak);   // v8.811: kosu FSM kapamasini geri ac
+                _x enableAI "FSM";
                 _x setVariable [QGVAR(forceMove), nil];
                 _x setVariable [QEGVAR(main,currentTask), nil, EGVAR(main,debug_functions)];
                 // temas suruyorsa COMBAT (siper arar / yatar), degilse cekilme oncesi davranis
