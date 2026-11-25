@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.792 · Preset: `CBA_LAMBS_Danger_v8.792.txt` · 458 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.798 · Preset: `CBA_LAMBS_Danger_v8.798.txt` · 459 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.792.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.798.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -73,6 +73,7 @@ Not: 600 m'de güdümsüz roketin isabeti düşer; isabet için `rpgMaxM = 350`,
 | Ayar | Anlam |
 |---|---|
 | `baskiKapisi` / `baskiYakinM` / `baskiGozlemciM` | uzak + gözlemcisiz bastırma yok (80 / 250 m) |
+| `baskiBombaci` | koşan piyade bombacıya bastırma ateşi yok, bombacı da bastırma atmaz (araç bombası hariç) |
 | `oyuncuGrubuBot` | oyuncu grubundaki botlar da düşman kadar güçlü/hızlı |
 | `bombaYuzYuzeM` | yüz yüze el bombası yasağı (20 m) |
 
@@ -162,7 +163,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (335 ayar)
+### ELITE siper (336 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -184,6 +185,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `bakisFarkKacisOran` | Bakis farkindaligi: kacis orani | 0–1 | 0.3 | v8.693. Tepkinin KACIS (yan adim) olma olasiligi; kalani siper mikro duzeltme (varsayilan 0.3). |
 | `bakisFarkMenzil` | Bakis farkindaligi: menzil (m) | 100–600 | 350 | v8.693. Bu mesafeden uzaktaki bot icin hesap yapilmaz (varsayilan 350). |
 | `bakisFarkSure` | Bakis farkindaligi: bot basina bekleme (sn) | 3–30 | 8 | v8.693. Ayni bot icin iki tepki arasi en az sure (varsayilan 8). |
+| `baskiBombaci` | Bastirma: piyade bombaciya / bombaciyla bastirma YOK (arac haric) | açık/kapalı | açık | v8.798 (kullanici: 'baski atesini daha akilli yapsinlar, bombada azalt', 'arac haric'). ACIK: kosan piyade bombaci (canli bomba / Zeus / 3DEN / init isaretli) icin AI bastirma atesi (doSuppressiveFire: siper tahmini, penetrasyon / pencere, taban atesi, atis ustunlugu, MG, hucum, siper zorla, pusu / HQ destegi) iki yonden kesilir: bombaciya konum bastirmasi yapilmaz (nisanli ates normal) ve bombaci duvara bastirma atmaz. Arac bombasi (VBIED) ve aracin icindekiler ETKILENMEZ. KAPALI = eski davranis. Varsayilan ACIK. |
 | `baskiEtki` | Baski -> nisan bozulmasi siddeti | 0–1 | 0.5 | ceza = siddet x baski(0..1) x (1 - 0.6 x courage); aimingShake x (1 - ceza), aimingSpeed x (1 - 0.5 x ceza). 0 = kapali. Bot baski altinda daha az isabetli olur, courage yuksekse daha az. |
 | `baskiGozlemciM` | Bastirma kapisi: ileri gozlemci menzili (m) | 60–600 | 250 | v8.743. Gozlemci dusmani gorus hatti ile goruyorsa bastirma bu mesafeye kadar serbest; bundan uzak dusmana (gorulse bile) bastirma atilmaz. Varsayilan 250. |
 | `baskiKapisi` | Bastirma kapisi: bos yere bastirma yok | açık/kapalı | açık | v8.743 (kullanici: 'supress atarken cok sacma sapan yerlere atiyor, onunde bos duvar var orayi tariyor, dusman yakinda degilse yapmasin' + 'ileri gozlemci olabilir'). ACIK: dusman yakin degilse (asagidaki mesafe) VE gorus hatti olan bir gozlemci (kendisi / ayni grup / 150 m icindeki dost) dusmani su an gormuyorsa bastirma atisi (siper tahmini, penetrasyon / pencere, taban atesi, atis ustunlugu, hucum hazirligi, MG / kapsama, siper zorla) yapilmaz. KAPALI = eski davranis. |
@@ -491,7 +493,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `yemYanM` | Yem: gruptan yana uzaklik (m) | 40–160 | 90 | v8.693. Taciz noktasi oyuncu-grup cizgisine dik yonde gruptan bu kadar yanda (varsayilan 90; farkli bolgeden ates). |
 | `yereAtes` | Hostile act: olu / baygin dusmana yere ates | liste (Doktrine gore (varsayilan), Hep (her doktrin), Kapali) | Doktrine gore (varsayilan) | v8.789 (kullanici: olu ve baygin askerlere magdump, peshmerga / duzensiz tipi). Doktrine gore: doktrin anahtari yereAtes (DUZENSIZ 0.7, PESHMERGA 0.35, RUS 0.15, digerleri 0). Hep: her doktrin (olasilik 1). Kapali: hic. Varsayilan: Doktrine gore. |
 | `yereAtesBaygin` | Hostile act: BAYGIN / yerdeki yarali dusmana magdump | açık/kapalı | açık | v8.790 (kullanici: mag dump icin baygin CBA). Acik: baygin (INCAPACITATED / UNCONSCIOUS / ACE baygin) dusman govdesine yere ates edilir (doktrin olasiligi / yereAtes modu gecerli; teslim / kelepceli haric). Kapali: baygina atilmaz. Varsayilan ACIK. |
-| `yereAtesM` | Hostile act: yere ates menzili (m) | 10–100 | 40 | v8.789. Grubun bu mesafedeki taze olu / baygin dusmanina yere ates edebilir (gorus hatti acik olmali). Varsayilan 40. |
+| `yereAtesM` | Hostile act: yere ates menzili (m) | 10–100 | 60 | v8.789. Grubun bu mesafedeki taze olu / baygin dusmanina yere ates edebilir (gorus hatti acik olmali). v8.793: eski deger 40, yeni 60 (RPT 6f679694: grup 37-41 m'de duruyordu, sinirda atici kalmadi). Varsayilan 60. |
 | `yereAtesMermi` | Hostile act: yere ates mermi sayisi | 5–60 | 30 | v8.789. Hep modunda govdeye bosaltilan mermi (doktrine gore modunda doktrinin yereAtesMermi degeri). Varsayilan 30. |
 | `yereAtesOlu` | Hostile act: OLU dusman govdesine magdump | açık/kapalı | açık | v8.790. Acik: taze (<= 120 sn) olu dusman govdesine yere ates edilir. Kapali: oluye atilmaz. Varsayilan ACIK. |
 | `yereAtesOyuncu` | Hostile act: baygin / olu OYUNCUYA da | açık/kapalı | açık | v8.789. Acik: yere ates baygin (revive / ACE) oyuncuyu da hedef sayar (captive olsa da; teslim / kelepceli haric). Kapali: yalniz AI govdeleri. Varsayilan ACIK. |

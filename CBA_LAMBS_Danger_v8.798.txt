@@ -308,6 +308,7 @@ force lambs_danger_siperTahmin = true;
 force lambs_danger_baskiKapisi = true;
 force lambs_danger_baskiYakinM = 80;
 force lambs_danger_baskiGozlemciM = 250;
+force lambs_danger_baskiBombaci = true;
 force lambs_danger_rpgSistem = true;
 force lambs_danger_rpgKarar = true;
 force lambs_danger_rpgMinM = 10;

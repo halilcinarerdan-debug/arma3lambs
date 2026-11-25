@@ -24,6 +24,21 @@
 */
 
 params ["_u", ["_e", objNull], ["_kaynak", ""]];
+// v8.798 PIYADE BOMBACI (kullanici: 'baski atesini daha akilli yapsinlar, bombada azalt', 'arac haric', 'siperde de check et'): bombaci ATICI ise (RPT 44282768: kosan bombaci 23 m'de duvara [PENETRE-ATES] atti, kosusu durdu) ya da HEDEF ise (kosan hedefe konum bastirmasi bos mermi, bombaciyi dondurur; AI nisanli atesle zaten vurur) bastirma yok. ARAC bombasi etkilenmez (fnc_bombaciMi).
+private _bomba = "";
+if ([_u] call FUNC(bombaciMi)) then { _bomba = "atici"; } else { if (!isNull _e && {[_e] call FUNC(bombaciMi)}) then { _bomba = "hedef"; }; };
+if (_bomba isNotEqualTo "") exitWith {
+    private _sb = missionNamespace getVariable ["lambs_danger_baskiKapiSay", createHashMap];
+    missionNamespace setVariable ["lambs_danger_baskiKapiSay", _sb];
+    private _kb = format ["%1_bombaci_%2", _kaynak, _bomba];
+    _sb set [_kb, (_sb getOrDefault [_kb, 0]) + 1];
+    private _nb = missionNamespace getVariable ["lambs_danger_baskiBombaLogN", 0];
+    if (_nb < 20) then {
+        missionNamespace setVariable ["lambs_danger_baskiBombaLogN", _nb + 1];
+        diag_log format ["[BASKI-KAPI] BOMBACI RED | %1 | %2 | bombaci %3 | atici %4 | dusman %5 | %6 m", _kaynak, groupId group _u, _bomba, name _u, ["yok", name _e] select !isNull _e, ["?", str round (_u distance2D _e)] select !isNull _e];
+    };
+    false
+};
 if !(missionNamespace getVariable ["lambs_danger_baskiKapisi", true]) exitWith {true};
 if (isNull _e || {!alive _e}) exitWith {true};
 if (isPlayer _u) exitWith {false};   // v8.749: oyuncu birimine bastirma emri anlamsiz

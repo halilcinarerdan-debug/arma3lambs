@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.797"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.798"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -645,7 +645,8 @@ def kabul(path):
     ekle("SIPER COK ACILI GUVENCE", "BILGI", ("sinanan kazanan aday %d | ortalama gorunen atici konumu %.2f / 4 (dusuk iyi: 0 = her yandan kapali) | vurulunca yeni siper yok (teshis logu) %d" % (ca_n, ca_g / float(ca_n), vy)) if ca_n else "cok acili guvence kaydi yok (v8.750 oncesi RPT ya da siper secimi olmadi)")
     bk = [l for l in L if "[BASKI-KAPI-OZET]" in l]
     bkr = len([1 for l in L if "[BASKI-KAPI] RED" in l])
-    ekle("BASTIRMA KAPISI (bos yere bastirma yok)", "BILGI", (("RED ornek %d (ilk 30 loglanir) | " % bkr) + (re.sub(r"^.*?\"\[BASKI-KAPI-OZET\] ", "", bk[-1]).strip().rstrip('"')[:260] if bk else "OZET yok")) if (bk or bkr) else "bastirma kapisi kaydi yok (v8.743 oncesi RPT ya da baskiKapisi kapali / uzak + gozlemcisiz bastirma denemesi olmadi)")
+    bkb = [l for l in L if "[BASKI-KAPI] BOMBACI RED" in l]
+    ekle("BASTIRMA KAPISI (bos yere bastirma yok)", "BILGI", (("RED ornek %d (ilk 30 loglanir) | bombaci RED %d (atici %d, hedef %d; v8.798, arac haric) | " % (bkr, len(bkb), len([1 for l in bkb if "bombaci atici" in l]), len([1 for l in bkb if "bombaci hedef" in l]))) + (re.sub(r"^.*?\"\[BASKI-KAPI-OZET\] ", "", bk[-1]).strip().rstrip('"')[:260] if bk else "OZET yok")) if (bk or bkr or bkb) else "bastirma kapisi kaydi yok (v8.743 oncesi RPT ya da baskiKapisi kapali / uzak + gozlemcisiz bastirma denemesi olmadi)")
     bm = [l for l in L if "[EL-BOMBASI-MESAFE]" in l]
     bmy = len([1 for l in bm if "yuz yuze:true" in l])
     ekle("EL BOMBASI YUZ YUZE (motor atisi)", "BILGI", "motor atisi iptal %d (yuz yuze %d, uzak / baygin %d); iptal yoksa motor yuz yuze bomba atmadi ya da v8.743 oncesi" % (len(bm), bmy, len(bm) - bmy))

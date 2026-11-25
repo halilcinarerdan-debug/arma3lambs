@@ -69,6 +69,8 @@ private _tak0 = _grp getVariable [QGVAR(isExecutingTactic), false];
 _grp setVariable [QGVAR(isExecutingTactic), true];
 _b setVariable [QGVAR(taktikKilit), time + 8];
 _b setVariable [QGVAR(disableAI), true];
+// v8.798: piyade bombaci kosuyor bayragi (fnc_bombaciMi: bastirma atesi bu birimi ne hedef alir ne de atar; arac bombasi HARIC)
+if (!_arac) then { _b setVariable [QGVAR(bombaKosuyor), true, true]; };
 _b allowFleeing 0;
 // v8.790 (RPT f2a62ebb: piyade bomba 79 sn'de varamadi, [EYP-KOS] komut 'GET IN' / bos): atanmis arac (cargo) varsa AI binmeye calisiyordu -> atama kaldirilir
 if (!_arac && {!isNull (assignedVehicle _b)}) then { unassignVehicle _b; };
@@ -314,7 +316,7 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                             private _dl = missionNamespace getVariable ["lambs_danger_eypDurLogN2", 0];
                             if (_dl < 20) then {
                                 missionNamespace setVariable ["lambs_danger_eypDurLogN2", _dl + 1];
-                                diag_log format ["[EYP-KOS] DURAKLAMA | %1 | hedef %2 m | duruyor %3 sn | baski %4 | hasar %5 (bacak %6) | komut '%7' | anim %8 | durus %9 | AI MOVE %10 PATH %11 ANIM %12 SUPPRESSION %13 | captive %14 | yasam %15 | beh %16", name _b, round _m, (time - _stallT) toFixed 1, (getSuppression _b) toFixed 2, (damage _b) toFixed 2, (_b getHitPointDamage "HitLegs") toFixed 2, ((["", "moveToFailed "] select _mf) + (currentCommand _b)), animationState _b, stance _b, _b checkAIFeature "MOVE", _b checkAIFeature "PATH", _b checkAIFeature "ANIM", _b checkAIFeature "SUPPRESSION", captive _b, lifeState _b, behaviour _b];
+                                diag_log format ["[EYP-KOS] DURAKLAMA | %1 | hedef %2 m | duruyor %3 sn | baski %4 | hasar %5 (bacak %6) | komut '%7' | anim %8 | durus %9 | AI MOVE %10 PATH %11 ANIM %12 SUPPRESSION %13 | captive %14 | yasam %15 | beh %16 | hazir %17 | zorlaYuru %18 | hizModu %19 | muharebe %20", name _b, round _m, (time - _stallT) toFixed 1, (getSuppression _b) toFixed 2, (damage _b) toFixed 2, (_b getHitPointDamage "HitLegs") toFixed 2, ((["", "moveToFailed "] select _mf) + (currentCommand _b)), animationState _b, stance _b, _b checkAIFeature "MOVE", _b checkAIFeature "PATH", _b checkAIFeature "ANIM", _b checkAIFeature "SUPPRESSION", captive _b, lifeState _b, behaviour _b, unitReady _b, isForcedWalk _b, speedMode _b, unitCombatMode _b];
                             };
                         };
                     } else {
@@ -363,7 +365,7 @@ if (!isNull _grp) then {
     _grp setVariable [QGVAR(gorev), [nil, _gGorev0] select (_gGorev0 isNotEqualTo "")];
     _grp setVariable [QGVAR(isExecutingTactic), [nil, true] select _tak0];
 };
-if (!isNull _b) then { _b setVariable [QGVAR(taktikKilit), time]; };
+if (!isNull _b) then { _b setVariable [QGVAR(taktikKilit), time]; _b setVariable [QGVAR(bombaKosuyor), nil, true]; };
 if (alive _b) then {
     { _b enableAI _x; } forEach ["TARGET", "AUTOTARGET", "AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];
     _b forceSpeed -1;

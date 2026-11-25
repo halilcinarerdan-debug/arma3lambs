@@ -68,7 +68,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
         private _ilkSn = missionNamespace getVariable ["lambs_danger_siperliIlkTemasSn", 40];
 
         private _adaylar = allUnits select {
-            local _x && {alive _x} && {!isPlayer _x} && {((units group _x) findIf {isPlayer _x}) < 0} && {(side group _x) in [west, east, resistance]} && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
+            local _x && {alive _x} && {!isPlayer _x} && {((units group _x) findIf {isPlayer _x}) < 0} && {(side group _x) in [west, east, resistance]} && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call FUNC(bombaciMi))}
             && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 20)}
             && {
                 (isNull objectParent _x && {(primaryWeapon _x) isNotEqualTo ""}) || {(vehicle _x) isNotEqualTo _x && {_x isEqualTo (gunner (vehicle _x))} && {(vehicle _x) isKindOf "LandVehicle"}}

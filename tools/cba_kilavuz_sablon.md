@@ -73,6 +73,7 @@ Not: 600 m'de güdümsüz roketin isabeti düşer; isabet için `rpgMaxM = 350`,
 | Ayar | Anlam |
 |---|---|
 | `baskiKapisi` / `baskiYakinM` / `baskiGozlemciM` | uzak + gözlemcisiz bastırma yok (80 / 250 m) |
+| `baskiBombaci` | koşan piyade bombacıya bastırma ateşi yok, bombacı da bastırma atmaz (araç bombası hariç) |
 | `oyuncuGrubuBot` | oyuncu grubundaki botlar da düşman kadar güçlü/hızlı |
 | `bombaYuzYuzeM` | yüz yüze el bombası yasağı (20 m) |
 
