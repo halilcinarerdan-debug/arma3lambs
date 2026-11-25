@@ -89,9 +89,10 @@ _dolu = _dolu select {(time - (_x select 1)) < 30};
 private _aralik = missionNamespace getVariable ["lambs_danger_yigilmaAralik", 6];
 private _talepler = ((_g getVariable [QEGVAR(main,coverClaims), []]) select {(time - (_x select 1)) < 8 && {(_x select 2) isNotEqualTo _u}}) apply {_x select 0};
 private _dostPoz = ((_u nearEntities ["CAManBase", _yar + 14]) select {_x isNotEqualTo _u && {alive _x} && {(side group _x) isEqualTo (side group _u)}}) apply {getPosATL _x};
+private _kara = (_u getVariable [QGVAR(acikSiperKara), []]) select {time < (_x select 1)};   // v8.804: ULASILAMAYAN siper noktalari (varis gozcusu) bu asker icin 60 sn secilmez
 private _doluMu = {
     params ["_pt", "_r"];
-    ((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0) || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min ([_u, "siperDostAralik", 4.5] call FUNC(ayarTaraf)))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
+    ((_kara findIf {((_x select 0) distance2D _pt) < 4}) >= 0) || {((_dolu findIf {((_x select 0) distance2D _pt) < _r}) >= 0)} || {(_talepler findIf {_x distance2D _pt < _r}) >= 0} || {(_dostPoz findIf {_x distance2D _pt < (_r min ([_u, "siperDostAralik", 4.5] call FUNC(ayarTaraf)))}) >= 0}   // v8.656: canli dost araligi 3 -> 4.5 m (CBA siperDostAralik; ekran goruntusu: 6 bot birkac metrede kumeleniyor)
 };
 // v8.657 COKLU TEHDIT (kullanici: 'dediklerini yap / zayif olanlari yap'; egitimli asker yan ve arka acidan da korunur): en yakin dusman (_en) disinda BILINEN (>= SEZILDI) en cok 3 baska dusman (<= 250 m) icin aday siper noktasinin (1.0 m) FIRE LOD hatti ACIKSA +5 ceza / dusman (CBA siperCokluTehdit)
 private _digerE = [];
@@ -452,13 +453,67 @@ private _nesneGit = {
     [_u, _obj] spawn {
         params ["_a", "_pt0"];
         sleep 2;
-        private _bit = time + 12;
-        // v8.644: varis = SON siper hedefine 4 m icinde + durmus (eski: ilk hedef degisirse tamamen vazgeciyor + 8 m / 1.2 sn erken tetik: RPT 18ce6e97 4 secimden 1 [SIPER-OTUR]; acikSiper 10 sn'de bir yeniden degerlendirip hedefi degistiriyor)
-        waitUntil {
+        // v8.804 VARIS GOZCUSU (kullanici: 'siper varisini duzelt, coverlar cok iyi olsun'; RPT b4f22e03: [SIPER-OTUR] 14 kaydin 6'si 'oturtulamadi' - siper noktasina 6.8 / 9.7 / 21.5 / 27.6 / 28.3 / 54.2 m kala; eski bekleme TEK 12 sn'di, kosan asker (hiz 6-15) ya da durmus asker (hiz 0) icin hicbir sey yapilmiyordu):
+        //   en cok 30 sn izler: yaklasma ILERLIYORSA beklemeye devam; 3 sn ilerleme yok + durmus ise ayni noktaya yeniden doMove (en cok 2); hala ilerlemiyorsa nokta 60 sn KARA LISTEYE alinir ve (varsa) YEDEK SIPER'e gidilir (15 sn izlenir); yedek de yoksa siper hedefi sifirlanir, hemen YENIDEN SECIM (acikSiperT = 0).
+        private _son = time + 30;
+        private _ilerT = time;
+        private _enAz = 1e9;
+        private _reemir = 0;
+        private _yedekK = false;
+        private _bitti = false;
+        private _ulasilamadi = false;
+        private _hOnc = [];
+        private _sy = missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap];
+        while {!_bitti && {time < _son}} do {
             sleep 0.4;
-            private _h = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) param [0, []];   // v8.742: param (bos dizi = hata verme)
-            !alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {time > _bit} || {_h isNotEqualTo [] && {(((getPosATL _a) distance2D _h) < 4) && {(speed _a) < 0.8}}}
+            if (!alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])}) then { _bitti = true; } else {
+                private _h = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) param [0, []];
+                if (_h isEqualTo []) then { _bitti = true; } else {
+                    if (_hOnc isEqualTo [] || {(_h distance2D _hOnc) > 1}) then { _hOnc = +_h; _enAz = 1e9; _ilerT = time; _reemir = 0; };   // siper hedefi degisti (yeniden secim): ilerleme sayaci sifirlanir
+                    private _d = (getPosATL _a) distance2D _h;
+                    if (_d < 4 && {(speed _a) < 0.8}) then { _bitti = true; } else {
+                        if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; };
+                        if ((time - _ilerT) > 3 && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
+                            if (_reemir < 2) then {
+                                _reemir = _reemir + 1;
+                                _ilerT = time;
+                                _a setVariable [QGVAR(oturDoMoveT), time];
+                                _a doMove _h;
+                                _sy set ["varis_yeniden_emir", (_sy getOrDefault ["varis_yeniden_emir", 0]) + 1];
+                            } else {
+                                private _kr = (_a getVariable [QGVAR(acikSiperKara), []]) select {time < (_x select 1)};
+                                _kr pushBack [_h, time + 60];
+                                if ((count _kr) > 6) then { _kr deleteAt 0; };
+                                _a setVariable [QGVAR(acikSiperKara), _kr];
+                                private _yd = _a getVariable [QGVAR(acikSiperYedek), []];
+                                if (!_yedekK && {_yd isNotEqualTo []} && {(time - (_yd select 1)) < 60} && {((getPosATL _a) distance2D (_yd select 0)) <= 40}) then {
+                                    _yedekK = true;
+                                    _a setVariable [QGVAR(acikSiperHedef), [_yd select 0, time]];
+                                    _a setVariable [QGVAR(acikSiperYedek), []];
+                                    _a doMove (_yd select 0);
+                                    _reemir = 0; _ilerT = time; _enAz = 1e9;
+                                    _son = (time + 15) max _son;
+                                    _sy set ["varis_yedege_gecti", (_sy getOrDefault ["varis_yedege_gecti", 0]) + 1];
+                                    _sy set ["yedek_kullanildi", (_sy getOrDefault ["yedek_kullanildi", 0]) + 1];
+                                } else {
+                                    _a setVariable [QGVAR(acikSiperHedef), [[], 0]];
+                                    _a setVariable [QGVAR(acikSiperT), 0];
+                                    _ulasilamadi = true;
+                                    _bitti = true;
+                                    _sy set ["varis_ulasilamadi", (_sy getOrDefault ["varis_ulasilamadi", 0]) + 1];
+                                    private _vl = missionNamespace getVariable ["lambs_danger_varisLogN", 0];
+                                    if (_vl < 25) then {
+                                        missionNamespace setVariable ["lambs_danger_varisLogN", _vl + 1];
+                                        diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala 3 sn ilerleme yok, 2 yeniden emir sonuc vermedi%4 -> kara liste 60 sn + yeniden secim", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK];
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            };
         };
+        if (_ulasilamadi) exitWith {};
         if (!alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])} || {_a getVariable ["ACE_isUnconscious", false]}) exitWith {};   // v8.653: baygin asker oturtulmaz
         if ((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]}) exitWith {};   // v8.687: geri cekilen / kosucu askeri siper noktasina geri KAYDIRMA / doMove ile cekme (RPT 6a939f32)
         private _pt = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) param [0, []];

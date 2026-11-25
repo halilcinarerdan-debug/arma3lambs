@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.803"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.804"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -793,6 +793,21 @@ def kabul(path):
         ekle("GERCEKCILIK: REAKSIYON (gorunur -> fark)", "GECTI" if HB_FARK[0] <= fo_ <= HB_FARK[1] else "KONTROL", "ort. %.2f sn (hedef %.1f-%.1f sn; ornek %d: bizim tetik %d + motor %d; ayar: hizliFark*, reaksiyonArtis)" % (fo_, HB_FARK[0], HB_FARK[1], fark_n, hf_t, hf_m))
     else:
         ekle("GERCEKCILIK: REAKSIYON (gorunur -> fark)", "VERI YOK", "[HIZLI-FARK-OZET] ornegi yok / az (%d); gorunen insan oyuncu gerekir" % fark_n)
+    # v8.804 (kullanici: 'siper varisini duzelt'): siper noktasina VARIS orani + varis gozcusu sonuclari
+    sv_ok = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtuldu" in l]); sv_no = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtulamadi" in l])
+    sv_ul = len([1 for l in L if "[SIPER-VARIS] ULASILAMADI" in l])
+    sv_re = 0; sv_ye = 0; sv_ua = 0
+    for l in L:
+        if "[ACIK-SIPER-OZET]" in l:
+            for k_, v_ in re.findall(r"(varis_yeniden_emir|varis_yedege_gecti|varis_ulasilamadi)=(\d+)", l):
+                if k_ == "varis_yeniden_emir": sv_re += int(v_)
+                elif k_ == "varis_yedege_gecti": sv_ye += int(v_)
+                else: sv_ua += int(v_)
+    if sv_ok + sv_no >= 4 or sv_re or sv_ul or sv_ye:
+        o_ = 100.0 * sv_no / max(sv_ok + sv_no, 1)
+        ekle("GERCEKCILIK: SIPER VARISI", "GECTI" if o_ <= 15 and sv_ul <= 2 else "KONTROL", "oturtuldu %d / oturtulamadi %d (%%%.0f; hedef <= %%15) | varis gozcusu: yeniden emir %d, yedek sipere gecis %d, ulasilamadi (kara liste + yeniden secim) %d (v8.804+)" % (sv_ok, sv_no, o_, sv_re, sv_ye, max(sv_ul, sv_ua)))
+    else:
+        ekle("GERCEKCILIK: SIPER VARISI", "VERI YOK", "[SIPER-OTUR] / varis gozcusu kaydi az (siper atilisi yok)")
     ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
 
     print("=" * 100); print("KABUL TESTI |", path)
