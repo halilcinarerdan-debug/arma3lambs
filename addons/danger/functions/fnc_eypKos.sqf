@@ -241,7 +241,8 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         _izlenen = _h;
                     };
                     // v8.799: doWatch KALDIRILDI (hedefe bakan AI nisan durusunda durdu: RPT cc75a129); kosarken ates = govdenin baktigi yone forceWeaponFire (doFire / doTarget / doWatch YOK). 8 - 300 m, mermi varsa, 0.15 - 0.5 sn aralikla tek atis
-                    if (time >= _atesT && {_m > 8} && {_m < 300}) then {
+                    // v8.800 (RPT d26f0712: v8.798 catisarak bombaci 6:07'de 50 sn 'komut ATTACK / hiz 0 / beh COMBAT' durdu; durma ates (forceWeaponFire) ile ayni anda basliyordu): YALNIZ KOSARKEN (hiz > 5 km/s) ates; duran bombaci ates etmez, boylece AI yeniden yuruyebilir
+                    if (time >= _atesT && {(speed _b) > 5} && {_m > 8} && {_m < 300}) then {
                         _atesT = time + 0.15 + (random 0.35);
                         private _kw = currentWeapon _b;
                         if (_kw isNotEqualTo "" && {(_b ammo _kw) > 0}) then {
@@ -315,6 +316,15 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                                 _b doMove _hp;
                                 _sonEmir = _hp;
                                 _dmT = time + 2.5;
+                            };
+                            // v8.800: komut MOVE degilken (ATTACK / FIRE / STOP ...) kimin / neyin komut verdigini ayirmak icin teshis (ilk 15): atanmis hedef, motorun beklenen varis noktasi, ates denemesi
+                            if ((currentCommand _b) isNotEqualTo "MOVE") then {
+                                private _kt = missionNamespace getVariable ["lambs_danger_eypKomutTeshisN", 0];
+                                if (_kt < 15) then {
+                                    missionNamespace setVariable ["lambs_danger_eypKomutTeshisN", _kt + 1];
+                                    private _at = assignedTarget _b;
+                                    diag_log format ["[EYP-KOS] KOMUT-TESHIS | %1 | komut '%2' | atanmis hedef %3 | beklenen varis %4 | hedefim %5 m | beh %6 | muharebe %7 | ates denemesi %8 | hiz %9 | sipEskiCM '%10' | forceMove %11", name _b, currentCommand _b, ["yok", typeOf _at] select !isNull _at, expectedDestination _b, round _m, behaviour _b, unitCombatMode _b, _atesN, round (speed _b), _b getVariable [QGVAR(sipEskiCM), ""], _b getVariable [QGVAR(forceMove), false]];
+                                };
                             };
                             private _dl = missionNamespace getVariable ["lambs_danger_eypDurLogN2", 0];
                             if (_dl < 20) then {
