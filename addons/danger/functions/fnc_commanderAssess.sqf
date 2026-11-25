@@ -350,8 +350,22 @@ private _erkenKayip60 = (selectMax ([_ownCount] + ((_kayipGecmis select {(time -
 private _erkenOn = (missionNamespace getVariable ["lambs_danger_erkenCekilme", true]) && {_enemyCount > 0} && {_ownCount >= 2};
 // v8.555 DONEM: Ikinci Dunya Savasi'nda birlikler kayba daha dayanikli (modern kayip-kacinimi yok): kayip hizi esigi +1, kayip orani esigi x1.4
 private _erkenWW2 = (["cag"] call FUNC(cag)) >= 2;
-private _erkenA = _erkenOn && {_erkenKayip60 >= (([_group, "erkenKayipHiz", 3] call FUNC(ayarTaraf)) + ([0, 1] select _erkenWW2))} && {_closest >= 120} && {_pwrRatio >= 0.7};
-private _erkenB = _erkenOn && {_lossRatio >= (([_group, "erkenKayipOran", 0.25] call FUNC(ayarTaraf)) * ([1, 1.4] select _erkenWW2))} && {_closest >= 150} && {_pwrRatio >= 0.8};
+// v8.812 GORUNMEYEN ATICI (kullanici: 'retreat coz'; RPT beabaf64 v8.811: EAST Alpha 1-2 (8 kisi) 80 sn'de TAMAMEN oldu (3 kayip 15:29:49-15:30:08, %50 kayip 15:30:42, 5 kayip / 60 sn 15:30:48), dusman 177-254 m ACIK arazi, karar BOUNDING -> SUPPRESS_ASSAULT, HIC WITHDRAW YOK):
+//   guc orani = (gorulen dusman gucu x sayi / 12) / bizim guc; gorunen dusman az (<= 3) iken eriyen grup 'ustunuz' sanip (oran < 0.7 / 0.8) erken cekilmeyi hic tetiklemiyordu. Agir kayip + az gorunen dusman = gorunmeyen / uzak nisanci (kayip hizi gercek gucu gosterir):
+//   guc orani kosulu yerine (oran >= esik VEYA gorunen dusman <= 3). CBA erkenCekilme / erkenKayipHiz / erkenKayipOran degerleri DEGISMEZ. Reddedilen tetikler [ERKEN-CEKILME-RED] ile loglanir.
+private _erkenGorunmeyen = _enemyCount <= 3;
+private _erkenA = _erkenOn && {_erkenKayip60 >= (([_group, "erkenKayipHiz", 3] call FUNC(ayarTaraf)) + ([0, 1] select _erkenWW2))} && {_closest >= 120} && {(_pwrRatio >= 0.7) || _erkenGorunmeyen};
+private _erkenB = _erkenOn && {_lossRatio >= (([_group, "erkenKayipOran", 0.25] call FUNC(ayarTaraf)) * ([1, 1.4] select _erkenWW2))} && {_closest >= 150} && {(_pwrRatio >= 0.8) || _erkenGorunmeyen};
+// v8.812 TANI: esik asildi ama erken cekilme TETIKLENMEDI ise nedeni (grup basina 20 sn'de bir, ilk 25)
+if (_erkenOn && {!_erkenA} && {!_erkenB}) then {
+    private _hizE = ([_group, "erkenKayipHiz", 3] call FUNC(ayarTaraf)) + ([0, 1] select _erkenWW2);
+    private _oranE = ([_group, "erkenKayipOran", 0.25] call FUNC(ayarTaraf)) * ([1, 1.4] select _erkenWW2);
+    if ((_erkenKayip60 >= _hizE || {_lossRatio >= _oranE}) && {time >= (_group getVariable [QGVAR(erkenRedT), 0])} && {(missionNamespace getVariable ["lambs_danger_erkenRedN", 0]) < 25}) then {
+        _group setVariable [QGVAR(erkenRedT), time + 20];
+        missionNamespace setVariable ["lambs_danger_erkenRedN", (missionNamespace getVariable ["lambs_danger_erkenRedN", 0]) + 1];
+        diag_log format ["[ERKEN-CEKILME-RED] %1 | kayip60 %2 (esik %3) | kayip orani %4 (esik %5) | dusman %6 m (A >= 120, B >= 150) | guc orani %7 (A >= 0.7, B >= 0.8) | gorulen dusman %8 | etkin %9 -> A:%10 B:%11", groupId _group, _erkenKayip60, _hizE, _lossRatio toFixed 2, _oranE toFixed 2, round _closest, _pwrRatio toFixed 2, _enemyCount, _ownCount, _erkenA, _erkenB];
+    };
+};
 private _result = call {
 
     // =======================================================================
@@ -386,7 +400,8 @@ private _result = call {
         && {_pwrRatio <= 1.0}
         && {_lossRatio >= 0.15}
         && {_lossRatio < 0.8}
-        && {_armorCount isEqualTo 0}) exitWith {
+        && {_armorCount isEqualTo 0}
+        && {!(_erkenA || _erkenB)}) exitWith {   // v8.812: agir kayip uzaktan geliyorsa (erken cekilme esigi asildi, dusman >= 120 / 150 m) PUSH degil WITHDRAW (RPT beabaf64: 4-5 kisi / <= 3 gorulen dusman = PUSH, 80 sn'de grup yok oldu)
         [
             ["SUPPRESS_ASSAULT", "ASSAULT"] select (_closest < 120),
             format ["PUSH: ustun guc (%1v%2, oran %3) kayip %4%% - cekilme, bastir + hucum", _ownCount, _enemyCount, _pwrRatio toFixed 2, round (_lossRatio * 100)]
@@ -529,6 +544,12 @@ private _result = call {
 
 private _decision = _result select 0;
 private _reason   = _result select 1;
+// v8.812 TANI: agir uzak kayip esigi asildi ama karar WITHDRAW degil -> HANGI kural hangi gerekceyle (grup basina 20 sn'de bir, ilk 25): [ERKEN-CEKILME-KARAR]
+if (_erkenOn && {_decision isNotEqualTo "WITHDRAW"} && {_erkenKayip60 >= ([_group, "erkenKayipHiz", 3] call FUNC(ayarTaraf)) || {_lossRatio >= ([_group, "erkenKayipOran", 0.25] call FUNC(ayarTaraf))}} && {time >= (_group getVariable [QGVAR(erkenKarT), 0])} && {(missionNamespace getVariable ["lambs_danger_erkenKarN", 0]) < 25}) then {
+    _group setVariable [QGVAR(erkenKarT), time + 20];
+    missionNamespace setVariable ["lambs_danger_erkenKarN", (missionNamespace getVariable ["lambs_danger_erkenKarN", 0]) + 1];
+    diag_log format ["[ERKEN-CEKILME-KARAR] %1 | karar %2 | gerekce: %3 | kayip60 %4 | kayip orani %5 | dusman %6 m | gorulen dusman %7 | etkin %8 | guc orani %9", groupId _group, _decision, _reason, _erkenKayip60, _lossRatio toFixed 2, round _closest, _enemyCount, _ownCount, _pwrRatio toFixed 2];
+};
 
 // PUSH kararlari hafiza / koordinasyon ile alternatife CEVRILMEZ (israrla bastir + hucum)
 private _push = (_reason select [0, 5]) isEqualTo "PUSH:";

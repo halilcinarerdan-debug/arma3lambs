@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.811"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.812"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -866,6 +866,12 @@ def kabul(path):
         ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "GECTI" if o_ <= 40 and rb_ip == 0 else "KONTROL", "kosucu ornegi %d: duran (< 2 km/sa) %d (%%%.0f; hedef <= %%40; sicrama basindan t+4 sn sonrasi: %d ornek, duran %%%.0f), bunlardan ATTACK komutlu %d | retreat bitisi 'ilerleme yok': %d / %d | eski siper komutu engellendi (v8.806+): %s (log %d) | kosu patlamasi (v8.807+, ATTACK ile duran kosucuda hedef alma kisa sure kapali): %s (log %d) | retreat doMove testi (v8.809+; ilk 30): kabul %d / yok sayildi %d | kosu FSM kapama (v8.811+; lider haric): uygulandi %d, erken birakildi %d (log %d)" % (iz_n, iz_dur, o_, iz4_n, 100.0 * iz4_dur / max(iz4_n, 1), iz_atk, rb_ip, len(rb_), (", ".join("%s %d" % (k, v) for k, v in sorted(rc_say.items())) or "yok"), rc_n, (", ".join("%s %d" % (k, v) for k, v in sorted(kp_say.items())) or "yok"), kp_n, dm_k, dm_y, kf_u, kf_b, kf_n))
     else:
         ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "VERI YOK", "[GERI-CEKILME-IZ] ornegi az (retreat yok)")
+    # v8.812 (kullanici: 'retreat coz'; RPT beabaf64: grup 80 sn'de yok oldu, WITHDRAW yok): erken cekilme tetigi / reddi
+    ec_tet = len([1 for l in L if "erken cekilme:" in l])
+    ec_red = [l for l in L if "[ERKEN-CEKILME-RED]" in l]
+    ol_ = len([1 for l in L if "[OLAY]" in l and "| Casualty |" in l])
+    ec_kar = [l for l in L if "[ERKEN-CEKILME-KARAR]" in l]
+    ekle("GERCEKCILIK: ERKEN CEKILME (kayip hizi / orani)", "BILGI", "erken cekilme karari %d | esik asildi ama tetiklenmedi (RED, ilk 25 log) %d | grup kaybi (Casualty olayi) %d | esik asildi ama karar WITHDRAW degil (KARAR logu) %d, ilk: %s | ilk RED: %s (v8.812+: gorunen dusman <= 3 iken guc orani sarti kalkti; PUSH agir uzak kayipta WITHDRAW'a yol verir)" % (ec_tet, len(ec_red), ol_, len(ec_kar), (re.sub(r'^.*?"\[ERKEN-CEKILME-KARAR\] ', "", ec_kar[0]).strip().rstrip('"')[:200]) if ec_kar else "-", (re.sub(r'^.*?"\[ERKEN-CEKILME-RED\] ', "", ec_red[0]).strip().rstrip('"')[:230]) if ec_red else "-"))
     ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
 
     print("=" * 100); print("KABUL TESTI |", path)
