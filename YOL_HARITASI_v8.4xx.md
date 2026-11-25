@@ -197,6 +197,22 @@ Fikir (kullanıcı): ses / limiter dünyasındaki "look-ahead" gibi botlar yapac
 
 Not: öngörü katmanı yeni hareket emri üretmeden, mevcut SEÇİM noktalarını (siper, rota, karar) cezalandıran / ağırlıklandıran biçimde ilerler (titreme / ters dönüş riski düşük); komutan karar öngörüsü (madde 4) en riskli adımdır: bayrakla kapatılabilir, tek adım + RPT.
 
+## HATIRLATMA (kullanıcı kararı, 2026-11-25): "Hedefte konsolidasyon ve yeniden örgütlenme", "Dolaylı ateşte darbe sonrası bölgeyi terk", "Açık tehlike alanı geçişi" (Aşama 14 madde 1, 2, 3) yapılacaklara EKLENDİ. **HER ŞEY STABİL OLDUKTAN SONRA kullanıcıya bu üç maddeyi HATIRLAT** (kullanıcı "stabil" / "testler bitti" dediğinde ilk iş olarak öner; sıra: 1 → 2 → 3). Madde 34 (arazi ve mekâna göre doktrin) bunlardan sonra.
+
+## Aşama 15 — v8.817 çalışması (YARIM; kullanıcı "dur ilk test yapalım" dedi, v8.816 test ediliyor; kullanıcı kararı: "hepsini yapalım")
+Test sonrası devam edilecek 8 madde (kod yazıldı ama PREP kaydı, CBA ayarları, sürüm, belge, preset YAPILMADI; yerel `git stash` içinde ve oturum kapanırsa kaybolur — buradaki liste yeniden yazma için kaynaktır):
+| # | Madde | Yazılan / kalan |
+|---|---|---|
+| 1 | **ATTACK emri doMove'u eziyor** (RPT 7ba225b8: siper varışı doMove testi 10 / 14 "VARIS-ATTACK → ATTACK"): hedefi unutturma merdiveni | `fnc_atakSifirla` (1 forgetTarget, 2 doFollow, 3 hedef alma 8 sn kapalı; 1.2 sn sonra sonuç ölçümü); bağlantı: acikSiper varış gözcüsü + tacticsRetreat ezme işleyicisi; KALAN: CBA `atakSifirla`, karne satırı |
+| 2 | **MOVE kabul edilmiş ama asker yürümüyor** (15 testin 13'ü hız < 2) | `fnc_hareketKaldir` (1 setDestination LEADER DIRECT, 2 calculatePath düğüm doMove, 3 DIRECT + duruş UP + hız FULL); bağlantı: acikSiper + tacticsRetreat TAKILI dalı; KALAN: CBA `hareketKaldir`, karne |
+| 3 | **Görünmeyen düşman tahmini** (kayıp hızından etkin düşman sayısı) | commanderAssess: son 60 sn ≥ 2 kayıp ise etkin düşman ≥ ceil(kayıp × 0.75), güç oranı ölçeklenir, PUSH etkin sayıya bakar; `[GORUNMEYEN-TAHMIN]`; KALAN: CBA `gorunmeyenTahmin`, karne |
+| 4 | **4 kişiden küçük grup: ikili sıçrama (buddy bounding)** | `fnc_tacticsIkili` + fnc_tactics küçük grup yolu (temas kesme tetiği yoksa); `[IKILI-SICRAMA]`; KALAN: CBA `ikiliSicrama`, karne |
+| 5 | **Log tavanı yerine zamana yayılmış örnekleme** | `fnc_logIzin` (ilk N + sonra aralık); uygulandı: durusAkici, siperVaris, retDomove, kosuPatlama, kosuFsm, yolTara, erkenRed / erkenKar, retEzmeTani, retreat iz (retreat başına 120 satır); KALAN: ek log noktaları |
+| 6 | **Yeniden üretilebilir retreat test senaryosu** (ardışık 5 RPT'de gerçek retreat yoktu) | KALAN: `senaryo/retreat_test.sqf` (zayıf dost grup + aşırı güçlü düşman, mümkünse kıyı noktası) + TEST_SENARYOLARI.md maddesi |
+| 7 | **CBA ayar dosyası denetçisi** (yapışmış metin hatası: `[cite: 1]`) | KALAN: `tools/cba_dosya_denetle.py` (satır kalıbı, bilinmeyen ayar, tür / aralık) |
+| 8 | **BOT İSABET mesafe bandı ayarı** (50–120 m düşük, > 250 m yüksek) | botIsabet: ≥ 250 m rastgele sapma `isabetUzakSapma` (0.4°), < 120 m ek yönlendirme `isabetYakinYardim` (0); KALAN: CBA kayıtları + karne "ayar önerisi" |
+Ortak KALAN: XEH_PREP (PREP + CBA ayarları), sürüm v8.817, preset, CBA kılavuzu, devir logu, lint.
+
 ## Aşama 14 — TEST SONRASI doktrin manevra adayları (kullanıcı isteği, 2026-11-25; kitapta DOĞRULANAN ve bizde EKSİK olanlar; hiçbiri başlanmadı)
 Yöntem: depodaki birincil metinler (`kaynaklar_doktrin/`: TC 3-21.76 Ranger Handbook 2017, ATP 3-21.8, MCWP 3-11.1, MCWP 3-11.2) satır satır tarandı; `[K]` = kitapta var (dosya + satır), `[K~]` = kavram kitapta var, sayı / ayrıntı tasarım, kod durumu `grep` ile bu oturumda kontrol edildi. Test sonuçları (retreat, siper varışı, bomber, gafil avlama) bitmeden bu maddelere başlanmaz.
 
