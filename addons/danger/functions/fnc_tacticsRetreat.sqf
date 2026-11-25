@@ -601,9 +601,9 @@ if (EGVAR(main,debug_functions)) then {
             if (missionNamespace getVariable ["lambs_danger_hareketKurtar", true]) then {
                 {
                     private _b = _x select 0;
-                    if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(time - _t0) > 4} && {(speed _b) < 1} && {(currentCommand _b) isEqualTo "MOVE"} && {(_b distance2D (_x select 1)) > 12}
+                    if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(time - _t0) > 3} && {(speed _b) < 1} && {(currentCommand _b) isEqualTo "MOVE"} && {(_b distance2D (_x select 1)) > 12}
                         && {(time - (_b getVariable [QGVAR(hkT), -999])) > 3.5} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5}) then {
-                        [_b, _x select 1, "retreat-idle"] call FUNC(hareketKurtar);
+                        [_b, _x select 1, "retreat-idle", 4, 3] call FUNC(hareketKurtar);   // adim 3'ten basla (RPT a049faa1: adim 1 yurudu 7 / 19, adim 3 7 / 12, adim 4 9 / 13)
                     };
                 } forEach _varis;
             };

@@ -19,17 +19,20 @@
  * 1: Hedef (AGL) <ARRAY>
  * 2: Kaynak <STRING> (varis / retreat-ezme / retreat-takili / retreat-idle)
  * 3: Azami adim (1-4) <NUMBER> (varsayilan 4)
+ * 4: Baslangic adimi (1-4) <NUMBER> (varsayilan 1; ilk cagrida bu adimdan baslanir)
  *
  * Return Value: Uygulanan adim (1..4) ya da -1 (kapali / gecersiz) <NUMBER>
  * CBA: lambs_danger_hareketKurtar (acik / kapali), lambs_danger_hareketKurtarCare (CARELESS adimi acik / kapali)
  * Public: No
 */
 
-params [["_u", objNull, [objNull]], ["_hedef", [], [[]]], ["_kaynak", "?", [""]], ["_azami", 4, [0]]];
+params [["_u", objNull, [objNull]], ["_hedef", [], [[]]], ["_kaynak", "?", [""]], ["_azami", 4, [0]], ["_baslangic", 1, [0]]];
 if (isNull _u || {!alive _u} || {isPlayer _u} || {!local _u} || {!isNull objectParent _u} || {(count _hedef) < 2}) exitWith {-1};
 if !(missionNamespace getVariable ["lambs_danger_hareketKurtar", true]) exitWith {-1};
+// v8.818 (RPT a049faa1): ayni askerde ayni saniyede 3 cagri (birden fazla varis gozcusu) adimlari saniyede 1 artiriyordu -> 1.5 sn'den sik cagri mevcut adimi doner, eylem yapmaz
+if ((time - (_u getVariable [QGVAR(hkT), -999])) < 1.5) exitWith { (_u getVariable [QGVAR(hkN), 1]) max 1 };
 private _n = if ((time - (_u getVariable [QGVAR(hkT), -999])) > 20) then { 0 } else { _u getVariable [QGVAR(hkN), 0] };
-_n = (_n + 1) min ((_azami max 1) min 4);
+_n = (((_n + 1) max ((_baslangic max 1) min 4)) min ((_azami max 1) min 4));   // v8.818: baslangic adimi (RPT a049faa1: retreat-idle adim 1 %37 / adim 3 %58 / adim 4 %69 -> bosta dali 3'ten baslar)
 _u setVariable [QGVAR(hkN), _n];
 _u setVariable [QGVAR(hkT), time];
 private _h3 = [_hedef select 0, _hedef select 1, 0];

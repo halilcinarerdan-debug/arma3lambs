@@ -450,8 +450,10 @@ private _nesneGit = {
     [_u, _en] call FUNC(mgDestek);   // v8.732: acikta kalanin siper atilisina MG bastirma destegi
     // v8.641 SIPER NOKTASINA OTUR (kullanici: 'arada 2 metre var', RPT 47dde7ed: [SIPER-YAPIS] YAPISTI satiri HIC yok -> coverHug kayma kolu bu askerlerde calismiyor; asker doMove toleransinda (~1-2 m) duruyor):
     //   bu dalin KENDI tamamlayicisi: hareket 1.2 sn sonra baslar, asker durdugunda (< 0.8 m/sn, 8 m icinde) ya da 12 sn sonra, hedef hala ayni siper noktasiysa 0.15-6 m kalan mesafe yumusak kayarak (ayak hatti GEOM acik) kapatilir; hat kapaliysa (govde araya girer) doMove tekrar
-    [_u, _obj] spawn {
-        params ["_a", "_pt0"];
+    private _gozTok = time + (random 0.001);
+    _u setVariable [QGVAR(varisGozcuTok), _gozTok];   // v8.818: birimde TEK varis gozcusu (RPT a049faa1: ayni askerde ayni saniyede 3 gozcu -> merdiven adimlari saniyede 1 artti)
+    [_u, _obj, _gozTok] spawn {
+        params ["_a", "_pt0", "_gozTok"];
         sleep 2;
         // v8.804 VARIS GOZCUSU (kullanici: 'siper varisini duzelt, coverlar cok iyi olsun'; RPT b4f22e03: [SIPER-OTUR] 14 kaydin 6'si 'oturtulamadi' - siper noktasina 6.8 / 9.7 / 21.5 / 27.6 / 28.3 / 54.2 m kala; eski bekleme TEK 12 sn'di, kosan asker (hiz 6-15) ya da durmus asker (hiz 0) icin hicbir sey yapilmiyordu):
         //   en cok 30 sn izler: yaklasma ILERLIYORSA beklemeye devam; 3 sn ilerleme yok + durmus ise ayni noktaya yeniden doMove (en cok 2); hala ilerlemiyorsa nokta 60 sn KARA LISTEYE alinir ve (varsa) YEDEK SIPER'e gidilir (15 sn izlenir); yedek de yoksa siper hedefi sifirlanir, hemen YENIDEN SECIM (acikSiperT = 0).
@@ -466,6 +468,7 @@ private _nesneGit = {
         private _sy = missionNamespace getVariable ["lambs_danger_acikSiperSay", createHashMap];
         while {!_bitti && {time < _son}} do {
             sleep 0.4;
+            if ((_a getVariable [QGVAR(varisGozcuTok), 0]) isNotEqualTo _gozTok) exitWith { _ulasilamadi = true; };   // v8.818: yeni gozcu devraldi
             if (!alive _a || {!((lifeState _a) in ["HEALTHY", "INJURED"])}) then { _bitti = true; } else {
                 private _h = (_a getVariable [QGVAR(acikSiperHedef), [[], 0]]) param [0, []];
                 if (_h isEqualTo []) then { _bitti = true; } else {
@@ -474,13 +477,13 @@ private _nesneGit = {
                     if (_d < 4 && {(speed _a) < 0.8}) then { _bitti = true; } else {
                         if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; };
                         if ((time - _ilerT) > ([3, 3.5, 4.5] select ((["STAND", "CROUCH", "PRONE"] find (stance _a)) max 0)) && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
-                            if (_reemir < 3) then {   // v8.818: 2 -> 3 yeniden emir (hareket kurtarma merdiveni adim 1-3; pencere duruşa gore 3 / 3.5 / 4.5 sn)
+                            if (_reemir < 4) then {   // v8.818: 2 -> 4 yeniden emir (hareket kurtarma merdiveni adim 1-4; pencere duruşa gore 3 / 3.5 / 4.5 sn)
                                 _reemir = _reemir + 1;
                                 _ilerT = time;
                                 _son = (time + 6) max _son;
                                 _a setVariable [QGVAR(oturDoMoveT), time];
                                 // v8.818 HAREKET KURTARMA (RPT 7ba225b8 + a8638e70: 35 basarisizligin 30'unda yol acik, 32'sinde baski 0, 35'inin hepsi COMBAT, 22'si komut ATTACK): ortak merdiven (hedef unut -> formasyon sifirla + CARELESS -> LEADER DIRECT); doMove'u kendisi verir
-                                if (([_a, _h, "varis", 3] call FUNC(hareketKurtar)) < 0) then {
+                                if (([_a, _h, "varis", 4] call FUNC(hareketKurtar)) < 0) then {
                                     if ((currentCommand _a) in ["ATTACK", "Suppress"]) then { [_a, 6, "varis"] call FUNC(kosuPatlamasi); };   // v8.807: motor ATTACK ile durdurduysa (RPT d03615e7: 18 basarisizligin 8'i ATTACK / Suppress, baski 0) hedef alma 6 sn kapanir
                                     _a doMove _h;
                                 };
