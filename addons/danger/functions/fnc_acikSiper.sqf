@@ -473,13 +473,17 @@ private _nesneGit = {
                     private _d = (getPosATL _a) distance2D _h;
                     if (_d < 4 && {(speed _a) < 0.8}) then { _bitti = true; } else {
                         if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; };
-                        if ((time - _ilerT) > 3 && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
-                            if (_reemir < 2) then {
+                        if ((time - _ilerT) > ([3, 3.5, 4.5] select ((["STAND", "CROUCH", "PRONE"] find (stance _a)) max 0)) && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
+                            if (_reemir < 3) then {   // v8.818: 2 -> 3 yeniden emir (hareket kurtarma merdiveni adim 1-3; pencere duruşa gore 3 / 3.5 / 4.5 sn)
                                 _reemir = _reemir + 1;
                                 _ilerT = time;
+                                _son = (time + 6) max _son;
                                 _a setVariable [QGVAR(oturDoMoveT), time];
-                                if ((currentCommand _a) in ["ATTACK", "Suppress"]) then { [_a, 6, "varis"] call FUNC(kosuPatlamasi); };   // v8.807: motor ATTACK ile durdurduysa (RPT d03615e7: 18 basarisizligin 8'i ATTACK / Suppress, baski 0) hedef alma 6 sn kapanir
-                                _a doMove _h;
+                                // v8.818 HAREKET KURTARMA (RPT 7ba225b8 + a8638e70: 35 basarisizligin 30'unda yol acik, 32'sinde baski 0, 35'inin hepsi COMBAT, 22'si komut ATTACK): ortak merdiven (hedef unut -> formasyon sifirla + CARELESS -> LEADER DIRECT); doMove'u kendisi verir
+                                if (([_a, _h, "varis", 3] call FUNC(hareketKurtar)) < 0) then {
+                                    if ((currentCommand _a) in ["ATTACK", "Suppress"]) then { [_a, 6, "varis"] call FUNC(kosuPatlamasi); };   // v8.807: motor ATTACK ile durdurduysa (RPT d03615e7: 18 basarisizligin 8'i ATTACK / Suppress, baski 0) hedef alma 6 sn kapanir
+                                    _a doMove _h;
+                                };
                                 _sy set ["varis_yeniden_emir", (_sy getOrDefault ["varis_yeniden_emir", 0]) + 1];
                             } else {
                                 private _kr = (_a getVariable [QGVAR(acikSiperKara), []]) select {time < (_x select 1)};
@@ -507,7 +511,7 @@ private _nesneGit = {
                                     private _vl = missionNamespace getVariable ["lambs_danger_varisLogN", 0];
                                     if (_vl < 25) then {
                                         missionNamespace setVariable ["lambs_danger_varisLogN", _vl + 1];
-                                        diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala 3 sn ilerleme yok, 2 yeniden emir sonuc vermedi%4 -> kara liste 60 sn + yeniden secim | YOL-TANI: yol %5 (%6, dolasma %7, engel %8) | durus %9 | komut '%10' | anim %11 | baski %12 | davranis %13 | yukseklik farki %14 m", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK, (_yt select 0), (_yt select 2), (_yt select 1) toFixed 2, (_yt select 3), stance _a, currentCommand _a, animationState _a, (getSuppression _a) toFixed 2, behaviour _a, (((getPosASL _a) select 2) - ((AGLToASL _h) select 2)) toFixed 1];
+                                        diag_log format ["[SIPER-VARIS] ULASILAMADI | %1 | %2 | siper noktasina %3 m kala ilerleme yok, %15 yeniden emir (hareket kurtarma) sonuc vermedi%4 -> kara liste 60 sn + yeniden secim | YOL-TANI: yol %5 (%6, dolasma %7, engel %8) | durus %9 | komut '%10' | anim %11 | baski %12 | davranis %13 | yukseklik farki %14 m", groupId (group _a), name _a, round _d, [", yedek siper yok", ", yedek siper de ulasilamadi"] select _yedekK, (_yt select 0), (_yt select 2), (_yt select 1) toFixed 2, (_yt select 3), stance _a, currentCommand _a, animationState _a, (getSuppression _a) toFixed 2, behaviour _a, (((getPosASL _a) select 2) - ((AGLToASL _h) select 2)) toFixed 1, _reemir];
                                     };
                                 };
                             };

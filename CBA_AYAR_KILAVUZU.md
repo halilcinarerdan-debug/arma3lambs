@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.817 · Preset: `CBA_LAMBS_Danger_v8.817.txt` · 660 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.818 · Preset: `CBA_LAMBS_Danger_v8.818.txt` · 662 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.817.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.818.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (354 ayar)
+### ELITE siper (356 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -296,6 +296,8 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `hakimYaricap` | Hakim nokta: arama yaricapi (m) | 20–80 | 45 | v8.669. MG / nisanci / AT icin hakim nokta aramasinin ust siniri (varsayilan 45 m; uzak nokta = gec kurulum, ates ussu kurulum tavani mesafeye gore 16 sn'ye kadar uzar). |
 | `hareketDestek` | Hareket tikanma kurtarici (MOVE + hiz 0 + hedef uzak) | açık/kapalı | açık | v8.726. Acik: yerel AI asker MOVE komutundayken hareketsiz kalir ve hedefi 6 m'den uzaksa hareketDestekS sn sonra ayni hedefe yeniden emir alir; 2 x S'de 45 derece 4 m yan adim; 4 x S'de gruba doner. LAMBS / TUTAN sahipli gruplar, bina ici, baski, tedavi, sniper / pusu, siperTut ve yerinde donus muaf. Kapali = eski (yalniz YURUMUYOR logu). |
 | `hareketDestekS` | Hareket tikanma kurtarici: bekleme (sn) | 3–30 | 3 | v8.726. Askerin 'tikali' sayilmasi ve ilk yeniden emir icin hareketsiz kalma suresi (varsayilan 3; yan adim 2 x, gruba donus 4 x). |
+| `hareketKurtar` | Hareket kurtarma: emir kabul edilip yurumeyen askeri kurtar | açık/kapalı | açık | v8.818 (kullanici: 'MOVE kabul edilip yurunmemesinin nedeni hala yok, siper varisina ulasamama'; RPT 7ba225b8 + a8638e70: doMove testlerinin %81'inde asker < 2 km/sa, [SIPER-VARIS] ULASILAMADI 35 kaydin 30'unda yol acik / baski 0 / davranis COMBAT). Acik: siper varis gozcusu ve geri cekilme kosucusu yurumeyince ortak merdiven isler: 1) saldiri / atanan hedefi unut + doMove, 2) + formasyon sifirla + durus UP + 8 sn CARELESS + kosu patlamasi, 3) + setDestination LEADER DIRECT + hiz FULL, 4) + calculatePath yol dugumu (yalniz retreat). 2.5 sn sonra sonuc [HAREKET-KURTAR] log'unda. Kapali = eski doMove tekrari. |
+| `hareketKurtarCare` | Hareket kurtarma: CARELESS adimi (8 sn) | açık/kapalı | açık | v8.818. Merdivenin 2. adimindan itibaren asker 8 sn CARELESS davranisa alinir (motorun 'dusman var, dur ve nisan al' alt durumunu baypas eder; tufek kisa sure asagi gelebilir), sure sonunda onceki davranis geri gelir. Kapali = CARELESS adimi atlanir (hedef birakma, formasyon sifirlama, LEADER DIRECT yine calisir). |
 | `havaAAAktif` | Helikoptere karsi katman: AA ekibi | açık/kapalı | açık | v8.387 (fnc_havaAA). Silahli helikopter hedefi secilen grupta hava yetenekli omuz fuzesi (aiAmmoUsageFlags HAVA: Stinger / Titan AA / Igla / Strela, RHS / CUP / LAMBS RPG dahil) 150 m - fuze kilit menzili x 0.85 (yoksa 2000 m) arasi hedefe ates eder: secim -> doTarget -> doFire, arka patlama / hat / duvar kontrolu, birim basina 12 sn, ates sonrasi 10 sn icinde alternatif pozisyon (ATP 3-01.8 pasif onlemler). Kapaliyken eski davranis (AA'li asker yalniz hedefe doFire). |
 | `havaAAHold` | Helikoptere karsi ates: yalniz hostile act (Weapons-Hold) | açık/kapalı | kapalı | ATP 3-01.8 2-13. Acik: AA / roketatar YALNIZ heli son 20 sn ates ettiyse / havada asiliysa ya da grup baski altindaysa ates eder. Kapali (varsayilan, Weapons-Tight): dusman olarak TANIMLI her silahli heliye (menzil zarfinda). |
 | `havaATAktif` | Roketatar (RPG-7 sinifi) alcak / asili heliye atabilir | açık/kapalı | açık | v8.387. Yonlendirmesiz roketle (maxControlRange 0, kilit yok) donanmis AT askeri, helikopter havada asiliysa ya da alcak-yavassa (<= 25 m, < 12 m/sn) ve <= 350 m ise ates eder. Yonlendirmeli AT (Titan AT, Javelin) helikoptere atilmaz. |

@@ -590,11 +590,23 @@ if (EGVAR(main,debug_functions)) then {
                         //   doStop yalniz asker gercekten DURUYORSA (< 3 km/sa); hareket halindeyse dogrudan doMove (komutu degistirir, yol hesabi + ayak ritmi kesilmez).
                         if ((speed _b) < 3) then { doStop _b; };
                         _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
-                        _b doMove (_x select 1);
+                        if (([_b, _x select 1, "retreat-ezme"] call FUNC(hareketKurtar)) < 0) then { _b doMove (_x select 1); };   // v8.818: ortak hareket kurtarma merdiveni (doMove'u kendisi verir)
                         [_b, _x select 1, _kmt] spawn FUNC(retDomoveTani);   // v8.809: motor doMove'u kabul etti mi? (0.7 sn sonra AI durumu + beklenen hedef)
                     };
                 };
             } forEach _varis;
+
+            // v8.818 MOVE-BOSTA (RPT 7ba225b8 + a8638e70: 59 doMove testinin %81'i < 2 km/sa; 25 KABUL'un 22'si duruyor; komut MOVE olunca yukaridaki ezme dali calismiyordu): komut MOVE ama asker duruyorsa (baslama gecikmesi 4 sn sonra)
+            //   ortak hareket kurtarma merdiveni (en az 3.5 sn arayla adim artar; kosucu yurumeye baslarsa cagri kesilir).
+            if (missionNamespace getVariable ["lambs_danger_hareketKurtar", true]) then {
+                {
+                    private _b = _x select 0;
+                    if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(time - _t0) > 4} && {(speed _b) < 1} && {(currentCommand _b) isEqualTo "MOVE"} && {(_b distance2D (_x select 1)) > 12}
+                        && {(time - (_b getVariable [QGVAR(hkT), -999])) > 3.5} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5}) then {
+                        [_b, _x select 1, "retreat-idle"] call FUNC(hareketKurtar);
+                    };
+                } forEach _varis;
+            };
 
             // v8.680 EMIR KORUMASI (RPT 0e8cb384: haltKur / roleStation / noktaEleman vb. 10+ yerde gecikmeli 'doFollow' serbest birakmasi koşu emrini formasyon planina ('LEADER PLANNED' / 'Formation') ezebiliyor): LIDER OLMAYAN
             //   kosucunun hedef modu formasyona donduyse (ve yavassa) 1.5 sn'den once degil, birim basina 1.5 sn arayla emir doStop OLMADAN yeniden verilir (yol hesabini sifirlayan doStop yok). Log: [GERI-CEKILME-KORUMA] (ilk 20).
@@ -631,7 +643,7 @@ if (EGVAR(main,debug_functions)) then {
                     } else {
                         // v8.679: hedef modu 'LEADER PLANNED' / 'Formation' = asker kendi doMove emrini degil lider / formasyon planini izliyor (emir ezilmis; yol hesabi gecikmesi DEGIL) -> 2.5 sn'de yeniden emir (yol hesabi sifirlama riski yok); diger durumlarda 7 sn
                         private _ezMod = (((expectedDestination _b) select 1) find "Formation") >= 0;   // v8.787: 'LEADER PLANNED' = normal planli doMove (ezilme DEGIL)
-                        if ((time - (_x select 3)) > ([7, 2.5] select _ezMod)) then {   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
+                        if ((time - (_x select 3)) > ([[7, 5] select (missionNamespace getVariable ["lambs_danger_hareketKurtar", true]), 2.5] select _ezMod)) then {   // v8.818: kurtarma merdiveni aciksa 7 -> 5 sn   // v8.674: 3.5 -> 7 sn (RPT 8f8a8871: ~5 sn baslama gecikmesi takilma sayiliyor, her 3.5 sn'de doMove tekrari yol hesabini sifirliyordu)
                             _x set [4, (_x select 4) + 1];
                             // v8.24 TAKILMA TANISI + KADEMELI MUDAHALE (RPT 17:52: lider STAND / MOVE / baski 0.00 ile 70 sn ayni yerde, gorev Retreat/Bound)
                             if (isNil "lambs_danger_retTakiliN") then { lambs_danger_retTakiliN = 0; };
@@ -682,7 +694,7 @@ if (EGVAR(main,debug_functions)) then {
                             };
                             _b setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                             private _kmtT = currentCommand _b;
-                            _b doMove (_x select 1);
+                            if (([_b, _x select 1, "retreat-takili"] call FUNC(hareketKurtar)) < 0) then { _b doMove (_x select 1); };   // v8.818: ortak hareket kurtarma merdiveni
                             [_b, _x select 1, "TAKILI-" + _kmtT] spawn FUNC(retDomoveTani);   // v8.810: MOVE + hiz 0 durgunlugu (RPT 1366df8e: duranlarin %84'u MOVE / idle) icin de motor doMove'u kabul etti mi?
                             _x set [3, time];
                         };
