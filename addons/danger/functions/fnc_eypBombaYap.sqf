@@ -41,6 +41,13 @@ _obj setVariable [QGVAR(eypTereddutS), _tereddutS];
 _obj setVariable [QGVAR(eypMenzil), _menzil];
 _obj setVariable [QGVAR(eypHedefTaraf), _hedefTaraf];
 _obj setVariable [QGVAR(eypOlumSans), _olumSans];
+// v8.795 (kullanici: 'bombaci uzakta durdu, yanindan mermi gecince'): mermi yanindan gecince / vurulunca / yakinda atis olunca ates eden dusman kaydedilir (fnc_eypAtesTepki)
+if (isNil {_obj getVariable QGVAR(eypEH)}) then {
+    _obj setVariable [QGVAR(eypEH), true];
+    _obj addEventHandler ["Suppressed", { params ["_u", "", "_s", "_i"]; [_u, [_s, _i] select (!isNull _i)] call FUNC(eypAtesTepki); }];
+    _obj addEventHandler ["Hit", { params ["_u", "_s", "", "_i"]; [_u, [_s, _i] select (!isNull _i)] call FUNC(eypAtesTepki); }];
+    _obj addEventHandler ["FiredNear", { params ["_u", "_f"]; [_u, _f] call FUNC(eypAtesTepki); }];
+};
 private _arac = !(_obj isKindOf "CAManBase");
 if (_arac && {_varil > 0}) then {
     // referans VBIED: kasada gorsel patlayici varil
@@ -62,7 +69,13 @@ diag_log format ["[EYP-ISARET] %1 | %2 | tespit %3 m | %4 | son an %5 | guc %6 |
         sleep 1;
         private _r = if (_o isKindOf "CAManBase") then {_o} else {driver _o};
         if (isNull _r || {!alive _r} || {!local _o} || {isPlayer _r}) then { continue };
-        private _h = [_o, _men, _ht] call FUNC(eypHedefBul);
+        // ates altinda (son 30 sn) tespit menzili genisler; hedef yoksa ates edene kosar (v8.795)
+        private _atesli = (time - (_o getVariable [QGVAR(eypAtesT), -999])) < 30;
+        private _h = [_o, [_men, _men max 2500] select _atesli, _ht] call FUNC(eypHedefBul);
+        if (isNull _h && {_atesli}) then {
+            private _k = _o getVariable [QGVAR(eypAtesKaynak), objNull];
+            if (!isNull _k && {alive _k}) then { _h = _k; };
+        };
         if (isNull _h) then { continue };
         _sonuc = [_r, _h, 120] call FUNC(eypKos);
         diag_log format ["[EYP-ISARET] SONUC | %1 | %2", typeOf _o, _sonuc];
