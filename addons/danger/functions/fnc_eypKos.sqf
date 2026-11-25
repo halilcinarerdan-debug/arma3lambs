@@ -116,6 +116,8 @@ if (_arac) then {
 private _sonEmir = [];
 private _dmT = 0;
 private _tazeT = 0;
+private _stallT = -1;
+private _stallEmirT = 0;
 private _isaretli = !isNil {_v getVariable QGVAR(eypBomba)};
 private _yokT = -1;
 private _durT = -1;
@@ -236,6 +238,9 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                     _tazeT = time + 2;
                     if ((behaviour _b) isNotEqualTo "CARELESS") then { _b setBehaviour "CARELESS"; };
                     _b forceSpeed (_b getSpeed "FAST");
+                    // v8.794: baski / ates altinda bayraklarin baska betikle geri acilmasina karsi her 2 sn'de yeniden kapat / ac
+                    { _b disableAI _x; } forEach ["SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
+                    { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
                 };
                 // ARAC: doMove NADIREN (hedef 60 m / yakinda 25 m kaydiysa, en az 3 sn arayla; hedef sabitse 8 sn'de bir): her yeni emir yol hesabini sifirlar, arac durup yeniden planliyordu (RPT 0689d2a0: hiz 47 -> 0)
                 private _hp = getPosATL _h;
@@ -247,6 +252,26 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                     _b doMove _hp;
                     _sonEmir = _hp;
                     _dmT = time + (if (_arac) then {3} else {[2.5, 1.5] select (_m < 30)});
+                };
+                // v8.794 (kullanici: 'piyade ates gelince sabit durdu'): PIYADE DURAKLAMA algilayici: hedefe uzakken (tetik + 3 m'den fazla) hiz < 1.5 km/s 1.2 sn'den uzun surerse bayraklar yeniden kurulur, durus UP, hiz FAST, emir yeniden (2 sn'de bir en cok); neden RPT'de [EYP-KOS] DURAKLAMA (ilk 20)
+                if (!_arac) then {
+                    if ((speed _b) < 1.5 && {_m > (_tetikT + 3)}) then {
+                        if (_stallT < 0) then { _stallT = time; };
+                        if ((time - _stallT) > 1.2 && {time >= _stallEmirT}) then {
+                            _stallEmirT = time + 2;
+                            { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
+                            { _b disableAI _x; } forEach ["SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
+                            if !(_gizli) then { _b setUnitPos "UP"; _b forceSpeed (_b getSpeed "FAST"); };
+                            _b doMove _hp;
+                            _sonEmir = _hp;
+                            _dmT = time + 2.5;
+                            private _dl = missionNamespace getVariable ["lambs_danger_eypDurLogN2", 0];
+                            if (_dl < 20) then {
+                                missionNamespace setVariable ["lambs_danger_eypDurLogN2", _dl + 1];
+                                diag_log format ["[EYP-KOS] DURAKLAMA | %1 | hedef %2 m | duruyor %3 sn | baski %4 | hasar %5 (bacak %6) | komut '%7' | anim %8 | durus %9 | AI MOVE %10 PATH %11 ANIM %12 SUPPRESSION %13 | captive %14 | yasam %15 | beh %16", name _b, round _m, (time - _stallT) toFixed 1, (getSuppression _b) toFixed 2, (damage _b) toFixed 2, (_b getHitPointDamage "HitLegs") toFixed 2, currentCommand _b, animationState _b, stance _b, _b checkAIFeature "MOVE", _b checkAIFeature "PATH", _b checkAIFeature "ANIM", _b checkAIFeature "SUPPRESSION", captive _b, lifeState _b, behaviour _b];
+                            };
+                        };
+                    } else { _stallT = -1; };
                 };
             };
         };
