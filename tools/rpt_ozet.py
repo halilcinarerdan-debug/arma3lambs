@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.801"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.802"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -595,6 +595,16 @@ def kabul(path):
     ekle("RPG MUHIMMAT (AP roket tasima / yuklu mermi degisimi)", "BILGI", ("[RPG-MUHIMMAT] birim %d (ilk 40 loglanir; yer degisimi AT->AP %d, yer yok %d) | [RPG-MERMI-DEGIS] %d (basarili %d)" % (len(rm), len([1 for l in rm if "yer degisimi 0" not in l]), len([1 for l in rm if "yer yok 0" not in l]), len(rd_), len([1 for l in rd_ if "basarili: true" in l]))) if (rm or rd_) else "muhimmat kaydi yok (v8.748 oncesi RPT ya da roketatarli AI / AP uyumlu sarjor yok)")
     rs = [l for l in L if "[RPG-KARAR-SONUC]" in l]; rsa = len([1 for l in rs if "atildi: true" in l])
     ro = [l for l in L if "[RPG-OZET]" in l]
+    # v8.802 (kullanici: 'roket neden kullanilmadi'): karar ozeti toplami + muhimmat sonucu = roketin neden kullanilmadigi
+    rko_ = {}
+    for l in L:
+        if "[RPG-KARAR-OZET]" in l:
+            for k_, v_ in re.findall(r"(\w+)=(\d+)", l.split("[RPG-KARAR-OZET]", 1)[1]): rko_[k_] = rko_.get(k_, 0) + int(v_)
+    rmu_ = [l for l in L if "[RPG-MUHIMMAT] " in l and "AP sarjor" in l]
+    rme_ = sum(int(x) for l in rmu_ for x in re.findall(r"eklenen (\d+)", l)); rmy_ = sum(int(x) for l in rmu_ for x in re.findall(r"yer yok (\d+)", l)); rmc_ = sum(int(x) for l in rmu_ for x in re.findall(r"canta eklendi (\d+)", l))
+    if rko_ or rmu_:
+        ekle("RPG: NEDEN KULLANILMADI (karar ozeti)", "KONTROL" if (rko_.get("izin_yok", 0) > 0 and rko_.get("emir", 0) == 0) else "BILGI",
+             "aday %d | filtre %d | hedef bilinmiyor %d | IZIN YOK (yuklu roket piyadeye uygun degil + AP yok) %d | emir %d || AP muhimmat: birim %d, eklenen %d, yer yok %d, canta eklendi %d (v8.802+; izin yok yuksek + eklenen 0 ise: envanter / canta sorunu, 'RPG muhimmat: sirt cantasi' CBA acik olmali)" % (rko_.get("aday", 0), rko_.get("filtre", 0), rko_.get("hedef_bilinmiyor", 0), rko_.get("izin_yok", 0), rko_.get("emir", 0), len(rmu_), rme_, rmy_, rmc_))
     ekle("RPG SISTEMI (karar + atis kapisi)", "BILGI", ("karar %d | sonuc: atildi %d / %d | atis (kapidan gecen) %d | iptal %d | %s" % (rk, rsa, len(rs), ra, ri, (re.sub(r"^.*?\"\[RPG-OZET\] ", "", ro[-1]).strip().rstrip('"')[:240]) if ro else "OZET yok")) if (ra or ri or rk) else "RPG kaydi yok (v8.746 oncesi RPT ya da roketatarli AI atis / karar yok; karar atilmiyorsa [RPG-KARAR-SONUC] 'atilmadi' = motor roketatari secmedi)")
     sp = len([1 for l in L if "[SIS-PERDE] " in l]); so = [l for l in L if "[SIS-PERDE-OLCUM]" in l]
     sok = len([1 for l in so if "bulutu: 0 " not in l])

@@ -64,18 +64,23 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             } forEach (allUnits select {
                 local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {_x isKindOf "CAManBase"} && {(secondaryWeapon _x) isNotEqualTo ""} && {!(_x getVariable [QGVAR(rpgMuhOk), false])}
                 && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
+                && {[side group _x, "rpgMuhimmat", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli AP roket tasima
             });
         };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(secondaryWeapon _x) isNotEqualTo ""}
             && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 25)} && {_x isKindOf "CAManBase"}
             && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
+            && {[side group _x, "rpgAktif", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli (BLUFOR / OPFOR / INDEPENDENT) karar katmani acma / kapama
         };
         {
             if (_verilen >= 2) exitWith {};
             private _u = _x;
             private _g = group _u;
             private _ls = secondaryWeapon _u;
+            // v8.802: taraf bazli en uzak hedef mesafesi (-1 = genel rpgMaxM)
+            private _maxU = [side _g, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
+            _maxU = if (_maxU < 0) then {_maxM} else {(_maxU max (_minM + 30)) min 600};
             ["aday"] call _ar;
             if (
                 time < (_u getVariable [QGVAR(rpgBekleT), 0]) || {(time - (_g getVariable [QGVAR(rpgGrupT), -999])) < (((missionNamespace getVariable ["lambs_danger_rpgGrupBekleS", 8]) max 0) min 30)}
@@ -100,7 +105,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
 
             private _taraf = side _g;
             private _eye = eyePos _u;
-            private _gor = (_u nearTargets _maxM) select {
+            private _gor = (_u nearTargets _maxU) select {
                 private _o = _x select 4;
                 !isNull _o && {alive _o} && {(_taraf getFriend (side group _o)) < 0.6} && {(side group _o) isNotEqualTo civilian}
                 && {(_u knowsAbout _o) >= _esit} && {((_u targetKnowledge _o) select 2) > (time - 20)}
@@ -114,7 +119,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             {
                 private _o = _x;
                 private _d = _u distance _o;
-                if (_d < (_minM + 10) || {_d > _maxM}) then { continue };
+                if (_d < (_minM + 10) || {_d > _maxU}) then { continue };
                 private _tur = "";
                 private _deger = 0;
                 if (_o isKindOf "StaticWeapon") then {

@@ -30,6 +30,8 @@ params ["_unit", "_weapon", "_yon", "_imp", ["_muaf", false], ["_atildi", false]
 private _minM = ((missionNamespace getVariable ["lambs_danger_rpgMinM", 25]) max 10) min 80;
 private _dostM = ((missionNamespace getVariable ["lambs_danger_rpgDostM", 12]) max 4) min 40;
 private _yedek = ((missionNamespace getVariable ["lambs_danger_rpgYedek", 2]) max 0) min 4;
+private _yedekT = [side group _unit, "rpgYedek", -1] call FUNC(rpgTarafDeger);   // v8.802: taraf bazli yedek roket (-1 = genel rpgYedek)
+if (_yedekT >= 0) then { _yedek = (_yedekT max 0) min 4; };
 
 if ((_unit distance _imp) < _minM) exitWith {"min"};
 if ((insideBuilding _unit) > 0.5) exitWith {"bina ici"};

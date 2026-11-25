@@ -65,9 +65,15 @@ if (_mod isEqualTo "yukle") exitWith {
         private _eklenen = 0;
         private _degis = 0;
         private _yok = 0;
+        private _canta = 0;
         if (_var < _adet) then {
             private _en = ([_ap, [], {[_x] call _skor}, "DESCEND"] call BIS_fnc_sortBy) select 0;
             for "_i" from 1 to (_adet - _var) do {
+                // v8.802 (RPT b4f22e03: 3 RPG-7'li 'yer yok 3', AP roket hic yuklenmedi -> karar katmani 0 karar, roket kullanilmadi): envanter dolu / sirt cantasi yoksa kucuk bir canta eklenir (CBA rpgSirtCantasi)
+                if (!(_u canAdd _en) && {missionNamespace getVariable ["lambs_danger_rpgSirtCantasi", true]} && {(backpack _u) isEqualTo ""} && {isClass (configFile >> "CfgVehicles" >> "B_FieldPack_blk")}) then {
+                    _u addBackpack "B_FieldPack_blk";
+                    _canta = _canta + 1;
+                };
                 if (_u canAdd _en) then { _u addMagazine _en; _eklenen = _eklenen + 1; } else {
                     private _atl = (magazines _u) select {(toLower _x) in _uyum && {!([_x] call _apMag)}};
                     if (_atl isNotEqualTo []) then {
@@ -83,7 +89,7 @@ if (_mod isEqualTo "yukle") exitWith {
             private _n = missionNamespace getVariable ["lambs_danger_rpgMuhLogN", 0];
             if (_n < 40) then {
                 missionNamespace setVariable ["lambs_danger_rpgMuhLogN", _n + 1];
-                diag_log format ["[RPG-MUHIMMAT] %1 | %2 | %3 | AP sarjor %4 | tasinan AP %5 -> hedef %6 | eklenen %7 (AT -> AP yer degisimi %8, yer yok %9)", groupId group _u, name _u, _ls, _en, _var, _adet, _eklenen, _degis, _yok];
+                diag_log format ["[RPG-MUHIMMAT] %1 | %2 | %3 | AP sarjor %4 | tasinan AP %5 -> hedef %6 | eklenen %7 (AT -> AP yer degisimi %8, yer yok %9) | canta eklendi %10 (simdiki canta '%11')", groupId group _u, name _u, _ls, _en, _var, _adet, _eklenen, _degis, _yok, _canta, backpack _u];
             };
         };
         _u setVariable [QGVAR(rpgMuhOk), true];
