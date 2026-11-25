@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.816 · Preset: `CBA_LAMBS_Danger_v8.816.txt` · 659 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.817 · Preset: `CBA_LAMBS_Danger_v8.817.txt` · 660 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.816.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.817.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (353 ayar)
+### ELITE siper (354 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -374,6 +374,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `reaksiyonArtis` | Reaksiyon artisi (dusunme hizina ek carpan) | 0–1 | 0.3 | v8.735 (kullanici: 'reaksiyon sureleri 3x dusunme hizinin hakkini versin, %30 arttir'). Sicak temasta TUM dusunme / reaksiyon izleyicilerinin bekleme suresi (dusunSure) CBA dusunHizi carpanina EK olarak (1 + bu deger) ile bolunur (0.3 = %30 daha hizli; dusunHizi 3 sinirinin USTUNE cikar); hizliFark esigi de ayni oranda kisalir. 0 = eski. |
 | `retBacakCarpan` | Geri cekilme: bacak kisaltma carpani | 0.8–2 | 1.2 | v8.816. Kosucunun tek sicramada gidecegi en uzun mesafe = adim boyu (30 / 45 / 75 m, tehdit mesafesine gore) x bu carpan (en az 30 m). Varsayilan 1.2. |
 | `retBacakKap` | Geri cekilme: kosucu hedefini adim boyuna kisalt (ara nokta) | açık/kapalı | açık | v8.816 (RPT 7ba225b8: kosucularin sicrama basi hedef mesafesi 32-151 m, vardi 0/3, mesafe kazanci -15..+24 m). Acik (varsayilan): kosucunun kendi konumundan hedefe mesafe adim boyu x retBacakCarpan'i asarsa hedef o yonde o kadar uzakta bir ara nokta olur; dagik mangada uzaktaki kosucu 100+ m kosup yigilmaz. Kapali = eski. |
+| `retBacakMaxM` | Geri cekilme: bacak kisaltma mutlak tavani (m) | 25–120 | 45 | v8.817 (RPT a8638e70: kosucularin ilk ~20 sn'de katettigi mesafe ortanca 21 m, p75 38 m, en cok 81 m; adim boyu 90 m -> 108 m tavan hic ulasilamiyordu). Kosucunun tek sicramada gidecegi en uzun mesafe, adim boyu x carpan ile BU degerin kucugu (en az 25 m). Varsayilan 45 m; kucuk = daha cok / daha kisa bacak (varis orani artar, toplam cekilme yavaslar). |
 | `retKosuFsm` | Geri cekilme: kosucunun motor FSM'ini kosu suresince kapat | açık/kapalı | açık | v8.811 (kullanici: 'retreat coz'; RPT'lerde kosucularin %60-67'si MOVE komutu + hiz 0 ile duruyor; ayni ortamda FSM'i kapali bombaci kesintisiz kosuyor). Acik (varsayilan): geri cekilme sicramasinda kosucu askerin (lider haric) FSM'i en cok 14 sn kapanir, sicrama sonunda / varista / retreat bitince geri acilir; COMBAT + tufek yukarda kalir. Kapali = eski. |
 | `retKosuFsmLider` | Geri cekilme: koşu FSM kapamasi LIDERI de kapsasin | açık/kapalı | açık | v8.816 (RPT 7ba225b8: kosucu ilk hareket gecikmesi lider 12-17 sn, FSM'i kapali lider olmayan 0-5 sn). Acik (varsayilan): retKosuFsm acikken lider de kosu suresince (en cok 14 sn) FSM'siz kosar; kapali = lider haric (eski). |
 | `rolDisiplini` | Rol disiplini: MG / saglikci / nisanci manevrada KOSMAZ | açık/kapalı | açık | v8.661. Hucum, kanat ve bounding kosucusu secilirken MG (taban ates / bastirma), saglikci, nisanci ve (son tercih) AT manevraya katilmaz; RIFLE / UGL oncelikli. Baska kimse kalmazsa en az 1-2 kisi sirayla eklenir. |

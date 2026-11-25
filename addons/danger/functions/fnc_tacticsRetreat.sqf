@@ -420,7 +420,8 @@ if (EGVAR(main,debug_functions)) then {
     //   WP lider konumundan hesaplaniyor ama manga uyeleri dagik: uzaktaki kosucu 100+ m kosup WP'ye yigiliyor (hatta dusmana dogru). Kural: kosucunun KENDI konumundan hedefe mesafe adim boyu x CBA retBacakCarpan'i (1.2; en az 30 m) asarsa hedef, kosucudan o yone o kadar uzakta bir ARA NOKTA olur (sonraki sicrama yeniden planlanir). CBA retBacakKap kapaliysa eski.
                     if (missionNamespace getVariable ["lambs_danger_retBacakKap", true]) then {
                         private _rp = getPosATL _x;
-                        private _kap = ((_adimBoy * (((missionNamespace getVariable ["lambs_danger_retBacakCarpan", 1.2]) max 0.8) min 2)) max 30);
+                        // v8.817 (RPT a8638e70: adim boyu 90 m -> tavan 108 m; 16 kosucu serisinde ilk ~20 sn'de katedilen mesafe ortanca 21 m, p75 38 m, en cok 81 m; varis 3 / 17): tavan ayrica retBacakMaxM (45 m) ile sinirli
+                        private _kap = (((_adimBoy * (((missionNamespace getVariable ["lambs_danger_retBacakCarpan", 1.2]) max 0.8) min 2)) min ((missionNamespace getVariable ["lambs_danger_retBacakMaxM", 45]) max 25)) max 25);
                         if ((_rp distance2D _p) > _kap) then {
                             private _hp = _rp getPos [_kap, _rp getDir _p];
                             if (!surfaceIsWater _hp) then {
