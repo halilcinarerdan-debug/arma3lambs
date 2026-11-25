@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.820"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.821"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -295,20 +295,22 @@ def kabul(path):
         m = re.search(r"\[TELEMETRI-GRUP\] (Alpha [\d-]+|[^|]+?) \| (\w+) \|.*?\| karar:([A-Z_]+) \((\d+) sn once\)", l)
         z = zaman(l)
         if m and z is not None:
-            ser[(m.group(1).strip(), m.group(2))].append((z - int(m.group(4)), m.group(3), z))
+            dm_ = re.search(r"en yakin dusman:(\d+) m", l)
+            ser[(m.group(1).strip(), m.group(2))].append((z - int(m.group(4)), m.group(3), z, int(dm_.group(1)) if dm_ else 9999))
     ATAK = {"BOUNDING", "FLANK", "ASSAULT", "SUPPRESS_ASSAULT"}
     SAV = {"DELAY", "HOLD"}
     kisa, gecis, aba = [], 0, 0
     for k, v in ser.items():
         v.sort()
         kar = []
-        for bs, kr, z in v:
+        for bs, kr, z, dm in v:
             if kar and kar[-1][1] == kr and abs(kar[-1][0] - bs) <= 4: continue
-            kar.append([bs, kr])
+            kar.append([bs, kr, dm])
         for i in range(len(kar) - 1):
             gecis += 1
             if kar[i][1] in SAV and kar[i + 1][1] in ATAK:
-                if kar[i + 1][0] - kar[i][0] < 25: kisa.append((k, kar[i][1], kar[i + 1][1], kar[i + 1][0] - kar[i][0]))
+                # v8.821: savunma karari dusman <= 30 m iken verilmisse (yakin temas: PUSH / hucum mesru) kisa gecis sayilmaz
+                if kar[i + 1][0] - kar[i][0] < 25 and kar[i][2] > 30: kisa.append((k, kar[i][1], kar[i + 1][1], kar[i + 1][0] - kar[i][0]))
         for i in range(len(kar) - 2):
             if kar[i][1] in ATAK and kar[i + 1][1] in SAV and kar[i + 2][1] in ATAK and kar[i + 2][0] - kar[i][0] < 90: aba += 1
     if ser:
@@ -794,7 +796,7 @@ def kabul(path):
     else:
         ekle("GERCEKCILIK: REAKSIYON (gorunur -> fark)", "VERI YOK", "[HIZLI-FARK-OZET] ornegi yok / az (%d); gorunen insan oyuncu gerekir" % fark_n)
     # v8.804 (kullanici: 'siper varisini duzelt'): siper noktasina VARIS orani + varis gozcusu sonuclari
-    sv_ok = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtuldu" in l]); sv_no = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtulamadi" in l])
+    sv_ok = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtuldu" in l]); sv_no = len([1 for l in L if "[SIPER-OTUR]" in l and "oturtulamadi" in l and not re.search(r"kalan 0\.[01] m", l)])   # v8.821: kalan 0.0-0.1 m = zaten yerinde (eski RPT'lerde de basarisizlik sayilmaz)
     sv_ul = len([1 for l in L if "[SIPER-VARIS] ULASILAMADI" in l])
     sv_re = 0; sv_ye = 0; sv_ua = 0
     for l in L:

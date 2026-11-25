@@ -483,7 +483,7 @@ private _nesneGit = {
                                 _son = (time + 6) max _son;
                                 _a setVariable [QGVAR(oturDoMoveT), time];
                                 // v8.818 HAREKET KURTARMA (RPT 7ba225b8 + a8638e70: 35 basarisizligin 30'unda yol acik, 32'sinde baski 0, 35'inin hepsi COMBAT, 22'si komut ATTACK): ortak merdiven (hedef unut -> formasyon sifirla + CARELESS -> LEADER DIRECT); doMove'u kendisi verir
-                                if (([_a, _h, "varis", 4] call FUNC(hareketKurtar)) < 0) then {
+                                if (([_a, _h, "varis", 4, 2] call FUNC(hareketKurtar)) < 0) then {   // v8.821: adim 2'den basla (RPT f4bf5df2: varis adim 1 yurudu 5 / 15 %33, adim 2 8 / 8, adim 3 4 / 5, adim 4 5 / 5)
                                     if ((currentCommand _a) in ["ATTACK", "Suppress"]) then { [_a, 6, "varis"] call FUNC(kosuPatlamasi); };   // v8.807: motor ATTACK ile durdurduysa (RPT d03615e7: 18 basarisizligin 8'i ATTACK / Suppress, baski 0) hedef alma 6 sn kapanir
                                     _a doMove _h;
                                 };
@@ -546,7 +546,12 @@ private _nesneGit = {
         } else {
             if ((missionNamespace getVariable ["lambs_danger_siperOturLogN2", 0]) < 15) then {
                 missionNamespace setVariable ["lambs_danger_siperOturLogN2", (missionNamespace getVariable ["lambs_danger_siperOturLogN2", 0]) + 1];
-                diag_log format ["[SIPER-OTUR] %1 | %2 | oturtulamadi: kalan %3 m, hiz %4 km/sa", groupId (group _a), name _a, _d0 toFixed 1, round (speed _a)];
+                // v8.821 (RPT f4bf5df2: 12 'oturtulamadi' kaydinin 6'si kalan 0.0-0.1 m = ZATEN yerinde (< 0.15 m esigi); karne %32 gosteriyordu): gercek basarisizlik yalniz kalan >= 0.15 m
+                if (_d0 < 0.15) then {
+                    diag_log format ["[SIPER-OTUR] %1 | %2 | siper noktasina %3 m kaldi -> oturtuldu (zaten yerinde)", groupId (group _a), name _a, _d0 toFixed 2];
+                } else {
+                    diag_log format ["[SIPER-OTUR] %1 | %2 | oturtulamadi: kalan %3 m, hiz %4 km/sa", groupId (group _a), name _a, _d0 toFixed 1, round (speed _a)];
+                };
             };
         };
     };
