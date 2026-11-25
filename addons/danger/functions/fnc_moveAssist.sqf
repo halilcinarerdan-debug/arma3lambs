@@ -188,7 +188,12 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                     _u setVariable [QGVAR(sideUntil), 0];
                     private _sd = _u getVariable [QGVAR(sideDest), []];
                     if (_sd isNotEqualTo [] && {alive _u}) then {
-                        if (_u isEqualTo (leader _u)) then { _u doMove _sd; } else { _u doMove _sd; };
+                        // v8.806 RETREAT CAKISMASI: yan adim retreat / temas kesme / kosucu oncesi baslamissa eski varisa doMove retreat emrini ezmesin
+                        if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isBreakingContact), false]} || {!isNil {_u getVariable QGVAR(forceMove)}}) then {
+                            [_u, "moveAssist"] call FUNC(retCakismaSay);
+                        } else {
+                            if (_u isEqualTo (leader _u)) then { _u doMove _sd; } else { _u doMove _sd; };
+                        };
                     };
                 };
             } else {

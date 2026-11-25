@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.805"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.806"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -825,6 +825,28 @@ def kabul(path):
         ekle("GERCEKCILIK: SIPER YOLU (yol tarama)", "BILGI", "tarama %d: duz acik %d | dolasma %d | ERISILEMEZ %d (su %d, dik yamac %d, dolasma kordu yok %d, dolasma > sinir %d) | acikSiper: yol_kapali %d (nokta elendi + yeniden secim), yol_dolasma %d | ilk olumsuz: %s (v8.805+; yol_kapali yuksek + [SIPER-VARIS] ULASILAMADI dusuk = ise yariyor)" % (yt_say["cagri"], yt_say["duz"], yt_say["dolasma"], yt_say["kapali"], yt_say["su"], yt_say["dik_yamac"], yt_say["dolasma_yok"], yt_say["dolasma_asildi"], yk_as, yd_as, (re.sub(r'^.*?"\[YOL-TARA\] ', "", yt_log[0]).strip().rstrip('"')[:160]) if yt_log else "-"))
     else:
         ekle("GERCEKCILIK: SIPER YOLU (yol tarama)", "VERI YOK", "[YOL-TARA] / [YOL-TARA-OZET] yok (v8.805 oncesi RPT ya da lambs_danger_yolTara kapali)")
+    # v8.806 (kullanici: 'retreattami cakisan bir sey var'): retreat kosucusu hareket orani + cakisma korumasi sayaci
+    iz_ = [l for l in L if "[GERI-CEKILME-IZ]" in l]
+    iz_dur = 0; iz_atk = 0; iz_n = 0
+    for l in iz_:
+        m_ = re.search(r"\| hiz (\d+) \| anim \S+ \| komut (\w+)", l)
+        if not m_: continue
+        iz_n += 1
+        if int(m_.group(1)) < 2:
+            iz_dur += 1
+            if m_.group(2) == "ATTACK": iz_atk += 1
+    rb_ = [l for l in L if "[GERI-CEKILME-BITIS]" in l]
+    rb_ip = len([1 for l in rb_ if "ilerleme yok" in l])
+    rc_say = {}
+    for l in L:
+        if "[RET-CAKISMA-OZET]" in l:
+            for k_, v_ in re.findall(r"(siperZorla|yumusakKay|moveAssist)=(\d+)", l): rc_say[k_] = rc_say.get(k_, 0) + int(v_)
+    rc_n = len([1 for l in L if "[RET-CAKISMA] " in l])
+    if iz_n >= 10:
+        o_ = 100.0 * iz_dur / iz_n
+        ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "GECTI" if o_ <= 40 and rb_ip == 0 else "KONTROL", "kosucu ornegi %d: duran (< 2 km/sa) %d (%%%.0f; hedef <= %%40), bunlardan ATTACK komutlu %d | retreat bitisi 'ilerleme yok': %d / %d | eski siper komutu engellendi (v8.806+): %s (log %d)" % (iz_n, iz_dur, o_, iz_atk, rb_ip, len(rb_), (", ".join("%s %d" % (k, v) for k, v in sorted(rc_say.items())) or "yok"), rc_n))
+    else:
+        ekle("GERCEKCILIK: RETREAT KOSUSU (kosucu hareket orani)", "VERI YOK", "[GERI-CEKILME-IZ] ornegi az (retreat yok)")
     ekle("GERCEKCILIK: BASKI ETKISI (kafa egme / karsilik dususu)", "VERI YOK", "sayac yok: sonraki adim (baski altindaki bot orani + baski altindaki botun atis hizi); simdilik [DURUS-DISIPLIN-OZET] ve [VURULDU-TEPKI] satirlarina bak")
 
     print("=" * 100); print("KABUL TESTI |", path)

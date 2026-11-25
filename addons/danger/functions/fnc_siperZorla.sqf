@@ -137,6 +137,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
 }, {
     params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1", "_ak", "_mm0"];
     if (alive _uu) then {
+        if (((group _uu) getVariable [QGVAR(isRetreating), false]) || {(_uu getVariable [QGVAR(forceMove), false]) isEqualTo true}) exitWith { _uu setVariable [QGVAR(zorlaBitis), 0]; [_uu, "siperZorla"] call FUNC(retCakismaSay); };   // v8.806: retreat / kosucu basladiysa eski siper komutu (doMove cover, AI bayragi geri yukleme, siperTut, yumusakKay) retreat emrini ezmesin; retreat sonunda AI bayraklarini kendisi acar
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
@@ -153,6 +154,7 @@ if ((missionNamespace getVariable ["lambs_danger_zorlaLogN", 0]) < 40) then {
 }, [_u, _pos, _ds, _e, _atVar && {!_ateseKos}, _tVar && {!_ateseKos}, _ateseKos, _m0], _sure, {
     params ["_uu", "_pp", "_dd", "_ee", "_a1", "_t1", "_ak", "_mm0"];
     if (alive _uu) then {
+        if (((group _uu) getVariable [QGVAR(isRetreating), false]) || {(_uu getVariable [QGVAR(forceMove), false]) isEqualTo true}) exitWith { _uu setVariable [QGVAR(zorlaBitis), 0]; [_uu, "siperZorla"] call FUNC(retCakismaSay); };   // v8.806: retreat / kosucu basladiysa eski siper komutu (doMove cover, AI bayragi geri yukleme, siperTut, yumusakKay) retreat emrini ezmesin; retreat sonunda AI bayraklarini kendisi acar
         if (_a1) then { _uu enableAI "AUTOTARGET"; };
         if (_t1) then { _uu enableAI "TARGET"; };
         _uu setVariable [QGVAR(zorlaBitis), 0];
