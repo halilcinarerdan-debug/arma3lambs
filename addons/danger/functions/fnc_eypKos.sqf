@@ -293,6 +293,8 @@ while {alive _b && {!_bitti} && {time < (_t0 + _sure)}} do {
                         if (_stallT < 0) then { _stallT = time; };
                         if ((time - _stallT) > 1.2 && {time >= _stallEmirT}) then {
                             _stallEmirT = time + 2;
+                            // v8.831 BOMBACI SCRIPT KOSU (kullanici: 'bomba birazcik sabit kaliyor, direk kosmasi lazim degil mi'; RPT 05e62626: hasar 0 / bacak 0 iken bile 'duruyor 1.2-7.3 sn / komut MOVE / anim aidlpercmstp...g01 (bosta)' = motor MOVE'u uygulamiyor; 29 sn'de vuruldu): 1.5 sn'den uzun duruyorsa hedefe (<= 220 m) script kosu (hizli, engel yonlendirmeli)
+                            if ((time - _stallT) > 1.5 && {_m <= 220}) then { [_b, _hp, "bomba"] call FUNC(kosuAdim); };
                             { _b enableAI _x; } forEach ["MOVE", "PATH", "ANIM"];
                             { _b disableAI _x; } forEach ["SUPPRESSION", "AUTOCOMBAT", "COVER", "FSM"];
                             if !(_gizli) then { _b setUnitPos "UP"; _b forceSpeed (_b getSpeed "FAST"); };

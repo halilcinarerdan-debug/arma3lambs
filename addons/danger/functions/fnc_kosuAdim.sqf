@@ -14,7 +14,7 @@
 params [["_u", objNull, [objNull]], ["_hedef", [], [[]]], ["_kaynak", "?", [""]]];
 if (isNull _u || {!alive _u} || {isPlayer _u} || {!local _u} || {!isNull objectParent _u} || {(count _hedef) < 2}) exitWith {false};
 if !(missionNamespace getVariable ["lambs_danger_hareketKurtarKos", true]) exitWith {false};
-private _ret = (_kaynak select [0, 7]) isEqualTo "retreat";   // v8.825: geri cekilme kosucusu icin de (retreat bacagi): forceMove / isRetreating engeli yok (cagiran retreat dali kendisi istiyor)
+private _ret = ((_kaynak select [0, 7]) isEqualTo "retreat") || {(_kaynak select [0, 5]) isEqualTo "bomba"};   // v8.831: bombaci kosusu da (forceMove / isRetreating engeli yok)   // v8.825: geri cekilme kosucusu icin de (retreat bacagi): forceMove / isRetreating engeli yok (cagiran retreat dali kendisi istiyor)
 if ((!_ret && {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(group _u) getVariable [QGVAR(isRetreating), false]}}) || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getVariable ["ACE_isUnconscious", false]}) exitWith {false};
 private _an = toLower (animationState _u);
 private _w = ["wrfl", "wpst"] select { (_an find _x) >= 0 };
@@ -34,9 +34,10 @@ _say set ["basla", (_say getOrDefault ["basla", 0]) + 1];
 if (["kosuAdim", 20, 30] call FUNC(logIzin)) then {
     diag_log format ["[KOSU-ADIM] BASLA | %1 | %2 | %3 | hedefe %4 m | durus %5 | komut %6 | anim %7 -> %8", _kaynak, groupId (group _u), name _u, round (_p0 distance2D _hedef), stance _u, currentCommand _u, animationState _u, _kosAnim];
 };
+private _hiz = if ((_kaynak select [0, 5]) isEqualTo "bomba") then {5.5} else { if (_ret) then {4.5} else {4} };   // m/sn (bombaci 5.5, retreat 4.5, siper 4)
 [{
     params ["_args", "_h"];
-    _args params ["_a", "_hd", "_tok", "_t0", "_kosAnim", "_ky", "_p0", "_ret", "_sureMax"];
+    _args params ["_a", "_hd", "_tok", "_t0", "_kosAnim", "_ky", "_p0", "_ret", "_sureMax", "_hz"];
     private _bitir = {
         params ["_neden"];
         [_h] call CBA_fnc_removePerFrameHandler;
@@ -60,12 +61,30 @@ if (["kosuAdim", 20, 30] call FUNC(logIzin)) then {
     if ((time - _t0) > _sureMax) exitWith { ["sure doldu"] call _bitir; };
     private _pa = getPosATL _a;
     if ((_pa distance2D _hd) < 2.5) exitWith { ["hedefe vardi"] call _bitir; };
-    _a setDir (_pa getDir _hd);
+    // v8.831 ENGEL YONLENDIRME (kullanici: 'bir de engellere takiliyorlar'; script kosu duz hatta hiz verir, yolTara 1.5 m'den ince nesneleri (agac govdesi, direk) engel saymaz): onde 1.6 m (bel yuksekligi, GEOM) engel varsa +-40 / +-80 derece temiz yon aranir, yoksa kosu biter
+    private _hedefYon = _pa getDir _hd;
+    private _temiz = {
+        params ["_dy"];
+        private _p1 = (getPosASL _a) vectorAdd [0, 0, 0.7];
+        private _p2 = _p1 vectorAdd [(sin _dy) * 1.6, (cos _dy) * 1.6, 0];
+        ((lineIntersectsSurfaces [_p1, _p2, _a, objNull, true, 2, "GEOM", "NONE"]) findIf { private _o = _x select 2; (!isNull _o) && {!(_o isKindOf "CAManBase")} && {!(_o isKindOf "Animal")} }) < 0
+    };
+    private _yonSec = _hedefYon;
+    private _engelBitti = false;
+    if !([_hedefYon] call _temiz) then {
+        private _on = _a getVariable [QGVAR(kosuAdimSap), 0];
+        private _aday = [_on, 40, -40, 80, -80, 120, -120] arrayIntersect [_on, 40, -40, 80, -80, 120, -120];
+        private _bulundu = false;
+        { if (!_bulundu && {[_hedefYon + _x] call _temiz}) then { _yonSec = _hedefYon + _x; _a setVariable [QGVAR(kosuAdimSap), _x]; _bulundu = true; }; } forEach _aday;
+        if (!_bulundu) then { _engelBitti = true; };
+    } else { _a setVariable [QGVAR(kosuAdimSap), 0]; };
+    if (_engelBitti) exitWith { ["engel (temiz yon yok)"] call _bitir; };
+    _a setDir _yonSec;
     if ((toLower (animationState _a)) find "mrun" < 0) then {
         // v8.825 (RPT 62e4a6ff: 'sure doldu' 3 kayitta 8 sn'de yalniz 2-7 m: playMoveNow AI / gecis animasyonu (turn) tarafindan eziliyor): 1.2 sn sonra hala yurumuyorsa switchMove (gecis atlanir), 0.5 sn'de bir
         if ((time - _t0) > 1.2 && {(speed _a) < 1.5} && {time > ((_a getVariable [QGVAR(kosuSwT), 0]) + 0.5)}) then { _a setVariable [QGVAR(kosuSwT), time]; _a switchMove _kosAnim; } else { _a playMoveNow _kosAnim; };
     };
     private _v = velocityModelSpace _a;
-    _a setVelocityModelSpace [0, [4, 4.5] select _ret, _v select 2];
-}, 0, [_u, _hedef, _tok, time, _kosAnim, _kaynak, _p0, _ret, (((_p0 distance2D _hedef) / 3) + 4) max ([8, 12] select _ret) min 18]] call CBA_fnc_addPerFrameHandler;
+    _a setVelocityModelSpace [0, _hz, _v select 2];
+}, 0, [_u, _hedef, _tok, time, _kosAnim, _kaynak, _p0, _ret, (((_p0 distance2D _hedef) / 3) + 4) max ([8, 12] select _ret) min 18, _hiz]] call CBA_fnc_addPerFrameHandler;
 true
