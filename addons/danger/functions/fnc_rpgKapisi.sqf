@@ -58,6 +58,15 @@ private _ahMuaf = !isNull _ah && {alive _ah} && {(_taraf getFriend (side group _
 private _neden = [_unit, _weapon, _yon, _imp, _arac || _ahMuaf || {[_unit, "apMi", _ammo] call FUNC(rpgMuhimmat)}, true] call FUNC(rpgGuvenli);   // AP (piyadeye uygun) roket rezervden muaf
 private _kaynak = ["motor", "karar"] select ((time - (_unit getVariable [QGVAR(rpgKararT), -999])) < 10);
 private _dI = _unit distance _imp;
+// v8.829 MENZIL DISI MOTOR ATISI (RPT 5ed58e66: MRAWS atislari 'kaynak: motor', dusus 880-913 m, 'dusus hedefi: hedef yok / nokta' (21 roket, isabet 2 = %10); [RPG-MENZIL] MRAWS kullanilabilir menzil 550 m, max 700 m): dususun 15 m'sinde dusman YOKSA ve dusus mesafesi
+//   silahin kullanilabilir menzilinin (fnc_rpgSistem [RPG-MENZIL] tablosu) ya da rpgMaxM'in kucugunun 1.15 kati ustundeyse atis IPTAL (mermi 12 sn sonra geri verilir; CBA rpgMotorMenzil). Arac / zirh / piyade hedefine dusen atis dokunulmaz.
+if (_neden isEqualTo "" && {_kaynak isEqualTo "motor"} && {_yakin isEqualTo []} && {missionNamespace getVariable ["lambs_danger_rpgMotorMenzil", true]}) then {
+    private _kapM = ((missionNamespace getVariable ["lambs_danger_rpgMenzilTab", createHashMap]) getOrDefault [_weapon, 0]);
+    private _maxG = [side group _unit, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
+    if (_maxG < 0) then { _maxG = missionNamespace getVariable ["lambs_danger_rpgMaxM", 250]; };
+    private _lim = if (_kapM > 0) then { _kapM min _maxG } else { _maxG };
+    if (_dI > (_lim * 1.15)) then { _neden = "menzil disi"; };
+};
 
 if (_neden isNotEqualTo "") then {
     deleteVehicle _proj;
