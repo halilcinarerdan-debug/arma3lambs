@@ -89,7 +89,9 @@ if (_mod isEqualTo "yukle") exitWith {
                             _u removeWeapon _ls;
                             _u addMagazine _en;
                             _u addWeapon _ls;
-                            if (((secondaryWeaponMagazine _u) param [0, ""]) isEqualTo _en) then { _eklenen = _eklenen + 1; _degis = _degis + 1; ["muhimmat_yuklu_degis"] call _art; } else {
+                            // v8.832 (RPT 05e62626: 6 RPG-7'li 'yer yok 3', yuklu degisim hic basarili olmadi: isEqualTo BUYUK / kucuk harf duyarli; motor sarjor adini farkli harfle dondurebilir) -> toLower karsilastirma
+                            private _yeniM = (secondaryWeaponMagazine _u) param [0, ""];
+                            if ((toLower _yeniM) isEqualTo (toLower _en)) then { _eklenen = _eklenen + 1; _degis = _degis + 1; ["muhimmat_yuklu_degis"] call _art; diag_log format ["[RPG-MERMI-DEGIS] %1 | %2 | %3 | yuklu AT %4 -> AP %5 (yer yok / yedek AT yok: silah cikarilip AP ile yeniden takildi)", groupId group _u, name _u, _ls, _yukluM, _yeniM]; } else {
                                 _u removeWeapon _ls;
                                 _u addMagazine [_yukluM, _yukluA];
                                 _u addWeapon _ls;

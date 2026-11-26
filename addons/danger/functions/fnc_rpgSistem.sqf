@@ -200,6 +200,11 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             // v8.825 (RPT 62e4a6ff: 16 emrin 16'si ATILMADI; [RPG-ZAMAN] komut MOVE, hiz 0 = emir bekleyen / yurumeyen asker emri uygulamiyor): MOVE komutu bekleyen asker once doStop ile serbest birakilir
             private _stopVerildi = false;
             if ((currentCommand _u) isEqualTo "MOVE" && {_u isNotEqualTo (leader _g)}) then { doStop _u; _stopVerildi = true; };
+            // v8.832 (RPT 05e62626: MRAWS atici 6 emirde de ATMADI; 3'unde roketatar ELDE ama gorunurluk 0.00 / aimedAtTarget 0.00, durus CROUCH: v8.830 sert comel duruşu gorus acisini kapatiyor, motor gorunmeyen hedefe atmaz): atici emir suresince AYAKTA (sert UP, 9 sn) -> gorus; duruş disiplini 12 sn bekler, sonra AUTO
+            _u setVariable [QGVAR(siperDurusTut), nil];
+            _u setVariable [QGVAR(durusBekT), time + 12];
+            _u setUnitPos "UP";
+            [{ params ["_uu"]; if (alive _uu && {!((group _uu) getVariable [QGVAR(isRetreating), false])}) then { _uu setUnitPos "AUTO"; }; }, [_u], 9] call CBA_fnc_waitAndExecute;
             _u doTarget _en;
             // v8.762 KOSMASIN, GORDUGU GIBI CAKSIN (kullanici): hareket eden roketatarli ates emrinde DURDURULUR (doStop); 5 sn sonra gruba doner (CBA rpgDurAt)
             if ((missionNamespace getVariable ["lambs_danger_rpgDurAt", true]) && {_stopVerildi || {(speed _u) > 0.8}} && {_u isNotEqualTo (leader _g)}) then {
