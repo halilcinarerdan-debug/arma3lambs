@@ -42,7 +42,7 @@ if (isNil "lambs_danger_yolOzetT") then { lambs_danger_yolOzetT = time + 60; };
 if (time > lambs_danger_yolOzetT) then {
     lambs_danger_yolOzetT = time + 60;
     private _o = _say getOrDefault ["dolasma_n", 0];
-    diag_log format ["[YOL-TARA-OZET] 60 sn: cagri=%1 duz=%2 dolasma=%3 (ort oran %4) kapali=%5 [su=%6 dik_yamac=%7 dolasma_yok=%8 dolasma_asildi=%9]", _say getOrDefault ["cagri", 0], _say getOrDefault ["duz", 0], _o, if (_o > 0) then { ((_say getOrDefault ["dolasma_top", 0]) / _o) toFixed 2 } else { "-" }, _say getOrDefault ["kapali", 0], _say getOrDefault ["su", 0], _say getOrDefault ["dik_yamac", 0], _say getOrDefault ["dolasma_yok", 0], _say getOrDefault ["dolasma_asildi", 0]];
+    diag_log format ["[YOL-TARA-OZET] 60 sn: cagri=%1 duz=%2 dolasma=%3 (ort oran %4) kapali=%5 [su=%6 dik_yamac=%7 dolasma_yok=%8 dolasma_asildi=%9 bina_kose=%10]", _say getOrDefault ["cagri", 0], _say getOrDefault ["duz", 0], _o, if (_o > 0) then { ((_say getOrDefault ["dolasma_top", 0]) / _o) toFixed 2 } else { "-" }, _say getOrDefault ["kapali", 0], _say getOrDefault ["su", 0], _say getOrDefault ["dik_yamac", 0], _say getOrDefault ["dolasma_yok", 0], _say getOrDefault ["dolasma_asildi", 0], _say getOrDefault ["bina_kose", 0]];
     _say = createHashMap;
     missionNamespace setVariable ["lambs_danger_yolSay", _say];
 };
@@ -121,6 +121,38 @@ private _en = 1e9;
         };
     } forEach [1, -1];
 } forEach [0.2, 0.35, 0.55, 0.8, 1.2];   // v8.807: 3 -> 5 kord yanal orani (RPT d03615e7: 32 reddin 31'i 'dolasma kordu yok', koy evleri / duvar; dar gecit / avlu icin daha fazla aday)
+// v8.828 BINA KOSESI DOLASMASI (RPT a4a03ba1: yolTara ERISILEMEZ 390 / 1328 (%29), 'dolasma kordu yok' 388; ilk engel land_ffaa_casa_af_3 = EV; coverOlcum: gercek siper (<= 4 m nesne) %0, bina arkasi (<= 8 m) 0 / 119 -> evin arkasi gibi EN IYI siper adaylari eleniyordu): dar iki bacakli kord (orta noktadan yana)
+//   evi dolasamiyor (cit / duvar / komsu ev kordu keser). Engel BINA / ev ise sinir kutusunun 4 koseli (2.5 m dis pay) uzerinden a -> kose -> b ve (komsu iki kose) a -> k1 -> k2 -> b yollari denenir; bacaklar o binayi yok sayar (kosede 2.5 m bosluk); en kisa acik yol oran sinirinda kabul edilir.
+if (_en >= 1e9 && {_blk isKindOf "House" || {_blk isKindOf "Building"}}) then {
+    private _bb = boundingBoxReal _blk;
+    private _mn = _bb select 0;
+    private _mx = _bb select 1;
+    private _kos = [[(_mn select 0) - 2.5, (_mn select 1) - 2.5], [(_mx select 0) + 2.5, (_mn select 1) - 2.5], [(_mx select 0) + 2.5, (_mx select 1) + 2.5], [(_mn select 0) - 2.5, (_mx select 1) + 2.5]] apply {
+        private _w = _blk modelToWorld [_x select 0, _x select 1, 0];
+        [_w select 0, _w select 1, getTerrainHeightASL [_w select 0, _w select 1]]
+    };
+    private _ignB = _blk;
+    private _acik2 = {
+        params ["_p", "_q"];
+        private _ok = true;
+        { private _yy = _x; if ((lineIntersectsSurfaces [_p vectorAdd [0, 0, _yy], _q vectorAdd [0, 0, _yy], _ign, _ignB, true, 3, "GEOM", "NONE"]) findIf { private _o = _x select 2; (!isNull _o) && {!(_o isKindOf "CAManBase")} && {!(_o isKindOf "Animal")} && {private _b2 = boundingBoxReal _o; (((_b2 select 1) select 0) - ((_b2 select 0) select 0)) >= 1.5 || {(((_b2 select 1) select 1) - ((_b2 select 0) select 1)) >= 1.5}} } >= 0) then { _ok = false; }; } forEach [0.6, 1.0];
+        _ok
+    };
+    private _kor = count _kos;
+    for "_i" from 0 to (_kor - 1) do {
+        private _k1 = _kos select _i;
+        if (!(surfaceIsWater _k1) && {[_a, _k1] call _acik2} && {[_k1, _b1] call _acik2}) then {
+            private _u = (_a distance2D _k1) + (_k1 distance2D _b);
+            if (_u < _en) then { _en = _u; };
+        };
+        private _k2 = _kos select ((_i + 1) % _kor);
+        if (!(surfaceIsWater _k1) && {!(surfaceIsWater _k2)} && {[_a, _k1] call _acik2} && {[_k1, _k2] call _acik2} && {[_k2, _b1] call _acik2}) then {
+            private _u2 = (_a distance2D _k1) + (_k1 distance2D _k2) + (_k2 distance2D _b);
+            if (_u2 < _en) then { _en = _u2; };
+        };
+    };
+    if (_en < 1e9) then { _say set ["bina_kose", (_say getOrDefault ["bina_kose", 0]) + 1]; };
+};
 if (_en >= 1e9) exitWith {
     _say set ["dolasma_yok", (_say getOrDefault ["dolasma_yok", 0]) + 1];
     [false, 99, "dolasma kordu yok", _ad] call _log

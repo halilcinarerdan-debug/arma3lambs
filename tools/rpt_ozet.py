@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.827"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.828"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -902,6 +902,10 @@ def kabul(path):
     dh_l = [l for l in L if "[DOST-HATTI]" in l]
     dh_oz = len(dh_l)
     ekle("GERCEKCILIK: DOST ATES HATTI (bastirma)", "BILGI", "engellenen bastirma atesi (log: ilk 20 + 30 sn'de bir) %d | ilk: %s | KONTROL: oyunda dost hattina bastirma atesi gorulmemeli; [DOST-HATTI] satiri varsa onleme calisiyor" % (dh_oz, dh_l[0].split("[DOST-HATTI]",1)[1].strip()[:170] if dh_l else "-"))
+    rz_l = [l for l in L if "[RPG-ZORLA]" in l]
+    if rz_l:
+        rz_ok = len([1 for l in L if "[RPG-ZORLA]" in l and "atildi true" in l])
+        ekle("RPG: ZORLA ATIS (v8.828)", "BILGI", "deneme satiri %d (ilk 20 + 30 sn'de bir), atildi true %d | ilk: %s | KONTROL: fireAtTarget / forceWeaponFire sonucu ve 'elde' (roketatar mi tufek mi) hangisi calisiyor" % (len(rz_l), rz_ok, rz_l[0].split("[RPG-ZORLA]",1)[1].strip()[:200]))
     rt_l = [l for l in L if "[RPG-ATILMADI-TANI]" in l]
     if rt_l:
         ekle("RPG: ATILMADI TANISI", "BILGI", "tani satiri %d | ilk: %s" % (len(rt_l), rt_l[0].split("[RPG-ATILMADI-TANI]",1)[1].strip()[:420]))

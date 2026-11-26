@@ -82,7 +82,7 @@ if (_yeni isEqualTo _aktif) then { _aday = _aktif; _ilkT = time; } else {
     if (_yeni isNotEqualTo _aday) then { _aday = _yeni; _ilkT = time; };
     if ((time - _ilkT) >= 60 || {_ilkTarama}) then {
         if (["mekanDoktrin", 30, 30] call FUNC(logIzin)) then {
-            diag_log format ["[MEKAN-DOKTRIN] %1 | %2 -> %3 | oy %4 | nokta %5 | dusman %6 | lider hedefe %7 m", groupId _g, _aktif, _yeni, (_oy toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }, count _noktalar, if (isNull _en) then {"-"} else {str (round (_l distance2D _en))}, if (_ed isEqualType []) then {str (round (_l distance2D _ed))} else {"-"}];
+            diag_log format ["[MEKAN-DOKTRIN] %1 | %2 -> %3 | oy %4 | nokta %5 | dusman %6 | lider hedefe %7 m", format ["%1 %2", str (side _g), groupId _g], _aktif, _yeni, (_oy toArray false) apply { format ["%1=%2", _x select 0, _x select 1] }, count _noktalar, if (isNull _en) then {"-"} else {str (round (_l distance2D _en))}, if (_ed isEqualType []) then {str (round (_l distance2D _ed))} else {"-"}];
         };
         _aktif = _yeni; _aday = _yeni;
         private _gs = missionNamespace getVariable ["lambs_danger_mekanGecis", 0];

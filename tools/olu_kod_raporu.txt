@@ -1,0 +1,128 @@
+== 1a) OKUNAN ama HIC YAZILMAYAN bayrak (okuma hep varsayilani doner = OLU OKUMA; 13) ==
+  agacMuaf  (okuma 1)
+  ffvDuzelt  (okuma 1)
+  hendekNokta  (okuma 1)
+  hendekYerlesT  (okuma 1)
+  kinSurus  (okuma 1)
+  mevziIlk  (okuma 5)
+  mevziStatikGorev  (okuma 2)
+  reconArac  (okuma 3)
+  roleStationOff  (okuma 1)
+  suMuaf  (okuma 2)
+  tasimaBekle  (okuma 2)
+  tasimaMesgul  (okuma 9)
+  yolcuBirak  (okuma 3)
+== 1b) YAZILAN ama HIC OKUNMAYAN bayrak (19) ==
+  atesPolitikasi  (yazma 3)
+  cmdFactors  (yazma 1)
+  cmdLastThreat  (yazma 1)
+  dronYon  (yazma 1)
+  gafilGozlemBas  (yazma 2)
+  gorulduT  (yazma 1)
+  halefSkor  (yazma 1)
+  ihaHazir  (yazma 3)
+  ihaOperator  (yazma 1)
+  mermiSayi  (yazma 1)
+  motorSesMesafe  (yazma 1)
+  motorSesTip  (yazma 1)
+  motorSesYon  (yazma 1)
+  murMesgulT  (yazma 1)
+  olaySon  (yazma 1)
+  pusuGuvenlik  (yazma 2)
+  rotaAci  (yazma 1)
+  toparlanBitis  (yazma 1)
+  toparlanT  (yazma 1)
+== 2) PREP'li ama HIC CAGRILMAYAN fonksiyon (14) ==
+  brain
+  brainAdjust
+  brainAssess
+  brainEngage
+  brainForced
+  brainHide
+  brainReact
+  brainVehicle
+  fsmAllowAnimation
+  isForced
+  isForcedExit
+  isLeader
+  tacticsCQB
+  tacticsProfiles
+== 3a) KAYITLI ama KODDA HIC OKUNMAYAN CBA ayari (6) ==
+  lambs_danger_esik_ISARET
+  lambs_danger_esik_KESIN
+  lambs_danger_esik_SEZILDI
+  lambs_danger_esik_SUPHE
+  lambs_danger_esik_TAM
+  lambs_danger_esik_TESPIT
+== 3b) OKUNAN ama KAYITSIZ (CBA'da yok, baska yerde de atanmiyor) 'lambs_danger_*' (54; yazim hatasi / olu ayar adayi) ==
+  lambs_danger_aaOverride (okuma 1)
+  lambs_danger_agirYasak (okuma 1)
+  lambs_danger_aktifCiv (okuma 1)
+  lambs_danger_aktifEast (okuma 1)
+  lambs_danger_aktifInd (okuma 1)
+  lambs_danger_aktifWest (okuma 1)
+  lambs_danger_cephaneOyuncuEsik (okuma 1)
+  lambs_danger_dangerRadio (okuma 1)
+  lambs_danger_doktrinEast (okuma 1)
+  lambs_danger_doktrinInd (okuma 1)
+  lambs_danger_doktrinWest (okuma 1)
+  lambs_danger_dronAtesM (okuma 1)
+  lambs_danger_dronAviAktif (okuma 1)
+  lambs_danger_dronAviArac (okuma 1)
+  lambs_danger_dronIstiksaf (okuma 1)
+  lambs_danger_dronSesM (okuma 1)
+  lambs_danger_elBombasiAktif (okuma 1)
+  lambs_danger_gozetleme (okuma 1)
+  lambs_danger_havaVolSn (okuma 1)
+  lambs_danger_hqId (okuma 1)
+  lambs_danger_ihaDalisHiz (okuma 1)
+  lambs_danger_ihaGorusMenzil (okuma 2)
+  lambs_danger_ihaKilitSure (okuma 1)
+  lambs_danger_ihaSeyirHiz (okuma 1)
+  lambs_danger_ihaTetik (okuma 1)
+  lambs_danger_ihaTip (okuma 1)
+  lambs_danger_ihaTipOverride (okuma 1)
+  lambs_danger_isSniper (okuma 1)
+  lambs_danger_konusmaOlcek (okuma 1)
+  lambs_danger_medevacRezerv (okuma 1)
+  lambs_danger_olaySay_Casualty (okuma 2)
+  lambs_danger_ortamSkillOlcek (okuma 1)
+  lambs_danger_paletJetonlari (okuma 1)
+  lambs_danger_panikSans (okuma 1)
+  lambs_danger_patlayiciAktif (okuma 2)
+  lambs_danger_planCCPlar (okuma 1)
+  lambs_danger_planZirh (okuma 7)
+  lambs_danger_planZirhHide (okuma 1)
+  lambs_danger_planZirhKilit (okuma 1)
+  lambs_danger_planlar (okuma 7)
+  lambs_danger_pusuCagriAktif (okuma 1)
+  lambs_danger_pusuKanatAktif (okuma 1)
+  lambs_danger_pusuTepkiAktif (okuma 1)
+  lambs_danger_sunucuDevirBekleArac (okuma 1)
+  lambs_danger_sunucuDevirBekleS (okuma 1)
+  lambs_danger_tcccSurukleAc (okuma 1)
+  lambs_danger_teslimBirey (okuma 1)
+  lambs_danger_tohum (okuma 1)
+  lambs_danger_topcuAralikS (okuma 1)
+  lambs_danger_topcuPartiN (okuma 1)
+  lambs_danger_uglSans (okuma 1)
+  lambs_danger_yaprakEsikAyakta (okuma 1)
+  lambs_danger_yaprakEsikYatik (okuma 1)
+  lambs_danger_zihinHiz (okuma 1)
+== 4) KARNEDE ARANAN ama KODDA HIC URETILMEYEN log etiketi (13) ==
+  [A-Z-]
+  [A-Z0-9-]
+  [HENDEK-DURUM]
+  [KAYIP-DEGERLENDIRME]
+  [OTO-GARNIZON]
+  [PLAN-ARAC]
+  [PLAN-GRUP-BOS]
+  [PLAN-ORAN]
+  [PLAN-TUT]
+  [PLAN-ZINCIR]
+  [TANK-DUELLO]
+  [ZIRH-GECIT]
+  [ZIRH-SICRAMA]
+== 5) commanderAssess kararlari: ['ASSAULT', 'AT_ENGAGE', 'BOUNDING', 'DELAY', 'EVADE_ARMOR', 'FLANK', 'HOLD', 'PEEL', 'SUPPRESS_ASSAULT', 'WITHDRAW'] ==
+  fnc_tactics.sqf case dallari: ['ASSAULT', 'AT_ENGAGE', 'DELAY', 'EVADE_ARMOR', 'FLANK', 'HOLD', 'PEEL', 'SUPPRESS_ASSAULT', 'WITHDRAW'] | karar olup case'i OLMAYAN (default'a duser): ['BOUNDING']
+  fnc_tacticsBounding.sqf case dallari: ['AT_ENGAGE', 'DELAY', 'EVADE_ARMOR', 'HOLD', 'PEEL'] | karar olup case'i OLMAYAN (default'a duser): ['ASSAULT', 'BOUNDING', 'FLANK', 'SUPPRESS_ASSAULT', 'WITHDRAW']

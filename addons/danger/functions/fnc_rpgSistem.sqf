@@ -215,10 +215,31 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             private _atFn = { params ["_uu", "_tt"]; if (alive _uu && {alive _tt} && {isNull objectParent _uu}) then { _uu doFire _tt; }; };
             if (_gec <= 0) then { [_u, _en] call _atFn; } else { [_atFn, [_u, _en], _gec] call CBA_fnc_waitAndExecute; };
             if (missionNamespace getVariable ["lambs_danger_rpgZorlaAtis", true]) then {
-                [{
-                    params ["_uu", "_tt", "_ll", "_aa0"];
-                    if (alive _uu && {alive _tt} && {isNull objectParent _uu} && {(_uu ammo _ll) >= _aa0} && {(currentWeapon _uu) isEqualTo _ll}) then { _uu fireAtTarget [_tt, currentMuzzle _uu]; };
-                }, [_u, _en, _ls, _a0], _gec + 1.5] call CBA_fnc_waitAndExecute;
+                // v8.828 ZORLA ATIS (RPT a4a03ba1: [RPG-ATILMADI-TANI] 14 / 14 weaponState = TUFEK (Mk18), roketatar 7 sn sonra ELDE DEGIL: motor piyade hedefine kendi silah secimiyle tufege donuyor; eski zorla atis yalniz roketatar elde ise fireAtTarget [hedef, currentMuzzle] veriyordu = hic calismiyordu):
+                //   gecikmeden 1.2 sn sonra en cok 6 kez (0.7 sn arayla): roketatar secilir, hedefe bakilir, fireAtTarget [hedef, ROKETATAR muzzle'i] (secili silahtan bagimsiz) ; basarisizsa forceWeaponFire [muzzle, mod]. Her deneme [RPG-ZORLA] (ilk 20 / sonra 30 sn'de bir).
+                [_u, _en, _ls, _a0, _gec] spawn {
+                    params ["_uu", "_tt", "_ll", "_aa0", "_gc"];
+                    sleep (_gc + 1.2);
+                    private _mz = ((getArray (configFile >> "CfgWeapons" >> _ll >> "muzzles")) param [0, "this"]);
+                    if (_mz isEqualTo "this") then { _mz = _ll; };
+                    private _mod = (getArray (configFile >> "CfgWeapons" >> _ll >> "modes")) param [0, "Single"];
+                    for "_i" from 1 to 6 do {
+                        if (!alive _uu || {!alive _tt} || {!isNull objectParent _uu} || {(_uu ammo _ll) < _aa0}) exitWith {};
+                        if ((currentWeapon _uu) isNotEqualTo _ll) then { _uu selectWeapon _ll; sleep 0.25; };
+                        _uu doWatch _tt;
+                        _uu doTarget _tt;
+                        private _r1 = _uu fireAtTarget [_tt, _mz];
+                        private _r2 = false;
+                        if (!_r1) then { _uu forceWeaponFire [_mz, _mod]; _r2 = true; };
+                        sleep 0.2;
+                        private _ad = (_uu ammo _ll) < _aa0;
+                        if (["rpgZorla", 20, 30] call FUNC(logIzin)) then {
+                            diag_log format ["[RPG-ZORLA] %1 | %2 | deneme %3 | muzzle %4 mod %5 | fireAtTarget %6 | forceWeaponFire denendi %7 | elde %8 | mermi %9 -> %10 | atildi %11 | hedef %12 m", groupId group _uu, name _uu, _i, _mz, _mod, _r1, _r2, currentWeapon _uu, _aa0, _uu ammo _ll, _ad, round (_uu distance _tt)];
+                        };
+                        if (_ad) exitWith {};
+                        sleep 0.5;
+                    };
+                };
             };
             // v8.763 ZAMAN TESHISI (kullanici: 'eleman mal gibi bekliyo'): emirden silah secimine / atisa kadar gecen sure; 0.25 sn'de bir 12 sn izlenir -> [RPG-ZAMAN]
             [_u, _ls, time] spawn {
