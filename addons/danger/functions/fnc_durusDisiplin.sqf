@@ -39,6 +39,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
         private _sn = ((missionNamespace getVariable ["lambs_danger_durusDisiplinSn", 2.5]) max 1) min 10;
         private _yatM = ((missionNamespace getVariable ["lambs_danger_durusYatMesafe", 100]) max 40) min 400;
         private _esik = ["SUPHE"] call FUNC(bilgiEsik);
+        private _katiDurus = missionNamespace getVariable ["lambs_danger_durusKati", true];
         private _n = 0;
         {
             private _u = _x;
@@ -49,14 +50,19 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
             if ((speed _u) >= 1.5) then {
                 if (!isNil {_u getVariable QGVAR(durusDusT)}) then {
                     _u setUnitPosWeak "AUTO";
+                    if (_katiDurus) then { _u setUnitPos "AUTO"; };
                     _u setVariable [QGVAR(durusDusT), nil];
                     _say set ["serbest", (_say get "serbest") + 1];
                 };
+                // v8.830: siper durusu tutma (fnc_acikSiper) yurumeye baslayinca birakilir
+                if (!isNil {_u getVariable QGVAR(siperDurusTut)}) then { _u setUnitPos "AUTO"; _u setVariable [QGVAR(siperDurusTut), nil]; };
                 if (!isNil {_u getVariable QGVAR(durgunT)}) then { _u setVariable [QGVAR(durgunT), nil]; };
                 continue
             };
 
             private _g = group _u;
+            // v8.830: siper durusu tutma temas bittikten 120 sn sonra birakilir (yerde sonsuza kadar kalmasin)
+            if (!isNil {_u getVariable QGVAR(siperDurusTut)} && {((_g getVariable [QGVAR(contact), 0]) < (time - 120)) || {(time - ((_u getVariable [QGVAR(siperDurusTut), [0, time]]) param [1, time])) > 240}}) then { _u setUnitPos "AUTO"; _u setVariable [QGVAR(siperDurusTut), nil]; };
             if (
                 ((_g getVariable [QGVAR(contact), 0]) < (time - 45)) || {(insideBuilding _u) > 0.5}
                 || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u} || {_u getVariable [QGVAR(teslim), false]}
@@ -145,7 +151,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
                 continue
             };
 
-            _u setUnitPosWeak _hedef;
+            if (_katiDurus) then { _u setUnitPos _hedef; } else { _u setUnitPosWeak _hedef; };   // v8.830: CBA durusKati: sert durus (AI ayaga kaldiramaz; hat kapaliysa zaten ayakta birakiliyor)
             _u setVariable [QGVAR(durusDusT), time];
             _u setVariable [QGVAR(durusBekT), time + 4];
             private _sk = ["comel", "yat"] select (_hedef isEqualTo "DOWN");
