@@ -101,6 +101,7 @@ if ([_u, _e] call FUNC(atesHatiAcik) && {[_u, _e, "siperZorla"] call FUNC(baskiK
 private _atVar = _u checkAIFeature "AUTOTARGET";
 private _tVar = _u checkAIFeature "TARGET";
 private _m0 = _u ammo (currentMuzzle _u);
+if (_ateseKos && {([_u, _e] call FUNC(dostHatti))}) then { _ateseKos = false; };   // v8.825: hatta dost varsa kosarken bastirma yok
 if (_ateseKos) then {
     _u doSuppressiveFire _e;
     // v8.517: RPT 13:36 [KOSU-ATES] kosarken atilan mermi: 0 -> doSuppressiveFire hareket halinde yutuluyor; kosu boyunca 0.45 sn'de bir forceWeaponFire (atis hatti acik, asker gercekten kosuyorsa) kisa seri

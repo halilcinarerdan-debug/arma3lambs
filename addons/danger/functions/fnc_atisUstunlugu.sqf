@@ -140,6 +140,7 @@ diag_log "[ATIS-USTUNLUK] atis ustunlugu (surekli bastirma) watchdog baslatildi 
                     };
                 };
 
+                if ([_u, _aim] call FUNC(dostHatti)) then { continue };   // v8.825: hatta / hedefte dost varsa bastirma yok
                 _u setVariable [QGVAR(atisT), time];
                 _u doSuppressiveFire _aim;
                 _butce = _butce - 1;

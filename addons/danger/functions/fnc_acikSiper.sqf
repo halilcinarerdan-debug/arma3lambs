@@ -480,7 +480,7 @@ private _nesneGit = {
                         if (_d < (_enAz - 0.5)) then { _enAz = _d; _ilerT = time; _son = (_son max (time + 8)) min (_t00 + 75); };   // v8.824: ilerleme suruyorsa bitis suresi uzar (en cok 75 sn; RPT 9eb0728d: oturtulamadi 10'un 7'si hala yuruyor, kalan 16-33 m, hiz 5-17 km/sa = 30 sn pencere yetmedi)
                         if ((time - _ilerT) > ([3, 3.5, 4.5] select ((["STAND", "CROUCH", "PRONE"] find (stance _a)) max 0)) && {(speed _a) < 1.5} && {!((_a getVariable [QGVAR(forceMove), false]) || {(group _a) getVariable [QGVAR(isRetreating), false]} || {(group _a) getVariable [QGVAR(isEvading), false]} || {(group _a) getVariable [QGVAR(isBreakingContact), false]})}) then {
                             // v8.824: script kosu uygunsa (<= 30 m, duz hat acik) merdiven 2 adimdan sonra script kosuya gecer (RPT 9eb0728d: script kosu 5 / 6 vardi; merdiven adim 2 %55, adim 3 %43, adim 4 %44)
-                            private _kosuUygun = !_kosuDenendi && {_d <= 30} && {missionNamespace getVariable ["lambs_danger_hareketKurtarKos", true]} && {(([_a, _h] call FUNC(yolTara)) select 1) <= 1.05};
+                            private _kosuUygun = !_kosuDenendi && {_d <= 50} && {missionNamespace getVariable ["lambs_danger_hareketKurtarKos", true]} && {(([_a, _h] call FUNC(yolTara)) select 1) <= 1.05};
                             if (_reemir < ([4, 2] select _kosuUygun)) then {   // v8.818: 2 -> 4 yeniden emir (hareket kurtarma merdiveni adim 1-4; pencere duruşa gore 3 / 3.5 / 4.5 sn)
                                 _reemir = _reemir + 1;
                                 _ilerT = time;

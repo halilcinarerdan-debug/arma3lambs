@@ -4,7 +4,7 @@
  * SCRIPT KOSU (SON CARE; v8.823; kullanici: 'fixle'; RPT 01a3fcd2 (v8.822, 14 dk): [SIPER-VARIS] ULASILAMADI 10 (hareket kurtarma merdiveninin 4 adimi da sonuc vermedi; hepsi yol acik (yolTara 1.00), komut MOVE, baski ~0, siper noktasina 6-20 m kala, biri 55 m);
  *   merdiven adim basina yurudu %50-67. KOK NEDEN hala bilinmiyor (motor emri aliyor ama yurumuyor).
  * Merdiven (fnc_hareketKurtar) tukendikten sonra ve yalniz yakin (<= 30 m), DUZ ve acik (yolTara oran <= 1.05) hedef icin: asker AI'in yurumesi BEKLENMEDEN kosu animasyonuyla (AmovPercMrunSras...Df / AmovPknlMrunSras...Df; tufek / tabanca) hedefe BAKTIRILIP (setDir) ve hizi
- *   birim basina her karede setVelocityModelSpace [0, 4, z] ile surulur (en cok 8 sn; hedefe < 2.5 m, token degisimi, retreat / kosucu, olum / baygin -> durur). Gorunur davranis normal kosu animasyonudur; yalniz yol / AI beyni atlanir (yolTara duz hatti dogruladi).
+ *   birim basina her karede setVelocityModelSpace [0, 4, z] ile surulur (en cok 8 sn, retreat 12 sn; hedefe < 2.5 m, token degisimi, retreat / kosucu, olum / baygin -> durur). Gorunur davranis normal kosu animasyonudur; yalniz yol / AI beyni atlanir (yolTara duz hatti dogruladi).
  *   Bittiginde hiz sifirlanir, asker kendi AI'ina doner (doMove hedefe yeniden). Yalniz yerel AI, arac disi, oyuncusuz, tufek / tabanca elde (diger silahta atlanir).
  * Arguments: 0: Asker <OBJECT> | 1: Hedef (AGL) <ARRAY> | 2: Kaynak <STRING> (varis)
  * Return Value: Baslatildi mi <BOOL>
@@ -14,7 +14,8 @@
 params [["_u", objNull, [objNull]], ["_hedef", [], [[]]], ["_kaynak", "?", [""]]];
 if (isNull _u || {!alive _u} || {isPlayer _u} || {!local _u} || {!isNull objectParent _u} || {(count _hedef) < 2}) exitWith {false};
 if !(missionNamespace getVariable ["lambs_danger_hareketKurtarKos", true]) exitWith {false};
-if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(group _u) getVariable [QGVAR(isRetreating), false]} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getVariable ["ACE_isUnconscious", false]}) exitWith {false};
+private _ret = (_kaynak select [0, 7]) isEqualTo "retreat";   // v8.825: geri cekilme kosucusu icin de (retreat bacagi): forceMove / isRetreating engeli yok (cagiran retreat dali kendisi istiyor)
+if ((!_ret && {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(group _u) getVariable [QGVAR(isRetreating), false]}}) || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {_u getVariable ["ACE_isUnconscious", false]}) exitWith {false};
 private _an = toLower (animationState _u);
 private _w = ["wrfl", "wpst"] select { (_an find _x) >= 0 };
 if (_w isEqualTo []) then { _w = if ((currentWeapon _u) isEqualTo (handgunWeapon _u) && {(handgunWeapon _u) isNotEqualTo ""}) then { ["wpst"] } else { ["wrfl"] }; };
@@ -22,7 +23,7 @@ if ((currentWeapon _u) isNotEqualTo "" && {(currentWeapon _u) isNotEqualTo (prim
 private _kosAnim = format ["AmovP%1MrunSras%2Df", ["erc", "knl"] select ((stance _u) isEqualTo "CROUCH"), _w select 0];
 private _tok = time + (random 0.001);
 _u setVariable [QGVAR(kosuAdimTok), _tok];
-_u setVariable [QGVAR(taktikKilit), time + 10];
+_u setVariable [QGVAR(taktikKilit), time + ([10, 15] select _ret)];
 _u setUnitPosWeak (["UP", "MIDDLE"] select ((stance _u) isEqualTo "CROUCH"));
 _u enableAI "ANIM";
 _u enableAI "MOVE";
@@ -35,7 +36,7 @@ if (["kosuAdim", 20, 30] call FUNC(logIzin)) then {
 };
 [{
     params ["_args", "_h"];
-    _args params ["_a", "_hd", "_tok", "_t0", "_kosAnim", "_ky", "_p0"];
+    _args params ["_a", "_hd", "_tok", "_t0", "_kosAnim", "_ky", "_p0", "_ret", "_sureMax"];
     private _bitir = {
         params ["_neden"];
         [_h] call CBA_fnc_removePerFrameHandler;
@@ -55,13 +56,16 @@ if (["kosuAdim", 20, 30] call FUNC(logIzin)) then {
     if (isNull _a || {!alive _a}) exitWith { ["olu"] call _bitir; };
     if ((_a getVariable [QGVAR(kosuAdimTok), 0]) isNotEqualTo _tok) exitWith { ["yeni emir (token)"] call _bitir; };
     if (!((lifeState _a) in ["HEALTHY", "INJURED"]) || {_a getVariable ["ACE_isUnconscious", false]}) exitWith { ["yarali / baygin"] call _bitir; };
-    if ((group _a) getVariable [QGVAR(isRetreating), false] || {(_a getVariable [QGVAR(forceMove), false]) isEqualTo true}) exitWith { ["retreat / kosucu"] call _bitir; };
-    if ((time - _t0) > 8) exitWith { ["sure doldu"] call _bitir; };
+    if (!_ret && {(group _a) getVariable [QGVAR(isRetreating), false] || {(_a getVariable [QGVAR(forceMove), false]) isEqualTo true}}) exitWith { ["retreat / kosucu"] call _bitir; };
+    if ((time - _t0) > _sureMax) exitWith { ["sure doldu"] call _bitir; };
     private _pa = getPosATL _a;
     if ((_pa distance2D _hd) < 2.5) exitWith { ["hedefe vardi"] call _bitir; };
     _a setDir (_pa getDir _hd);
-    if ((toLower (animationState _a)) find "mrun" < 0) then { _a playMoveNow _kosAnim; };
+    if ((toLower (animationState _a)) find "mrun" < 0) then {
+        // v8.825 (RPT 62e4a6ff: 'sure doldu' 3 kayitta 8 sn'de yalniz 2-7 m: playMoveNow AI / gecis animasyonu (turn) tarafindan eziliyor): 1.2 sn sonra hala yurumuyorsa switchMove (gecis atlanir), 0.5 sn'de bir
+        if ((time - _t0) > 1.2 && {(speed _a) < 1.5} && {time > ((_a getVariable [QGVAR(kosuSwT), 0]) + 0.5)}) then { _a setVariable [QGVAR(kosuSwT), time]; _a switchMove _kosAnim; } else { _a playMoveNow _kosAnim; };
+    };
     private _v = velocityModelSpace _a;
-    _a setVelocityModelSpace [0, 4, _v select 2];
-}, 0, [_u, _hedef, _tok, time, _kosAnim, _kaynak, _p0]] call CBA_fnc_addPerFrameHandler;
+    _a setVelocityModelSpace [0, [4, 4.5] select _ret, _v select 2];
+}, 0, [_u, _hedef, _tok, time, _kosAnim, _kaynak, _p0, _ret, (((_p0 distance2D _hedef) / 3) + 4) max ([8, 12] select _ret) min 18]] call CBA_fnc_addPerFrameHandler;
 true

@@ -33,6 +33,8 @@ params [
 
 if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
+// v8.825 BOMBACI HARIC (kullanici: 'bomba retreat atmasin'; RPT 62e4a6ff: canli bomba (Alpha 1-4, tek kisilik izole grup) bayrak [BRK] = temas kesme + EYP-KOS DURAKLAMA): bombaci / bomba kosusundaki grup geri cekilme / temas kesme / son direnis akislarina GIRMEZ
+if (_group getVariable [QGVAR(disableGroupAI), false] || {(_group getVariable [QGVAR(gorev), ""]) isEqualTo "HARIC"} || {((units _group) findIf { (_x getVariable [QGVAR(bombaKosuyor), false]) isEqualTo true || {!isNil {_x getVariable QGVAR(eypBomba)}} }) >= 0}) exitWith {false};
 if ((units _group) isEqualTo []) exitWith {false};
 if (({alive _x} count (units _group)) < 1) exitWith {false};   // v8.10: bos (hepsi olu) grup retreat baslatmaz (RPT: toplam:0)
 // v8.678: etkin (saglikli / yarali, yaya) asker <= 1 ise GRUP geri cekilmesi anlamsiz (RPT 19e02c4e: 'ALPHA:1 BRAVO:0 toplam:1', emir 8 kez STOP'a dondu, 75 sn takildi); tek kalani fnc_kacis (TEK KALAN) yonetir.
@@ -603,7 +605,7 @@ if (EGVAR(main,debug_functions)) then {
                     private _b = _x select 0;
                     if (alive _b && {(lifeState _b) in ["HEALTHY", "INJURED"]} && {!(_b in _pinned)} && {(time - _t0) > 3} && {(speed _b) < 1} && {(currentCommand _b) isEqualTo "MOVE"} && {(_b distance2D (_x select 1)) > 12}
                         && {(time - (_b getVariable [QGVAR(hkT), -999])) > 3.5} && {(time - (_b getVariable [QGVAR(retEzmeT), -999])) > 2.5}) then {
-                        [_b, _x select 1, "retreat-idle", 4, 3] call FUNC(hareketKurtar);   // adim 3'ten basla (RPT a049faa1: adim 1 yurudu 7 / 19, adim 3 7 / 12, adim 4 9 / 13)
+                        [_b, _x select 1, "retreat-idle", 4, 4] call FUNC(hareketKurtar);   // v8.825: adim 4'ten basla; sonraki cagri script kosu (RPT 62e4a6ff: adim 3 %25, adim 4 %43)   // adim 3'ten basla (RPT a049faa1: adim 1 yurudu 7 / 19, adim 3 7 / 12, adim 4 9 / 13)
                     };
                 } forEach _varis;
             };

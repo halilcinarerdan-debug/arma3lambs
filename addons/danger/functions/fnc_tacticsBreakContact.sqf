@@ -41,6 +41,8 @@ params [
 
 if (_group isEqualType objNull) then {_group = group _group;};
 if (isNull _group) exitWith {false};
+// v8.825 BOMBACI HARIC (kullanici: 'bomba retreat atmasin'; RPT 62e4a6ff: canli bomba (Alpha 1-4, tek kisilik izole grup) bayrak [BRK] = temas kesme + EYP-KOS DURAKLAMA): bombaci / bomba kosusundaki grup geri cekilme / temas kesme / son direnis akislarina GIRMEZ
+if (_group getVariable [QGVAR(disableGroupAI), false] || {(_group getVariable [QGVAR(gorev), ""]) isEqualTo "HARIC"} || {((units _group) findIf { (_x getVariable [QGVAR(bombaKosuyor), false]) isEqualTo true || {!isNil {_x getVariable QGVAR(eypBomba)}} }) >= 0}) exitWith {false};
 
 private _birimler = (units _group) select {alive _x && {isNull objectParent _x}};
 private _alive = count _birimler;

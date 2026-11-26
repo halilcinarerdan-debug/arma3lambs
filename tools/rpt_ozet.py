@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.824"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.825"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -898,6 +898,16 @@ def kabul(path):
     tl_ = len([1 for l in L if "[TELEMETRI-GRUP]" in l])
     if tl_ >= 5:
         ekle("GERCEKCILIK: CARELESS TEMASTA", "GECTI" if not cr_k else "KALDI", "telemetri %d satir, CARELESS %d (%%%.0f) | dusman < 150 m ya da temas varken CARELESS: %d %s (0 olmali; v8.822: hareket kurtarma CARELESS'i yalniz dusman >= 150 m, baski < 0.3, 4 sn, grup duzeyinde geri alinir)" % (tl_, cr_t, 100.0 * cr_t / tl_, len(cr_k), cr_k[:3]))
+    # v8.825: DOST ATES HATTI (bastirma) + RPG tani
+    dh_l = [l for l in L if "[DOST-HATTI]" in l]
+    dh_oz = len(dh_l)
+    ekle("GERCEKCILIK: DOST ATES HATTI (bastirma)", "BILGI", "engellenen bastirma atesi (log: ilk 20 + 30 sn'de bir) %d | ilk: %s | KONTROL: oyunda dost hattina bastirma atesi gorulmemeli; [DOST-HATTI] satiri varsa onleme calisiyor" % (dh_oz, dh_l[0].split("[DOST-HATTI]",1)[1].strip()[:170] if dh_l else "-"))
+    rt_l = [l for l in L if "[RPG-ATILMADI-TANI]" in l]
+    if rt_l:
+        ekle("RPG: ATILMADI TANISI", "BILGI", "tani satiri %d | ilk: %s" % (len(rt_l), rt_l[0].split("[RPG-ATILMADI-TANI]",1)[1].strip()[:420]))
+    ks_ = [l for l in L if "[KOSU-ADIM] BASLA" in l and "retreat" in l]
+    if ks_:
+        ekle("GERCEKCILIK: RETREAT SCRIPT KOSU", "BILGI", "retreat script kosu basladi %d, hedefe vardi %d (BITTI satirlari ilk 20 + 30 sn'de bir)" % (len(ks_), len([1 for l in L if "[KOSU-ADIM] BITTI" in l and "retreat-" in l and "hedefe vardi" in l])))
     # v8.823: MEKAN DOKTRINI (grup sinifi, titrememe) + SCRIPT KOSU (son care)
     mk_l = [l for l in L if "[MEKAN-DOKTRIN] " in l]
     mk_oz = [l for l in L if "[MEKAN-DOKTRIN-OZET]" in l]

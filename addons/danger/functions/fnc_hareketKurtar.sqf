@@ -33,6 +33,14 @@ if !(missionNamespace getVariable ["lambs_danger_hareketKurtar", true]) exitWith
 // v8.818 (RPT a049faa1): ayni askerde ayni saniyede 3 cagri (birden fazla varis gozcusu) adimlari saniyede 1 artiriyordu -> 1.5 sn'den sik cagri mevcut adimi doner, eylem yapmaz
 if ((time - (_u getVariable [QGVAR(hkT), -999])) < 1.5) exitWith { (_u getVariable [QGVAR(hkN), 1]) max 1 };
 private _n = if ((time - (_u getVariable [QGVAR(hkT), -999])) > 20) then { 0 } else { _u getVariable [QGVAR(hkN), 0] };
+// v8.825 SCRIPT KOSU (retreat): merdiven 4. adimi tukendiyse (onceki cagri adim 4) ve hedef <= 60 m, duz hat acikken retreat kosucusu script kosuyla surulur (RPT 62e4a6ff: retreat varis 10 / 36, doMove kabul 6 / yok sayildi 24, idle adim 4 %43; cover'da script kosu %83)
+if (_n >= 4 && {(_kaynak select [0, 7]) isEqualTo "retreat"} && {(_u distance2D _hedef) <= 60} && {(((([_u, _hedef] call FUNC(yolTara)) select 1)) <= 1.05)} && {[_u, _hedef, _kaynak] call FUNC(kosuAdim)}) exitWith {
+    _u setVariable [QGVAR(hkT), time];
+    private _sy = missionNamespace getVariable ["lambs_danger_hkSay", createHashMap];
+    missionNamespace setVariable ["lambs_danger_hkSay", _sy];
+    _sy set [_kaynak + "_kosu", (_sy getOrDefault [_kaynak + "_kosu", 0]) + 1];
+    5
+};
 _n = (((_n + 1) max ((_baslangic max 1) min 4)) min ((_azami max 1) min 4));   // v8.818: baslangic adimi (RPT a049faa1: retreat-idle adim 1 %37 / adim 3 %58 / adim 4 %69 -> bosta dali 3'ten baslar)
 _u setVariable [QGVAR(hkN), _n];
 _u setVariable [QGVAR(hkT), time];
@@ -58,6 +66,7 @@ _u forceSpeed -1;
 if (_n >= 2) then {
     [_u] call FUNC(doFollowGuvenli);   // korumali (retreat / temas kesme / kacis grubunda atlanir; o taktik emri zaten surekli yeniden verir)
     _u setUnitPosWeak "UP";
+    [{ params ["_uu"]; if (alive _uu && {!((group _uu) getVariable [QGVAR(isRetreating), false])}) then { _uu setUnitPosWeak "AUTO"; }; }, [_u], 4] call CBA_fnc_waitAndExecute;   // v8.825: ayakta kalma (RPT 62e4a6ff: "ayakta bekliyorlar") - 4 sn sonra otomatik durus
     [_u, 8, "kurtar"] call FUNC(kosuPatlamasi);
     // v8.820 (kullanici: 'vanilla'da eleman mermi yiyince / hedef bilince kipirdayamiyor'; RPT a049faa1: duran askerlerde cok sayida _turnl / _turnr donus animasyonu, getAttackTarget dolu, dusman 230-285 m, baski 0): bakis gidilecek noktaya cevrilir (hedefe donme dongusu kirilsin);
     //   8 sn sonra serbest birakilir (doWatch objNull; retreat zaten sicrama sonunda birakir)
@@ -70,7 +79,7 @@ if (_n >= 2) then {
     private _gc = group _u;
     private _enC = (leader _gc) findNearestEnemy (leader _gc);
     private _enUzak = isNull _enC || {((leader _gc) distance2D _enC) >= 150};
-    if ((missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) && {_enUzak} && {(getSuppression _u) < 0.3} && {time >= (_gc getVariable [QGVAR(hkGrpCareBekle), 0])} && {(_gc getVariable [QGVAR(contact), 0]) < (time - 20)}) then {   // v8.823: son 20 sn'de temas varsa CARELESS YOK (RPT 01a3fcd2: 5 kayit dusman 164-353 m ama temas 9-29 sn)
+    if ((missionNamespace getVariable ["lambs_danger_hareketKurtarCare", true]) && {_enUzak} && {(getSuppression _u) < 0.3} && {time >= (_gc getVariable [QGVAR(hkGrpCareBekle), 0])} && {(_gc getVariable [QGVAR(contact), 0]) < (time - 20)} && {(behaviour _u) isNotEqualTo "COMBAT"} && {({_gc getVariable [_x, false]} count [QGVAR(isRetreating), QGVAR(isBounding), QGVAR(isExecutingTactic), QGVAR(isBreakingContact), QGVAR(isEvading)]) isEqualTo 0}) then {   // v8.825: COMBAT davranisi (catisma) ve taktik / retreat gruplari ASLA CARELESS yapilmaz (kullanici: 'catisma ortasinda aware geciyor, ayakta bekliyorlar'; RPT 62e4a6ff: retreat dusman 266-448 m, temas bayragi eski)   // v8.823: son 20 sn'de temas varsa CARELESS YOK (RPT 01a3fcd2: 5 kayit dusman 164-353 m ama temas 9-29 sn)
         private _tok = time + (random 0.001);
         if ((_gc getVariable [QGVAR(hkGrpCareTok), 0]) isEqualTo 0) then {
             _gc setVariable [QGVAR(hkGrpOncekiBeh), behaviour _u];

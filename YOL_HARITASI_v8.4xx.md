@@ -242,3 +242,5 @@ Not: aşağıdakiler bizde VAR sayıldı (grep ile fonksiyon + başlık okundu):
 Tamamlanan (DENENMEDİ): açık alan dolaşma (Aşama 14 / 3), ikili sıçrama (Aşama 15 / 4), BOT İSABET mesafe bandı (Aşama 15 / 8), CARELESS güvenliği. Test + fix sonrası SIRADA: madde 34 (arazi ve mekâna göre gerçek doktrin seçimi), ardından Aşama 14 / 1 ve 2 (konsolidasyon, dolaylı ateş sonrası bölgeyi terk).
 
 - v8.823 (kullanıcı: 'fixle ve çevreye göre doktrinde ekle'): madde 34 v1 (mekan sınıfı + dk çarpanları), script koşu (son çare), BOT İSABET 120–250 bandı, CARELESS temas kapısı. Sıradaki: test; sonra madde 34 v2 (formasyon/aralık, manevra seçimi), Aşama 14 / 1 ve 2.
+
+- v8.825 (kullanıcı: 'bomba retreat atmasın, coveri çöz, retreat, supress dost, rpg'): dost ateş hattı (bastırma), bombacı retreat/temas kesme hariç, retreat script koşu, RPG yüklü roket değişimi + tanı, CARELESS COMBAT'ı ezmez. AÇIK: retreat tetik mantığı (uzak düşmana karşı retreat), cover kalitesi ölçümü (coverOlcum), bombacı duraklama.

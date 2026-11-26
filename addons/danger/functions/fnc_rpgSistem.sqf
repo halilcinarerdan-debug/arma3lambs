@@ -176,10 +176,13 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             _g setVariable [QGVAR(rpgGrupT), time];
             _g reveal [_en, 2.5];
             if !(missionNamespace getVariable ["lambs_danger_silahDegisimOff", false]) then { [_u, _ls] call CBA_fnc_selectWeapon; };
+            // v8.825 (RPT 62e4a6ff: 16 emrin 16'si ATILMADI; [RPG-ZAMAN] komut MOVE, hiz 0 = emir bekleyen / yurumeyen asker emri uygulamiyor): MOVE komutu bekleyen asker once doStop ile serbest birakilir
+            private _stopVerildi = false;
+            if ((currentCommand _u) isEqualTo "MOVE" && {_u isNotEqualTo (leader _g)}) then { doStop _u; _stopVerildi = true; };
             _u doTarget _en;
             // v8.762 KOSMASIN, GORDUGU GIBI CAKSIN (kullanici): hareket eden roketatarli ates emrinde DURDURULUR (doStop); 5 sn sonra gruba doner (CBA rpgDurAt)
-            if ((missionNamespace getVariable ["lambs_danger_rpgDurAt", true]) && {(speed _u) > 0.8} && {_u isNotEqualTo (leader _g)}) then {
-                doStop _u;
+            if ((missionNamespace getVariable ["lambs_danger_rpgDurAt", true]) && {_stopVerildi || {(speed _u) > 0.8}} && {_u isNotEqualTo (leader _g)}) then {
+                if (!_stopVerildi) then { doStop _u; };
                 [{
                     params ["_uu"];
                     if (alive _uu && {(_uu getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {_uu isNotEqualTo (leader group _uu)}) then { [_uu, leader group _uu] call FUNC(doFollowGuvenli); };
@@ -228,18 +231,25 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             };
             // sonuc (7 sn sonra): atildi mi
             [{
-                params ["_uu", "_ll", "_aa0", "_tr"];
+                params ["_uu", "_ll", "_aa0", "_tr", ["_tt", objNull]];
                 if (!alive _uu) exitWith {};
                 private _s = missionNamespace getVariable ["lambs_danger_rpgSay", createHashMap];
                 private _atildi = ((_uu ammo _ll) < _aa0) || {(time - (_uu getVariable [QGVAR(rpgAtisT), -999])) < 9};   // v8.754: yalniz ROKET atisi (eskiden sonAtisT = tufek atisi de sayiliyordu)
                 private _kk = ["sonuc_atilmadi", "sonuc_atildi"] select _atildi;
                 _s set [_kk, (_s getOrDefault [_kk, 0]) + 1];
                 private _n = missionNamespace getVariable ["lambs_danger_rpgSonucLogN", 0];
+                if (!_atildi && {["rpgAtilmadi", 12, 30] call FUNC(logIzin)}) then {
+                    // v8.825 TANI: roket neden atilmadi (motor nisan / hedef / durum dokumu)
+                    private _ws = weaponState _uu;
+                    diag_log format ["[RPG-ATILMADI-TANI] %1 | %2 | hedef %3 %4 m | weaponState %5 | komut %6 | ready %7 | saldiri hedefi %8 | atanan %9 | nisan (aimedAtTarget) %10 | knowsAbout %11 | gorunurluk %12 | AI TARGET:%13 AUTOTARGET:%14 WEAPONAIM:%15 FSM:%16 MOVE:%17 | durus %18 | anim %19 | baski %20 | hiz %21 km/sa | sarjor %22",
+                        groupId group _uu, name _uu, typeOf _tt, round (_uu distance _tt), _ws, currentCommand _uu, unitReady _uu, typeOf (getAttackTarget _uu), typeOf (assignedTarget _uu), if (isNull _tt) then {"-"} else {(_uu aimedAtTarget [_tt, _ll]) toFixed 2}, if (isNull _tt) then {"-"} else {(_uu knowsAbout _tt) toFixed 1},
+                        if (isNull _tt) then {"-"} else {([_uu, "VIEW", _tt] checkVisibility [eyePos _uu, eyePos _tt]) toFixed 2}, _uu checkAIFeature "TARGET", _uu checkAIFeature "AUTOTARGET", _uu checkAIFeature "WEAPONAIM", _uu checkAIFeature "FSM", _uu checkAIFeature "MOVE", stance _uu, animationState _uu, (getSuppression _uu) toFixed 2, round (speed _uu), secondaryWeaponMagazine _uu];
+                };
                 if (_n < 40) then {
                     missionNamespace setVariable ["lambs_danger_rpgSonucLogN", _n + 1];
                     diag_log format ["[RPG-KARAR-SONUC] %1 | %2 | atildi: %3 | mermi %4 -> %5 | elde: %6 | komut: %7", groupId group _uu, name _uu, _atildi, _aa0, _uu ammo _ll, currentWeapon _uu, currentCommand _uu];
                 };
-            }, [_u, _ls, _a0, _enTur], 7] call CBA_fnc_waitAndExecute;
+            }, [_u, _ls, _a0, _enTur, _en], 7] call CBA_fnc_waitAndExecute;
         } forEach _adaylar;
         if (time > _ozT) then {
             _ozT = time + 60;

@@ -20,6 +20,7 @@ params ["_u", "_hedef"];
 private _hASL = if (_hedef isEqualType objNull) then { (getPosASL _hedef) vectorAdd [0, 0, 1] } else { (AGLToASL _hedef) vectorAdd [0, 0, 1] };
 private _eye = eyePos _u;
 if (_eye distance _hASL < 3) exitWith {true};
+if ([_u, _hedef] call FUNC(dostHatti)) exitWith {false};   // v8.825: hatta / hedef noktasinda DOST varsa bastirma YOK (squad ici + squadlar arasi)
 if (terrainIntersectASL [_eye, _hASL]) exitWith {false};
 private _vur = lineIntersectsSurfaces [_eye, _hASL, _u, [objNull, _hedef] select (_hedef isEqualType objNull), true, 4, "FIRE", "NONE"];
 private _kapali = false;

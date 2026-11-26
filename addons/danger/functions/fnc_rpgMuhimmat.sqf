@@ -80,7 +80,23 @@ if (_mod isEqualTo "yukle") exitWith {
                         private _at = _atl select 0;
                         _u removeMagazine _at;
                         if (_u canAdd _en) then { _u addMagazine _en; _eklenen = _eklenen + 1; _degis = _degis + 1; } else { _u addMagazine _at; _yok = _yok + 1; };
-                    } else { _yok = _yok + 1; };
+                    } else {
+                        // v8.825 YUKLU ROKET DEGISIMI (RPT 62e4a6ff: 3 RPG-7'li 'tasinan AP 0 -> hedef 3, eklenen 0, yer yok 3'; envanterde yedek AT sarjor yok, canta dolu -> AP hic yuklenmedi, PG-7VL piyadeye atilmadi): yer yok + degistirilecek yedek AT yoksa
+                        //   YUKLU AT mermisi AP ile degistirilir (removeWeapon -> AP ekle -> addWeapon = AP yuklenir; yer silahin cikarilmasiyla acilir). Basarisizsa AT geri yuklenir. CBA rpgMuhimmatYuklu (varsayilan acik). Bu atici artik AT (arac) atamaz.
+                        private _yukluM = (secondaryWeaponMagazine _u) param [0, ""];
+                        if ((missionNamespace getVariable ["lambs_danger_rpgMuhimmatYuklu", true]) && {_yukluM isNotEqualTo ""} && {!([_yukluM] call _apMag)} && {_degis isEqualTo 0} && {_eklenen isEqualTo 0}) then {
+                            private _yukluA = _u ammo _ls;
+                            _u removeWeapon _ls;
+                            _u addMagazine _en;
+                            _u addWeapon _ls;
+                            if (((secondaryWeaponMagazine _u) param [0, ""]) isEqualTo _en) then { _eklenen = _eklenen + 1; _degis = _degis + 1; ["muhimmat_yuklu_degis"] call _art; } else {
+                                _u removeWeapon _ls;
+                                _u addMagazine [_yukluM, _yukluA];
+                                _u addWeapon _ls;
+                                _yok = _yok + 1;
+                            };
+                        } else { _yok = _yok + 1; };
+                    };
                 };
             };
             if (_eklenen > 0) then { ["muhimmat_eklendi"] call _art; };
