@@ -73,6 +73,12 @@ _b setVariable [QGVAR(disableAI), true];
 // v8.798: piyade bombaci kosuyor bayragi (fnc_bombaciMi: bastirma atesi bu birimi ne hedef alir ne de atar; arac bombasi HARIC)
 if (!_arac) then { _b setVariable [QGVAR(bombaKosuyor), true, true]; };
 _b allowFleeing 0;
+// v8.826 BOMBACI BACAK (RPT 0c1269e0: bacak hasari 0.63 = motor hiz siniri, 5 km/sa topallama, bomba 47 sn'de varamadi): kosu basinda bacak hasari en cok 0.25'e indirilir (fanatik / adrenalin; yalniz piyade bombaci)
+if (!_arac && {(_b getHitPointDamage "HitLegs") > 0.25}) then {
+    private _bacakOnce = _b getHitPointDamage "HitLegs";
+    _b setHitPointDamage ["HitLegs", 0.25];
+    diag_log format ["[EYP-KOS] BACAK | %1 | bacak hasari %2 -> 0.25 (topallama kosuyu kesiyordu)", name _b, _bacakOnce toFixed 2];
+};
 // v8.790 (RPT f2a62ebb: piyade bomba 79 sn'de varamadi, [EYP-KOS] komut 'GET IN' / bos): atanmis arac (cargo) varsa AI binmeye calisiyordu -> atama kaldirilir
 if (!_arac && {!isNull (assignedVehicle _b)}) then { unassignVehicle _b; };
 { _b disableAI _x; } forEach ["AUTOCOMBAT", "COVER", "SUPPRESSION", "FSM"];

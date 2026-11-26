@@ -87,7 +87,8 @@ private _engel = {
     {
         private _yy = _x;
         private _r = lineIntersectsSurfaces [_p vectorAdd [0, 0, _yy], _q vectorAdd [0, 0, _yy], _ign, objNull, true, 3, "GEOM", "NONE"];
-        private _i = _r findIf { private _o = _x select 2; (!isNull _o) && {!(_o isKindOf "CAManBase")} && {!(_o isKindOf "Animal")} };
+        // v8.826 INCE NESNE (RPT 0c1269e0: yolTara ERISILEMEZ 89 / 444 (%20), 'dolasma kordu yok' 84; ilk olumsuz engeller t_poplar2f_dead_f (agac govdesi) / city_8m_f): yatay boyutu < 1.5 m olan nesne (agac govdesi, diregi, tabela) engel SAYILMAZ - AI yurur / dolasir
+        private _i = _r findIf { private _o = _x select 2; (!isNull _o) && {!(_o isKindOf "CAManBase")} && {!(_o isKindOf "Animal")} && {private _bb = boundingBoxReal _o; (((_bb select 1) select 0) - ((_bb select 0) select 0)) >= 1.5 || {(((_bb select 1) select 1) - ((_bb select 0) select 1)) >= 1.5}} };
         if (_i >= 0) exitWith { _blk = (_r select _i) select 2; };
     } forEach _yk;
     _blk

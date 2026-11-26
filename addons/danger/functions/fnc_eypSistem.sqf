@@ -119,7 +119,9 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                             private _surucu = objNull;
                             { private _dd = driver _x; if (!isNull _dd && {alive _dd} && {_dd in _hepsi} && {!isPlayer _dd}) exitWith { _surucu = _dd; }; } forEach _araclar;
                             // v8.786 (RPT 1f3a00f8: secilen 'en son' asker hedeften 235 m uzaktaydi (lider-dusman 98 m), 40 sn'de 54 m gidebildi -> zaman asimi x2): bomba = HEDEFE EN YAKIN asker (arac yoksa)
-                            private _b = if (!isNull _surucu) then {_surucu} else {if (_uyeler isEqualTo []) then {objNull} else {([_uyeler, [], {_x distance _en}, "ASCEND"] call BIS_fnc_sortBy) select 0}};
+                            // v8.826 (RPT 0c1269e0: secilen bombaci bacak hasari 0.63 -> 5 km/sa topallayarak yurudu, 47 sn'de 108 m'den 81 m'ye, zaman asimi): bacagi saglam (hasar < 0.35) askerler once; yoksa en yakin asker (kosu basinda bacak hasari 0.25'e indirilir: fnc_eypKos)
+                            private _saglamUye = _uyeler select {(_x getHitPointDamage "HitLegs") < 0.35};
+                            private _b = if (!isNull _surucu) then {_surucu} else {if (_uyeler isEqualTo []) then {objNull} else {([[_uyeler, _saglamUye] select (_saglamUye isNotEqualTo []), [], {_x distance _en}, "ASCEND"] call BIS_fnc_sortBy) select 0}};
                             if (!isNull _b && {isNil {_b getVariable QGVAR(canliBomba)}}) then {
                                 _olaylar pushBack time;
                                 _bombaOlaylar set [str _taraf, _olaylar];

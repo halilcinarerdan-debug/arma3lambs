@@ -81,6 +81,27 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             // v8.802: taraf bazli en uzak hedef mesafesi (-1 = genel rpgMaxM)
             private _maxU = [side _g, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
             _maxU = if (_maxU < 0) then {_maxM} else {(_maxU max (_minM + 30)) min 600};
+            // v8.826 MOTOR MENZILI (RPT 62e4a6ff + 0c1269e0: tum RPG emirleri MRAWS'a 256-485 m piyade hedefine verildi, 40 emrin 40'i ATILMADI; roketatar 0.0 sn'de elde ama 12 sn atmiyor): AI atis modunun config menzil
+            //   esikleriyle (minRange / midRange / maxRange) atar; hedef uzaksa AI atmaz. Karar mesafesi atis modunun KULLANILABILIR menziline sinirlanir: mid >= 0 ise mid + 0.5 x (max - mid), degilse 0.85 x max (CBA rpgMotorMenzil, varsayilan acik). [RPG-MENZIL] log (silah basina bir kez).
+            if (_ls isNotEqualTo "" && {missionNamespace getVariable ["lambs_danger_rpgMotorMenzil", true]}) then {
+                private _mt = missionNamespace getVariable ["lambs_danger_rpgMenzilTab", createHashMap];
+                missionNamespace setVariable ["lambs_danger_rpgMenzilTab", _mt];
+                if !(_ls in _mt) then {
+                    private _wc = configFile >> "CfgWeapons" >> _ls;
+                    private _kap = 0;
+                    private _dok = [];
+                    { private _mc = _wc >> _x; if (isClass _mc) then {
+                        private _mx = getNumber (_mc >> "maxRange"); private _md = getNumber (_mc >> "midRange");
+                        private _us = if (_md > 0 && {_mx > _md}) then { _md + (0.5 * (_mx - _md)) } else { 0.85 * _mx };
+                        _dok pushBack format ["%1: min %2 mid %3 max %4 (olasilik %5 / %6 / %7) -> kullanilabilir %8", _x, getNumber (_mc >> "minRange"), _md, _mx, getNumber (_mc >> "minRangeProbab"), getNumber (_mc >> "midRangeProbab"), getNumber (_mc >> "maxRangeProbab"), round _us];
+                        if (_us > _kap) then { _kap = _us; };
+                    }; } forEach (getArray (_wc >> "modes"));
+                    _mt set [_ls, _kap];
+                    diag_log format ["[RPG-MENZIL] %1 | atis modlari: %2 | karar mesafesi sinirlari: %3 m", _ls, _dok joinString " ; ", round _kap];
+                };
+                private _kapU = _mt getOrDefault [_ls, 0];
+                if (_kapU > 0) then { _maxU = _maxU min (_kapU max (_minM + 30)); };
+            };
             ["aday"] call _ar;
             if (
                 time < (_u getVariable [QGVAR(rpgBekleT), 0]) || {(time - (_g getVariable [QGVAR(rpgGrupT), -999])) < (((missionNamespace getVariable ["lambs_danger_rpgGrupBekleS", 8]) max 0) min 30)}

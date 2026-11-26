@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.825 · Preset: `CBA_LAMBS_Danger_v8.825.txt` · 672 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.826 · Preset: `CBA_LAMBS_Danger_v8.826.txt` · 673 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.825.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.826.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (366 ayar)
+### ELITE siper (367 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -398,6 +398,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `rpgKarar` | RPG sistemi: hedef secimi (MG yuvasi / bina ici dusman / piyade kumesi) | açık/kapalı | açık | v8.746. ACIK: roketatarli AI, uygun hedefi (sabit silah, binadaki dusman, acikta >= 3 kisilik kume) secip roketatara gecer + hedef alir + ates emri verir (atisi motor / LAMBS RPG yapar; ELITE roketi script ile firlatmaz). Zirh: AT taarruzu, hava: havaAA ayri. Kapali: yalniz atis kapisi / olcum. |
 | `rpgMaxM` | RPG sistemi: en uzak hedef secim mesafesi (m) | 100–600 | 250 | v8.746. Karar katmani bu mesafeden uzak hedefe roketatar emri vermez (gudumsuz roketin isabeti uzakta duser). Varsayilan 250. |
 | `rpgMinM` | RPG sistemi: en kisa atis mesafesi (m) | 10–80 | 25 | v8.746. Dusus noktasi aticiya bu mesafeden yakinsa atis iptal / karar verilmez (kendi patlamasi). Varsayilan 25. |
+| `rpgMotorMenzil` | RPG: karar mesafesini roketatarin atis modu menziline sinirla | açık/kapalı | açık | v8.826 (RPT 62e4a6ff + 0c1269e0: RPG emirlerinin 40'i 40'i ATILMADI; hepsi MRAWS'a 256-485 m piyade hedefine verildi, roketatar 12 sn elde ama atmadi). Acik: karar mesafesi, silahin atis modlarinin config menzil esikleriyle (minRange / midRange / maxRange) sinirlanir (mid > 0 ise mid + 0.5 x (max - mid), degilse 0.85 x max); ayar rpgMaxM bundan buyukse bu gecerli. Kapali = yalniz rpgMaxM. Log: [RPG-MENZIL] (silah basina bir kez). |
 | `rpgMuhimmat` | RPG muhimmat: roketatarli AI piyadeye uygun (AP) roket tasisin | açık/kapalı | açık | v8.748 (kullanici: 'b yap, cba opsiyonel'). ACIK: RPG-7 / SMAW / MAAWS gibi roketatarlilara piyadeye uygun roket (OG-7V, TBG-7V, HEDP ...; allowAgainstInfantry > 0 ya da aiAmmoUsageFlags 64) verilir. Envanterde yer yoksa 1 adet AT sarjoru AP ile yer degistirir. Anti-tank roket (PG-7VL) piyadeye hic atilmaz (motor reddeder); bu olmadan karar katmani 0 karar verir. KAPALI = envantere dokunulmaz. |
 | `rpgMuhimmatAdet` | RPG muhimmat: birim basina AP roket sayisi | 1–3 | 1 | v8.748. Roketatarli birimin tasidigi piyadeye uygun roket sayisi (yuklu dahil). Varsayilan 1 (yedek kurali: kalan AT roketler zirh / heli icin saklanir). |
 | `rpgMuhimmatDegis` | RPG muhimmat: piyade hedefinde yuklu AT mermisini AP ile degistir | açık/kapalı | açık | v8.748. ACIK: karar katmani piyade / bina / kume emri vermeden once yuklu mermi AT ise ve atici AP tasiyorsa yuklu mermiyi AP ile degistirir (removeWeapon + addWeapon; diger sarjorler geri konur, sigmayan yere dusurulur). KAPALI: yalniz AP tasinir, yuklemeyi motor / LAMBS munisyon degisimi yapar. |
