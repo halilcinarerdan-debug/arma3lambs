@@ -740,6 +740,10 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                         [_group, _target, "BREAK_CONTACT"] call _sisFn;
                     };
                 };
+                // v8.827 (kullanici: 'peeling var mi geri cekilmede'; RPT 62e4a6ff: 22 telemetri satiri karar PEEL, [PEEL] logu 0): bounding cikisinda PEEL karari dogrudan tacticsRetreat'e gidiyordu -> isPeeling bayragi ve [PEEL] logu hic yazilmiyordu (yalniz fnc_tactics dali tacticsPeel'i cagiriyordu)
+                case "PEEL": {
+                    [_group, _target] call FUNC(tacticsPeel);
+                };
                 default {
                     [_group, _target] call FUNC(tacticsRetreat);
                 };
