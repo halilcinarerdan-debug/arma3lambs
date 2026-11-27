@@ -78,7 +78,7 @@ diag_log "[OZGUVEN] ozguven + baski->nisan bozulmasi (courage bagli) baslatildi 
             };
 
             // ---- 2) baski -> nisan ----
-            private _baski = ((getSuppression _u) max 0) min 1;
+            private _baski = (([_u] call FUNC(baskiEf)) max 0) min 1;   // v8.837: motor baskisi + yakin mermi korkusu (x0.7): korku da nisan bozulmasina yansir
             private _cour = _u skill "courage";
             private _ceza = _etkiU * _baski * (1 - (0.6 * _cour));
             private _eskiCeza = _u getVariable [QGVAR(ozgCeza), 0];
