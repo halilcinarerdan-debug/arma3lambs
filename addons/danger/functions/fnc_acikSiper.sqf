@@ -25,7 +25,7 @@ if (time < (_u getVariable [QGVAR(acikSiperT), 0])) exitWith {false};
 // v8.650 KENDI SIPERINDE KAL (kullanici: 'altisteki gibi almiyorlar'; RPT d6ee1c87: [SIPER-OTUR] oturtuldu 2.8-8.7 m, ayni asker 10-15 sn arayla yeniden secip yeniden kosuyor: coverHug CUP / A2 agacinda (FIRE LOD yok / dar) 'siperde' saymiyor -> acikta -> acikSiper 10 sn'de bir yeniden sec -> git-gel):
 //   asker son 60 sn'de KENDI sectigi siper noktasinin 1.5 m icindeyse ve dusman gozunden hala GIZLIyse (VIEW LOD hatti arada nesneye carpiyor) yeniden secim YOK (baski >= 0.9 ise yine de yeniden bakar)
 private _ah0 = _u getVariable [QGVAR(acikSiperHedef), []];
-if (_ah0 isNotEqualTo [] && {(time - (_u getVariable [QGVAR(vurulduT), -99])) > 20} && {(time - (_ah0 select 1)) < 60} && {((getPosATL _u) distance2D (_ah0 select 0)) < 1.5} && {(getSuppression _u) < 0.9}) then {
+if (_ah0 isNotEqualTo [] && {(time - (_u getVariable [QGVAR(vurulduT), -99])) > 20} && {(time - (_ah0 select 1)) < 60} && {((getPosATL _u) distance2D (_ah0 select 0)) < 1.5} && {([_u] call FUNC(baskiEf)) < 0.9}) then {
     private _gz = (lineIntersectsSurfaces [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 0.9], _en, _u, true, 1, "VIEW", "NONE"]) isNotEqualTo [];
     if (_gz || {terrainIntersectASL [eyePos _en, (getPosASL _u) vectorAdd [0, 0, 0.9]]}) exitWith {
         _u setVariable [QGVAR(acikSiperT), time + 6];
@@ -64,11 +64,11 @@ private _yakinKosu = (([_u, "siperYakinKosuM", 6] call FUNC(profilDeger)) max 2)
 private _yakinDovus = _yakinM > 0 && {_ed < _yakinM} && {!(lineIntersects [eyePos _u, _eASL, _u, _en])} && {([_u, "VIEW", _en] checkVisibility [eyePos _u, _eASL]) >= 0.4};
 if (_yakinDovus) then { _sayAS set ["yakin_dovus", (_sayAS getOrDefault ["yakin_dovus", 0]) + 1]; };
 // v8.737 ZOR DURUM (kullanici: 'zor durumda gizlensinler, onu sakin cok geriye atma oncelikte'): baski >= 0.5, yarali ya da komutan WITHDRAW / PEEL / DELAY kararinda ise GIZLENME onceligi DUSMEZ: sahte siper cezasi x0.2, karsilik verme sarti yok, yan yon cezasi x0.5 (cali / yatis dahil gizlenme serbest)
-private _zor = ((getSuppression _u) >= 0.5) || {(lifeState _u) isEqualTo "INJURED"} || {((group _u) getVariable [QGVAR(cmdSonKarar), ""]) in ["WITHDRAW", "PEEL", "DELAY"]};
+private _zor = (([_u] call FUNC(baskiEf)) >= 0.5) || {(lifeState _u) isEqualTo "INJURED"} || {((group _u) getVariable [QGVAR(cmdSonKarar), ""]) in ["WITHDRAW", "PEEL", "DELAY"]};
 // v8.736 AYNI ANDA HAREKET SINIRI (kullanici: 'cover to cover daha profesyonel'): grupta son 6 sn'de siper atilisina cikmis ve hala kosan asker sayisi siperAyniAnda'ya (2) ulastiysa bu asker (baski < 0.35, yakin dovus degil) 1.5 sn bekler: biri kosar, digerleri kapsar; 6 = kapali
 private _ayniA = (([_u, "siperAyniAnda", 2] call FUNC(ayarTaraf)) max 1) min 6;
 private _ertele = false;
-if (_ayniA < 6 && {!_yakinDovus} && {(getSuppression _u) < 0.35}) then {
+if (_ayniA < 6 && {!_yakinDovus} && {([_u] call FUNC(baskiEf)) < 0.35}) then {
     private _kosan = ({ alive _x && {_x isNotEqualTo _u} && {(time - (_x getVariable [QGVAR(siperDoMoveT), -999])) < 6} && {(speed _x) > 2} } count (units _g));
     if (_kosan >= _ayniA) then { _ertele = true; };
 };
@@ -201,7 +201,7 @@ private _govdeR = {
     // v8.643: govde yaricapi MODEL PROFILINDEN (FIRE / GEOM / VIEW olcumu, onbellekli; fnc_agacProfil)
     (([_o] call FUNC(agacProfil)) select 0)
 };
-private _geriMax = [3, 10] select ((getSuppression _u) >= 0.5);
+private _geriMax = [3, 10] select (([_u] call FUNC(baskiEf)) >= 0.5);
 // v8.664 MESAFEYE OLCEKLI BAND (RPT 5b2735f6 lythium: dusman 316-354 m, agac 22-29 m ileride / 23-28 m geride, 'mesafe bandinda 0' -> aday_yok 14; sabit band [ed - 10, ed + 3] 330 m'de 25 m'lik agaci eliyordu): dusman > 150 m ise ileri sinir ed x 0.12 (10-40 m), geri sinir +ed x 0.03 (<= 12 m)
 private _ileriM = if (_ed > 150) then { ((_ed * 0.12) max 10) min 40 } else {10};
 private _geriG = _geriMax + (if (_ed > 150) then { (_ed * 0.03) min 12 } else {0});
@@ -281,7 +281,7 @@ private _objAd = "";
                         _sk = _sk - (([_u, "siperKarsilikBonus", 6] call FUNC(ayarTaraf)) max 0 min 20);   // v8.751: CBA (eski sabit 3)
                         _sayAS set ["siper_karsilik", (_sayAS getOrDefault ["siper_karsilik", 0]) + 1];
                     } else {
-                        if ((getSuppression _u) < 0.5) then { _sk = _sk + (([_u, "siperSafCeza", 14] call FUNC(ayarTaraf)) max 0 min 40); _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
+                        if (([_u] call FUNC(baskiEf)) < 0.5) then { _sk = _sk + (([_u, "siperSafCeza", 14] call FUNC(ayarTaraf)) max 0 min 40); _sayAS set ["siper_saf_saklanma", (_sayAS getOrDefault ["siper_saf_saklanma", 0]) + 1]; };
                     };
                 };
                 // v8.737 COK YONLU KAPALILIK (kullanici: 'bir yerden yemesin'): adaydan dusmana bakan eksene +-45 / +-90 derece 4 yonden (40 m, goz 1.6 m) FIRE LOD hatti ACIK mi; her acik yon x siperYanAgirlik (2 m; son 20 sn'de vurulduysa x3)
@@ -571,8 +571,8 @@ private _nesneGit = {
     private _dusukK = (round ([_u, "siperDusuk", 1] call FUNC(profilDeger)) max 0) min 2;   // v8.738: ORMAN / KENTSEL'de -1
     // v8.656 DURUS CESITLILIGI (kullanici: 'dediklerini yap'; Altis goruntuleri: HEPSI yatik; egitimli tim karisik durur): baski yoksa (<= 0.35) ve MG degilse askerlerin CBA siperDurusCesit orani (varsayilan %50) bir kademe YUKSEK (yatma -> comelme) durur; kisiye bagli sabit secim (birimId)
     private _cesit = ([_u, "siperDurusCesit", 0.5] call FUNC(ayarTaraf)) max 0 min 1;
-    if ((getSuppression _u) <= 0.35 && {_dusukK > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _cesit}) then { _dusukK = _dusukK - 1; };
-    if ((getSuppression _u) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
+    if (([_u] call FUNC(baskiEf)) <= 0.35 && {_dusukK > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < _cesit}) then { _dusukK = _dusukK - 1; };
+    if (([_u] call FUNC(baskiEf)) > 0.35) then { _dusukK = (_dusukK + 1) min 2; };
     for "_dk" from 1 to _dusukK do { _objDurus = switch (_objDurus) do { case "UP": {"MIDDLE"}; default {"DOWN"} }; };
     if (_yakinDovus && {_objDurus isEqualTo "DOWN"}) then { _objDurus = "MIDDLE"; };   // v8.729: yakin dovusta yatma yok
     // v8.830 SIPERDE AYAKTA YOK (kullanici: 'askerler ayakta durmasin cover pozisyonunda, ya yatsin ya comelsin, ona oncelik gosterin'; RPT 5ed58e66: hareketsiz askerlerin %40'i AYAKTA, hedef <= %30): siper durusu hicbir zaman UP olmaz (UP -> MIDDLE; CBA siperAyaktaYok)
@@ -670,7 +670,7 @@ private _edir = _p getDir _en;
                         if (_acik >= 5) then { _sk = _sk + 8; };
                     } else {
                         _sk = _sk + 30;
-                        if ((getSuppression _u) < 0.5) then { _sk = 1e9; };   // v8.521: atis pozisyonu yoksa (pasif gizlenme) yalniz ciddi baskida; aksi halde binanin icinde atissiz bekleme (git-gel / pasif) yok
+                        if (([_u] call FUNC(baskiEf)) < 0.5) then { _sk = 1e9; };   // v8.521: atis pozisyonu yoksa (pasif gizlenme) yalniz ciddi baskida; aksi halde binanin icinde atissiz bekleme (git-gel / pasif) yok
                     };
                     if !(lineIntersects [_bA vectorAdd [0, 0, 1.6], _bA vectorAdd [0, 0, 25], _u]) then { _sk = _sk + 15; };
                     switch (_rolB) do {

@@ -146,7 +146,7 @@ private _calis = {
                 private _neden = [];
                 private _zirhKorku = false;
                 if (_temas || _lambsPanik) then {
-                    private _bask = getSuppression _u;
+                    private _bask = [_u] call FUNC(baskiEf);   // v8.835: motor baskisi + yakin mermi korkusu
                     _s = _s + (0.6 * (_bask min 1));
                     if (_bask >= 0.3) then { _neden pushBack format ["baski %1", _bask toFixed 2]; };
                     private _yakinOlum = _olum findIf {((_x select 0) distance2D _u) <= 25};

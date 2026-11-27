@@ -77,7 +77,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             private _l = leader _g;
             private _bsk = 0;
             private _dusukC = 0;
-            { _bsk = _bsk + ((getSuppression _x) min 1); if ((count (magazines _x)) <= 1 && {(_x ammo (primaryWeapon _x)) < 10}) then { _dusukC = _dusukC + 1; }; } forEach _us;
+            { _bsk = _bsk + (([_x] call FUNC(baskiEf)) min 1); if ((count (magazines _x)) <= 1 && {(_x ammo (primaryWeapon _x)) < 10}) then { _dusukC = _dusukC + 1; }; } forEach _us;
             _bsk = _bsk / (count _us);
             private _komsu = 9999;
             if ((count _us) > 1 && {!isNull _l}) then {

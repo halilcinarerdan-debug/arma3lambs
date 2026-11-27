@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.834 · Preset: `CBA_LAMBS_Danger_v8.834.txt` · 678 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.835 · Preset: `CBA_LAMBS_Danger_v8.835.txt` · 682 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.834.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.835.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (372 ayar)
+### ELITE siper (376 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -340,6 +340,10 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `komutanRolDuzelt` | Komutan MG / saglikci / nisanci / AT olmasin | açık/kapalı | açık | v8.663. Grup komutani destek rolundeyse (MG, saglikci, nisanci, AT) ve gruptaki en iyi tufekli aday puanca en fazla ~1 rutbe geride ise komutan o tufekliye devredilir (120 sn'de bir; temas / bounding / supurme / geri cekilme sirasinda degil). |
 | `konusmaAlgi` | Konusma sesi dusmana bilgi verir (STEALTH degilse) | açık/kapalı | açık | v8.535. Bir bot callout yaptiginda (ya da oyuncu ses konusmasi yaparken: TFAR / vanilla getPlayerChannel) ve davranisi STEALTH degilse, kisitli mesafedeki (Konusma menzili) DUSMAN askerler konusma suresince konusanin konumunu duyar (bilgi + yaklasik yon). Duvar araya girerse menzil kisalir. DOST etkilenmez. |
 | `konusmaM` | Konusma duyulma menzili (m) | 10–400 | 60 | v8.535. Konusma sesinin dusmana bilgi verdigi azami mesafe (varsayilan 60). Bina / duvar araya girerse etkin mesafe x1.8. |
+| `korku` | Korku: yakin mermi gecisi (FiredNear) korku + temkin | açık/kapalı | açık | v8.835 (kullanici: 'elemanlar olmekten korksun, ayik ve zeki olsunlar'; RPT 5057c18e / 8dd900cd: grup baskisi en cok 0.25, baski esikli davranislar uykudaydi). Acik: dusman mermisi korkuM icinden gecince asker korku kazanir (<= 5 m +0.35, <= 12 m +0.20, digeri +0.08; 6 sn'de azalir): grup uyarilir (temas + ates edeni bilir), hareketsiz asker comelir / yatar, korku >= 0.5 ise siper arar; motor baskisi yetmezse korku (x0.7) siper duruşu / panik / moral hesabinda baskinin yerine gecer. PANIK DEGIL: donma / panik eklenmez. Log: [KORKU]. |
+| `korkuM` | Korku: mermi gecis mesafesi (m) | 8–60 | 25 | v8.835. Dusman mermisi askerden bu mesafe icinde gecerse korku uretir (varsayilan 25 m; <= 5 m en guclu). |
+| `korkuSiper` | Korku: korkuyunca siper ara | açık/kapalı | açık | v8.835. Korku >= 0.5 iken asker 10 sn'de bir fnc_acikSiper ile siper arar (fonksiyonun kendi kapilari gecerli). Kapali = yalniz alcalir. |
+| `korkuSure` | Korku: alcak durus suresi (sn) | 2–12 | 4 | v8.835. Korkuyla comelen / yatan asker bu kadar sn sonra AUTO'ya birakilir (varsayilan 4; siper duruşu tutuluyorsa dokunulmaz). |
 | `koseIcHassas` | Bina ici: kose temkini ekstra hassas | açık/kapalı | açık | v8.605. Bina icinde kose tespiti daha hassas (isin farki 3 -> 2.2 m, yakin taraf 8 -> 10 m, kose 7 -> 9 m, aci 52 -> 60 derece) ve bina temizleme / LAMBS CQB sirasinda temas damgasi olmadan da calisir: koseden once durur, bilinmeyen sektoru dilimler (pie), namlu koseye doner. |
 | `kosuPatlama` | Kosu patlamasi: motor 'dur + nisan al' alt durumunu kisa sure kapat | açık/kapalı | açık | v8.807 (kullanici: 'retreati incele, cok aciktta durmasinlar'; RPT d03615e7: retreat kosucularinin %67'si duruyor, duranlarin 14 / 16'si komut ATTACK; lider 25 sn ATTACK -> MOVE dongusunde aciktta kaldi). Acik: geri cekilme kosucusu ATTACK komutuyla durursa (ve siper varis gozcusunde ATTACK / Suppress ile takilan asker icin) TARGET + AUTOTARGET kosuPatlamaS sn kapatilir, hedef birakilir, MOVE yeniden verilir; tufek indirilmez (COMBAT), sure sonunda hedef alma geri gelir. Kapali = eski (ezme isleyicisi hedef almayi hep acik tutar). |
 | `kosuPatlamaS` | Kosu patlamasi: sure (sn) | 2–15 | 6 | v8.807. Hedef alma kac sn kapali kalsin (varsayilan 6; art arda durmada retreat +2 sn / durma, en cok +6). Kisa = daha cok karsilik, uzun = daha az aciktta durma. |

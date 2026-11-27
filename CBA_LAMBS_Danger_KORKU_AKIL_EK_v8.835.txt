@@ -41,3 +41,7 @@ force lambs_danger_vurulmaGercekYon = true;
 force lambs_danger_siperPeek = true;
 force lambs_danger_siperMikro = true;
 force lambs_danger_yakinHareket = true;
+force lambs_danger_korku = true;
+force lambs_danger_korkuM = 25;
+force lambs_danger_korkuSure = 4;
+force lambs_danger_korkuSiper = true;
