@@ -44,3 +44,27 @@ Tam fark listesi: `CBA_LAMBS_Danger_v8.834.txt` ile `diff`.
 4. Teslimiyet: `[TESLIM]` satırı olmamalı.
 5. Cover/duruş: `GIZLENME / DURUS` ayakta ≤ %30.
 6. Bina: `BINA-SALDIRI-OZET` `GIRIS_BASLATILDI` > 1 (oyuncu bina içindeyken).
+
+---
+
+## Korku + akıl eki ("ölmekten korksun, ayık ve zeki olsunlar", "ayakta durmasınlar")
+
+Dosyalar (deponun kökünde):
+- `CBA_LAMBS_Danger_DOKTRIN_KORKU_v8.834.txt` — **tam preset** = doktrin test preset'i + bu ek (31 satır daha değişti).
+- `CBA_LAMBS_Danger_KORKU_AKIL_EK_v8.834.txt` — **yalnız ek satırlar** (43 satır, taraf varyantları dahil). CBA içe aktarma yalnız yazılan anahtarları değiştirir; çalışmazsa tam dosyayı kullan.
+
+Fikir: korku = **panik değil, temkin**. Özgüven (`ozguven` 0.95) ve `panicChance` (0.01) aynen kalır ki asker donmasın / paniklemesin (ayık). Ölüm korkusu şu davranışlarla görünür:
+
+| Davranış | Ayar | Eski → Yeni |
+|---|---|---|
+| Kayıp başlayınca erken geri çekilme | `erkenKayipHiz` (60 sn'de kayıp), `erkenKayipOran` | 4–5 / 0.35–0.45 → **2 / 0.20** |
+| Ağır kayıptan sonra temkin (hücum kilidi) | `kacisKayip`, `kacisKilitS` | 0.55 / 75 sn → **0.30 / 150 sn** |
+| Tek kalan / mermisi bitmiş kaçar | `kacisBireysel` | açık |
+| Daha temkinli ilerleme tempo | `bndAgresif` (Dengeli), `uzakHucumM` | Agresif / 120–150 m → **Dengeli / 100 m** |
+| Tehditte daha erken siper atılışı | `zorlaRisk` | 0.25 → **0.15** |
+| Ayakta durma azalır | `siperDusuk` 2, `siperDurusCesit` 0.1 (eski 0.25–0.5), `durusDisiplinSn` **1 sn**, `durusYatMesafe` **70 m**, `siperAyaktaYok`, `siperDurusTut`, `durusKati` | siperde yat / çömel, hareketsiz ayakta 1 sn'de iner |
+| Siperde daha uzun kalır | `siperTutSn` 32 → **60**, `siperTutTemasS` 7 → **12** | acele açığa çıkmaz |
+| Duman (kaçış / hareket örtüsü) | `sisButceMax` 3 → **5** | daha çok duman olayı |
+| Vurulunca tepki | `vurulmaTepki`, `vurulmaGercekYon`, `siperPeek`, `siperMikro`, `yakinHareket` | açık |
+
+Beklenti (T, denenmedi): karne `GIZLENME / DURUS` "ayakta" ≤ %20; `ERKEN-CEKILME` karar sayısı artar; `[KACIS]` / `[BND]` tempo azalır. Çok pasif / geri çekilgen çıkarsa önce `erkenKayipOran` 0.2 → 0.3, `bndAgresif` 1 → 2 yap.
