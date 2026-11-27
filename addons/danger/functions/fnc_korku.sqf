@@ -25,19 +25,20 @@ lambs_danger_korkuSay = createHashMap;
         };
     };
 };
-["CAManBase", "FiredNear", {
-    params ["_u", "_f", "_d", "_w", "_mz", "_mod", "_ammo"];
+// v8.836 (RPT 2ac21bb3, v8.835: [KORKU] olay 0; 446 bot atisi, 18 isabet ama grup baskisi en cok 0.05): 'FiredNear' mermi GECISINI degil, ATEŞ EDENIN yakinligini bildirir (ates eden askerin korkuM icinde olmasi) -> yalniz CQB'de tetiklenirdi.
+//   MERMI GECISI icin motorun 'Suppressed' olayi eklendi (mermi askerin yanindan gecti: distance = merminin gecis mesafesi; <= 1.5 m +0.35, <= 4 m +0.20, digeri +0.10). Her iki olay ortak isleme kodunu kullanir; olay isleyicileri CBA sinif olayi yerine
+//   10 sn'de bir TUM yerel AI askerlere addEventHandler ile baglanir (XEH 'FiredNear' / 'Suppressed' destegine bagimlilik yok).
+lambs_danger_korkuIsle = {
+    params ["_u", "_f", "_d", "_agirlik", "_kaynak"];
     if (!local _u || {isPlayer _u} || {!alive _u}) exitWith {};
     if !(missionNamespace getVariable ["lambs_danger_korku", true]) exitWith {};
     if (time < (_u getVariable [QGVAR(korkuIslT), 0])) exitWith {};
     _u setVariable [QGVAR(korkuIslT), time + 0.25];
     if (isNull _f || {!alive _f} || {_f isEqualTo _u} || {((side group _u) getFriend (side group _f)) >= 0.6} || {(side group _f) isEqualTo civilian}) exitWith {};
-    private _m = ((missionNamespace getVariable ["lambs_danger_korkuM", 25]) max 8) min 60;
-    if (_d > _m) exitWith {};
-    if !(_ammo isKindOf ["BulletBase", configFile >> "CfgAmmo"]) exitWith {};
     private _s = lambs_danger_korkuSay;
+    _s set [_kaynak, (_s getOrDefault [_kaynak, 0]) + 1];
     _s set ["olay", (_s getOrDefault ["olay", 0]) + 1];
-    private _v = (([_u] call FUNC(korkuDeger)) + (if (_d <= 5) then {0.35} else { if (_d <= 12) then {0.2} else {0.08} })) min 1;
+    private _v = (([_u] call FUNC(korkuDeger)) + _agirlik) min 1;
     _u setVariable [QGVAR(korkuD), [_v, time]];
     if (_v < 0.25) exitWith {};
     private _g = group _u;
@@ -73,7 +74,26 @@ lambs_danger_korkuSay = createHashMap;
         _eylem pushBack "siper ara";
     };
     if (_eylem isNotEqualTo [] && {["korku", 20, 30] call FUNC(logIzin)}) then {
-        diag_log format ["[KORKU] %1 | %2 | ates eden %3 %4 m (%5) | korku %6 | %7", groupId _g, name _u, typeOf _f, round _d, _ammo, _v toFixed 2, _eylem joinString " + "];
+        diag_log format ["[KORKU] %1 | %2 | ates eden %3 %4 m (%5) | korku %6 | %7", groupId _g, name _u, typeOf _f, round _d, _kaynak, _v toFixed 2, _eylem joinString " + "];
     };
-}, true, [], true] call CBA_fnc_addClassEventHandler;
+};
+// olay isleyicilerini tum yerel AI askerlere bagla (10 sn'de bir)
+[] spawn {
+    while {true} do {
+        sleep 10;
+        if !(missionNamespace getVariable ["lambs_danger_korku", true]) then { continue };
+        {
+            private _u = _x;
+            if (local _u && {!isPlayer _u} && {isNil {_u getVariable QGVAR(korkuEH)}}) then {
+                _u setVariable [QGVAR(korkuEH), true];
+                _u addEventHandler ["Suppressed", { params ["_unit", "_dist", "_shooter", "_instigator"]; private _f = if (isNull _shooter) then {_instigator} else {_shooter}; [_unit, _f, _dist, (if (_dist <= 1.5) then {0.35} else { if (_dist <= 4) then {0.2} else {0.1} }), "gecis"] call lambs_danger_korkuIsle; }];
+                _u addEventHandler ["FiredNear", {
+                    params ["_unit", "_firer", "_dist", "_w", "_mz", "_mod", "_ammo"];
+                    private _m = ((missionNamespace getVariable ["lambs_danger_korkuM", 25]) max 8) min 60;
+                    if (_dist <= _m && {_ammo isKindOf ["BulletBase", configFile >> "CfgAmmo"]}) then { [_unit, _firer, _dist, (if (_dist <= 5) then {0.25} else { if (_dist <= 12) then {0.12} else {0.05} }), "yakin_atis"] call lambs_danger_korkuIsle; };
+                }];
+            };
+        } forEach allUnits;
+    };
+};
 true
