@@ -84,7 +84,7 @@ diag_log "[MEDIC-TASMA] saglikci tasmasi baslatildi (temasta lidere gore arkada 
                             _a setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI];
                             _a setVariable [QGVAR(forceMove), nil];
                             _a setVariable [QGVAR(taktikKilit), nil];
-                            _a setUnitPosWeak (["MIDDLE", "DOWN"] select ((getSuppression _a) > 0.4));
+                            _a setUnitPosWeak (["MIDDLE", "DOWN"] select (([_a] call FUNC(baskiSeviye)) >= 2));
                         };
                     };
                 };

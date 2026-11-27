@@ -73,7 +73,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
             private _en = _l findNearestEnemy _l;
             private _yakinDusman = !isNull _en && {(_en distance2D _l) < 50};
             private _urban = (_bina >= 8) || {(insideBuilding _l) > 0.5} || {_yakinDusman && {_bina >= 5}};
-            private _hareketVar = ((speed _l) > 1) || {(_g getVariable [QGVAR(contact), 0]) > (time - 90)};
+            private _hareketVar = ((speed _l) > 1) || {([_g] call FUNC(temasSeviye)) <= 2};
             if (_urban && {_hareketVar} && {time > (_g getVariable [QGVAR(rearBekle), 0])}) then {
                 _g setVariable [QGVAR(rearAktifT), time];
             };
@@ -96,7 +96,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                     && {(secondaryWeapon _x) isEqualTo ""}
                     && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}
                     && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
-                    && {(getSuppression _x) < 0.5}
+                    && {([_x] call FUNC(baskiSeviye)) < 3}
                     && {!(_x getVariable [QGVAR(noktaEk), false])}   // v8.376: nokta elemani arka guvenlik olmaz
                 };
                 if ((count _adaylar) >= 3) then {
@@ -116,7 +116,7 @@ diag_log "[ARKA-GUVENLIK] arka guvenlik watchdog baslatildi (CQB / yogun urban, 
                 _g setVariable [QGVAR(rearBekle), time + 60];
                 continue
             };
-            if ((getSuppression _u) >= 0.6) then { continue };   // ezilen siper alir, FSM yonetsin
+            if (([_u] call FUNC(baskiSeviye)) >= 4) then { continue };   // ezilen siper alir, FSM yonetsin
 
             // --- on yon: dusman > lider hareket yonu > lider bakis yonu ---
             private _on = if (!isNull _en && {(_en distance2D _l) < 400}) then {

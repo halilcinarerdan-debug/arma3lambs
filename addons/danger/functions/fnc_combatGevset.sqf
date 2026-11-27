@@ -34,7 +34,7 @@ diag_log "[COMBAT-GEVSE] temassiz uzun COMBAT -> AWARE izleyicisi baslatildi (v8
                 private _le = leader _g;
                 private _ee = _le findNearestEnemy _le;
                 if (!isNull _ee && {alive _ee} && {(_le distance2D _ee) <= 800} && {(_le knowsAbout _ee) >= (["SEZILDI"] call FUNC(bilgiEsik))}
-                    && {((_g getVariable [QGVAR(contact), 0]) > (time - 8)) || {([_le, "VIEW", _ee] checkVisibility [eyePos _le, eyePos _ee]) >= 0.3}}) then {
+                    && {(([_g] call FUNC(temasSeviye)) <= 0) || {([_le, "VIEW", _ee] checkVisibility [eyePos _le, eyePos _ee]) >= 0.3}}) then {
                     _g setBehaviour "COMBAT";
                     _g setVariable [QGVAR(gevsetT), time + 20];
                     lambs_danger_temasCombatN = (missionNamespace getVariable ["lambs_danger_temasCombatN", 0]) + 1;
@@ -43,7 +43,7 @@ diag_log "[COMBAT-GEVSE] temassiz uzun COMBAT -> AWARE izleyicisi baslatildi (v8
             };
             if ((behaviour (leader _g)) isNotEqualTo "COMBAT") then { continue };
             if (time < (_g getVariable [QGVAR(gevsetT), 0])) then { continue };
-            if (((_g getVariable [QGVAR(contact), 0]) > (time - 120)) || {(selectMax ([-999] + ((units _g) apply {_x getVariable [QGVAR(sonAtisT), -999]}))) > (time - 60)}) then { continue };
+            if ((([_g] call FUNC(temasSeviye)) <= 2) || {(selectMax ([-999] + ((units _g) apply {_x getVariable [QGVAR(sonAtisT), -999]}))) > (time - 60)}) then { continue };
             if ((_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isATEngage), false]}) then { continue };
             if ([_g, "combatGevset", true] call FUNC(senaryoKapi)) then { continue };

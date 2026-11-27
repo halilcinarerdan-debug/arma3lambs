@@ -72,7 +72,7 @@ private _calis = {
 
             // tehdit: dusman yakin / baski
             private _en = _d findNearestEnemy _d;
-            if ((!isNull _en && {(_d distance2D _en) < 100}) || {(getSuppression _d) > 0.5}) then { ["dusman < 100 m / baski"] call _serbest; continue };
+            if ((!isNull _en && {(_d distance2D _en) < 100}) || {([_d] call FUNC(baskiSeviye)) >= 3}) then { ["dusman < 100 m / baski"] call _serbest; continue };
 
             // eskort piyade grubu
             private _vp = getPosATL _veh;

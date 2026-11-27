@@ -157,7 +157,7 @@ diag_log format [
         private _ldr = [leader _g, _canliL select 0] select (isNull (leader _g) || {!alive (leader _g)});
         private _dus = _ldr findNearestEnemy _ldr;
         if (!isNull _dus && {(_ldr distance2D _dus) <= 150} && {(_g getVariable [QGVAR(contact), 0]) > time}) exitWith { _neden = format ["temas yeniden basladi (dusman %1 m)", round (_ldr distance2D _dus)]; };
-        if ((((units _g) findIf {alive _x && {(getSuppression _x) > 0.8}}) > -1) && {!isNull _dus} && {(_ldr distance2D _dus) < 200}) exitWith { _neden = "baski altinda"; };
+        if ((((units _g) findIf {alive _x && {([_x] call FUNC(baskiSeviye)) >= 4}}) > -1) && {!isNull _dus} && {(_ldr distance2D _dus) < 200}) exitWith { _neden = "baski altinda"; };
 
         // asker / mevzi: varista doStop + durus + sektor bakisi; 6 sn'de bir sapanlari tekrar yonlendir (LAMBS birim FSM'i dagitabilir)
         {

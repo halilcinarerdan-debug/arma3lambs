@@ -38,9 +38,9 @@ private _calis = {
             if ((speed _l) > 1) then { _g setVariable [QGVAR(haltHareketT), time]; };
 
             private _engel =
-                ((_g getVariable [QGVAR(contact), 0]) > (time - 20))
+                (([_g] call FUNC(temasSeviye)) <= 1)
                 || {(time - (selectMax ([-999] + (_us apply {_x getVariable [QGVAR(sonAtisT), -999]})))) < 25}   // v8.376: gercek ates sinyali (davranis COMBAT kosulu KALDIRILDI: COMBAT temas bitince de kaliyor -> halt hic calismiyor, slot kovalama / BOSTA-HAREKET geri geldi)
-                || {(getSuppression _l) > 0.2}
+                || {([_l] call FUNC(baskiSeviye)) >= 1}
                 || {(count _us) < 6}
                 || {({_g getVariable [_x, false]} count [QGVAR(isRetreating), QGVAR(isEvading), QGVAR(isBounding), QGVAR(isExecutingTactic), QGVAR(isBreakingContact), QGVAR(isAmbushing), QGVAR(sniperTeam), QGVAR(isSonDirenis), QGVAR(disableGroupAI)]) > 0}
                 || {(time - (_g getVariable [QGVAR(haltHareketT), -999])) < 8}

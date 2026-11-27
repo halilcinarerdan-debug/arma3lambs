@@ -255,7 +255,7 @@ private _calis = {
             //   eski kosul (contact > time) yuzunden grup neredeyse hep 'temasta' sayilip yalniz <= 6 m esler paslasabiliyordu (kullanici: 2 sarjorlu M4'e arkadaslari vermedi).
             private _sit = _g getVariable [QGVAR(cmdSit), []];
             private _yakinDusman = _sit isEqualType [] && {(count _sit) >= 2} && {(time - (_sit select 0)) < 20} && {(_sit select 1) < 60};
-            private _aktif = _yakinDusman || {((units _g) findIf {alive _x && {((time - (_x getVariable [QGVAR(sonAtisT), -999])) < 10) || {(getSuppression _x) > 0.2}}}) >= 0};
+            private _aktif = _yakinDusman || {((units _g) findIf {alive _x && {((time - (_x getVariable [QGVAR(sonAtisT), -999])) < 10) || {([_x] call FUNC(baskiSeviye)) >= 1}}}) >= 0};
             if (_aktif) then { _g setVariable [QGVAR(cephaneSonTemasT), time]; };
             private _temas = _aktif;
             private _sakin = (time - (_g getVariable [QGVAR(cephaneSonTemasT), -999])) > 8;

@@ -513,7 +513,7 @@ if (EGVAR(main,debug_functions)) then {
             // Baski >= 0.85: ezilen kosmaya devam etmez, forceMove birakilir -> FSM siper alir
             {
                 private _b = _x select 0;
-                if (alive _b && {!(_b in _pinned)} && {(getSuppression _b) >= 0.95}) then {
+                if (alive _b && {!(_b in _pinned)} && {([_b] call FUNC(baskiSeviye)) >= 4}) then {
                     _pinned pushBack _b;
                     _b setVariable [QGVAR(forceMove), nil];
                     _b enableAI "AUTOCOMBAT";
@@ -526,7 +526,7 @@ if (EGVAR(main,debug_functions)) then {
             // Ezilen asker baski dusunce (< 0.5) kosuya geri doner
             {
                 private _b = _x select 0;
-                if (alive _b && {_b in _pinned} && {(getSuppression _b) < 0.6}) then {
+                if (alive _b && {_b in _pinned} && {([_b] call FUNC(baskiSeviye)) < 4}) then {
                     _pinned = _pinned - [_b];
                     _b enableAI "TARGET";
                     _b enableAI "AUTOTARGET";
@@ -670,7 +670,7 @@ if (EGVAR(main,debug_functions)) then {
                             // v8.671 KOSU MODU (RPT 04a53ab5: 5 asker COMBAT + hedef alma acik iken 17-25 sn MOVE komutuyla STAND / hiz 0 kaldi, baski 0, dusman gorunurlugu 0, doStop + yeni doMove bile islemedi; bu sirada 3 asker vuruldu):
                             //   ilk takilmada (baski < 0.3) o asker eski kosu moduna alinir: AWARE + TARGET / AUTOTARGET kapali (motorun 'hedefe dur / nisan al' alt durumu devre disi); sicrama sonunda (4) COMBAT + hedef alma geri verilir.
                             //   v8.674: VARSAYILAN KAPALI (RPT 8f8a8871: takilma tespiti her sicramanin ~5. sn'sinde TUM kosucularda tetiklendi = normal baslama gecikmesi; 5 askeri AWARE + hedef alma kapali yapti -> 'nisan alip karsilik vermiyorlar'). Acmak: lambs_danger_cekilKosuModu = true.
-                            if ((_x select 4) >= 1 && {(getSuppression _b) < 0.3} && {missionNamespace getVariable ["lambs_danger_cekilKosuModu", false]} && {!(_b getVariable [QGVAR(retKosuModu), false])}) then {
+                            if ((_x select 4) >= 1 && {([_b] call FUNC(baskiSeviye)) < 2} && {missionNamespace getVariable ["lambs_danger_cekilKosuModu", false]} && {!(_b getVariable [QGVAR(retKosuModu), false])}) then {
                                 _b setVariable [QGVAR(retKosuModu), true];
                                 _b disableAI "TARGET";
                                 _b disableAI "AUTOTARGET";
@@ -803,7 +803,7 @@ if (EGVAR(main,debug_functions)) then {
                 private _cv = [_x, _targetPos, 25, "ASCEND", 1, "OVERWATCH"] call EFUNC(main,findCover);
                 if (_cv isNotEqualTo [] && {(_cv select 0) isNotEqualTo []}) then {
                     private _cp = (_cv select 0) select 0;
-                    if ((getSuppression _x) < 0.85 && {(_x distance2D _cp) > 3}) then {
+                    if (([_x] call FUNC(baskiSeviye)) < 4 && {(_x distance2D _cp) > 3}) then {
                         _x setVariable [QGVAR(forceMove), true];
                         _x setVariable [QGVAR(retEmirT), time];   // v8.713: ters donus kaynak atfi (durumLog)
                         _x doMove _cp;

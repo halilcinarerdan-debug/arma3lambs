@@ -44,7 +44,7 @@ if ((time - (_g getVariable [QGVAR(sisButceT), -999])) < _grupAralik) exitWith {
 
 private _l = leader _g;
 private _temas = (_g getVariable [QGVAR(contact), 0]) > time;
-private _baski = (!isNull _l) && {(getSuppression _l) > 0.15};
+private _baski = (!isNull _l) && {([_l] call FUNC(baskiSeviye)) >= 1};
 if (!_temas && {!_baski}) exitWith { ["gercek tehdit yok (temas / baski yok)"] call _ret };
 
 _liste pushBack time;

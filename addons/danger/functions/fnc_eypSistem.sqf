@@ -59,7 +59,7 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                 private _hepsi = (units _g) select {alive _x && {local _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};   // v8.777: araca binmis olanlar da (arac bombasi)
                 if (_uyeler isEqualTo [] && {_hepsi isEqualTo []}) then { continue };
                 private _taraf = side _g;
-                private _temas = (_g getVariable [QGVAR(contact), 0]) > (time - 15);
+                private _temas = ([_g] call FUNC(temasSeviye)) <= 1;
                 if (!_temas) then { continue };
                 private _en = _l findNearestEnemy _l;
                 if (isNull _en || {!alive _en} || {(_taraf getFriend (side group _en)) >= 0.6} || {(side group _en) isEqualTo civilian}) then { continue };

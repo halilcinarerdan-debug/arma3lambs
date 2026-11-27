@@ -358,8 +358,8 @@ lambs_danger_patlayiciDon = {
             if ((_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(teslimOldu), false]}) then { continue };
             private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {!(_x getVariable [QGVAR(teslim), false])}};   // v8.314: bina ici de dahil (bomba atabilir; roket icin ayrica disarida sarti)
             if (_uyeler isEqualTo []) then { continue };
-            private _baski = ({(getSuppression _x) > 0.4} count _uyeler) >= 2;
-            private _baskiGev = ({(getSuppression _x) > 0.3} count _uyeler) >= 1;   // v8.316: esnek baski (bomba icin)
+            private _baski = ({([_x] call FUNC(baskiSeviye)) >= 2} count _uyeler) >= 2;
+            private _baskiGev = ({([_x] call FUNC(baskiSeviye)) >= 2} count _uyeler) >= 1;   // v8.316: esnek baski (bomba icin)
             private _pusu = (time - (_g getVariable [QGVAR(pusuT), -999])) < 30;   // v8.313: pusu alarmi (fnc_pusuTepki) son 30 sn -> bilinen atici icin bomba / roket 'deger tasir' sayilir
             private _taraf = side _g;
             private _tr = _l nearTargets 320;

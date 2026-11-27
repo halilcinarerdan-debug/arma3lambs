@@ -44,7 +44,7 @@ diag_log "[BINA-SALDIRI] koordineli bina girisi (temasta, binadaki dusman) watch
             if (isNull _l || {!alive _l} || {isPlayer _l} || {!isNull objectParent _l}) then { continue };
             private _uyeler = (units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}};
             if ((count _uyeler) < (((missionNamespace getVariable ["lambs_danger_binaMinAsker", 4]) max 2) min 8) || {((count _uyeler) / ((count (units _g)) max 1)) < 0.6}) then { ["asker_az"] call _ar; continue };   // v8.770: CBA binaMinAsker
-            if (({(getSuppression _x) > 0.8} count _uyeler) > 0) then { ["baski"] call _ar; continue };
+            if (({([_x] call FUNC(baskiSeviye)) >= 4} count _uyeler) > 0) then { ["baski"] call _ar; continue };
             private _taraf = side _g;
             private _bMenzil = ((missionNamespace getVariable ["lambs_danger_binaMenzilM", 120]) max 60) min 250;   // v8.770: CBA binaMenzilM
             private _bMin = ((missionNamespace getVariable ["lambs_danger_binaMinM", 12]) max 4) min 30;   // v8.770: CBA binaMinM

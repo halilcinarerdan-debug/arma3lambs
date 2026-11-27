@@ -30,7 +30,7 @@ diag_log "[CQB-KUME] CQB kumelenme (kopuk askeri yakin dostuna cek) baslatildi (
             if (_butce <= 0) exitWith {};
             private _g = _x;
             if (isNull _g || {(count (units _g)) < 3}) then { continue };
-            if (((_g getVariable [QGVAR(contact), 0]) < (time - 20))) then { continue };
+            if ((([_g] call FUNC(temasSeviye)) > 1)) then { continue };
             if (
                 (_g getVariable [QGVAR(isBounding), false]) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isATEngage), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]}
@@ -53,7 +53,7 @@ diag_log "[CQB-KUME] CQB kumelenme (kopuk askeri yakin dostuna cek) baslatildi (
                 private _u = _x;
                 if (!local _u || {isPlayer _u} || {_u isEqualTo _l}) then { continue };
                 if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {time < (_u getVariable [QGVAR(kumeT), 0])}) then { continue };
-                if ((getSuppression _u) >= 0.6 || {(insideBuilding _u) >= 0.5} || {(_u getVariable [QGVAR(stationPos), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(tcccBusy), false]) isEqualTo true}) then { continue };
+                if (([_u] call FUNC(baskiSeviye)) >= 4 || {(insideBuilding _u) >= 0.5} || {(_u getVariable [QGVAR(stationPos), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(tcccBusy), false]) isEqualTo true}) then { continue };
                 if ((_u getVariable [QGVAR(reloadState), []]) isNotEqualTo [] || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []}) then { continue };
                 private _dostlar = _saglam - [_u];
                 if (_dostlar isEqualTo []) then { continue };

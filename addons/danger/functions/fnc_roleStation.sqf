@@ -101,7 +101,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     private _gu = _x;
                     if (
                         alive _gu && {local _gu} && {!isPlayer _gu} && {isNull objectParent _gu}
-                        && {(speed _gu) < 1.5} && {(getSuppression _gu) < 0.5}
+                        && {(speed _gu) < 1.5} && {([_gu] call FUNC(baskiSeviye)) < 3}
                         && {!(_gu getVariable [QGVAR(forceMove), false])}
                         && {(time - (_gu getVariable [QGVAR(bndSonKos), -999])) > 10}   // v8.381: kosucu olarak secilen / yeni kosan bombaatar sicrama sirasinda 40 mm yuklemeye durmaz
                         && {([_gu] call _glFn) isNotEqualTo ""}
@@ -255,7 +255,7 @@ diag_log "[ROL] rol istasyonu (formasyon sirasi + MG / nisanci / UGL / AT / sagl
                     || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
                     || {(speed _u) > 1.5}
-                    || {(getSuppression _u) >= 0.5}
+                    || {([_u] call FUNC(baskiSeviye)) >= 3}
                     || {(insideBuilding _u) >= 0.5}
                 ) then { continue };
 

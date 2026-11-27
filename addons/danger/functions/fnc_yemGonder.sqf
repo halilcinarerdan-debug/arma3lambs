@@ -44,7 +44,7 @@ diag_log "[YEM] yem + taciz atesi (oyuncu grubuna: en basit asker farkli bolgede
             private _l = leader _g;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if (time < (_g getVariable [QGVAR(yemT), 0])) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 120)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 2) then { continue };
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
                 || {_g getVariable [QGVAR(isBounding), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]} || {_g getVariable [QGVAR(isSweeping), false]}
@@ -62,7 +62,7 @@ diag_log "[YEM] yem + taciz atesi (oyuncu grubuna: en basit asker farkli bolgede
             // yem birimi: en basit asker
             private _aday = _us select {
                 _x isNotEqualTo _l && {([_x] call _rolFn) isEqualTo "RIFLE"} && {(_x getVariable [QGVAR(gozcu), false]) isNotEqualTo true} && {(_x getVariable [QGVAR(noktaEk), false]) isNotEqualTo true}
-                && {(_x getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {time > (_x getVariable [QGVAR(taktikKilit), 0])} && {(getSuppression _x) < 0.3} && {!captive _x}
+                && {(_x getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {time > (_x getVariable [QGVAR(taktikKilit), 0])} && {([_x] call FUNC(baskiSeviye)) < 2} && {!captive _x}
             };
             if (_aday isEqualTo []) then { _say set ["adayYok", (_say get "adayYok") + 1]; _g setVariable [QGVAR(yemT), time + 30]; continue };
             _aday = [_aday, [], {(rankId _x) + (random 0.5)}, "ASCEND"] call BIS_fnc_sortBy;

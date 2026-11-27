@@ -23,14 +23,14 @@ private _rolFn = missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {
 private _mgs = (units _g) select {
     alive _x && {_x isNotEqualTo _u} && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
     && {([_x] call _rolFn) isEqualTo "MG"} && {(_x distance2D _en) <= 400} && {(_x getVariable [QGVAR(forceMove), false]) isNotEqualTo true}
-    && {(getSuppression _x) < 0.8} && {(_x ammo (currentMuzzle _x)) > 8}
+    && {([_x] call FUNC(baskiSeviye)) < 4} && {(_x ammo (currentMuzzle _x)) > 8}
 };
 // v8.736 KAPSAMA ATESI (kullanici: 'cover to cover daha profesyonel'): MG yoksa / uygun degilse ayni gruptan YAKIN (<= 40 m) bosta, siperde, ates hatti acik bir dost (tufek / AT / nisanci) kapsama ateşi acar (siperKapsamaAtesi); koşan asker ates altinda yalniz kalmaz
 if (_mgs isEqualTo [] && {missionNamespace getVariable ["lambs_danger_siperKapsamaAtesi", true]}) then {
     _mgs = (units _g) select {
         alive _x && {_x isNotEqualTo _u} && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}
         && {(_x distance2D _u) <= 40} && {(_x distance2D _en) <= 250} && {(speed _x) < 2} && {(_x getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
-        && {(getSuppression _x) < 0.6} && {(_x ammo (currentMuzzle _x)) > 8}
+        && {([_x] call FUNC(baskiSeviye)) < 4} && {(_x ammo (currentMuzzle _x)) > 8}
     };
 };
 if (_mgs isEqualTo []) exitWith {false};

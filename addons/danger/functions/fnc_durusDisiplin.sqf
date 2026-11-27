@@ -62,9 +62,9 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
 
             private _g = group _u;
             // v8.830: siper durusu tutma temas bittikten 120 sn sonra birakilir (yerde sonsuza kadar kalmasin)
-            if (!isNil {_u getVariable QGVAR(siperDurusTut)} && {((_g getVariable [QGVAR(contact), 0]) < (time - 120)) || {(time - ((_u getVariable [QGVAR(siperDurusTut), [0, time]]) param [1, time])) > 240}}) then { _u setUnitPos "AUTO"; _u setVariable [QGVAR(siperDurusTut), nil]; };
+            if (!isNil {_u getVariable QGVAR(siperDurusTut)} && {(([_g] call FUNC(temasSeviye)) > 2) || {(time - ((_u getVariable [QGVAR(siperDurusTut), [0, time]]) param [1, time])) > 240}}) then { _u setUnitPos "AUTO"; _u setVariable [QGVAR(siperDurusTut), nil]; };
             if (
-                ((_g getVariable [QGVAR(contact), 0]) < (time - 45)) || {(insideBuilding _u) > 0.5}
+                (([_g] call FUNC(temasSeviye)) > 1) || {(insideBuilding _u) > 0.5}
                 || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u} || {_u getVariable [QGVAR(teslim), false]}
             ) then { if (!isNil {_u getVariable QGVAR(durgunT)}) then { _u setVariable [QGVAR(durgunT), nil]; }; continue };
 

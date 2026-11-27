@@ -115,7 +115,7 @@ diag_log "[UFUK-ALGI] ufuk cizgisi farkindaligi v2 baslatildi (v8.528): siluet d
                     _u setVariable [QGVAR(ufukDurT), -1];
                     continue
                 };
-                private _temas = (_g getVariable [QGVAR(contact), 0]) > (time - 20);
+                private _temas = ([_g] call FUNC(temasSeviye)) <= 1;
                 private _hiz = speed _u;
                 if (_hiz >= 1) then {
                     // yurur / kosarken ufuk cizgisini comelerek gec

@@ -198,7 +198,7 @@ diag_log "[CQB-CEVIK] CQB cevik hareket + ates (civilenme onleyici) watchdog'u b
                         continue
                     };
                     private _st = stance _u;
-                    if (_st isEqualTo "PRONE" && {_d < 22} && {(getSuppression _u) < 0.5}) then {
+                    if (_st isEqualTo "PRONE" && {_d < 22} && {([_u] call FUNC(baskiSeviye)) < 3}) then {
                         _u setUnitPosWeak "MIDDLE";
                         _sayac set ["kalk", (_sayac get "kalk") + 1];
                     };

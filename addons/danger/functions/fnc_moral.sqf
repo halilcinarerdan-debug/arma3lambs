@@ -83,7 +83,7 @@ diag_log "[MORAL] moral + teslimiyet izleyicisi baslatildi";
             if ((count _us) > 1 && {!isNull _l}) then {
                 { if (_x isNotEqualTo _l) then { _komsu = _komsu min (_l distance2D _x); }; } forEach _us;
             } else { _komsu = 0; };
-            private _temasYok = (_g getVariable [QGVAR(contact), 0]) < (time - 60);
+            private _temasYok = ([_g] call FUNC(temasSeviye)) > 2;
 
             // v8.275 COKME TERIMI (RPT 04dfc9d7: hic [TESLIM-ADAY] yok, teslim hic tetiklenmedi): eski formulde kayip 0.6 + baski 0.4 ile moral en iyi ihtimalle 0.60'ta kaliyordu,
             //   0.30 esigi lider olu + cephane yok + dost uzak olmadan ULASILAMAZDI. Simdi grup yarisini kaybedince ek -0.25 (yuzde 40'ta -0.10): kayip 0.5 + baski 0.3 -> hedef 0.425 (< 0.45 yeni esik).

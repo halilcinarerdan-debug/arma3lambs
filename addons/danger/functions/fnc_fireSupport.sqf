@@ -100,7 +100,7 @@ diag_log "[ATES-DESTEK] UGL doktrini + stratejik sis + silahsiz dusman ates watc
             private _dusman = _l findNearestEnemy _l;
             if (!isNull _dusman && {alive _dusman}) then {
                 private _dm = _l distance2D _dusman;
-                private _baskili = (_uyeler select {(getSuppression _x) > 0.55});
+                private _baskili = (_uyeler select {([_x] call FUNC(baskiSeviye)) >= 3});
                 private _yarali = (units _g) select {alive _x && {(lifeState _x) isEqualTo "INCAPACITATED"}};
                 if (_dm > 40 && {_dm < 250}) then {
                     if ((count _baskili) >= 2 || {_yarali isNotEqualTo []}) then {

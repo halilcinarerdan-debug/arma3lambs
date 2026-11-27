@@ -150,7 +150,7 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             };
 
             // BOSTA-HAREKET (kullanici: "formasyonda surekli hareket eden AI"): temas >= 30 sn yok, lider duruyor (< 1 km/s) ama >= 2 asker yuruyor (> 3 km/s), > 10 sn
-            if (!_bayrakVar && {(_g getVariable [QGVAR(contact), 0]) < (time - 30)} && {(speed _l) < 1}) then {
+            if (!_bayrakVar && {([_g] call FUNC(temasSeviye)) > 1} && {(speed _l) < 1}) then {
                 private _yuruyen = _us select {_x isNotEqualTo _l && {(speed _x) > 3}};
                 if ((count _yuruyen) >= 2) then {
                     if ((_g getVariable [QGVAR(saglikBostaT), -1]) < 0) then { _g setVariable [QGVAR(saglikBostaT), time]; };
@@ -176,7 +176,7 @@ diag_log "[SAGLIK] saglik / anomali izleyicisi baslatildi";
             };
             // FORMASYON-FELC (kullanici: "form line / column felc ediyor"): temas var, formasyon LINE / COLUMN / FILE / ECH, >= %70 asker AYAKTA ve duruyor (< 0.5 km/s, baski < 0.2), > 20 sn
             if ((_g getVariable [QGVAR(contact), 0]) > time && {!(_g getVariable [QGVAR(isAmbushing), false])} && {(formation _g) in ["LINE", "COLUMN", "FILE", "STAG COLUMN", "ECH LEFT", "ECH RIGHT"]}) then {
-                private _atil = _us select {(speed _x) < 0.5 && {(stance _x) isEqualTo "STAND"} && {(getSuppression _x) < 0.2}};
+                private _atil = _us select {(speed _x) < 0.5 && {(stance _x) isEqualTo "STAND"} && {([_x] call FUNC(baskiSeviye)) < 1}};
                 if ((count _atil) >= ceil ((count _us) * 0.7)) then {
                     if ((_g getVariable [QGVAR(saglikFelcT), -1]) < 0) then { _g setVariable [QGVAR(saglikFelcT), time]; };
                     if ((time - (_g getVariable [QGVAR(saglikFelcT), time])) > 20) then {

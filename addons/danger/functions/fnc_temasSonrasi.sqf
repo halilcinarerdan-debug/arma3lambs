@@ -59,7 +59,7 @@ diag_log "[TEMAS-SONRASI] temas sonrasi gevseme (temas bittikten sonra COMBAT ->
             private _hareketli = (_canli findIf {
                 private _e = _x findNearestEnemy _x;
                 (!isNull _e && {alive _e} && {(_x distance _e) < 500} && {(_x knowsAbout _e) >= _esik})
-                || {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 15} || {(getSuppression _x) > 0.05}
+                || {(time - (_x getVariable [QGVAR(sonAtisT), -999])) < 15} || {([_x] call FUNC(baskiSeviye)) >= 1}
             }) >= 0;
             if (_hareketli) then { _g setVariable [QGVAR(sessizT), time]; continue };
             private _st = _g getVariable [QGVAR(sessizT), -1];

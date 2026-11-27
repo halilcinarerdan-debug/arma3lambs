@@ -94,7 +94,7 @@ diag_log "[YAPRAK] yaprak arkasi gorus kirici baslatildi (BUSH / SMALL TREE / uz
                     private _d = _o distance2D _h;
                     if (_d < 25) then { _say set ["yakin", (_say get "yakin") + 1]; continue };
                     if ((time - (_h getVariable [QGVAR(sonAtisT), -99])) < 4) then { _say set ["ates", (_say get "ates") + 1]; continue };
-                    if ((getSuppression _o) > 0.3) then { _say set ["baski", (_say get "baski") + 1]; continue };
+                    if (([_o] call FUNC(baskiSeviye)) >= 2) then { _say set ["baski", (_say get "baski") + 1]; continue };
 
                     _say set ["kontrol", (_say get "kontrol") + 1];
                     private _st = stance _h;

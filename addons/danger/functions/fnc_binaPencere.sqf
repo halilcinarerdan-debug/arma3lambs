@@ -61,7 +61,7 @@ diag_log "[BINA-PENCERE] bina ici pencere / atis pozisyonu watchdog baslatildi (
                     || {captive _u} || {_u getVariable [QGVAR(teslim), false]}
                     || {(speed _u) > 2} || {(insideBuilding _u) < 0.6}
                     || {(time - (_u getVariable [QGVAR(pencereT), -999])) < 20}
-                    || {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 8} || {(getSuppression _u) > 0.5}
+                    || {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 8} || {([_u] call FUNC(baskiSeviye)) >= 3}
                     || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time}
                     || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []}
                     || {(behaviour _u) isEqualTo "STEALTH"}

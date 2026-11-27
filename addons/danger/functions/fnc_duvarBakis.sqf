@@ -49,7 +49,7 @@ diag_log "[DUVAR-BAKIS] duvar bakisi bekcisi baslatildi (v8.500w): ayakta / come
                     _hdfGizli = true;
                 };
                 // comelen asker temas varken (8 sn) siperinde bekliyor olabilir: dokunma
-                if ((stance _u) isEqualTo "CROUCH" && {((group _u) getVariable [QGVAR(contact), -999]) > (time - 8)}) then { continue };
+                if ((stance _u) isEqualTo "CROUCH" && {([(group _u)] call FUNC(temasSeviye)) <= 0}) then { continue };
                 if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                     || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []} || {_u getUnitTrait "medic" && {(damage _u) > 0}}) then { continue };
                 _say set [2, (_say select 2) + 1];

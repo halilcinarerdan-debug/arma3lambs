@@ -43,7 +43,7 @@ diag_log "[KACIS] kacis katmani baslatildi (v8.544): tek kalan / mermisi az aske
             if (_bu >= 4) exitWith {};
             private _u = _x;
             private _g = group _u;
-            if (((_g getVariable [QGVAR(contact), 0]) < (time - 25)) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}) then { continue };
+            if ((([_g] call FUNC(temasSeviye)) > 1) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}) then { continue };
             if ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true || {(_u getVariable [QGVAR(zorlaBitis), 0]) > time} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                 || {(_u getVariable [QGVAR(siperTutBit), 0]) > time} || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}) then { continue };
             private _en = _u findNearestEnemy _u;

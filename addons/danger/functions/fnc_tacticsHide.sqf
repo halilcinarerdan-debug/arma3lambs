@@ -58,7 +58,7 @@ if ((formation _group) isNotEqualTo "WEDGE") then { [_group, "WEDGE", "hide", 1]
 // v8.89 ATES KESME DUZELTMESI (RPT e020cec6: IS gruplari 75 karardan 39'unda DELAY = siper + 'WHITE' (ates kesme); 140-250 m'de bilinen dusman ates ederken karsilik vermiyorlardi, 15 bayilan / 4):
 //   WHITE yalniz saklanma / pusu icin anlamli. Bilinen dusman 400 m icinde ve gruptan biri baski altindaysa siper al + KARSILIK VER (YELLOW).
 private _hEn = _unit findNearestEnemy _unit;
-private _hBask = ((units _group) findIf {alive _x && {(getSuppression _x) > 0.1}}) > -1;
+private _hBask = ((units _group) findIf {alive _x && {([_x] call FUNC(baskiSeviye)) >= 1}}) > -1;
 [_group, (["WHITE", "YELLOW"] select ((!isNull _hEn && {(_unit distance2D _hEn) < 400} && {(_unit knowsAbout _hEn) > (["KESIN"] call FUNC(bilgiEsik))}) || {_hBask})), "hide"] call FUNC(cmSet);
 _group enableAttack false;
 

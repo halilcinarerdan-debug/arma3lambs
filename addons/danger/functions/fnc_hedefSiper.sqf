@@ -49,7 +49,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
             // ACIGA CIKTI: net gorunur (>= 0.6), hareketlendi, yer degistirdi ya da CQB'ye girdi -> ilk temas fazi biter, TUM grup ayni anda serbest kalir
             private _acik = !isNull _e && {alive _e} && {(_vis >= 0.6) || {(time - (_e getVariable [QGVAR(sonAtisT), -999])) < 5} || {(speed _e) > 3} || {((getPosATL _e) distance2D (_u getVariable [QGVAR(sipPoz), [0, 0, 0]])) > 3} || {(_u distance2D _e) < (missionNamespace getVariable ["lambs_danger_siperliMinM", 25])}};
             if (_acik) then { _g0 setVariable [QGVAR(hsBas), -1000000]; };
-            if (isNull _e || {!alive _e} || _acik || {(getSuppression _u) >= 0.25} || {(time - (_g0 getVariable [QGVAR(hsBas), time])) > _ilkSn0} || {time > (_u getVariable [QGVAR(sipHoldT), 0])}) then {
+            if (isNull _e || {!alive _e} || _acik || {([_u] call FUNC(baskiSeviye)) >= 2} || {(time - (_g0 getVariable [QGVAR(hsBas), time])) > _ilkSn0} || {time > (_u getVariable [QGVAR(sipHoldT), 0])}) then {
                 _u setUnitCombatMode (_u getVariable [QGVAR(sipEskiCM), "YELLOW"]);
                 _u setVariable [QGVAR(sipEskiCM), ""];
                 if (!isNull _e && {alive _e}) then { _u doTarget _e; };
@@ -69,7 +69,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
 
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {((units group _x) findIf {isPlayer _x}) < 0} && {(side group _x) in [west, east, resistance]} && {!captive _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call FUNC(bombaciMi))}
-            && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 20)}
+            && {([(group _x)] call FUNC(temasSeviye)) <= 1}
             && {
                 (isNull objectParent _x && {(primaryWeapon _x) isNotEqualTo ""}) || {(vehicle _x) isNotEqualTo _x && {_x isEqualTo (gunner (vehicle _x))} && {(vehicle _x) isKindOf "LandVehicle"}}
             }
@@ -151,7 +151,7 @@ diag_log "[HEDEF-SIPER] penetrasyon atesi (tahta / kumas arkasi, arac MG dahil) 
                 if (_arac) then { continue };
 
                 // ---- 2) SIPERLI HEDEF DISIPLINI ----
-                if (_siperliAcik && {_ilkFaz} && {!(_g getVariable [QGVAR(disableGroupAI), false])} && {!_atesVerdi} && {_d > _siperliM} && {(time - (_e getVariable [QGVAR(sonAtisT), -999])) >= 5} && {_vis < 0.3} && {(getSuppression _u) < 0.25}
+                if (_siperliAcik && {_ilkFaz} && {!(_g getVariable [QGVAR(disableGroupAI), false])} && {!_atesVerdi} && {_d > _siperliM} && {(time - (_e getVariable [QGVAR(sonAtisT), -999])) >= 5} && {_vis < 0.3} && {([_u] call FUNC(baskiSeviye)) < 2}
                     && {!(_g getVariable [QGVAR(isBounding), false])} && {!(_g getVariable [QGVAR(isExecutingTactic), false])} && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
                     && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {(speed _e) < 3} && {!(_g getVariable [QGVAR(isAmbushing), false])}) then {
                     if ((_u getVariable [QGVAR(sipEskiCM), ""]) isEqualTo "") then {

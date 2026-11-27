@@ -43,7 +43,7 @@ diag_log "[BILGI-ARTIS] genel bilgi artisi (bilinen dusmanin bilgisi / konum net
             if (_n >= 12) exitWith {};
             private _l = leader _g;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l}) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 2) then { continue };
             _n = _n + 1;
             private _h = _g getVariable [QGVAR(bilgiH), createHashMap];
             _g setVariable [QGVAR(bilgiH), _h];

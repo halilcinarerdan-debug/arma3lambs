@@ -27,6 +27,9 @@ for f, t in txt.items():
 out.append("== 3) AYNI SINYAL, FARKLI ESIK ==")
 out.append("  getSuppression: %d farkli esik (deger:adet) %s" % (len(bt), dict(sorted(bt.items(), key=lambda x: -x[1]))))
 out.append("  temas yasi (contact): %d farkli sn esigi %s" % (len(ct), dict(sorted(ct.items(), key=lambda x: -x[1]))))
+ham_b = sum(len(re.findall(r"getSuppression", t)) for t in txt.values()); sev_b = sum(len(re.findall(r"FUNC\(baskiSeviye\)", t)) for t in txt.values())
+ham_t = sum(len(re.findall(r"QGVAR\(contact\)[^;]{0,40}?time *[-+] *\d+", t)) for t in txt.values()); sev_t = sum(len(re.findall(r"FUNC\(temasSeviye\)", t)) for t in txt.values())
+out.append("  TASIMA ILERLEMESI: baski ham %d (getSuppression) / seviye %d (baskiSeviye); temas yasi ham %d / seviye %d (temasSeviye); hakem (emirKilitli) %d yer" % (ham_b, sev_b, ham_t, sev_t, sum(len(re.findall(r"FUNC\(emirKilitli\)", t)) for t in txt.values())))
 out.append("  'dusman biliniyor' tanimi: findNearestEnemy %d dosya / nearTargets %d dosya / knowsAbout %d dosya" % (len(cnt(r"findNearestEnemy")), len(cnt(r"nearTargets")), len(cnt(r"knowsAbout"))))
 out.append("  zamanlanmis dongu: while{true} %d dosya, spawn %d dosya, sleep %d dosya" % (len(cnt(r"while \{true\}")), len(cnt(r"\bspawn\b")), len(cnt(r"\bsleep\b"))))
 rk = sys.argv[1] if len(sys.argv) > 1 else None

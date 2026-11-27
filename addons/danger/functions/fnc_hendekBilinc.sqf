@@ -68,7 +68,7 @@ lambs_danger_hendekBLogN = 0;
                 private _hn = ["EN-YAKIN", getPosATL _u, _askM, _taraf] call FUNC(hendekAlani);
                 if (_hn isNotEqualTo []) then {
                     _u enableAI "PATH"; _u enableAI "MOVE";
-                    _u doMove ((_hn select 0) getPos [random 1, random 360]);
+                    if !([_u] call FUNC(emirKilitli)) then { _u doMove ((_hn select 0) getPos [random 1, random 360]); };   // v8.838: hakem
                     [_u] spawn {
                         params ["_u"];
                         sleep 6;

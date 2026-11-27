@@ -109,7 +109,7 @@ if (isServer) then {
         if (missionNamespace getVariable ["lambs_danger_mevziHafiza", true]) then {
             {
                 private _u = _x;
-                if (local _u && {alive _u} && {!isPlayer _u} && {(_u getVariable [QGVAR(siperTutBit), 0]) > time} && {((group _u) getVariable [QGVAR(contact), 0]) > (time - 10)}) then {
+                if (local _u && {alive _u} && {!isPlayer _u} && {(_u getVariable [QGVAR(siperTutBit), 0]) > time} && {([(group _u)] call FUNC(temasSeviye)) <= 0}) then {
                     private _iz = _u getVariable [QGVAR(mevziIz), []];   // [baslangic zamani, hasar0, pozisyon]
                     if (_iz isEqualTo [] || {(_u distance2D (_iz select 2)) > 6}) then {
                         _u setVariable [QGVAR(mevziIz), [time, damage _u, getPosATL _u]];

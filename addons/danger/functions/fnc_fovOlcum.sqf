@@ -50,7 +50,7 @@ diag_log "[FOV-OLCUM] FOV / algi kaynagi olcumu (aci x mesafe kovalari, arka yar
             if (_k >= 25) exitWith {};
             if (
                 !local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
-                || {captive _u} || {(insideBuilding _u) > 0.5} || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 60)}
+                || {captive _u} || {(insideBuilding _u) > 0.5} || {([(group _u)] call FUNC(temasSeviye)) > 2}
             ) then { continue };
             private _e = _u findNearestEnemy _u;
             if (isNull _e || {!alive _e} || {!(_e isKindOf "CAManBase")}) then { continue };

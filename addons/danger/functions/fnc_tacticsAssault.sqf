@@ -45,7 +45,7 @@ private _hazirYap = false;
 if (!_hazirGecildi && {!(missionNamespace getVariable ["lambs_danger_hazirlikOff", false])}) then {
     private _dM = _unit distance2D _target;
     private _canliH = (units _group) select {alive _x && {isNull objectParent _x}};
-    private _bskH = (_canliH findIf {(getSuppression _x) > 0.5}) >= 0;
+    private _bskH = (_canliH findIf {([_x] call FUNC(baskiSeviye)) >= 3}) >= 0;
     private _sonH = time - (_group getVariable [QGVAR(hazirT), -999]);
     if (_dM > 45 && {_dM < 250} && {(count _canliH) >= 4} && {!_bskH} && {_sonH > 60}) then {
         _hazirYap = true;

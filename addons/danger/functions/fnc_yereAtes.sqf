@@ -84,7 +84,7 @@ private _calis = {
                 if (_dostYakin) then { _say set ["dost_yakin", (_say getOrDefault ["dost_yakin", 0]) + 1]; continue };
                 private _atici = (units _g) select {
                     alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!(_x getVariable [QGVAR(disableAI), false])} && {!(_x getVariable [QGVAR(teslim), false])}
-                    && {time > (_x getVariable [QGVAR(yereAtesT), 0])} && {(getSuppression _x) < 0.5} && {(primaryWeapon _x) isNotEqualTo ""} && {(_x ammo (primaryWeapon _x)) >= 5}
+                    && {time > (_x getVariable [QGVAR(yereAtesT), 0])} && {([_x] call FUNC(baskiSeviye)) < 3} && {(primaryWeapon _x) isNotEqualTo ""} && {(_x ammo (primaryWeapon _x)) >= 5}
                     && {(_x distance2D _b) <= _menzil} && {(lineIntersectsSurfaces [eyePos _x, _bp, _x, _b, true, 1, "VIEW", "NONE"]) isEqualTo []}
                 };
                 if (_atici isEqualTo []) then { _say set ["atici_yok", (_say getOrDefault ["atici_yok", 0]) + 1]; continue };

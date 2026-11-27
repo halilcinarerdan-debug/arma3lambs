@@ -36,7 +36,7 @@ diag_log "[DURUS-AKICI] yat-kalk sonumleyici (durus degisimi sinirlayici) baslat
             private _u = _x;
             if (!local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u}) then { continue };
             private _g = group _u;
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 2) then { continue };
             private _st = stance _u;
             if !(_st in ["STAND", "CROUCH", "PRONE"]) then { continue };
             _say set ["tick", (_say get "tick") + 1];
@@ -53,7 +53,7 @@ diag_log "[DURUS-AKICI] yat-kalk sonumleyici (durus degisimi sinirlayici) baslat
             if ((count _fl) < _fN || {time < _sb}) then { continue };
             // muaf (bilincli durus / tehlike / baska katmanin durusu)
             if (
-                ((getSuppression _u) >= 0.5) || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {_u getVariable ["ACE_isUnconscious", false]}
+                (([_u] call FUNC(baskiSeviye)) >= 3) || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {_u getVariable ["ACE_isUnconscious", false]}
                 || {time < (_u getVariable [QGVAR(tcccBusy), 0])} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}
                 || {time < (_u getVariable [QGVAR(panikBitis), 0])} || {!isNil {_u getVariable QGVAR(koseAktif)}} || {!isNil {_u getVariable QGVAR(yanGuv)}} || {_u getVariable [QGVAR(disableAI), false]}
                 || {(_g getVariable [QGVAR(isAmbushing), false]) isEqualTo true} || {(_g getVariable [QGVAR(sniperTeam), false]) isEqualTo true}
@@ -79,7 +79,7 @@ diag_log "[DURUS-AKICI] yat-kalk sonumleyici (durus degisimi sinirlayici) baslat
             };
             [{
                 params ["_a", "_t"];
-                !alive _a || {time > (_a getVariable [QGVAR(akiciKB), 0])} || {(getSuppression _a) >= 0.6} || {(_a getVariable [QGVAR(akiciTok), -1]) isNotEqualTo _t}
+                !alive _a || {time > (_a getVariable [QGVAR(akiciKB), 0])} || {([_a] call FUNC(baskiSeviye)) >= 4} || {(_a getVariable [QGVAR(akiciTok), -1]) isNotEqualTo _t}
             }, {
                 params ["_a", "_t"];
                 if (alive _a && {(_a getVariable [QGVAR(akiciTok), -1]) isEqualTo _t}) then {

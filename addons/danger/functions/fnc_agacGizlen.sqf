@@ -81,7 +81,7 @@ lambs_danger_agacSayFn = _agacSay;
                 if (alive _u && {isNull objectParent _u} && {!isPlayer _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]}) then {
                     private _pt = _en getPos [2 + random 8, random 360];
                     _u enableAI "PATH"; _u enableAI "MOVE";
-                    _u doMove _pt;
+                    if !([_u] call FUNC(emirKilitli)) then { _u doMove _pt; };   // v8.838: hakem (hayatta kalma > komutan > refleks > kozmetik)
                     [_u, _pt, _g] spawn {
                         params ["_u", "_pt", "_g"];
                         private _bit = time + 60;

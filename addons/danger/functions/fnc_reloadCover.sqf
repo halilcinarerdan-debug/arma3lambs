@@ -132,7 +132,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                     // GO: siperine vardi mi / zaman asimi / ezildi
                     if (_faz isEqualTo "GO") then {
                         private _vardi = (_u distance2D _pos) < 3;
-                        private _ezildi = (getSuppression _u) >= 0.85;
+                        private _ezildi = ([_u] call FUNC(baskiSeviye)) >= 4;
                         if (_vardi || {_ezildi} || {time > (_t0 + 8)}) then {
                             _u setVariable [QGVAR(forceMove), nil];
                             _u setUnitPosWeak ([_stance, "DOWN"] select _ezildi);
@@ -147,7 +147,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                         _u setVariable [QGVAR(reloadState), []];
                         // sarjor DOLDUYSA 15 sn, dolmadan zaman asimiysa 30 sn cooldown (engine mermi bitince reload eder)
                         _u setVariable [QGVAR(reloadLast), [time + 15, time] select (_mermi > (_tetikMermi + 2))];
-                        if (_mermi > 0 && {(getSuppression _u) < 0.5} && {(["cag"] call FUNC(cag)) < 2}) then {   // v8.526: WWII donemde peek-reload-peek (ayaga kalkma) yok
+                        if (_mermi > 0 && {([_u] call FUNC(baskiSeviye)) < 3} && {(["cag"] call FUNC(cag)) < 2}) then {   // v8.526: WWII donemde peek-reload-peek (ayaga kalkma) yok
                             _u setUnitPosWeak "UP";
                             _u setVariable [QGVAR(reloadPeekEnd), time + 2];
                         } else {
@@ -209,7 +209,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                 //   risk esigi atlanir: acikta reload tehlikeli); olmazsa eski kisa yol (<= 4 m)
                                 if (
                                     _cv isNotEqualTo []
-                                    && {(getSuppression _u) < 0.85}
+                                    && {([_u] call FUNC(baskiSeviye)) < 4}
                                     && {(_u distance2D ((_cv select 0) select 0)) <= 10}
                                 ) then {
                                     _hedef = (_cv select 0) select 0;
@@ -252,7 +252,7 @@ diag_log "[RELOAD] sarjor korumasi (once siper / buddy korur / peek-reload-peek)
                                 && {(_c distance2D _u) < 40}
                                 && {(_c getVariable [QGVAR(reloadState), []]) isEqualTo []}
                                 && {(_c ammo (primaryWeapon _c)) > 0}
-                                && {(getSuppression _c) < 0.85}
+                                && {([_c] call FUNC(baskiSeviye)) < 4}
                             };
                             if !([_b] call _bGecerli) then {
                                 _b = objNull;

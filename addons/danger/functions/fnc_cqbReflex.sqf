@@ -40,7 +40,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
         {
             private _g = _x;
             if (isNull _g || {!local _g}) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 30)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 1) then { continue };
             if (_g getVariable [QGVAR(sniperTeam), false]) then { continue };
             if (
                 (_g getVariable [QGVAR(isRetreating), false])
@@ -128,7 +128,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                                 };
                             };
 
-                            if (!_siperGitti && {_d <= 15} && {(stance _u) isEqualTo "STAND"} && {(getSuppression _u) < 0.7}) then {
+                            if (!_siperGitti && {_d <= 15} && {(stance _u) isEqualTo "STAND"} && {([_u] call FUNC(baskiSeviye)) < 4}) then {
                                 _u setUnitPosWeak "MIDDLE";
                             };
 
@@ -150,7 +150,7 @@ diag_log "[CQB] yakin mesafe refleksi + siper disiplini watchdog baslatildi";
                         // ---------------- B) SIPER DISIPLINI ----------------
                         if (
                             _d <= 220 && {_bilgi >= (["TESPIT"] call FUNC(bilgiEsik))}
-                            && {(getSuppression _u) >= 0.35}
+                            && {([_u] call FUNC(baskiSeviye)) >= 2}
                             && {(stance _u) isEqualTo "STAND"}
                             && {(speed _u) < 2}
                             && {(insideBuilding _u) < 0.5}

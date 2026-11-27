@@ -42,7 +42,7 @@ diag_log "[MG-ONDE] MG tehdit yonunde konumlanma (geride kalan MG ileri alinir) 
             private _mgs = _us select {
                 ([_x] call _rolFn) isEqualTo "MG" && {(speed _x) < 1.5} && {time >= (_x getVariable [QGVAR(mgOndeT), 0])} && {(_x getVariable [QGVAR(forceMove), false]) isNotEqualTo true}
                 && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time} && {(_x getVariable [QGVAR(siperTutBit), 0]) <= time} && {time >= (_x getVariable [QGVAR(tcccBusy), 0])}
-                && {(getSuppression _x) < 0.5} && {(insideBuilding _x) <= 0.5} && {!captive _x}
+                && {([_x] call FUNC(baskiSeviye)) < 3} && {(insideBuilding _x) <= 0.5} && {!captive _x}
             };
             if (_mgs isEqualTo []) then { continue };
             private _digerler = _us select {([_x] call _rolFn) isNotEqualTo "MG"};

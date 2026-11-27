@@ -30,7 +30,7 @@ diag_log "[ODA-PUSU] oda pususu (temizlenen binanin derin odasinda bekle) izleyi
             if (!alive _u || {!((lifeState _u) in ["HEALTHY", "INJURED"])}) then { _sebep = "asker dustu"; } else {
                 if (time > _bit) then { _sebep = "sure doldu"; } else {
                     if (_poz isEqualTo [] || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]}) then { _sebep = "grup cekiliyor"; } else {
-                        if ((getSuppression _u) > 0.7) then { _sebep = "baski"; } else {
+                        if (([_u] call FUNC(baskiSeviye)) >= 4) then { _sebep = "baski"; } else {
                             private _en = _u findNearestEnemy _u;
                             if (!isNull _en && {alive _en} && {(_u distance _en) < 25} && {(_u knowsAbout _en) >= (["SUPHE"] call FUNC(bilgiEsik))}) then { _sebep = "dusman yakin (pusu tetigi)"; };
                         };

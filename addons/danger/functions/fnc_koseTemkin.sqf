@@ -114,7 +114,7 @@ diag_log "[CQB-KOSE] kose / aralik temkini (acilari dilimleme) watchdog baslatil
         private _t0 = time;
         private _iptal = {
             params ["_uu"];
-            !alive _uu || {!((lifeState _uu) in ["HEALTHY", "INJURED"])} || {(getSuppression _uu) > 0.6}
+            !alive _uu || {!((lifeState _uu) in ["HEALTHY", "INJURED"])} || {([_uu] call FUNC(baskiSeviye)) >= 4}
             || {_uu getVariable [QGVAR(forceMove), false]}
             || {
                 private _e = _uu findNearestEnemy _uu;

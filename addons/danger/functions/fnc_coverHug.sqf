@@ -136,7 +136,7 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 };
                 // v8.737 SAHTE SIPER (kullanici: 'gercekten ya goremeyelim ya da islemesin', 'sus niyetine gizlenmesin'): yakinda sert yuzey VAR ama dusmanin mermisi onu AŞIYOR (yumusak) VE VIEW LOD hatti ACIK (gorunuyor) -> siper degil, acikta say (acikSiper gercek siperi arar); asker basina 20 sn'de bir
                 private _sahteS = false;
-                if (_hP isNotEqualTo [] && {_d <= _esik} && {missionNamespace getVariable ["lambs_danger_siperGercekCover", true]} && {time >= (_u getVariable [QGVAR(sahteT), 0])} && {(getSuppression _u) < 0.5}) then {
+                if (_hP isNotEqualTo [] && {_d <= _esik} && {missionNamespace getVariable ["lambs_danger_siperGercekCover", true]} && {time >= (_u getVariable [QGVAR(sahteT), 0])} && {([_u] call FUNC(baskiSeviye)) < 3}) then {
                     private _gPh = [_en] call FUNC(munisyonGucu);
                     private _prh = [_eASL, _pASL vectorAdd [0, 0, 1.0], _en, _u, _gPh] call FUNC(penetreGuc);
                     if ((_prh select 0) && {(_prh select 1) > 0} && {(lineIntersectsSurfaces [_eASL, _pASL vectorAdd [0, 0, 1.0], _en, _u, true, 1, "VIEW", "NONE"]) isEqualTo []} && {!(terrainIntersectASL [_eASL, _pASL vectorAdd [0, 0, 1.0]])}) then {
@@ -297,12 +297,12 @@ diag_log "[SIPER-YAPIS] sipere yapisma (hull-down / yuzeyin 45 cm arkasi) watchd
                 // v8.593 SIPERDE ALCAK DURUS (kullanici: 'botlar sipere yapissin, botlari goremeyim neredeyse'): CBA siperDusuk 0-2 kademe alcal (setUnitPosWeak: ates gerekirse motor kalkabilir)
                 // v8.662 DURUS CESITLILIGI coverHug'da da (RPT 4a0e73e9: hareketsiz askerlerin 34 / 41'i PRONE, 4 CROUCH, 3 STAND; acikSiper'deki siperDurusCesit yalniz nesne dalinda uyguluyordu): baski <= 0.35 ve MG degilse CBA siperDurusCesit orani bir kademe az alcalir
 private _dusukKH = (round ([_u, "siperDusuk", 1] call FUNC(profilDeger)) max 0) min 2;   // v8.738: cevre profiline gore
-if ((getSuppression _u) <= 0.35 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (([_u, "siperDurusCesit", 0.5] call FUNC(ayarTaraf)) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
+if (([_u] call FUNC(baskiSeviye)) < 2 && {_dusukKH > 0} && {([_u] call (missionNamespace getVariable ["lambs_danger_fnc_getUnitRole", {"RIFLE"}])) isNotEqualTo "MG"} && {(["siperDurusCesit", [_u] call FUNC(birimId)] call FUNC(rastgele)) < (([_u, "siperDurusCesit", 0.5] call FUNC(ayarTaraf)) max 0 min 1)}) then { _dusukKH = _dusukKH - 1; };
 for "_k" from 1 to _dusukKH do {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; default {"DOWN"} };
                 };
                 // baski altinda bir kademe alcal
-                if ((getSuppression _u) > 0.35) then {
+                if (([_u] call FUNC(baskiSeviye)) >= 2) then {
                     _durus = switch (_durus) do { case "UP": {"MIDDLE"}; case "MIDDLE": {"DOWN"}; default {"DOWN"} };
                 };
                 // v8.729 YAKIN DOVUS (kullanici: 'face to face'de yere yatiyorlar'): dusman CBA siperYakinM (25 m) icinde ve gorunurse (arada engel yok) yatma yok, en cok comel

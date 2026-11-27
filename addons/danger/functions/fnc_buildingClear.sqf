@@ -64,7 +64,7 @@ diag_log "[BINA-TEMIZLE] cevre emniyeti + bina temizleme watchdog baslatildi";
             // Dusman / baski izleme
             private _en = _l findNearestEnemy _l;
             private _yakin = !isNull _en && {alive _en} && {(_l distance2D _en) < 250};
-            private _baski = (_alive findIf {(getSuppression _x) > 0.1}) > -1;
+            private _baski = (_alive findIf {([_x] call FUNC(baskiSeviye)) >= 1}) > -1;
             if (_yakin || _baski) then {
                 _g setVariable [QGVAR(sweepFightTs), time];
                 _g setVariable [QGVAR(sweepFight), true];

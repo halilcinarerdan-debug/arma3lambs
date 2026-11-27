@@ -62,7 +62,7 @@ diag_log "[ATES-HATTI] ates hatti kontrolu baslatildi (v8.388: gercek atista tet
     private _kayabilir = {
         params ["_u"];
         alive _u && {local _u} && {!isPlayer _u} && {!([_u] call FUNC(oyuncuKomutaMi))} && {isNull objectParent _u} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(_u getVariable ["ACE_isUnconscious", false])}
-        && {!(_u getVariable [QGVAR(forceMove), false])} && {time >= (_u getVariable [QGVAR(flLast), 0])} && {(getSuppression _u) < 0.6}
+        && {!(_u getVariable [QGVAR(forceMove), false])} && {time >= (_u getVariable [QGVAR(flLast), 0])} && {([_u] call FUNC(baskiSeviye)) < 4}
         && {time >= (_u getVariable [QGVAR(tcccBusy), 0])} && {(_u getVariable [QGVAR(grState), []]) isEqualTo []}
     };
 

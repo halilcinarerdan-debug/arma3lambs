@@ -34,10 +34,10 @@ diag_log "[SIPER-PEEK] siperden kalk-nisan-alcal (peek) katmani baslatildi (v8.6
                 !local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                 || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {(speed _u) > 1.5} || {(insideBuilding _u) > 0.5}
                 || {time < (_u getVariable [QGVAR(peekNext), 0])}
-                || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 30)}
+                || {([(group _u)] call FUNC(temasSeviye)) > 1}
                 || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {!isNil {_u getVariable QGVAR(koseAktif)}}
                 || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}
-                || {(getSuppression _u) >= 0.6}
+                || {([_u] call FUNC(baskiSeviye)) >= 4}
                 || {(primaryWeapon _u) isEqualTo ""} || {(_u ammo (primaryWeapon _u)) < 3}
                 || {((time - (_u getVariable [QGVAR(hugAt), -999])) > 25) && {(time - ((_u getVariable [QGVAR(acikSiperHedef), [0, -999]]) param [1, -999])) > 40}}
                 || {[_u] call FUNC(oyuncuKomutaMi)}

@@ -301,7 +301,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
             };
 
             // Yanma: baski / yakinda ve bizi biliyor -> pozisyon degistir
-            private _yandik = ((getSuppression _s) >= 0.5)
+            private _yandik = (([_s] call FUNC(baskiSeviye)) >= 3)
                 || {(_dEn <= 150) && {(_dusman knowsAbout _s) >= (["TAM"] call FUNC(bilgiEsik))}};
             private _kotu = _ng getVariable [QGVAR(snpKotu), []];
             if (_yandik && {_hold isNotEqualTo []}) then {
@@ -356,7 +356,7 @@ diag_log "[SNIPER] keskin nisanci takimi watchdog baslatildi";
                     { _s reveal [_x, (_sp knowsAbout _x) max 0.5]; } forEach (_sp targets [true, 700]);
                     _sp doWatch _tp;
                     // nisanci ates ederse (veya baski altinda) gozlemci de serbest
-                    if ((getSuppression _sp) >= 0.5 || {_dEn <= 150}) then { _sp setCombatMode "YELLOW"; };
+                    if (([_sp] call FUNC(baskiSeviye)) >= 3 || {_dEn <= 150}) then { _sp setCombatMode "YELLOW"; };
                 };
 
                 // hedef secimi

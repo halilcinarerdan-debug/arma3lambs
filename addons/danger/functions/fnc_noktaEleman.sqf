@@ -62,7 +62,7 @@ private _calis = {
                 private _sonAtis = selectMax ([-999] + (_canli apply {_x getVariable [QGVAR(sonAtisT), -999]}));
                 private _enYk = _l findNearestEnemy _l;
                 if (
-                    (time - _sonAtis) < 25 || {(getSuppression _l) > 0.2}
+                    (time - _sonAtis) < 25 || {([_l] call FUNC(baskiSeviye)) >= 1}
                     || {!isNull _enYk && {alive _enYk} && {(_l distance2D _enYk) < 80} && {(_l knowsAbout _enYk) >= _sezildi}}
                 ) then { _neden = "temas"; };
             };

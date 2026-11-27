@@ -66,7 +66,7 @@ private _kaldir = [];
     if (_bit isEqualTo "" && {(_aG getVariable [QGVAR(isRetreating), false]) || {_aG getVariable [QGVAR(isBreakingContact), false]}}) then { _bit = "taarruz grubu cekiliyor" };
     if (_bit isEqualTo "" && {!(_aG getVariable [QGVAR(isBounding), false]) && {!(_aG getVariable [QGVAR(isExecutingTactic), false])} && {(time - _t0) > 20}}) then { _bit = "taarruz bitti" };
     if (_bit isEqualTo "" && {_bG getVariable [QGVAR(isRetreating), false]}) then { _bit = "destek grubu cekiliyor" };
-    if (_bit isEqualTo "" && {_durum isEqualTo "BASKI"} && {({alive _x && {(getSuppression _x) > 0.75}} count (units _bG)) >= 2}) then { _bit = "destek grubu ates altinda" };
+    if (_bit isEqualTo "" && {_durum isEqualTo "BASKI"} && {({alive _x && {([_x] call FUNC(baskiSeviye)) >= 4}} count (units _bG)) >= 2}) then { _bit = "destek grubu ates altinda" };
 
     if (_bit isNotEqualTo "") then {
         {

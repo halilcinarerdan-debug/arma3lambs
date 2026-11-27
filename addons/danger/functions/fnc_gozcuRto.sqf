@@ -98,7 +98,7 @@ private _calis = {
             };
             if (isNull _gz) then { continue };
 
-            private _gozlem = ((_g getVariable [QGVAR(contact), 0]) < (time - 20))
+            private _gozlem = (([_g] call FUNC(temasSeviye)) > 1)
                 && {(speed _l) < 4}
                 && {!(_gz getVariable [QGVAR(forceMove), false])} && {(_gz getVariable [QGVAR(taktikKilit), 0]) <= time}
                 && {({_g getVariable [_x, false]} count [QGVAR(isRetreating), QGVAR(isEvading), QGVAR(isBreakingContact), QGVAR(isAmbushing), QGVAR(sniperTeam), QGVAR(disableGroupAI)]) == 0};

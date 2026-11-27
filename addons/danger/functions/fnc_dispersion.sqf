@@ -73,7 +73,7 @@ diag_log "[DAGILMA] dagilma bilinci watchdog baslatildi";
                 && {(lifeState _x) in ["HEALTHY", "INJURED"]}
                 && {!(_x getVariable [QGVAR(forceMove), false])} && {(_x getVariable [QGVAR(taktikKilit), 0]) <= time}
                 && {(speed _x) < 1.5}
-                && {(getSuppression _x) < 0.6}
+                && {([_x] call FUNC(baskiSeviye)) < 4}
                 && {(insideBuilding _x) < 0.5}
                 && {(time - (_x getVariable [QGVAR(stationLast), -999])) > 25}
                 && {(_x getVariable [QGVAR(stationPos), []]) isEqualTo []}

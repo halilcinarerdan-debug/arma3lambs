@@ -34,7 +34,7 @@ diag_log "[COVER-OLCUM] cover / manevra olcum katmani baslatildi (v8.661)";
             if (_k >= 30) exitWith {};
             if (
                 !local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
-                || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 30)}
+                || {([(group _u)] call FUNC(temasSeviye)) > 1}
             ) then { continue };
             private _e = _u findNearestEnemy _u;
             if (isNull _e || {!alive _e} || {(_u distance _e) > 400} || {(_u knowsAbout _e) < _esik}) then { continue };

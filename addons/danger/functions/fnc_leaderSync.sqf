@@ -110,7 +110,7 @@ diag_log "[KOMUTAN-BEKLE] komutan senkron watchdog baslatildi";
             // --- birakma kosullari (zaten tutuyorsa) ---
             if (_tutuyor) then {
                 private _bitis = (_oran < 0.2)
-                    || {(getSuppression _l) > 0.4}
+                    || {([_l] call FUNC(baskiSeviye)) >= 2}
                     || {private _en = _l findNearestEnemy _l; !isNull _en && {(_en distance2D _l) < 40}}
                     || {(_g getVariable [QGVAR(syncHold), false]) && {(time - (_g getVariable [QGVAR(syncBasla), time])) > 12}};
                 if (_bitis) then {

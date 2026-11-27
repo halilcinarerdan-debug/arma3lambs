@@ -99,7 +99,7 @@ private _calis = {
             private _neden = "";
             if (!canMove _v) then { _neden = "arac hareketsiz"; } else {
                 if ((damage _v) > (_hasarOnce + 0.08)) then { _neden = "hasar aldi"; } else {
-                    if ((getSuppression _d) > 0.6) then { _neden = "surucu baskida"; } else {
+                    if (([_d] call FUNC(baskiSeviye)) >= 4) then { _neden = "surucu baskida"; } else {
                         if (_temas && {!isNull _en} && {alive _en} && {(_v distance2D _en) <= _esik}) then { _neden = format ["temas + dusman %1 m (esik %2 m)", round (_v distance2D _en), round _esik]; };
                     };
                 };

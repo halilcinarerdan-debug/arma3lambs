@@ -120,7 +120,7 @@ lambs_danger_topIzle = {
                     private _hdf = (_hn select 0) getPos [random 1.2, random 360];
                     _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1;
                     _u setUnitPos "UP"; _u setSpeedMode "FULL";
-                    _u doMove _hdf;
+                    if !([_u] call FUNC(emirKilitli)) then { _u doMove _hdf; };   // v8.838: hakem
                     private _bitisKos = time + (_eta - 1.2);
                     waitUntil { sleep 0.2; time > _bitisKos || {!alive _u} || {(_u distance2D _hdf) < 2} };
                 };
@@ -132,7 +132,7 @@ lambs_danger_topIzle = {
                     if (!surfaceIsWater _hdf) then {
                         _u enableAI "PATH"; _u enableAI "MOVE"; _u forceSpeed -1;
                         _u setUnitPos "UP"; _u setSpeedMode "FULL";
-                        _u doMove _hdf;
+                        if !([_u] call FUNC(emirKilitli)) then { _u doMove _hdf; };   // v8.838: hakem
                         private _bitisKos = time + (_eta - 1.2);
                         waitUntil { sleep 0.2; time > _bitisKos || {!alive _u} || {(_u distance2D _hdf) < 2} };
                     };

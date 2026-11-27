@@ -677,7 +677,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         while {!isNull _g && {_g getVariable ["lambs_danger_isBounding", false]} && {(_g getVariable [QGVAR(bndToken), ""]) isEqualTo _tok}} do {
             private _df = _g getVariable ["lambs_danger_dangerFormation", ""];
             // Baski altinda (>= 0.4) formasyon ZORLANMAZ: gercek catismada esner, siper icin bozulur
-            private _baskida = ((units _g) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
+            private _baskida = ((units _g) findIf {alive _x && {([_x] call FUNC(baskiSeviye)) >= 2}}) > -1;
             // v8.388 SALINIM SINIRI (RPT 17:30-17:33: motor / baska yazar formasyonu 6 sn'de bir WEDGE'e geri aliyor, 'bounding-zorla' STAG COLUMN'a geri atiyordu = askerler slot degistire degistire 2-3 m dur-kalk):
             //   90 sn'de 3 zorlamadan sonra 60 sn zorlama birakilir (motorun formasyonu kabul edilir); aralik 6 -> 20 sn.
             if (time > _zorlaDur && {(time - _zorlaT0) > 90}) then { _zorlaT0 = time; _zorlaN = 0; };
@@ -753,7 +753,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
         // FORMASYON KORUMA
         private _bndFormation = _group getVariable [QGVAR(dangerFormation), "WEDGE"];
         private _mevcutFormation = formation _group;
-        private _grupBaskida = ((units _group) findIf {alive _x && {(getSuppression _x) >= 0.4}}) > -1;
+        private _grupBaskida = ((units _group) findIf {alive _x && {([_x] call FUNC(baskiSeviye)) >= 2}}) > -1;
         if (!_grupBaskida && {_mevcutFormation isNotEqualTo _bndFormation}
             && {!(_group getVariable [QGVAR(isRetreating), false])} && {!(_group getVariable [QGVAR(isEvading), false])} && {!(_group getVariable [QGVAR(isBreakingContact), false])}
             && {time > (_group getVariable [QGVAR(formKorumaT), 0])} && {(time - (_group getVariable [QGVAR(taktikFormT), -999])) > 25}) then {
@@ -1084,7 +1084,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
             || {(time - _atesBasi) >= _kapiMax}
             || {
                 ((time - _atesBasi) >= _kapiMin)   // v8.379: 3 sn; v8.507: agresiflige gore 1.2 - 3 sn
-                && {isNull _odak || {!alive _odak} || {(getSuppression _odak) >= 0.25}}
+                && {isNull _odak || {!alive _odak} || {([_odak] call FUNC(baskiSeviye)) >= 2}}
             }
             // v8.355: odak UZAK makinede (oyuncu / baska makine) ise getSuppression -1 doner -> kapi hic 'bastirildi' demiyor ve 5 sn'in tamamini bekliyordu (RPT 30-10: kapi 5.3-5.9 sn); bu durumda 3 sn
             || {((time - _atesBasi) >= _kapiMin) && {!isNull _odak} && {(getSuppression _odak) < 0}}
@@ -1190,7 +1190,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                     // Baski >= 0.9: kosucu ezildi. v8.388 (kullanici: 'dur kalk yogun ates altinda cok oluyor'): eskiden 0.85'te HEMEN yerinde yatiyordu (hop'un 2-3 m'sinde, her cevrimde tekrar).
                     //   Simdi: hedefe <= 15 m kaldiysa KOSMAYA DEVAM (forceMove kalir); uzaksa en yakin siper (18 m, SURVIVE) YENI hedef olur ve oraya kosar (atilim kisalir, durmaz);
                     //   siper yoksa eskisi gibi yatar. Her kosucu icin hop basina en cok 1 yonlendirme.
-                    if (alive _b && {!(_b in _inen)} && {(getSuppression _b) >= 0.9}) then {
+                    if (alive _b && {!(_b in _inen)} && {([_b] call FUNC(baskiSeviye)) >= 4}) then {
                         if ((_b distance2D _p) <= 15) then {
                             // kosmaya devam: yalniz bir kez bildir, ezilme sayilmaz
                             if !(_b getVariable [QGVAR(bndBaskiDevam), false]) then { _b setVariable [QGVAR(bndBaskiDevam), true]; };
@@ -1340,7 +1340,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
             private _ldrM = leader _group;
             private _mgAdaylar = _kapsama select {
                 alive _x && {isNull objectParent _x} && {([_x] call _rolFn) isEqualTo "MG"}
-                && {(getSuppression _x) < 0.4} && {(time - (_x getVariable [QGVAR(mgYerT), -999])) > 40}
+                && {([_x] call FUNC(baskiSeviye)) < 2} && {(time - (_x getVariable [QGVAR(mgYerT), -999])) > 40}
                 && {(((_x distance2D _ldrM) > 55) || {((_x distance2D _target) - (_ldrM distance2D _target)) > 45})}
             };
             if (_mgAdaylar isNotEqualTo []) then {
@@ -1390,9 +1390,9 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                 if (!alive _mgU) then {
                     _mgGidis = [];
                 } else {
-                    if (((_mgU distance2D (_mgGidis select 1)) < 3) || {(getSuppression _mgU) >= 0.7}) then {
+                    if (((_mgU distance2D (_mgGidis select 1)) < 3) || {([_mgU] call FUNC(baskiSeviye)) >= 4}) then {
                         _mgU setVariable [QGVAR(forceMove), nil];
-                        _mgU setUnitPosWeak (["DOWN", (_mgGidis select 2)] select ((getSuppression _mgU) < 0.85));
+                        _mgU setUnitPosWeak (["DOWN", (_mgGidis select 2)] select (([_mgU] call FUNC(baskiSeviye)) < 4));
                         doStop _mgU;
                         _mgU doWatch _target;
                         _mgGidis = [];
@@ -1417,7 +1417,7 @@ if (_kapaliArazi && {missionNamespace getVariable ["lambs_danger_kanatBounding",
                     private _pb = _x select 0;
                     if (
                         alive _pb && {(_x select 2) isNotEqualTo "UP"}
-                        && {(getSuppression _pb) < 0.3}
+                        && {([_pb] call FUNC(baskiSeviye)) < 2}
                         && {(_pb distance2D (_x select 1)) < 4}
                     ) then {
                         _pb setUnitPosWeak "UP";

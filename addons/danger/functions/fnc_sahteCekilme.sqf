@@ -50,7 +50,7 @@ diag_log "[SAHTE-CEKILME] sahte geri cekilme + alan hakimiyeti (oyuncuyu kotu ar
             private _l = leader _g;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if (time < (_g getVariable [QGVAR(sahteT), 0])) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 90)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 2) then { continue };
             // v8.722 HUNI: kapilar ayri ayri sayilir (sahte cekilme 111 RPT'de hic baslamadi; hangi kapida elendigi bilinmiyordu)
             if (
                 (_g getVariable [QGVAR(isRetreating), false]) || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}

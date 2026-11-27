@@ -134,7 +134,7 @@ private _calis = {
 
             private _taraf = side _g;
             private _lp = getPosATL _l;
-            private _bask = ((units _g) findIf {alive _x && {(getSuppression _x) > 0.15}}) >= 0;
+            private _bask = ((units _g) findIf {alive _x && {([_x] call FUNC(baskiSeviye)) >= 1}}) >= 0;
 
             // en yakin ilgili hava tehdidi
             private _hedef = objNull;
@@ -302,7 +302,7 @@ private _calis = {
                                         [{ params ["_uu"]; if (alive _uu) then { _uu setUnitPos "AUTO"; }; }, [_u], 75] call CBA_fnc_waitAndExecute;
                                         private _cv = [_u, _hh, 40, "ASCEND", 1, "SURVIVE"] call EFUNC(main,findCover);
                                         if (_cv isNotEqualTo []) then {
-                                            _u doMove ((_cv select 0) select 0);
+                                            if !([_u] call FUNC(emirKilitli)) then { _u doMove ((_cv select 0) select 0); };   // v8.838: hakem
                                             _u setUnitPos ((_cv select 0) select 1);
                                         } else {
                                             _u setUnitPos "DOWN";

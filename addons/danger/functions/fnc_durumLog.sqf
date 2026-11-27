@@ -50,7 +50,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
         if (_u getVariable [QGVAR(forceMove), false]) then { _t pushBack "fm"; };
         if (time < (_u getVariable [QGVAR(taktikKilit), 0])) then { _t pushBack "tk"; };
         if ((time - (_u getVariable [QGVAR(sonAtisT), -999])) < 3) then { _t pushBack "atis"; };
-        if ((getSuppression _u) > 0.3) then { _t pushBack "baski"; };
+        if (([_u] call FUNC(baskiSeviye)) >= 2) then { _t pushBack "baski"; };
         if ((time - (_u getVariable [QGVAR(hugAt), -999])) < 8) then { _t pushBack "hug"; };
         private _ah = _u getVariable [QGVAR(acikSiperHedef), [0, -999]];
         if ((time - (_ah param [1, -999])) < 8) then { _t pushBack "acikSiper"; };
@@ -77,7 +77,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
         {
             private _g = _x;
             if (isNull _g || {!local _g} || {isPlayer (leader _g)}) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) < (time - 60)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) > 2) then { continue };
             {
                 private _u = _x;
                 if (!alive _u || {!isNull objectParent _u}) then { continue };
@@ -163,7 +163,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
             private _us = (units _g) select {alive _x && {isNull objectParent _x}};
             if (_us isEqualTo []) then { continue };
 
-            private _temas = (_g getVariable [QGVAR(contact), 0]) > (time - 60);
+            private _temas = ([_g] call FUNC(temasSeviye)) <= 2;
             if ((time - (_g getVariable [QGVAR(durumT), -999])) < ([60, 20] select _temas)) then { continue };
             _g setVariable [QGVAR(durumT), time];
 
@@ -224,7 +224,7 @@ diag_log "[DURUM] durum / doktrin gozlemcisi baslatildi (her asker: konum, rol, 
                 };
 
                 private _st = stance _u;
-                if (_st isEqualTo "STAND" && {(getSuppression _u) > 0.2 || {_temas}}) then { _ayakta = _ayakta + 1; };
+                if (_st isEqualTo "STAND" && {([_u] call FUNC(baskiSeviye)) >= 1 || {_temas}}) then { _ayakta = _ayakta + 1; };
                 if ((speed _u) > 1.5) then { _hareket = _hareket + 1; };
                 private _mag = count (magazines _u);
                 if (_mag <= 1 && {(_u ammo (primaryWeapon _u)) < 10}) then { _dusukC = _dusukC + 1; };

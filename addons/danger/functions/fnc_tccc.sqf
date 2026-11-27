@@ -139,7 +139,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
     //   (PRONE / baygin) -> hekim DIZ COKMUS (MIDDLE; 'medicOther' animasyonu zaten diz cokerek oynar, daha alcagi animasyonsuz). Sonuc donus degeri: uygulanan durus (log icin).
     lambs_danger_tcccDurus = {
         params ["_m", "_c"];
-        private _guvenli = (((group _m) getVariable [QGVAR(contact), 0]) < time) && {(getSuppression _m) < 0.2};
+        private _guvenli = (((group _m) getVariable [QGVAR(contact), 0]) < time) && {([_m] call FUNC(baskiSeviye)) < 1};
         private _ds = ["MIDDLE", "UP"] select ((stance _c) isEqualTo "STAND" && {_guvenli});
         _m setUnitPos _ds;
         _ds
@@ -297,7 +297,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     private _yT = time + 14; private _y0 = _m distance2D _c;
                     _bitis = _bitis + 14;
                     _m setUnitPos "UP";
-                    while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {(getSuppression _m) < 0.9}} do {
+                    while {([_m] call lambs_danger_tcccMedikOk) && {alive _c} && {(_m distance2D _c) > 2.5} && {time < _yT} && {([_m] call FUNC(baskiSeviye)) < 4}} do {
                         // v8.103: pürüzsüz yürütme (kullanici: 'minik minik tplene tplene'): her 0.15 sn'de anim yeniden baslatma + dir snap titreme yapiyordu
                         //   -> animasyon yalniz kosu degilse baslatilir, yon yalniz > 20 derece sapmada duzeltilir, hiz vektoru 0.05 sn'de bir (hedef hiz yumusak)
                         private _hDir = _m getDir _c;
@@ -330,7 +330,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
             // v8.190: yaklasiyorsa (3 m+ ilerleme) sure uzar (toplam 150 sn'ye kadar); RPT 2a205c2b: 8-39 m'de "sure doldu" iptalleri
             if (([_m] call lambs_danger_tcccMedikOk) && {(_m distance2D _c) < (_enYakin - 3)}) then { _enYakin = _m distance2D _c; _bitis = (_bitis max (time + 12)) min (_t0 + 150); };
             !([_m] call lambs_danger_tcccMedikOk) || {!alive _c} || {(_m distance2D _c) < 4.5} || {time > _bitis}
-            || {!_strict && {!([_g] call _guvenliFn)} && {(getSuppression _m) > 0.6}}   // v8.375: kati modda grup temas bayragina (AllClear'a kadar +600 sn) BAKILMAZ (RPT 04:05: hekim baski 0.00 iken 'IPTAL yaklasma')
+            || {!_strict && {!([_g] call _guvenliFn)} && {([_m] call FUNC(baskiSeviye)) >= 4}}   // v8.375: kati modda grup temas bayragina (AllClear'a kadar +600 sn) BAKILMAZ (RPT 04:05: hekim baski 0.00 iken 'IPTAL yaklasma')
             || {_strict && {(call _gd) < 1}}
         };
         if (_daiAc) then { _m setVariable [QGVAR(disableAI), [nil, true] select _eskiDAI]; };
@@ -607,7 +607,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                     (_x isNotEqualTo _c) && {alive _x} && {local _x} && {!isPlayer _x} && {isNull objectParent _x}
                     && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!([_x] call _baygin)}
                     && {time > (_x getVariable [QGVAR(tcccBusy), 0])}
-                    && {(time - (_x getVariable [QGVAR(tcccHekimIptalT), -999])) > ([15, 20] select ((getSuppression _x) > 0.4))}
+                    && {(time - (_x getVariable [QGVAR(tcccHekimIptalT), -999])) > ([15, 20] select (([_x] call FUNC(baskiSeviye)) >= 2))}
                     && {!(_x getVariable [QGVAR(forceMove), false]) || {([_x] call _rolFn) isEqualTo "MEDIC" || {_x getUnitTrait "Medic"}}}   // v8.102: gercek hekim bounding'in forceMove'u yuzunden elenmez (RPT 30f9155e: hekim 'fm' diye atlandi, tufekci hekim secildi)
                     && {(_x getVariable [QGVAR(grState), []]) isEqualTo []}
                 };
@@ -643,7 +643,7 @@ if (isNil "lambs_danger_tcccAceDinleyici" && {!isNil "CBA_fnc_addEventHandler"})
                 // ates altinda: hekim baskida degil ve dusman uzak olmali (eski mod: KATI GUVENLIK kapaliyken)
                 if (!_strict && {!_guvenli}) then {
                     private _en = _m findNearestEnemy _m;
-                    if ((getSuppression _m) >= 0.4 || {!isNull _en && {(_m distance2D _en) < 35}}) then { continue };   // v8.82: 50 -> 35 m (medevac guclendirme)
+                    if (([_m] call FUNC(baskiSeviye)) >= 2 || {!isNull _en && {(_m distance2D _en) < 35}}) then { continue };   // v8.82: 50 -> 35 m (medevac guclendirme)
                     // v8.303 ATES ALTINDA BAKIM (kullanici: 'yaralıya catisma ortasinda gitmek ... goze batiyor'; TCCC care under fire: once ates ustunlugu / siper, acikta tedavi YOK): yaralinin bulundugu nokta bilinen bir dusmana
                     //   <= 300 m'de ACIK (gorus hatti serbest) ise hekim bekler; yaralinin ilk goruldugu andan 90 sn sonra (kan kaybi) yine de gider.
                     private _ec = _c findNearestEnemy _c;

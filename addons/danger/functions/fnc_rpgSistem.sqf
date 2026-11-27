@@ -69,7 +69,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
         };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(secondaryWeapon _x) isNotEqualTo ""}
-            && {((group _x) getVariable [QGVAR(contact), 0]) > (time - 25)} && {_x isKindOf "CAManBase"}
+            && {([(group _x)] call FUNC(temasSeviye)) <= 1} && {_x isKindOf "CAManBase"}
             && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
             && {[side group _x, "rpgAktif", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli (BLUFOR / OPFOR / INDEPENDENT) karar katmani acma / kapama
         };
@@ -108,7 +108,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
                 || {(_u ammo _ls) <= 0} || {(insideBuilding _u) >= 0.5} || {_u getVariable [QGVAR(forceMove), false]} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}
                 || {(_g getVariable [QGVAR(isRetreating), false]) isEqualTo true} || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true}
                 || {(time - (_u getVariable [QGVAR(hvAAT), -999])) < 12} || {(time - (_u getVariable [QGVAR(sonAtisT), -999])) < 6}
-                || {(getSuppression _u) >= 0.7} || {_u getVariable [QGVAR(disableAI), false]} || {captive _u} || {_u getVariable ["ACE_isUnconscious", false]}
+                || {([_u] call FUNC(baskiSeviye)) >= 4} || {_u getVariable [QGVAR(disableAI), false]} || {captive _u} || {_u getVariable ["ACE_isUnconscious", false]}
             ) then { ["filtre"] call _ar; continue };
             private _mag = (secondaryWeaponMagazine _u) param [0, ""];
             private _ammo = if (_mag isEqualTo "") then {""} else { getText (configFile >> "CfgMagazines" >> _mag >> "ammo") };

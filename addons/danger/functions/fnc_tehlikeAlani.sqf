@@ -352,7 +352,7 @@ private _calis = {
             private _l = leader _g;
             if (isNull _l || {!local _g} || {isPlayer _l} || {!alive _l} || {!isNull objectParent _l}) then { continue };
             if ((time - (_g getVariable [QGVAR(tehlikeAlaniT), -999])) < 120) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) > (time - 20)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) <= 1) then { continue };
             if (({_g getVariable [_x, false]} count [QGVAR(isRetreating), QGVAR(isEvading), QGVAR(isBounding), QGVAR(isExecutingTactic), QGVAR(isBreakingContact), QGVAR(isAmbushing), QGVAR(sniperTeam), QGVAR(isSonDirenis), QGVAR(disableGroupAI)]) > 0) then { continue };
             if ((_g getVariable [QGVAR(iedIs), []]) isNotEqualTo []) then { continue };
             if (((units _g) select {alive _x && {isNull objectParent _x}}) isEqualTo [] || {(count ((units _g) select {alive _x && {isNull objectParent _x}})) < 5}) then { continue };

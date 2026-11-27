@@ -83,7 +83,7 @@ diag_log "[TESLIM-BIREY] bireysel teslim izleyicisi baslatildi (v8.308)";
             private _enD = if (isNull _en || {!alive _en}) then {1e9} else {_u distance2D _en};
             private _bilgi = !isNull _en && {(_u knowsAbout _en) >= (["TESPIT"] call FUNC(bilgiEsik))};
             private _drn = (_u nearEntities ["Air", 300]) select {unitIsUAV _x && {alive _x} && {((side _g) getFriend (side (group (effectiveCommander _x)))) < 0.6}};
-            private _tehdit = (_bilgi && {_enD <= 120}) || {_drn isNotEqualTo []} || {_bilgi && {_enD <= 300} && {(getSuppression _u) >= 0.35}};
+            private _tehdit = (_bilgi && {_enD <= 120}) || {_drn isNotEqualTo []} || {_bilgi && {_enD <= 300} && {([_u] call FUNC(baskiSeviye)) >= 2}};
             if (!_tehdit) then { _u setVariable [QGVAR(birTeslimSay), 0]; continue };
 
             private _say = (_u getVariable [QGVAR(birTeslimSay), 0]) + 1;

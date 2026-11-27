@@ -50,7 +50,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                 || {_g getVariable [QGVAR(isAmbushing), false]} || {_g getVariable [QGVAR(isExecutingTactic), false]}
             ) then { continue };
             if ((time - (_g getVariable [QGVAR(pusuSon), -999])) < 90) then { continue };
-            if ((_g getVariable [QGVAR(contact), 0]) > (time - 6)) then { continue };
+            if (([_g] call FUNC(temasSeviye)) <= 0) then { continue };
 
             private _us = (units _g) select {alive _x && {isNull objectParent _x}};
             if ((count _us) < ([_g, "pusuMinKisi", 4] call FUNC(dk))) then { continue };
@@ -197,7 +197,7 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                         if (_dur > 320) then { _neden = "IPTAL:dusman uzaklasti"; };
                     };
 
-                    private _elden = (_canli findIf {((getSuppression _x) > 0.15) || {(damage _x) > 0.05}}) > -1;
+                    private _elden = (_canli findIf {(([_x] call FUNC(baskiSeviye)) >= 1) || {(damage _x) > 0.05}}) > -1;
                     private _olen = (count _canli) < _n0;
 
                     // bilinen dusman (lider + guvenlik gozu): nearTargets, knowsAbout >= 0.4, 400 m
@@ -258,8 +258,8 @@ diag_log "[PUSU] pusu / ates emri izleyicisi baslatildi";
                             params ["_gg", "_hp"];
                             private _tb = time;
                             sleep 20;
-                            waitUntil { sleep 3; isNull _gg || {((_gg getVariable [QGVAR(contact), 0]) < (time - 10))} || {(time - _tb) > 100} };
-                            if (!isNull _gg && {((_gg getVariable [QGVAR(contact), 0]) < (time - 10))}
+                            waitUntil { sleep 3; isNull _gg || {(([_gg] call FUNC(temasSeviye)) > 0)} || {(time - _tb) > 100} };
+                            if (!isNull _gg && {(([_gg] call FUNC(temasSeviye)) > 0)}
                                 && {!(_gg getVariable [QGVAR(isRetreating), false])} && {!(_gg getVariable [QGVAR(isToparlan), false])}) then {
                                 [_gg, _hp, _gg getVariable [QGVAR(disableGroupAI), false]] call FUNC(toparlan);
                             };

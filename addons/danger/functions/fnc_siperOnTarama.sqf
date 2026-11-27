@@ -44,7 +44,7 @@ diag_log "[SIPER-ON-TARAMA] siper on tarama (gizli ama sert siperi olmayan asker
                 || {([_g] call FUNC(wpSahip)) in ["LAMBS", "TUTAN"]} || {[_u] call FUNC(oyuncuKomutaMi)}
                 || {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {(_u getVariable [QGVAR(siperTutBit), 0]) > time}
                 || {time < (_u getVariable [QGVAR(tcccBusy), 0])} || {(_u getVariable [QGVAR(grState), []]) isNotEqualTo []} || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}
-                || {!isNil {_u getVariable QGVAR(koseAktif)}} || {!isNil {_u getVariable QGVAR(yanGuv)}} || {(getSuppression _u) >= 0.5} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u}
+                || {!isNil {_u getVariable QGVAR(koseAktif)}} || {!isNil {_u getVariable QGVAR(yanGuv)}} || {([_u] call FUNC(baskiSeviye)) >= 3} || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u}
             ) then { continue };
             private _en = _u findNearestEnemy _u;
             if (isNull _en || {!alive _en} || {!(_en isKindOf "CAManBase")} || {captive _en} || {(_u knowsAbout _en) < _esik}) then { continue };

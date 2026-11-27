@@ -36,7 +36,7 @@ diag_log "[SIPER-MIKRO] siperde mikro duzeltme (gorus acisi yoksa yanal kayma / 
                 !local _u || {isPlayer _u} || {!alive _u} || {!isNull objectParent _u} || {!((lifeState _u) in ["HEALTHY", "INJURED"])}
                 || {captive _u} || {_u getVariable [QGVAR(teslim), false]} || {(speed _u) > 1.5} || {(insideBuilding _u) > 0.5}
                 || {time < (_u getVariable [QGVAR(mikroT), 0])}
-                || {((group _u) getVariable [QGVAR(contact), 0]) < (time - 30)}
+                || {([(group _u)] call FUNC(temasSeviye)) > 1}
                 || {_u getVariable [QGVAR(forceMove), false]} || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {!isNil {_u getVariable QGVAR(koseAktif)}}
                 || {(_u getVariable [QGVAR(reloadState), []]) isNotEqualTo []}
                 || {((time - (_u getVariable [QGVAR(hugAt), -999])) > 25) && {(time - ((_u getVariable [QGVAR(acikSiperHedef), [0, -999]]) param [1, -999])) > 40}}
