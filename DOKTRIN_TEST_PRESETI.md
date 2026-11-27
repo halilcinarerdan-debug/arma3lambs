@@ -1,7 +1,7 @@
-# Doktrin test preset'i (v8.833)
+# Doktrin test preset'i (v8.834)
 
-Dosya: `CBA_LAMBS_Danger_DOKTRIN_TEST_v8.833.txt` (deponun kökünde). Kendi dosyanın (`CBA_LAMBS_Danger_v8.833.txt` = senin değerlerin + yeni anahtarlar) üstüne **90 satır** değişiklik; geri kalan 615 satır aynı.
-İçe aktarma: CBA → Eklenti Ayarları → içe aktar (ya da dosyayı `userconfig`/profil CBA ayar dosyasının yerine koy). Eski haline dönmek için `CBA_LAMBS_Danger_v8.833.txt`'i aktar.
+Dosya: `CBA_LAMBS_Danger_DOKTRIN_TEST_v8.834.txt` (deponun kökünde). Kendi dosyanın (`CBA_LAMBS_Danger_v8.834.txt` = senin değerlerin + yeni anahtarlar) üstüne **90 satır** değişiklik; geri kalan 615 satır aynı.
+İçe aktarma: CBA → Eklenti Ayarları → içe aktar (ya da dosyayı `userconfig`/profil CBA ayar dosyasının yerine koy). Eski haline dönmek için `CBA_LAMBS_Danger_v8.834.txt`'i aktar.
 
 ## Amaç
 Doktrine uygun, zeki ve insansı bot: **ölmemek için** elinden geleni yapar (siper, geri çekilme, kaçış, duruş disiplini, sis, bastırma altında tepki), **öldürmek için** elinden geleni yapar (bastırma + manevra, kanat, bomba, bina girişi, RPG, CQB isabeti). **Teslimiyet kapalı.** Test ölçümleri açık.
@@ -25,7 +25,7 @@ Doktrine uygun, zeki ve insansı bot: **ölmemek için** elinden geleni yapar (s
 | **Doktrin** | `mekanDoktrin`, `tehlikeAcikAktif/Dolas`, `hakimNokta`, `avantajliYer`, `rolDisiplini`, `sektorPlan` | açık | Arazi/mekâna göre sayılar, tehlike alanı, hâkim nokta |
 | **Test / log** | `durumLogOff` true → **false**, `perfOlcum`, `fovOlcum`, `ongoruOlcum`, `coverOlcum` | açık | RPT'de karne verisi |
 
-Tam fark listesi: `CBA_LAMBS_Danger_v8.833.txt` ile `diff`.
+Tam fark listesi: `CBA_LAMBS_Danger_v8.834.txt` ile `diff`.
 
 ## Doktrin dayanağı (depodaki kaynaklar; sayılar tasarım = T)
 - Bastırma + manevra, bounding overwatch, tehlike alanları: TC 3-21.76 (Bölük/manga saldırısı, Danger Areas 6-8), MCWP 3-11.2 (manga), MCWP 3-11.1.
@@ -38,7 +38,7 @@ Tam fark listesi: `CBA_LAMBS_Danger_v8.833.txt` ile `diff`.
 - WEST'in üstünlüğünü (0.65–0.92 isabet vb.) kaldırır: tarafların farkı yok. Asimetri istiyorsan WEST için `skill*West` ve `hizliFark*West` değerlerini elle yükselt, ama `skillTitremeMin/MaxWest` **yüksek** (0.5+) olsun (düşük = çok sallanır).
 
 ## Test planı
-1. İlk RPT'de boot satırı `v8.833` ve karne `SURUM` GEÇTİ olmalı.
+1. İlk RPT'de boot satırı `v8.834` ve karne `SURUM` GEÇTİ olmalı.
 2. CQB: karne `BOT ISABET` < 50 m bandı hedef %10–20 (en az 10 isabet), `GENEL MERMI / ISABET` 30–100.
 3. Reaksiyon: `REAKSIYON` ort. 0.8–2.5 sn.
 4. Teslimiyet: `[TESLIM]` satırı olmamalı.

@@ -47,6 +47,13 @@ private _sure = ((_d / 1.0) max 0.45) min 1.6;
 private _t0 = time;
 // v8.674 PER-FRAME KAYDIRMA (kullanici: 'siper duzeltme asiri stutterli'; RPT 8f8a8871: 169-175 eszamanli zamanlanmis betik): eskiden 'while + sleep 0.02' ZAMANLANMIS (scheduled) betikte kosuyordu;
 //   yuk altinda her betik birkac karede bir sira aldigi icin adimlar duzensiz atliyor (gorunur tirtilma / sicrama). Simdi UNSCHEDULED per-frame handler: her karede bir adim, scheduler'dan bagimsiz.
+// v8.834 KAYMA ANIMASYONU (kullanici: 'animasyon bazen oldugu yerde kaliyor ... zorlama cok iyi ama pek akici degil'): son 0.15-1.6 m setPos ile kayarken asker bosta (durus) animasyonuyla KAYIYORDU (yerinde duran animasyon + hareket); simdi kayma suresince yuruyus / emekleme animasyonu oynatilir ve bakis kayma yonune cevrilir
+private _kayAn = toLower (animationState _a);
+private _kayW = if ((_kayAn find "wrfl") >= 0) then {"Wrfl"} else { if ((_kayAn find "wpst") >= 0) then {"Wpst"} else {""} };
+if (_kayW isNotEqualTo "") then {
+    _a setDir (_p0 getDir _p1);
+    _a playMoveNow (switch (stance _a) do { case "PRONE": {"AmovPpneMrunSras" + _kayW + "Df"}; case "CROUCH": {"AmovPknlMwlkSras" + _kayW + "Df"}; default {"AmovPercMwlkSras" + _kayW + "Df"} });
+};
 [{
     params ["_args", "_h"];
     _args params ["_a", "_p0", "_p1", "_t0", "_sure"];
