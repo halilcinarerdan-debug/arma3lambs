@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.832 · Preset: `CBA_LAMBS_Danger_v8.832.txt` · 676 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.833 · Preset: `CBA_LAMBS_Danger_v8.833.txt` · 678 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.832.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.833.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (370 ayar)
+### ELITE siper (372 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -315,6 +315,8 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `hqSisSiddet` | Istihbarat: sis siddeti (rapor gecikmesi / kaybi) | 0–1 | 0.4 | v8.710 (CBA; eskiden yalniz degisken). Mangalar arasi dusman raporlarinin ne kadar gec / eksik / belirsiz geldigi. 0 = mukemmel paylasim (rapor 2-6 sn, kayip yok), 1 = tam sis (gecikme ~20-45 sn, menzil sinirinda %35 guvenilirlik). Varsayilan 0.4 (ornek gecikme ~10 sn). Dusurmek botlari koordineli ve olumcul yapar; hile degil, rapor yine gecikmeli ve hatali gelir. Telsiz sarti (muhbir + alici lider) aynen kalir. |
 | `icBakisKose` | Bina ici: namlu ses / dusman yonune degil, koselere | açık/kapalı | açık | v8.605. Bina ICINDEKI asker ses / bilinen dusman yonune duvar boyunca doWatch (namlu kaldirma) yapmaz; bunun yerine (v8.614) dusmanin GELEBILECEGI acik yone (kapi / pencere / koridor) ve KAT GECISINE (merdiven, dusman farkli katta ise) bakar; koseler fnc_koseTemkin ile taranir. Bina disi degismez. Kapali: eski davranis. |
 | `ikiliSicrama` | Ikili sicrama: 2-3 kisilik ekip buddy bounding | açık/kapalı | açık | v8.822 (yol haritasi Asama 15 / 4). Komutan beyni ve bounding >= 4 kisilik gruplar icin; 2-3 kisilik ates timi / kalan manga temas kesme tetigi (tek kalan / kayip >= %50 / baski >= 0.7) yoksa LAMBS'in duz akisina dusuyordu. Acik: biri gozetler, digeri 8-35 m ileri siperden siperye sicrar (dusmana >= 45 m, yol taramasi erisilebilir), her sicramada baska asker; bilinen dusman 60-350 m ve gorulen dusman <= kendi sayimiz, baski < 0.5, retreat / evade / temas kes / taktik yok. Aday siper yoksa eski akis. Ilke: ATP 3-21.8 / MCWP 3-11.2 (ates timi ikili sicrama); sayilar TASARIM. Log: [IKILI-SICRAMA]. |
+| `isabetCqbM` | Bot isabet: CQB mesafesi (m) | 5–50 | 25 | v8.833. isabetCqbYardim'in TAM uygulandigi azami mesafe (varsayilan 25 m); ardindan 60 m'ye dogru isabetYakinYardim'a iner. |
+| `isabetCqbYardim` | Bot isabet: CQB (cok yakin) mermi yonu duzeltme | 0–1 | 0.45 | v8.833 (kullanici: 'cqbde neden kolay'; RPT 5057c18e: bot atislari 1535 / isabet 2; < 50 m 131 nisanli atis 0 isabet; aimingAccuracy 0.25-0.45). <= isabetCqbM mesafedeki bot mermilerinde mermi yonu hedefe bu oranda cekilir (0 = kapali); isabetCqbM'den 60 m'ye dogrusal azalip isabetYakinYardim'a iner. Varsayilan 0.45 (TAHMIN; < 50 m isabeti %0-8 -> ~%15-25 beklenir; karne bant isabetiyle ayarlayin). Yalniz botlar. |
 | `isabetSeviye` | Bot isabet seviyesi (1 = oyunun azami becerisi; > 1 = ustu) | 0–4 | 0 | v8.571 / v8.575. YALNIZ BOTLAR. > 1 ise botlarin aimingAccuracy / aimingShake degeri 1.0'a (motorun siniri) sabitlenir ve mermi yonu hatasi (1 - 1 / seviye) oraninda duzeltilir (1.25 -> %20, 1.30 -> %23, 1.5 -> %33). 0 / <= 1 = kapali (eski beceri geri yazilir). Oyunculu gruptaki botlar, ALiVE birimleri, disableAI haric. HILE BENZERI. |
 | `isabetUzakSapma` | Bot isabet: >= 250 m rastgele sapma (derece) | 0–2 | 0.65 | v8.822 (yol haritasi Asama 15 / 8; karne BOT ISABET: > 250 m isabet %2.2-3.6, hedef %0-1). >= 250 m'deki bot mermilerine +-bu kadar derece (azimut + yukselme) rastgele sapma eklenir (0 = kapali; 0.65 derece ~ 300 m'de +-3.4 m; v8.823: 120-250 m bandinda bunun x0.4'u). Yalniz botlar; oyunculu gruptaki botlar oyuncuGrubuBot kapaliysa dokunulmaz. Kaba model (Gauss, kesit 0.85 m2): %2.5 isabet -> ~%1.5. isabetYardim / isabetSeviye aciksa mermi sonradan duzeltilir ve bu sapmayi azaltir. DENENMEDI; karne bant isabeti ile ayarlayin. |
 | `isabetYakinYardim` | Bot isabet: < 120 m ek mermi yonu duzeltme | 0–1 | 0.15 | v8.822 (karne BOT ISABET: < 50 m %8 / 50-120 m %3, hedef %10-20 / %5-10). < 120 m'deki bot mermilerinde isabetYardim'a ek olarak (buyuk olan gecerli) bu oranda mermi yonu hedefe cekilir (0 = kapali; 0.15 = hatanin %15'i). v8.823: eski deger 0.3 idi, 0.15'e indirildi (RPT 01a3fcd2: 0.3 ile 50-120 m %3 -> %14, hedef %5-10; model dusuk ongormustu). DENENMEDI; karne bant isabeti ile ayarlayin. |

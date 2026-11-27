@@ -78,7 +78,19 @@ lambs_danger_savasMi = { params ["_h"]; ((behaviour _h) isEqualTo "COMBAT") && {
     private _yrd = missionNamespace getVariable ["lambs_danger_isabetYardim", 0];
     private _sev = missionNamespace getVariable ["lambs_danger_isabetSeviye", 0];
     if (_sev > 1) then { _yrd = _yrd max (1 - (1 / _sev)); };
-    if (_gecerli && {(_u distance _t) < 120}) then { _yrd = _yrd max (missionNamespace getVariable ["lambs_danger_isabetYakinYardim", 0.15]); };
+    // v8.833 CQB ISABETI (kullanici: 'cqbde neden kolay'; RPT 5057c18e: bot atislari 1535, isabet 2 (768 mermi / isabet); < 50 m nisanli 131 atis / 0 isabet, 50-120 m 67 / 1; aimingAccuracy 0.25-0.45 + aimingShake 0.28-0.44 (skillVarsayilan tablosu), isabetSeviye / isabetYardim 0 (kullanici); oyuncu ayni sirada 37 m'de 1-2 sn'de 4 isabet):
+    //   mesafeye gore mermi yonu duzeltmesi: <= isabetCqbM (25 m) isabetCqbYardim (0.45), 25-60 m dogrusal azalir (-> isabetYakinYardim 0.15), 60-120 m isabetYakinYardim, > 120 m yok. Yalniz botlar; buyuk olan (isabetYardim / isabetSeviye) gecerli.
+    if (_gecerli) then {
+        private _dd = _u distance _t;
+        if (_dd < 120) then {
+            private _yk = missionNamespace getVariable ["lambs_danger_isabetYakinYardim", 0.15];
+            private _cq = (missionNamespace getVariable ["lambs_danger_isabetCqbYardim", 0.45]) max _yk;
+            private _cm = ((missionNamespace getVariable ["lambs_danger_isabetCqbM", 25]) max 5) min 50;
+            private _hi = 60 max (_cm + 20);
+            private _f = if (_dd <= _cm) then { _cq } else { if (_dd < _hi) then { _cq + ((_yk - _cq) * ((_dd - _cm) / (_hi - _cm))) } else { _yk } };
+            _yrd = _yrd max _f;
+        };
+    };
     if (_yrd <= 0 || {!_gecerli} || {isNull _proj} || {(((units group _u) findIf {isPlayer _x}) > -1) && {!(missionNamespace getVariable ["lambs_danger_oyuncuGrubuBot", false])}}) exitWith {};   // v8.721: CBA oyuncuGrubuBot acikken oyuncu grubundaki botlar da isabet yardimi alir
     private _v = velocity _proj;
     private _sp = vectorMagnitude _v;
