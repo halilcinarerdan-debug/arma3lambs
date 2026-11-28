@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.841"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.842"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -675,8 +675,11 @@ def kabul(path):
         m = re.search(r"\[ACIK-SIPER\] .*?\| dusman (\d+) m acikta -> (?:NESNE ARKASI|bina) \S+ \((\d+) m", l)
         if m:
             yd[0] += 1
-            if int(m.group(1)) < 25 and int(m.group(2)) > 6: yd[1] += 1
-    ekle("YAKIN DOVUS KOSUSU", "GECTI" if yd[1] == 0 else "KALDI", "siper kosusu %d | dusman < 25 m iken > 6 m kosu: %d (0 olmali; v8.729 siperYakinM)" % (yd[0], yd[1]))
+            # v8.842: yeni log 'yakin dovus (dusman gorunur): evet/hayir'; GORUNMEYEN dusmanda (duvar / bina arkasi) uzun siper kosusu kurala konu degil (kod da yalniz gorunurde yasaklar)
+            gor = re.search(r"yakin dovus \(dusman gorunur\): (\w+)", l)
+            if int(m.group(1)) < 25 and int(m.group(2)) > 6 and (gor is None or gor.group(1) == "evet"): yd[1] += 1
+            elif int(m.group(1)) < 25 and int(m.group(2)) > 6: yd.append(l)
+    ekle("YAKIN DOVUS KOSUSU", "GECTI" if yd[1] == 0 else "KALDI", "siper kosusu %d | GORUNUR dusman < 25 m iken > 6 m kosu: %d (0 olmali; v8.729 siperYakinM) | gorunmeyen dusmanda uzun kosu (sayilmaz): %d" % (yd[0], yd[1], len(yd) - 2))
     hd = [0] * 5; hdn = 0
     for l in L:
         m = re.search(r"\[HAREKET-DESTEK-OZET\] 60 sn: tespit (\d+) \| adim1 \(yeniden emir\) (\d+) \| adim2 \(yan adim\) (\d+) \| adim3 \(gruba don\) (\d+) \| kurtarilan (\d+)", l)
@@ -889,9 +892,14 @@ def kabul(path):
     else:
         ekle("GERCEKCILIK: HAREKET KURTARMA (MOVE kabul + yurumuyor)", "VERI YOK", "[HAREKET-KURTAR] yok (v8.818 oncesi RPT, lambs_danger_hareketKurtar kapali ya da hic yurumeyen asker olmadi)")
     # v8.822 CARELESS TEMASTA (kullanici: 'elemanlar catismada careless kaliyor?'): TELEMETRI-GRUP davranisi CARELESS olan satirlar; dusman < 150 m ya da son 20 sn'de temas varsa = HATA (hedef 0)
-    cr_t = 0; cr_k = []
+    cr_t = 0; cr_k = []; cr_x = 0
+    # v8.842: disableGroupAI:true grup (elle / Zeus ile olusturulan test askeri) ELITE / LAMBS yonetiminde DEGIL; varsayilan CARELESS'i hata sayilmaz (RPT 7f6f0494: Alpha 1-2 tek askerli, disableGroupAI true)
+    kapali = set(m.group(1).strip() for l in L for m in [re.search(r"\[TELSIZ-GRUP\] ([^|]+?) \|.*disableGroupAI:true", l)] if m)
     for l in L:
         m_ = re.search(r"\[TELEMETRI-GRUP\] ([^|]+?) \|.*?\| CARELESS/\w+/\w+/\w+ .*?temas:(-?\d+) sn once \|.*?en yakin dusman:(\d+) m", l)
+        if m_ and m_.group(1).strip() in kapali and "/" in l and re.search(r"\| 1/1 \|", l):
+            cr_x += 1
+            continue
         if m_:
             cr_t += 1
             if int(m_.group(3)) < 150 or int(m_.group(2)) > -20: cr_k.append("%s %s m / temas %s sn" % (m_.group(1).strip(), m_.group(3), m_.group(2)))

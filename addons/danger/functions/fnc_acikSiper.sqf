@@ -583,7 +583,7 @@ private _nesneGit = {
     [{ params ["_uu"]; if (alive _uu && {!((_uu getVariable [QGVAR(forceMove), false]) || {(group _uu) getVariable [QGVAR(isRetreating), false]} || {(group _uu) getVariable [QGVAR(isEvading), false]} || {(group _uu) getVariable [QGVAR(isBreakingContact), false]})}) then { if (!(missionNamespace getVariable ["lambs_danger_siperDurusTut", true]) || {isNil {_uu getVariable QGVAR(siperDurusTut)}}) then { _uu setUnitPos "AUTO"; }; }; }, [_u], 25] call CBA_fnc_waitAndExecute;   // v8.830: siper durusu TUTULUR (siperDurusTut): asker yurumeye baslayana / temas bitene kadar AUTO'ya birakilmaz (durusDisiplin birakir)   // v8.687: gecikmeli geri cagrilar geri cekilme / temas kes / kacis / forceMove kosucusunun durusunu EZMEZ (RPT 6a939f32)
     if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
         missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
-        diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> NESNE ARKASI %4 (%5 m, durus %6, dusmandan gizli)", groupId _g, name _u, round _ed, _objAd, round (_u distance2D _obj), _objDurus];
+        diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> NESNE ARKASI %4 (%5 m, durus %6, dusmandan gizli) | yakin dovus (dusman gorunur): %7", groupId _g, name _u, round _ed, _objAd, round (_u distance2D _obj), _objDurus, ["hayir", "evet"] select _yakinDovus];   // v8.842: karne yalniz GORUNUR dusmanda uzun kosuyu hata sayar
     };
     true
 };
@@ -718,6 +718,6 @@ if (_atisVar) then {
 };
 if ((missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) < 40) then {
     missionNamespace setVariable ["lambs_danger_acikSiperLogN", (missionNamespace getVariable ["lambs_danger_acikSiperLogN", 0]) + 1];
-    diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> bina %4 (%5 m, %6, skor %7)", groupId _g, name _u, round _ed, _binaAd, round (_u distance2D _en_iyi), if (_atisVar) then {format ["ATIS POZISYONU: dusman gorunuyor, durus %1", _durusB]} else {"pasif gizlenme (atis pozisyonu yok)"}, round _enS];
+    diag_log format ["[ACIK-SIPER] %1 | %2 | dusman %3 m acikta -> bina %4 (%5 m, %6, skor %7) | yakin dovus (dusman gorunur): %8", groupId _g, name _u, round _ed, _binaAd, round (_u distance2D _en_iyi), if (_atisVar) then {format ["ATIS POZISYONU: dusman gorunuyor, durus %1", _durusB]} else {"pasif gizlenme (atis pozisyonu yok)"}, round _enS, ["hayir", "evet"] select _yakinDovus];
 };
 true
