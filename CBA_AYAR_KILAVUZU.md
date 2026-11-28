@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.843 · Preset: `CBA_LAMBS_Danger_v8.843.txt` · 682 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.844 · Preset: `CBA_LAMBS_Danger_v8.844.txt` · 685 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.843.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.844.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (376 ayar)
+### ELITE siper (379 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -277,6 +277,9 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `eypButce` | EYP: taraf basina en cok canli tuzak | 1–10 | 3 | v8.775. Ayni anda sahada duran tuzak sayisi ust siniri (taraf basina). Varsayilan 3. |
 | `eypKomutlu` | EYP: tuzak = komutla patlayan EYP pususu | açık/kapalı | açık | v8.777 (kullanici referansi eyp_deme). ACIK: eypKur tuzagi mayin yerine komutla patlayan EYP: asker EYP kurar (5 sn animasyon + kamuflaj), gozetleme noktasina ceker, dusman EYP'ye 12 m yaklasinca (8 m icinde dost yoksa) 0.4 sn sonra patlatir; asker olurse EYP etkisiz. KAPALI: eski mayin. eypKur KAPALIYSA etkisiz. Varsayilan ACIK. |
 | `eypKur` | EYP: geri cekilirken tuzak birak (oyun davranisi) | açık/kapalı | kapalı | v8.775 (kullanici: canli bomba / tuzaklama; ATP 3-34.20 + JP 3-15.1 oyun davranisina uyarlandi). ACIK: geri cekilen / temas kesen DUSMAN grup (>= 3 canli, dusman >= 60 m) en geride kalan askerle dusmanin geldigi yone vanilla anti-personel mayin (APERSMine) birakir; kendi tarafi bilir ve kacinir. Varsayilan KAPALI. |
+| `eypKurEast` | EYP: geri cekilirken tuzak - OPFOR (EAST) kullanabilsin | açık/kapalı | açık | v8.844 (kullanici: USMC / ISIS senaryosu). Acik (varsayilan): bu tarafin geri cekilen / temas kesen grubu tuzak (EYP) birakabilir. Kapali: bu taraf hic tuzak birakmaz. Genel 'EYP: geri cekilirken tuzak birak' ana salterdir (ikisi de acik olmali). Zeus EYP modulleri etkilenmez. |
+| `eypKurInd` | EYP: geri cekilirken tuzak - INDEPENDENT (GUER) kullanabilsin | açık/kapalı | açık | v8.844 (kullanici: USMC / ISIS senaryosu). Acik (varsayilan): bu tarafin geri cekilen / temas kesen grubu tuzak (EYP) birakabilir. Kapali: bu taraf hic tuzak birakmaz. Genel 'EYP: geri cekilirken tuzak birak' ana salterdir (ikisi de acik olmali). Zeus EYP modulleri etkilenmez. |
+| `eypKurWest` | EYP: geri cekilirken tuzak - BLUFOR (WEST) kullanabilsin | açık/kapalı | açık | v8.844 (kullanici: USMC / ISIS senaryosu). Acik (varsayilan): bu tarafin geri cekilen / temas kesen grubu tuzak (EYP) birakabilir. Kapali: bu taraf hic tuzak birakmaz. Genel 'EYP: geri cekilirken tuzak birak' ana salterdir (ikisi de acik olmali). Zeus EYP modulleri etkilenmez. |
 | `eypPatlamaGucu` | EYP: patlama gucu (0 hafif, 1 orta, 2 referans) | 0–2 | 1 | v8.777 (referans kodlar). 0: yalniz DemoCharge. 1: piyade DemoCharge + 40 mm TBG32V, arac Mk82 bombasi, EYP DemoCharge + TBG32V. 2: arac GBU-12 + buyuk patlama, EYP GBU-12 (olum yaricapi cok buyuk; kendi tarafa da zarar verir). Varsayilan 1. |
 | `eypStandoffCarpan` | EYP / defuse: emniyet cemberi carpani | 0.5–3 | 1 | v8.775 (ATP 3-34.20: olay kategorisine gore cember). fnc_iedFarkindalik emniyet cemberi (IED menzili x 6, 30-80 m; buyuk IED 55 m) bu carpanla olceklenir: 1 = eski, 2 = iki kat guvenli mesafe. Varsayilan 1. |
 | `fireLineOn` | Dost ates hatti: hattin icindeki dost kayar (MG oncelikli) | açık/kapalı | açık | v8.388. Ates eden askerin hattinda dost varsa (1.6 m, +-40 derece) dusuk oncelikli olan 3.5-5.5 m yana kayar: MG 3 > nisanci 2 > digerleri; MG yerinden oynamaz, hattindaki herkes kayar. Bounding / geri cekilmede kosucular kaymaz, kapsama askerleri kayar. Yalniz GERCEKTEN ates edildiginde tetiklenir. |

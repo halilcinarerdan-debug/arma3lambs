@@ -66,7 +66,8 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                 private _d = _l distance2D _en;
 
                 // ---------------- 1) TUZAKLAMA ----------------
-                if (_kur && {(count _uyeler) >= 3} && {_d >= 60} && {_d <= 400}
+                // v8.844 TARAF BAZLI EYP TUZAGI (kullanici: 'USMC / ISIS senaryosuna gore'; eypKur tum taraflari kapsiyordu -> USMC botu da tuzak kuruyordu): CBA eypKurWest / East / Ind; genel eypKur ana salter
+                if (_kur && {[_taraf, "eypKur", true] call FUNC(rpgTarafDeger)} && {(count _uyeler) >= 3} && {_d >= 60} && {_d <= 400}
                     && {((_g getVariable [QGVAR(isRetreating), false]) isEqualTo true) || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true}}
                     && {time >= (_g getVariable [QGVAR(eypKurT), 0])}) then {
                     private _liste = (_tuzaklar getOrDefault [str _taraf, []]) select {!isNull _x && {alive _x}};

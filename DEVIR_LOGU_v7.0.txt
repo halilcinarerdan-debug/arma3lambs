@@ -5051,3 +5051,8 @@ v8.843 (dal claude/tutarli-karar) kullanici: 'botlar sabitken formasyonu zor otu
  - BULGU (RPT 7f6f0494, Alpha 1-2 spawn 03:58:07): (1) fnc_haltKur: haltHareketT hic yazilmadigi icin spawnda 'lider 1307 sn duruyor' sayildi; kural 'beklenen hedefi <= 20 m olan yuruyen asker doStop' ile ilk saniyede slota 20 m'ye kadar uzaktaki herkes OLDUGU YERDE durduruldu -> formasyon kapanmadi (slota yakin ama dizilmemis). (2) spawndan 4-6 sn sonra ROL-SIRA (joinSilent yeniden siralama) ve komutan formasyonu WEDGE -> COLUMN (SEYIR) ust uste slot yeniden hesabi + nokta elemani 55-65 m one, birkac asker 102 m kopuk (YETIM-TOPLA).
  - DUZELTME (T, DENENMEDI): halt'a YERLESME PENCERESI: grup ilk gorulunce haltHareketT = simdi; lider duralidan 25 sn icinde yalniz slota <= 4 m kalan durdurulur, uzaktakiler slota yurur; 25 sn sonra eski kural (<= 20 m; sonsuz slot kovalamayi kesme amaci korunur). [HALT] logunda tolerans yazar.
  - KALAN (degistirilmedi): ROL-SIRA + ilk komutan formasyonu ayni 6 sn icinde; yerlesme beklemesi yetmezse ikisi de spawn'dan 20 sn sonraya ertelenecek.
+
+v8.844 (dal claude/tutarli-karar) kullanici: 'bana oyle bir cba ayari yaz ki USMC / ISIS senaryolarina gore olsun, gercek kaynaklara gore'.
+ - YENI preset: CBA_LAMBS_Danger_USMC_ISIS_v8.844.txt (taban DOKTRIN_KORKU; West = USMC, East + Ind = IS; 92 satir degisti) + USMC_ISIS_PRESETI.md (her satir icin kaynak etiketi [K] / [G] / [T]; guven siniri acik: arastirma WebSearch ozetleri, mutlak sayi yok, yalniz oranlar).
+ - KOD (T): eypKur tum taraflari kapsiyordu (USMC botu da geri cekilirken tuzak kurardi); CBA eypKurWest / East / Ind eklendi (fnc_eypSistem: rpgTarafDeger ile; genel eypKur ana salter). Ayar sayisi 685.
+ - DENENMEDI.

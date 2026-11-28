@@ -28,7 +28,7 @@ Taşınmayan: ham `getSuppression` kullanımları (ör. `x - y` aritmetiği, de�
 - Bir modül başka modülün iç değişkenini okumaz; ortak durum yalnızca yukarıdaki okuyucular + `fnc_dk` (doktrin) üzerinden.
 
 ## 5. Test planı (dal ayrı: sorun çıkarsa `claude/sade-waypoint`'e dönülür)
-1. Boot `v8.843`, karne `SURUM` GEÇTİ, script hatası 0.
+1. Boot `v8.844`, karne `SURUM` GEÇTİ, script hatası 0.
 2. Karar sayıları önceki RPT'lerle benzer: retreat varışı %60+, siper oturtulamadı %0–10, ayakta ≤ %30.
 3. `[KORKU-OZET]` var ve baskı seviyeleri tetikleniyor (grup baskısı seviyesi ≥1).
 4. Gözlem: botlar vurulunca/yakından ateş alınca **tutarlı** davranıyor mu (bir yerde siper alıp diğerinde ayakta yürümek yok).
