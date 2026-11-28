@@ -52,7 +52,8 @@ lambs_danger_korkuIsle = {
         _eylem pushBack "grup uyari";
     };
     // (2) alcalma
-    private _muaf = ((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
+    // v8.840 (RPT eaa99885: 'korku 0.66' sonrasi hicbir eylem yok; asker forceMove=true iken ayakta durdugu icin alcalma muaf sayiliyordu): YUKSEK korkuda (>= 0.55) forceMove tek basina muafiyet DEGIL (hayatta kalma > komutan); kosarken (hiz >= 2) alcalma zaten yapilmaz
+    private _muaf = (((_u getVariable [QGVAR(forceMove), false]) isEqualTo true) && {_v < 0.55}) || {_g getVariable [QGVAR(isRetreating), false]} || {_g getVariable [QGVAR(isEvading), false]} || {_g getVariable [QGVAR(isBreakingContact), false]}
         || {time < (_u getVariable [QGVAR(tcccBusy), 0])} || {_u getVariable [QGVAR(disableAI), false]} || {(insideBuilding _u) > 0.5} || {(_u getVariable [QGVAR(bombaKosuyor), false]) isEqualTo true} || {[_u] call FUNC(oyuncuKomutaMi)} || {captive _u} || {!isNull objectParent _u};
     if (!_muaf && {(speed _u) < 2} && {(stance _u) isEqualTo "STAND" || {(_v >= 0.55) && {(stance _u) isEqualTo "CROUCH"}}}) then {
         private _hd = ["MIDDLE", "DOWN"] select (_v >= 0.55);
@@ -67,7 +68,7 @@ lambs_danger_korkuIsle = {
         }, [_u, _tok], ((missionNamespace getVariable ["lambs_danger_korkuSure", 4]) max 2) min 12] call CBA_fnc_waitAndExecute;
     };
     // (3) siper arama
-    if (!_muaf && {_v >= 0.5} && {missionNamespace getVariable ["lambs_danger_korkuSiper", true]} && {time > (_u getVariable [QGVAR(korkuSiperT), 0])}) then {
+    if (!_muaf && {_v >= 0.5} && {(_u getVariable [QGVAR(forceMove), false]) isNotEqualTo true} && {missionNamespace getVariable ["lambs_danger_korkuSiper", true]} && {time > (_u getVariable [QGVAR(korkuSiperT), 0])}) then {
         _u setVariable [QGVAR(korkuSiperT), time + 10];
         [_u, _f] call FUNC(acikSiper);
         _s set ["siper", (_s getOrDefault ["siper", 0]) + 1];
