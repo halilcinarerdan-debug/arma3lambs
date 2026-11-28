@@ -34,6 +34,16 @@ Depodaki araştırma (`kaynaklar_doktrin/arastirma_gerceklik/`) **WebSearch öze
 
 Değişmeyenler (kaynak ya da ihtiyaç yok): `siper*` taraf değerleri, `hizliFark*` (0.5 sn), `korku*`, `durusDisiplin*`, `isabetSeviye / isabetYardim = 0` (aim-assist yok), `isabetUzakSapma / CQB yardımı`.
 
+## Ek kaynaklar (bu oturumda WebSearch; özet düzeyinde, tam metin okunmadı)
+- **IS savunması (Musul):** az sayıda piyade + savunma EYP'leri, tüneller, önceden ölçülmüş hedefli havan; mobil savunma, karşı saldırı, arkaya sızma; bütün şehri çevre savunmasıyla tutamaz; engeller yalnız ateşle (keskin nişancı, havan, tanksavar) korunursa işe yarar; liderler yetenekli ama profesyonel ordu değil; bomba taşıyan ticari dron (günde 70'e varan saldırı) + araç bombası eşleşmesi: [CTC Sentinel, Knights & Mello](https://ctc.westpoint.edu/defeat-by-annihilation-mobility-and-attrition-in-the-islamic-states-defense-of-mosul/), [MWI rehberi](https://mwi.westpoint.edu/guide-islamic-states-way-urban-warfare/). → `komutanKisilik* = SALDIRGAN`, `eypKur*`, `canliBomba*` açık; USMC'de kapalı.
+- **M203A1 etkili menzil 350 m** (ikincil kaynak): [TDG Weapons Guide](https://www.mca-marines.org/wp-content/uploads/TDG-Weapons-Guide.pdf) → `uglMaxM = 350`. AT4 / SMAW menzili doğrulanamadı (SMAW HEAT 300 m'ye rastlandı, hangi sistem olduğu belirsiz) → `rpgMaxMWest = 300` `[G]`.
+- **Tüfek ekibi ateşi:** eğitimde atılan mermilerin yaklaşık 1 / 8'i hedefin kritik bölgesine isabet etmiş (**eğitim, muharebe değil**): [army.mil](https://www.army.mil/article/282397/rate_of_fire_against_men_a_quantitative_assessment_of_fire_team_lethality). Yakınlaştıkça isabetin beklenenden az arttığı (Cranfield, 83 veri noktası): [core.ac.uk](https://core.ac.uk/download/342671927.pdf). Afganistan'da angajmanlar sıklıkla > 300 m (Ehrhart 2009).
+- **Marine tüfek manga yapısı** hâlâ değişiyor (13 kişi, 3 ateş ekibi; 4'lü takım düzenlemesi 2025 haberi): [Marine Corps](https://www.marines.mil/Portals/1/Publications/MCWP%203-11.2%20Marine%20Rifle%20Squad.pdf) — grup büyüklüğünü preset değil Zeus / senaryo belirler.
+
+## Gerçekçiliği bozan, bilerek bırakılanlar
+- `isabetCqbYardim` (0.45) ve `isabetYakinYardim` (0.15): 25 m altında mermi yönünü düzelten **motor telafisi** (AI yakında neredeyse hiç isabet ettiremiyordu, RPT 5057c18e). Gerçek veri yakın mesafede isabetin beklenenden az arttığını söylüyor, yani bu hâliyle CQB gerçekten biraz **kolay**. Karne `< 50 m` bandı %10-20'de kalıyorsa (en az 10 isabetle) 0.30'a indirebilirsin.
+- Dron / havan ayarları taraf bazlı değil: IS'in bomba atan droni ve önceden ölçülmüş havanı gerçek, ama USMC botları da aynı sistemleri kullanabilir. Bu preset onlara dokunmuyor.
+
 ## Bilinen sınırlar
 - **IS acemi oranı / optik oranı** ve **%20-30'da kopma** kaynaksız; ilk testte kayıp oranına bak (`rpt_ozet.py --kayip`), IS çok erken ya da hiç kopmuyorsa `erkenKayipOranEast` değiştir.
 - IS'in iyi ya da kötü olduğu **fraksiyona göre** değişir (Zeus'ta IS sınıfı her zaman optiksiz mi?). Mod IS'inde ACOG / dürbünlü silah varsa `skillOptiksizCarpan` onlara uygulanmaz.
