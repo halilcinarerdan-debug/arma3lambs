@@ -62,7 +62,7 @@ private _dI = _unit distance _imp;
 //   silahin kullanilabilir menzilinin (fnc_rpgSistem [RPG-MENZIL] tablosu) ya da rpgMaxM'in kucugunun 1.15 kati ustundeyse atis IPTAL (mermi 12 sn sonra geri verilir; CBA rpgMotorMenzil). Arac / zirh / piyade hedefine dusen atis dokunulmaz.
 if (_neden isEqualTo "" && {_kaynak isEqualTo "motor"} && {_yakin isEqualTo []} && {missionNamespace getVariable ["lambs_danger_rpgMotorMenzil", true]}) then {
     private _kapM = ((missionNamespace getVariable ["lambs_danger_rpgMenzilTab", createHashMap]) getOrDefault [_weapon, 0]);
-    private _maxG = [side group _unit, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
+    private _maxG = [group _unit, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
     if (_maxG < 0) then { _maxG = missionNamespace getVariable ["lambs_danger_rpgMaxM", 250]; };
     private _lim = if (_kapM > 0) then { _kapM min _maxG } else { _maxG };
     if (_dI > (_lim * 1.15)) then { _neden = "menzil disi"; };

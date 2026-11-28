@@ -165,6 +165,7 @@ private _acemiK = [_u, "skillAcemiCarpan", 0.75] call FUNC(ayarTaraf);
 private _acemi = (["skillAcemi", [_u] call FUNC(birimId), false] call FUNC(rastgele)) < _acemiOran;
 if (_acemi) then {
     { _u setSkill [_x, (_u skill _x) * _acemiK]; } forEach ["aimingAccuracy", "aimingShake"];
+    _u setVariable [QGVAR(acemi), true];   // v8.845: korku 'egitimsizlik' sabitlenmesi icin
     _yeni pushBack format ["TECRUBESIZ x%1 (isabet / titreme)", _acemiK];
 };
 // v8.289: isabet carpani (varsayilan 1.26 = eski 1.2 x 1.05) ve nisan hizi carpani (1.2) CBA'dan ayri ayarlanir

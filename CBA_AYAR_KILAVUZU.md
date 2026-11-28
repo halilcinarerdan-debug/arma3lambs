@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.844 · Preset: `CBA_LAMBS_Danger_v8.844.txt` · 685 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.845 · Preset: `CBA_LAMBS_Danger_v8.845.txt` · 687 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.844.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.845.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (379 ayar)
+### ELITE siper (381 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -183,6 +183,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `avantajBagla` | Avantajli yer: savunma + bounding | açık/kapalı | açık | v8.675. HOLD (savunma) kararinda 'mis gibi' bir yer (skor >= 45, merkezden >= 15 iyi; 120 m) varsa manga oraya yerlesir (dusman yonune dik hatta 5 m arayla); bounding ates ekibi (FSE) 80 m icinde 'mis gibi' yer varsa onun etrafina dizilir (MG / nisanci / AT kendi hakim noktasini korur). Atis alani kapsami zorunlu. Dusman < 120 m / baski >= 0.4 / bina / mevzi / retreat vb. atlanir. Log: [SAVUNMA-YER], [AVANTAJLI-YER]. |
 | `avantajYaricap` | Avantajli yer: arama yaricapi (m) | 60–300 | 150 | v8.674. Geri cekilmede avantajli yer aramasinin ust siniri (varsayilan 150 m; 4 halka x 9 yon). |
 | `avantajliYer` | Avantajli yer analizi (arazi + koy / ev) | açık/kapalı | açık | v8.674. Geri cekilme dusmandan uzaga degil, fnc_avantajliYer ile secilen yere yonelir: dusmana gore yukseklik, dusman gozunden gizlilik (ayakta / comelik / yatik), 40 m icinde koy / ev kumesi (>= 3 bina +26, 1-2 bina +12), bina arkasi, sert nesne, gizli gidis yolu, mesafe kazanci. Kapali = eski (tehdidin tersi). Log: [AVANTAJLI-YER]. |
+| `ayarDoktrinBazli` | Taraf ayarlari DOKTRINE gore uygulansin (taraf fark etmez) | açık/kapalı | kapalı | v8.845 (kullanici: 'ISIS ve Amerika farkini net koy'; ABD fraksiyonu EAST'te, duzensiz fraksiyon WEST'te olabilir). KAPALI (varsayilan): 'West / East / Ind' ayarlari tarafa gore (BLUFOR / OPFOR / INDEPENDENT). ACIK: grubun DOKTRINI DUZENSIZ ise 'East' ayarlari (IS / milis profili), baska her doktrin (ABD, USMC, RUS...) 'West' ayarlari (duzenli ordu profili) uygulanir; taraf fark etmez. Doktrin 'Doktrin' ayarindan (taraf basina) ya da fraksiyondan gelir; tanimsiz fraksiyonu 'doktrinWest / East / Ind = DUZENSIZ' ile isaretle. Beceri yalniz birim olusurken uygulanir (mevcut birimler icin oyunu yeniden baslat). |
 | `bakisFarkAci` | Bakis farkindaligi: aci (derece) | 1–15 | 5 | v8.693. Botun bakis dogrultusundan sapmasi bu aciyi gecmezse bot bakiliyor sayilir (varsayilan 5). |
 | `bakisFarkAktif` | Bakis farkindaligi: oyuncu bota bakinca bot tepki verir | açık/kapalı | kapalı | v8.693. Acik: oyuncunun bakis dogrultusu (oyuncu basina TEK isin) bir botu hedefliyorsa (aci bakisFarkAci icinde, arada engel yok, bot oyuncuyu biliyor) bot bakisFarkBekle sn sonra siper mikro duzeltir (acikSiper) ya da yan adimla gorus hattindan cikar. Yalniz insan oyunculara. Varsayilan kapali. |
 | `bakisFarkBekle` | Bakis farkindaligi: bakilma suresi (sn) | 0.2–3 | 0.8 | v8.693. Bot bu kadar sn kesintisiz bakilirsa tepki verir (varsayilan 0.8). |
@@ -270,6 +271,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `dusunHizi` | AI dusunme hizi (sicak temas) | 0.5–3 | 1.25 | v8.601. SICAK TEMASTA (yerel AI grubu temasta) karar / algi izleyicilerinin dongu suresi bu carpanla kisalir (1.25 = yaklasik %25 daha hizli dusunur; 1 = eski). Temas yokken degismez. CQB izleyicileri (cqbCevik / cqbKume / cqbReflex / bina) bundan ETKILENMEZ. Yuksek deger CPU maliyetini artirir. |
 | `dusunHiziCqb` | AI dusunme hizi: CQB izleyicileri (sicak temas) | 0.5–3 | 1.1 | v8.603. CQB izleyicileri (cqbCevik / cqbKume / cqbReflex / bina pencere / kose temkin / yakin hareket / yakin ates / bina saldirisi / kapi / oda pususu) icin carpan (1.10 = %10 daha hizli dusunur; 1 = eski). CPU maliyeti artar. Temas yokken degismez. |
 | `dusunHiziOnemli` | AI dusunme hizi: onemli izleyiciler (sicak temas) | 0.5–3 | 1.3 | v8.601. Ates ustunlugu, ates-hareket, pusu tepkisi, patlayici, kacis, hedef siper, ufuk / sektor / gizli algi, yeniden doldurma siperi, lider senkronu ve komutan karar onbellegi icin carpan (1.30 = %30 daha hizli). Temas yokken degismez. |
+| `egitimsizlik` | Egitimsizlik etkisi (DUZENSIZ doktrin / tecrubesiz asker) | 0–1 | 0 | v8.845 (kullanici: 'ISIS gercekten egitimsizligini bir noktada hissettirsin'). 0 = kapali. Ates altinda (yakin mermi korkusu >= 0.35) EGITIMSIZ asker (DUZENSIZ doktrinli grup, ya da tecrubesiz isaretli asker) olasilikla SABITLENIR: yere yatar, 3-6 sn basini kaldirmaz (hedef alma / karsilik ates kapali), 15 sn'de bir. Olasilik = bu deger x (tecrubesiz 1, diger DUZENSIZ 0.6, egitimli doktrinde tecrubesiz 0.3) x (0.5 + korku). Kaynak: egitimsiz birliklerde yogun atesin altinda ates disiplini cokusu (genel bilgi; sayi tasarim). |
 | `erkenCekilme` | Erken geri cekilme (kayip hizi / uzak mesafe) | açık/kapalı | açık | v8.553. Dusman >= 120 m iken son 60 sn'de Kayip hizi kadar etkin kayip (varsayilan 3) ya da dusman >= 150 m iken kayip orani Erken kayip orani'ni (0.25) asarsa ve biz ustun degilsek (guc orani >= 0.7 / 0.8) komutan WITHDRAW secer; eskiden %40 kayiptan sonra + karar gecikmesiyle ~40 sn gec cekiliyordu. Acik arazide uzaktan ates altinda erimeyi onler. |
 | `erkenKayipHiz` | Erken cekilme: 60 sn'de kayip (kisi) | 2–8 | 3 | v8.553. Son 60 sn'de bu kadar etkin asker kaybi (dusman >= 120 m) geri cekilmeyi tetikler (varsayilan 3). |
 | `erkenKayipOran` | Erken cekilme: kayip orani (dusman >= 150 m) | 0.1–0.5 | 0.25 | v8.553. Dusman >= 150 m iken baslangica gore kayip orani bunu asarsa geri cekilme (varsayilan 0.25). |

@@ -7,7 +7,7 @@
  * Kullanan: fnc_rpgSistem (rpgAktif, rpgMuhimmat, rpgMaxM), fnc_rpgGuvenli (rpgYedek).
  *
  * Arguments:
- * 0: Taraf <SIDE> (west / east / resistance; baska = Ind gibi)
+ * 0: Taraf <SIDE> ya da grup / birim (v8.845; doktrin bazli modda grup gerekir)
  * 1: Ayar anahtari (onek yok, taraf eki yok) <STRING> (ornek "rpgMaxM")
  * 2: Varsayilan <ANY>
  *
@@ -17,5 +17,6 @@
 */
 
 params ["_taraf", "_anahtar", "_varsayilan"];
-private _ek = if (_taraf isEqualTo west) then {"West"} else { if (_taraf isEqualTo east) then {"East"} else {"Ind"} };
+private _ek = [_taraf] call FUNC(ayarEk);   // v8.845: taraf / grup / birim (doktrin bazli modda DUZENSIZ = East profili)
+if (_ek isEqualTo "") then { _ek = "Ind"; };
 missionNamespace getVariable [format ["lambs_danger_%1%2", _anahtar, _ek], _varsayilan]

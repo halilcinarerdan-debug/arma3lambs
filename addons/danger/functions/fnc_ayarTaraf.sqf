@@ -19,13 +19,7 @@
 
 params ["_ctx", "_ad", "_varsayilan"];
 private _genel = missionNamespace getVariable ["lambs_danger_" + _ad, _varsayilan];
-private _s = switch (typeName _ctx) do {
-    case "OBJECT": { if (isNull _ctx) then {sideUnknown} else {side group _ctx} };
-    case "GROUP": { if (isNull _ctx) then {sideUnknown} else {side _ctx} };
-    case "SIDE": {_ctx};
-    default {sideUnknown};
-};
-private _ek = if (_s isEqualTo west) then {"West"} else { if (_s isEqualTo east) then {"East"} else { if (_s isEqualTo resistance) then {"Ind"} else {""} } };
+private _ek = [_ctx] call FUNC(ayarEk);   // v8.845: taraf ya da doktrin bazli (CBA ayarDoktrinBazli)
 if (_ek isEqualTo "") exitWith {_genel};
 private _v = missionNamespace getVariable ["lambs_danger_" + _ad + _ek, -1];
 if (_v isEqualType 0 && {_v >= 0}) then {_v} else {_genel}

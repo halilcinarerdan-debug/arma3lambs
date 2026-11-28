@@ -67,7 +67,7 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
 
                 // ---------------- 1) TUZAKLAMA ----------------
                 // v8.844 TARAF BAZLI EYP TUZAGI (kullanici: 'USMC / ISIS senaryosuna gore'; eypKur tum taraflari kapsiyordu -> USMC botu da tuzak kuruyordu): CBA eypKurWest / East / Ind; genel eypKur ana salter
-                if (_kur && {[_taraf, "eypKur", true] call FUNC(rpgTarafDeger)} && {(count _uyeler) >= 3} && {_d >= 60} && {_d <= 400}
+                if (_kur && {[_g, "eypKur", true] call FUNC(rpgTarafDeger)} && {(count _uyeler) >= 3} && {_d >= 60} && {_d <= 400}
                     && {((_g getVariable [QGVAR(isRetreating), false]) isEqualTo true) || {(_g getVariable [QGVAR(isBreakingContact), false]) isEqualTo true}}
                     && {time >= (_g getVariable [QGVAR(eypKurT), 0])}) then {
                     private _liste = (_tuzaklar getOrDefault [str _taraf, []]) select {!isNull _x && {alive _x}};
@@ -106,7 +106,7 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
                     private _toplam = count (units _g);
                     private _kayip = 1 - ((count _hepsi) / (_toplam max 1));
                     // v8.808 TARAF BAZLI CANLI BOMBA (kullanici: 'hangi taraflarin bomber olup olmayacagini ayarlayabilelim'): CBA canliBombaWest / East / Ind (BLUFOR / OPFOR / INDEPENDENT); genel canliBomba ana salter (VE). Kapali tarafin grubu bomba secmez.
-                    private _bTaraf = [_taraf, "canliBomba", true] call FUNC(rpgTarafDeger);
+                    private _bTaraf = [_g, "canliBomba", true] call FUNC(rpgTarafDeger);
                     if (!_bTaraf && {((count _hepsi) <= 2) || {_kayip >= 0.6}} && {isNil {missionNamespace getVariable format ["lambs_danger_bombaYasakLog_%1", str _taraf]}}) then {
                         missionNamespace setVariable [format ["lambs_danger_bombaYasakLog_%1", str _taraf], true];
                         diag_log format ["[CANLI-BOMBA] TARAF KAPALI | %1 | %2 | agir kayip + dusman %3 m ama CBA canliBomba%4 KAPALI -> bomba secilmedi (bu taraf icin bir kez loglanir)", groupId _g, str _taraf, round _d, (["Ind", "West", "East"] select (([independent, west, east] find _taraf) max 0))];
@@ -170,7 +170,7 @@ diag_log "[EYP-SISTEM] eyp tuzaklama + canli bomba (oyun davranisi; CBA eypKur /
             private _k = _u getVariable [QGVAR(teslimBombaK), -1];
             if (_k < 0) then {
                 private _esya = (magazines _u) findIf { private _a = getText (configFile >> "CfgMagazines" >> _x >> "ammo"); _a isNotEqualTo "" && {_a isKindOf ["TimeBombCore", configFile >> "CfgAmmo"]} };
-                private _tasiyor = ([side group _u, "canliBomba", true] call FUNC(rpgTarafDeger)) && {(_esya >= 0) || {(random 1) < (((missionNamespace getVariable ["lambs_danger_teslimBombaSans", 0]) max 0) min 1)}};   // v8.808: taraf bazli canliBomba kapaliysa teslim bombasi da yok
+                private _tasiyor = ([group _u, "canliBomba", true] call FUNC(rpgTarafDeger)) && {(_esya >= 0) || {(random 1) < (((missionNamespace getVariable ["lambs_danger_teslimBombaSans", 0]) max 0) min 1)}};   // v8.808: taraf bazli canliBomba kapaliysa teslim bombasi da yok
                 _k = [0, 1] select _tasiyor;
                 _u setVariable [QGVAR(teslimBombaK), _k];
                 _u setVariable [QGVAR(teslimBombaM), 6 + (random 6)];

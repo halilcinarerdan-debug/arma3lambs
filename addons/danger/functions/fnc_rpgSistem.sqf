@@ -64,14 +64,14 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             } forEach (allUnits select {
                 local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {_x isKindOf "CAManBase"} && {(secondaryWeapon _x) isNotEqualTo ""} && {!(_x getVariable [QGVAR(rpgMuhOk), false])}
                 && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
-                && {[side group _x, "rpgMuhimmat", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli AP roket tasima
+                && {[group _x, "rpgMuhimmat", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli AP roket tasima
             });
         };
         private _adaylar = allUnits select {
             local _x && {alive _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {(secondaryWeapon _x) isNotEqualTo ""}
             && {([(group _x)] call FUNC(temasSeviye)) <= 1} && {_x isKindOf "CAManBase"}
             && {(side group _x) in [west, east, resistance]} && {(!([_x] call FUNC(oyuncuKomutaMi))) || {_oyEsit}}
-            && {[side group _x, "rpgAktif", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli (BLUFOR / OPFOR / INDEPENDENT) karar katmani acma / kapama
+            && {[group _x, "rpgAktif", true] call FUNC(rpgTarafDeger)}   // v8.802: taraf bazli (BLUFOR / OPFOR / INDEPENDENT) karar katmani acma / kapama
         };
         {
             if (_verilen >= 2) exitWith {};
@@ -79,7 +79,7 @@ diag_log "[RPG-SISTEM] RPG karar katmani (MG yuvasi / bina ici dusman / piyade k
             private _g = group _u;
             private _ls = secondaryWeapon _u;
             // v8.802: taraf bazli en uzak hedef mesafesi (-1 = genel rpgMaxM)
-            private _maxU = [side _g, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
+            private _maxU = [_g, "rpgMaxM", -1] call FUNC(rpgTarafDeger);
             _maxU = if (_maxU < 0) then {_maxM} else {(_maxU max (_minM + 30)) min 600};
             // v8.826 MOTOR MENZILI (RPT 62e4a6ff + 0c1269e0: tum RPG emirleri MRAWS'a 256-485 m piyade hedefine verildi, 40 emrin 40'i ATILMADI; roketatar 0.0 sn'de elde ama 12 sn atmiyor): AI atis modunun config menzil
             //   esikleriyle (minRange / midRange / maxRange) atar; hedef uzaksa AI atmaz. Karar mesafesi atis modunun KULLANILABILIR menziline sinirlanir: mid >= 0 ise mid + 0.5 x (max - mid), degilse 0.85 x max (CBA rpgMotorMenzil, varsayilan acik). [RPG-MENZIL] log (silah basina bir kez).

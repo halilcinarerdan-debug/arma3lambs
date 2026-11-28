@@ -8,7 +8,8 @@
  *   (3) SIPER ARAMA (korku >= 0.5, CBA korkuSiper): fnc_acikSiper (10 sn'de bir; fonksiyonun kendi kapilari gecerli);
  *   (4) fnc_baskiEf: motor baskisi yetmezse korku (x0.7) siper duruşu / panik gerilimi / moral hesabinda baskinin yerine gecer.
  * Panik DEGIL: ozguven / panicChance'e dokunulmaz ('ayik': donmaz, sadece alcalir / siper arar / bilir).
- * CBA: lambs_danger_korku (acik), korkuM (25 m), korkuSure (4 sn), korkuSiper (acik). Log: [KORKU] (ilk 20, sonra 30 sn'de bir) + 60 sn [KORKU-OZET].
+ *   (4) v8.845 EGITIMSIZLIK: CBA egitimsizlik > 0 ise egitimsiz asker olasilikla SABITLENIR (3-6 sn yatar, karsilik ates yok).
+ * CBA: lambs_danger_korku (acik), korkuM (25 m), korkuSure (4 sn), korkuSiper (acik), egitimsizlik (0). Log: [KORKU] (ilk 20, sonra 30 sn'de bir) + 60 sn [KORKU-OZET].
  * Arguments: None | Return Value: Baslatildi mi <BOOL> | Public: No
 */
 if (!isNil "lambs_danger_korkuStarted") exitWith {false};
@@ -73,6 +74,32 @@ lambs_danger_korkuIsle = {
         [_u, _f] call FUNC(acikSiper);
         _s set ["siper", (_s getOrDefault ["siper", 0]) + 1];
         _eylem pushBack "siper ara";
+    };
+    // (4) EGITIMSIZLIK (v8.845; CBA egitimsizlik; kullanici: 'ISIS gercekten egitimsizligini bir noktada hissettirsin'): egitimsiz asker (DUZENSIZ doktrin / tecrubesiz) ates altinda olasilikla SABITLENIR: yere yatar, 3-6 sn basini kaldirmaz (hedef alma / karsilik ates kapali).
+    //   Olasilik = egitimsizlik x (tecrubesiz 1, diger DUZENSIZ 0.6, egitimli doktrinde tecrubesiz 0.3) x (0.5 + korku); birim basina 15 sn'de bir; retreat / kacis / hekim / oyuncu komutasi muaf (_muaf).
+    private _egit = missionNamespace getVariable ["lambs_danger_egitimsizlik", 0];
+    if (_egit > 0 && {!_muaf} && {_v >= 0.35} && {time > (_u getVariable [QGVAR(sabitT), 0])}) then {
+        private _acemi = (_u getVariable [QGVAR(acemi), false]) isEqualTo true;
+        private _dz = ([_g, "ad", "GENEL"] call FUNC(dk)) isEqualTo "DUZENSIZ";
+        private _faktor = if (_dz) then { [0.6, 1] select _acemi } else { [0, 0.3] select _acemi };
+        if (_faktor > 0 && {(random 1) < (_egit * _faktor * (0.5 + _v))}) then {
+            private _sure = 3 + (random 3);
+            private _tk = time + (random 0.001);
+            _u setVariable [QGVAR(sabitT), time + _sure + 15];
+            _u setVariable [QGVAR(sabitTok), _tk];
+            _u setUnitPosWeak "DOWN";
+            _u disableAI "AUTOTARGET";
+            _u disableAI "TARGET";
+            _s set ["sabitlendi", (_s getOrDefault ["sabitlendi", 0]) + 1];
+            _eylem pushBack format ["SABITLENDI %1 sn (%2%3)", _sure toFixed 1, ["egitimli doktrin", "DUZENSIZ"] select _dz, [", tecrubeli", ", tecrubesiz"] select _acemi];
+            [{
+                params ["_uu", "_tk2"];
+                if (!alive _uu || {(_uu getVariable [QGVAR(sabitTok), 0]) isNotEqualTo _tk2}) exitWith {};
+                _uu enableAI "AUTOTARGET";
+                _uu enableAI "TARGET";
+                if (isNil {_uu getVariable QGVAR(siperDurusTut)}) then { _uu setUnitPosWeak "AUTO"; };
+            }, [_u, _tk], _sure] call CBA_fnc_waitAndExecute;
+        };
     };
     if (_eylem isNotEqualTo [] && {["korku", 20, 30] call FUNC(logIzin)}) then {
         diag_log format ["[KORKU] %1 | %2 | ates eden %3 %4 m (%5) | korku %6 | %7", groupId _g, name _u, typeOf _f, round _d, _kaynak, _v toFixed 2, _eylem joinString " + "];

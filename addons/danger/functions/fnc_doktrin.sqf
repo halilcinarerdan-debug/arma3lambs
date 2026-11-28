@@ -124,6 +124,7 @@ private _tanim = [
 private _harita = missionNamespace getVariable ["lambs_danger_doktrinHaritasi", [
     ["rhs_faction_usmc", "USMC"], ["usmc", "USMC"],
     ["rhs_faction_usarmy", "ABD"], ["blu_f", "ABD"], ["blu_g_f", "ABD"],
+    ["rhsusaf_ranger", "ABD"], ["ff_mfas", "DUZENSIZ"],   // v8.845: RPT c30f0e7f fraksiyonlari (fp_rhsusaf_ranger = ABD Ranger, ff_mfas = duzensiz milis); OTO modunda taraf fark etmez
     ["rhs_faction_msv", "RUS"], ["rhs_faction_vdv", "RUS"], ["rhs_faction_rva", "RUS"], ["rhs_faction_tv", "RUS"],
     ["opf_t_f", "CHN"], ["_chn", "CHN"], ["_pla", "CHN"], ["china", "CHN"],
     ["peshmerga", "PESHMERGA"], ["kurd", "PESHMERGA"], ["_pesh", "PESHMERGA"],
