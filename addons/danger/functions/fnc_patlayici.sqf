@@ -68,7 +68,10 @@ lambs_danger_patlayiciDon = {
                 if (alive _u && {alive _t} && {(magazines _u) findIf {_x isEqualTo _mag} >= 0}) then {
                     private _rel = (eyePos _u) vectorAdd [0, 0, -0.1];
                     private _hp = getPosASL _t;
-                    private _dag = random (1.5 + ((_u distance2D _t) * 0.04));
+                    // v8.841 (kullanici: 'bombalar evin icine girmiyor, pencereye / kapiya'; RPT 7f6f0494: 19 atisin 14'u hedefe <= 5 m ama cogu cephe duvarina +3.3..+4.5 m'de carpti; hiz +-%5 = menzil +-%10 (30 m'de +-3 m) + yayilma 1.5 + 0.04 x mesafe; pencere acikligi ~1 m): bina ici hedefte yayilma ve hiz sapmasi KUCUK (pencereden girebilsin)
+                    private _icHedef = (insideBuilding _t) > 0.15;
+                    private _dag = random ([1.5 + ((_u distance2D _t) * 0.04), 0.4 + ((_u distance2D _t) * 0.012)] select _icHedef);
+                    private _hizSap = [0.05, 0.015] select _icHedef;
                     private _hedef = (AGLToASL ((ASLToAGL _hp) getPos [_dag, random 360]));
                     private _D = ((_rel select 0) - (_hedef select 0)) ^ 2;
                     _D = sqrt (_D + (((_rel select 1) - (_hedef select 1)) ^ 2));
@@ -115,7 +118,7 @@ lambs_danger_patlayiciDon = {
                         if (_payda > 0.5) then {
                             private _vv = sqrt ((9.81 * _D * _D) / (2 * ((cos _a) ^ 2) * _payda));
                             if (_vv <= (26 + (4 * (((_dh / 4) max 0) min 1)))) then {   // v8.597: ust kat (>= +4 m) hedefe hiz tavani 26 -> 28 m/sn
-                                private _vk = _vv * (1 + ((random 0.1) - 0.05));
+                                private _vk = _vv * (1 + ((random (2 * _hizSap)) - _hizSap));
                                 private _vl = [(sin _yon) * (cos _a) * _vk, (cos _yon) * (cos _a) * _vk, (sin _a) * _vk];
                                 private _tTop = _D / ((cos _a) * _vk max 1);
                                 private _onceki = _rel;
@@ -133,7 +136,7 @@ lambs_danger_patlayiciDon = {
                                 for "_i" from 1 to 8 do {
                                         private _tt = _tTop * (_i / 8);   // v8.596: 0.92 -> 1.0 (yayin SON %8'i de denetlenir: pencere / duvar onunde dusup geri sekme riski; RPT 38ac1efc: grup 10 -> 4 etkin)
                                         private _nokta = _rel vectorAdd [(_vl select 0) * _tt, (_vl select 1) * _tt, ((_vl select 2) * _tt) - (4.905 * _tt * _tt)];
-                                        private _ht = if (_i >= 2) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
+                                        private _ht = if (_i >= 2 || {(insideBuilding _u) > 0.5}) then { lineIntersectsSurfaces [_onceki, _nokta, _u, _t, true, 1, "GEOM", "NONE"] } else { [] };
                                         if (_ht isNotEqualTo []) exitWith {
                                             _engel = true;
                                             _ni = _i;
@@ -146,14 +149,15 @@ lambs_danger_patlayiciDon = {
                                 // v8.722 TUP DENETIMI (kullanici: 'botlar 2. kata el bombasini tutturamiyor, disari atiyorlar'; RPT: 74 izli atistan 48'i bina duvarina +2.5..+3.0 m'de carpti = 2. kat pencere denizligi hemen alti; cizgi yayi 'temiz' ama bomba
                 //   gercekte ~6-10 cm kalinlikta, pencere kenarina / denizlige surtunuyor): bina ici hedefte yay, merkez cizgisinin ALTINA 0.55 m, USTUNE 0.25 m ve iki yanina 0.3 m kaydirilmis 4 paralel cizgiyle de denetlenir (pencere acikliginin ortasindan gecen yay secilir);
                 //   hedef noktasina 2.5 m kala (ic zemin / duvar) denetim yapilmaz. Gecis dar ise yay 'engelli' sayilir, siradaki aci / nisan noktasi denenir.
-                if (!_engel && {_binaHedef}) then {
+                // v8.841: ATICI binanin ICINDEYSE (pencereden / kapidan DISARI atis) dar gecis denetimi de uygulanir (RPT: 3 bomba atici yaninda, duvara 3-4 m'de carpip geri dondu; ilk yay parcasi da denetlenir)
+                if (!_engel && {_binaHedef || {(insideBuilding _u) > 0.5}}) then {
                     private _sg = [cos _yon, -(sin _yon), 0];
                     private _tup = [[0, 0, -0.55], [0, 0, 0.25], _sg vectorMultiply 0.3, _sg vectorMultiply -0.3];
                     private _o2 = _rel;
                     for "_i" from 1 to 8 do {
                         private _tt2 = _tTop * (_i / 8);
                         private _nk2 = _rel vectorAdd [(_vl select 0) * _tt2, (_vl select 1) * _tt2, ((_vl select 2) * _tt2) - (4.905 * _tt2 * _tt2)];
-                        if (_i >= 2 && {(_nk2 distance _hedef) > 2.5}) then {
+                        if ((_i >= 2 || {(insideBuilding _u) > 0.5}) && {(_nk2 distance _hedef) > 2.5}) then {
                             {
                                 if (!_engel && {(lineIntersectsSurfaces [_o2 vectorAdd _x, _nk2 vectorAdd _x, _u, _t, true, 1, "GEOM", "NONE"]) isNotEqualTo []}) then {
                                     _engel = true;

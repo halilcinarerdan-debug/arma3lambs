@@ -168,7 +168,7 @@ diag_log "[HAREKET] hareket yardimcisi baslatildi (v8.283: donus x1.2 + yat/kalk
                                 _u setVariable [QGVAR(mvFix), _n];
                                 _u setVariable [QGVAR(mvFixT), time];
                                 // 3 duzeltmeden sonra 15 sn dokunma: bina kapisi / sorunlu navmesh'te asker surekli geri alinip takiliyordu (RPT: retreat lideri bina yaninda 40 sn kipirdamadi)
-                                if (_n >= 2) then { _u setVariable [QGVAR(mvGrace), time + 20]; _u setVariable [QGVAR(mvFix), 0]; };   // v8.375: 3 -> 2 duzeltme, 15 -> 20 sn (ev kenarinda salinim bitsin)
+                                if (_n >= 2) then { _u setVariable [QGVAR(mvGrace), time + 8]; _u setVariable [QGVAR(mvFix), 0]; };   // v8.375: 3 -> 2 duzeltme, 15 -> 20 sn (ev kenarinda salinim bitsin); v8.841: 20 -> 8 sn (RPT 7f6f0494: 17 duvar korumasi, 2 duzeltmeden sonra 20 sn korumasiz = 'botlar duvar arkasindan geciyor'; ayni evde (L_7 / L_3) ayni asker 15-25 sn arayla tekrar kesti)
                                 if (lambs_danger_mvLogN < 25) then {
                                     lambs_danger_mvLogN = lambs_danger_mvLogN + 1;
                                     diag_log format ["[DUVAR-KORUMA] %1 | %2 | %3 icinden gecmeye calisti -> geri alindi (%4)", groupId (group _u), name _u, typeOf _o, round (_mv * 100) / 100];
