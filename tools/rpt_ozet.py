@@ -24,7 +24,7 @@ TAGS = ["DURUM", "DURUM-GRUP", "DOKTRIN", "KOMUT", "CAGRI", "JEST", "CMD", "BND-
         "GERI-CEKILME-BASLA", "GERI-CEKILME-EK", "ROTA", "PUSU", "KAMUFLAJ", "KAMUFLAJ-YER", "ARAZI", "ARAZI-KOMUTAN", "ANOMALI", "SAGLIK", "ORTAM-SKILL", "SKILL-VARSAYILAN", "SKILL-OZET", "MEDIC-TASMA", "MEDIC-TASMA-OZET", "MORAL", "MORAL-OZET", "ROE-IHLAL", "ROE-OZET", "SON-DIRENIS", "GERI-CEKILME-TOPLAN", "HQ", "HQ-TAHTA", "HQ-RAPOR", "HQ-TAKVIYE", "HQ-EMIR", "HQ-MEDEVAC", "HQ-KANAT", "HQ-ISTIHBARAT", "HQ-MODUL", "TOPLAN", "TOPLAN-RAPOR", "PUSU-GUVENLIK", "PUSU-KZ", "ROTA-ZINCIR", "ODA", "HQ-FEINT", "GERI-CEKILME-YON", "GERI-CEKILME-BITIS", "TESLIM", "YORGUNLUK", "SIPER-YAPIS-OZET", "SIPER-YAPIS-TANI", "GERI-CEKILME-TAKILI", "CQB-POZ", "TELSIZ-GRUP", "TEMAS-KES-YON", "YAPRAK", "YAPRAK-OZET", "YAPRAK-TANI", "YAPRAK-PERF", "YAPRAK-TEST", "GERI-CEKILME", "GERI-CEKILME-TAMAM", "TEMAS-KES-BASLA", "TEMAS-KES", "ATES-DESTEK", "ATIS-GUVENLIK",
         "ATES-HATTI", "SIKISMA", "DUVAR-KORUMA", "ARKA-GUVENLIK", "GRENADE-ATIS", "EL-BOMBASI", "EL-BOMBASI-TARAMA", "ATIS-TANI",
         "KOMUTAN-BEKLE", "KOMUTAN-FORM", "ROL-GOREV", "SIS", "TCCC", "SAHA", "BUDDY", "SIPER-ANALIZ", "DOKTRIN-PROFIL", "OLAY", "YIGILMA-NEDEN", "YIGILMA-COZ", "YIGILMA-BAYGIN", "YIGILMA-OZET", "TCCC-DURUS", "CQB-CEVIK", "CQB-CEVIK-OZET", "OZGUVEN", "OZGUVEN-OZET", "ISINLANMA", "STEALTH-SES", "EDEN-POZISYON", "POZISYON-SEC", "MEVZI-POZ", "CM-DEGIS", "HAVA-AA", "LAMBS-RPG", "ATES-HATTI-OZET", "BND-BASKI-YON", "BND-FORM-SALINIM", "BND-MG-YER", "TEHLIKE-ACIK"]
-BEKLENEN_SURUM = "v8.845"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
+BEKLENEN_SURUM = "v8.846"   # her surumde guncelle (karne SURUM satiri eski paket yuklu mu diye kontrol eder)
 NOISE = ("Bone ", "setHitPointDamage", "CAN_COLLIDE", "addWeaponWithAttachmentsCargoGlobal", "Destroy waypoint", "fnc_throwWeapon")
 
 def sn(t):
@@ -915,10 +915,15 @@ def kabul(path):
     ko_oz = collections.Counter()
     for l in L:
         if "[KORKU-OZET]" in l:
-            for m_ in re.finditer(r"(olay|grup_uyari|alcalma|siper|gecis|yakin_atis|sabitlendi)=(\d+)", l): ko_oz[m_.group(1)] += int(m_.group(2))
+            for m_ in re.finditer(r"(olay|grup_uyari|alcalma|siper|gecis|yakin_atis|sabitlendi|yon)=(\d+)", l): ko_oz[m_.group(1)] += int(m_.group(2))
     ko_l = [l for l in L if "[KORKU] " in l]
     if bs_v:
         ekle("GERCEKCILIK: BASKI DAGILIMI + KORKU", "BILGI", "grup baskisi ornek %d: >= 0.3 %d, >= 0.6 %d, en cok %.2f | korku olay %d (mermi gecisi %d, yakin atis %d), grup uyari %d, alcalma %d, siper arama %d (log %d) | ilk: %s | KONTROL: baski >= 0.3 hic yoksa baski esikli davranislar uykuda; korku olayi / alcalma > 0 ise korku calisiyor" % (len(bs_v), sum(1 for x in bs_v if x >= 0.3), sum(1 for x in bs_v if x >= 0.6), max(bs_v), ko_oz["olay"], ko_oz["gecis"], ko_oz["yakin_atis"], ko_oz["grup_uyari"], ko_oz["alcalma"], ko_oz["siper"], len(ko_l), ko_l[0].split("[KORKU]",1)[1].strip()[:150] if ko_l else "-"))
+    # v8.846: ATIS YONU (mermi gecisi / isabette yone don + karsilik): [ATIS-YONU] olaylari ve [PUSU-TEPKI] 'tahmin: yok' orani
+    ay_l = [l for l in L if "[ATIS-YONU]" in l]
+    pt_l = [l for l in L if "[PUSU-TEPKI]" in l and "alarm:" in l]
+    pt_yok = len([1 for l in pt_l if "tahmin: yok" in l])
+    ekle("GERCEKCILIK: ATIS YONU (donme + karsilik)", "GECTI" if (ay_l and (not pt_l or pt_yok < 0.5 * len(pt_l))) else ("BILGI" if not pt_l else "KALDI"), "[ATIS-YONU] olay (log) %d, ozet sayaci %d | [PUSU-TEPKI] alarm %d, 'tahmin: yok (yon yok)' %d (hedef: yarisindan az; susturuculu / uzak atista eskiden hep yoktu) | KONTROL: olay > 0 ve 'yone dondu' askerler; v8.846 oncesi paketlerde olay yok" % (len(ay_l), ko_oz.get("yon", 0), len(pt_l), pt_yok))
     # v8.845: EGITIMSIZLIK (IS / DUZENSIZ): ates altinda sabitlenme olaylari + doktrin bazli kayip karsilastirmasi (iki grup: egitimli / egitimsiz)
     sb_l = [l for l in L if "[KORKU] " in l and "SABITLENDI" in l]
     dz_g = set(m.group(1).strip() for l in L for m in [re.search(r"\[DOKTRIN-PROFIL\] ([^|]+?) \|.*-> DUZENSIZ", l)] if m)

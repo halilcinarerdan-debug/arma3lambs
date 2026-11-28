@@ -1,6 +1,6 @@
 # USMC (BLUFOR) vs IS / DAESH (OPFOR + INDEPENDENT) preset'i (v8.844)
 
-Dosya: `CBA_LAMBS_Danger_USMC_ISIS_v8.845.txt` (deponun kökünde). Taban: `CBA_LAMBS_Danger_DOKTRIN_KORKU_v8.845.txt` (doktrin + korku, teslimiyet kapalı); üstüne **135 satır** değişiklik. Ana dosyana (`CBA_LAMBS_Danger_v8.845.txt`) dokunulmadı.
+Dosya: `CBA_LAMBS_Danger_USMC_ISIS_v8.846.txt` (deponun kökünde). Taban: `CBA_LAMBS_Danger_DOKTRIN_KORKU_v8.846.txt` (doktrin + korku, teslimiyet kapalı); üstüne **135 satır** değişiklik. Ana dosyana (`CBA_LAMBS_Danger_v8.846.txt`) dokunulmadı.
 Taraf ayarları artık **doktrine** göre uygulanır (aşağıda); `West` sütunu = düzenli ordu (ABD), `East / Ind` sütunu = IS.
 
 ## Güven uyarısı (önemli)
@@ -31,7 +31,10 @@ RPT c30f0e7f'de ABD Ranger BLUFOR'da, düzensiz fraksiyon OPFOR'daydı; taraf ba
 | | `botAdimCarpan` (ayak sesi) | 0.9 | 1.3 | `[T]` |
 | **Eğitimsizlik (YENİ)** | `egitimsizlik` (0.7) | – | **ateş altında sabitlenme** | aşağıya bak |
 | **Kayıp eşiği** | `erkenKayipHiz / Oran` | 4 / 0.35 | 2 / 0.22 | `[K]` Fallujah II'de ABD > %10 kayıpla kırılmadı (orta); IS %20-30'da kopar **kaynaksız tahmin** |
-| **Gerçek dışı hız** | `animHiz`, `cqbAnimEk`, `donusHizi`, `dusunHizi*` | 0 / 0 / 1 / 1 | aynı | `[T]` doktrin tablosu; **`dusunHizi` 1 yavaş gelirse 1.25-1.5 yap** |
+| **Gerçek dışı hız** | `animHiz`, `cqbAnimEk` | 0 / 0 | aynı | `[T]` doktrin tablosu: hız artışı zorluk düğmesi |
+| **Dönüş / düşünme** | `donusHizi` (dönüş animasyonu) | 1.8 | 1.4 | `[T]` v8.846: Arma dönüş animasyonu yavaş, **1 atış yönüne geç bakar** (RPT 236eee40: 'atış yönüne bakamıyor'); eski değerlerin (2.4 / 1.4) altında ama 1'in üstünde |
+| | `dusunHizi`, `dusunHiziCqb`, `dusunHiziOnemli` | 2 | 2 | `[T]` v8.846: 1 tepkiyi yavaşlattı ('karşılık veremiyorlar'); doktrin tablosu 1, senin dosyan 3 |
+| **Atış yönü (YENİ)** | `atisYonu` | açık | açık | v8.846: mermi geçişi / isabette atıcının yaklaşık konumu grubun yön bilgisine yazılır, asker yöne döner, pusu tepkisi karşılık bastırma ateşi verir |
 | **Silahlar** | `rpgMaxM` | 300 (AT4 `[G]`) | 250 | `[K]` RPG-7 hareketli hedef 100 m %96, 200 m %51, 300 m %22, 400 m %9 (dosya 3) |
 | | `uglMinM / uglMaxM`, `elBombasiMaxMesafe`, `bombaMinM`, `bombaDostM`, `bastirmaYogunluk` | 25 / 350, 35, 15, 20, 1 | aynı | `[G]` M203A1 350 m ([TDG](https://www.mca-marines.org/wp-content/uploads/TDG-Weapons-Guide.pdf)); el bombası yaralanma yarıçapı ≈ 15 m |
 | **IS'e özgü** | `canliBomba*`, `eypKur*`, `eypKomutlu` | **kapalı** | açık | `[K]` Musul: SVBIED + canlı bomba; Fallujah II 653 EYP |

@@ -1,10 +1,10 @@
 # LAMBS Danger ELITE (sade-waypoint) — CBA Ayarları Kullanım Kılavuzu
 
-Sürüm: v8.845 · Preset: `CBA_LAMBS_Danger_v8.845.txt` · 687 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
+Sürüm: v8.846 · Preset: `CBA_LAMBS_Danger_v8.846.txt` · 688 CBA ayarı · Tüm ayarlar oyunda **CBA → Eklenti Ayarları → LAMBS Danger** altında. Oyun içinde her ayarın açıklaması ipucu metninde de yazıyor.
 
 ## 1. Preset nasıl kullanılır
 
-1. `CBA_LAMBS_Danger_v8.845.txt` dosyasını indirin.
+1. `CBA_LAMBS_Danger_v8.846.txt` dosyasını indirin.
 2. CBA Ayarları → ilgili sekmede **Preset / İçe aktar** (ya da dosyadaki `force lambs_danger_… = değer;` satırlarını tek tek girin).
 3. Sunucuda `force` satırları istemci ayarını ezer; tek oyunculu testte oyuna yeniden başlamak gerekmez (görev yeniden başlatın).
 4. Bir ayarı kapatıp açarak etkisini RPT'deki ilgili `[...]` logundan doğrulayın (aşağıda her bölümde yazılı).
@@ -166,7 +166,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `teslimV1` | Teslim olma AKTIF (ana anahtar) | açık/kapalı | açık | Kapaliyken hicbir taraf teslim olmaz (sonuna kadar savasir). |
 | `teslimWest` | Teslim: BLUFOR (west) | açık/kapalı | açık | Isaretli degilse BLUFOR gruplari teslim olmaz (fraksiyon 'Acik' listesi bunu ezer). |
 
-### ELITE siper (381 ayar)
+### ELITE siper (382 ayar)
 
 | Ayar | Ad | Aralık | Varsayılan | Açıklama |
 |---|---|---|---|---|
@@ -180,6 +180,7 @@ Aralık: kaydırıcının alt–üst sınırı · Varsayılan: kod varsayılanı
 | `atesHareketMaxM` | Ates-hareket: azami dusman mesafesi (m) | 100–500 | 300 | v8.500x. Ates ve hareket (taban ates / rush / hareket halinde ates) bilinen dusman piyade bu mesafeden yakinsa (ve >= 30 m) tetiklenir. Eskiden sabit 220; varsayilan 300. |
 | `atesHareketOran` | Hareket halinde ates orani ('b' sikki) | 0–1 | 0.25 | Rush sirasinda ates etme (bastirma) olasiligi; ZOR DURUMDA (baski > 0.5 ya da grup kaybi >= %40) her zaman ates eder. 0 = yalniz zor durumda. TASARIM: 0.25 (v8.500x; eskiden 0.10). |
 | `atisUstunlugu` | Atis ustunlugu (surekli bastirma) | açık/kapalı | açık | v8.355. Temasta bilinen (son 25 sn icinde gorulmus, 30-400 m) dusman konumuna, hareket etmeyen askerler HEMEN ve surekli bastirma atesi acar: ilk temasin ilk 12 sn'sinde hepsi, sonra MG surekli + tufekliler 8 sn'lik dilimlerle yarisi (mermi ekonomisi). Hatta dost / duvar varsa atmaz; mermi azsa (< 3 sarjor) atmaz. Bounding kapisi uzak makinedeki (oyuncu) hedefte 5 yerine 3 sn. |
+| `atisYonu` | Ates yonu: mermi gecisi / isabette ateseden yone donsun, karsilik versin | açık/kapalı | açık | v8.846 (kullanici: 'elemanlar atis yonune bakamiyor, karsilik veremiyorlar'). Acik (varsayilan): mermi askerin yanindan gecince ya da asker vurulunca grubun ses / yon bilgisine aticinin YAKLASIK konumu yazilir (hata: mermi gecisi mesafenin %15'i, isabet %6; kesin konum degil); olay askeri ve en yakin 2 asker yone doner (6 sn) ve pusu tepkisi ayni tahminle karsilik bastirma atesi / komsu uyarisi verir. Susturuculu atis dahil. Kapali: yon yalniz ses algisindan (eski). |
 | `avantajBagla` | Avantajli yer: savunma + bounding | açık/kapalı | açık | v8.675. HOLD (savunma) kararinda 'mis gibi' bir yer (skor >= 45, merkezden >= 15 iyi; 120 m) varsa manga oraya yerlesir (dusman yonune dik hatta 5 m arayla); bounding ates ekibi (FSE) 80 m icinde 'mis gibi' yer varsa onun etrafina dizilir (MG / nisanci / AT kendi hakim noktasini korur). Atis alani kapsami zorunlu. Dusman < 120 m / baski >= 0.4 / bina / mevzi / retreat vb. atlanir. Log: [SAVUNMA-YER], [AVANTAJLI-YER]. |
 | `avantajYaricap` | Avantajli yer: arama yaricapi (m) | 60–300 | 150 | v8.674. Geri cekilmede avantajli yer aramasinin ust siniri (varsayilan 150 m; 4 halka x 9 yon). |
 | `avantajliYer` | Avantajli yer analizi (arazi + koy / ev) | açık/kapalı | açık | v8.674. Geri cekilme dusmandan uzaga degil, fnc_avantajliYer ile secilen yere yonelir: dusmana gore yukseklik, dusman gozunden gizlilik (ayakta / comelik / yatik), 40 m icinde koy / ev kumesi (>= 3 bina +26, 1-2 bina +12), bina arkasi, sert nesne, gizli gidis yolu, mesafe kazanci. Kapali = eski (tehdidin tersi). Log: [AVANTAJLI-YER]. |

@@ -29,6 +29,42 @@ lambs_danger_korkuSay = createHashMap;
 // v8.836 (RPT 2ac21bb3, v8.835: [KORKU] olay 0; 446 bot atisi, 18 isabet ama grup baskisi en cok 0.05): 'FiredNear' mermi GECISINI degil, ATEŞ EDENIN yakinligini bildirir (ates eden askerin korkuM icinde olmasi) -> yalniz CQB'de tetiklenirdi.
 //   MERMI GECISI icin motorun 'Suppressed' olayi eklendi (mermi askerin yanindan gecti: distance = merminin gecis mesafesi; <= 1.5 m +0.35, <= 4 m +0.20, digeri +0.10). Her iki olay ortak isleme kodunu kullanir; olay isleyicileri CBA sinif olayi yerine
 //   10 sn'de bir TUM yerel AI askerlere addEventHandler ile baglanir (XEH 'FiredNear' / 'Suppressed' destegine bagimlilik yok).
+// v8.846 ATIS YONU (kullanici: 'elemanlar atis yonune bakamiyor, karsilik veremiyorlar'; RPT 236eee40: oyuncunun susturuculu atesi 60-190 m'den, [PUSU-TEPKI] 'tahmin: yok (taze ses yok -> 360 derece)': yon yalniz SES algisindan (fnc_soundAwareness; grup temastaysa doWatch bile yok) geliyordu,
+//   mermi gecisi / isabet yon vermiyordu -> ates altindaki asker donmuyor, pusu tepkisi (bastirma karsiliginin, komsu uyarisinin, kanadin kaynagi) 'yon yok' diye calismiyordu): mermi askerin yanindan gecince (Suppressed) ya da vurulunca (Hit) grubun ses / yon bilgisine ATICININ YAKLASIK konumu yazilir
+//   (hata: mermi gecisi mesafenin %15'i, en az 6 m; isabet %6; kesin konum DEGIL), olay askeri ve en yakin 2 asker yone DONER (doWatch, 6 sn) - retreat / kacis / temas kesme / kosucu (forceMove) / hekim hari -; [PUSU-TEPKI] ayni tahminle karsilik bastirma atesi ve komsu uyarisi verir. Grup basina 3 sn'de bir. Kapatma: CBA atisYonu.
+lambs_danger_atisYonuKaydet = {
+    params ["_u", "_f", "_hataOran", "_kaynak"];
+    if (!(missionNamespace getVariable ["lambs_danger_atisYonu", true]) || {!local _u} || {isPlayer _u} || {!alive _u}) exitWith {};
+    if (isNull _f || {!alive _f} || {_f isEqualTo _u} || {((side group _u) getFriend (side group _f)) >= 0.6} || {(side group _f) isEqualTo civilian}) exitWith {};
+    private _g = group _u;
+    if (time < (_g getVariable [QGVAR(atisYonuT), 0])) exitWith {};
+    _g setVariable [QGVAR(atisYonuT), time + 3];
+    private _d = _u distance2D _f;
+    private _est = (getPosATL _f) getPos [random ((_d * _hataOran) max 6), random 360];
+    _est set [2, 0];
+    _g setVariable [QGVAR(sesSonZaman), time];
+    _g setVariable [QGVAR(sesSonPos), _est];
+    if ((_g knowsAbout _f) < (["TESPIT"] call FUNC(bilgiEsik))) then { _g reveal [_f, 0.9]; };
+    if ((behaviour (leader _g)) in ["SAFE", "CARELESS"]) then { _g setBehaviour "AWARE"; };
+    private _bak = [(units _g) select {alive _x && {local _x} && {!isPlayer _x} && {isNull objectParent _x} && {(lifeState _x) in ["HEALTHY", "INJURED"]}}, [], {_x distance2D _u}, "ASCEND"] call BIS_fnc_sortBy;
+    private _n = 0;
+    {
+        private _x1 = _x;
+        if (_x1 isEqualTo _u || {_n < 3}) then {
+            if (!((_x1 getVariable [QGVAR(forceMove), false]) isEqualTo true) && {!(_g getVariable [QGVAR(isRetreating), false])} && {!(_g getVariable [QGVAR(isEvading), false])} && {!(_g getVariable [QGVAR(isBreakingContact), false])}
+                && {time >= (_x1 getVariable [QGVAR(tcccBusy), 0])} && {!(_x1 getVariable [QGVAR(disableAI), false])} && {(speed _x1) < 4}) then {
+                _x1 doWatch _est;
+                [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x1], 6] call CBA_fnc_waitAndExecute;
+                _n = _n + 1;
+            };
+        };
+    } forEach _bak;
+    private _s = lambs_danger_korkuSay;
+    _s set ["yon", (_s getOrDefault ["yon", 0]) + 1];
+    if (["atisYonu", 20, 30] call FUNC(logIzin)) then {
+        diag_log format ["[ATIS-YONU] %1 | %2 | kaynak %3 | atici %4 %5 m | tahmin hatasi ~%6 m | yone dondu %7 asker", groupId _g, name _u, _kaynak, typeOf _f, round _d, round ((_d * _hataOran) max 6), _n];
+    };
+};
 lambs_danger_korkuIsle = {
     params ["_u", "_f", "_d", "_agirlik", "_kaynak"];
     if (!local _u || {isPlayer _u} || {!alive _u}) exitWith {};
@@ -39,6 +75,7 @@ lambs_danger_korkuIsle = {
     private _s = lambs_danger_korkuSay;
     _s set [_kaynak, (_s getOrDefault [_kaynak, 0]) + 1];
     _s set ["olay", (_s getOrDefault ["olay", 0]) + 1];
+    [_u, _f, 0.15, _kaynak] call lambs_danger_atisYonuKaydet;
     private _v = (([_u] call FUNC(korkuDeger)) + _agirlik) min 1;
     _u setVariable [QGVAR(korkuD), [_v, time]];
     if (_v < 0.25) exitWith {};
@@ -115,6 +152,7 @@ lambs_danger_korkuIsle = {
             if (local _u && {!isPlayer _u} && {isNil {_u getVariable QGVAR(korkuEH)}}) then {
                 _u setVariable [QGVAR(korkuEH), true];
                 _u addEventHandler ["Suppressed", { params ["_unit", "_dist", "_shooter", "_instigator"]; private _f = if (isNull _shooter) then {_instigator} else {_shooter}; [_unit, _f, _dist, (if (_dist <= 1.5) then {0.35} else { if (_dist <= 4) then {0.2} else {0.1} }), "gecis"] call lambs_danger_korkuIsle; }];
+                _u addEventHandler ["Hit", { params ["_unit", "_source", "_damage", "_instigator"]; private _f = if (isNull _instigator) then {_source} else {_instigator}; [_unit, _f, 0.06, "isabet"] call lambs_danger_atisYonuKaydet; }];
                 _u addEventHandler ["FiredNear", {
                     params ["_unit", "_firer", "_dist", "_w", "_mz", "_mod", "_ammo"];
                     private _m = ((missionNamespace getVariable ["lambs_danger_korkuM", 25]) max 8) min 60;
