@@ -36,6 +36,12 @@ private _calis = {
             private _us = (units _g) select {alive _x && {isNull objectParent _x} && {!isPlayer _x}};
             private _haltli = _us select {_x getVariable [QGVAR(haltOldu), false]};
             if ((speed _l) > 1) then { _g setVariable [QGVAR(haltHareketT), time]; };
+            // v8.843 (kullanici: 'botlar sabitken formasyonu zor oturtuyor, ilk spawnlandiklarinda'; RPT 7f6f0494: spawn'da 'lider 1307 sn duruyor' -> halt ilk saniyede slota <= 20 m'deki herkesi OLDUKLARI YERDE durdurdu, formasyon hic kapanmadi): grup ilk gorulunce yerlesme penceresi baslar (haltHareketT = simdi); pencere (lider durali 25 sn) icinde yalniz slota <= 4 m kalan durdurulur, uzaktakiler slota yurumeye devam eder; 25 sn sonra eski kural (<= 20 m: sonsuz slot kovalamayi kes)
+            if (isNil {_g getVariable QGVAR(haltIlkT)}) then {
+                _g setVariable [QGVAR(haltIlkT), time];
+                if ((_g getVariable [QGVAR(haltHareketT), -999]) < -900) then { _g setVariable [QGVAR(haltHareketT), time]; };
+            };
+            private _halTol = [4, 20] select ((time - (_g getVariable [QGVAR(haltHareketT), -999])) > 25);
 
             private _engel =
                 (([_g] call FUNC(temasSeviye)) <= 1)
@@ -68,7 +74,7 @@ private _calis = {
                 if (_u getVariable [QGVAR(forceMove), false] || {(_u getVariable [QGVAR(taktikKilit), 0]) > time} || {time < (_u getVariable [QGVAR(tcccBusy), 0])}) then { continue };
                 if (_u getUnitTrait "explosiveSpecialist" || {_u getVariable [QGVAR(iedIsci), false]} || {_u getVariable [QGVAR(iedGuv), false]} || {_u getVariable [QGVAR(noktaEk), false]} || {!isNil {_u getVariable QGVAR(yanGuv)}}) then { continue };
                 private _ed = expectedDestination _u;
-                if ((_ed select 1) in ["FORMATION PLANNED", "LEADER PLANNED"] && {(speed _u) > 1} && {(_u distance2D (_ed select 0)) <= 20}) then {
+                if ((_ed select 1) in ["FORMATION PLANNED", "LEADER PLANNED"] && {(speed _u) > 1} && {(_u distance2D (_ed select 0)) <= _halTol}) then {
                     doStop _u;
                     _u setVariable [QGVAR(haltOldu), true];
                     _dur = _dur + 1;
@@ -78,7 +84,7 @@ private _calis = {
                 _say set ["halt", (_say getOrDefault ["halt", 0]) + _dur];
                 if (_logN < 60) then {
                     _logN = _logN + 1;
-                    diag_log format ["[HALT] %1 | %2 asker slota yakin yurumeyi kesti (lider %3 sn duruyor) | formasyon %4 | beh %5", groupId _g, _dur, round (time - (_g getVariable [QGVAR(haltHareketT), -999])), formation _g, behaviour _l];
+                    diag_log format ["[HALT] %1 | %2 asker slota yakin yurumeyi kesti (lider %3 sn duruyor; tolerans %6 m) | formasyon %4 | beh %5", groupId _g, _dur, round (time - (_g getVariable [QGVAR(haltHareketT), -999])), formation _g, behaviour _l, _halTol];
                 };
             };
         } forEach (allGroups select {local _x && {!isNull leader _x} && {!(_x getVariable ["lambs_danger_tarafKapali", false])} && {!([_x, "haltKur", true] call FUNC(senaryoKapi))}});
