@@ -64,7 +64,7 @@ diag_log "[DURUS-DISIPLIN] duruş disiplini (temasta hareketsiz asker ayakta kal
             // v8.830: siper durusu tutma temas bittikten 120 sn sonra birakilir (yerde sonsuza kadar kalmasin)
             if (!isNil {_u getVariable QGVAR(siperDurusTut)} && {(([_g] call FUNC(temasSeviye)) > 2) || {(time - ((_u getVariable [QGVAR(siperDurusTut), [0, time]]) param [1, time])) > 240}}) then { _u setUnitPos "AUTO"; _u setVariable [QGVAR(siperDurusTut), nil]; };
             if (
-                (([_g] call FUNC(temasSeviye)) > 1) || {(insideBuilding _u) > 0.5}
+                ((time - (_g getVariable [QGVAR(contact), -9999])) > 45) || {(insideBuilding _u) > 0.5}   // v8.839: durus ozel 45 sn penceresi (temasSeviye SICAK siniri 30 sn: gocte ayakta orani 23% -> 45% yukseldi; tek tuketici 45 sn kullaniyordu)
                 || {!((lifeState _u) in ["HEALTHY", "INJURED"])} || {captive _u} || {_u getVariable [QGVAR(teslim), false]}
             ) then { if (!isNil {_u getVariable QGVAR(durgunT)}) then { _u setVariable [QGVAR(durgunT), nil]; }; continue };
 

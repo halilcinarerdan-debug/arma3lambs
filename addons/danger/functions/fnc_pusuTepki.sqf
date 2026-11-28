@@ -72,7 +72,7 @@ diag_log "[PUSU-TEPKI] pusuya hizli tepki + konum tahmini + cagri atesi izleyici
                 { if (!(missionNamespace getVariable ["lambs_danger_icBakisKose", true]) || {(insideBuilding _x) <= 0.5}) then { _x doWatch _est; [{ params ["_c"]; if (alive _c) then { _c doWatch objNull; }; }, [_x], 7] call CBA_fnc_waitAndExecute; }; } forEach (_bak select [0, 3]);   // v8.605: bina icinde tahmine namlu yok
                 private _mesafe = _l distance2D _est;
                 if (_mesafe >= 25) then {
-                    private _atici = ([_uye select {(primaryWeapon _x) isNotEqualTo "" && {(_x ammo (primaryWeapon _x)) > 0} && {!([_x] call FUNC(bombaciMi))}}, [], {_x distance2D _est}, "ASCEND"] call BIS_fnc_sortBy) select [0, 2];
+                    private _atici = ([_uye select {(primaryWeapon _x) isNotEqualTo "" && {(_x ammo (primaryWeapon _x)) > 0} && {!([_x] call FUNC(bombaciMi))} && {!([_x] call FUNC(emirKilitli))}}, [], {_x distance2D _est}, "ASCEND"] call BIS_fnc_sortBy) select [0, 2];   // v8.839: refleks atis hayatta kalma / komutan emrini ezmez
                     { if ([_x, _est] call FUNC(atesHatiAcik)) then { _x doSuppressiveFire _est; }; } forEach _atici;
                 };
             };

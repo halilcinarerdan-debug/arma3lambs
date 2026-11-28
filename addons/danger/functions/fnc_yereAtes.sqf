@@ -102,13 +102,21 @@ private _calis = {
                         private _w = primaryWeapon _u;
                         private _hedefA = ((_u ammo _w) - _n) max 0;
                         private _t0 = time;
-                        _u setVariable [QGVAR(taktikKilit), time + 10];
+                        private _kilitT = time + 10;
+                        _u setVariable [QGVAR(taktikKilit), _kilitT];
                         _u selectWeapon _w;
-                        while {alive _u && {time < (_t0 + 9)} && {(_u ammo _w) > _hedefA} && {(lifeState _u) in ["HEALTHY", "INJURED"]}} do {
+                        // v8.839 (RPT 52df98ce: retreat emri 1.5 sn sonra 'Suppress / DoNotPlan' ile bozuldu; refleks dongusu retreat / kacis / temas kesme / korku baslayinca da 9 sn boyunca emir veriyordu): HAYATTA KALMA durumu gelince dongu hemen biter, geri-follow / doWatch verilmez (o katman kendi emrini yonetir)
+                        private _hk = {
+                            private _gg = group _u;
+                            (_gg getVariable [QGVAR(isRetreating), false]) || {_gg getVariable [QGVAR(isEvading), false]} || {_gg getVariable [QGVAR(isBreakingContact), false]}
+                            || {(_u getVariable [QGVAR(forceMove), false]) isEqualTo true} || {([_u] call FUNC(korkuDeger)) >= 0.55}
+                        };
+                        while {alive _u && {time < (_t0 + 9)} && {(_u ammo _w) > _hedefA} && {(lifeState _u) in ["HEALTHY", "INJURED"]} && {!(call _hk)}} do {
                             _u doSuppressiveFire (ASLToAGL ((getPosASL _b) vectorAdd [0, 0, 0.15]));
                             sleep 1.2;
                         };
-                        if (alive _u) then { _u doWatch objNull; [_u] call FUNC(doFollowGuvenli); };
+                        if ((_u getVariable [QGVAR(taktikKilit), 0]) isEqualTo _kilitT) then { _u setVariable [QGVAR(taktikKilit), 0] };   // yalniz kendi kilidimizi birak
+                        if (alive _u && {!(call _hk)}) then { _u doWatch objNull; [_u] call FUNC(doFollowGuvenli); };
                     };
                 } forEach _secilen;
             } forEach _govdeler;

@@ -108,7 +108,7 @@ if (hasInterface) then {
                     _s setVariable ["lambs_danger_konSayBit", _bitS];
                     _say set ["olay", (_say get "olay") + 1];
                     private _dn = 1e9;
-                    { if (alive _x && {(side group _x) isNotEqualTo civilian} && {((side group _s) getFriend (side group _x)) < 0.6}) then { _dn = _dn min (_s distance _x); }; } forEach (_s nearEntities ["CAManBase", 400]);
+                    { if (alive _x && {(side group _x) isNotEqualTo civilian} && {((side group _s) getFriend (side group _x)) < 0.6} && {(lifeState _x) in ["HEALTHY", "INJURED"]} && {!captive _x || {isPlayer _x}}) then { _dn = _dn min (_s distance _x); }; } forEach (_s nearEntities ["CAManBase", 400]);   // v8.839: olcum doCallout CQB-sessiz kapisiyla ayni dusman tanimi (baygin / esir dusman sayilmaz; eskiden yaniltici KALDI)
                     _say set ["enYakin", (_say get "enYakin") min _dn];
                     if ((missionNamespace getVariable ["lambs_danger_konOlayN", 0]) < 12) then {
                         missionNamespace setVariable ["lambs_danger_konOlayN", (missionNamespace getVariable ["lambs_danger_konOlayN", 0]) + 1];
